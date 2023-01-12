@@ -4,7 +4,7 @@ import {
   SEPARATOR_ITEM,
 } from '../components/internal/Menu';
 
-type Optional<T> = T | false | null | undefined;
+export type Optional<T> = T | false | null | undefined;
 
 function withSeparators<T>(elements: T[], separator: T) {
   const result: T[] = [];

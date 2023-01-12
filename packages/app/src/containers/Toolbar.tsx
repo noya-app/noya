@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from 'noya-designsystem';
 import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
+import { LayerIcon } from 'noya-inspector';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
@@ -25,7 +26,6 @@ import {
 import { round } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
   | {

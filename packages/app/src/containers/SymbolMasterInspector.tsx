@@ -1,11 +1,13 @@
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
+import {
+  SymbolLayoutRow,
+  SymbolMasterOverrideRow,
+  SymbolSourceRow,
+} from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback } from 'react';
-import SymbolLayoutRow from '../components/inspector/SymbolLayoutRow';
-import SymbolMasterOverrideRow from '../components/inspector/SymbolMasterOverrideRow';
-import SymbolSourceRow from '../components/inspector/SymbolSourceRow';
 
 export default memo(function SymbolMasterInspector() {
   const dispatch = useDispatch();

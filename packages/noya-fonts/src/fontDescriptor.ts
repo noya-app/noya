@@ -1,5 +1,5 @@
 import { FontFamilyId, FontWeight } from 'noya-fonts';
-import { FontId } from './fontManager';
+import { FontId } from './types';
 
 export type FontSlant = 'upright' | 'italic';
 

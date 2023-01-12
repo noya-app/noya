@@ -8,10 +8,11 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
-import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
 import React, { memo, useEffect, useMemo, useState } from 'react';
+import { Group, Path } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
@@ -80,6 +81,13 @@ const SketchFill = memo(function SketchFill({
             SketchModel.shaderVariable({
               name: 'iTime',
               value: { type: 'float', data: time },
+            }),
+            SketchModel.shaderVariable({
+              name: 'iResolution',
+              value: {
+                type: 'float2',
+                data: { x: frame.width, y: frame.height },
+              },
             }),
           ])
         : undefined;

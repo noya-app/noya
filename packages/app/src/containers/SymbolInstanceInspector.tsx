@@ -1,11 +1,10 @@
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { LinkedSymbolRow, SymbolInstanceOverridesRow } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback } from 'react';
-import SymbolSelectorRow from '../components/inspector/LinkedSymbolRow';
-import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
 import FillInspector from './FillInspector';
 
 export default memo(function SymbolMasterInspector() {
@@ -36,11 +35,11 @@ export default memo(function SymbolMasterInspector() {
   }, [dispatch]);
 
   const elements = [
-    <SymbolSelectorRow
+    <LinkedSymbolRow
       symbolId={selectedSymbolInstance.symbolID}
       onSelect={useCallback(
         (value) => {
-          dispatch('setInstanceSymbolSource', value);
+          dispatch('setInstanceSymbolSource', value, 'resetToMaster');
         },
         [dispatch],
       )}

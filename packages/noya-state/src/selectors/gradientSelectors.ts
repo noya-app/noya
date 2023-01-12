@@ -17,7 +17,7 @@ import {
   Layers,
 } from 'noya-state';
 import { lerp } from 'noya-utils';
-import {
+import type {
   ApplicationState,
   SelectedGradient,
 } from '../reducers/applicationReducer';

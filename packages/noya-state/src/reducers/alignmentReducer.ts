@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import { Bounds, createBounds, transformRect } from 'noya-geometry';
 import { sum } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
@@ -10,8 +10,9 @@ import {
   getLayerTransformAtIndexPath,
   getSelectedLayerIndexPaths,
   getSelectedRect,
-} from '../selectors/selectors';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+} from '../selectors';
+import { accessPageLayers } from '../selectors/layerSelectors';
+import type { ApplicationState } from './applicationReducer';
 
 export type AlignmentAction =
   | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']

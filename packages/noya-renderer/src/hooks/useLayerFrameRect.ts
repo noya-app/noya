@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
-import { useCanvasKit } from 'noya-renderer';
 import { Primitives } from 'noya-state';
 import { useMemo } from 'react';
+import { useCanvasKit } from './useCanvasKit';
 
 export default function useLayerFrameRect(layer: Sketch.AnyLayer) {
   const CanvasKit = useCanvasKit();

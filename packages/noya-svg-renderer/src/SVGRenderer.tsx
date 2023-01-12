@@ -1,13 +1,25 @@
 import { Paint } from 'canvaskit';
-import { AffineTransform, Size } from 'noya-geometry';
+import { AffineTransform, Point, Size } from 'noya-geometry';
 import { ClipProps } from 'noya-react-canvaskit';
 import {
   ComponentsContextValue,
   ComponentsProvider,
   useCanvasKit,
 } from 'noya-renderer';
-import { Base64, detectFileType, getFileExtensionForType } from 'noya-utils';
-import React, { memo, ReactNode, useMemo, useRef } from 'react';
+import {
+  Base64,
+  detectFileType,
+  getFileExtensionForType,
+  zip,
+} from 'noya-utils';
+import React, {
+  ComponentProps,
+  memo,
+  ReactNode,
+  SVGProps,
+  useMemo,
+  useRef,
+} from 'react';
 import { ElementIdProvider, useGetNextElementId } from './ElementIdContext';
 
 const stringifyAffineTransform = (matrix: AffineTransform) => {
@@ -96,55 +108,53 @@ const Path: ComponentsContextValue['Path'] = memo(({ path, paint }) => {
 });
 
 const Text: ComponentsContextValue['Text'] = memo(({ rect, paragraph }) => {
-  // const rectProps = getRectProps(rect);
+  // To disable text for now:
+  // return null;
 
-  // const transform = useMemo(() => {
-  //   const affineTransform = AffineTransform.translation(
-  //     rectProps.x,
-  //     rectProps.y,
-  //   );
-  //   return stringifyAffineTransform(affineTransform);
-  // }, [rectProps.x, rectProps.y]);
+  const rectProps = getRectProps(rect);
 
-  return null;
+  const transform = useMemo(() => {
+    const affineTransform = AffineTransform.translate(rectProps.x, rectProps.y);
+    return stringifyAffineTransform(affineTransform);
+  }, [rectProps.x, rectProps.y]);
 
-  // const shapedLines = useMemo(() => paragraph.getShapedLines(), [paragraph]);
+  const shapedLines = useMemo(() => paragraph.getShapedLines(), [paragraph]);
 
-  // return (
-  //   <g transform={transform}>
-  //     {shapedLines.map((shapedLine, s) =>
-  //       shapedLine.runs.map((run, r) => {
-  //         const positions: Point[] = [];
+  return (
+    <g transform={transform}>
+      {shapedLines.map((shapedLine, s) =>
+        shapedLine.runs.map((run, r) => {
+          const positions: Point[] = [];
 
-  //         run.positions.forEach((value, index) => {
-  //           if (index % 2 === 0) {
-  //             positions.push({ x: value, y: 0 });
-  //           } else {
-  //             positions[positions.length - 1].y = value;
-  //           }
-  //         });
+          run.positions.forEach((value, index) => {
+            if (index % 2 === 0) {
+              positions.push({ x: value, y: 0 });
+            } else {
+              positions[positions.length - 1].y = value;
+            }
+          });
 
-  //         const strings = [...run.glyphs].map(
-  //           (value) => String.fromCharCode(value + 28), // TODO: Lookup by glyph id
-  //         );
+          const strings = [...run.glyphs].map(
+            (value) => String.fromCharCode(value + 28), // TODO: Lookup by glyph id
+          );
 
-  //         const info = zip(positions, strings);
+          const info = zip(positions, strings);
 
-  //         return info.map(([position, string], i) => (
-  //           <text
-  //             fontSize={12}
-  //             fill="white"
-  //             key={`${s}-${r}-${i}`}
-  //             x={position.x}
-  //             y={shapedLine.top + position.y}
-  //           >
-  //             {string}
-  //           </text>
-  //         ));
-  //       }),
-  //     )}
-  //   </g>
-  // );
+          return info.map(([position, string], i) => (
+            <text
+              fontSize={12}
+              fill="white"
+              key={`${s}-${r}-${i}`}
+              x={position.x}
+              y={shapedLine.top + position.y}
+            >
+              {string}
+            </text>
+          ));
+        }),
+      )}
+    </g>
+  );
 });
 
 const ClipPath = memo(
@@ -174,23 +184,60 @@ const ClipPath = memo(
   },
 );
 
+function useImageFilter(
+  imageFilter: ComponentProps<ComponentsContextValue['Group']>['imageFilter'],
+) {
+  const getNextId = useGetNextElementId();
+  const shadowId = useMemo(() => getNextId('shadow-'), [getNextId]);
+  const dropShadow =
+    imageFilter && 'type' in imageFilter ? imageFilter : undefined;
+
+  if (!dropShadow) return undefined;
+
+  return {
+    id: shadowId,
+    element: (
+      <filter id={shadowId}>
+        <feDropShadow
+          dx={dropShadow.offset.x}
+          dy={dropShadow.offset.y}
+          stdDeviation={dropShadow.radius / 2}
+        />
+      </filter>
+    ),
+  };
+}
+
 const Group: ComponentsContextValue['Group'] = memo(
-  ({ opacity, transform, children, clip, colorFilter, imageFilter }) => {
-    const groupProps = {
+  ({ opacity, transform, children, clip, imageFilter }) => {
+    const shadow = useImageFilter(imageFilter);
+
+    const groupProps: Partial<SVGProps<SVGGElement>> = {
       opacity,
       transform: transform ? stringifyAffineTransform(transform) : undefined,
       children,
+      filter: shadow ? `url(#${shadow.id})` : undefined,
     };
 
     if (clip) {
       return (
         <ClipPath clip={clip}>
-          {(url) => <g {...groupProps} clipPath={url} />}
+          {(url) => (
+            <>
+              {shadow?.element ?? null}
+              <g {...groupProps} clipPath={url} />
+            </>
+          )}
         </ClipPath>
       );
     }
 
-    return <g {...groupProps} />;
+    return (
+      <>
+        {shadow?.element ?? null}
+        <g {...groupProps} />
+      </>
+    );
   },
 );
 

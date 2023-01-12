@@ -1,14 +1,20 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
+import {
+  ApplicationReducerContext,
+  findIndexPath,
+  Primitives,
+} from 'noya-state';
 import { getIncrementedName, groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { PageLayer } from '../layers';
 import {
   addSiblingLayer,
+  addToParentLayer,
   deleteLayers,
   findPageLayerIndexPaths,
   getBoundingRect,
@@ -17,11 +23,11 @@ import {
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
   getLayerIndexPathsExcludingDescendants,
-  addToParentLayer,
-  getSelectedLayerIndexPathsExcludingDescendants,
+  getLayersInRect,
   getLayerTransformAtIndexPath,
   getParentLayer,
   getRightMostLayerBounds,
+  getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedSymbols,
   getSymbols,
   getSymbolsInstancesIndexPaths,
@@ -30,16 +36,10 @@ import {
   LayerIndexPaths,
   moveLayer,
   removeLayer,
-  getLayersInRect,
-} from '../selectors/selectors';
+} from '../selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState } from './applicationReducer';
-import { createPage } from './pageReducer';
-import {
-  ApplicationReducerContext,
-  findIndexPath,
-  Primitives,
-} from 'noya-state';
+import type { ApplicationState } from './applicationReducer';
+import { createPage } from '../selectors/pageSelectors';
 
 export type LayerAction =
   | [

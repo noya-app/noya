@@ -1,6 +1,7 @@
-import type Sketch from 'noya-file-format';
 import produce, { Draft } from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
 import { RelativeDropPosition } from 'noya-designsystem';
+import type Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -13,23 +14,38 @@ import {
   rectsIntersect,
   transformRect,
 } from 'noya-geometry';
+import { CSSProperties } from 'react';
 import { IndexPath } from 'tree-visit';
-import {
-  ApplicationState,
-  getMultiValue,
-  isLine,
-  isPointsLayer,
-  Layers,
-  PageLayer,
-  Selectors,
-} from '../index';
+import { Layers } from '../layer';
+import { PageLayer } from '../layers';
+import type { ApplicationState } from '../reducers/applicationReducer';
+import { CompassDirection } from '../reducers/interactionReducer';
 import type { UUID } from '../types';
+import { getMultiValue } from '../utils/getMultiValue';
 import {
   getLayerIndexPathsExcludingDescendants,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
+import { isLine } from './pointSelectors';
+import { getTextSelection } from './textSelectors';
 import { getLayerTransformAtIndexPath } from './transformSelectors';
+
+/*
+ * Get an array of all layers using as few lookups as possible on the state tree.
+ *
+ * Immer will duplicate any objects we access within a produce method, so we
+ * don't want to walk every layer, since that would duplicate all of them.
+ */
+export function accessPageLayers(
+  state: WritableDraft<ApplicationState>,
+  pageIndex: number,
+  layerIndexPaths: IndexPath[],
+): Sketch.AnyLayer[] {
+  return layerIndexPaths.map((layerIndex) => {
+    return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+  });
+}
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -46,11 +62,11 @@ export const getSelectedLayersExcludingDescendants = (
 export const getSelectedTextLayers = (
   state: ApplicationState,
 ): Sketch.Text[] => {
-  const selectedText = Selectors.getTextSelection(state);
+  const selectedText = getTextSelection(state);
 
   if (selectedText) {
     const layer = Layers.find(
-      Selectors.getCurrentPage(state),
+      getCurrentPage(state),
       (layer) => layer.do_objectID === selectedText.layerId,
     );
 
@@ -184,16 +200,38 @@ export function getSelectedLineLayer(
 ): Layers.PointsLayer | undefined {
   if (state.selectedLayerIds.length !== 1) return;
 
-  const page = Selectors.getCurrentPage(state);
+  const page = getCurrentPage(state);
 
   const layer = Layers.find(
     page,
     (layer) => layer.do_objectID === state.selectedLayerIds[0],
   );
 
-  if (!layer || !isPointsLayer(layer) || !isLine(layer.points)) return;
+  if (!layer || !Layers.isPointsLayer(layer) || !isLine(layer.points)) return;
 
   return layer;
+}
+
+export function getCursorForDirection(
+  direction: CompassDirection,
+  state: ApplicationState,
+): CSSProperties['cursor'] {
+  if (getSelectedLineLayer(state)) return 'move';
+
+  switch (direction) {
+    case 'e':
+    case 'w':
+      return 'ew-resize';
+    case 'n':
+    case 's':
+      return 'ns-resize';
+    case 'ne':
+    case 'sw':
+      return 'nesw-resize';
+    case 'nw':
+    case 'se':
+      return 'nwse-resize';
+  }
 }
 
 export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {

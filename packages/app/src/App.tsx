@@ -2,7 +2,11 @@ import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
 import { getCurrentPlatform, PlatformName } from 'noya-keymap';
-import { PromiseState } from 'noya-react-utils';
+import {
+  castHashParameter,
+  PromiseState,
+  useUrlHashParameters,
+} from 'noya-react-utils';
 import {
   CanvasKitProvider,
   FontManagerProvider,
@@ -27,10 +31,6 @@ import {
   EnvironmentParametersProvider,
   useEnvironmentParameter,
 } from './hooks/useEnvironmentParameters';
-import {
-  castHashParameter,
-  useUrlHashParameters,
-} from './hooks/useUrlHashParameters';
 
 type Action =
   | { type: 'set'; value: SketchFile }

@@ -1,8 +1,9 @@
 import * as CanvasKit from 'canvaskit';
 import Sketch from 'noya-file-format';
-import { Group, useCanvasKit } from 'noya-renderer';
 import React, { memo, ReactNode, useMemo } from 'react';
 import { getSaturationMatrix } from '../../colorMatrix';
+import { Group } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 
 type Props = {
   blur: Sketch.Blur;

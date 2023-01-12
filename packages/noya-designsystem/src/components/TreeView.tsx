@@ -6,10 +6,9 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import IconButton from './IconButton';
-import * as ListView from './ListView';
-import { ListViewRowProps } from './ListView';
-import * as Spacer from './Spacer';
+import { IconButton } from './IconButton';
+import { ListView } from './ListView';
+import { Spacer } from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Row
@@ -21,8 +20,8 @@ type TreeRowBaseProps = {
   onClickChevron?: ({ altKey }: { altKey: boolean }) => void;
 };
 
-export type TreeRowProps<MenuItemType extends string> =
-  ListViewRowProps<MenuItemType> & TreeRowBaseProps;
+type TreeViewRowProps<MenuItemType extends string> =
+  ListView.RowProps<MenuItemType> & TreeRowBaseProps;
 
 const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
   {
@@ -31,10 +30,10 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
     onClickChevron,
     children,
     ...rest
-  }: TreeRowProps<MenuItemType>,
+  }: TreeViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLLIElement>,
 ) {
-  const { expandable } = useContext(ListView.ListRowContext);
+  const { expandable } = useContext(ListView.RowContext);
 
   const handleClickChevron = useCallback(
     (event: React.MouseEvent) => {
@@ -75,8 +74,12 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
  * Root
  * ------------------------------------------------------------------------- */
 
-export const Root = ListView.Root;
-export const RowTitle = ListView.RowTitle;
-export const EditableRowTitle = ListView.EditableRowTitle;
-export const Row = memo(TreeRow);
-export type TreeViewClickInfo = ListView.ListViewClickInfo;
+export namespace TreeView {
+  export const Root = ListView.Root;
+  export const RowTitle = ListView.RowTitle;
+  export const EditableRowTitle = ListView.EditableRowTitle;
+  export const Row = memo(TreeRow);
+  export type ClickInfo = ListView.ClickInfo;
+  export type RowProps<MenuItemType extends string> =
+    TreeViewRowProps<MenuItemType>;
+}

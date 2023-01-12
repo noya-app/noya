@@ -8,12 +8,12 @@ import {
   getSelectedLayerIndexPaths,
   moveControlPoints,
   moveSelectedPoints,
-} from '../selectors/selectors';
+} from '../selectors';
+import { SetNumberMode } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
-import {
+import type {
   ApplicationState,
   SelectedPointLists,
-  SetNumberMode,
 } from './applicationReducer';
 
 export type PointAction =

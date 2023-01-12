@@ -1,5 +1,4 @@
 import { Property } from 'csstype';
-import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
 import { CaretDownIcon } from 'noya-icons';
 import { memoize } from 'noya-utils';
 import React, {
@@ -16,7 +15,9 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import handleNudge from '../utils/handleNudge';
-import Button from './Button';
+import { Button } from './Button';
+import { DropdownMenu } from './DropdownMenu';
+import { MenuItem } from './internal/Menu';
 import TextInput, { TextInputProps } from './internal/TextInput';
 
 type LabelPosition = 'start' | 'end';
@@ -66,7 +67,9 @@ interface InputFieldLabelProps {
   children?: ReactNode;
 }
 
-function InputFieldLabel({ children = false }: InputFieldLabelProps) {
+const InputFieldLabel = memo(function InputFieldLabel({
+  children = false,
+}: InputFieldLabelProps) {
   const { labelPosition, hasDropdown } = useContext(InputFieldContext);
 
   return (
@@ -74,7 +77,7 @@ function InputFieldLabel({ children = false }: InputFieldLabelProps) {
       {children}
     </LabelContainer>
   );
-}
+});
 
 /* ----------------------------------------------------------------------------
  * Dropdown
@@ -91,21 +94,19 @@ interface InputFieldDropdownProps<T extends string> {
   onSelect: (value: T) => void;
 }
 
-function InputFieldDropdownMenu<T extends string>({
-  id,
-  items,
-  onSelect,
-}: InputFieldDropdownProps<T>) {
+const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
+  T extends string,
+>({ id, items, onSelect }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu<T> items={items} onSelect={onSelect}>
+      <DropdownMenu<T> items={items} onSelect={onSelect}>
         <Button id={id} variant="thin">
           <CaretDownIcon />
         </Button>
-      </NoyaDropdownMenu>
+      </DropdownMenu>
     </DropdownContainer>
   );
-}
+});
 
 /* ----------------------------------------------------------------------------
  * Input
@@ -326,10 +327,10 @@ function InputFieldRoot({
   const childrenArray = Children.toArray(children);
 
   const hasDropdown = childrenArray.some(
-    (child) => isValidElement(child) && child.type === DropdownMenu,
+    (child) => isValidElement(child) && child.type === InputFieldDropdownMenu,
   );
   const hasLabel = childrenArray.some(
-    (child) => isValidElement(child) && child.type === Label,
+    (child) => isValidElement(child) && child.type === InputFieldLabel,
   );
 
   const contextValue = useMemo(
@@ -346,8 +347,10 @@ function InputFieldRoot({
   );
 }
 
-export const Input = memo(InputFieldInput);
-export const NumberInput = memo(InputFieldNumberInput);
-export const Label = memo(InputFieldLabel);
-export const DropdownMenu = memo(InputFieldDropdownMenu);
-export const Root = memo(InputFieldRoot);
+export namespace InputField {
+  export const Root = memo(InputFieldRoot);
+  export const Input = memo(InputFieldInput);
+  export const NumberInput = memo(InputFieldNumberInput);
+  export const DropdownMenu = InputFieldDropdownMenu;
+  export const Label = InputFieldLabel;
+}

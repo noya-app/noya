@@ -1,13 +1,12 @@
-import type Sketch from 'noya-file-format';
-import { delimitedPath } from 'noya-utils';
-import { Layers } from '..';
 import { Draft } from 'immer';
-import { ApplicationState } from '../reducers/applicationReducer';
+import type Sketch from 'noya-file-format';
+import { SketchModel } from 'noya-sketch-model';
+import { delimitedPath, uuid } from 'noya-utils';
+import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
+import { Layers } from '../layer';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
 import { getCurrentTab } from './workspaceSelectors';
-import { uuid } from 'noya-utils';
-import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
-import { SketchModel } from 'noya-sketch-model';
 
 export type ComponentsTypes =
   | Sketch.Swatch
@@ -105,9 +104,18 @@ export function setComponentName<T extends ComponentsTypes>(
 export const getSymbols = (
   state: Draft<ApplicationState>,
 ): Sketch.SymbolMaster[] => {
-  return state.sketch.pages.flatMap((p) =>
-    p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
-  );
+  return [
+    ...state.sketch.pages.flatMap((p) =>
+      p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
+    ),
+    ...state.sketch.document.foreignSymbols.map((s) => s.symbolMaster),
+  ];
+};
+
+export const getSymbolMaster = (state: ApplicationState, symbolId: string) => {
+  return getSymbols(state).find(
+    (layer) => layer.symbolID === symbolId,
+  ) as Sketch.SymbolMaster;
 };
 
 export const getSelectedSymbols = (
@@ -115,12 +123,12 @@ export const getSelectedSymbols = (
 ): Sketch.SymbolMaster[] => {
   const symbols = getSymbols(state);
 
-  const filter =
+  const selectedIds =
     getCurrentTab(state) === 'canvas'
       ? state.selectedLayerIds
       : state.selectedThemeTab.symbols.ids;
 
-  return symbols.filter((symbol) => filter.includes(symbol.do_objectID));
+  return symbols.filter((symbol) => selectedIds.includes(symbol.do_objectID));
 };
 
 export const getSymbolsInstancesIndexPaths = (

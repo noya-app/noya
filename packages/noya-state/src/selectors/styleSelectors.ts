@@ -1,5 +1,5 @@
 import type Sketch from 'noya-file-format';
-import { ApplicationState } from '../index';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { getSelectedLayers } from './layerSelectors';
 import {
   getSelectedLayerStyles,

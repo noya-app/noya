@@ -1,5 +1,4 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { Spacer } from 'noya-designsystem';
 import React, {
   ComponentProps,
   ForwardedRef,
@@ -9,7 +8,8 @@ import React, {
   useRef,
 } from 'react';
 import styled from 'styled-components';
-import IconButton from './IconButton';
+import { IconButton } from './IconButton';
+import { Spacer } from './Spacer';
 
 const StyledOverlay = styled(DialogPrimitive.Overlay)({
   backgroundColor: 'rgba(0,0,0,0.5)',
@@ -28,7 +28,7 @@ const StyledContent = styled(DialogPrimitive.Content)(({ theme }) => ({
   maxWidth: '450px',
   maxHeight: '85vh',
   padding: theme.sizes.dialog.padding,
-  borderRadius: 4,
+  borderRadius: 2,
   ...theme.textStyles.small,
   backgroundColor: theme.colors.popover.background,
   overflowY: 'auto',

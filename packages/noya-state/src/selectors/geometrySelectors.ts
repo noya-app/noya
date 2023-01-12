@@ -19,9 +19,9 @@ import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { ScalingOptions } from 'noya-state';
 import { SKIP, STOP, VisitOptions } from 'tree-visit';
-import { ApplicationState, Layers, PageLayer } from '../index';
-import { visitReversed } from '../layers';
+import { PageLayer, visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { getDragHandles } from '../selection';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import {
@@ -41,6 +41,7 @@ import {
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
 } from './transformSelectors';
+import { Layers } from '../layer';
 
 export type LayerTraversalOptions = {
   /**

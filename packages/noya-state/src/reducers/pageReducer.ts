@@ -1,12 +1,10 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import { getSymbolsInstancesIndexPaths } from '../selectors/selectors';
+import { createPage, getSymbolsInstancesIndexPaths } from '../selectors';
 import { UUID } from '../types';
 import { moveArrayItem } from '../utils/moveArrayItem';
-import { ApplicationState } from './applicationReducer';
+import type { ApplicationState } from './applicationReducer';
 import { detachSymbolIntances } from './layerReducer';
 
 export type PageAction =
@@ -16,24 +14,6 @@ export type PageAction =
   | [type: 'deletePage', pageId: UUID]
   | [type: 'setPageName', pageId: UUID, name: string]
   | [type: 'duplicatePage', pageId: UUID];
-
-export const createPage = (
-  pages: Sketch.Page[],
-  user: Sketch.User,
-  pageId: string,
-  name: string,
-): Sketch.Page => {
-  const newPage = SketchModel.page({ do_objectID: pageId, name });
-
-  user[newPage.do_objectID] = {
-    scrollOrigin: '{0, 0}',
-    zoomValue: 1,
-  };
-
-  pages.push(newPage);
-
-  return newPage;
-};
 
 export function pageReducer(
   state: ApplicationState,

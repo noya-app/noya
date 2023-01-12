@@ -1,10 +1,12 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { useColorFill } from 'noya-react-canvaskit';
-import { Rect, useCanvasKit, useZoom } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import { range } from 'noya-utils';
 import React from 'react';
 import { useTheme } from 'styled-components';
+import { Rect } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
+import { useZoom } from '../ZoomContext';
 
 export const SHOW_PIXELS_ZOOM_THRESHOLD = 5;
 

@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { useSelector, useWorkspace } from 'noya-app-state-context';
+import { Canvas, CanvasKitRenderer } from 'noya-canvas';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -10,15 +11,14 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
+import { Size } from 'noya-geometry';
 import { MagnifyingGlassIcon } from 'noya-icons';
+import { AutoSizer, useSystemColorScheme } from 'noya-react-utils';
+import { DesignFile } from 'noya-renderer';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import React, { memo, ReactNode, useMemo, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { AutoSizer } from '../components/AutoSizer';
-import { DialogProvider } from '../contexts/DialogContext';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
-import useSystemColorScheme from '../hooks/useSystemColorScheme';
-import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';
@@ -144,6 +144,15 @@ const WorkspaceContent = memo(function WorkspaceContent({
     });
   }, [colorScheme, isElectron]);
 
+  const insets = useMemo(() => {
+    return {
+      top: theme.sizes.toolbar.height,
+      right: theme.sizes.sidebarWidth,
+      bottom: 0,
+      left: theme.sizes.sidebarWidth,
+    };
+  }, [theme.sizes.sidebarWidth, theme.sizes.toolbar.height]);
+
   const leftSidebarContent = useTabElement({
     canvas: (
       <>
@@ -192,42 +201,53 @@ const WorkspaceContent = memo(function WorkspaceContent({
       </MenubarContainer>
     );
 
+  const renderCanvas = useCallback(
+    ({ size }: { size: Size }) => (
+      <CanvasKitRenderer size={size}>
+        <DesignFile />
+      </CanvasKitRenderer>
+    ),
+    [],
+  );
+
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
-      <DialogProvider>
-        {actuallyShowLeftSidebar && (
-          <LeftSidebar>
-            {menuBar}
-            <LeftSidebarBorderedContent>
-              <PageList />
-              <Divider />
-              {leftSidebarContent}
-            </LeftSidebarBorderedContent>
-          </LeftSidebar>
-        )}
-        <MainView>
-          <ToolbarContainer onDoubleClick={doubleClickToolbar}>
-            {!actuallyShowLeftSidebar && menuBar}
-            {useTabElement({
-              canvas: <Toolbar />,
-              pages: null,
-              theme: <ThemeToolbar />,
-            })}
-          </ToolbarContainer>
-          <ContentArea>
-            {useTabElement({
-              canvas: <Canvas />,
-              pages: <PagesGrid />,
-              theme: <ThemeWindow />,
-            })}
-            {actuallyShowRightSidebar && (
-              <RightSidebar>
-                <ScrollArea>{rightSidebarContent}</ScrollArea>
-              </RightSidebar>
-            )}
-          </ContentArea>
-        </MainView>
-      </DialogProvider>
+      {actuallyShowLeftSidebar && (
+        <LeftSidebar>
+          {menuBar}
+          <LeftSidebarBorderedContent>
+            <PageList />
+            <Divider />
+            {leftSidebarContent}
+          </LeftSidebarBorderedContent>
+        </LeftSidebar>
+      )}
+      <MainView>
+        <ToolbarContainer onDoubleClick={doubleClickToolbar}>
+          {!actuallyShowLeftSidebar && menuBar}
+          {useTabElement({
+            canvas: <Toolbar />,
+            pages: null,
+            theme: <ThemeToolbar />,
+          })}
+        </ToolbarContainer>
+        <ContentArea>
+          {useTabElement({
+            canvas: (
+              <Canvas rendererZIndex={-1} insets={insets}>
+                {renderCanvas}
+              </Canvas>
+            ),
+            pages: <PagesGrid />,
+            theme: <ThemeWindow />,
+          })}
+          {actuallyShowRightSidebar && (
+            <RightSidebar>
+              <ScrollArea>{rightSidebarContent}</ScrollArea>
+            </RightSidebar>
+          )}
+        </ContentArea>
+      </MainView>
     </DesignSystemConfigurationProvider>
   );
 });

@@ -1,11 +1,12 @@
 import { useApplicationState } from 'noya-app-state-context';
 import { Rect } from 'noya-geometry';
-import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit, useZoom } from 'noya-renderer';
+import { DropShadow, useColorFill } from 'noya-react-canvaskit';
 import { getDragHandles, Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import { pixelAlignRect } from '../pixelAlignment';
+import { useZoom } from '../ZoomContext';
 
 interface Props {
   rect: Rect;
@@ -21,16 +22,12 @@ export default memo(function DragHandles({ rect }: Props) {
   const dragHandles = getDragHandles(state, rect, zoom);
 
   const dropShadow = useMemo(
-    () =>
-      CanvasKit.ImageFilter.MakeDropShadowOnly(
-        0,
-        0,
-        1 / zoom,
-        1 / zoom,
-        CanvasKit.Color(0, 0, 0, 0.5),
-        null,
-      ),
-
+    (): DropShadow => ({
+      type: 'dropShadow',
+      color: CanvasKit.Color(0, 0, 0, 0.5),
+      offset: { x: 0, y: 0 },
+      radius: 1 / zoom,
+    }),
     [CanvasKit, zoom],
   );
 

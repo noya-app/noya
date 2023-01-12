@@ -2,12 +2,11 @@ import React, {
   CSSProperties,
   ForwardedRef,
   forwardRef,
-  memo,
   ReactNode,
   useCallback,
 } from 'react';
 import styled from 'styled-components';
-import { Tooltip } from '..';
+import { Tooltip } from './Tooltip';
 
 type ButtonVariant = 'normal' | 'thin' | 'none';
 
@@ -86,7 +85,7 @@ export interface ButtonRootProps {
   onClick?: (event: React.MouseEvent) => void;
 }
 
-const Button = forwardRef(function Button(
+export const Button = forwardRef(function Button(
   {
     id,
     flex,
@@ -125,5 +124,3 @@ const Button = forwardRef(function Button(
     buttonElement
   );
 });
-
-export default memo(Button);

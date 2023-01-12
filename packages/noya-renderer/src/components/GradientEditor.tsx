@@ -1,7 +1,7 @@
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Point } from 'noya-geometry';
-import { useColorFill, useStroke } from 'noya-react-canvaskit';
+import { DropShadow, useColorFill, useStroke } from 'noya-react-canvaskit';
 import {
   getAngularGradientCircle,
   getCircleTangentSquare,
@@ -128,16 +128,12 @@ export default memo(function GradientEditor({
     strokeWidth: 1 / zoom,
   });
   const gradientEditorShadow = useMemo(
-    () =>
-      CanvasKit.ImageFilter.MakeDropShadowOnly(
-        0,
-        0,
-        2 / zoom,
-        2 / zoom,
-        CanvasKit.Color(0, 0, 0, 0.5),
-        null,
-      ),
-
+    (): DropShadow => ({
+      type: 'dropShadow',
+      color: CanvasKit.Color(0, 0, 0, 0.5),
+      offset: { x: 0, y: 0 },
+      radius: 2 / zoom,
+    }),
     [CanvasKit, zoom],
   );
 

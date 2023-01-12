@@ -3,8 +3,10 @@ import { Point } from 'noya-geometry';
 import { useDeletable, useStroke } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Polyline, useCanvasKit, useZoom } from '..';
+import { Polyline } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import { pixelAlignPoints } from '../pixelAlignment';
+import { useZoom } from '../ZoomContext';
 
 interface GuideProps {
   points: [Point, Point];

@@ -12,7 +12,7 @@ import {
 } from 'noya-colorpicker';
 import type Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
-import * as Spacer from '../components/Spacer';
+import { Spacer } from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
   onSelectStop: (index: number) => void;
 }
 
-export default memo(function GradientPicker({
+export const GradientPicker = memo(function GradientPicker({
   value,
   selectedStop,
   onChangeColor,

@@ -325,6 +325,10 @@ export type ShaderVariable = {
         data: number;
       }
     | {
+        type: 'float2';
+        data: { x: number; y: number };
+      }
+    | {
         type: 'color';
         data: Color;
       };
@@ -1157,6 +1161,7 @@ export type SymbolInstance = {
   symbolID: Uuid;
   verticalSpacing: number;
   horizontalSpacing: number;
+  blockText?: string;
 };
 /**
  * Defines an individual symbol override

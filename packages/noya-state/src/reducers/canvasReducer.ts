@@ -32,11 +32,6 @@ import * as Layers from '../layers';
 import { ScalingOptions } from '../primitives';
 import { getLineDragHandleIndexForDirection } from '../selection';
 import {
-  getAngularGradientCircle,
-  getSelectedGradient,
-  getSelectedGradientStopPoints,
-} from '../selectors/gradientSelectors';
-import {
   addToParentLayer,
   computeCurvePointBoundingRect,
   EncodedPageMetadata,
@@ -52,17 +47,22 @@ import {
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
-  getSymbols,
+  getSymbolMaster,
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
   resizeLayerFrame,
-} from '../selectors/selectors';
+} from '../selectors';
+import {
+  getAngularGradientCircle,
+  getSelectedGradient,
+  getSelectedGradientStopPoints,
+} from '../selectors/gradientSelectors';
 import {
   getScaledSnapBoundingRect,
   getSnapAdjustmentForVisibleLayers,
 } from '../snapping';
-import {
+import type {
   ApplicationReducerContext,
   ApplicationState,
 } from './applicationReducer';
@@ -99,7 +99,7 @@ export type CanvasAction =
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
   | [type: 'addStopToGradient', point: Point]
-  | [type: 'deleteStopToGradient']
+  | [type: 'deleteStopFromGradient']
   | [
       type: 'importImage',
       images: InsertedImage[],
@@ -286,30 +286,57 @@ export function canvasReducer(
         if (draft.interactionState.type !== 'drawing') return;
 
         const shapeType = draft.interactionState.shapeType;
-        const layer = createDrawingLayer(
-          CanvasKit,
-          shapeType,
-          SketchModel.style({
-            fills: [
-              SketchModel.fill({
-                color: defaultFillColor,
-              }),
-            ],
-            borders: [
-              SketchModel.border({
-                color: defaultBorderColor,
-              }),
-            ],
-          }),
-          draft.interactionState.origin,
-          draft.interactionState.current,
-          false,
-          {
-            constrainProportions: state.keyModifiers.shiftKey,
-            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
-          },
-          state.lastEditedTextStyle,
-        );
+        const layer =
+          typeof shapeType === 'string'
+            ? createDrawingLayer(
+                CanvasKit,
+                shapeType,
+                SketchModel.style({
+                  fills: [
+                    SketchModel.fill({
+                      color: defaultFillColor,
+                    }),
+                  ],
+                  borders: [
+                    SketchModel.border({
+                      color: defaultBorderColor,
+                    }),
+                  ],
+                }),
+                draft.interactionState.origin,
+                draft.interactionState.current,
+                false,
+                {
+                  constrainProportions: state.keyModifiers.shiftKey,
+                  scalingOriginMode: state.keyModifiers.altKey
+                    ? 'center'
+                    : 'extent',
+                },
+                state.lastEditedTextStyle,
+              )
+            : (() => {
+                const symbol = getSymbolMaster(state, shapeType.symbolId);
+
+                if (!symbol) return SketchModel.rectangle();
+
+                const layer = SketchModel.symbolInstance({
+                  name: symbol.name,
+                  symbolID: symbol.symbolID,
+                  frame: SketchModel.rect(
+                    createRect(
+                      draft.interactionState.current,
+                      draft.interactionState.origin,
+                    ),
+                  ),
+                  // frame: {
+                  //   ...symbol.frame,
+                  //   x: draft.interactionState.origin.x,
+                  //   y: draft.interactionState.origin.y,
+                  // },
+                });
+
+                return layer;
+              })();
 
         if (shapeType === 'text') {
           if (layer.frame.width < 10) {
@@ -384,9 +411,7 @@ export function canvasReducer(
       const [, symbolId, point] = action;
       const pageIndex = getCurrentPageIndex(state);
 
-      const symbol = getSymbols(state).find(
-        ({ do_objectID }) => do_objectID === symbolId,
-      ) as Sketch.SymbolMaster;
+      const symbol = getSymbolMaster(state, symbolId);
 
       const layer = SketchModel.symbolInstance({
         name: symbol.name,
@@ -473,7 +498,7 @@ export function canvasReducer(
         return;
       });
     }
-    case 'deleteStopToGradient': {
+    case 'deleteStopFromGradient': {
       const pageIndex = getCurrentPageIndex(state);
 
       if (!state.selectedGradient) return state;
@@ -965,7 +990,9 @@ export function canvasReducer(
             const originalBoundingRect = getBoundingRect(
               pageSnapshot,
               layerIds,
-            )!;
+            );
+
+            if (!originalBoundingRect) break;
 
             const lineLayer = Selectors.getSelectedLineLayer(state);
 
@@ -1226,6 +1253,10 @@ export function createDrawingLayer(
   }
 
   const frame = SketchModel.rect(rect);
+
+  if (typeof shapeType !== 'string') {
+    return SketchModel.rectangle({ style, frame });
+  }
 
   switch (shapeType) {
     case 'oval':

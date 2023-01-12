@@ -1,11 +1,13 @@
 import Sketch from 'noya-file-format';
 import { getRectCornerPoints } from 'noya-geometry';
 import { makePath } from 'noya-react-canvaskit';
-import { Group, Image, useCanvasKit, useZoom } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
+import { Group, Image } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useSketchImage } from '../../ImageCache';
+import { useZoom } from '../../ZoomContext';
 import BlurGroup from '../effects/BlurGroup';
 import ColorControlsGroup from '../effects/ColorControlsGroup';
 import DropShadowGroup from '../effects/DropShadowGroup';

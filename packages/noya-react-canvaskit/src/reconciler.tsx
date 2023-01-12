@@ -1,10 +1,11 @@
 // Some snippets adapted from udevbe/react-canvaskit (MIT License)
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
-import { Canvas, CanvasKit, Surface } from 'canvaskit';
+import { Canvas, CanvasKit, ImageFilter, Surface } from 'canvaskit';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
 import ReactReconciler from 'react-reconciler';
+import { MakeDropShadowOnly } from './filters/ImageFilter';
 import {
   AnyElementInstance,
   AnyElementProps,
@@ -343,6 +344,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
             const needsLayer =
               opacity < 1 || colorFilter || imageFilter || backdropImageFilter;
 
+            const deletable: { delete: () => void }[] = [];
+
             if (needsLayer) {
               const layerPaint = new CanvasKit.Paint();
 
@@ -355,7 +358,17 @@ const hostConfig: ReactCanvasKitHostConfig = {
               }
 
               if (imageFilter) {
-                layerPaint.setImageFilter(imageFilter);
+                let resolved: ImageFilter;
+
+                if ('type' in imageFilter) {
+                  resolved = MakeDropShadowOnly(CanvasKit, imageFilter);
+
+                  deletable.push(resolved);
+                } else {
+                  resolved = imageFilter;
+                }
+
+                layerPaint.setImageFilter(resolved);
               }
 
               canvas.saveLayer(layerPaint, null, backdropImageFilter);
@@ -364,6 +377,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
             element._elements.forEach(draw);
 
             canvas.restoreToCount(saveCount);
+            deletable.forEach((d) => d.delete());
             break;
           }
           // default:

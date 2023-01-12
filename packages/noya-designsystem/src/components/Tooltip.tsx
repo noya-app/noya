@@ -21,7 +21,7 @@ interface Props {
   content: ReactNode;
 }
 
-export default memo(function Tooltip({ children, content }: Props) {
+export const Tooltip = memo(function Tooltip({ children, content }: Props) {
   return (
     <TooltipPrimitive.Provider>
       <TooltipPrimitive.Root>

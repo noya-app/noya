@@ -1,6 +1,6 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { SetNumberMode } from './styleReducer';
+import Sketch from 'noya-file-format';
+import { SetNumberMode } from '../types';
 
 export type StringAttributeAction =
   | [type: 'setTextColor', value: Sketch.Color]

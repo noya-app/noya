@@ -3,13 +3,14 @@ import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
-import { Group, Rect, Text, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Selectors, TextSelectionRange } from 'noya-state';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
 import { getLuminance } from '../../colorMatrix';
+import { Group, Rect, Text } from '../../ComponentsContext';
 import { useFontManager } from '../../FontManagerContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import BlurGroup from '../effects/BlurGroup';
 
 function useNearestBackgroundColor(layer: Sketch.Text) {

@@ -1,15 +1,15 @@
 import { CanvasKit } from 'canvaskit';
 import Sketch from 'noya-file-format';
 import { toDegrees } from 'noya-geometry';
-import { useCanvasKit } from 'noya-renderer';
 import React, { memo, ReactNode, useMemo } from 'react';
-import { Group } from '../..';
 import {
   getBrightnessMatrix,
   getContrastMatrix,
   getHueRotationMatrix,
   getSaturationMatrix,
 } from '../../colorMatrix';
+import { Group } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 
 function multiplyColorMatrix(
   CanvasKit: CanvasKit,

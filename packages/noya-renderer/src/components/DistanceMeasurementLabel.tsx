@@ -7,12 +7,13 @@ import {
   Size,
 } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit, useZoom } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Rect, Text } from '..';
+import { Group, Rect, Text } from '../ComponentsContext';
 import { useFontManager } from '../FontManagerContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
+import { useZoom } from '../ZoomContext';
 
 interface Props {
   points: [Point, Point];

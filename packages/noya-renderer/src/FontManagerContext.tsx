@@ -3,7 +3,6 @@ import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
 import { getPublicPath } from 'noya-public-path';
 import { SuspendedValue, useMutableState } from 'noya-react-utils';
-import { useCanvasKit } from 'noya-renderer';
 import React, {
   createContext,
   memo,
@@ -12,6 +11,7 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
+import { useCanvasKit } from './hooks/useCanvasKit';
 
 export type IFontManager = Pick<
   FontManager,

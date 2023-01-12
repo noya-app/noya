@@ -8,8 +8,11 @@ import React, {
   useContext,
 } from 'react';
 import styled from 'styled-components';
-import { ContextMenu, MenuItem, ScrollArea, Spacer } from '..';
 import withSeparatorElements from '../utils/withSeparatorElements';
+import { ContextMenu } from './ContextMenu';
+import { MenuItem } from './internal/Menu';
+import { ScrollArea } from './ScrollArea';
+import { Spacer } from './Spacer';
 
 export type GridViewVariant = 'small' | 'large';
 
@@ -206,7 +209,9 @@ function GridViewSectionHeader({ title }: { title: string }) {
   );
 }
 
-export const Root = memo(GridViewRoot);
-export const Item = memo(GridViewItem);
-export const Section = memo(GridViewSection);
-export const SectionHeader = memo(GridViewSectionHeader);
+export namespace GridView {
+  export const Root = memo(GridViewRoot);
+  export const Item = memo(GridViewItem);
+  export const Section = memo(GridViewSection);
+  export const SectionHeader = memo(GridViewSectionHeader);
+}

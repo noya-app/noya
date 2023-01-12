@@ -1,15 +1,16 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import { Selectors, SimpleTextDecoration } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
-  getCurrentTab,
-  getCurrentPageIndex,
-  getSelectedLayerIndexPaths,
   findPageLayerIndexPaths,
-} from '../selectors/selectors';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+  getCurrentPageIndex,
+  getCurrentTab,
+  getSelectedLayerIndexPaths,
+} from '../selectors';
+import type { ApplicationState } from './applicationReducer';
+import { accessPageLayers } from '../selectors/layerSelectors';
 import {
   StringAttributeAction,
   stringAttributeReducer,

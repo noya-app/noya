@@ -1,15 +1,17 @@
 import { Point } from 'noya-geometry';
-import { decodeCurvePoint } from 'noya-state';
-import { ApplicationState, Layers } from '../index';
-import { SelectedControlPoint } from '../reducers/applicationReducer';
-import { SelectedPoint } from '../reducers/pointReducer';
+import { decodeCurvePoint, getCurrentHandleDirection } from 'noya-state';
+import { getBoundingRectMap } from './geometrySelectors';
+import { getCursorForDirection, getSelectedLayers } from './layerSelectors';
+import { getIndexPathOfOpenShapeLayer, isPointInRange } from './pointSelectors';
+
+import { CSSProperties } from 'react';
+import { Layers } from '../layer';
+import type {
+  ApplicationState,
+  SelectedControlPoint,
+} from '../reducers/applicationReducer';
+import type { SelectedPoint } from '../reducers/pointReducer';
 import { getCurrentPage } from './pageSelectors';
-import {
-  getBoundingRectMap,
-  getIndexPathOfOpenShapeLayer,
-  isPointInRange,
-  getSelectedLayers,
-} from './selectors';
 
 type PathElement =
   | {
@@ -65,6 +67,46 @@ export const getCursorForEditPathMode = (
     return 'default';
   }
 };
+
+export function getCursor(state: ApplicationState): CSSProperties['cursor'] {
+  switch (state.interactionState.type) {
+    case 'panning':
+    case 'maybePan':
+      return 'grabbing';
+    case 'panMode':
+      return 'grab';
+    case 'insert':
+      return 'crosshair';
+    case 'drawingShapePath':
+      return 'crosshair';
+    case 'editPath': {
+      const { point } = state.interactionState;
+
+      if (!point) return 'default';
+
+      return getCursorForEditPathMode(state, point);
+    }
+    case 'maybeMoveControlPoint':
+    case 'maybeMovePoint':
+    case 'movingControlPoint':
+    case 'movingPoint':
+      return 'move';
+    case 'editingText':
+    case 'selectingText':
+    case 'maybeSelectingText':
+      return 'text';
+    case 'maybeScale':
+    case 'scaling':
+    case 'hoverHandle':
+      const direction = getCurrentHandleDirection(state.interactionState);
+
+      if (!direction) return 'default';
+
+      return getCursorForDirection(direction, state);
+    default:
+      return 'default';
+  }
+}
 
 export function getPathElementAtPoint(
   state: ApplicationState,

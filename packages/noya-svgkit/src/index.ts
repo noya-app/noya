@@ -3,10 +3,6 @@ import { PathKitInit } from 'pathkit';
 import { createJSPath } from './JSPath';
 import { SVGKit } from './SVGKit';
 
-export type SerializableProperties<T> = {
-  [K in keyof T as T[K] extends Function ? never : K]: T[K];
-};
-
 let loadingPromise: Promise<typeof SVGKit> | undefined = undefined;
 
 export default function loadSVGKit() {

@@ -1,3 +1,4 @@
+import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import {
@@ -6,19 +7,18 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
-import {
-  Group,
-  Rect as RCKRect,
-  Text,
-  useCanvasKit,
-  useZoom,
-} from 'noya-renderer';
+import { SketchModel } from 'noya-sketch-model';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { Group, Rect as RCKRect, Text } from '../../ComponentsContext';
 import { useFontManager } from '../../FontManagerContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
+import { useDotFill } from '../../hooks/useDotFill';
 import { useRenderingMode } from '../../RenderingModeContext';
+import { useZoom } from '../../ZoomContext';
 import SketchGroup from './SketchGroup';
+import { BaseLayerProps } from './types';
 
 interface ArtboardLabelProps {
   text: string;
@@ -103,20 +103,26 @@ const ArtboardBlur = memo(function ArtboardBlur({
   return <RCKRect rect={blurRect} paint={blur} />;
 });
 
-interface SketchArtboardContentProps {
+interface SketchArtboardContentProps extends BaseLayerProps {
   layer: Sketch.Artboard | Sketch.SymbolMaster;
 }
 
 export const SketchArtboardContent = memo(function SketchArtboardContent({
   layer,
+  SketchLayer,
 }: SketchArtboardContentProps) {
+  const {
+    preferences: { showDotGrid },
+  } = useWorkspace();
   const CanvasKit = useCanvasKit();
 
-  const paint = usePaint({
-    color: layer.hasBackgroundColor
-      ? Primitives.color(CanvasKit, layer.backgroundColor)
-      : CanvasKit.WHITE,
-    style: CanvasKit.PaintStyle.Fill,
+  const paint = useDotFill({
+    gridSize: 10,
+    frame: layer.frame,
+    backgroundColor: layer.hasBackgroundColor
+      ? layer.backgroundColor
+      : SketchModel.WHITE,
+    foregroundColor: showDotGrid ? SketchModel.BLACK : SketchModel.WHITE,
   });
 
   const rect = Primitives.rect(CanvasKit, layer.frame);
@@ -138,18 +144,22 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
     <>
       {showBackground && <RCKRect rect={rect} paint={paint} />}
       <Group clip={clip}>
-        <SketchGroup layer={layer} />
+        <SketchGroup SketchLayer={SketchLayer} layer={layer} />
       </Group>
     </>
   );
 });
 
-interface Props {
+interface Props extends BaseLayerProps {
   layer: Sketch.Artboard | Sketch.SymbolMaster;
   isSymbolMaster: boolean;
 }
 
-export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
+export default memo(function SketchArtboard({
+  layer,
+  isSymbolMaster,
+  SketchLayer,
+}: Props) {
   const renderingMode = useRenderingMode();
 
   return (
@@ -164,7 +174,7 @@ export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
           <ArtboardBlur layerFrame={layer.frame} />
         </>
       )}
-      <SketchArtboardContent layer={layer} />
+      <SketchArtboardContent SketchLayer={SketchLayer} layer={layer} />
     </>
   );
 });

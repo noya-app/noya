@@ -1,7 +1,7 @@
 import * as Icons from 'noya-icons';
 import React, { ForwardedRef, forwardRef, memo } from 'react';
 import { useTheme } from 'styled-components';
-import Button, { ButtonRootProps } from './Button';
+import { Button, ButtonRootProps } from './Button';
 
 type Props = Omit<ButtonRootProps, 'children' | 'variant' | 'flex'> & {
   iconName: keyof typeof Icons;
@@ -10,7 +10,7 @@ type Props = Omit<ButtonRootProps, 'children' | 'variant' | 'flex'> & {
   size?: number;
 };
 
-export default memo(
+export const IconButton = memo(
   forwardRef(function IconButton(
     { selected, iconName, color, size, ...props }: Props,
     forwardedRef: ForwardedRef<HTMLButtonElement>,

@@ -1,10 +1,9 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { ColorControlsRow, EnableableElementController } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { getMultiNumberValue, Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
-import ColorControlsRow from '../components/inspector/ColorControlsRow';
-import EnableableElementController from '../components/inspector/EnableableElementController';
 
 function makeInterpolator(options: InterpolateOptions) {
   return {

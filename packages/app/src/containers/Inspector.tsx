@@ -1,5 +1,10 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
+import {
+  DimensionsInspector,
+  InspectorPrimitives,
+  LineInspector,
+} from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import {
   getMultiNumberValue,
@@ -11,9 +16,6 @@ import {
 } from 'noya-state';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import DimensionsInspector from '../components/inspector/DimensionsInspector';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import LineInspector from '../components/inspector/LineInspector';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BlurInspector from './BlurInspector';

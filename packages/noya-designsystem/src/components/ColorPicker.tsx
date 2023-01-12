@@ -11,8 +11,8 @@ import {
 } from 'noya-colorpicker';
 import type Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
-import * as Spacer from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
+import { Spacer } from './Spacer';
 
 interface Props {
   value: Sketch.Color;
@@ -26,7 +26,10 @@ const colorModel: ColorModel<HsvaColor> = {
   fromHsva: (a) => a,
 };
 
-export default memo(function ColorPicker({ value, onChange }: Props) {
+export const ColorPicker = memo(function ColorPicker({
+  value,
+  onChange,
+}: Props) {
   const hsva = value.colorSpaces?.hsva;
 
   const color = useMemo(() => {

@@ -1,9 +1,15 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { GroupLayouts, Layers, SetNumberMode } from '..';
+import Sketch from 'noya-file-format';
+import { GroupLayouts } from '../groupLayouts';
+import { Layers } from '../layer';
 import { getSelectedLayers } from '../selectors/layerSelectors';
-import { getSelectedSymbols, getSymbols } from '../selectors/themeSelectors';
-import { ApplicationState } from './applicationReducer';
+import {
+  getSelectedSymbols,
+  getSymbolMaster,
+  getSymbols,
+} from '../selectors/themeSelectors';
+import { SetNumberMode } from '../types';
+import type { ApplicationState } from './applicationReducer';
 
 export type SymbolsAction =
   | [type: 'setAdjustContentOnResize', value: boolean]
@@ -17,7 +23,11 @@ export type SymbolsAction =
   | [type: 'setMinWidth', amount: number, type: SetNumberMode]
   | [type: 'setAllowsOverrides', value: boolean]
   | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
-  | [type: 'setInstanceSymbolSource', symbolId: string]
+  | [
+      type: 'setInstanceSymbolSource',
+      symbolId: string,
+      dimensions: 'resetToMaster' | 'preserveCurrent',
+    ]
   | [type: 'goToSymbolSource', overrideName: string]
   | [type: 'setOverrideValue', overrideName?: string, value?: string];
 
@@ -172,11 +182,9 @@ export function symbolsReducer(
       });
     }
     case 'setInstanceSymbolSource': {
-      const [, symbolId] = action;
+      const [, symbolId, dimensions] = action;
 
-      const symbolMaster = getSymbols(state).find(
-        (symbol) => symbol.symbolID === symbolId,
-      );
+      const symbolMaster = getSymbolMaster(state, symbolId);
 
       return produce(state, (draft) => {
         const symbols = getSelectedLayers(draft).filter(
@@ -187,8 +195,14 @@ export function symbolsReducer(
         symbols.forEach((symbol) => {
           symbol.frame = {
             ...symbol.frame,
-            width: symbolMaster.frame.width,
-            height: symbolMaster.frame.height,
+            width:
+              dimensions === 'resetToMaster'
+                ? symbolMaster.frame.width
+                : symbol.frame.width,
+            height:
+              dimensions === 'resetToMaster'
+                ? symbolMaster.frame.height
+                : symbol.frame.height,
           };
           symbol.symbolID = symbolId;
         });

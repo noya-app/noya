@@ -13,10 +13,10 @@ import {
 } from 'noya-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { HamburgerMenuIcon } from 'noya-icons';
+import { InspectorPrimitives } from 'noya-inspector';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useFileManager } from '../hooks/useFileManager';
 import { useHistory } from '../hooks/useHistory';

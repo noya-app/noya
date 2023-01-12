@@ -1,8 +1,8 @@
 import { useDeletable } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import { CHECKERED_BACKGROUND_BYTES } from 'noya-state';
 import { useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { useCanvasKit } from './useCanvasKit';
 
 export default function useCheckeredFill() {
   const CanvasKit = useCanvasKit();

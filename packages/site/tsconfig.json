@@ -2,15 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "module": "esnext",
-    "baseUrl": ".",
-    "paths": {
-      "components/*": [
-        "src/components/*"
-      ],
-      "system": [
-        "src/system/index"
-      ]
-    },
+    "incremental": true,
     "jsx": "preserve"
   },
   "include": [

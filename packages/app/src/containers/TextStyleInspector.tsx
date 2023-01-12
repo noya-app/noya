@@ -1,13 +1,10 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { TextLayoutRow, TextOptionsRow, TextStyleRow } from 'noya-inspector';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
-import TextLayoutRow from '../components/inspector/TextLayoutRow';
-import TextOptionsRow from '../components/inspector/TextOptionsRow';
-import TextStyleRow from '../components/inspector/TextStyleRow';
-
 export default memo(function TextStyleInspector() {
   const [state, dispatch] = useApplicationState();
 

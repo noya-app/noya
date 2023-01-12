@@ -8,6 +8,9 @@ import Text from './components/Text';
 
 export const Components = { Rect, Path, Group, Image, Text, Polyline };
 
+// Filters
+export * from './filters/ImageFilter';
+
 // Hooks
 export { default as useBlurMaskFilter } from './hooks/useBlurMaskFilter';
 export { default as useColor } from './hooks/useColor';

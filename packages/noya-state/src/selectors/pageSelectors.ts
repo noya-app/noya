@@ -1,8 +1,9 @@
 import Sketch from 'noya-file-format';
 import { Draft } from 'immer';
 import { Point } from 'noya-geometry';
-import { PointString } from 'noya-sketch-model';
-import { ApplicationState, Layers } from '../index';
+import { PointString, SketchModel } from 'noya-sketch-model';
+import type { ApplicationState } from '../reducers/applicationReducer';
+import { Layers } from '../layer';
 
 export type EncodedPageMetadata = {
   zoomValue: number;
@@ -81,4 +82,22 @@ export const getCurrentSymbolPageIndex = (
   );
 
   return pageIndex;
+};
+
+export const createPage = (
+  pages: Sketch.Page[],
+  user: Sketch.User,
+  pageId: string,
+  name: string,
+): Sketch.Page => {
+  const newPage = SketchModel.page({ do_objectID: pageId, name });
+
+  user[newPage.do_objectID] = {
+    scrollOrigin: '{0, 0}',
+    zoomValue: 1,
+  };
+
+  pages.push(newPage);
+
+  return newPage;
 };

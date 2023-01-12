@@ -6,8 +6,14 @@ function getVariableUniformDeclaration({ name, value }: Sketch.ShaderVariable) {
       return `uniform int ${name};`;
     case 'float':
       return `uniform float ${name};`;
+    case 'float2':
+      return `uniform float2 ${name};`;
     case 'color':
       return `uniform float4 ${name};`;
+    default:
+      throw new Error(
+        `Unsupported shader variable type: ${JSON.stringify(value)}`,
+      );
   }
 }
 
@@ -20,6 +26,8 @@ export function getVariableUniformValues({ value }: Sketch.ShaderVariable) {
     case 'integer':
     case 'float':
       return [value.data];
+    case 'float2':
+      return [value.data.x, value.data.y];
     case 'color':
       const { red, green, blue, alpha } = value.data;
       return [red, green, blue, alpha];

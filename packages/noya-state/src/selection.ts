@@ -6,8 +6,9 @@ import {
   decodeCurvePoint,
   DragHandle,
   getSelectedLineLayer,
+  InteractionState,
 } from 'noya-state';
-import { ApplicationState } from './reducers/applicationReducer';
+import type { ApplicationState } from './reducers/applicationReducer';
 
 export const compassDirectionMap: Record<CompassDirection, Point> = {
   n: { x: 0.5, y: 0 },
@@ -112,6 +113,14 @@ export function getDragHandles(
         zoom,
       )
     : getRectDragHandles(rect, zoom);
+}
+
+export function getCurrentHandleDirection(interactionState: InteractionState) {
+  return interactionState.type === 'hoverHandle' ||
+    interactionState.type === 'maybeScale' ||
+    interactionState.type === 'scaling'
+    ? interactionState.direction
+    : undefined;
 }
 
 // This function doesn't ensure a positive width/height, since we use it when

@@ -2,12 +2,12 @@ import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { Point } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Rect, Text } from '..';
+import { Rect, Text } from '../ComponentsContext';
 import { useFontManager } from '../FontManagerContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 
 function RulerLabel({ text, origin }: { text: string; origin: Point }) {
   const CanvasKit = useCanvasKit();

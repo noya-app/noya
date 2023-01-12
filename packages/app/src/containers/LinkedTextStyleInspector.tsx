@@ -1,5 +1,5 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Button, Select } from 'noya-designsystem';
+import { Button, Select, useOpenInputDialog } from 'noya-designsystem';
 import {
   CursorTextIcon,
   LinkBreak2Icon,
@@ -7,12 +7,11 @@ import {
   ResetIcon,
   UpdateIcon,
 } from 'noya-icons';
+import { InspectorPrimitives } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useOpenInputDialog } from '../contexts/DialogContext';
 
 const NO_TEXT_STYLE = 'none';
 

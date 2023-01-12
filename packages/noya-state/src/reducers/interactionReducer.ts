@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import { Point, Rect } from 'noya-geometry';
 import { TextSelectionRange, UUID } from 'noya-state';
 
@@ -32,7 +32,8 @@ export type DrawableLayerType =
   | 'line'
   | 'text'
   | 'artboard'
-  | 'slice';
+  | 'slice'
+  | { symbolId: string };
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 
@@ -53,7 +54,7 @@ export type InteractionAction =
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
-  | [type: 'updateDrawing', point: Point]
+  | [type: 'updateDrawing', point: Point, shapeType?: DrawableLayerType]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
@@ -72,6 +73,7 @@ export type InteractionAction =
   | [type: 'maybeMoveGradientEllipseLength', origin: Point]
   | [type: 'movingGradientEllipseLength', current: Point]
   | [type: 'editingText', id: UUID, range: TextSelectionRange]
+  | [type: 'editingBlock', id: UUID]
   | [type: 'maybeSelectText', origin: Point]
   | [type: 'selectingText', current: Point];
 
@@ -178,6 +180,7 @@ export type InteractionState =
       current: Point;
     }
   | { type: 'editingText'; layerId: UUID; range: TextSelectionRange }
+  | { type: 'editingBlock'; layerId: UUID }
   | {
       type: 'maybeSelectingText';
       origin: Point;
@@ -258,11 +261,12 @@ export function interactionReducer(
     case 'updateDrawing': {
       if (state.type !== 'drawing') return state;
 
-      const [, point] = action;
+      const [, point, shapeType] = action;
 
       return {
         ...state,
         current: point,
+        shapeType: shapeType ?? state.shapeType,
       };
     }
     case 'maybeMove': {
@@ -489,6 +493,14 @@ export function interactionReducer(
         type: 'editingText',
         layerId,
         range,
+      };
+    }
+    case 'editingBlock': {
+      const [, layerId] = action;
+
+      return {
+        type: 'editingBlock',
+        layerId,
       };
     }
     case 'maybeSelectText': {

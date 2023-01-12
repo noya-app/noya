@@ -19,7 +19,7 @@ import {
   TextSelectionRange,
 } from 'noya-state';
 import { memoize, unique } from 'noya-utils';
-import { ApplicationState } from '../reducers/applicationReducer';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
 
@@ -151,13 +151,15 @@ export function getLayerParagraph(
   return paragraph;
 }
 
+export type CharacterSelectionMode = 'bounded' | 'unbounded';
+
 export function getCharacterIndexAtPoint(
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
   state: ApplicationState,
   layerId: string,
   point: Point,
-  mode: 'bounded' | 'unbounded',
+  mode: CharacterSelectionMode,
 ) {
   const page = Selectors.getCurrentPage(state);
   const textLayer = Layers.find(page, (layer) => layer.do_objectID === layerId);

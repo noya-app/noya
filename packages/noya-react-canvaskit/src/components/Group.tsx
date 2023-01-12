@@ -1,6 +1,7 @@
 import { ColorFilter, ImageFilter } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { createElement, memo, ReactNode, useMemo } from 'react';
+import { DropShadow } from '../filters/ImageFilter';
 import { ClipProps, GroupComponentProps } from '../types';
 
 interface GroupProps {
@@ -9,7 +10,7 @@ interface GroupProps {
   children?: ReactNode;
   clip?: ClipProps;
   colorFilter?: ColorFilter;
-  imageFilter?: ImageFilter;
+  imageFilter?: ImageFilter | DropShadow;
   backdropImageFilter?: ImageFilter;
 }
 
