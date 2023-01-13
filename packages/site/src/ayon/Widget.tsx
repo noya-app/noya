@@ -115,12 +115,13 @@ export function Widget({
 
   const blockTypes = inferBlockTypes({ rect });
 
+  const showWidgetUI =
+    isSelected &&
+    !isContextMenuOpen &&
+    state.interactionState.type !== 'drawing';
+
   return (
     <WidgetContainer frame={rect}>
-      {isSelected && !isContextMenuOpen && (
-        <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
-      )}
-
       <textarea
         ref={textareaRef}
         style={{
@@ -150,43 +151,46 @@ export function Widget({
         }}
         value={blockText}
       />
-      {isSelected && !isContextMenuOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 36px)',
-            right: 0,
-            background: 'whitesmoke',
-            border: '1px solid rgba(0,0,0,0.1)',
-            color: 'black',
-            pointerEvents: 'all',
-            padding: '1px 4px',
-            whiteSpace: 'pre',
-            borderRadius: '2px',
-            fontSize: 13,
-            zIndex: 1,
-          }}
-        >
-          {blockTypes.map((blockType) => {
-            const name =
-              typeof blockType.type === 'string'
-                ? blockType.type
-                : Selectors.getSymbolMaster(state, blockType.type.symbolId)
-                    .name;
+      {showWidgetUI && (
+        <>
+          <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 36px)',
+              right: 0,
+              background: 'whitesmoke',
+              border: '1px solid rgba(0,0,0,0.1)',
+              color: 'black',
+              pointerEvents: 'all',
+              padding: '1px 4px',
+              whiteSpace: 'pre',
+              borderRadius: '2px',
+              fontSize: 13,
+              zIndex: 1,
+            }}
+          >
+            {blockTypes.map((blockType) => {
+              const name =
+                typeof blockType.type === 'string'
+                  ? blockType.type
+                  : Selectors.getSymbolMaster(state, blockType.type.symbolId)
+                      .name;
 
-            return (
-              <div
-                key={name}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                  onChangeBlockType(blockType.type);
-                }}
-              >
-                {blockType.score} {name}
-              </div>
-            );
-          })}
-        </div>
+              return (
+                <div
+                  key={name}
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
+                    onChangeBlockType(blockType.type);
+                  }}
+                >
+                  {blockType.score} {name}
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </WidgetContainer>
   );
