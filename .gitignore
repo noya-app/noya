@@ -30,4 +30,5 @@ yarn-error.log*
 dist
 
 # custom
+.env
 .eslintcache

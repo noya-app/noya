@@ -1,21 +1,26 @@
 import { NoyaAPI } from 'noya-api';
 
-const host = 'https://www.noya.io';
-// const host = 'http://localhost:31112';
+const host = process.env.NEXT_PUBLIC_NOYA_WEB_URL;
 
-const networkClient = new NoyaAPI.NetworkClient({
-  baseURI: `${host}/api`,
-  onError: (error) => {
-    if (error instanceof NoyaAPI.Error && error.type === 'unauthorized') {
-      window.location.href = host;
-      return true;
-    } else {
-      return false;
-    }
-  },
-});
+const networkClient = host
+  ? new NoyaAPI.NetworkClient({
+      baseURI: `${host}/api`,
+      onError: (error) => {
+        if (error instanceof NoyaAPI.Error && error.type === 'unauthorized') {
+          window.location.href = host;
+          return true;
+        } else {
+          return false;
+        }
+      },
+    })
+  : new NoyaAPI.LocalStorageClient();
 
-// const networkClient = new NoyaAPI.LocalStorageClient();
+if (host) {
+  console.info('INFO: Using Noya API at', host);
+} else {
+  console.info('INFO: Using local storage');
+}
 
 export const noyaClient = new NoyaAPI.Client({
   networkClient,
