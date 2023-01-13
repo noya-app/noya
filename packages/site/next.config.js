@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const workspacePath = path.join(__dirname, '..');
 
 module.exports = {
+  basePath: '/app',
   webpack(config, options) {
     if (!options.isServer) {
       config.resolve.fallback.fs = false;
