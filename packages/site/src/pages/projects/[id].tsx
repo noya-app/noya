@@ -3,10 +3,13 @@ import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
+  Divider,
   lightTheme,
+  Stack,
 } from 'noya-designsystem';
 import { getCurrentPlatform } from 'noya-keymap';
 import React, { useEffect } from 'react';
+import { Toolbar } from '../../components/Toolbar';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
@@ -27,11 +30,13 @@ export default function Project(): JSX.Element {
     client.files.read(id).then(setFile);
   }, [client, id]);
 
-  if (!file) return <div>Loading...</div>;
-
   return (
     <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
-      <Ayon file={file} />
+      <Stack.V flex="1" background={lightTheme.colors.canvas.background}>
+        <Toolbar />
+        <Divider variant="strong" />
+        {file && <Ayon file={file} />}
+      </Stack.V>
     </DesignSystemConfigurationProvider>
   );
 }

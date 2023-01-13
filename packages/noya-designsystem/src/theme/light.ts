@@ -2,6 +2,10 @@ import { CSSObject } from 'styled-components';
 import { mediaQuery } from '../mediaQuery';
 
 export const colors = {
+  logo: {
+    fill: 'rgb(190,190,190)',
+    highlight: 'rgb(190,190,190)',
+  },
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
   textSubtle: 'rgb(121, 121, 121)',

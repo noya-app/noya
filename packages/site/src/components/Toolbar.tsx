@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useNoyaSession } from 'noya-api';
 import {
   Button,
@@ -9,10 +11,24 @@ import {
 } from 'noya-designsystem';
 import { ChevronDownIcon } from 'noya-icons';
 import React from 'react';
+import styled from 'styled-components';
+import { Logo } from './Logo';
+
+const StyledLogo = styled(Logo)({
+  cursor: 'pointer',
+  userSelect: 'none',
+  '&:hover': {
+    opacity: 0.9,
+  },
+  '&:active': {
+    opacity: 0.95,
+  },
+});
 
 export function Toolbar() {
   const theme = useDesignSystemTheme();
   const session = useNoyaSession();
+  const router = useRouter();
 
   const userMenuItems = createSectionedMenu([
     { title: 'Sign out', value: 'signOut' },
@@ -23,8 +39,15 @@ export function Toolbar() {
       background={theme.colors.sidebar.background}
       flex={`0 0 ${theme.sizes.toolbar.height}px`}
       alignItems="center"
-      padding={'0 20px'}
+      padding={'0 10px'}
     >
+      <Link href="/">
+        <StyledLogo
+          onClick={() => {
+            router.push('/');
+          }}
+        />
+      </Link>
       <Spacer.Horizontal />
       {session && (
         <DropdownMenu

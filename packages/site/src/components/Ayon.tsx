@@ -89,7 +89,7 @@ export default function Ayon({ file }: { file: NoyaAPI.File }): JSX.Element {
   };
 
   return (
-    <Suspense fallback="Loading">
+    <Suspense fallback={null}>
       <ImageCacheProvider>
         <CanvasKitProvider>
           <FontManagerProvider>
