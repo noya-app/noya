@@ -3,13 +3,13 @@ import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import { Design, RenderingModeProvider } from 'noya-renderer';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import * as React from 'react';
+import React, { memo } from 'react';
 import { DOMRenderer } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { buttonSymbol } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
 
-export function Content() {
+export const Content = memo(function Content() {
   const { canvasSize } = useWorkspace();
   const [state, dispatch] = useApplicationState();
 
@@ -104,4 +104,4 @@ export function Content() {
       </div>
     </div>
   );
-}
+});

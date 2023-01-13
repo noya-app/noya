@@ -1,7 +1,6 @@
-import produce from 'immer';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { NoyaAPI, useNoyaClient } from 'noya-api';
+import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
   Divider,
@@ -35,69 +34,82 @@ const TitleContainer = styled.div({
   },
 });
 
-function Content() {
-  const {
-    query: { id },
-  } = useRouter();
+function FileTitle({ id }: { id: string }) {
   const client = useNoyaClient();
+  const files = useNoyaFiles();
+  const cachedFile = files.find((file) => file.id === id);
 
-  const [file, setFile] = useState<NoyaAPI.File | undefined>();
+  const openDialog = useOpenInputDialog();
+
+  const updateName = useCallback(async () => {
+    if (!cachedFile) return;
+
+    const newName = await openDialog('Rename project', cachedFile.data.name);
+
+    if (!newName) return;
+
+    const data = { ...cachedFile.data, name: newName };
+
+    client.files.update(cachedFile.id, data);
+  }, [cachedFile, client.files, openDialog]);
+
+  const theme = useDesignSystemTheme();
+
+  if (!cachedFile) return null;
+
+  return (
+    <TitleContainer onClick={updateName}>
+      <DashboardIcon color={theme.colors.textMuted} />
+      <Spacer.Horizontal size={6} />
+      <Small lineHeight={'15px'}>{cachedFile.data.name}</Small>
+    </TitleContainer>
+  );
+}
+
+function FileEditor({ id }: { id: string }) {
+  const client = useNoyaClient();
+  const files = useNoyaFiles();
+  const cachedFile = files.find((file) => file.id === id);
+  const fileName = cachedFile?.data.name;
 
   // The Ayon component is a controlled component that manages its own state
   const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
 
   useEffect(() => {
-    if (typeof id !== 'string') return;
-
-    client.files.read(id).then((file) => {
-      setInitialFile(file);
-      setFile(file);
-    });
+    // Load the latest version of this file from the server
+    client.files.read(id).then(setInitialFile);
   }, [client, id]);
 
-  const updateDesign = useCallback((design: SketchFile) => {
-    setFile((file) => {
-      if (!file) return undefined;
+  const updateDesign = useCallback(
+    (design: SketchFile) => {
+      if (fileName === undefined) return;
 
-      return produce(file, (draft) => {
-        draft.data.design = design;
-      });
-    });
-  }, []);
+      client.files.update(id, { name: fileName, design });
+    },
+    [client, fileName, id],
+  );
 
-  const openDialog = useOpenInputDialog();
+  if (!initialFile) return null;
 
-  const updateName = useCallback(async () => {
-    if (!file) return;
+  return (
+    <Ayon initialDesign={initialFile.data.design} onChange={updateDesign} />
+  );
+}
 
-    const newName = await openDialog('Rename project', file.data.name);
-
-    if (!newName) return;
-
-    const data = { ...file.data, name: newName };
-
-    client.files.update(file.id, data);
-
-    setFile({ ...file, data });
-  }, [client, file, openDialog]);
-
+function Content() {
+  const { query } = useRouter();
+  const id = query.id as string | undefined;
   const theme = useDesignSystemTheme();
+
+  if (!id) return null;
 
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
       <Toolbar>
-        {file && (
-          <TitleContainer onClick={updateName}>
-            <DashboardIcon color={theme.colors.textMuted} />
-            <Spacer.Horizontal size={6} />
-            <Small lineHeight={'15px'}>{file.data.name}</Small>
-          </TitleContainer>
-        )}
+        <FileTitle id={id} />
       </Toolbar>
       <Divider variant="strong" />
-      {initialFile && (
-        <Ayon initialDesign={initialFile.data.design} onChange={updateDesign} />
-      )}
+      <FileEditor id={id} />
     </Stack.V>
   );
 }
