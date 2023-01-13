@@ -30,18 +30,19 @@ interface KeyboardShortcutOptions {
   eventListener?: KeyboardEventListener | null;
 }
 
+const root = typeof document !== 'undefined' ? document : null;
+const platformName =
+  typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
+
 export function useKeyboardShortcuts(
   shortcuts: KeyShortcuts,
   options: KeyboardShortcutOptions = {},
 ) {
   const eventName = options.eventName ?? 'keydown';
   const eventRef = useMemo(
-    () =>
-      options.eventListener !== undefined ? options.eventListener : document,
-    [options?.eventListener],
+    () => (options.eventListener !== undefined ? options.eventListener : root),
+    [options.eventListener],
   );
-
-  const platformName = getCurrentPlatform(navigator);
 
   const shortcutsRef = useRef(shortcuts);
 
@@ -68,5 +69,5 @@ export function useKeyboardShortcuts(
     return () => {
       listenerElement?.removeEventListener(eventName, handler);
     };
-  }, [eventName, eventRef, platformName]);
+  }, [eventName, eventRef]);
 }
