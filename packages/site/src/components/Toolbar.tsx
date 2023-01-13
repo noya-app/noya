@@ -10,11 +10,16 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { ChevronDownIcon } from 'noya-icons';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { Logo } from './Logo';
 
-const StyledLogo = styled(Logo)({
+const LogoContainer = styled.div({
+  alignSelf: 'stretch',
+  aspectRatio: '1',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
   cursor: 'pointer',
   userSelect: 'none',
   '&:hover': {
@@ -25,7 +30,11 @@ const StyledLogo = styled(Logo)({
   },
 });
 
-export function Toolbar() {
+interface Props {
+  children?: ReactNode;
+}
+
+export function Toolbar({ children }: Props) {
   const theme = useDesignSystemTheme();
   const session = useNoyaSession();
   const router = useRouter();
@@ -39,15 +48,26 @@ export function Toolbar() {
       background={theme.colors.sidebar.background}
       flex={`0 0 ${theme.sizes.toolbar.height}px`}
       alignItems="center"
-      padding={'0 10px'}
+      padding={'0 10px 0 0'}
+      position="relative"
     >
       <Link href="/">
-        <StyledLogo
+        <LogoContainer
           onClick={() => {
             router.push('/');
           }}
-        />
+        >
+          <Logo />
+        </LogoContainer>
       </Link>
+      <div
+        style={{
+          alignSelf: 'stretch',
+          width: 1,
+          background: theme.colors.divider,
+        }}
+      />
+      <Spacer.Horizontal size={10} />
       <Spacer.Horizontal />
       {session && (
         <DropdownMenu
@@ -67,6 +87,28 @@ export function Toolbar() {
           </Button>
         </DropdownMenu>
       )}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: theme.colors.textMuted,
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'all',
+          }}
+        >
+          {children}
+        </div>
+      </div>
     </Stack.H>
   );
 }

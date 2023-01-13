@@ -1,5 +1,4 @@
 import produce from 'immer';
-import { NoyaAPI, useNoyaClient } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -17,7 +16,13 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import React, { Suspense, useCallback, useEffect, useReducer } from 'react';
+import React, {
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useReducer,
+} from 'react';
 import { Content } from '../ayon/Content';
 import { allAyonSymbols, ayonLibraryId } from '../ayon/symbols';
 
@@ -59,7 +64,14 @@ function Workspace({
   });
 
   useEffect(() => {
-    updateData(state.history.present.sketch);
+    const designWithoutForeignSymbols = produce(
+      state.history.present.sketch,
+      (draft) => {
+        draft.document.foreignSymbols = [];
+      },
+    );
+
+    updateData(designWithoutForeignSymbols);
   }, [state.history.present.sketch, updateData]);
 
   return (
@@ -69,34 +81,27 @@ function Workspace({
   );
 }
 
-export default function Ayon({ file }: { file: NoyaAPI.File }): JSX.Element {
+export default memo(function Ayon({
+  initialDesign,
+  onChange,
+}: {
+  initialDesign: SketchFile;
+  onChange: (design: SketchFile) => void;
+}): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
     initialized = true;
   }
-
-  const client = useNoyaClient();
-
-  const updateData = (design: SketchFile) => {
-    const designWithoutForeignSymbols = produce(design, (draft) => {
-      draft.document.foreignSymbols = [];
-    });
-
-    client.files.update(file.id, {
-      name: file.data.name,
-      design: designWithoutForeignSymbols,
-    });
-  };
 
   return (
     <Suspense fallback={null}>
       <ImageCacheProvider>
         <CanvasKitProvider>
           <FontManagerProvider>
-            <Workspace initialData={file.data.design} updateData={updateData} />
+            <Workspace initialData={initialDesign} updateData={onChange} />
           </FontManagerProvider>
         </CanvasKitProvider>
       </ImageCacheProvider>
     </Suspense>
   );
-}
+});

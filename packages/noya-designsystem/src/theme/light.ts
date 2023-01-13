@@ -3,8 +3,8 @@ import { mediaQuery } from '../mediaQuery';
 
 export const colors = {
   logo: {
-    fill: 'rgb(190,190,190)',
-    highlight: 'rgb(190,190,190)',
+    fill: 'rgb(175,175,175)',
+    highlight: 'rgb(175,175,175)',
   },
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
