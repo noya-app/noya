@@ -13,9 +13,9 @@ import {
   getSelectedLayerIndexPaths,
   resizeLayerFrame,
 } from '../selectors';
+import { accessPageLayers } from '../selectors/layerSelectors';
 import { SetNumberMode } from '../types';
 import type { ApplicationState } from './applicationReducer';
-import { accessPageLayers } from '../selectors/layerSelectors';
 
 export type LayerPropertyAction =
   | [type: 'setLayerName', layerId: string, name: string]
@@ -40,7 +40,8 @@ export type LayerPropertyAction =
   | [type: 'setHasClippingMask', value: boolean]
   | [type: 'setShouldBreakMaskChain', value: boolean]
   | [type: 'setMaskMode', value: 'alpha' | 'outline']
-  | [type: 'setBlockText', value: string];
+  | [type: 'setBlockText', value: string]
+  | [type: 'setSymbolIdIsFixed', value: boolean];
 
 export function layerPropertyReducer(
   state: ApplicationState,
@@ -334,6 +335,19 @@ export function layerPropertyReducer(
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           if (Layers.isSymbolInstance(layer)) {
             layer.blockText = value;
+          }
+        });
+      });
+    }
+    case 'setSymbolIdIsFixed': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (Layers.isSymbolInstance(layer)) {
+            layer.symbolIDIsFixed = value;
           }
         });
       });

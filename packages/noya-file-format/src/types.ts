@@ -1162,6 +1162,7 @@ export type SymbolInstance = {
   verticalSpacing: number;
   horizontalSpacing: number;
   blockText?: string;
+  symbolIDIsFixed?: boolean;
 };
 /**
  * Defines an individual symbol override

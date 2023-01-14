@@ -1,4 +1,5 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   AffineTransform,
@@ -6,6 +7,7 @@ import {
   Rect,
   transformRect,
 } from 'noya-geometry';
+import { LockClosedIcon, MagicWandIcon } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
@@ -63,11 +65,13 @@ function WidgetLabel({
         border: '1px solid rgba(0,0,0,0.1)',
         color: 'black',
         pointerEvents: 'all',
-        padding: '1px 4px',
+        padding: '2px 4px',
         whiteSpace: 'pre',
         borderRadius: '2px',
         zIndex: 1,
         fontSize: 13,
+        display: 'flex',
+        lineHeight: '1.2',
       }}
       onPointerDown={(event) => {
         event.stopPropagation();
@@ -153,7 +157,24 @@ export function Widget({
       />
       {showWidgetUI && (
         <>
-          <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
+          <WidgetLabel>
+            {layer.symbolIDIsFixed ? (
+              <LockClosedIcon
+                onClick={() => {
+                  dispatch('setSymbolIdIsFixed', false);
+                }}
+              />
+            ) : (
+              <MagicWandIcon
+                style={{ position: 'relative', top: '1px' }}
+                onClick={() => {
+                  dispatch('setSymbolIdIsFixed', true);
+                }}
+              />
+            )}
+            <Spacer.Horizontal size={4} />
+            {symbol?.name ?? layer.name}
+          </WidgetLabel>
           <div
             style={{
               position: 'absolute',
@@ -183,6 +204,7 @@ export function Widget({
                   onPointerDown={(event) => {
                     event.stopPropagation();
                     onChangeBlockType(blockType.type);
+                    dispatch('setSymbolIdIsFixed', true);
                   }}
                 >
                   {blockType.score} {name}

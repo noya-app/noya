@@ -1108,7 +1108,11 @@ export function canvasReducer(
                 });
               }
 
-              if (inferBlockType && Layers.isSymbolInstance(newLayer)) {
+              if (
+                inferBlockType &&
+                Layers.isSymbolInstance(newLayer) &&
+                !newLayer.symbolIDIsFixed
+              ) {
                 const newType = inferBlockType({ rect: newLayer.frame });
 
                 if (typeof newType !== 'string') {
