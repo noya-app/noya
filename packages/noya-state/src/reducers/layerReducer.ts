@@ -37,9 +37,9 @@ import {
   moveLayer,
   removeLayer,
 } from '../selectors';
+import { createPage } from '../selectors/pageSelectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import type { ApplicationState } from './applicationReducer';
-import { createPage } from '../selectors/pageSelectors';
 
 export type LayerAction =
   | [
@@ -48,6 +48,8 @@ export type LayerAction =
       relativeLayer: string,
       position: RelativeDropPosition,
     ]
+  | [type: 'bringToFront', layerId: string | string[]]
+  | [type: 'sendToBack', layerId: string | string[]]
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayers', layerId: string | string[]]
   | [type: 'ungroupLayers', layerId: string | string[]]
@@ -174,6 +176,40 @@ export function layerReducer(
       // Since layers are stored in reverse order, to place a layer "above",
       // we actually place it "below" in terms of index, etc.
       return moveLayer(state, id, destinationId, rawPosition);
+    }
+    case 'bringToFront':
+    case 'sendToBack': {
+      const [type, id] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+      const page = getCurrentPage(state);
+      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+        ids.includes(layer.do_objectID),
+      );
+      const groupedByParent = groupBy(indexPaths, (indexPath) =>
+        indexPath.slice(0, -1).join(','),
+      );
+
+      return (
+        Object.entries(groupedByParent)
+          // Convert index paths back to layer ids
+          .map(([parentKey, childrenIndexPaths]) => {
+            const parentIndexPath = parentKey.split(',').map(Number);
+            const parentId = Layers.access(page, parentIndexPath).do_objectID;
+            const childrenIds = childrenIndexPaths
+              .map((indexPath) => Layers.access(page, indexPath))
+              .map((layer) => layer.do_objectID);
+            return [parentId, childrenIds] as const;
+          })
+          .reduce((result, [parentId, childrenIds]) => {
+            return moveLayer(
+              result,
+              childrenIds,
+              parentId,
+              type === 'bringToFront' ? 'inside' : 'inside-end',
+            );
+          }, state)
+      );
     }
     case 'deleteLayer':
     case 'deleteSymbol': {

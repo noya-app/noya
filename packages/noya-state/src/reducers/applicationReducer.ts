@@ -202,6 +202,8 @@ export function applicationReducer(
     case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':
+    case 'bringToFront':
+    case 'sendToBack':
     case 'selectLayer':
     case 'selectAllLayers':
     case 'ungroupLayers':

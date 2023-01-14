@@ -8,6 +8,7 @@ import { createInsertModeInteraction } from './insertMode';
 import { marqueeInteraction } from './marquee';
 import { moveInteraction } from './move';
 import { panInteraction } from './pan';
+import { reorderInteraction } from './reorder';
 import { scaleInteraction } from './scale';
 import { selectionInteraction } from './selection';
 
@@ -24,4 +25,5 @@ export namespace Interactions {
   export const editText = editTextInteraction;
   export const copyPaste = copyPasteInteraction;
   export const escape = escapeInteraction;
+  export const reorder = reorderInteraction;
 }

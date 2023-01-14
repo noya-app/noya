@@ -21,6 +21,7 @@ export const Content = memo(function Content() {
         <SimpleCanvas
           interactions={[
             Interactions.escape,
+            Interactions.reorder,
             Interactions.copyPaste,
             Interactions.editText,
             Interactions.editBlock,

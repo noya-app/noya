@@ -31,9 +31,11 @@ import { CopyPasteActions } from '../interactions/copyPaste';
 import { DrawingActions } from '../interactions/drawing';
 import { EditBlockActions } from '../interactions/editBlock';
 import { EditTextActions } from '../interactions/editText';
+import { EscapeActions } from '../interactions/escape';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { PanActions } from '../interactions/pan';
+import { ReorderActions } from '../interactions/reorder';
 import { ScaleActions } from '../interactions/scale';
 import { SelectionActions } from '../interactions/selection';
 import { InteractionAPI } from '../interactions/types';
@@ -51,7 +53,9 @@ export type Actions = MarqueeActions &
   PanActions &
   EditBlockActions &
   EditTextActions &
-  CopyPasteActions;
+  CopyPasteActions &
+  EscapeActions &
+  ReorderActions;
 
 export type Interaction = (
   actions: Actions,
@@ -148,6 +152,8 @@ export function useInteractionHandlers({
         dispatch('highlightLayer', layerHighlight),
       enterInsertMode: (layerType) =>
         dispatch('interaction', ['insert', layerType]),
+      bringToFront: (id: string[]) => dispatch('bringToFront', id),
+      sendToBack: (id: string[]) => dispatch('sendToBack', id),
     };
   }, [dispatch]);
 

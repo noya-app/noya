@@ -247,7 +247,7 @@ export function moveLayer(
   state: ApplicationState,
   id: string | string[],
   destinationId: string,
-  rawPosition: RelativeDropPosition,
+  rawPosition: RelativeDropPosition | 'inside-end',
 ) {
   const position =
     rawPosition === 'above'
@@ -283,14 +283,15 @@ export function moveLayer(
     let destinationIndex: number;
 
     switch (position) {
-      case 'inside': {
+      case 'inside':
+      case 'inside-end': {
         parentIndexPath = destinationIndexPath;
         parent = Layers.access(
           draftPage,
           parentIndexPath,
         ) as Layers.ParentLayer;
 
-        destinationIndex = parent.layers.length;
+        destinationIndex = position === 'inside-end' ? 0 : parent.layers.length;
         break;
       }
       case 'above':
