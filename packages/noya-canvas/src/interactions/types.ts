@@ -4,6 +4,7 @@ import { OffsetPoint } from 'noya-react-utils';
 import {
   CharacterSelectionMode,
   CompassDirection,
+  DrawableLayerType,
   LayerTraversalOptions,
   LayerType,
   SelectedGradient,
@@ -23,6 +24,7 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   getClickCount: () => number;
   convertPoint: (point: Point, to: 'screen' | 'canvas') => Point;
   getScreenPoint: (input: OffsetPoint) => Point;
+  getCanvasPoint: (input: OffsetPoint) => Point;
   getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => string[];
   getLayerIdAtPoint: (
     point: Point,
@@ -42,3 +44,5 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   getTextLength: (layerId: string) => number;
   handleKeyboardEvent: (keyMap: KeyMap) => (event: React.KeyboardEvent) => void;
 };
+
+export type InferBlockType = ({ rect }: { rect: Rect }) => DrawableLayerType;

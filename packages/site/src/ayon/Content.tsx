@@ -26,11 +26,12 @@ export const Content = memo(function Content() {
             Interactions.focus,
             Interactions.pan,
             Interactions.scale,
+            Interactions.createInsertMode({ inferBlockType }),
             Interactions.selection,
             Interactions.move,
             Interactions.createDrawing({
-              initialState: 'none',
-              inferBlockType: inferBlockType,
+              allowDrawingFromNoneState: true,
+              inferBlockType,
             }),
           ]}
           widgets={

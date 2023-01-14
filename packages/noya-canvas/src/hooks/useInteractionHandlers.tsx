@@ -146,6 +146,8 @@ export function useInteractionHandlers({
       addLayer: (layer) => dispatch('addLayer', layer),
       highlightLayer: (layerHighlight) =>
         dispatch('highlightLayer', layerHighlight),
+      enterInsertMode: (layerType) =>
+        dispatch('interaction', ['insert', layerType]),
     };
   }, [dispatch]);
 
@@ -163,6 +165,8 @@ export function useInteractionHandlers({
       convertPoint: (point, system) =>
         convertPoint(scrollOrigin, zoomValue, point, system),
       getScreenPoint: getPoint,
+      getCanvasPoint: (input: OffsetPoint) =>
+        convertPoint(scrollOrigin, zoomValue, getPoint(input), 'canvas'),
       getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
         const layers = Selectors.getLayersInRect(
           state,

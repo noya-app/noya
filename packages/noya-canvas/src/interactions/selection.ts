@@ -51,7 +51,7 @@ export function selectionInteraction({
             break;
         }
       },
-      onMouseMove: (event) => {
+      onPointerMove: (event) => {
         const layerId = api.getLayerIdAtPoint(
           api.getScreenPoint(event.nativeEvent),
           {

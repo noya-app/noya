@@ -3,6 +3,7 @@ import { createDrawingInteraction } from './drawing';
 import { editBlockInteraction } from './editBlock';
 import { editTextInteraction } from './editText';
 import { focusInteraction } from './focus';
+import { createInsertModeInteraction } from './insertMode';
 import { marqueeInteraction } from './marquee';
 import { moveInteraction } from './move';
 import { panInteraction } from './pan';
@@ -17,6 +18,7 @@ export namespace Interactions {
   export const selection = selectionInteraction;
   export const pan = panInteraction;
   export const createDrawing = createDrawingInteraction;
+  export const createInsertMode = createInsertModeInteraction;
   export const editBlock = editBlockInteraction;
   export const editText = editTextInteraction;
   export const copyPaste = copyPasteInteraction;

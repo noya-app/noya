@@ -1,29 +1,32 @@
 import { ReactEventHandlers } from 'noya-designsystem';
-import { createRect, Point, Rect } from 'noya-geometry';
+import { createRect, Point } from 'noya-geometry';
 import {
   DrawableLayerType,
   handleActionType,
   InteractionState,
 } from 'noya-state';
-import { InteractionAPI } from './types';
+import { InferBlockType, InteractionAPI } from './types';
 
 export interface DrawingActions {
+  enterInsertMode: (layerType: DrawableLayerType) => void;
   startDrawing: (layerType: DrawableLayerType, point: Point) => void;
   updateDrawing: (point: Point, layerType?: DrawableLayerType) => void;
   addDrawnLayer: () => void;
-  reset: () => void;
 }
 
 export const createDrawingInteraction =
   (
     options: {
-      initialState?: 'insert' | 'none';
-      inferBlockType?: ({ rect }: { rect: Rect }) => DrawableLayerType;
+      allowDrawingFromNoneState?: boolean;
+      inferBlockType?: InferBlockType;
     } = {},
   ) =>
-  ({ startDrawing, updateDrawing, addDrawnLayer, reset }: DrawingActions) => {
-    const initialState = options.initialState ?? 'none';
-
+  ({
+    startDrawing,
+    updateDrawing,
+    addDrawnLayer,
+    enterInsertMode,
+  }: DrawingActions) => {
     return handleActionType<
       InteractionState,
       [InteractionAPI],
@@ -31,17 +34,15 @@ export const createDrawingInteraction =
     >({
       none: (interactionState, api) => ({
         onPointerDown: (event) => {
-          if (initialState !== 'none') return;
+          if (!options.allowDrawingFromNoneState) return;
+          if (!options.inferBlockType) return;
 
-          const screenPoint = api.getScreenPoint(event.nativeEvent);
-          const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           startDrawing(
-            options.inferBlockType
-              ? options.inferBlockType({
-                  rect: createRect(canvasPoint, canvasPoint),
-                })
-              : 'rectangle',
+            options.inferBlockType({
+              rect: createRect(canvasPoint, canvasPoint),
+            }),
             canvasPoint,
           );
 
@@ -50,10 +51,7 @@ export const createDrawingInteraction =
       }),
       insert: (interactionState, api) => ({
         onPointerDown: (event) => {
-          if (initialState !== 'insert') return;
-
-          const screenPoint = api.getScreenPoint(event.nativeEvent);
-          const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           startDrawing(interactionState.layerType, canvasPoint);
 
@@ -62,32 +60,35 @@ export const createDrawingInteraction =
       }),
       drawing: (interactionState, api) => ({
         onPointerMove: (event) => {
-          const screenPoint = api.getScreenPoint(event.nativeEvent);
-          const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
-          if (options.inferBlockType) {
-            updateDrawing(
-              canvasPoint,
-              options.inferBlockType({
-                rect: createRect(
-                  interactionState.origin,
-                  interactionState.current,
-                ),
-              }),
-            );
-          } else {
-            updateDrawing(canvasPoint, 'rectangle');
-          }
+          updateDrawing(
+            canvasPoint,
+            options.inferBlockType?.({
+              rect: createRect(
+                interactionState.origin,
+                interactionState.current,
+              ),
+            }) ?? interactionState.shapeType,
+          );
 
           api.setPointerCapture?.(event.pointerId);
           event.preventDefault();
         },
         onPointerUp: (event) => {
-          const screenPoint = api.getScreenPoint(event.nativeEvent);
-          const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           updateDrawing(canvasPoint);
           addDrawnLayer();
+
+          // Allow creating a new layer immediately
+          if (options.allowDrawingFromNoneState && event[api.platformModKey]) {
+            enterInsertMode(
+              options.inferBlockType?.({
+                rect: createRect(canvasPoint, canvasPoint),
+              }) ?? interactionState.shapeType,
+            );
+          }
 
           api.releasePointerCapture?.(event.pointerId);
           event.preventDefault();
