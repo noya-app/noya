@@ -21,7 +21,7 @@
   "scripts": {
     "start": "cross-env PORT=1234 modular start app",
     "start:desktop": "cd packages/noya-desktop && yarn run start",
-    "start:site": "yarn workspace site start",
+    "start:site": "yarn workspace site dev",
     "build": "modular build app",
     "build:desktop": "cd packages/noya-desktop && yarn run make",
     "build:site": "yarn workspace site build",

@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "next dev -p 4000",
-    "build": "next build && next export"
+    "dev": "next dev -p 4000",
+    "build": "next build",
+    "start": "next start -p 4000",
+    "lint": "next lint"
   },
   "dependencies": {
     "@types/styled-components": "^5.1.14",
