@@ -1,4 +1,8 @@
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import {
+  useApplicationState,
+  useHistory,
+  useWorkspace,
+} from 'noya-app-state-context';
 import {
   createSectionedMenu,
   mergeEventHandlers,
@@ -27,11 +31,12 @@ import { useMemo } from 'react';
 import { ZERO_INSETS } from '../components/CanvasElement';
 import { ICanvasElement } from '../components/types';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
-import { CopyPasteActions } from '../interactions/copyPaste';
+import { ClipboardActions } from '../interactions/clipboard';
 import { DrawingActions } from '../interactions/drawing';
 import { EditBlockActions } from '../interactions/editBlock';
 import { EditTextActions } from '../interactions/editText';
 import { EscapeActions } from '../interactions/escape';
+import { HistoryActions } from '../interactions/history';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { PanActions } from '../interactions/pan';
@@ -53,9 +58,10 @@ export type Actions = MarqueeActions &
   PanActions &
   EditBlockActions &
   EditTextActions &
-  CopyPasteActions &
+  ClipboardActions &
   EscapeActions &
-  ReorderActions;
+  ReorderActions &
+  HistoryActions;
 
 export type Interaction = (
   actions: Actions,
@@ -84,9 +90,12 @@ export function useInteractionHandlers({
   const { zoomValue, scrollOrigin } = meta;
   const { getClickCount, setLatestClick } = useMultipleClickCount();
   const textSelection = Selectors.getTextSelection(state);
+  const { canUndo, canRedo } = useHistory();
 
   const actions = useMemo((): Actions => {
     return {
+      undo: () => dispatch('undo'),
+      redo: () => dispatch('redo'),
       startMarquee: (point) => dispatch('interaction', ['startMarquee', point]),
       updateMarquee: (point) =>
         dispatch('interaction', ['updateMarquee', point]),
@@ -168,6 +177,8 @@ export function useInteractionHandlers({
       selectedGradient: state.selectedGradient,
       highlightedLayerId: highlightedLayer?.id,
       textSelection,
+      canRedo,
+      canUndo,
       convertPoint: (point, system) =>
         convertPoint(scrollOrigin, zoomValue, point, system),
       getScreenPoint: getPoint,
@@ -236,6 +247,8 @@ export function useInteractionHandlers({
     };
   }, [
     CanvasKit,
+    canRedo,
+    canUndo,
     elementInterface,
     fontManager,
     getClickCount,

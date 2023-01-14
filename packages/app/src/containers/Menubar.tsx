@@ -2,6 +2,7 @@ import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
   useGetStateSnapshot,
+  useHistory,
   useWorkspace,
 } from 'noya-app-state-context';
 import {
@@ -19,7 +20,6 @@ import { ApplicationState } from 'noya-state';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useFileManager } from '../hooks/useFileManager';
-import { useHistory } from '../hooks/useHistory';
 
 interface Props {
   fileHandle?: FileSystemHandle;
@@ -34,8 +34,8 @@ interface Props {
   actuallyShowLeftSidebar: boolean;
   actuallyShowRightSidebar: boolean;
   showPageListThumbnails: boolean;
-  redoDisabled: boolean;
-  undoDisabled: boolean;
+  canRedo: boolean;
+  canUndo: boolean;
 }
 
 const MenubarContent = memo(function MenubarContent({
@@ -51,8 +51,8 @@ const MenubarContent = memo(function MenubarContent({
   actuallyShowLeftSidebar,
   actuallyShowRightSidebar,
   showPageListThumbnails,
-  redoDisabled,
-  undoDisabled,
+  canRedo,
+  canUndo,
 }: Props) {
   const fileManager = useFileManager();
   const isElectron = useEnvironmentParameter('isElectron');
@@ -137,14 +137,14 @@ const MenubarContent = memo(function MenubarContent({
             {
               value: 'undo',
               title: 'Undo',
-              disabled: undoDisabled,
+              disabled: !canUndo,
               shortcut: 'Mod-z',
               role: 'undo',
             },
             {
               value: 'redo',
               title: 'Redo',
-              disabled: redoDisabled,
+              disabled: !canRedo,
               shortcut: 'Mod-Shift-z',
               role: 'redo',
             },
@@ -216,10 +216,10 @@ const MenubarContent = memo(function MenubarContent({
     actuallyShowLeftSidebar,
     actuallyShowRightSidebar,
     isElectron,
-    redoDisabled,
+    canRedo,
     showPageListThumbnails,
     showRulers,
-    undoDisabled,
+    canUndo,
   ]);
 
   const onSelectMenuItem = useCallback(
@@ -323,14 +323,14 @@ export default function Menubar() {
     preferences: { showRulers, showPageListThumbnails },
   } = useWorkspace();
   const getStateSnapshot = useGetStateSnapshot();
-  const { redoDisabled, undoDisabled } = useHistory();
+  const { canRedo, canUndo } = useHistory();
 
   return (
     <MenubarContent
       fileHandle={fileHandle}
       getStateSnapshot={getStateSnapshot}
-      redoDisabled={redoDisabled}
-      undoDisabled={undoDisabled}
+      canRedo={canRedo}
+      canUndo={canUndo}
       showRulers={showRulers}
       actuallyShowInterface={actuallyShowInterface}
       actuallyShowLeftSidebar={actuallyShowLeftSidebar}

@@ -5,13 +5,13 @@ import { ClipboardUtils } from 'noya-utils';
 import { NoyaClipboardData } from '../hooks/useCopyHandler';
 import { InteractionAPI } from './types';
 
-export interface CopyPasteActions {
+export interface ClipboardActions {
   addLayer: (layers: Sketch.AnyLayer[]) => void;
 }
 
 type MenuItemType = 'copy' | 'paste';
 
-export function copyPasteInteraction({ addLayer }: CopyPasteActions) {
+export function clipboardInteraction({ addLayer }: ClipboardActions) {
   return handleActionType<
     InteractionState,
     [InteractionAPI],

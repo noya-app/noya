@@ -20,6 +20,8 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   selectedGradient?: SelectedGradient;
   textSelection?: TextSelection;
   zoomValue: number;
+  canUndo: boolean;
+  canRedo: boolean;
   getClickCount: () => number;
   convertPoint: (point: Point, to: 'screen' | 'canvas') => Point;
   getScreenPoint: (input: OffsetPoint) => Point;

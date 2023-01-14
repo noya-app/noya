@@ -22,7 +22,8 @@ export const Content = memo(function Content() {
           interactions={[
             Interactions.escape,
             Interactions.reorder,
-            Interactions.copyPaste,
+            Interactions.history,
+            Interactions.clipboard,
             Interactions.editText,
             Interactions.editBlock,
             Interactions.focus,

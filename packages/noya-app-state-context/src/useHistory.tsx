@@ -3,14 +3,14 @@ import { useMemo } from 'react';
 
 export function useHistory() {
   const state = useWorkspaceState();
-  const redoDisabled = state.history.future.length === 0;
-  const undoDisabled = state.history.past.length === 0;
+  const canRedo = state.history.future.length > 0;
+  const canUndo = state.history.past.length > 0;
 
   return useMemo(
     () => ({
-      redoDisabled,
-      undoDisabled,
+      canRedo,
+      canUndo,
     }),
-    [redoDisabled, undoDisabled],
+    [canRedo, canUndo],
   );
 }
