@@ -16,7 +16,7 @@ export const Content = memo(function Content() {
   const layers = Layers.flat(Selectors.getCurrentPage(state));
 
   return (
-    <div style={{ flex: '1', display: 'flex' }}>
+    <div style={{ flex: '1', display: 'flex', overflow: 'hidden' }}>
       <div style={{ flex: '1', display: 'flex', position: 'relative' }}>
         <SimpleCanvas
           interactions={[

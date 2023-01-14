@@ -1,9 +1,15 @@
 import { isRightButtonClicked, ReactEventHandlers } from 'noya-designsystem';
-import { handleActionType, InteractionState, SelectionType } from 'noya-state';
+import {
+  handleActionType,
+  InteractionState,
+  LayerHighlight,
+  SelectionType,
+} from 'noya-state';
 import { InteractionAPI } from './types';
 
 export interface SelectionActions {
   selectLayer: (id: string[], selectionType?: SelectionType) => void;
+  highlightLayer: (highlight: LayerHighlight | undefined) => void;
   selectAllLayers: () => void;
   deleteLayer: (id: string[]) => void;
 }
@@ -13,6 +19,7 @@ type MenuItemType = 'delete' | 'selectAll';
 export function selectionInteraction({
   selectLayer,
   selectAllLayers,
+  highlightLayer,
   deleteLayer,
 }: SelectionActions) {
   return handleActionType<
@@ -42,6 +49,30 @@ export function selectionInteraction({
           case 'selectAll':
             selectAllLayers();
             break;
+        }
+      },
+      onMouseMove: (event) => {
+        const layerId = api.getLayerIdAtPoint(
+          api.getScreenPoint(event.nativeEvent),
+          {
+            groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
+            artboards: 'emptyOrContainedArtboardOrChildren',
+            includeLockedLayers: false,
+          },
+        );
+
+        // For perf, check that we actually need to update the highlight.
+        // This gets called on every mouse movement.
+        if (api.highlightedLayerId !== layerId) {
+          highlightLayer(
+            layerId
+              ? {
+                  id: layerId,
+                  precedence: 'belowSelection',
+                  isMeasured: event.altKey,
+                }
+              : undefined,
+          );
         }
       },
       onPointerDown: (event) => {

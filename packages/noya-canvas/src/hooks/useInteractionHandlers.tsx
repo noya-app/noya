@@ -1,4 +1,4 @@
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   createSectionedMenu,
   mergeEventHandlers,
@@ -71,6 +71,7 @@ export function useInteractionHandlers({
   elementInterface,
 }: Props) {
   const [state, dispatch] = useApplicationState();
+  const { highlightedLayer } = useWorkspace();
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const platform = usePlatform();
@@ -143,6 +144,8 @@ export function useInteractionHandlers({
         dispatch('setLayerY', value, mode),
       selectAllLayers: () => dispatch('selectAllLayers'),
       addLayer: (layer) => dispatch('addLayer', layer),
+      highlightLayer: (layerHighlight) =>
+        dispatch('highlightLayer', layerHighlight),
     };
   }, [dispatch]);
 
@@ -155,6 +158,7 @@ export function useInteractionHandlers({
       getClickCount,
       selectedLayerIds: state.selectedLayerIds,
       selectedGradient: state.selectedGradient,
+      highlightedLayerId: highlightedLayer?.id,
       textSelection,
       convertPoint: (point, system) =>
         convertPoint(scrollOrigin, zoomValue, point, system),
@@ -225,6 +229,7 @@ export function useInteractionHandlers({
     elementInterface,
     fontManager,
     getClickCount,
+    highlightedLayer?.id,
     platform,
     platformModKey,
     scrollOrigin,
