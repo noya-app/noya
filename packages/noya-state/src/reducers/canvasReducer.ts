@@ -982,6 +982,9 @@ export function canvasReducer(
             break;
           }
           case 'scaling': {
+            const inferBlockType =
+              action[1][0] === 'updateScaling' ? action[1][2] : undefined;
+
             const { origin, current, pageSnapshot, direction } =
               interactionState;
 
@@ -1103,6 +1106,16 @@ export function canvasReducer(
                       ? !layer.isFlippedVertical
                       : layer.isFlippedVertical;
                 });
+              }
+
+              if (inferBlockType && Layers.isSymbolInstance(newLayer)) {
+                const newType = inferBlockType({ rect: newLayer.frame });
+
+                if (typeof newType !== 'string') {
+                  newLayer = produce(newLayer, (draft) => {
+                    draft.symbolID = newType.symbolId;
+                  });
+                }
               }
 
               Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);

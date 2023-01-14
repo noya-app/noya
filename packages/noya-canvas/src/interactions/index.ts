@@ -9,13 +9,12 @@ import { marqueeInteraction } from './marquee';
 import { moveInteraction } from './move';
 import { panInteraction } from './pan';
 import { reorderInteraction } from './reorder';
-import { scaleInteraction } from './scale';
+import { createScaleInteraction } from './scale';
 import { selectionInteraction } from './selection';
 
 export namespace Interactions {
   export const focus = focusInteraction;
   export const move = moveInteraction;
-  export const scale = scaleInteraction;
   export const marquee = marqueeInteraction;
   export const selection = selectionInteraction;
   export const pan = panInteraction;
@@ -26,4 +25,7 @@ export namespace Interactions {
   export const copyPaste = copyPasteInteraction;
   export const escape = escapeInteraction;
   export const reorder = reorderInteraction;
+
+  export const scale = createScaleInteraction();
+  export const createScale = createScaleInteraction;
 }

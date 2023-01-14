@@ -442,7 +442,7 @@ export function applicationReducer(
     case 'setMinWidth':
     case 'setAllowsOverrides':
     case 'onSetOverrideProperty':
-    case 'setInstanceSymbolSource':
+    case 'setSymbolInstanceSource':
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);

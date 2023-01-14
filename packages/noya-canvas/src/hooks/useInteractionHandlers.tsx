@@ -98,8 +98,8 @@ export function useInteractionHandlers({
       updateMoving: (point) => dispatch('interaction', ['updateMoving', point]),
       maybeScale: (point, direction) =>
         dispatch('interaction', ['maybeScale', point, direction]),
-      updateScaling: (point) =>
-        dispatch('interaction', ['updateScaling', point]),
+      updateScaling: (point, inferBlockType) =>
+        dispatch('interaction', ['updateScaling', point, inferBlockType]),
       addDrawnLayer: () => dispatch('addDrawnLayer'),
       startDrawing: (layerType: DrawableLayerType, point: Point) =>
         dispatch('interaction', ['startDrawing', layerType, point]),

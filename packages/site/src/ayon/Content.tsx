@@ -27,7 +27,7 @@ export const Content = memo(function Content() {
             Interactions.editBlock,
             Interactions.focus,
             Interactions.pan,
-            Interactions.scale,
+            Interactions.createScale({ inferBlockType }),
             Interactions.createInsertMode({ inferBlockType }),
             Interactions.selection,
             Interactions.move,
@@ -45,7 +45,7 @@ export const Content = memo(function Content() {
                   inferBlockTypes={inferBlockTypes}
                   onChangeBlockType={(type: DrawableLayerType) => {
                     dispatch(
-                      'setInstanceSymbolSource',
+                      'setSymbolInstanceSource',
                       typeof type !== 'string'
                         ? type.symbolId
                         : buttonSymbol.symbolID,

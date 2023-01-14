@@ -3,9 +3,10 @@ import { createRect } from 'noya-geometry';
 import {
   DrawableLayerType,
   handleActionType,
+  InferBlockType,
   InteractionState,
 } from 'noya-state';
-import { InferBlockType, InteractionAPI } from './types';
+import { InteractionAPI } from './types';
 
 export interface InsertModeActions {
   enterInsertMode: (layerType: DrawableLayerType) => void;

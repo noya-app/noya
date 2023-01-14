@@ -26,6 +26,8 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
+export type InferBlockType = ({ rect }: { rect: Rect }) => DrawableLayerType;
+
 export type DrawableLayerType =
   | 'rectangle'
   | 'oval'
@@ -60,7 +62,7 @@ export type InteractionAction =
   | [type: 'hoverHandle', direction: CompassDirection]
   | [type: 'startPanning', point: Point]
   | [type: 'updateMoving', point: Point]
-  | [type: 'updateScaling', point: Point]
+  | [type: 'updateScaling', point: Point, inferBlockType?: InferBlockType]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
   | [type: 'maybePan', origin: Point]
