@@ -11,7 +11,7 @@ import {
 } from 'noya-designsystem';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
 import React, { useState } from 'react';
-import { createAyonFile } from '../ayon/createAyonFile';
+import { createAyonDocument } from '../ayon/createAyonDocument';
 
 export function Projects() {
   const { push } = useRouter();
@@ -33,12 +33,20 @@ export function Projects() {
         <Spacer.Horizontal />
         <Button
           onClick={() => {
-            const design = createAyonFile();
+            const document = createAyonDocument();
 
             client.files
               // Wait till after navigating to refetch, since it looks bad
               // if the list updates before transitioning to the new page
-              .create({ name: 'Untitled', design }, { fetchPolicy: 'no-cache' })
+              .create(
+                {
+                  name: 'Untitled',
+                  type: 'io.noya.ayon',
+                  schemaVersion: '0.1.0',
+                  document,
+                },
+                { fetchPolicy: 'no-cache' },
+              )
               .then((id) => push(`/projects/${id}`))
               .then(() => client.files.refetch());
           }}

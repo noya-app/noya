@@ -16,7 +16,9 @@ export const noyaSessionSchema = z.object({
 export const noyaFileDataSchema = z
   .object({
     name: z.string(),
-    design: z.custom<SketchFile>(),
+    type: z.literal('io.noya.ayon'),
+    schemaVersion: z.literal('0.1.0'),
+    document: z.custom<SketchFile>(),
   })
   .passthrough();
 

@@ -14,7 +14,7 @@ import {
 import { DashboardIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { SketchFile } from 'noya-sketch-file';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { Toolbar } from '../../components/Toolbar';
@@ -70,7 +70,11 @@ function FileEditor({ id }: { id: string }) {
   const client = useNoyaClient();
   const files = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
-  const fileName = cachedFile?.data.name;
+  const fileProperties = useMemo(() => {
+    if (!cachedFile) return undefined;
+    const { document: design, ...rest } = cachedFile.data;
+    return rest;
+  }, [cachedFile]);
 
   // The Ayon component is a controlled component that manages its own state
   const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
@@ -80,19 +84,38 @@ function FileEditor({ id }: { id: string }) {
     client.files.read(id).then(setInitialFile);
   }, [client, id]);
 
-  const updateDesign = useCallback(
-    (design: SketchFile) => {
-      if (fileName === undefined) return;
+  const updateDocument = useCallback(
+    (document: SketchFile) => {
+      if (
+        fileProperties?.name === undefined ||
+        fileProperties.schemaVersion === undefined ||
+        fileProperties.type === undefined
+      )
+        return;
 
-      client.files.update(id, { name: fileName, design });
+      client.files.update(id, {
+        name: fileProperties.name,
+        schemaVersion: fileProperties.schemaVersion,
+        type: fileProperties.type,
+        document,
+      });
     },
-    [client, fileName, id],
+    [
+      client,
+      fileProperties?.name,
+      fileProperties?.schemaVersion,
+      fileProperties?.type,
+      id,
+    ],
   );
 
   if (!initialFile) return null;
 
   return (
-    <Ayon initialDesign={initialFile.data.design} onChange={updateDesign} />
+    <Ayon
+      initialDocument={initialFile.data.document}
+      onChangeDocument={updateDocument}
+    />
   );
 }
 

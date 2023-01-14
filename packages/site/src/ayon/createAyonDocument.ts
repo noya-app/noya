@@ -28,7 +28,7 @@ const artboard = SketchModel.artboard({
   layers: [rectangle],
 });
 
-export function createAyonFile() {
+export function createAyonDocument() {
   const sketch = createSketchFile(SketchModel.page({ layers: [artboard] }));
 
   return sketch;
