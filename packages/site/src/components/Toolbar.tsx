@@ -9,7 +9,12 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
+import {
+  ChevronDownIcon,
+  EnvelopeClosedIcon,
+  PersonIcon,
+  QuestionMarkCircledIcon,
+} from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { Logo } from './Logo';
@@ -39,9 +44,13 @@ export function Toolbar({ children }: Props) {
   const session = useNoyaSession();
   const router = useRouter();
 
-  const userMenuItems = createSectionedMenu([
-    { title: 'Sign out', value: 'signOut' },
-  ]);
+  const userMenuItems = createSectionedMenu(
+    [{ title: 'Sign out', value: 'signOut', icon: <PersonIcon /> }],
+    [
+      { title: 'Contact us', value: 'contact', icon: <EnvelopeClosedIcon /> },
+      { title: 'Get help', value: 'help', icon: <QuestionMarkCircledIcon /> },
+    ],
+  );
 
   return (
     <Stack.H
@@ -76,6 +85,14 @@ export function Toolbar({ children }: Props) {
             switch (value) {
               case 'signOut':
                 window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
+                return;
+              case 'contact':
+                window.location.href =
+                  'https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd';
+                return;
+              case 'help':
+                window.location.href =
+                  'https://noyasoftware.notion.site/Noya-Help-4344e26dc3394c7195305b15b050e616';
                 return;
             }
           }}
