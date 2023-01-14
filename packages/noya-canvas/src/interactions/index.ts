@@ -2,6 +2,7 @@ import { copyPasteInteraction } from './copyPaste';
 import { createDrawingInteraction } from './drawing';
 import { editBlockInteraction } from './editBlock';
 import { editTextInteraction } from './editText';
+import { escapeInteraction } from './escape';
 import { focusInteraction } from './focus';
 import { createInsertModeInteraction } from './insertMode';
 import { marqueeInteraction } from './marquee';
@@ -22,4 +23,5 @@ export namespace Interactions {
   export const editBlock = editBlockInteraction;
   export const editText = editTextInteraction;
   export const copyPaste = copyPasteInteraction;
+  export const escape = escapeInteraction;
 }

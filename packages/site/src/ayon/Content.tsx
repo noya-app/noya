@@ -20,6 +20,7 @@ export const Content = memo(function Content() {
       <div style={{ flex: '1', display: 'flex', position: 'relative' }}>
         <SimpleCanvas
           interactions={[
+            Interactions.escape,
             Interactions.copyPaste,
             Interactions.editText,
             Interactions.editBlock,
