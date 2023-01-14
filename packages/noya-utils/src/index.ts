@@ -21,6 +21,7 @@ export * from './base64';
 export * from './utf16';
 export * from './fileType';
 export * from './memoize';
+export * from './memoizedGetter';
 export * from './types';
 export * from './upperFirst';
 export * from './unique';

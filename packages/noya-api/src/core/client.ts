@@ -1,4 +1,5 @@
 import { observable } from '@legendapp/state';
+import { memoizedGetter } from 'noya-utils';
 import { makeCollectionReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
 import { NoyaFile, NoyaFileData, NoyaSession } from './schema';
@@ -31,13 +32,13 @@ export class NoyaClient {
   };
 
   get files() {
-    return {
+    return memoizedGetter(this, 'files', {
       read: this.networkClient.files.read,
       create: this.#createFile,
       update: this.#updateFile,
       delete: this.#deleteFile,
       refetch: this.#fetchFiles,
-    };
+    });
   }
 
   #fetchFiles = async () => {

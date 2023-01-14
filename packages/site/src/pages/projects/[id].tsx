@@ -1,3 +1,4 @@
+import throttle from 'lodash.throttle';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
@@ -84,6 +85,11 @@ function FileEditor({ id }: { id: string }) {
     client.files.read(id).then(setInitialFile);
   }, [client, id]);
 
+  const throttledUpdate = useMemo(
+    () => throttle(client.files.update, 1000),
+    [client],
+  );
+
   const updateDocument = useCallback(
     (document: SketchFile) => {
       if (
@@ -93,7 +99,7 @@ function FileEditor({ id }: { id: string }) {
       )
         return;
 
-      client.files.update(id, {
+      throttledUpdate(id, {
         name: fileProperties.name,
         schemaVersion: fileProperties.schemaVersion,
         type: fileProperties.type,
@@ -101,11 +107,11 @@ function FileEditor({ id }: { id: string }) {
       });
     },
     [
-      client,
+      id,
+      throttledUpdate,
       fileProperties?.name,
       fileProperties?.schemaVersion,
       fileProperties?.type,
-      id,
     ],
   );
 

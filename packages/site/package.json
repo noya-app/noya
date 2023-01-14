@@ -9,12 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/styled-components": "^5.1.14",
-    "date-fns": "^2.29.3",
-    "next": "^12",
     "@chakra-ui/react": "^1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
-    "framer-motion": "^6"
+    "@types/styled-components": "^5.1.14",
+    "date-fns": "^2.29.3",
+    "framer-motion": "^6",
+    "lodash.throttle": "^4.1.1",
+    "next": "^12"
+  },
+  "devDependencies": {
+    "@types/lodash.throttle": "^4.1.7"
   }
 }
