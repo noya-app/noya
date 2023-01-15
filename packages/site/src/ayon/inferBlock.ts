@@ -97,7 +97,7 @@ function isApproximatelySquare(rect: Rect, tolerance: number) {
   );
 }
 
-function scoreStringPrefixMatch(a?: string, b?: string) {
+function commonPrefixLength(a?: string, b?: string) {
   if (!a || !b) {
     return 0;
   }
@@ -107,17 +107,16 @@ function scoreStringPrefixMatch(a?: string, b?: string) {
   const firstDiffCharIndex = [...a].findIndex(
     (character, index) => character !== b[index],
   );
-  return firstDiffCharIndex === -1
-    ? 0
-    : firstDiffCharIndex / Math.max(a.length, b.length);
+  return firstDiffCharIndex === -1 ? 0 : firstDiffCharIndex;
 }
 
 function scoreCommandMatch(symbolMaster: Sketch.SymbolMaster, text?: string) {
-  const score = scoreStringPrefixMatch(
-    `/${symbolMaster.name.toLowerCase()}`,
-    text?.toLowerCase(),
+  return (
+    commonPrefixLength(
+      `/${symbolMaster.name.toLowerCase()}`,
+      text?.toLowerCase(),
+    ) - 1
   );
-  return score === 0 ? 0 : score + 1;
 }
 
 export function inferBlockTypes(
