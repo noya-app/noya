@@ -82,6 +82,7 @@ export type ApplicationState = {
   selectedControlPoint?: SelectedControlPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
   selectedGradient?: SelectedGradient;
+  isolatedLayerId?: string;
   sketch: SketchFile;
 };
 
@@ -90,6 +91,7 @@ export type Action =
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
   | [type: 'setSelectedGradientStopIndex', value: number]
+  | [type: 'setIsolatedLayer', layerId: string | undefined]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -151,10 +153,18 @@ export function applicationReducer(
     }
     case 'setSelectedGradientStopIndex': {
       const [, value] = action;
+
       return produce(state, (draft) => {
         if (!draft.selectedGradient) return;
 
         draft.selectedGradient.stopIndex = value;
+      });
+    }
+    case 'setIsolatedLayer': {
+      const [, layerId] = action;
+
+      return produce(state, (draft) => {
+        draft.isolatedLayerId = layerId;
       });
     }
     case 'selectPage':
@@ -515,6 +525,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
       textStyles: { ids: [], groupName: '' },
       symbols: { ids: [], groupName: '' },
     },
+    isolatedLayerId: undefined,
     sketch,
   };
 }

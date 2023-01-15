@@ -56,7 +56,9 @@ export function selectionInteraction({
           api.getScreenPoint(event.nativeEvent),
           {
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
-            artboards: 'emptyOrContainedArtboardOrChildren',
+            artboards: api.isolatedLayerId
+              ? 'childrenOnly'
+              : 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
           },
         );
@@ -80,7 +82,9 @@ export function selectionInteraction({
           api.getScreenPoint(event.nativeEvent),
           {
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
-            artboards: 'emptyOrContainedArtboardOrChildren',
+            artboards: api.isolatedLayerId
+              ? 'childrenOnly'
+              : 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
           },
         );

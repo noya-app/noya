@@ -12,6 +12,7 @@ import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import {
   createInitialWorkspaceState,
+  Layers,
   WorkspaceAction,
   workspaceReducer,
   WorkspaceState,
@@ -50,6 +51,13 @@ function Workspace({
     return produce(workspace, (draft) => {
       draft.preferences.showDotGrid = true;
       draft.preferences.wireframeMode = true;
+
+      const artboardId = Layers.find(
+        draft.history.present.sketch.pages[0],
+        Layers.isArtboard,
+      )?.do_objectID;
+
+      draft.history.present.isolatedLayerId = artboardId;
 
       draft.history.present.sketch.document.foreignSymbols = allAyonSymbols.map(
         (symbol) =>

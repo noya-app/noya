@@ -356,15 +356,17 @@ export function DOMRenderer(): JSX.Element {
   const ratio = artboard.frame.width / artboard.frame.height;
 
   return (
-    <div ref={containerRef} style={{ flex: 1 }}>
-      {size && (
-        <DOMRendererContent
-          size={{
-            width: size.width,
-            height: size.width / ratio,
-          }}
-        />
-      )}
+    <div style={{ display: 'flex', flex: 1, padding: 20 }}>
+      <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
+        {size && (
+          <DOMRendererContent
+            size={{
+              width: size.width,
+              height: size.width / ratio,
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -105,6 +105,11 @@ export const CanvasElement = memo(
       return () => input.removeEventListener('beforeinput', onBeforeInput);
     }, [onBeforeInput]);
 
+    useLayoutEffect(() => {
+      // Initial focus
+      inputRef.current?.focus();
+    }, []);
+
     return (
       <Container
         id="canvas-container"

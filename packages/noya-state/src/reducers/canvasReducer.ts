@@ -17,6 +17,7 @@ import {
   resize,
   roundPoint,
   Size,
+  transformRect,
 } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
@@ -89,9 +90,56 @@ export type InsertedImage = { name: string } & (
     }
 );
 
+type ResizePosition =
+  | 'top'
+  | 'right top'
+  | 'right'
+  | 'right bottom'
+  | 'bottom'
+  | 'left bottom'
+  | 'left'
+  | 'left top';
+
+function getAnchorForResizePosition(position?: ResizePosition): {
+  x: 'minX' | 'midX' | 'maxX';
+  y: 'minY' | 'midY' | 'maxY';
+} {
+  switch (position) {
+    case 'top':
+      return { x: 'midX', y: 'minY' };
+    case 'right top':
+      return { x: 'maxX', y: 'minY' };
+    case 'right':
+      return { x: 'maxX', y: 'midY' };
+    case 'right bottom':
+      return { x: 'maxX', y: 'maxY' };
+    case 'bottom':
+      return { x: 'midX', y: 'maxY' };
+    case 'left bottom':
+      return { x: 'minX', y: 'maxY' };
+    case 'left':
+      return { x: 'minX', y: 'midY' };
+    case 'left top':
+      return { x: 'minX', y: 'minY' };
+    default:
+      return { x: 'midX', y: 'midY' };
+  }
+}
+
+export type ZoomToFitOptions = {
+  padding?: string | number;
+  min?: number;
+  max?: number;
+  position?: ResizePosition;
+};
+
 export type CanvasAction =
   | [type: 'setZoom*', value: number, mode?: 'replace' | 'multiply']
-  | [type: 'zoomToFit*', target: 'canvas' | 'selection']
+  | [
+      type: 'zoomToFit*',
+      target: 'canvas' | 'selection' | { type: 'layer'; value: string },
+      padding?: ZoomToFitOptions,
+    ]
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -124,46 +172,68 @@ export function canvasReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'zoomToFit*': {
-      const [, target] = action;
+      const [, target, options] = action;
 
       const page = Selectors.getCurrentPage(state);
+
       let boundingRect =
         target === 'canvas'
           ? Selectors.getPageContentBoundingRect(page)
-          : Selectors.getBoundingRect(page, state.selectedLayerIds);
+          : target === 'selection'
+          ? Selectors.getBoundingRect(page, state.selectedLayerIds)
+          : Selectors.getBoundingRect(page, [target.value]);
 
       if (!boundingRect) return state;
 
-      // Padding is 10% of the smallest side of the target
-      const padding = Math.min(boundingRect.width, boundingRect.height) * 0.1;
+      const inputPadding = options?.padding ?? '10%';
 
-      boundingRect = insetRect(boundingRect, -padding, -padding);
+      const padding =
+        typeof inputPadding === 'string'
+          ? // Percent padding is n% of the smallest side of the canvas
+            Math.min(context.canvasSize.width, context.canvasSize.height) *
+            (parseInt(inputPadding) / 100)
+          : inputPadding;
 
-      const bounds = createBounds(boundingRect);
+      const paddedCanvasRect = insetRect(
+        { x: 0, y: 0, ...context.canvasSize },
+        padding,
+      );
+
       const pageId = getCurrentPage(state).do_objectID;
 
       const croppedRect = resize(
         boundingRect,
-        context.canvasSize,
+        paddedCanvasRect,
         'scaleAspectFit',
       );
 
-      const newZoom = Math.min(
+      let newZoom = Math.min(
         croppedRect.width / boundingRect.width,
         croppedRect.height / boundingRect.height,
+      );
+
+      if (options?.min !== undefined) {
+        newZoom = Math.max(newZoom, options.min);
+      }
+
+      if (options?.max !== undefined) {
+        newZoom = Math.min(newZoom, options.max);
+      }
+
+      const bounds = createBounds(
+        transformRect(boundingRect, AffineTransform.scale(newZoom)),
       );
 
       return produce(state, (draft) => {
         const draftUser = draft.sketch.user;
 
-        const viewportCenter = {
-          x: context.canvasSize.width / 2,
-          y: context.canvasSize.height / 2,
-        };
+        const paddedCanvasBounds = createBounds(paddedCanvasRect);
+
+        const anchor = getAnchorForResizePosition(options?.position);
 
         const newScrollOrigin = roundPoint({
-          x: viewportCenter.x - bounds.midX * newZoom,
-          y: viewportCenter.y - bounds.midY * newZoom,
+          x: paddedCanvasBounds[anchor.x] - bounds[anchor.x],
+          y: paddedCanvasBounds[anchor.y] - bounds[anchor.y],
         });
 
         draftUser[pageId] = {

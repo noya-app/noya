@@ -1,7 +1,7 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import React, { memo, useMemo, useRef } from 'react';
+import React, { memo, useLayoutEffect, useMemo, useRef } from 'react';
 import { useCopyHandler } from '../hooks/useCopyHandler';
 import {
   Interaction,
@@ -31,6 +31,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   const ref = useRef<ICanvasElement>(null);
   const [state, dispatch] = useApplicationState();
   const { setIsContextMenuOpen } = useWorkspace();
+  const { canvasSize } = useWorkspace();
 
   const { actions, handlers, getMenuItems, onSelectMenuItem } =
     useInteractionHandlers({
@@ -52,6 +53,21 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   usePasteHandler<SupportedImageUploadType>({
     onPasteLayers: actions.addLayer,
   });
+
+  // When canvasSize changes, zoom to fit the isolated layer
+  useLayoutEffect(() => {
+    if (!state.isolatedLayerId) return;
+
+    // canvasSize always exists, but we include it here so it's automatically added
+    // as a dependency of useLayoutEffect
+    if (!canvasSize) return;
+
+    dispatch(
+      'zoomToFit*',
+      { type: 'layer', value: state.isolatedLayerId },
+      { padding: 20, max: 1, position: 'top' },
+    );
+  }, [canvasSize, state.isolatedLayerId, dispatch]);
 
   return (
     <ContextMenu

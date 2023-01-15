@@ -180,6 +180,7 @@ export function useInteractionHandlers({
       getClickCount,
       selectedLayerIds: state.selectedLayerIds,
       selectedGradient: state.selectedGradient,
+      isolatedLayerId: state.isolatedLayerId,
       highlightedLayerId: highlightedLayer?.id,
       textSelection,
       canRedo,

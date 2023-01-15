@@ -17,6 +17,7 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   platformModKey: 'ctrlKey' | 'metaKey';
   selectedLayerIds: string[];
   highlightedLayerId?: string;
+  isolatedLayerId?: string;
   selectedGradient?: SelectedGradient;
   textSelection?: TextSelection;
   zoomValue: number;
