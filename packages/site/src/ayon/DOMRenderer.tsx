@@ -5,11 +5,13 @@ import {
   Button,
   ChakraProvider,
   Checkbox,
+  Flex,
   Heading,
   IconButton,
   Image,
   Input,
   Switch,
+  SystemProps,
   Text,
   theme,
 } from '@chakra-ui/react';
@@ -62,6 +64,7 @@ function filterTextPropertyHashTags(text?: string): {
   colorScheme?: string;
   fontWeight?: string;
   fontSize?: string;
+  align?: string;
 } {
   const { content, hashTags } = filterHashTags(text);
   const colorByHashTag = hashTags?.find((hashTag) =>
@@ -80,6 +83,9 @@ function filterTextPropertyHashTags(text?: string): {
   const fontSize = hashTags?.find((hashTag) =>
     Object.keys(theme.fontSizes).includes(hashTag),
   );
+  const align = hashTags?.find((hashTag) =>
+    ['left', 'center', 'right'].includes(hashTag),
+  );
   return {
     content,
     hashTags,
@@ -87,6 +93,7 @@ function filterTextPropertyHashTags(text?: string): {
     colorScheme,
     fontWeight,
     fontSize,
+    align,
   };
 }
 
@@ -133,11 +140,15 @@ export const symbolIdToElement = {
   [inputSymbol.symbolID]: (props: DOMElementsProps) => <Input />,
   [switchSymbol.symbolID]: (props: DOMElementsProps) => <Switch />,
   [textSymbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Text color={color} fontWeight={fontWeight} fontSize={fontSize}>
+      <Text
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+        align={align as SystemProps['textAlign']}
+      >
         {content}
       </Text>
     );
@@ -152,93 +163,99 @@ export const symbolIdToElement = {
     />
   ),
   [heading1Symbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Heading
-        size="2xl"
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-      >
-        {content}
-      </Heading>
+      <Flex justify={align}>
+        <Heading
+          size="2xl"
+          color={color}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+        >
+          {content}
+        </Heading>
+      </Flex>
     );
   },
   [heading2Symbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Heading
-        size="xl"
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-      >
-        {content}
-      </Heading>
+      <Flex justify={align}>
+        <Heading
+          size="xl"
+          color={color}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+        >
+          {content}
+        </Heading>
+      </Flex>
     );
   },
   [heading3Symbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Heading
-        size="lg"
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-      >
-        {content}
-      </Heading>
+      <Flex justify={align}>
+        <Heading
+          size="lg"
+          color={color}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+        >
+          {content}
+        </Heading>
+      </Flex>
     );
   },
   [heading4Symbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Heading
-        size="md"
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-      >
-        {content}
-      </Heading>
+      <Flex justify={align}>
+        <Heading
+          size="md"
+          color={color}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+        >
+          {content}
+        </Heading>
+      </Flex>
     );
   },
   [heading5Symbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Heading
-        size="sm"
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-      >
-        {content}
-      </Heading>
+      <Flex justify={align}>
+        <Heading
+          size="sm"
+          color={color}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+        >
+          {content}
+        </Heading>
+      </Flex>
     );
   },
   [heading6Symbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
-      props.blockText,
-    );
+    const { content, color, fontWeight, fontSize, align } =
+      filterTextPropertyHashTags(props.blockText);
     return (
-      <Heading
-        size="xs"
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-      >
-        {content}
-      </Heading>
+      <Flex justify={align}>
+        <Heading
+          size="xs"
+          color={color}
+          fontWeight={fontWeight}
+          fontSize={fontSize}
+        >
+          {content}
+        </Heading>
+      </Flex>
     );
   },
 };
