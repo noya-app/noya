@@ -40,7 +40,7 @@ export const checkboxSymbol = SketchModel.symbolMaster({
 
 export const iconButtonSymbol = SketchModel.symbolMaster({
   symbolID: iconButtonSymbolId,
-  name: 'Icon Button',
+  name: 'IconButton',
 });
 
 export const inputSymbol = SketchModel.symbolMaster({
@@ -65,32 +65,32 @@ export const imageSymbol = SketchModel.symbolMaster({
 
 export const heading1Symbol = SketchModel.symbolMaster({
   symbolID: heading1SymbolId,
-  name: 'Heading 1',
+  name: 'Heading1',
 });
 
 export const heading2Symbol = SketchModel.symbolMaster({
   symbolID: heading2SymbolId,
-  name: 'Heading 2',
+  name: 'Heading2',
 });
 
 export const heading3Symbol = SketchModel.symbolMaster({
   symbolID: heading3SymbolId,
-  name: 'Heading 3',
+  name: 'Heading3',
 });
 
 export const heading4Symbol = SketchModel.symbolMaster({
   symbolID: heading4SymbolId,
-  name: 'Heading 4',
+  name: 'Heading4',
 });
 
 export const heading5Symbol = SketchModel.symbolMaster({
   symbolID: heading5SymbolId,
-  name: 'Heading 5',
+  name: 'Heading5',
 });
 
 export const heading6Symbol = SketchModel.symbolMaster({
   symbolID: heading6SymbolId,
-  name: 'Heading 6',
+  name: 'Heading6',
 });
 
 export const allAyonSymbols = [
