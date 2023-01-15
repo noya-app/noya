@@ -102,7 +102,7 @@ function commonPrefixLength(a?: string, b?: string) {
     return 0;
   }
   if (a === b) {
-    return 1;
+    return a.length;
   }
   const firstDiffCharIndex = [...a].findIndex(
     (character, index) => character !== b[index],
