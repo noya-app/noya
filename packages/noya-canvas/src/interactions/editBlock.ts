@@ -38,6 +38,19 @@ export function editBlockInteraction({
           event.preventDefault();
         }
       },
+      onKeyDown: api.handleKeyboardEvent({
+        Enter: () => {
+          const selectedLayerIds = api.selectedLayerIds;
+
+          if (selectedLayerIds.length > 0) {
+            const layerId = selectedLayerIds[0];
+
+            if (api.getLayerTypeById(layerId) === 'symbolInstance') {
+              startEditingBlock(layerId);
+            }
+          }
+        },
+      }),
     }),
     editingBlock: () => ({
       onPointerDown: (event) => {

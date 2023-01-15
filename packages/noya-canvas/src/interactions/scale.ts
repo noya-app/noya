@@ -34,7 +34,7 @@ export const createScaleInteraction = (
     >({
       none: (interactionState, api) => ({
         onPointerDown: (event) => {
-          const canvasPoint = api.getScreenPoint(event.nativeEvent);
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           const direction = api.getScaleDirectionAtPoint(canvasPoint);
 
@@ -44,7 +44,7 @@ export const createScaleInteraction = (
           }
         },
         onPointerMove: (event) => {
-          const canvasPoint = api.getScreenPoint(event.nativeEvent);
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           const direction = api.getScaleDirectionAtPoint(canvasPoint);
 
@@ -55,7 +55,7 @@ export const createScaleInteraction = (
       }),
       hoverHandle: (interactionState, api) => ({
         onPointerDown: (event) => {
-          const canvasPoint = api.getScreenPoint(event.nativeEvent);
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           const direction = api.getScaleDirectionAtPoint(canvasPoint);
 
@@ -65,7 +65,7 @@ export const createScaleInteraction = (
           }
         },
         onPointerMove: (event) => {
-          const canvasPoint = api.getScreenPoint(event.nativeEvent);
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           const direction = api.getScaleDirectionAtPoint(canvasPoint);
 
@@ -80,7 +80,7 @@ export const createScaleInteraction = (
       }),
       maybeScale: (interactionState, api) => ({
         onPointerMove: (event) => {
-          const canvasPoint = api.getScreenPoint(event.nativeEvent);
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           const { origin } = interactionState;
 
@@ -100,7 +100,7 @@ export const createScaleInteraction = (
       }),
       scaling: (interactionState, api) => ({
         onPointerMove: (event) => {
-          const canvasPoint = api.getScreenPoint(event.nativeEvent);
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
           updateScaling(canvasPoint, options.inferBlockType);
 

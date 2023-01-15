@@ -70,8 +70,7 @@ export function editTextInteraction({
 
         startEditingText(layerId, { anchor: 0, head: length });
 
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         const characterIndex = api.getCharacterIndexAtPoint(
           layerId,
@@ -100,8 +99,7 @@ export function editTextInteraction({
 
         if (api.getLayerTypeById(layerId) !== 'text') return;
 
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         const characterIndex = api.getCharacterIndexAtPoint(
           layerId,
@@ -182,8 +180,7 @@ export function editTextInteraction({
     }),
     maybeSelectingText: (interactionState, api) => ({
       onPointerMove: (event) => {
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         const { origin } = interactionState;
 
@@ -211,8 +208,7 @@ export function editTextInteraction({
       onPointerMove: (event) => {
         if (!api.textSelection) return;
 
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         const characterIndex = api.getCharacterIndexAtPointInSelectedLayer(
           canvasPoint,
@@ -234,8 +230,7 @@ export function editTextInteraction({
           return;
         }
 
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         const characterIndex = api.getCharacterIndexAtPointInSelectedLayer(
           canvasPoint,

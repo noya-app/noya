@@ -27,14 +27,13 @@ export function moveInteraction({
     none: (interactionState, api) => ({
       onPointerDown: (event) => {
         const screenPoint = api.getScreenPoint(event.nativeEvent);
+        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
         const layerId = api.getLayerIdAtPoint(screenPoint, {
           groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
           artboards: 'emptyOrContainedArtboardOrChildren',
           includeLockedLayers: false,
         });
-
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
         if (layerId) {
           maybeMove(canvasPoint);
@@ -55,8 +54,7 @@ export function moveInteraction({
     }),
     maybeMove: (interactionState, api) => ({
       onPointerMove: (event) => {
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         const { origin } = interactionState;
 
@@ -76,8 +74,7 @@ export function moveInteraction({
     }),
     moving: (interactionState, api) => ({
       onPointerMove: (event) => {
-        const screenPoint = api.getScreenPoint(event.nativeEvent);
-        const canvasPoint = api.convertPoint(screenPoint, 'canvas');
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
         updateMoving(canvasPoint);
 
