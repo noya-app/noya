@@ -11,6 +11,7 @@ import {
   Input,
   Switch,
   Text,
+  theme,
 } from '@chakra-ui/react';
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
@@ -39,8 +40,60 @@ type DOMElementsProps = {
   blockText?: string;
 };
 
+function filterHashTags(text?: string): {
+  content?: string;
+  hashTags?: string[];
+} {
+  const words = text?.split(' ');
+  const content = words?.filter((word) => !word.startsWith('#')).join(' ');
+  const hashTags = words
+    ?.filter((word) => word.startsWith('#'))
+    .map((word) => word.slice(1));
+  return {
+    content,
+    hashTags,
+  };
+}
+
+function filterTextPropertyHashTags(text?: string): {
+  content?: string;
+  hashTags?: string[];
+  color?: string;
+  colorScheme?: string;
+  fontWeight?: string;
+  fontSize?: string;
+} {
+  const { content, hashTags } = filterHashTags(text);
+  const colorByHashTag = hashTags?.find((hashTag) =>
+    CSS.supports('color', hashTag),
+  );
+  const colorByHashTagHex = hashTags
+    ?.map((hashTag) => `#${hashTag}`)
+    .find((hashTag) => CSS.supports('color', hashTag));
+  const color = colorByHashTag ?? colorByHashTagHex;
+  const colorScheme = hashTags?.find((hashTag) =>
+    Object.keys(theme.colors).includes(hashTag),
+  );
+  const fontWeight = hashTags?.find((hashTag) =>
+    Object.keys(theme.fontWeights).includes(hashTag),
+  );
+  const fontSize = hashTags?.find((hashTag) =>
+    Object.keys(theme.fontSizes).includes(hashTag),
+  );
+  return {
+    content,
+    hashTags,
+    color,
+    colorScheme,
+    fontWeight,
+    fontSize,
+  };
+}
+
 export const symbolIdToElement = {
   [buttonSymbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, colorScheme, fontWeight, fontSize } =
+      filterTextPropertyHashTags(props.blockText);
     let size;
     if (props.frame.height < 30) {
       size = 'xs' as const;
@@ -50,8 +103,14 @@ export const symbolIdToElement = {
       size = 'md' as const;
     }
     return (
-      <Button size={size} isFullWidth>
-        {props.blockText}
+      <Button
+        colorScheme={colorScheme}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+        size={size}
+        isFullWidth
+      >
+        {content}
       </Button>
     );
   },
@@ -73,9 +132,16 @@ export const symbolIdToElement = {
   ),
   [inputSymbol.symbolID]: (props: DOMElementsProps) => <Input />,
   [switchSymbol.symbolID]: (props: DOMElementsProps) => <Switch />,
-  [textSymbol.symbolID]: (props: DOMElementsProps) => (
-    <Text>{props.blockText}</Text>
-  ),
+  [textSymbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Text color={color} fontWeight={fontWeight} fontSize={fontSize}>
+        {content}
+      </Text>
+    );
+  },
   [imageSymbol.symbolID]: (props: DOMElementsProps) => (
     <Image
       src={`https://source.unsplash.com/${props.frame.width}x${props.frame.height}?${props.blockText}`}
@@ -85,24 +151,96 @@ export const symbolIdToElement = {
       h="100%"
     />
   ),
-  [heading1Symbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading size="2xl">{props.blockText}</Heading>
-  ),
-  [heading2Symbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading size="xl">{props.blockText}</Heading>
-  ),
-  [heading3Symbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading size="lg">{props.blockText}</Heading>
-  ),
-  [heading4Symbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading size="md">{props.blockText}</Heading>
-  ),
-  [heading5Symbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading size="sm">{props.blockText}</Heading>
-  ),
-  [heading6Symbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading size="xs">{props.blockText}</Heading>
-  ),
+  [heading1Symbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Heading
+        size="2xl"
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+      >
+        {content}
+      </Heading>
+    );
+  },
+  [heading2Symbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Heading
+        size="xl"
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+      >
+        {content}
+      </Heading>
+    );
+  },
+  [heading3Symbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Heading
+        size="lg"
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+      >
+        {content}
+      </Heading>
+    );
+  },
+  [heading4Symbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Heading
+        size="md"
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+      >
+        {content}
+      </Heading>
+    );
+  },
+  [heading5Symbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Heading
+        size="sm"
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+      >
+        {content}
+      </Heading>
+    );
+  },
+  [heading6Symbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, color, fontWeight, fontSize } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Heading
+        size="xs"
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+      >
+        {content}
+      </Heading>
+    );
+  },
 };
 
 function SymbolRenderer({
