@@ -11,6 +11,7 @@ import { LockClosedIcon, MagicWandIcon } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
+import { allAyonSymbols, headingSymbolId } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
 function useGetScreenRect() {
@@ -139,7 +140,46 @@ export function Widget({
         }}
         disabled={!isEditing}
         onChange={(event) => {
-          dispatch('setBlockText', event.target.value);
+          const text = event.target.value;
+          const words = text.split(' ');
+          const lines = text.split(/\r?\n/);
+
+          if (words.length > 1 && words[0] === '#') {
+            onChangeBlockType({ symbolId: headingSymbolId });
+            dispatch('setSymbolIdIsFixed', true);
+            dispatch('setBlockText', words.slice(1).join(' '));
+            return;
+          }
+
+          if (words.length > 1 && text.charAt(0) === '/') {
+            const symbol = allAyonSymbols.find(
+              (symbol) =>
+                symbol.name.toLowerCase() ===
+                words[0].substring(1).toLowerCase(),
+            );
+            if (symbol) {
+              onChangeBlockType({ symbolId: symbol.symbolID });
+              dispatch('setSymbolIdIsFixed', true);
+              dispatch('setBlockText', words.slice(1).join(' '));
+              return;
+            }
+          }
+
+          if (lines.length > 1 && text.charAt(0) === '/') {
+            const symbol = allAyonSymbols.find(
+              (symbol) =>
+                symbol.name.toLowerCase() ===
+                lines[0].substring(1).toLowerCase(),
+            );
+            if (symbol) {
+              onChangeBlockType({ symbolId: symbol.symbolID });
+              dispatch('setSymbolIdIsFixed', true);
+              dispatch('setBlockText', words.slice(1).join(' '));
+              return;
+            }
+          }
+
+          dispatch('setBlockText', text);
         }}
         onFocusCapture={(event) => {
           event.stopPropagation();
