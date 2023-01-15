@@ -12,6 +12,7 @@ import { panInteraction } from './pan';
 import { reorderInteraction } from './reorder';
 import { createScaleInteraction } from './scale';
 import { selectionInteraction } from './selection';
+import { zoomInteraction } from './zoom';
 
 export namespace Interactions {
   export const focus = focusInteraction;
@@ -26,6 +27,7 @@ export namespace Interactions {
   export const clipboard = clipboardInteraction;
   export const history = historyInteraction;
   export const escape = escapeInteraction;
+  export const zoom = zoomInteraction;
   export const reorder = reorderInteraction;
   export const scale = createScaleInteraction();
   export const createScale = createScaleInteraction;

@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Avatar,
   Box,
@@ -17,8 +16,11 @@ import {
 } from '@chakra-ui/react';
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { createRect, Rect } from 'noya-geometry';
+import { createRect, Rect, Size } from 'noya-geometry';
+import { useSize } from 'noya-react-utils';
+import { createResizeTransform } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
+import React, { useRef } from 'react';
 import {
   avatarSymbol,
   boxSymbol,
@@ -277,22 +279,44 @@ function SymbolRenderer({
   );
 }
 
-export function DOMRenderer(): JSX.Element {
+function DOMRendererContent({ size }: { size: Size }): JSX.Element {
   const [state] = useApplicationState();
   const page = Selectors.getCurrentPage(state);
   const artboard = page.layers[0] as Sketch.Artboard;
 
+  const { transform, paddedRect } = createResizeTransform({
+    containerSize: size,
+    contentRect: artboard.frame,
+    scalingMode: 'upOrDown',
+  });
+
   return (
-    <div style={{ position: 'relative', background: '#f9f9f9', flex: '1' }}>
-      <ChakraProvider>
+    <ChakraProvider>
+      <div
+        style={{
+          position: 'absolute',
+          width: paddedRect.width,
+          height: paddedRect.height,
+          left: paddedRect.x,
+          top: paddedRect.y,
+          outline: '1px solid #ccc',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          transform: transform.toString(),
+          transformOrigin: 'top left',
+        }}
+      >
         <div
           style={{
             position: 'absolute',
+            left: artboard.frame.x,
+            top: artboard.frame.y,
             width: artboard.frame.width,
             height: artboard.frame.height,
             backgroundColor: '#fff',
-            borderRight: '1px solid #ccc',
-            borderBottom: '1px solid #ccc',
           }}
         >
           {artboard.layers.filter(Layers.isSymbolInstance).map((layer) => (
@@ -318,7 +342,29 @@ export function DOMRenderer(): JSX.Element {
             />
           )}
         </div>
-      </ChakraProvider>
+      </div>
+    </ChakraProvider>
+  );
+}
+
+export function DOMRenderer(): JSX.Element {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const size = useSize(containerRef);
+  const [state] = useApplicationState();
+  const page = Selectors.getCurrentPage(state);
+  const artboard = page.layers[0] as Sketch.Artboard;
+  const ratio = artboard.frame.width / artboard.frame.height;
+
+  return (
+    <div ref={containerRef} style={{ flex: 1 }}>
+      {size && (
+        <DOMRendererContent
+          size={{
+            width: size.width,
+            height: size.width / ratio,
+          }}
+        />
+      )}
     </div>
   );
 }

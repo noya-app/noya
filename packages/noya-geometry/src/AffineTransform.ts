@@ -1,8 +1,21 @@
 import { Point } from './types';
 
 /**
+ * Represents a 2d transformation matrix of the form:
+ *
+ * [  m00  m01  m02  ]
+ * [  m10  m11  m12  ]
+ * [   0    0    1   ]
+ *
+ * Also sometimes written as:
+ *
+ * [   a    c    tx  ]
+ * [   b    d    ty  ]
+ * [   0    0    1   ]
+ *
  * For more details:
  *
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/matrix
  * https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
  * https://people.cs.clemson.edu/~dhouse/courses/401/notes/affines-matrices.pdf
  */
@@ -171,5 +184,38 @@ export class AffineTransform {
     if (!first) return AffineTransform.identity;
 
     return rest.reduce((result, item) => result.prepend(item), first);
+  }
+
+  get a() {
+    return this.m00;
+  }
+
+  get b() {
+    return this.m10;
+  }
+
+  get c() {
+    return this.m01;
+  }
+
+  get d() {
+    return this.m11;
+  }
+
+  get tx() {
+    return this.m02;
+  }
+
+  get ty() {
+    return this.m12;
+  }
+
+  /**
+   * https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/matrix#syntax
+   *
+   * Returns a string representation of the matrix, "matrix(a, b, c, d, tx, ty)"
+   */
+  toString() {
+    return `matrix(${this.a}, ${this.b}, ${this.c}, ${this.d}, ${this.tx}, ${this.ty})`;
   }
 }

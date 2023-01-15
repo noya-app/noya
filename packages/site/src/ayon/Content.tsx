@@ -13,13 +13,23 @@ export const Content = memo(function Content() {
   const { canvasSize } = useWorkspace();
   const [state, dispatch] = useApplicationState();
 
-  const layers = Layers.flat(Selectors.getCurrentPage(state));
+  const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
+    Layers.isSymbolInstance,
+  );
 
   return (
     <div style={{ flex: '1', display: 'flex', overflow: 'hidden' }}>
-      <div style={{ flex: '1', display: 'flex', position: 'relative' }}>
+      <div
+        style={{
+          flex: '3',
+          display: 'flex',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
         <SimpleCanvas
           interactions={[
+            Interactions.zoom,
             Interactions.escape,
             Interactions.reorder,
             Interactions.history,
@@ -103,7 +113,14 @@ export const Content = memo(function Content() {
         </div>
       </div>
       <div style={{ width: '1px', backgroundColor: '#ccc' }} />
-      <div style={{ flex: '1', display: 'flex' }}>
+      <div
+        style={{
+          flex: '1',
+          display: 'flex',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
         <DOMRenderer />
       </div>
     </div>

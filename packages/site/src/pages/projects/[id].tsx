@@ -86,7 +86,7 @@ function FileEditor({ id }: { id: string }) {
   }, [client, id]);
 
   const updateDebounced = useMemo(
-    () => debounce(client.files.update, 1000, { maxWait: 1000 }),
+    () => debounce(client.files.update, 250, { maxWait: 1000 }),
     [client],
   );
 

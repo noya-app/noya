@@ -1,12 +1,7 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import {
-  AffineTransform,
-  createRect,
-  Rect,
-  transformRect,
-} from 'noya-geometry';
+import { createRect, Rect, transformRect } from 'noya-geometry';
 import { LockClosedIcon, MagicWandIcon } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
@@ -23,37 +18,35 @@ import {
 } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
-function useGetScreenRect() {
-  const [state] = useApplicationState();
-  const meta = Selectors.getCurrentPageMetadata(state);
-  const { zoomValue, scrollOrigin } = meta;
-
-  const screenTransform = AffineTransform.scale(1 / zoomValue)
-    .translate(-scrollOrigin.x, -scrollOrigin.y)
-    .invert();
-
-  return (frame: Rect) => transformRect(frame, screenTransform);
-}
-
 function WidgetContainer({
   frame,
   children,
+  transform,
 }: {
   frame: Rect;
   children: React.ReactNode;
+  transform?: string;
 }) {
   return (
     <div
       style={{
         position: 'absolute',
-        left: frame.x,
-        top: frame.y,
-        width: frame.width,
-        height: frame.height,
         pointerEvents: 'none',
+        transform,
       }}
     >
-      {children}
+      <div
+        style={{
+          position: 'absolute',
+          left: frame.x,
+          top: frame.y,
+          width: frame.width,
+          height: frame.height,
+          pointerEvents: 'none',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -112,9 +105,12 @@ export function Widget({
   inferBlockTypes: (input: BlockHeuristicInput) => InferredBlockTypeResult[];
   onChangeBlockType: (type: DrawableLayerType) => void;
 }) {
+  const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const { isContextMenuOpen } = useWorkspace();
-  const rect = useGetScreenRect()(layer.frame);
+  const page = Selectors.getCurrentPage(state);
+  const rect = Selectors.getBoundingRect(page, [layer.do_objectID])!;
+  const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const symbol = Layers.isSymbolInstance(layer)
@@ -148,7 +144,7 @@ export function Widget({
   const slashWords = words.filter((word) => word[0] === '/' && word !== '/');
 
   return (
-    <WidgetContainer frame={rect}>
+    <WidgetContainer frame={rect} transform={canvasTransform.toString()}>
       <textarea
         ref={textareaRef}
         style={{
@@ -354,7 +350,8 @@ export function DrawingWidget({
   inferBlockType: ({ rect }: { rect: Rect }) => DrawableLayerType;
 }) {
   const [state] = useApplicationState();
-  const getScreenRect = useGetScreenRect();
+  const { canvasInsets } = useWorkspace();
+  const transform = Selectors.getCanvasTransform(state, canvasInsets);
 
   if (state.interactionState.type !== 'drawing') return null;
 
@@ -369,8 +366,9 @@ export function DrawingWidget({
 
   const symbol = Selectors.getSymbolMaster(state, block.symbolId);
 
-  const rect = getScreenRect(
+  const rect = transformRect(
     createRect(state.interactionState.origin, state.interactionState.current),
+    transform,
   );
 
   return (

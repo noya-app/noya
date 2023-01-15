@@ -6,6 +6,7 @@ import {
   resize,
   resizeIfLarger,
   Size,
+  transformRect,
 } from 'noya-geometry';
 import { ClipProps, useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { PageLayer, Primitives } from 'noya-state';
@@ -41,10 +42,54 @@ interface Props {
   backgroundColor?: Sketch.Color;
 }
 
+export function createResizeTransform({
+  contentRect,
+  containerSize,
+  padding = 0,
+  scalingMode = 'upOrDown',
+}: {
+  contentRect: Rect;
+  containerSize: Size;
+  padding?: number;
+  scalingMode: Props['scalingMode'];
+}) {
+  const bounds = createBounds(contentRect);
+
+  const containerSizeMinusPadding = {
+    width: containerSize.width - padding * 2,
+    height: containerSize.height - padding * 2,
+  };
+
+  const resizedContentRect =
+    scalingMode === 'down'
+      ? resizeIfLarger(contentRect, containerSizeMinusPadding)
+      : resize(contentRect, containerSizeMinusPadding);
+
+  const scale = {
+    x: resizedContentRect.width / contentRect.width,
+    y: resizedContentRect.height / contentRect.height,
+  };
+
+  const transform = AffineTransform.multiply(
+    // Translate to the center of the size
+    AffineTransform.translate(
+      containerSize.width / 2 + padding * scale.x,
+      containerSize.height / 2 + padding * scale.y,
+    ),
+    AffineTransform.scale(scale.x, scale.y),
+    // Translate to (0,0) before scaling, since scale is applied at the origin
+    AffineTransform.translate(-bounds.midX - padding, -bounds.midY - padding),
+  );
+
+  const paddedRect = transformRect(contentRect, transform);
+
+  return { transform, paddedRect };
+}
+
 export function LayerPreview({
   layer,
-  layerFrame: frame,
-  previewSize: size,
+  layerFrame: contentRect,
+  previewSize: containerSize,
   padding = 0,
   scalingMode = 'upOrDown',
   showCheckeredBackground = false,
@@ -52,56 +97,15 @@ export function LayerPreview({
 }: Props) {
   const CanvasKit = useCanvasKit();
 
-  const bounds = createBounds(frame);
-
-  const paddedSize = {
-    width: size.width - padding * 2,
-    height: size.height - padding * 2,
-  };
-
-  const layerSize = { width: frame.width, height: frame.height };
-
-  const scaledRect =
-    scalingMode === 'down'
-      ? resizeIfLarger(layerSize, paddedSize)
-      : resize(layerSize, paddedSize);
-
-  const transform = useMemo(() => {
-    const scale = {
-      x: scaledRect.width / layerSize.width,
-      y: scaledRect.height / layerSize.height,
-    };
-
-    return AffineTransform.multiply(
-      // Translate to the center of the size
-      AffineTransform.translate(
-        size.width / 2 + padding * scale.x,
-        size.height / 2 + padding * scale.y,
-      ),
-      AffineTransform.scale(scale.x, scale.y),
-      // Translate to (0,0) before scaling, since scale is applied at the origin
-      AffineTransform.translate(-bounds.midX - padding, -bounds.midY - padding),
-    );
-  }, [
-    size.width,
-    size.height,
-    scaledRect.width,
-    scaledRect.height,
-    layerSize.width,
-    layerSize.height,
-    bounds.midX,
-    bounds.midY,
-    padding,
-  ]);
-
-  const paddedRect = useMemo(
-    () => ({
-      x: scaledRect.x + padding,
-      y: scaledRect.y + padding,
-      width: scaledRect.width,
-      height: scaledRect.height,
-    }),
-    [padding, scaledRect.height, scaledRect.width, scaledRect.x, scaledRect.y],
+  const { transform, paddedRect } = useMemo(
+    () =>
+      createResizeTransform({
+        contentRect,
+        containerSize,
+        padding,
+        scalingMode,
+      }),
+    [contentRect, containerSize, padding, scalingMode],
   );
 
   const path = useMemo(() => {

@@ -1,6 +1,5 @@
 import { Insets, Size } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
-import { round } from 'noya-utils';
 import { useLayoutEffect, useMemo } from 'react';
 
 type CanvasSizes = {
@@ -26,8 +25,8 @@ export function useAutomaticCanvasSize({
     () =>
       rawContainerSize
         ? {
-            width: round(rawContainerSize.width),
-            height: round(rawContainerSize.height),
+            width: Math.max(rawContainerSize.width),
+            height: Math.max(rawContainerSize.height),
           }
         : undefined,
     [rawContainerSize],

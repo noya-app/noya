@@ -44,6 +44,7 @@ import { ReorderActions } from '../interactions/reorder';
 import { ScaleActions } from '../interactions/scale';
 import { SelectionActions } from '../interactions/selection';
 import { InteractionAPI } from '../interactions/types';
+import { ZoomActions } from '../interactions/zoom';
 import { convertPoint } from '../utils/convertPoint';
 
 function getPoint(event: OffsetPoint): Point {
@@ -61,7 +62,8 @@ export type Actions = MarqueeActions &
   ClipboardActions &
   EscapeActions &
   ReorderActions &
-  HistoryActions;
+  HistoryActions &
+  ZoomActions;
 
 export type Interaction = (
   actions: Actions,
@@ -94,6 +96,9 @@ export function useInteractionHandlers({
 
   const actions = useMemo((): Actions => {
     return {
+      zoomIn: () => dispatch('setZoom*', 2, 'multiply'),
+      zoomOut: () => dispatch('setZoom*', 0.5, 'multiply'),
+      zoomActualSize: () => dispatch('setZoom*', 1),
       undo: () => dispatch('undo'),
       redo: () => dispatch('redo'),
       startMarquee: (point) => dispatch('interaction', ['startMarquee', point]),
