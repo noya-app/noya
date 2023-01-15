@@ -271,7 +271,7 @@ export function Widget({
                     dispatch('setSymbolIdIsFixed', true);
                   }}
                 >
-                  {blockType.score} {name}
+                  {blockType.score.toFixed(2)} {name}
                 </div>
               );
             })}
