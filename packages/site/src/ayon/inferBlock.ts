@@ -110,12 +110,13 @@ function commonPrefixLength(a?: string, b?: string) {
 }
 
 function scoreCommandMatch(symbolMaster: Sketch.SymbolMaster, text?: string) {
-  return (
-    commonPrefixLength(
-      `/${symbolMaster.name.toLowerCase()}`,
-      text?.toLowerCase(),
-    ) - 1
-  );
+  const command = `/${symbolMaster.name.toLowerCase()}`;
+  const words = text?.split(/\s/);
+  const slashWords = words?.filter((word) => word[0] === '/' && word !== '/');
+
+  return (slashWords ?? [])
+    .map((word) => commonPrefixLength(command, word) - 1)
+    .reduce((a, b) => Math.max(a, b), -1);
 }
 
 export function inferBlockTypes(

@@ -144,6 +144,9 @@ export function Widget({
     !isContextMenuOpen &&
     state.interactionState.type !== 'drawing';
 
+  const words = blockText.split(/\s/);
+  const slashWords = words.filter((word) => word[0] === '/' && word !== '/');
+
   return (
     <WidgetContainer frame={rect}>
       <textarea
@@ -162,18 +165,33 @@ export function Widget({
           if (event.key !== 'Tab') {
             return;
           }
+
           event.preventDefault();
-          const words = blockText.split(' ');
-          if (blockText[0] === '/') {
+
+          const words = blockText.split(/\s/);
+          const slashWords = words.filter(
+            (word) => word[0] === '/' && word !== '/',
+          );
+
+          if (slashWords.length > 0) {
             const symbol = allAyonSymbols.find(
               (symbol) =>
                 symbol.name.toLowerCase() ===
-                words[0].substring(1).toLowerCase(),
+                slashWords[slashWords.length - 1].substring(1).toLowerCase(),
             );
+            const newText = blockText
+              .split(/\r?\n/)
+              .map((line) =>
+                line
+                  .split(' ')
+                  .filter((word) => word[0] !== '/' || word === '/')
+                  .join(' '),
+              )
+              .join('\n');
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', words.slice(1).join(' '));
+              dispatch('setBlockText', newText);
               return;
             } else if (
               blockTypes.length > 0 &&
@@ -183,19 +201,20 @@ export function Widget({
                 symbolId: blockTypes[0].type.symbolId,
               });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', words.slice(1).join(' '));
+              dispatch('setBlockText', newText);
               return;
             }
           }
-          dispatch('setBlockText', blockText + ' ');
         }}
         onChange={(event) => {
           const text = event.target.value;
-          const words = text.split(' ');
-          const lines = text.split(/\r?\n/);
+          const words = text.split(/\s/);
+          const slashWords = words.filter(
+            (word) => word[0] === '/' && word !== '/',
+          );
 
           if (
-            words.length > 1 &&
+            words.length > blockText.split(' ').length &&
             Object.keys(BLOCK_TYPE_TEXT_SHORTCUTS).includes(words[0])
           ) {
             onChangeBlockType({
@@ -206,16 +225,28 @@ export function Widget({
             return;
           }
 
-          if (words.length > 1 && text.charAt(0) === '/') {
+          if (
+            slashWords.length > 0 &&
+            words.length > blockText.split(/\s/).length
+          ) {
             const symbol = allAyonSymbols.find(
               (symbol) =>
                 symbol.name.toLowerCase() ===
-                words[0].substring(1).toLowerCase(),
+                slashWords[slashWords.length - 1].substring(1).toLowerCase(),
             );
+            const newText = text
+              .split(/\r?\n/)
+              .map((line) =>
+                line
+                  .split(' ')
+                  .filter((word) => word[0] !== '/' || word === '/')
+                  .join(' '),
+              )
+              .join('\n');
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', words.slice(1).join(' '));
+              dispatch('setBlockText', newText);
               return;
             } else if (
               blockTypes.length > 0 &&
@@ -225,31 +256,7 @@ export function Widget({
                 symbolId: blockTypes[0].type.symbolId,
               });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', words.slice(1).join(' '));
-              return;
-            }
-          }
-
-          if (lines.length > 1 && text[0] === '/') {
-            const symbol = allAyonSymbols.find(
-              (symbol) =>
-                symbol.name.toLowerCase() ===
-                lines[0].substring(1).toLowerCase(),
-            );
-            if (symbol) {
-              onChangeBlockType({ symbolId: symbol.symbolID });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', words.slice(1).join(' '));
-              return;
-            } else if (
-              blockTypes.length > 0 &&
-              typeof blockTypes[0].type !== 'string'
-            ) {
-              onChangeBlockType({
-                symbolId: blockTypes[0].type.symbolId,
-              });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', words.slice(1).join(' '));
+              dispatch('setBlockText', newText);
               return;
             }
           }
@@ -323,11 +330,11 @@ export function Widget({
                   style={{
                     padding: '1px 4px',
                     backgroundColor:
-                      index === 0 && blockText[0] === '/'
+                      index === 0 && slashWords.length > 0
                         ? 'rgb(132,63,255)'
                         : 'transparent',
                     color:
-                      index === 0 && blockText[0] === '/' ? '#fff' : '#000',
+                      index === 0 && slashWords.length > 0 ? '#fff' : '#000',
                   }}
                 >
                   {blockType.score.toFixed(2)} {name}
