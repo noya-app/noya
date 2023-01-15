@@ -1,4 +1,3 @@
-import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
@@ -15,6 +14,7 @@ import {
 import { DashboardIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { SketchFile } from 'noya-sketch-file';
+import { debounce } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -86,10 +86,7 @@ function FileEditor({ id }: { id: string }) {
   }, [client, id]);
 
   const updateDebounced = useMemo(
-    () =>
-      debounce(client.files.update, 3000, {
-        maxWait: 3000,
-      }),
+    () => debounce(client.files.update, 1000, { maxWait: 1000 }),
     [client],
   );
 
@@ -117,6 +114,26 @@ function FileEditor({ id }: { id: string }) {
       fileProperties?.type,
     ],
   );
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!updateDebounced.pending()) return;
+
+      updateDebounced.flush();
+
+      const message = "Your edits haven't finished syncing. Are you sure?";
+
+      event.preventDefault();
+      event.returnValue = message;
+      return message;
+    };
+
+    window.addEventListener('beforeunload', handler, { capture: true });
+
+    return () => {
+      window.removeEventListener('beforeunload', handler, { capture: true });
+    };
+  }, [updateDebounced]);
 
   if (!initialFile) return null;
 

@@ -26,5 +26,6 @@ export * from './types';
 export * from './upperFirst';
 export * from './unique';
 export * from './url';
+export * from './debounce';
 export * as delimitedPath from './delimitedPath';
 export { v4 as uuid } from 'uuid';
