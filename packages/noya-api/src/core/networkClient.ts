@@ -33,6 +33,7 @@ export class NoyaNetworkClient {
     onError?: (error: NoyaAPIError) => boolean;
   }) {
     this.baseURI = options.baseURI;
+    this.onError = options.onError;
   }
 
   get auth() {
