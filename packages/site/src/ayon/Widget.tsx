@@ -158,6 +158,37 @@ export function Widget({
           border: '1px solid rgba(0,0,0,0.1)',
         }}
         disabled={!isEditing}
+        onKeyDown={(event) => {
+          if (event.key !== 'Tab') {
+            return;
+          }
+          event.preventDefault();
+          const words = blockText.split(' ');
+          if (blockText.charAt(0) === '/') {
+            const symbol = allAyonSymbols.find(
+              (symbol) =>
+                symbol.name.toLowerCase() ===
+                words[0].substring(1).toLowerCase(),
+            );
+            if (symbol) {
+              onChangeBlockType({ symbolId: symbol.symbolID });
+              dispatch('setSymbolIdIsFixed', true);
+              dispatch('setBlockText', words.slice(1).join(' '));
+              return;
+            } else if (
+              blockTypes.length > 0 &&
+              typeof blockTypes[0].type !== 'string'
+            ) {
+              onChangeBlockType({
+                symbolId: blockTypes[0].type.symbolId,
+              });
+              dispatch('setSymbolIdIsFixed', true);
+              dispatch('setBlockText', words.slice(1).join(' '));
+              return;
+            }
+          }
+          dispatch('setBlockText', blockText + ' ');
+        }}
         onChange={(event) => {
           const text = event.target.value;
           const words = text.split(' ');
@@ -186,6 +217,16 @@ export function Widget({
               dispatch('setSymbolIdIsFixed', true);
               dispatch('setBlockText', words.slice(1).join(' '));
               return;
+            } else if (
+              blockTypes.length > 0 &&
+              typeof blockTypes[0].type !== 'string'
+            ) {
+              onChangeBlockType({
+                symbolId: blockTypes[0].type.symbolId,
+              });
+              dispatch('setSymbolIdIsFixed', true);
+              dispatch('setBlockText', words.slice(1).join(' '));
+              return;
             }
           }
 
@@ -197,6 +238,16 @@ export function Widget({
             );
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
+              dispatch('setSymbolIdIsFixed', true);
+              dispatch('setBlockText', words.slice(1).join(' '));
+              return;
+            } else if (
+              blockTypes.length > 0 &&
+              typeof blockTypes[0].type !== 'string'
+            ) {
+              onChangeBlockType({
+                symbolId: blockTypes[0].type.symbolId,
+              });
               dispatch('setSymbolIdIsFixed', true);
               dispatch('setBlockText', words.slice(1).join(' '));
               return;
