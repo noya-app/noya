@@ -122,17 +122,14 @@ export const symbolIdToElement = {
     );
   },
   [avatarSymbol.symbolID]: (props: DOMElementsProps) => <Avatar size="full" />,
-  [boxSymbol.symbolID]: (props: DOMElementsProps) => (
-    <Box
-      bg={
-        props.blockText && CSS.supports('color', props.blockText)
-          ? props.blockText
-          : '#eee'
-      }
-      w="100%"
-      h="100%"
-    />
-  ),
+  [boxSymbol.symbolID]: (props: DOMElementsProps) => {
+    const { content, hashTags } = filterHashTags(props.blockText);
+    const color =
+      [content]
+        .concat(hashTags)
+        .find((value) => CSS.supports('color', `${value}`)) ?? '#ebfdff';
+    return <Box bg={color} w="100%" h="100%" />;
+  },
   [checkboxSymbol.symbolID]: (props: DOMElementsProps) => <Checkbox />,
   [iconButtonSymbol.symbolID]: (props: DOMElementsProps) => (
     <IconButton aria-label={''} />
