@@ -21,7 +21,12 @@ import {
   boxSymbol,
   buttonSymbol,
   checkboxSymbol,
-  headingSymbol,
+  heading1Symbol,
+  heading2Symbol,
+  heading3Symbol,
+  heading4Symbol,
+  heading5Symbol,
+  heading6Symbol,
   iconButtonSymbol,
   imageSymbol,
   inputSymbol,
@@ -80,8 +85,23 @@ export const symbolIdToElement = {
       h="100%"
     />
   ),
-  [headingSymbol.symbolID]: (props: DOMElementsProps) => (
-    <Heading>{props.blockText}</Heading>
+  [heading1Symbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading size="2xl">{props.blockText}</Heading>
+  ),
+  [heading2Symbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading size="xl">{props.blockText}</Heading>
+  ),
+  [heading3Symbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading size="lg">{props.blockText}</Heading>
+  ),
+  [heading4Symbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading size="md">{props.blockText}</Heading>
+  ),
+  [heading5Symbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading size="sm">{props.blockText}</Heading>
+  ),
+  [heading6Symbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading size="xs">{props.blockText}</Heading>
   ),
 };
 

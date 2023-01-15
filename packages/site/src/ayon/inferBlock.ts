@@ -10,7 +10,12 @@ import {
   inputSymbol,
   switchSymbol,
   textSymbol,
-  headingSymbol,
+  heading1Symbol,
+  heading6Symbol,
+  heading5Symbol,
+  heading4Symbol,
+  heading3Symbol,
+  heading2Symbol,
 } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
@@ -57,7 +62,22 @@ export const BLOCK_TYPE_HEURISTICS = {
   [imageSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
     return 0.1;
   },
-  [headingSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+  [heading1Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    return 0.1;
+  },
+  [heading2Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    return 0.1;
+  },
+  [heading3Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    return 0.1;
+  },
+  [heading4Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    return 0.1;
+  },
+  [heading5Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    return 0.1;
+  },
+  [heading6Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
     return 0.1;
   },
 };

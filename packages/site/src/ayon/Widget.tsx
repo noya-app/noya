@@ -11,7 +11,16 @@ import { LockClosedIcon, MagicWandIcon } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
-import { allAyonSymbols, headingSymbolId } from './symbols';
+import {
+  allAyonSymbols,
+  heading1SymbolId,
+  heading2SymbolId,
+  heading3SymbolId,
+  heading4SymbolId,
+  heading5SymbolId,
+  heading6SymbolId,
+  textSymbolId,
+} from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
 function useGetScreenRect() {
@@ -84,6 +93,16 @@ function WidgetLabel({
   );
 }
 
+const BLOCK_TYPE_TEXT_SHORTCUTS: { [shortcut: string]: string } = {
+  '#': heading1SymbolId,
+  '##': heading2SymbolId,
+  '###': heading3SymbolId,
+  '####': heading4SymbolId,
+  '#####': heading5SymbolId,
+  '######': heading6SymbolId,
+  '"': textSymbolId,
+};
+
 export function Widget({
   layer,
   inferBlockTypes,
@@ -144,8 +163,13 @@ export function Widget({
           const words = text.split(' ');
           const lines = text.split(/\r?\n/);
 
-          if (words.length > 1 && words[0] === '#') {
-            onChangeBlockType({ symbolId: headingSymbolId });
+          if (
+            words.length > 1 &&
+            Object.keys(BLOCK_TYPE_TEXT_SHORTCUTS).includes(words[0])
+          ) {
+            onChangeBlockType({
+              symbolId: BLOCK_TYPE_TEXT_SHORTCUTS[words[0]],
+            });
             dispatch('setSymbolIdIsFixed', true);
             dispatch('setBlockText', words.slice(1).join(' '));
             return;

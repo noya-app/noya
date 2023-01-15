@@ -11,7 +11,12 @@ export const inputSymbolId = '4db59e9d-9bc1-4146-af0a-ec8bf801485f';
 export const switchSymbolId = '30a8ac0b-18dd-4744-bee1-77852ec4d3d8';
 export const textSymbolId = 'a1f7266f-50cc-416f-9ed2-4af4bca30257';
 export const imageSymbolId = 'd91ba1e3-7e64-4966-9cc1-daa48f989178';
-export const headingSymbolId = '955f4cb1-7879-4331-a359-a21a031147cb';
+export const heading1SymbolId = '955f4cb1-7879-4331-a359-a21a031147cb';
+export const heading2SymbolId = 'b3884865-3fbe-4ed0-b577-c3f5864c4a21';
+export const heading3SymbolId = 'ab7fb087-28b6-4c9a-a925-22311efb6a19';
+export const heading4SymbolId = 'b8441949-12ba-42be-8f87-5cf222af70d0';
+export const heading5SymbolId = 'a6f2653e-1595-4dcc-b979-4e0b1340fda3';
+export const heading6SymbolId = '467ed35a-0351-4997-ab1e-44b2c6779111';
 
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
@@ -58,9 +63,34 @@ export const imageSymbol = SketchModel.symbolMaster({
   name: 'Image',
 });
 
-export const headingSymbol = SketchModel.symbolMaster({
-  symbolID: headingSymbolId,
-  name: 'Heading',
+export const heading1Symbol = SketchModel.symbolMaster({
+  symbolID: heading1SymbolId,
+  name: 'Heading 1',
+});
+
+export const heading2Symbol = SketchModel.symbolMaster({
+  symbolID: heading2SymbolId,
+  name: 'Heading 2',
+});
+
+export const heading3Symbol = SketchModel.symbolMaster({
+  symbolID: heading3SymbolId,
+  name: 'Heading 3',
+});
+
+export const heading4Symbol = SketchModel.symbolMaster({
+  symbolID: heading4SymbolId,
+  name: 'Heading 4',
+});
+
+export const heading5Symbol = SketchModel.symbolMaster({
+  symbolID: heading5SymbolId,
+  name: 'Heading 5',
+});
+
+export const heading6Symbol = SketchModel.symbolMaster({
+  symbolID: heading6SymbolId,
+  name: 'Heading 6',
 });
 
 export const allAyonSymbols = [
@@ -73,5 +103,10 @@ export const allAyonSymbols = [
   switchSymbol,
   textSymbol,
   imageSymbol,
-  headingSymbol,
+  heading1Symbol,
+  heading2Symbol,
+  heading3Symbol,
+  heading4Symbol,
+  heading5Symbol,
+  heading6Symbol,
 ];
