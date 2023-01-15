@@ -1,85 +1,78 @@
+import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import { DrawableLayerType } from 'noya-state';
 import {
-  buttonSymbol,
   avatarSymbol,
   boxSymbol,
+  buttonSymbol,
   checkboxSymbol,
+  heading1Symbol,
+  heading2Symbol,
+  heading3Symbol,
+  heading4Symbol,
+  heading5Symbol,
+  heading6Symbol,
   iconButtonSymbol,
   imageSymbol,
   inputSymbol,
   switchSymbol,
   textSymbol,
-  heading1Symbol,
-  heading6Symbol,
-  heading5Symbol,
-  heading4Symbol,
-  heading3Symbol,
-  heading2Symbol,
 } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
 export const BLOCK_TYPE_HEURISTICS = {
-  [buttonSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    if (isWithinRectRange(rect, 60, 30, 300, 80)) {
-      return 1;
-    }
-    return 0;
-  },
-  [avatarSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    if (
+  [buttonSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(
+      scoreCommandMatch(buttonSymbol, text),
+      isWithinRectRange(rect, 60, 30, 300, 80) ? 0.8 : 0,
+    ),
+  [avatarSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(
+      scoreCommandMatch(avatarSymbol, text),
       isWithinRectRange(rect, 30, 30, 120, 120) &&
-      isApproximatelySquare(rect, 0.2)
-    ) {
-      return 1;
-    }
-    return 0;
-  },
-  [boxSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [checkboxSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    if (
+        isApproximatelySquare(rect, 0.2)
+        ? 0.8
+        : 0,
+    ),
+  [boxSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(boxSymbol, text), 0.1),
+  [checkboxSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(
+      scoreCommandMatch(checkboxSymbol, text),
       isWithinRectRange(rect, 10, 10, 20, 20) &&
-      isApproximatelySquare(rect, 0.1)
-    ) {
-      return 1;
-    }
-    return 0;
-  },
-  [iconButtonSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [inputSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [switchSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [textSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [imageSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [heading1Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [heading2Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [heading3Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [heading4Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [heading5Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
-  [heading6Symbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
-    return 0.1;
-  },
+        isApproximatelySquare(rect, 0.1)
+        ? 0.8
+        : 0,
+    ),
+  [iconButtonSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(iconButtonSymbol, text), 0.1),
+  [inputSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(inputSymbol, text), 0.1),
+  [switchSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(switchSymbol, text), 0.1),
+  [textSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(
+      scoreCommandMatch(textSymbol, text),
+      text &&
+        text.split(' ').filter((word) => word.charAt(0) !== '#').length > 0
+        ? 0.7
+        : 0,
+      0.1,
+    ),
+  [imageSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(imageSymbol, text), 0.1),
+  [heading1Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(heading1Symbol, text), 0.1),
+  [heading2Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(heading2Symbol, text), 0.1),
+  [heading3Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(heading3Symbol, text), 0.1),
+  [heading4Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(heading4Symbol, text), 0.1),
+  [heading5Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(heading5Symbol, text), 0.1),
+  [heading6Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(heading6Symbol, text), 0.1),
 };
 
 function isWithinRectRange(
@@ -102,6 +95,29 @@ function isApproximatelySquare(rect: Rect, tolerance: number) {
     Math.abs(rect.width - rect.height) <=
     tolerance * Math.min(rect.width, rect.height)
   );
+}
+
+function scoreStringPrefixMatch(a?: string, b?: string) {
+  if (!a || !b) {
+    return 0;
+  }
+  if (a === b) {
+    return 1;
+  }
+  const firstDiffCharIndex = [...a].findIndex(
+    (character, index) => character !== b[index],
+  );
+  return firstDiffCharIndex === -1
+    ? 0
+    : firstDiffCharIndex / Math.max(a.length, b.length);
+}
+
+function scoreCommandMatch(symbolMaster: Sketch.SymbolMaster, text?: string) {
+  const score = scoreStringPrefixMatch(
+    `/${symbolMaster.name.toLowerCase()}`,
+    text?.toLowerCase(),
+  );
+  return score === 0 ? 0 : score + 1;
 }
 
 export function inferBlockTypes(

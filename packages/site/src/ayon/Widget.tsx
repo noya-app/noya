@@ -137,7 +137,7 @@ export function Widget({
 
   const blockText = layer.blockText ?? '';
 
-  const blockTypes = inferBlockTypes({ rect });
+  const blockTypes = inferBlockTypes({ rect, text: blockText });
 
   const showWidgetUI =
     isSelected &&
