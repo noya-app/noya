@@ -53,8 +53,7 @@ export const BLOCK_TYPE_HEURISTICS = {
   [textSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
     Math.max(
       scoreCommandMatch(textSymbol, text),
-      text &&
-        text.split(' ').filter((word) => word.charAt(0) !== '#').length > 0
+      text && text.split(' ').filter((word) => word[0] !== '#').length > 0
         ? 0.7
         : 0,
       0.1,

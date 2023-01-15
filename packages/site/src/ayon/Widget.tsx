@@ -164,7 +164,7 @@ export function Widget({
           }
           event.preventDefault();
           const words = blockText.split(' ');
-          if (blockText.charAt(0) === '/') {
+          if (blockText[0] === '/') {
             const symbol = allAyonSymbols.find(
               (symbol) =>
                 symbol.name.toLowerCase() ===
@@ -230,7 +230,7 @@ export function Widget({
             }
           }
 
-          if (lines.length > 1 && text.charAt(0) === '/') {
+          if (lines.length > 1 && text[0] === '/') {
             const symbol = allAyonSymbols.find(
               (symbol) =>
                 symbol.name.toLowerCase() ===
