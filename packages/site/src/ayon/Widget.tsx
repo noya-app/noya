@@ -299,14 +299,13 @@ export function Widget({
               border: '1px solid rgba(0,0,0,0.1)',
               color: 'black',
               pointerEvents: 'all',
-              padding: '1px 4px',
               whiteSpace: 'pre',
               borderRadius: '2px',
               fontSize: 13,
               zIndex: 1,
             }}
           >
-            {blockTypes.map((blockType) => {
+            {blockTypes.map((blockType, index) => {
               const name =
                 typeof blockType.type === 'string'
                   ? blockType.type
@@ -320,6 +319,15 @@ export function Widget({
                     event.stopPropagation();
                     onChangeBlockType(blockType.type);
                     dispatch('setSymbolIdIsFixed', true);
+                  }}
+                  style={{
+                    padding: '1px 4px',
+                    backgroundColor:
+                      index === 0 && blockText[0] === '/'
+                        ? 'rgb(132,63,255)'
+                        : 'transparent',
+                    color:
+                      index === 0 && blockText[0] === '/' ? '#fff' : '#000',
                   }}
                 >
                   {blockType.score.toFixed(2)} {name}
