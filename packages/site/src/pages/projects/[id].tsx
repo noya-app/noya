@@ -1,4 +1,4 @@
-import throttle from 'lodash.throttle';
+import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
@@ -85,8 +85,11 @@ function FileEditor({ id }: { id: string }) {
     client.files.read(id).then(setInitialFile);
   }, [client, id]);
 
-  const throttledUpdate = useMemo(
-    () => throttle(client.files.update, 1000),
+  const updateDebounced = useMemo(
+    () =>
+      debounce(client.files.update, 3000, {
+        maxWait: 3000,
+      }),
     [client],
   );
 
@@ -99,7 +102,7 @@ function FileEditor({ id }: { id: string }) {
       )
         return;
 
-      throttledUpdate(id, {
+      updateDebounced(id, {
         name: fileProperties.name,
         schemaVersion: fileProperties.schemaVersion,
         type: fileProperties.type,
@@ -108,7 +111,7 @@ function FileEditor({ id }: { id: string }) {
     },
     [
       id,
-      throttledUpdate,
+      updateDebounced,
       fileProperties?.name,
       fileProperties?.schemaVersion,
       fileProperties?.type,
