@@ -20,7 +20,7 @@ const Overlay = styled.div({
 });
 
 export const Content = memo(function Content() {
-  const { canvasSize } = useWorkspace();
+  const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
@@ -32,9 +32,10 @@ export const Content = memo(function Content() {
       <Panel.Item ref={panelRef} collapsible defaultSize={75}>
         <SimpleCanvas
           interactions={[
+            Interactions.duplicate,
+            Interactions.reorder,
             Interactions.zoom,
             Interactions.escape,
-            Interactions.reorder,
             Interactions.history,
             Interactions.clipboard,
             Interactions.editText,
@@ -103,7 +104,11 @@ export const Content = memo(function Content() {
             </RenderingModeProvider>
           </SVGRenderer>
         </Overlay>
-        <Overlay style={{ zIndex: Stacking.level.overlay }}>
+        <Overlay
+          style={{
+            zIndex: isContextMenuOpen ? undefined : Stacking.level.overlay,
+          }}
+        >
           <SVGRenderer size={canvasSize}>
             <RenderingModeProvider value="interactive">
               <Design.Root>

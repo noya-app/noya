@@ -1,5 +1,6 @@
 import { clipboardInteraction } from './clipboard';
 import { createDrawingInteraction } from './drawing';
+import { duplicateInteraction } from './duplicate';
 import { editBlockInteraction } from './editBlock';
 import { editTextInteraction } from './editText';
 import { escapeInteraction } from './escape';
@@ -29,6 +30,7 @@ export namespace Interactions {
   export const escape = escapeInteraction;
   export const zoom = zoomInteraction;
   export const reorder = reorderInteraction;
+  export const duplicate = duplicateInteraction;
   export const scale = createScaleInteraction();
   export const createScale = createScaleInteraction;
 }

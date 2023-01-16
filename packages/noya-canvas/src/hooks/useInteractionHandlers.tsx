@@ -33,6 +33,7 @@ import { ICanvasElement } from '../components/types';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { ClipboardActions } from '../interactions/clipboard';
 import { DrawingActions } from '../interactions/drawing';
+import { DuplicateActions } from '../interactions/duplicate';
 import { EditBlockActions } from '../interactions/editBlock';
 import { EditTextActions } from '../interactions/editText';
 import { EscapeActions } from '../interactions/escape';
@@ -63,7 +64,8 @@ export type Actions = MarqueeActions &
   EscapeActions &
   ReorderActions &
   HistoryActions &
-  ZoomActions;
+  ZoomActions &
+  DuplicateActions;
 
 export type Interaction = (
   actions: Actions,
@@ -168,6 +170,7 @@ export function useInteractionHandlers({
         dispatch('interaction', ['insert', layerType]),
       bringToFront: (id: string[]) => dispatch('bringToFront', id),
       sendToBack: (id: string[]) => dispatch('sendToBack', id),
+      duplicateLayer: (id: string[]) => dispatch('duplicateLayer', id),
     };
   }, [dispatch]);
 
