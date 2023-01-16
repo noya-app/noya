@@ -3,30 +3,32 @@ import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import { Design, RenderingModeProvider } from 'noya-renderer';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import React, { memo } from 'react';
+import React, { memo, useRef } from 'react';
+import { ImperativePanelHandle } from 'react-resizable-panels';
+import styled from 'styled-components';
 import { DOMRenderer } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
+import { Panel } from './Panel';
 import { buttonSymbol } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
+
+const Overlay = styled.div({
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+});
 
 export const Content = memo(function Content() {
   const { canvasSize } = useWorkspace();
   const [state, dispatch] = useApplicationState();
-
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
   );
+  const panelRef = useRef<ImperativePanelHandle>(null);
 
   return (
-    <div style={{ flex: '1', display: 'flex', overflow: 'hidden' }}>
-      <div
-        style={{
-          flex: '3',
-          display: 'flex',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
+    <Panel.Root direction="horizontal" autoSaveId="ayon-canvas">
+      <Panel.Item ref={panelRef} collapsible defaultSize={75}>
         <SimpleCanvas
           interactions={[
             Interactions.zoom,
@@ -90,13 +92,7 @@ export const Content = memo(function Content() {
             </>
           )}
         </SimpleCanvas>
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-          }}
-        >
+        <Overlay>
           <SVGRenderer size={canvasSize}>
             <RenderingModeProvider value="interactive">
               <Design.Root>
@@ -110,19 +106,12 @@ export const Content = memo(function Content() {
               </Design.Root>
             </RenderingModeProvider>
           </SVGRenderer>
-        </div>
-      </div>
-      <div style={{ width: '1px', backgroundColor: '#ccc' }} />
-      <div
-        style={{
-          flex: '1',
-          display: 'flex',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
+        </Overlay>
+      </Panel.Item>
+      <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
+      <Panel.Item collapsible>
         <DOMRenderer />
-      </div>
-    </div>
+      </Panel.Item>
+    </Panel.Root>
   );
 });
