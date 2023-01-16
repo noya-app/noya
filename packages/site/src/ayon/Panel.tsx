@@ -25,6 +25,12 @@ const ResizeHandleElement = styled(PanelResizeHandle)(({ theme }) => ({
   outline: 'none',
   background: theme.colors.dividerStrong,
   display: 'flex',
+  '&:hover': {
+    opacity: 0.8,
+  },
+  '&:active': {
+    opacity: 0.9,
+  },
 }));
 
 const ContainerElement = styled.div({
