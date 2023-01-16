@@ -114,7 +114,11 @@ export function Widget({
   const page = Selectors.getCurrentPage(state);
   const rect = Selectors.getBoundingRect(page, [layer.do_objectID])!;
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const indexPath = Layers.findIndexPath(
+    page,
+    (l) => l.do_objectID === layer.do_objectID,
+  )!;
+  const parent = Selectors.getParentLayer(page, indexPath);
 
   const symbol = Layers.isSymbolInstance(layer)
     ? Selectors.getSymbolMaster(state, layer.symbolID)
@@ -125,6 +129,8 @@ export function Widget({
   const isEditing =
     state.interactionState.type === 'editingBlock' &&
     state.interactionState.layerId === layer.do_objectID;
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -162,6 +168,8 @@ export function Widget({
           padding: 4,
           resize: 'none',
           border: '1px solid rgba(0,0,0,0.1)',
+          // Children of the page don't appear in the rendered output, so we make them transparent.
+          opacity: Layers.isPageLayer(parent) ? 0.3 : 1,
         }}
         disabled={!isEditing}
         onKeyDown={(event) => {
