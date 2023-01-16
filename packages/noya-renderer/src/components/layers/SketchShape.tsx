@@ -30,7 +30,7 @@ function useClock({ enabled }: { enabled: boolean }) {
     if (!enabled) return;
 
     const id = requestAnimationFrame(() => {
-      setTime(performance.now());
+      setTime(performance.now() / 1000);
     });
 
     return () => {
