@@ -480,6 +480,12 @@ export function layerReducer(
         width: canvasSize.width + canvasInsets.left + canvasInsets.right,
         height: canvasSize.height + canvasInsets.top + canvasInsets.bottom,
       };
+      const isolatedLayerIndexPath = state.isolatedLayerId
+        ? Layers.findIndexPath(
+            getCurrentPage(state),
+            (l) => l.do_objectID === state.isolatedLayerId,
+          )
+        : undefined;
 
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[currentPageIndex];
@@ -516,6 +522,7 @@ export function layerReducer(
             l.name = layer.name;
           });
 
+          // If the original is selected, add the copy as a sibling
           if (allVisibleLayersIds.includes(layer.do_objectID)) {
             const indexPath =
               findIndexPath(
@@ -526,10 +533,13 @@ export function layerReducer(
             addSiblingLayer(draftPage, indexPath, newLayer);
           } else {
             const selectedLayer =
-              selectedLayerIndexPath && selectedLayerIndexPath.length > 0
+              isolatedLayerIndexPath && isolatedLayerIndexPath
+                ? Layers.access(draftPage, isolatedLayerIndexPath)
+                : selectedLayerIndexPath && selectedLayerIndexPath.length > 0
                 ? Layers.access(draftPage, selectedLayerIndexPath)
                 : draftPage;
 
+            // If the selected layer is a (non-page) parent layer
             if (
               Layers.isParentLayer(selectedLayer) &&
               !Layers.isPageLayer(selectedLayer)
@@ -546,18 +556,22 @@ export function layerReducer(
 
               addToParentLayer(selectedLayer.layers, newLayer);
             } else {
-              // Center the layer on the page
+              // The selected layer is a child layer or the page.
+
+              // Center the copy within the viewport.
               newLayer = produce(newLayer, (draftLayer) => {
                 draftLayer.frame.x = viewportCenter.x - parsed.x - bounds.midX;
                 draftLayer.frame.y = viewportCenter.y - parsed.y - bounds.midY;
               });
 
+              // If the selected layer is a child layer
               if (!Layers.isPageLayer(selectedLayer)) {
                 const selectedLayerParent = getParentLayer(
                   draftPage,
                   selectedLayerIndexPath,
                 );
 
+                // And its parent is not the page
                 if (!Layers.isPageLayer(selectedLayerParent)) {
                   const parentFrame = createBounds({
                     width: selectedLayerParent.frame.width,
