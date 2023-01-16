@@ -9,6 +9,7 @@ export interface MoveActions {
   updateMoving: (point: Point) => void;
   setLayerX: (value: number, mode: SetNumberMode) => void;
   setLayerY: (value: number, mode: SetNumberMode) => void;
+  moveLayersIntoParentAtPoint: (point: Point) => void;
   reset: () => void;
 }
 
@@ -17,6 +18,7 @@ export function moveInteraction({
   updateMoving,
   setLayerX,
   setLayerY,
+  moveLayersIntoParentAtPoint,
   reset,
 }: MoveActions) {
   return handleActionType<
@@ -84,6 +86,10 @@ export function moveInteraction({
         event.preventDefault();
       },
       onPointerUp: (event) => {
+        const canvasPoint = api.getCanvasPoint(event.nativeEvent);
+
+        moveLayersIntoParentAtPoint(canvasPoint);
+
         reset();
 
         api.releasePointerCapture?.(event.pointerId);

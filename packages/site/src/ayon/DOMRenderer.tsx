@@ -299,7 +299,7 @@ function DOMRendererContent({ size }: { size: Size }): JSX.Element {
           height: paddedRect.height,
           left: paddedRect.x,
           top: paddedRect.y,
-          outline: '1px solid #ccc',
+          outline: '1px solid #e0e0e0',
         }}
       />
       <div

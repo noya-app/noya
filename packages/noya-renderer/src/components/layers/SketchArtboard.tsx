@@ -106,7 +106,7 @@ const ArtboardBlur = memo(function ArtboardBlur({
   });
 
   const stroke = useStroke({
-    color: useColor('#ccc'),
+    color: useColor('#e0e0e0'),
     strokeWidth: 1,
   });
 

@@ -171,6 +171,8 @@ export function useInteractionHandlers({
       bringToFront: (id: string[]) => dispatch('bringToFront', id),
       sendToBack: (id: string[]) => dispatch('sendToBack', id),
       duplicateLayer: (id: string[]) => dispatch('duplicateLayer', id),
+      moveLayersIntoParentAtPoint: (point) =>
+        dispatch('moveLayersIntoParentAtPoint', point),
     };
   }, [dispatch]);
 
