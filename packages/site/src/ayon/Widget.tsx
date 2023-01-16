@@ -6,6 +6,7 @@ import { LockClosedIcon, MagicWandIcon } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
+import { Stacking } from './stacking';
 import {
   allAyonSymbols,
   heading1SymbolId,
@@ -22,10 +23,12 @@ function WidgetContainer({
   frame,
   children,
   transform,
+  zIndex,
 }: {
   frame: Rect;
   children: React.ReactNode;
   transform?: string;
+  zIndex?: number;
 }) {
   return (
     <div
@@ -33,6 +36,7 @@ function WidgetContainer({
         position: 'absolute',
         pointerEvents: 'none',
         transform,
+        zIndex,
       }}
     >
       <div
@@ -71,7 +75,6 @@ function WidgetLabel({
         padding: '2px 4px',
         whiteSpace: 'pre',
         borderRadius: '2px',
-        zIndex: 1,
         fontSize: 13,
         display: 'flex',
         lineHeight: '1.2',
@@ -144,7 +147,11 @@ export function Widget({
   const slashWords = words.filter((word) => word[0] === '/' && word !== '/');
 
   return (
-    <WidgetContainer frame={rect} transform={canvasTransform.toString()}>
+    <WidgetContainer
+      frame={rect}
+      transform={canvasTransform.toString()}
+      zIndex={showWidgetUI ? Stacking.level.interactive : undefined}
+    >
       <textarea
         ref={textareaRef}
         style={{
@@ -305,7 +312,6 @@ export function Widget({
               whiteSpace: 'pre',
               borderRadius: '2px',
               fontSize: 13,
-              zIndex: 1,
             }}
           >
             {blockTypes.map((blockType, index) => {

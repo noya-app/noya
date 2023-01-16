@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { DOMRenderer } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
+import { Stacking } from './stacking';
 import { buttonSymbol } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
 
@@ -98,11 +99,18 @@ export const Content = memo(function Content() {
               <Design.Root>
                 <Design.BoundingRect />
                 <Design.LayerHighlight />
+              </Design.Root>
+            </RenderingModeProvider>
+          </SVGRenderer>
+        </Overlay>
+        <Overlay style={{ zIndex: Stacking.level.overlay }}>
+          <SVGRenderer size={canvasSize}>
+            <RenderingModeProvider value="interactive">
+              <Design.Root>
                 <Design.DrawLayer />
                 <Design.SnapGuides />
                 <Design.MeasurementGuides />
                 <Design.DragHandles />
-                <Design.Rulers />
               </Design.Root>
             </RenderingModeProvider>
           </SVGRenderer>
