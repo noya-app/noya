@@ -20,7 +20,7 @@ import { createRect, Rect, Size } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { createResizeTransform } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   avatarSymbol,
   boxSymbol,
@@ -136,7 +136,22 @@ export const symbolIdToElement = {
   [iconButtonSymbol.symbolID]: (props: DOMElementsProps) => (
     <IconButton aria-label={''} />
   ),
-  [inputSymbol.symbolID]: (props: DOMElementsProps) => <Input />,
+  [inputSymbol.symbolID]: (props: DOMElementsProps) => {
+    const [value, setValue] = React.useState(props.blockText ?? '');
+
+    useEffect(() => {
+      setValue(props.blockText ?? '');
+    }, [props.blockText]);
+
+    return (
+      <Input
+        value={value}
+        onChange={(event) => {
+          setValue(event.target.value);
+        }}
+      />
+    );
+  },
   [switchSymbol.symbolID]: (props: DOMElementsProps) => <Switch />,
   [textSymbol.symbolID]: (props: DOMElementsProps) => {
     const { content, color, fontWeight, fontSize, align } =
