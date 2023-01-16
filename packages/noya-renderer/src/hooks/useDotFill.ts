@@ -45,8 +45,7 @@ export function useDotFill({
       ],
       shaderString: `
         float4 main(float2 position) {
-          float2 pixel = iResolution.xy * position.xy;
-          bool show = mod(pixel.x, gridSize) < 1.0 && mod(pixel.y, gridSize) < 1.0 ;
+          bool show = mod(position.x, gridSize) < 1.0 && mod(position.y, gridSize) < 1.0 ;
           return show ? mix(foregroundColor, backgroundColor, 0.8) : backgroundColor;
         }
       `,

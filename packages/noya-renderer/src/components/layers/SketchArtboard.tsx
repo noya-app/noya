@@ -134,6 +134,7 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
     preferences: { showDotGrid },
   } = useWorkspace();
   const CanvasKit = useCanvasKit();
+  const zoom = useZoom();
 
   const paint = useDotFill({
     gridSize: 10,
@@ -141,7 +142,8 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
     backgroundColor: layer.hasBackgroundColor
       ? layer.backgroundColor
       : SketchModel.WHITE,
-    foregroundColor: showDotGrid ? SketchModel.BLACK : SketchModel.WHITE,
+    foregroundColor:
+      showDotGrid && zoom >= 1 ? SketchModel.BLACK : SketchModel.WHITE,
   });
 
   const rect = Primitives.rect(CanvasKit, layer.frame);

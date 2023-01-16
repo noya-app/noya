@@ -29,7 +29,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { clamp, lerp, uuid, zip } from 'noya-utils';
+import { lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
 import { ScalingOptions } from '../primitives';
 import { getLineDragHandleIndexForDirection } from '../selection';
@@ -64,6 +64,7 @@ import {
   getScaledSnapBoundingRect,
   getSnapAdjustmentForVisibleLayers,
 } from '../snapping';
+import { Zoom } from '../utils/zoom';
 import type {
   ApplicationReducerContext,
   ApplicationState,
@@ -251,10 +252,8 @@ export function canvasReducer(
       return produce(state, (draft) => {
         const draftUser = draft.sketch.user;
 
-        const newValue = clamp(
-          mode === 'multiply' ? value * zoomValue : value,
-          0.01,
-          256,
+        const newValue = Zoom.clamp(
+          mode === 'multiply' ? Zoom.nearestLevel(value * zoomValue) : value,
         );
 
         const viewportCenter = {

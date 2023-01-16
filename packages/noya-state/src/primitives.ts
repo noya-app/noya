@@ -158,7 +158,6 @@ export function shader(
       const aspectRatio = layerFrame.width / layerFrame.height;
       const unitTransform = AffineTransform.multiply(
         AffineTransform.translate(layerFrame.x, layerFrame.y),
-        AffineTransform.scale(layerFrame.width, layerFrame.height),
         fillScale === Sketch.PatternFillType.Stretch
           ? AffineTransform.identity
           : AffineTransform.scale(1 / aspectRatio, 1, { x: 0.5, y: 0.5 }),
