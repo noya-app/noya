@@ -176,9 +176,8 @@ export const setNewShaderFill = (fills: Sketch.Fill[], index: number) => {
   fills[index].shader = {
     _class: 'shader',
     shaderString: `float4 main(float2 position) {
-  float x = floor(position.x / iResolution.x * 10) / 10;
-  float y = floor(position.y / iResolution.y * 10) / 10;
-  return mix(color1, color2, (x + y) / 2);
+  float2 point = floor((position / iResolution) * 10) / 10;
+  return mix(color1, color2, (point.x + point.y) / 2);
 }
 `,
     variables: [
