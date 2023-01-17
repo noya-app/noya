@@ -20,6 +20,7 @@ import { createRect, Rect, Size } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { createResizeTransform } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
+import { isExternalUrl } from 'noya-utils';
 import React, { useEffect, useRef } from 'react';
 import {
   avatarSymbol,
@@ -170,7 +171,11 @@ export const symbolIdToElement = {
   },
   [imageSymbol.symbolID]: (props: DOMElementsProps) => (
     <Image
-      src={props.resolvedBlockData?.resolvedText}
+      src={
+        props.blockText && isExternalUrl(props.blockText)
+          ? props.blockText
+          : props.resolvedBlockData?.resolvedText
+      }
       fit="cover"
       align="middle"
       w="100%"

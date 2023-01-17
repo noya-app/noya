@@ -3,6 +3,7 @@ import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import { Design, RenderingModeProvider } from 'noya-renderer';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
+import { isExternalUrl } from 'noya-utils';
 import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
@@ -49,7 +50,7 @@ export const Content = memo(function Content() {
         return;
       }
 
-      if (symbolID === imageSymbolId) {
+      if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
         const unsplashUrl = `https://source.unsplash.com/${frame.width}x${frame.height}?${blockText}`;
 
         redirectResolver.resolve(layerId, unsplashUrl);
