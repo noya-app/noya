@@ -44,6 +44,15 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     },
   };
 
+  assets = {
+    create: async (data: ArrayBuffer, fileId: string) => {
+      return '';
+    },
+    url: () => {
+      return '';
+    },
+  };
+
   files: INoyaNetworkClient['files'] = {
     list: async () => this.data.files,
     read: async (id: string) => {

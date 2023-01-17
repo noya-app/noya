@@ -13,6 +13,10 @@ export const noyaSessionSchema = z.object({
   expires: z.string(),
 });
 
+export const noyaAssetSchema = z.object({
+  id: z.string(),
+});
+
 export const noyaFileDataSchema = z
   .object({
     name: z.string(),

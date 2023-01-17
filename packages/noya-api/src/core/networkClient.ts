@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { NoyaAPIError } from './error';
 import {
+  noyaAssetSchema,
   NoyaFileData,
   noyaFileListSchema,
   noyaFileSchema,
@@ -22,6 +23,7 @@ unless otherwise specified, returns 200 on success or 4xx/5xx error
 export interface INoyaNetworkClient {
   auth: NoyaNetworkClient['auth'];
   files: NoyaNetworkClient['files'];
+  assets: NoyaNetworkClient['assets'];
 }
 
 export class NoyaNetworkClient {
@@ -51,6 +53,29 @@ export class NoyaNetworkClient {
       list: this.#listFiles,
     };
   }
+
+  get assets() {
+    return {
+      create: this.#createAsset,
+      url: this.#assetURL,
+    };
+  }
+
+  #assetURL = (id: string) => `${this.baseURI}/assets/${id}`;
+
+  #createAsset = async (data: ArrayBuffer, fileId: string) => {
+    const response = await fetch(`${this.baseURI}/files/${fileId}/assets`, {
+      method: 'POST',
+      credentials: 'include',
+      body: data,
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaAssetSchema.parse(json);
+    return parsed.id;
+  };
 
   #readSession = async () => {
     const response = await fetch(`${this.baseURI}/auth/session`, {

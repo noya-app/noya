@@ -41,6 +41,13 @@ export class NoyaClient {
     });
   }
 
+  get assets() {
+    return memoizedGetter(this, 'assets', {
+      create: this.networkClient.assets.create,
+      url: this.networkClient.assets.url,
+    });
+  }
+
   #fetchFiles = async () => {
     const files = await this.networkClient.files.list();
     this.files$.set(files);

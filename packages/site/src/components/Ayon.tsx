@@ -18,6 +18,7 @@ import {
   WorkspaceState,
 } from 'noya-state';
 import React, {
+  ComponentProps,
   memo,
   Suspense,
   useCallback,
@@ -30,9 +31,11 @@ import { allAyonSymbols, ayonLibraryId } from '../ayon/symbols';
 let initialized = false;
 
 function Workspace({
+  uploadAsset,
   initialDocument,
   onChangeDocument,
 }: {
+  uploadAsset: ComponentProps<typeof Content>['uploadAsset'];
   initialDocument: SketchFile;
   onChangeDocument: (document: SketchFile) => void;
 }): JSX.Element {
@@ -84,18 +87,14 @@ function Workspace({
 
   return (
     <StateProvider state={state} dispatch={dispatch}>
-      <Content />
+      <Content uploadAsset={uploadAsset} />
     </StateProvider>
   );
 }
 
-export default memo(function Ayon({
-  initialDocument,
-  onChangeDocument,
-}: {
-  initialDocument: SketchFile;
-  onChangeDocument: (design: SketchFile) => void;
-}): JSX.Element {
+export default memo(function Ayon(
+  props: ComponentProps<typeof Workspace>,
+): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
     initialized = true;
@@ -106,10 +105,7 @@ export default memo(function Ayon({
       <ImageCacheProvider>
         <CanvasKitProvider>
           <FontManagerProvider>
-            <Workspace
-              initialDocument={initialDocument}
-              onChangeDocument={onChangeDocument}
-            />
+            <Workspace {...props} />
           </FontManagerProvider>
         </CanvasKitProvider>
       </ImageCacheProvider>

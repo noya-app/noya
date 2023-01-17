@@ -1,8 +1,14 @@
+import { fileOpen } from 'browser-fs-access';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { Spacer } from 'noya-designsystem';
+import { DividerVertical, Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { createRect, Rect, transformRect } from 'noya-geometry';
-import { LockClosedIcon, MagicWandIcon } from 'noya-icons';
+import {
+  LockClosedIcon,
+  MagicWandIcon,
+  ReloadIcon,
+  UploadIcon,
+} from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
@@ -15,6 +21,7 @@ import {
   heading4SymbolId,
   heading5SymbolId,
   heading6SymbolId,
+  imageSymbolId,
   textSymbolId,
 } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
@@ -103,10 +110,12 @@ export function Widget({
   layer,
   inferBlockTypes,
   onChangeBlockType,
+  uploadAsset,
 }: {
   layer: Sketch.AnyLayer;
   inferBlockTypes: (input: BlockHeuristicInput) => InferredBlockTypeResult[];
   onChangeBlockType: (type: DrawableLayerType) => void;
+  uploadAsset: (file: ArrayBuffer) => Promise<string>;
 }) {
   const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -291,6 +300,42 @@ export function Widget({
       {showWidgetUI && (
         <>
           <WidgetLabel>
+            {layer.symbolID === imageSymbolId && (
+              <>
+                {layer.resolvedBlockData && (
+                  <>
+                    <ReloadIcon
+                      onClick={() => {
+                        dispatch(
+                          'setResolvedBlockData',
+                          layer.do_objectID,
+                          undefined,
+                        );
+                      }}
+                    />
+                    <Spacer.Horizontal size={4} />
+                    <DividerVertical variant="strong" />
+                    <Spacer.Horizontal size={4} />
+                  </>
+                )}
+                <UploadIcon
+                  onClick={async () => {
+                    const file = await fileOpen({
+                      extensions: ['.png', '.jpg', '.webp'],
+                      mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+                    });
+
+                    const url = await uploadAsset(await file.arrayBuffer());
+
+                    dispatch('setBlockText', url);
+                    dispatch('setSymbolIdIsFixed', true);
+                  }}
+                />
+                <Spacer.Horizontal size={4} />
+                <DividerVertical variant="strong" />
+                <Spacer.Horizontal size={4} />
+              </>
+            )}
             {layer.symbolIDIsFixed ? (
               <LockClosedIcon
                 onClick={() => {

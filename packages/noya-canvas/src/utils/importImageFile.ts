@@ -1,3 +1,4 @@
+import type { CanvasKit } from 'canvaskit';
 import { SupportedCanvasUploadType } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { TypedFile } from 'noya-react-utils';
@@ -33,4 +34,17 @@ export async function importImageFile(
       data,
     };
   }
+}
+
+export async function importImageFileWithCanvasKit(
+  CanvasKit: CanvasKit,
+  file: TypedFile<SupportedCanvasUploadType>,
+): Promise<InsertedImage | void> {
+  return importImageFile(file, (bytes) => {
+    const image = CanvasKit.MakeImageFromEncoded(bytes);
+
+    if (!image) return null;
+
+    return { image, width: image.width(), height: image.height() };
+  });
 }

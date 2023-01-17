@@ -135,10 +135,17 @@ function FileEditor({ id }: { id: string }) {
     };
   }, [updateDebounced]);
 
+  const uploadAsset = async (file: ArrayBuffer) => {
+    const fileId = await client.assets.create(file, id);
+
+    return client.assets.url(fileId);
+  };
+
   if (!initialFile) return null;
 
   return (
     <Ayon
+      uploadAsset={uploadAsset}
       initialDocument={initialFile.data.document}
       onChangeDocument={updateDocument}
     />

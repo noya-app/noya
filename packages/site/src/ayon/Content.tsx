@@ -1,6 +1,14 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
-import { Design, RenderingModeProvider } from 'noya-renderer';
+import {
+  CanvasKitRenderer,
+  convertPoint,
+  Interactions,
+  SimpleCanvas,
+} from 'noya-canvas';
+import { roundPoint } from 'noya-geometry';
+import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
+import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
+import { SketchModel } from 'noya-sketch-model';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { isExternalUrl } from 'noya-utils';
@@ -23,13 +31,54 @@ const Overlay = styled.div({
 
 const redirectResolver = new RedirectResolver();
 
-export const Content = memo(function Content() {
+export const Content = memo(function Content({
+  uploadAsset,
+}: {
+  uploadAsset: (file: ArrayBuffer) => Promise<string>;
+}) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
   );
   const panelRef = useRef<ImperativePanelHandle>(null);
+  const CanvasKit = useCanvasKit();
+  const meta = Selectors.getCurrentPageMetadata(state);
+  const { zoomValue, scrollOrigin } = meta;
+
+  const addImageFiles = async (files: File[], offsetPoint: OffsetPoint) => {
+    const images = await Promise.all(
+      files.map(async (file) => {
+        const data = await file.arrayBuffer();
+        const image = CanvasKit.MakeImageFromEncoded(data);
+        const url = await uploadAsset(data);
+        const size = image
+          ? { width: image.width(), height: image.height() }
+          : undefined;
+        return { url, size };
+      }),
+    );
+
+    const layers = images.map((image) => {
+      const symbol = SketchModel.symbolInstance({
+        symbolID: 'd91ba1e3-7e64-4966-9cc1-daa48f989178',
+      });
+      symbol.blockText = image.url;
+      symbol.frame.width = image.size?.width ?? 100;
+      symbol.frame.height = image.size?.height ?? 100;
+      symbol.symbolIDIsFixed = true;
+      return symbol;
+    });
+
+    const point = convertPoint(
+      scrollOrigin,
+      zoomValue,
+      roundPoint({ x: offsetPoint.offsetX, y: offsetPoint.offsetY }),
+      'canvas',
+    );
+
+    dispatch('addLayer', layers, point);
+  };
 
   useEffect(() => {
     const subscriptions: Array<() => void> = [];
@@ -75,70 +124,81 @@ export const Content = memo(function Content() {
   return (
     <Panel.Root direction="horizontal" autoSaveId="ayon-canvas">
       <Panel.Item ref={panelRef} collapsible defaultSize={75}>
-        <SimpleCanvas
-          interactions={[
-            Interactions.duplicate,
-            Interactions.reorder,
-            Interactions.zoom,
-            Interactions.escape,
-            Interactions.history,
-            Interactions.clipboard,
-            Interactions.editText,
-            Interactions.editBlock,
-            Interactions.focus,
-            Interactions.pan,
-            Interactions.createScale({ inferBlockType }),
-            Interactions.createInsertMode({ inferBlockType }),
-            Interactions.selection,
-            Interactions.move,
-            Interactions.createDrawing({
-              allowDrawingFromNoneState: true,
-              inferBlockType,
-            }),
+        <FileDropTarget
+          supportedFileTypes={[
+            'image/png' as const,
+            'image/jpeg' as const,
+            'image/webp' as const,
           ]}
-          widgets={
-            <>
-              {layers.map((layer) => (
-                <Widget
-                  key={layer.do_objectID}
-                  layer={layer}
-                  inferBlockTypes={inferBlockTypes}
-                  onChangeBlockType={(type: DrawableLayerType) => {
-                    dispatch(
-                      'setSymbolInstanceSource',
-                      typeof type !== 'string'
-                        ? type.symbolId
-                        : buttonSymbol.symbolID,
-                      'preserveCurrent',
-                    );
-                  }}
-                />
-              ))}
-              {state.interactionState.type === 'drawing' && (
-                <DrawingWidget inferBlockType={inferBlockType} />
-              )}
-            </>
-          }
+          onDropFiles={addImageFiles}
         >
-          {({ size }) => (
-            <>
-              <CanvasKitRenderer size={size}>
-                <RenderingModeProvider value="interactive">
-                  <Design.Root>
-                    <Design.Background />
-                    <Design.Page />
-                    <Design.PixelGrid />
-                    <Design.Marquee />
-                    <Design.GradientEditor />
-                    <Design.InsertSymbol />
-                    <Design.DrawPath />
-                    <Design.EditPath />
-                  </Design.Root>
-                </RenderingModeProvider>
-              </CanvasKitRenderer>
-            </>
-          )}
-        </SimpleCanvas>
+          <SimpleCanvas
+            interactions={[
+              Interactions.duplicate,
+              Interactions.reorder,
+              Interactions.zoom,
+              Interactions.escape,
+              Interactions.history,
+              Interactions.clipboard,
+              Interactions.editText,
+              Interactions.editBlock,
+              Interactions.focus,
+              Interactions.pan,
+              Interactions.createScale({ inferBlockType }),
+              Interactions.createInsertMode({ inferBlockType }),
+              Interactions.selection,
+              Interactions.move,
+              Interactions.createDrawing({
+                allowDrawingFromNoneState: true,
+                inferBlockType,
+              }),
+            ]}
+            widgets={
+              <>
+                {layers.map((layer) => (
+                  <Widget
+                    key={layer.do_objectID}
+                    layer={layer}
+                    inferBlockTypes={inferBlockTypes}
+                    onChangeBlockType={(type: DrawableLayerType) => {
+                      dispatch(
+                        'setSymbolInstanceSource',
+                        typeof type !== 'string'
+                          ? type.symbolId
+                          : buttonSymbol.symbolID,
+                        'preserveCurrent',
+                      );
+                    }}
+                    uploadAsset={uploadAsset}
+                  />
+                ))}
+                {state.interactionState.type === 'drawing' && (
+                  <DrawingWidget inferBlockType={inferBlockType} />
+                )}
+              </>
+            }
+          >
+            {({ size }) => (
+              <>
+                <CanvasKitRenderer size={size}>
+                  <RenderingModeProvider value="interactive">
+                    <Design.Root>
+                      <Design.Background />
+                      <Design.Page />
+                      <Design.PixelGrid />
+                      <Design.Marquee />
+                      <Design.GradientEditor />
+                      <Design.InsertSymbol />
+                      <Design.DrawPath />
+                      <Design.EditPath />
+                    </Design.Root>
+                  </RenderingModeProvider>
+                </CanvasKitRenderer>
+              </>
+            )}
+          </SimpleCanvas>
+        </FileDropTarget>
+
         <Overlay>
           <SVGRenderer size={canvasSize}>
             <RenderingModeProvider value="interactive">

@@ -1,7 +1,12 @@
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  Point,
+  transformRect,
+} from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,
@@ -57,7 +62,7 @@ export type LayerAction =
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
   | [type: 'duplicateLayer', ids: string[]]
-  | [type: 'addLayer', data: Sketch.AnyLayer | Sketch.AnyLayer[]]
+  | [type: 'addLayer', data: Sketch.AnyLayer | Sketch.AnyLayer[], point?: Point]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -464,7 +469,8 @@ export function layerReducer(
       });
     }
     case 'addLayer': {
-      const layers = Array.isArray(action[1]) ? action[1] : [action[1]];
+      const [, layer, point] = action;
+      const layers = Array.isArray(layer) ? layer : [layer];
       const currentPageIndex = getCurrentPageIndex(state);
       const selectedLayerIndexPath =
         getSelectedLayerIndexPathsExcludingDescendants(state)[0];
@@ -550,8 +556,12 @@ export function layerReducer(
               });
 
               newLayer = produce(newLayer, (draftLayer) => {
-                draftLayer.frame.x = parentBounds.midX - bounds.midX;
-                draftLayer.frame.y = parentBounds.midY - bounds.midY;
+                const targetPoint = point
+                  ? point
+                  : { x: parentBounds.midX, y: parentBounds.midY };
+
+                draftLayer.frame.x = targetPoint.x - bounds.midX;
+                draftLayer.frame.y = targetPoint.y - bounds.midY;
               });
 
               addToParentLayer(selectedLayer.layers, newLayer);

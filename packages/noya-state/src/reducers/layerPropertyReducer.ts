@@ -339,8 +339,15 @@ export function layerPropertyReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (Layers.isSymbolInstance(layer)) {
-            layer.blockText = value;
+          if (!Layers.isSymbolInstance(layer)) return;
+
+          layer.blockText = value;
+
+          if (
+            layer.resolvedBlockData &&
+            layer.resolvedBlockData.originalText !== value
+          ) {
+            delete layer.resolvedBlockData;
           }
         });
       });

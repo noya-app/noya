@@ -52,7 +52,7 @@ import { useGesture } from 'react-use-gesture';
 import styled from 'styled-components';
 import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
 import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
-import { importImageFile } from '../utils/importImageFile';
+import { importImageFileWithCanvasKit } from '../utils/importImageFile';
 import { ZERO_INSETS } from './CanvasElement';
 
 const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
@@ -902,15 +902,7 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const images = await Promise.all(
-        files.map((file) =>
-          importImageFile(file, (bytes) => {
-            const image = CanvasKit.MakeImageFromEncoded(bytes);
-
-            return image
-              ? { image, width: image.width(), height: image.height() }
-              : null;
-          }),
-        ),
+        files.map((file) => importImageFileWithCanvasKit(CanvasKit, file)),
       );
 
       const validImages = images.flatMap((image) => (image ? [image] : []));
