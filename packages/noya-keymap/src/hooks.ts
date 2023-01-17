@@ -30,7 +30,7 @@ interface KeyboardShortcutOptions {
   eventListener?: KeyboardEventListener | null;
 }
 
-const root = typeof document !== 'undefined' ? document : null;
+const root = typeof window !== 'undefined' ? window : null;
 const platformName =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
