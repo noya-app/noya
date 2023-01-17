@@ -3,14 +3,15 @@ import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import { Design, RenderingModeProvider } from 'noya-renderer';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import React, { memo, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { DOMRenderer } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
+import { RedirectResolver } from './RedirectResolver';
 import { Stacking } from './stacking';
-import { buttonSymbol } from './symbols';
+import { buttonSymbol, imageSymbolId } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
 
 const Overlay = styled.div({
@@ -19,6 +20,8 @@ const Overlay = styled.div({
   pointerEvents: 'none',
 });
 
+const redirectResolver = new RedirectResolver();
+
 export const Content = memo(function Content() {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -26,6 +29,47 @@ export const Content = memo(function Content() {
     Layers.isSymbolInstance,
   );
   const panelRef = useRef<ImperativePanelHandle>(null);
+
+  useEffect(() => {
+    const subscriptions: Array<() => void> = [];
+
+    layers.forEach((layer) => {
+      const {
+        blockText,
+        resolvedBlockData,
+        frame,
+        symbolID,
+        do_objectID: layerId,
+      } = layer;
+
+      if (typeof blockText !== 'string') return;
+
+      // Already resolved
+      if (resolvedBlockData && resolvedBlockData.originalText === blockText) {
+        return;
+      }
+
+      if (symbolID === imageSymbolId) {
+        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${frame.height}?${blockText}`;
+
+        redirectResolver.resolve(layerId, unsplashUrl);
+
+        subscriptions.push(
+          redirectResolver.addListener(layerId, unsplashUrl, (resolvedUrl) => {
+            dispatch('setResolvedBlockData', layerId, {
+              originalText: blockText,
+              resolvedText: resolvedUrl,
+              symbolID: symbolID,
+            });
+          }),
+        );
+      }
+    });
+
+    return () => {
+      subscriptions.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [dispatch, layers]);
 
   return (
     <Panel.Root direction="horizontal" autoSaveId="ayon-canvas">

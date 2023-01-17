@@ -208,6 +208,7 @@ export function applicationReducer(
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
     case 'setBlockText':
+    case 'setResolvedBlockData':
     case 'setSymbolIdIsFixed':
       return layerPropertyReducer(state, action, CanvasKit);
     case 'groupLayers':

@@ -1162,6 +1162,11 @@ export type SymbolInstance = {
   verticalSpacing: number;
   horizontalSpacing: number;
   blockText?: string;
+  resolvedBlockData?: {
+    symbolID: string;
+    originalText: string;
+    resolvedText: string;
+  };
   symbolIDIsFixed?: boolean;
 };
 /**

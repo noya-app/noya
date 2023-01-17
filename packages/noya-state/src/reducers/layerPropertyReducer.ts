@@ -5,6 +5,7 @@ import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
   computeCurvePointBoundingRect,
+  findPageLayerIndexPaths,
   fixGroupFrameHierarchy,
   getCurrentPage,
   getCurrentPageIndex,
@@ -41,6 +42,11 @@ export type LayerPropertyAction =
   | [type: 'setShouldBreakMaskChain', value: boolean]
   | [type: 'setMaskMode', value: 'alpha' | 'outline']
   | [type: 'setBlockText', value: string]
+  | [
+      type: 'setResolvedBlockData',
+      layerId: string,
+      value: Sketch.SymbolInstance['resolvedBlockData'],
+    ]
   | [type: 'setSymbolIdIsFixed', value: boolean];
 
 export function layerPropertyReducer(
@@ -336,6 +342,29 @@ export function layerPropertyReducer(
           if (Layers.isSymbolInstance(layer)) {
             layer.blockText = value;
           }
+        });
+      });
+    }
+    case 'setResolvedBlockData': {
+      const [, id, value] = action;
+      const layerIndexPaths = findPageLayerIndexPaths(
+        state,
+        (layer) => layer.do_objectID === id,
+      );
+
+      return produce(state, (draft) => {
+        layerIndexPaths.forEach(({ pageIndex, indexPaths }) => {
+          const layer = Layers.access(
+            draft.sketch.pages[pageIndex],
+            indexPaths[0],
+          );
+
+          if (!Layers.isSymbolInstance(layer)) return;
+
+          // Don't allow the resolved block data to be overwritten if the block text doesn't match
+          if (value && value.originalText !== layer.blockText) return;
+
+          layer.resolvedBlockData = value;
         });
       });
     }

@@ -42,6 +42,7 @@ import {
 type DOMElementsProps = {
   frame: Rect;
   blockText?: string;
+  resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
 };
 
 function filterHashTags(text?: string): {
@@ -169,7 +170,7 @@ export const symbolIdToElement = {
   },
   [imageSymbol.symbolID]: (props: DOMElementsProps) => (
     <Image
-      src={`https://source.unsplash.com/${props.frame.width}x${props.frame.height}?${props.blockText}`}
+      src={props.resolvedBlockData?.resolvedText}
       fit="cover"
       align="middle"
       w="100%"
@@ -278,6 +279,7 @@ function SymbolRenderer({
   frame,
   symbolId,
   blockText,
+  resolvedBlockData,
 }: { symbolId: string } & DOMElementsProps) {
   return (
     <div
@@ -289,7 +291,7 @@ function SymbolRenderer({
         height: frame.height,
       }}
     >
-      {symbolIdToElement[symbolId]({ frame, blockText })}
+      {symbolIdToElement[symbolId]({ frame, blockText, resolvedBlockData })}
     </div>
   );
 }
@@ -340,6 +342,7 @@ function DOMRendererContent({ size }: { size: Size }): JSX.Element {
               frame={layer.frame}
               symbolId={layer.symbolID}
               blockText={layer.blockText}
+              resolvedBlockData={layer.resolvedBlockData}
             />
           ))}
           {state.interactionState.type === 'drawing' && (
