@@ -368,9 +368,6 @@ export function layerPropertyReducer(
 
           if (!Layers.isSymbolInstance(layer)) return;
 
-          // Don't allow the resolved block data to be overwritten if the block text doesn't match
-          if (value && value.originalText !== layer.blockText) return;
-
           layer.resolvedBlockData = value;
         });
       });

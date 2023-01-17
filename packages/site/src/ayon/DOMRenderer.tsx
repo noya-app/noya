@@ -9,6 +9,7 @@ import {
   IconButton,
   Image,
   Input,
+  Spinner,
   Switch,
   SystemProps,
   Text,
@@ -38,6 +39,7 @@ import {
   inputSymbol,
   switchSymbol,
   textSymbol,
+  writeSymbol,
 } from './symbols';
 
 type DOMElementsProps = {
@@ -46,7 +48,7 @@ type DOMElementsProps = {
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
 };
 
-function filterHashTags(text?: string): {
+export function filterHashTags(text?: string): {
   content?: string;
   hashTags?: string[];
 } {
@@ -276,6 +278,36 @@ export const symbolIdToElement = {
           {content}
         </Heading>
       </Flex>
+    );
+  },
+  [writeSymbol.symbolID]: (props: DOMElementsProps) => {
+    const { color, fontWeight, fontSize, align } = filterTextPropertyHashTags(
+      props.blockText,
+    );
+    return (
+      <Text
+        color={color}
+        fontWeight={fontWeight}
+        fontSize={fontSize}
+        align={align as SystemProps['textAlign']}
+      >
+        {props.resolvedBlockData?.resolvedText ?? (
+          <Flex align="center">
+            {props.blockText && (
+              <>
+                <Spinner
+                  thickness="3px"
+                  color="gray"
+                  size={fontSize}
+                  speed="1.5s"
+                />
+                <span style={{ marginLeft: 10 }}>Thinking...</span>
+              </>
+            )}
+            {!props.blockText && 'Waiting for input...'}
+          </Flex>
+        )}
+      </Text>
     );
   },
 };
