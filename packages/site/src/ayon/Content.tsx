@@ -15,12 +15,13 @@ import { isExternalUrl } from 'noya-utils';
 import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
-import { DOMRenderer } from './DOMRenderer';
+import { DOMRenderer, filterHashTags } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
 import { RedirectResolver } from './RedirectResolver';
+import { GenerateResolver } from './GenerateResolver';
 import { Stacking } from './stacking';
-import { buttonSymbol, imageSymbolId } from './symbols';
+import { buttonSymbol, imageSymbolId, writeSymbolId } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
 
 const Overlay = styled.div({
@@ -30,6 +31,7 @@ const Overlay = styled.div({
 });
 
 const redirectResolver = new RedirectResolver();
+const generateResolver = new GenerateResolver();
 
 export const Content = memo(function Content({
   uploadAsset,
@@ -94,25 +96,54 @@ export const Content = memo(function Content({
 
       if (typeof blockText !== 'string') return;
 
+      const { content } = filterHashTags(blockText);
+      const originalText = content?.trim();
+
       // Already resolved
-      if (resolvedBlockData && resolvedBlockData.originalText === blockText) {
+      if (
+        resolvedBlockData &&
+        resolvedBlockData.originalText === originalText
+      ) {
+        return;
+      }
+
+      if (!originalText) {
+        dispatch('setResolvedBlockData', layerId, undefined);
         return;
       }
 
       if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
-        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${frame.height}?${blockText}`;
-
-        redirectResolver.resolve(layerId, unsplashUrl);
+        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${frame.height}?${originalText}`;
 
         subscriptions.push(
           redirectResolver.addListener(layerId, unsplashUrl, (resolvedUrl) => {
             dispatch('setResolvedBlockData', layerId, {
-              originalText: blockText,
+              originalText,
               resolvedText: resolvedUrl,
               symbolID: symbolID,
             });
           }),
         );
+
+        redirectResolver.resolve(layerId, unsplashUrl);
+      } else if (symbolID === writeSymbolId) {
+        dispatch('setResolvedBlockData', layerId, undefined);
+
+        subscriptions.push(
+          generateResolver.addListener(
+            layerId,
+            originalText,
+            (resolvedText) => {
+              dispatch('setResolvedBlockData', layerId, {
+                originalText,
+                resolvedText,
+                symbolID: symbolID,
+              });
+            },
+          ),
+        );
+
+        generateResolver.resolve(layerId, originalText);
       }
     });
 

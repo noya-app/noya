@@ -17,6 +17,7 @@ import {
   inputSymbol,
   switchSymbol,
   textSymbol,
+  writeSymbol,
 } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
@@ -72,6 +73,8 @@ export const BLOCK_TYPE_HEURISTICS = {
     Math.max(scoreCommandMatch(heading5Symbol, text), 0.1),
   [heading6Symbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
     Math.max(scoreCommandMatch(heading6Symbol, text), 0.1),
+  [writeSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(scoreCommandMatch(writeSymbol, text), 0.1),
 };
 
 function isWithinRectRange(
