@@ -20,6 +20,7 @@ const DividerContainer = styled.div<{
       : variant === 'subtle'
       ? theme.colors.dividerSubtle
       : theme.colors.divider,
+  alignSelf: 'stretch',
 }));
 
 interface DividerProps {

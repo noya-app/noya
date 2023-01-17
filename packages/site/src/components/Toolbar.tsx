@@ -4,6 +4,7 @@ import { useNoyaSession } from 'noya-api';
 import {
   Button,
   createSectionedMenu,
+  DividerVertical,
   DropdownMenu,
   Spacer,
   Stack,
@@ -21,7 +22,7 @@ import { Logo } from './Logo';
 
 const LogoContainer = styled.div({
   alignSelf: 'stretch',
-  aspectRatio: '1',
+  padding: '0 11px',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -69,13 +70,7 @@ export function Toolbar({ children }: Props) {
           <Logo />
         </LogoContainer>
       </Link>
-      <div
-        style={{
-          alignSelf: 'stretch',
-          width: 1,
-          background: theme.colors.divider,
-        }}
-      />
+      <DividerVertical />
       <Spacer.Horizontal size={10} />
       <Spacer.Horizontal />
       {session && (
