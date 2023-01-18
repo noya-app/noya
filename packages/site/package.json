@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^1.6.8",
     "@chakra-ui/icons": "^2.0.16",
     "@chakra-ui/react": "^1",
     "@emotion/react": "^11",
@@ -17,10 +18,13 @@
     "date-fns": "^2.29.3",
     "framer-motion": "^6",
     "lodash.debounce": "^4.0.8",
+    "logrocket": "^3.0.1",
+    "logrocket-react": "^5.0.1",
     "next": "^12",
     "react-resizable-panels": "^0.0.33"
   },
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.7"
+    "@types/lodash.debounce": "^4.0.7",
+    "@types/logrocket-react": "^3.0.0"
   }
 }
