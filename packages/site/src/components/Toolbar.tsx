@@ -92,7 +92,7 @@ export function Toolbar({ children }: Props) {
             }
           }}
         >
-          <Button id="insert-symbol">
+          <Button id="insert-symbol" data-private>
             {session.user.name ?? session.user.email}
             <Spacer.Horizontal size={4} />
             <ChevronDownIcon />
