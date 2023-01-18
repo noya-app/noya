@@ -1,7 +1,12 @@
 import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { Point, Rect } from 'noya-geometry';
-import { TextSelectionRange, UUID } from 'noya-state';
+import {
+  getCursorForCompassDirection,
+  TextSelectionRange,
+  UUID,
+} from 'noya-state';
+import { CSSProperties } from 'react';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -50,6 +55,7 @@ export type SnapshotInteractionAction =
 
 export type InteractionAction =
   | [type: 'reset']
+  | [type: 'setCursor', cursor?: CSSProperties['cursor']]
   | [type: 'insert', layerType: DrawableLayerType, current?: Point]
   | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
@@ -59,7 +65,7 @@ export type InteractionAction =
   | [type: 'updateDrawing', point: Point, shapeType?: DrawableLayerType]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
-  | [type: 'hoverHandle', direction: CompassDirection]
+  | [type: 'hoverHandle', direction?: CompassDirection]
   | [type: 'startPanning', point: Point]
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point, inferBlockType?: InferBlockType]
@@ -82,6 +88,7 @@ export type InteractionAction =
 export type InteractionState =
   | {
       type: 'none';
+      cursor?: CSSProperties['cursor'];
     }
   | {
       type: 'insert';
@@ -143,7 +150,6 @@ export type InteractionState =
       current: Point;
       pageSnapshot: Sketch.Page;
     }
-  | { type: 'hoverHandle'; direction: CompassDirection }
   | {
       type: 'maybeScale';
       origin: Point;
@@ -182,7 +188,7 @@ export type InteractionState =
       current: Point;
     }
   | { type: 'editingText'; layerId: UUID; range: TextSelectionRange }
-  | { type: 'editingBlock'; layerId: UUID }
+  | { type: 'editingBlock'; layerId: UUID; cursor?: CSSProperties['cursor'] }
   | {
       type: 'maybeSelectingText';
       origin: Point;
@@ -218,11 +224,6 @@ export function interactionReducer(
     case 'insertingSymbol': {
       const [, symbolID, point] = action;
       return { type: 'insertingSymbol', symbolID, point };
-    }
-    case 'hoverHandle': {
-      const [type, direction] = action;
-
-      return { type, direction };
     }
     case 'startMarquee': {
       const [, point] = action;
@@ -536,6 +537,27 @@ export function interactionReducer(
         layerId: state.layerId,
         range: state.range,
       };
+    }
+    case 'hoverHandle': {
+      const [, direction] = action;
+
+      if (state.type !== 'none' && state.type !== 'editingBlock') {
+        return state;
+      }
+
+      return {
+        ...state,
+        cursor: direction ? getCursorForCompassDirection(direction) : undefined,
+      };
+    }
+    case 'setCursor': {
+      const [, cursor] = action;
+
+      if (state.type !== 'none' && state.type !== 'editingBlock') {
+        return state;
+      }
+
+      return { ...state, cursor };
     }
     case 'reset': {
       return { type: 'none' };

@@ -12,7 +12,7 @@ import { InteractionAPI } from './types';
 export interface ScaleActions {
   maybeScale: (point: Point, direction: CompassDirection) => void;
   updateScaling: (point: Point, inferBlockType?: InferBlockType) => void;
-  hoverHandle: (direction: CompassDirection) => void;
+  hoverHandle: (direction: CompassDirection | undefined) => void;
   reset: () => void;
 }
 
@@ -50,31 +50,8 @@ export const createScaleInteraction = (
 
           if (direction) {
             hoverHandle(direction);
-          }
-        },
-      }),
-      hoverHandle: (interactionState, api) => ({
-        onPointerDown: (event) => {
-          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
-          const direction = api.getScaleDirectionAtPoint(canvasPoint);
-
-          if (direction) {
-            maybeScale(canvasPoint, direction);
             event.preventDefault();
-          }
-        },
-        onPointerMove: (event) => {
-          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
-
-          const direction = api.getScaleDirectionAtPoint(canvasPoint);
-
-          if (direction) {
-            if (direction !== interactionState.direction) {
-              hoverHandle(direction);
-            }
-          } else {
-            reset();
           }
         },
       }),

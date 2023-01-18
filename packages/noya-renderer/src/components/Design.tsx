@@ -569,7 +569,6 @@ const DesignDragHandles = memo(function DesignDragHandles() {
   if (
     renderingMode !== 'interactive' ||
     interactionState.type === 'drawingShapePath' ||
-    interactionState.type === 'editingBlock' ||
     isEditingPath ||
     state.selectedGradient ||
     interactionState.type === 'drawing' ||

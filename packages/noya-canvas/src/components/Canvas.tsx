@@ -333,7 +333,6 @@ export const Canvas = memo(function Canvas({
           }
           break;
         }
-        case 'hoverHandle':
         case 'editingText':
         case 'none': {
           const characterIndex =
@@ -665,19 +664,6 @@ export const Canvas = memo(function Canvas({
 
           break;
         }
-        case 'hoverHandle': {
-          const direction = Selectors.getScaleDirectionAtPoint(state, point);
-
-          if (direction) {
-            if (direction !== state.interactionState.direction) {
-              dispatch('interaction', ['hoverHandle', direction]);
-            }
-          } else {
-            dispatch('interaction', ['reset']);
-          }
-
-          break;
-        }
         case 'none': {
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
@@ -711,12 +697,12 @@ export const Canvas = memo(function Canvas({
 
             if (direction && !state.selectedGradient) {
               dispatch('interaction', ['hoverHandle', direction]);
-
-              return;
+            } else {
+              dispatch('interaction', ['hoverHandle', undefined]);
             }
-            return;
+          } else {
+            dispatch('interaction', ['hoverHandle', undefined]);
           }
-          break;
         }
       }
     },

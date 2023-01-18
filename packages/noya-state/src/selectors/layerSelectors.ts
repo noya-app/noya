@@ -212,12 +212,9 @@ export function getSelectedLineLayer(
   return layer;
 }
 
-export function getCursorForDirection(
+export function getCursorForCompassDirection(
   direction: CompassDirection,
-  state: ApplicationState,
 ): CSSProperties['cursor'] {
-  if (getSelectedLineLayer(state)) return 'move';
-
   switch (direction) {
     case 'e':
     case 'w':
@@ -232,6 +229,15 @@ export function getCursorForDirection(
     case 'se':
       return 'nwse-resize';
   }
+}
+
+export function getCursorForDirection(
+  direction: CompassDirection,
+  state: ApplicationState,
+): CSSProperties['cursor'] {
+  if (getSelectedLineLayer(state)) return 'move';
+
+  return getCursorForCompassDirection(direction);
 }
 
 export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {

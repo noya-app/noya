@@ -27,7 +27,7 @@ import {
   TextEditorCursorUnit,
   TextSelectionRange,
 } from 'noya-state';
-import { useMemo } from 'react';
+import { CSSProperties, useMemo } from 'react';
 import { ZERO_INSETS } from '../components/CanvasElement';
 import { ICanvasElement } from '../components/types';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
@@ -38,6 +38,7 @@ import { EditBlockActions } from '../interactions/editBlock';
 import { EditTextActions } from '../interactions/editText';
 import { EscapeActions } from '../interactions/escape';
 import { HistoryActions } from '../interactions/history';
+import { InsertModeActions } from '../interactions/insertMode';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { PanActions } from '../interactions/pan';
@@ -65,7 +66,8 @@ export type Actions = MarqueeActions &
   ReorderActions &
   HistoryActions &
   ZoomActions &
-  DuplicateActions;
+  DuplicateActions &
+  InsertModeActions;
 
 export type Interaction = (
   actions: Actions,
@@ -127,7 +129,7 @@ export function useInteractionHandlers({
         dispatch('interaction', ['updatePanning', point]),
       maybePan: (point) => dispatch('interaction', ['maybePan', point]),
       enablePanMode: () => dispatch('interaction', ['enablePanMode']),
-      hoverHandle: (direction: CompassDirection) =>
+      hoverHandle: (direction?: CompassDirection) =>
         dispatch('interaction', ['hoverHandle', direction]),
       startEditingBlock: (layerId) =>
         dispatch('interaction', ['editingBlock', layerId]),
@@ -173,6 +175,8 @@ export function useInteractionHandlers({
       duplicateLayer: (id: string[]) => dispatch('duplicateLayer', id),
       moveLayersIntoParentAtPoint: (point) =>
         dispatch('moveLayersIntoParentAtPoint', point),
+      setCursor: (cursor: CSSProperties['cursor'] | undefined) =>
+        dispatch('interaction', ['setCursor', cursor]),
     };
   }, [dispatch]);
 

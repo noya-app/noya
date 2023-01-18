@@ -16,10 +16,10 @@ import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { DOMRenderer, filterHashTags } from './DOMRenderer';
+import { GenerateResolver } from './GenerateResolver';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
 import { RedirectResolver } from './RedirectResolver';
-import { GenerateResolver } from './GenerateResolver';
 import { Stacking } from './stacking';
 import { buttonSymbol, imageSymbolId, writeSymbolId } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
@@ -172,7 +172,7 @@ export const Content = memo(function Content({
               Interactions.history,
               Interactions.clipboard,
               Interactions.editText,
-              Interactions.editBlock,
+              Interactions.createEditBlock({ inferBlockType }),
               Interactions.focus,
               Interactions.pan,
               Interactions.createScale({ inferBlockType }),
@@ -183,6 +183,7 @@ export const Content = memo(function Content({
                 allowDrawingFromNoneState: true,
                 inferBlockType,
               }),
+              Interactions.defaultCursor,
             ]}
             widgets={
               <>

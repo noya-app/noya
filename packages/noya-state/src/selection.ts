@@ -116,8 +116,7 @@ export function getDragHandles(
 }
 
 export function getCurrentHandleDirection(interactionState: InteractionState) {
-  return interactionState.type === 'hoverHandle' ||
-    interactionState.type === 'maybeScale' ||
+  return interactionState.type === 'maybeScale' ||
     interactionState.type === 'scaling'
     ? interactionState.direction
     : undefined;

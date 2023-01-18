@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { handleKeyboardEvent } from './events';
 import { KeyShortcuts } from './keyMap';
 import { getCurrentPlatform } from './platform';
@@ -20,17 +20,10 @@ interface KeyboardEventListener {
 
 interface KeyboardShortcutOptions {
   eventName?: KeyEventName;
-
-  /**
-   * A custom event listener.
-   *
-   * Pass null to ignore events, e.g. if the listener element hasn't mounted yet.
-   * This is similar to conditionally disabling the hook.
-   */
-  eventListener?: KeyboardEventListener | null;
 }
 
-const root = typeof window !== 'undefined' ? window : null;
+const listenerElement: KeyboardEventListener | null =
+  typeof window !== 'undefined' ? window : null;
 const platformName =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
@@ -39,10 +32,6 @@ export function useKeyboardShortcuts(
   options: KeyboardShortcutOptions = {},
 ) {
   const eventName = options.eventName ?? 'keydown';
-  const eventRef = useMemo(
-    () => (options.eventListener !== undefined ? options.eventListener : root),
-    [options.eventListener],
-  );
 
   const shortcutsRef = useRef(shortcuts);
 
@@ -62,12 +51,10 @@ export function useKeyboardShortcuts(
       handleKeyboardEvent(event, platformName, shortcutsRef.current);
     };
 
-    const listenerElement = eventRef;
-
     listenerElement?.addEventListener(eventName, handler);
 
     return () => {
       listenerElement?.removeEventListener(eventName, handler);
     };
-  }, [eventName, eventRef]);
+  }, [eventName]);
 }

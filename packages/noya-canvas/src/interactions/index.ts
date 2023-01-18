@@ -1,7 +1,8 @@
 import { clipboardInteraction } from './clipboard';
+import { defaultCursorInteraction } from './defaultCursor';
 import { createDrawingInteraction } from './drawing';
 import { duplicateInteraction } from './duplicate';
-import { editBlockInteraction } from './editBlock';
+import { createEditBlockInteraction } from './editBlock';
 import { editTextInteraction } from './editText';
 import { escapeInteraction } from './escape';
 import { focusInteraction } from './focus';
@@ -23,7 +24,7 @@ export namespace Interactions {
   export const pan = panInteraction;
   export const createDrawing = createDrawingInteraction;
   export const createInsertMode = createInsertModeInteraction;
-  export const editBlock = editBlockInteraction;
+  export const createEditBlock = createEditBlockInteraction;
   export const editText = editTextInteraction;
   export const clipboard = clipboardInteraction;
   export const history = historyInteraction;
@@ -31,6 +32,7 @@ export namespace Interactions {
   export const zoom = zoomInteraction;
   export const reorder = reorderInteraction;
   export const duplicate = duplicateInteraction;
+  export const defaultCursor = defaultCursorInteraction;
   export const scale = createScaleInteraction();
   export const createScale = createScaleInteraction;
 }

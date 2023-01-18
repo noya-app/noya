@@ -97,12 +97,14 @@ export function getCursor(state: ApplicationState): CSSProperties['cursor'] {
       return 'text';
     case 'maybeScale':
     case 'scaling':
-    case 'hoverHandle':
       const direction = getCurrentHandleDirection(state.interactionState);
 
       if (!direction) return 'default';
 
       return getCursorForDirection(direction, state);
+    case 'editingBlock':
+    case 'none':
+      return state.interactionState.cursor ?? 'default';
     default:
       return 'default';
   }

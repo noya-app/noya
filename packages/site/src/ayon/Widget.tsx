@@ -11,7 +11,7 @@ import {
 } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Stacking } from './stacking';
 import {
   allAyonSymbols,
@@ -85,6 +85,7 @@ function WidgetLabel({
         fontSize: 13,
         display: 'flex',
         lineHeight: '1.2',
+        cursor: 'default',
       }}
       onPointerDown={(event) => {
         event.stopPropagation();
@@ -147,6 +148,26 @@ export function Widget({
     }
   }, [isEditing]);
 
+  useLayoutEffect(() => {
+    const handler = (event: FocusEvent) => {
+      if (event.target !== textareaRef.current) return;
+
+      const canvasInput = document.querySelector('#hidden-canvas-input');
+
+      if (canvasInput instanceof HTMLInputElement) {
+        canvasInput.focus();
+      }
+
+      event.preventDefault();
+    };
+
+    window.addEventListener('blur', handler, { capture: true });
+
+    return () => {
+      window.removeEventListener('blur', handler, { capture: true });
+    };
+  }, []);
+
   if (!Layers.isSymbolInstance(layer)) return null;
 
   const blockText = layer.blockText ?? '';
@@ -178,7 +199,7 @@ export function Widget({
           resize: 'none',
           border: '1px solid rgba(0,0,0,0.1)',
           // Children of the page don't appear in the rendered output, so we make them transparent.
-          opacity: Layers.isPageLayer(parent) ? 0.3 : 1,
+          opacity: Layers.isPageLayer(parent) ? 0.3 : 0.8,
         }}
         disabled={!isEditing}
         onKeyDown={(event) => {
@@ -305,6 +326,7 @@ export function Widget({
                 {layer.resolvedBlockData && (
                   <>
                     <ReloadIcon
+                      style={{ cursor: 'pointer' }}
                       onClick={() => {
                         dispatch(
                           'setResolvedBlockData',
@@ -319,6 +341,7 @@ export function Widget({
                   </>
                 )}
                 <UploadIcon
+                  style={{ cursor: 'pointer' }}
                   onClick={async () => {
                     const file = await fileOpen({
                       extensions: ['.png', '.jpg', '.webp'],
@@ -338,13 +361,14 @@ export function Widget({
             )}
             {layer.symbolIDIsFixed ? (
               <LockClosedIcon
+                style={{ cursor: 'pointer' }}
                 onClick={() => {
                   dispatch('setSymbolIdIsFixed', false);
                 }}
               />
             ) : (
               <MagicWandIcon
-                style={{ position: 'relative', top: '1px' }}
+                style={{ position: 'relative', top: '1px', cursor: 'pointer' }}
                 onClick={() => {
                   dispatch('setSymbolIdIsFixed', true);
                 }}
@@ -365,6 +389,7 @@ export function Widget({
               whiteSpace: 'pre',
               borderRadius: '2px',
               fontSize: 13,
+              cursor: 'default',
             }}
           >
             {blockTypes.map((blockType, index) => {
@@ -390,6 +415,7 @@ export function Widget({
                         : 'transparent',
                     color:
                       index === 0 && slashWords.length > 0 ? '#fff' : '#000',
+                    cursor: 'pointer',
                   }}
                 >
                   {blockType.score.toFixed(2)} {name}

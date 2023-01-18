@@ -6,13 +6,14 @@ import {
   InferBlockType,
   InteractionState,
 } from 'noya-state';
+import { CSSProperties } from 'react';
 import { InteractionAPI } from './types';
 
 export interface DrawingActions {
-  enterInsertMode: (layerType: DrawableLayerType) => void;
   startDrawing: (layerType: DrawableLayerType, point: Point) => void;
   updateDrawing: (point: Point, layerType?: DrawableLayerType) => void;
   addDrawnLayer: () => void;
+  setCursor: (cursor: CSSProperties['cursor'] | undefined) => void;
 }
 
 export const createDrawingInteraction =
@@ -26,7 +27,7 @@ export const createDrawingInteraction =
     startDrawing,
     updateDrawing,
     addDrawnLayer,
-    enterInsertMode,
+    setCursor,
   }: DrawingActions) => {
     return handleActionType<
       InteractionState,
@@ -48,6 +49,24 @@ export const createDrawingInteraction =
           );
 
           event.preventDefault();
+        },
+        onPointerMove: (event) => {
+          if (!options.allowDrawingFromNoneState) return;
+
+          const layerId = api.getLayerIdAtPoint(
+            api.getScreenPoint(event.nativeEvent),
+            {
+              groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
+            },
+          );
+
+          if (!layerId) {
+            setCursor('crosshair');
+
+            event.preventDefault();
+          }
         },
       }),
       insert: (interactionState, api) => ({
@@ -81,15 +100,6 @@ export const createDrawingInteraction =
 
           updateDrawing(canvasPoint);
           addDrawnLayer();
-
-          // Allow creating a new layer immediately
-          if (options.allowDrawingFromNoneState && event[api.platformModKey]) {
-            enterInsertMode(
-              options.inferBlockType?.({
-                rect: createRect(canvasPoint, canvasPoint),
-              }) ?? interactionState.shapeType,
-            );
-          }
 
           api.releasePointerCapture?.(event.pointerId);
           event.preventDefault();

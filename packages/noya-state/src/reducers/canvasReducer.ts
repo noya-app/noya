@@ -353,6 +353,13 @@ export function canvasReducer(
     }
     case 'addDrawnLayer': {
       const pageIndex = getCurrentPageIndex(state);
+      const page = getCurrentPage(state);
+      const meta: EncodedPageMetadata = state.sketch.user[page.do_objectID] ?? {
+        zoomValue: 1,
+        scrollOrigin: '{0,0}',
+      };
+
+      const minimumSize = 2 / meta.zoomValue;
 
       return produce(state, (draft) => {
         if (draft.interactionState.type !== 'drawing') return;
@@ -419,22 +426,33 @@ export function canvasReducer(
           }
         }
 
-        if (layer.frame.width > 0 && layer.frame.height > 0) {
+        if (
+          layer.frame.width > minimumSize &&
+          layer.frame.height > minimumSize
+        ) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
           draft.selectedLayerIds = [layer.do_objectID];
+
+          if (shapeType === 'text') {
+            draft.interactionState = interactionReducer(
+              draft.interactionState,
+              ['editingText', layer.do_objectID, { anchor: 0, head: 0 }],
+            );
+
+            return;
+          } else if (typeof shapeType !== 'string') {
+            draft.interactionState = interactionReducer(
+              draft.interactionState,
+              ['editingBlock', layer.do_objectID],
+            );
+
+            return;
+          }
         }
 
-        if (shapeType === 'text') {
-          draft.interactionState = interactionReducer(draft.interactionState, [
-            'editingText',
-            layer.do_objectID,
-            { anchor: 0, head: 0 },
-          ]);
-        } else {
-          draft.interactionState = interactionReducer(draft.interactionState, [
-            'reset',
-          ]);
-        }
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'reset',
+        ]);
       });
     }
     case 'addShapePathLayer': {
