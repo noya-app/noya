@@ -6,6 +6,7 @@ import {
   boxSymbol,
   buttonSymbol,
   checkboxSymbol,
+  headerBarNavUserSymbol,
   heading1Symbol,
   heading2Symbol,
   heading3Symbol,
@@ -75,6 +76,14 @@ export const BLOCK_TYPE_HEURISTICS = {
     Math.max(scoreCommandMatch(heading6Symbol, text), 0.1),
   [writeSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
     Math.max(scoreCommandMatch(writeSymbol, text), 0.1),
+  [headerBarNavUserSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(
+      scoreCommandMatch(headerBarNavUserSymbol, text),
+      isWithinRectRange(rect, 400, 30, 2000, 100) && rect.x < 30 && rect.y < 30
+        ? 1
+        : 0,
+      0.1,
+    ),
 };
 
 function isWithinRectRange(
