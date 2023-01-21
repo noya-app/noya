@@ -327,7 +327,9 @@ export function Widget({
                   <>
                     <ReloadIcon
                       style={{ cursor: 'pointer' }}
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.preventDefault();
+
                         dispatch(
                           'setResolvedBlockData',
                           layer.do_objectID,
@@ -342,7 +344,9 @@ export function Widget({
                 )}
                 <UploadIcon
                   style={{ cursor: 'pointer' }}
-                  onClick={async () => {
+                  onPointerDown={async (event) => {
+                    event.preventDefault();
+
                     const file = await fileOpen({
                       extensions: ['.png', '.jpg', '.webp'],
                       mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
@@ -362,14 +366,18 @@ export function Widget({
             {layer.symbolIDIsFixed ? (
               <LockClosedIcon
                 style={{ cursor: 'pointer' }}
-                onClick={() => {
+                onPointerDown={(event) => {
+                  event.preventDefault();
+
                   dispatch('setSymbolIdIsFixed', false);
                 }}
               />
             ) : (
               <MagicWandIcon
                 style={{ position: 'relative', top: '1px', cursor: 'pointer' }}
-                onClick={() => {
+                onPointerDown={(event) => {
+                  event.preventDefault();
+
                   dispatch('setSymbolIdIsFixed', true);
                 }}
               />
@@ -403,8 +411,13 @@ export function Widget({
                 <div
                   key={name}
                   onPointerDown={(event) => {
+                    // Prevent default so the textarea doesn't lose focus
+                    event.preventDefault();
                     event.stopPropagation();
                     onChangeBlockType(blockType.type);
+
+                    // Remove any slash commands
+                    dispatch('setBlockText', blockText.replace(/^\/\w+/, ''));
                     dispatch('setSymbolIdIsFixed', true);
                   }}
                   style={{
