@@ -1,3 +1,4 @@
+import { SearchIcon } from '@chakra-ui/icons';
 import {
   Avatar,
   Box,
@@ -19,7 +20,6 @@ import {
   Text,
   theme,
 } from '@chakra-ui/react';
-import { SearchIcon } from '@chakra-ui/icons';
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { createRect, Rect, Size } from 'noya-geometry';
@@ -33,6 +33,7 @@ import {
   boxSymbol,
   buttonSymbol,
   checkboxSymbol,
+  headerBarNavUserSymbol,
   heading1Symbol,
   heading2Symbol,
   heading3Symbol,
@@ -45,7 +46,6 @@ import {
   switchSymbol,
   textSymbol,
   writeSymbol,
-  headerBarNavUserSymbol,
 } from './symbols';
 
 type DOMElementsProps = {
@@ -418,7 +418,8 @@ function DOMRendererContent({ size }: { size: Size }): JSX.Element {
   const { transform, paddedRect } = createResizeTransform({
     containerSize: size,
     contentRect: artboard.frame,
-    scalingMode: 'upOrDown',
+    scalingMode: 'down',
+    resizePosition: 'top',
   });
 
   return (

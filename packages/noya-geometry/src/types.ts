@@ -23,3 +23,13 @@ export type Insets = {
 export type Axis = 'x' | 'y';
 
 export type Orientation = 'horizontal' | 'vertical';
+
+export type ResizePosition =
+  | 'top'
+  | 'right top'
+  | 'right'
+  | 'right bottom'
+  | 'bottom'
+  | 'left bottom'
+  | 'left'
+  | 'left top';

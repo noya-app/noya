@@ -2,9 +2,11 @@ import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
+  getAnchorForResizePosition,
   Rect,
   resize,
   resizeIfLarger,
+  ResizePosition,
   Size,
   transformRect,
 } from 'noya-geometry';
@@ -47,11 +49,13 @@ export function createResizeTransform({
   containerSize,
   padding = 0,
   scalingMode = 'upOrDown',
+  resizePosition,
 }: {
   contentRect: Rect;
   containerSize: Size;
   padding?: number;
   scalingMode: Props['scalingMode'];
+  resizePosition?: ResizePosition;
 }) {
   const bounds = createBounds(contentRect);
 
@@ -59,6 +63,9 @@ export function createResizeTransform({
     width: containerSize.width - padding * 2,
     height: containerSize.height - padding * 2,
   };
+
+  const containerBounds = createBounds(containerSizeMinusPadding);
+  const anchor = getAnchorForResizePosition(resizePosition);
 
   const resizedContentRect =
     scalingMode === 'down'
@@ -73,12 +80,15 @@ export function createResizeTransform({
   const transform = AffineTransform.multiply(
     // Translate to the center of the size
     AffineTransform.translate(
-      containerSize.width / 2 + padding * scale.x,
-      containerSize.height / 2 + padding * scale.y,
+      containerBounds[anchor.x] + padding * scale.x,
+      containerBounds[anchor.y] + padding * scale.y,
     ),
     AffineTransform.scale(scale.x, scale.y),
     // Translate to (0,0) before scaling, since scale is applied at the origin
-    AffineTransform.translate(-bounds.midX - padding, -bounds.midY - padding),
+    AffineTransform.translate(
+      -bounds[anchor.x] - padding,
+      -bounds[anchor.y] - padding,
+    ),
   );
 
   const paddedRect = transformRect(contentRect, transform);

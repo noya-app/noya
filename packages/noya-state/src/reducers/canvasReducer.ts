@@ -8,6 +8,7 @@ import {
   createBounds,
   createRect,
   distance,
+  getAnchorForResizePosition,
   getCirclePercentage,
   getClosestPointOnLine,
   getLinePercentage,
@@ -15,6 +16,7 @@ import {
   Point,
   rectContainsPoint,
   resize,
+  ResizePosition,
   roundPoint,
   Size,
   transformRect,
@@ -90,42 +92,6 @@ export type InsertedImage = { name: string } & (
       svgString: string;
     }
 );
-
-type ResizePosition =
-  | 'top'
-  | 'right top'
-  | 'right'
-  | 'right bottom'
-  | 'bottom'
-  | 'left bottom'
-  | 'left'
-  | 'left top';
-
-function getAnchorForResizePosition(position?: ResizePosition): {
-  x: 'minX' | 'midX' | 'maxX';
-  y: 'minY' | 'midY' | 'maxY';
-} {
-  switch (position) {
-    case 'top':
-      return { x: 'midX', y: 'minY' };
-    case 'right top':
-      return { x: 'maxX', y: 'minY' };
-    case 'right':
-      return { x: 'maxX', y: 'midY' };
-    case 'right bottom':
-      return { x: 'maxX', y: 'maxY' };
-    case 'bottom':
-      return { x: 'midX', y: 'maxY' };
-    case 'left bottom':
-      return { x: 'minX', y: 'maxY' };
-    case 'left':
-      return { x: 'minX', y: 'midY' };
-    case 'left top':
-      return { x: 'minX', y: 'minY' };
-    default:
-      return { x: 'midX', y: 'midY' };
-  }
-}
 
 export type ZoomToFitOptions = {
   padding?: string | number;

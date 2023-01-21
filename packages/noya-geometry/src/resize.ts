@@ -1,4 +1,4 @@
-import { Rect, Size } from './types';
+import { Rect, ResizePosition, Size } from './types';
 
 export function center(source: Size, destination: Size): Rect {
   return {
@@ -56,4 +56,30 @@ export function resizeIfLarger(source: Size, destination: Size) {
   }
 
   return resize(source, destination, 'scaleAspectFit');
+}
+
+export function getAnchorForResizePosition(position?: ResizePosition): {
+  x: 'minX' | 'midX' | 'maxX';
+  y: 'minY' | 'midY' | 'maxY';
+} {
+  switch (position) {
+    case 'top':
+      return { x: 'midX', y: 'minY' };
+    case 'right top':
+      return { x: 'maxX', y: 'minY' };
+    case 'right':
+      return { x: 'maxX', y: 'midY' };
+    case 'right bottom':
+      return { x: 'maxX', y: 'maxY' };
+    case 'bottom':
+      return { x: 'midX', y: 'maxY' };
+    case 'left bottom':
+      return { x: 'minX', y: 'maxY' };
+    case 'left':
+      return { x: 'minX', y: 'midY' };
+    case 'left top':
+      return { x: 'minX', y: 'minY' };
+    default:
+      return { x: 'midX', y: 'midY' };
+  }
 }
