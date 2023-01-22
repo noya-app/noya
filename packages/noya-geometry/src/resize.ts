@@ -1,3 +1,5 @@
+import { AffineTransform } from './AffineTransform';
+import { createBounds } from './rect';
 import { Rect, ResizePosition, Size } from './types';
 
 export function center(source: Size, destination: Size): Rect {
@@ -82,4 +84,51 @@ export function getAnchorForResizePosition(position?: ResizePosition): {
     default:
       return { x: 'midX', y: 'midY' };
   }
+}
+
+export function createResizeTransform(
+  contentRect: Rect,
+  containerSize: Size,
+  {
+    padding = 0,
+    scalingMode = 'upOrDown',
+    resizePosition,
+  }: {
+    padding?: number;
+    scalingMode?: 'upOrDown' | 'down';
+    resizePosition?: ResizePosition;
+  } = {},
+) {
+  const bounds = createBounds(contentRect);
+
+  const containerSizeMinusPadding = {
+    width: containerSize.width - padding * 2,
+    height: containerSize.height - padding * 2,
+  };
+
+  const containerBounds = createBounds(containerSizeMinusPadding);
+  const anchor = getAnchorForResizePosition(resizePosition);
+
+  const resizedContentRect =
+    scalingMode === 'down'
+      ? resizeIfLarger(contentRect, containerSizeMinusPadding)
+      : resize(contentRect, containerSizeMinusPadding);
+
+  const scale = {
+    x: resizedContentRect.width / contentRect.width,
+    y: resizedContentRect.height / contentRect.height,
+  };
+
+  const transform = AffineTransform.multiply(
+    // Translate to the new position
+    AffineTransform.translate(
+      containerBounds[anchor.x] + padding,
+      containerBounds[anchor.y] + padding,
+    ),
+    AffineTransform.scale(scale.x, scale.y),
+    // Translate to (0,0) before scaling, since scale is applied at the origin
+    AffineTransform.translate(-bounds[anchor.x], -bounds[anchor.y]),
+  );
+
+  return transform;
 }

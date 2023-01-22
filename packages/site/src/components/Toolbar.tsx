@@ -38,9 +38,10 @@ const LogoContainer = styled.div({
 
 interface Props {
   children?: ReactNode;
+  right?: ReactNode;
 }
 
-export function Toolbar({ children }: Props) {
+export function Toolbar({ children, right }: Props) {
   const theme = useDesignSystemTheme();
   const session = useNoyaSession();
   const router = useRouter();
@@ -73,32 +74,35 @@ export function Toolbar({ children }: Props) {
       <DividerVertical />
       <Spacer.Horizontal size={10} />
       <Spacer.Horizontal />
-      {session && (
-        <DropdownMenu
-          items={userMenuItems}
-          onSelect={(value) => {
-            switch (value) {
-              case 'signOut':
-                window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
-                return;
-              case 'contact':
-                window.location.href =
-                  'https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd';
-                return;
-              case 'help':
-                window.location.href =
-                  'https://noyasoftware.notion.site/Noya-Help-4344e26dc3394c7195305b15b050e616';
-                return;
-            }
-          }}
-        >
-          <Button id="insert-symbol" data-private>
-            {session.user.name ?? session.user.email}
-            <Spacer.Horizontal size={4} />
-            <ChevronDownIcon />
-          </Button>
-        </DropdownMenu>
-      )}
+      <Stack.H gap={theme.sizes.toolbar.itemSeparator}>
+        {right}
+        {session && (
+          <DropdownMenu
+            items={userMenuItems}
+            onSelect={(value) => {
+              switch (value) {
+                case 'signOut':
+                  window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
+                  return;
+                case 'contact':
+                  window.location.href =
+                    'https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd';
+                  return;
+                case 'help':
+                  window.location.href =
+                    'https://noyasoftware.notion.site/Noya-Help-4344e26dc3394c7195305b15b050e616';
+                  return;
+              }
+            }}
+          >
+            <Button id="insert-symbol" data-private>
+              {session.user.name ?? session.user.email}
+              <Spacer.Horizontal size={4} />
+              <ChevronDownIcon />
+            </Button>
+          </DropdownMenu>
+        )}
+      </Stack.H>
       <div
         style={{
           position: 'absolute',

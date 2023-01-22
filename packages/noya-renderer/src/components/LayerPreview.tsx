@@ -1,12 +1,7 @@
 import Sketch from 'noya-file-format';
 import {
-  AffineTransform,
-  createBounds,
-  getAnchorForResizePosition,
+  createResizeTransform,
   Rect,
-  resize,
-  resizeIfLarger,
-  ResizePosition,
   Size,
   transformRect,
 } from 'noya-geometry';
@@ -44,58 +39,6 @@ interface Props {
   backgroundColor?: Sketch.Color;
 }
 
-export function createResizeTransform({
-  contentRect,
-  containerSize,
-  padding = 0,
-  scalingMode = 'upOrDown',
-  resizePosition,
-}: {
-  contentRect: Rect;
-  containerSize: Size;
-  padding?: number;
-  scalingMode: Props['scalingMode'];
-  resizePosition?: ResizePosition;
-}) {
-  const bounds = createBounds(contentRect);
-
-  const containerSizeMinusPadding = {
-    width: containerSize.width - padding * 2,
-    height: containerSize.height - padding * 2,
-  };
-
-  const containerBounds = createBounds(containerSizeMinusPadding);
-  const anchor = getAnchorForResizePosition(resizePosition);
-
-  const resizedContentRect =
-    scalingMode === 'down'
-      ? resizeIfLarger(contentRect, containerSizeMinusPadding)
-      : resize(contentRect, containerSizeMinusPadding);
-
-  const scale = {
-    x: resizedContentRect.width / contentRect.width,
-    y: resizedContentRect.height / contentRect.height,
-  };
-
-  const transform = AffineTransform.multiply(
-    // Translate to the center of the size
-    AffineTransform.translate(
-      containerBounds[anchor.x] + padding * scale.x,
-      containerBounds[anchor.y] + padding * scale.y,
-    ),
-    AffineTransform.scale(scale.x, scale.y),
-    // Translate to (0,0) before scaling, since scale is applied at the origin
-    AffineTransform.translate(
-      -bounds[anchor.x] - padding,
-      -bounds[anchor.y] - padding,
-    ),
-  );
-
-  const paddedRect = transformRect(contentRect, transform);
-
-  return { transform, paddedRect };
-}
-
 export function LayerPreview({
   layer,
   layerFrame: contentRect,
@@ -107,15 +50,18 @@ export function LayerPreview({
 }: Props) {
   const CanvasKit = useCanvasKit();
 
-  const { transform, paddedRect } = useMemo(
+  const transform = useMemo(
     () =>
-      createResizeTransform({
-        contentRect,
-        containerSize,
+      createResizeTransform(contentRect, containerSize, {
         padding,
         scalingMode,
       }),
     [contentRect, containerSize, padding, scalingMode],
+  );
+
+  const paddedRect = useMemo(
+    () => transformRect(contentRect, transform),
+    [contentRect, transform],
   );
 
   const path = useMemo(() => {

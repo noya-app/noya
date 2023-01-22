@@ -25,19 +25,19 @@ import React, {
   useEffect,
   useReducer,
 } from 'react';
-import { Content } from '../ayon/Content';
+import { Content, ViewType } from '../ayon/Content';
 import { allAyonSymbols, ayonLibraryId } from '../ayon/symbols';
-
-let initialized = false;
 
 function Workspace({
   uploadAsset,
   initialDocument,
   onChangeDocument,
+  viewType,
 }: {
   uploadAsset: ComponentProps<typeof Content>['uploadAsset'];
   initialDocument: SketchFile;
   onChangeDocument: (document: SketchFile) => void;
+  viewType: ViewType;
 }): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
@@ -87,10 +87,12 @@ function Workspace({
 
   return (
     <StateProvider state={state} dispatch={dispatch}>
-      <Content uploadAsset={uploadAsset} />
+      <Content uploadAsset={uploadAsset} viewType={viewType} />
     </StateProvider>
   );
 }
+
+let initialized = false;
 
 export default memo(function Ayon(
   props: ComponentProps<typeof Workspace>,

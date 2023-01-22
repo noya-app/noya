@@ -2,8 +2,10 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
+  Button,
   DesignSystemConfigurationProvider,
   Divider,
+  DropdownMenu,
   lightTheme,
   Small,
   Spacer,
@@ -11,12 +13,18 @@ import {
   useDesignSystemTheme,
   useOpenInputDialog,
 } from 'noya-designsystem';
-import { DashboardIcon } from 'noya-icons';
+import {
+  BoxIcon,
+  ChevronDownIcon,
+  DashboardIcon,
+  ViewVerticalIcon,
+} from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { SketchFile } from 'noya-sketch-file';
 import { debounce } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { ViewType } from '../../ayon/Content';
 
 import { Toolbar } from '../../components/Toolbar';
 
@@ -67,7 +75,7 @@ function FileTitle({ id }: { id: string }) {
   );
 }
 
-function FileEditor({ id }: { id: string }) {
+function FileEditor({ id, viewType }: { id: string; viewType: ViewType }) {
   const client = useNoyaClient();
   const files = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
@@ -148,6 +156,7 @@ function FileEditor({ id }: { id: string }) {
       uploadAsset={uploadAsset}
       initialDocument={initialFile.data.document}
       onChangeDocument={updateDocument}
+      viewType={viewType}
     />
   );
 }
@@ -156,16 +165,43 @@ function Content() {
   const { query } = useRouter();
   const id = query.id as string | undefined;
   const theme = useDesignSystemTheme();
+  const [viewType, setViewType] = useState<ViewType>('split');
 
   if (!id) return null;
 
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
-      <Toolbar>
+      <Toolbar
+        right={
+          <DropdownMenu<ViewType>
+            items={[
+              {
+                value: 'split',
+                title: 'Split View',
+                icon: <ViewVerticalIcon />,
+                checked: viewType === 'split',
+              },
+              {
+                value: 'combined',
+                title: 'Combined View',
+                icon: <BoxIcon />,
+                checked: viewType === 'combined',
+              },
+            ]}
+            onSelect={setViewType}
+          >
+            <Button>
+              View
+              <Spacer.Horizontal size={4} />
+              <ChevronDownIcon />
+            </Button>
+          </DropdownMenu>
+        }
+      >
         <FileTitle id={id} />
       </Toolbar>
       <Divider variant="strong" />
-      <FileEditor id={id} />
+      <FileEditor id={id} viewType={viewType} />
     </Stack.V>
   );
 }

@@ -28,15 +28,20 @@ const Overlay = styled.div({
   position: 'absolute',
   inset: 0,
   pointerEvents: 'none',
+  display: 'flex',
 });
 
 const redirectResolver = new RedirectResolver();
 const generateResolver = new GenerateResolver();
 
+export type ViewType = 'split' | 'combined';
+
 export const Content = memo(function Content({
   uploadAsset,
+  viewType,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
+  viewType: ViewType;
 }) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -230,7 +235,11 @@ export const Content = memo(function Content({
             )}
           </SimpleCanvas>
         </FileDropTarget>
-
+        {viewType === 'combined' && (
+          <Overlay>
+            <DOMRenderer resizeBehavior="match-canvas" />
+          </Overlay>
+        )}
         <Overlay>
           <SVGRenderer size={canvasSize}>
             <RenderingModeProvider value="interactive">
@@ -258,10 +267,14 @@ export const Content = memo(function Content({
           </SVGRenderer>
         </Overlay>
       </Panel.Item>
-      <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
-      <Panel.Item collapsible>
-        <DOMRenderer />
-      </Panel.Item>
+      {viewType === 'split' && (
+        <>
+          <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
+          <Panel.Item collapsible>
+            <DOMRenderer resizeBehavior="fit-container" />
+          </Panel.Item>
+        </>
+      )}
     </Panel.Root>
   );
 });

@@ -20,11 +20,16 @@ import {
   Text,
   theme,
 } from '@chakra-ui/react';
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { createRect, Rect, Size } from 'noya-geometry';
+import {
+  createRect,
+  createResizeTransform,
+  Rect,
+  Size,
+  transformRect,
+} from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
-import { createResizeTransform } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import React, { useEffect, useRef } from 'react';
@@ -410,17 +415,29 @@ function SymbolRenderer({
   );
 }
 
-function DOMRendererContent({ size }: { size: Size }): JSX.Element {
+function DOMRendererContent({
+  size,
+  resizeBehavior,
+}: {
+  size: Size;
+  resizeBehavior: ResizeBehavior;
+}): JSX.Element {
   const [state] = useApplicationState();
+  const { canvasInsets } = useWorkspace();
   const page = Selectors.getCurrentPage(state);
   const artboard = page.layers[0] as Sketch.Artboard;
+  const rect = Selectors.getBoundingRect(page, [artboard.do_objectID])!;
 
-  const { transform, paddedRect } = createResizeTransform({
-    containerSize: size,
-    contentRect: artboard.frame,
+  const containerTransform = createResizeTransform(artboard.frame, size, {
     scalingMode: 'down',
     resizePosition: 'top',
+    padding: 20,
   });
+  const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
+  const transform =
+    resizeBehavior === 'match-canvas' ? canvasTransform : containerTransform;
+
+  const paddedRect = transformRect(rect, transform);
 
   return (
     <ChakraProvider>
@@ -439,65 +456,54 @@ function DOMRendererContent({ size }: { size: Size }): JSX.Element {
           position: 'absolute',
           transform: transform.toString(),
           transformOrigin: 'top left',
+          background: 'white',
+          width: rect.width,
+          height: rect.height,
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            left: artboard.frame.x,
-            top: artboard.frame.y,
-            width: artboard.frame.width,
-            height: artboard.frame.height,
-            backgroundColor: '#fff',
-          }}
-        >
-          {artboard.layers.filter(Layers.isSymbolInstance).map((layer) => (
-            <SymbolRenderer
-              key={layer.do_objectID}
-              frame={layer.frame}
-              symbolId={layer.symbolID}
-              blockText={layer.blockText}
-              resolvedBlockData={layer.resolvedBlockData}
-            />
-          ))}
-          {state.interactionState.type === 'drawing' && (
-            <SymbolRenderer
-              key="drawing"
-              frame={createRect(
-                state.interactionState.origin,
-                state.interactionState.current,
-              )}
-              symbolId={
-                typeof state.interactionState.shapeType === 'string'
-                  ? buttonSymbol.symbolID
-                  : state.interactionState.shapeType.symbolId
-              }
-            />
-          )}
-        </div>
+        {artboard.layers.filter(Layers.isSymbolInstance).map((layer) => (
+          <SymbolRenderer
+            key={layer.do_objectID}
+            frame={layer.frame}
+            symbolId={layer.symbolID}
+            blockText={layer.blockText}
+            resolvedBlockData={layer.resolvedBlockData}
+          />
+        ))}
+        {state.interactionState.type === 'drawing' && (
+          <SymbolRenderer
+            key="drawing"
+            frame={createRect(
+              state.interactionState.origin,
+              state.interactionState.current,
+            )}
+            symbolId={
+              typeof state.interactionState.shapeType === 'string'
+                ? buttonSymbol.symbolID
+                : state.interactionState.shapeType.symbolId
+            }
+          />
+        )}
       </div>
     </ChakraProvider>
   );
 }
 
-export function DOMRenderer(): JSX.Element {
+type ResizeBehavior = 'match-canvas' | 'fit-container';
+
+export function DOMRenderer({
+  resizeBehavior,
+}: {
+  resizeBehavior: ResizeBehavior;
+}): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const size = useSize(containerRef);
-  const [state] = useApplicationState();
-  const page = Selectors.getCurrentPage(state);
-  const artboard = page.layers[0] as Sketch.Artboard;
-  const ratio = artboard.frame.width / artboard.frame.height;
 
   return (
-    <div style={{ display: 'flex', flex: 1, padding: 20 }}>
+    <div style={{ display: 'flex', flex: 1 }}>
       <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
         {size && (
-          <DOMRendererContent
-            size={{
-              width: size.width,
-              height: size.width / ratio,
-            }}
-          />
+          <DOMRendererContent size={size} resizeBehavior={resizeBehavior} />
         )}
       </div>
     </div>

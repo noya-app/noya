@@ -5,6 +5,7 @@ import React, {
   memo,
   ReactNode,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -17,9 +18,9 @@ interface Props {
 }
 
 export const CanvasViewer = memo(function CanvasViewer({
+  renderContent,
   width,
   height,
-  renderContent,
 }: Props) {
   const CanvasKit = useCanvasKit();
   const rawApplicationState = useWorkspaceState();
@@ -27,13 +28,18 @@ export const CanvasViewer = memo(function CanvasViewer({
   const [imageData, setImageData] = useState<ImageData | undefined>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const size = useMemo(
+    () => ({ width: Math.ceil(width), height: Math.ceil(height) }),
+    [width, height],
+  );
+
   useLayoutEffect(() => {
     let valid = true;
 
     generateImage(
       CanvasKit,
-      width,
-      height,
+      size.width,
+      size.height,
       theme,
       rawApplicationState,
       'bytes',
@@ -42,14 +48,25 @@ export const CanvasViewer = memo(function CanvasViewer({
       if (!valid || !bytes) return;
 
       setImageData(
-        new ImageData(new Uint8ClampedArray(bytes.buffer), width, height),
+        new ImageData(
+          new Uint8ClampedArray(bytes.buffer),
+          size.width,
+          size.height,
+        ),
       );
     });
 
     return () => {
       valid = false;
     };
-  }, [CanvasKit, width, height, theme, rawApplicationState, renderContent]);
+  }, [
+    CanvasKit,
+    theme,
+    rawApplicationState,
+    renderContent,
+    size.width,
+    size.height,
+  ]);
 
   useLayoutEffect(() => {
     if (!imageData) return;
@@ -59,7 +76,7 @@ export const CanvasViewer = memo(function CanvasViewer({
     if (!context) return;
 
     context.putImageData(imageData, 0, 0);
-  }, [height, imageData, width]);
+  }, [size.height, size.width, imageData]);
 
-  return <canvas ref={canvasRef} width={width} height={height} />;
+  return <canvas ref={canvasRef} width={size.width} height={size.height} />;
 });

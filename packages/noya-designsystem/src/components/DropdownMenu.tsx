@@ -63,6 +63,12 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
         <StyledItemIndicator>
           <CheckIcon />
         </StyledItemIndicator>
+        {icon && (
+          <>
+            {icon}
+            <Spacer.Horizontal size={8} />
+          </>
+        )}
         {children}
       </CheckboxItemElement>
     );
