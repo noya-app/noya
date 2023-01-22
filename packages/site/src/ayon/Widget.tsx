@@ -203,6 +203,13 @@ export function Widget({
         }}
         disabled={!isEditing}
         onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            dispatch('interaction', ['reset']);
+            dispatch('selectLayer', []);
+            event.preventDefault();
+            return;
+          }
+
           if (event.key !== 'Tab') {
             return;
           }
