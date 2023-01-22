@@ -111,8 +111,7 @@ export default memo(function ExportInspector() {
 
       return generateImage(
         CanvasKit,
-        exportSize.width,
-        exportSize.height,
+        exportSize,
         theme,
         getWorkspaceStateSnapshot(),
         exportFormat.fileFormat.toString() as ImageEncoding,

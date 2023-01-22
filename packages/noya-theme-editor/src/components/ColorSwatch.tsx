@@ -36,8 +36,7 @@ export const ColorSwatch = memo(function ColorSwatch({ value }: Props) {
 
   return (
     <CanvasViewer
-      width={size.width}
-      height={size.height}
+      size={size}
       renderContent={() => <RCKColorSwatch color={colorString} size={size} />}
     />
   );

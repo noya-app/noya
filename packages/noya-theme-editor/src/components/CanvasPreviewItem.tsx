@@ -39,13 +39,7 @@ export const CanvasPreviewItem = memo(function CanvasPreviewItem({
   return (
     <Container ref={containerRef} background={background}>
       <Inner>
-        {size && (
-          <CanvasViewer
-            width={size.width}
-            height={size.height}
-            renderContent={renderer}
-          />
-        )}
+        {size && <CanvasViewer size={size} renderContent={renderer} />}
       </Inner>
     </Container>
   );

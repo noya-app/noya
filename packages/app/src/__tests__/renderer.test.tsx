@@ -108,19 +108,11 @@ async function generatePageImage(
 
   const image = await new Promise<Uint8Array | undefined>((resolve) => {
     act(() => {
-      generateImage(
-        CanvasKit,
-        size.width,
-        size.height,
-        darkTheme,
-        updatedState,
-        'png',
-        () => (
-          <RenderingModeProvider value="interactive">
-            <DesignFile />
-          </RenderingModeProvider>
-        ),
-      ).then(resolve);
+      generateImage(CanvasKit, size, darkTheme, updatedState, 'png', () => (
+        <RenderingModeProvider value="interactive">
+          <DesignFile />
+        </RenderingModeProvider>
+      )).then(resolve);
     });
   });
 

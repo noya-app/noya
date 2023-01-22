@@ -2,6 +2,7 @@ import type { CanvasKit, Image } from 'canvaskit';
 import { StateProvider } from 'noya-app-state-context';
 import { Theme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
   CanvasKitProvider,
@@ -33,14 +34,16 @@ export type ImageEncoding = 'bytes' | 'svg' | 'png' | 'jpg' | 'webp';
 
 export function generateImage(
   CanvasKit: CanvasKit,
-  width: number,
-  height: number,
+  size: Size,
   theme: Theme,
   state: WorkspaceState,
   format: ImageEncoding,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
-  const size = { width: Math.ceil(width), height: Math.ceil(height) };
+  const roundedSize = {
+    width: Math.ceil(size.width),
+    height: Math.ceil(size.height),
+  };
 
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
@@ -50,7 +53,7 @@ export function generateImage(
             <StateProvider state={state}>
               <ImageCacheProvider>
                 <FontManagerProvider>
-                  <SVGRenderer idPrefix="" size={size}>
+                  <SVGRenderer idPrefix="" size={roundedSize}>
                     {renderContent()}
                   </SVGRenderer>
                 </FontManagerProvider>
@@ -65,7 +68,10 @@ export function generateImage(
       );
     }
     default: {
-      const surface = CanvasKit.MakeSurface(size.width, size.height);
+      const surface = CanvasKit.MakeSurface(
+        roundedSize.width,
+        roundedSize.height,
+      );
 
       if (!surface) {
         console.warn('failed to create surface');

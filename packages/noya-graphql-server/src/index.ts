@@ -84,8 +84,7 @@ async function main() {
 
             const image = await generateImage(
               CanvasKit,
-              size.width,
-              size.height,
+              size,
               lightTheme,
               workspaceState,
               format as ImageEncoding,

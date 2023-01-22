@@ -1,5 +1,6 @@
 import { useWorkspaceState } from 'noya-app-state-context';
 import { generateImage } from 'noya-generate-image';
+import { Size } from 'noya-geometry';
 import { useCanvasKit } from 'noya-renderer';
 import React, {
   memo,
@@ -12,15 +13,13 @@ import React, {
 import { useTheme } from 'styled-components';
 
 interface Props {
-  width: number;
-  height: number;
+  size: Size;
   renderContent: () => ReactNode;
 }
 
 export const CanvasViewer = memo(function CanvasViewer({
   renderContent,
-  width,
-  height,
+  size,
 }: Props) {
   const CanvasKit = useCanvasKit();
   const rawApplicationState = useWorkspaceState();
@@ -28,9 +27,9 @@ export const CanvasViewer = memo(function CanvasViewer({
   const [imageData, setImageData] = useState<ImageData | undefined>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const size = useMemo(
-    () => ({ width: Math.ceil(width), height: Math.ceil(height) }),
-    [width, height],
+  const roundedSize = useMemo(
+    () => ({ width: Math.ceil(size.width), height: Math.ceil(size.height) }),
+    [size.width, size.height],
   );
 
   useLayoutEffect(() => {
@@ -38,8 +37,7 @@ export const CanvasViewer = memo(function CanvasViewer({
 
     generateImage(
       CanvasKit,
-      size.width,
-      size.height,
+      roundedSize,
       theme,
       rawApplicationState,
       'bytes',
@@ -50,8 +48,8 @@ export const CanvasViewer = memo(function CanvasViewer({
       setImageData(
         new ImageData(
           new Uint8ClampedArray(bytes.buffer),
-          size.width,
-          size.height,
+          roundedSize.width,
+          roundedSize.height,
         ),
       );
     });
@@ -59,14 +57,7 @@ export const CanvasViewer = memo(function CanvasViewer({
     return () => {
       valid = false;
     };
-  }, [
-    CanvasKit,
-    theme,
-    rawApplicationState,
-    renderContent,
-    size.width,
-    size.height,
-  ]);
+  }, [CanvasKit, theme, rawApplicationState, renderContent, roundedSize]);
 
   useLayoutEffect(() => {
     if (!imageData) return;
@@ -76,7 +67,14 @@ export const CanvasViewer = memo(function CanvasViewer({
     if (!context) return;
 
     context.putImageData(imageData, 0, 0);
-  }, [size.height, size.width, imageData]);
+    // I think we need to re-run if size changes
+  }, [roundedSize.height, roundedSize.width, imageData]);
 
-  return <canvas ref={canvasRef} width={size.width} height={size.height} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      width={roundedSize.width}
+      height={roundedSize.height}
+    />
+  );
 });
