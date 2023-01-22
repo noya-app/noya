@@ -183,7 +183,7 @@ export const Content = memo(function Content({
               Interactions.createScale({ inferBlockType }),
               Interactions.createInsertMode({ inferBlockType }),
               Interactions.selection,
-              Interactions.move,
+              Interactions.createMove({ inferBlockType }),
               Interactions.createDrawing({
                 allowDrawingFromNoneState: true,
                 inferBlockType,

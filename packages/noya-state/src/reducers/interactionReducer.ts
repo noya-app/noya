@@ -67,7 +67,7 @@ export type InteractionAction =
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction?: CompassDirection]
   | [type: 'startPanning', point: Point]
-  | [type: 'updateMoving', point: Point]
+  | [type: 'updateMoving', point: Point, inferBlockType?: InferBlockType]
   | [type: 'updateScaling', point: Point, inferBlockType?: InferBlockType]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']

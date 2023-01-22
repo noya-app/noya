@@ -935,6 +935,9 @@ export function canvasReducer(
             break;
           }
           case 'moving': {
+            const inferBlockType =
+              action[1][0] === 'updateMoving' ? action[1][2] : undefined;
+
             const { origin, current, pageSnapshot } = interactionState;
 
             const sourceRect = getBoundingRect(pageSnapshot, layerIds, {
@@ -980,6 +983,18 @@ export function canvasReducer(
                 draft.sketch.pages[pageIndex],
                 indexPath.slice(0, -1),
               );
+
+              if (
+                inferBlockType &&
+                Layers.isSymbolInstance(draftLayer) &&
+                !draftLayer.symbolIDIsFixed
+              ) {
+                const newType = inferBlockType({ rect: draftLayer.frame });
+
+                if (typeof newType !== 'string') {
+                  draftLayer.symbolID = newType.symbolId;
+                }
+              }
             });
 
             break;

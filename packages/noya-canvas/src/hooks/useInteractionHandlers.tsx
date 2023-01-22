@@ -113,7 +113,8 @@ export function useInteractionHandlers({
         dispatch('selectLayer', layerId, selectionType),
       deleteLayer: (layerId) => dispatch('deleteLayer', layerId),
       maybeMove: (point) => dispatch('interaction', ['maybeMove', point]),
-      updateMoving: (point) => dispatch('interaction', ['updateMoving', point]),
+      updateMoving: (point, inferBlockType) =>
+        dispatch('interaction', ['updateMoving', point, inferBlockType]),
       maybeScale: (point, direction) =>
         dispatch('interaction', ['maybeScale', point, direction]),
       updateScaling: (point, inferBlockType) =>

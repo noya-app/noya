@@ -9,7 +9,7 @@ import { focusInteraction } from './focus';
 import { historyInteraction } from './history';
 import { createInsertModeInteraction } from './insertMode';
 import { marqueeInteraction } from './marquee';
-import { moveInteraction } from './move';
+import { createMoveInteraction } from './move';
 import { panInteraction } from './pan';
 import { reorderInteraction } from './reorder';
 import { createScaleInteraction } from './scale';
@@ -18,7 +18,7 @@ import { zoomInteraction } from './zoom';
 
 export namespace Interactions {
   export const focus = focusInteraction;
-  export const move = moveInteraction;
+  export const createMove = createMoveInteraction;
   export const marquee = marqueeInteraction;
   export const selection = selectionInteraction;
   export const pan = panInteraction;
