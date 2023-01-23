@@ -181,17 +181,22 @@ export default memo(function SketchArtboard({
   isSymbolMaster,
   SketchLayer,
 }: Props) {
+  const {
+    preferences: { showDotGrid },
+  } = useWorkspace();
   const renderingMode = useRenderingMode();
 
   return (
     <>
       {renderingMode === 'interactive' && (
         <>
-          <ArtboardLabel
-            text={layer.name}
-            layerFrame={layer.frame}
-            isSymbolMaster={isSymbolMaster}
-          />
+          {!showDotGrid && (
+            <ArtboardLabel
+              text={layer.name}
+              layerFrame={layer.frame}
+              isSymbolMaster={isSymbolMaster}
+            />
+          )}
           <ArtboardBlur layerFrame={layer.frame} />
         </>
       )}
