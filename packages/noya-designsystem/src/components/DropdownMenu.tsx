@@ -127,6 +127,7 @@ function DropdownMenuRoot<T extends string>({
   onSelect,
   isNested,
   shouldBindKeyboardShortcuts,
+  onOpenChange,
 }: MenuProps<T>) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
@@ -151,7 +152,7 @@ function DropdownMenuRoot<T extends string>({
   const ContentComponent = isNested ? SubContent : Content;
 
   return (
-    <RootComponent>
+    <RootComponent onOpenChange={onOpenChange}>
       <TriggerComponent asChild>{children}</TriggerComponent>
       <RadixDropdownMenu.Portal>
         <ContentComponent sideOffset={4}>

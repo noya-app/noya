@@ -32,6 +32,7 @@ export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 export * from './components/Label';
 export * from './components/LabeledElementView';
 export * from './components/ListView';
+export * from './components/Popover';
 export * from './components/RadioGroup';
 export * from './components/ScrollArea';
 export * from './components/Select';

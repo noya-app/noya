@@ -5,13 +5,9 @@ import {
   DesignSystemConfigurationProvider,
   Divider,
   lightTheme,
-  Small,
-  Spacer,
   Stack,
   useDesignSystemTheme,
-  useOpenInputDialog,
 } from 'noya-designsystem';
-import { DashboardIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { SketchFile } from 'noya-sketch-file';
 import { debounce } from 'noya-utils';
@@ -22,64 +18,26 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import styled from 'styled-components';
+import { ProjectTitle } from '../../components/ProjectTitle';
 
 import { Toolbar } from '../../components/Toolbar';
+import {
+  ProjectContextValue,
+  ProjectProvider,
+} from '../../contexts/ProjectContext';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
-const TitleContainer = styled.div({
-  display: 'flex',
-  alignItems: 'center',
-  cursor: 'pointer',
-  userSelect: 'none',
-  '&:hover': {
-    opacity: 0.8,
-  },
-  '&:active': {
-    opacity: 0.9,
-  },
-});
-
 function FileTitle({ id }: { id: string }) {
-  const client = useNoyaClient();
   const files = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
 
-  const openDialog = useOpenInputDialog();
-
-  const updateName = useCallback(async () => {
-    if (!cachedFile) return;
-
-    const newName = await openDialog('Rename project', cachedFile.data.name);
-
-    if (!newName) return;
-
-    const data = { ...cachedFile.data, name: newName };
-
-    client.files.update(cachedFile.id, data);
-  }, [cachedFile, client.files, openDialog]);
-
-  const theme = useDesignSystemTheme();
-
   if (!cachedFile) return null;
 
-  return (
-    <TitleContainer onClick={updateName}>
-      <DashboardIcon color={theme.colors.textMuted} />
-      <Spacer.Horizontal size={6} />
-      <Small lineHeight={'15px'}>{cachedFile.data.name}</Small>
-    </TitleContainer>
-  );
+  return <ProjectTitle>{cachedFile.data.name}</ProjectTitle>;
 }
 
-function FileEditor({
-  id,
-  setRightToolbar,
-}: {
-  id: string;
-  setRightToolbar: (rightToolbar: ReactNode) => void;
-}) {
+function FileEditor({ id }: { id: string }) {
   const client = useNoyaClient();
   const files = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
@@ -127,6 +85,19 @@ function FileEditor({
     ],
   );
 
+  const updateName = useCallback(
+    async (newName: string) => {
+      if (!cachedFile) return;
+
+      if (!newName) return;
+
+      const data = { ...cachedFile.data, name: newName };
+
+      client.files.update(cachedFile.id, data);
+    },
+    [cachedFile, client.files],
+  );
+
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (!updateDebounced.pending()) return;
@@ -153,14 +124,15 @@ function FileEditor({
     return client.assets.url(fileId);
   };
 
-  if (!initialFile) return null;
+  if (!initialFile || !cachedFile) return null;
 
   return (
     <Ayon
       uploadAsset={uploadAsset}
+      name={cachedFile.data.name}
       initialDocument={initialFile.data.document}
       onChangeDocument={updateDocument}
-      setRightToolbar={setRightToolbar}
+      onChangeName={updateName}
     />
   );
 }
@@ -170,17 +142,25 @@ function Content() {
   const id = query.id as string | undefined;
   const theme = useDesignSystemTheme();
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
+  const [centerToolbar, setCenterToolbar] = useState<ReactNode>(null);
+
+  const project: ProjectContextValue = useMemo(
+    () => ({ setCenterToolbar, setRightToolbar }),
+    [],
+  );
 
   if (!id) return null;
 
   return (
-    <Stack.V flex="1" background={theme.colors.canvas.background}>
-      <Toolbar right={rightToolbar}>
-        <FileTitle id={id} />
-      </Toolbar>
-      <Divider variant="strong" />
-      <FileEditor id={id} setRightToolbar={setRightToolbar} />
-    </Stack.V>
+    <ProjectProvider value={project}>
+      <Stack.V flex="1" background={theme.colors.canvas.background}>
+        <Toolbar right={rightToolbar}>
+          {centerToolbar || <FileTitle id={id} />}
+        </Toolbar>
+        <Divider variant="strong" />
+        <FileEditor id={id} />
+      </Stack.V>
+    </ProjectProvider>
   );
 }
 

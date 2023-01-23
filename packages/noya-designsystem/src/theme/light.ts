@@ -123,7 +123,7 @@ export const textStyles = {
     fontWeight: 400,
     lineHeight: '1.4',
     textTransform: 'uppercase',
-    letterSpacing: '0.4px',
+    letterSpacing: '0.3px',
   } as CSSObject,
 };
 

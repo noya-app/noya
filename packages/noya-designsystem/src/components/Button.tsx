@@ -21,6 +21,7 @@ const ButtonElement = styled.button<{
 }>(({ theme, active, disabled, variant, flex }) => ({
   WebkitAppRegion: 'no-drag',
   ...theme.textStyles.small,
+  lineHeight: '1',
   flex: flex ?? '0 0 auto',
   position: 'relative',
   border: '0',
@@ -68,6 +69,9 @@ const ButtonContent = styled.span(({ theme }) => ({
   alignItems: 'center',
   flex: '1',
   justifyContent: 'center',
+
+  // Helps with alignment with the default small text
+  lineHeight: '15px',
 }));
 
 /* ----------------------------------------------------------------------------

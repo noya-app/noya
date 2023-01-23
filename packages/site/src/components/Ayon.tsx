@@ -1,6 +1,12 @@
 import produce from 'immer';
 import { StateProvider } from 'noya-app-state-context';
-import { Button, DropdownMenu, Spacer } from 'noya-designsystem';
+import {
+  Button,
+  DropdownMenu,
+  Popover,
+  Spacer,
+  Stack,
+} from 'noya-designsystem';
 import { BoxIcon, ChevronDownIcon, ViewVerticalIcon } from 'noya-icons';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -22,7 +28,6 @@ import {
 import React, {
   ComponentProps,
   memo,
-  ReactNode,
   Suspense,
   useCallback,
   useEffect,
@@ -32,21 +37,27 @@ import React, {
 } from 'react';
 import { Content, ViewType } from '../ayon/Content';
 import { allAyonSymbols, ayonLibraryId } from '../ayon/symbols';
+import { useProject } from '../contexts/ProjectContext';
+import { ProjectMenu } from './ProjectMenu';
+import { ProjectTitle } from './ProjectTitle';
 
 function Workspace({
   uploadAsset,
   initialDocument,
   onChangeDocument,
-  setRightToolbar,
+  name,
+  onChangeName,
 }: {
   uploadAsset: ComponentProps<typeof Content>['uploadAsset'];
   initialDocument: SketchFile;
   onChangeDocument: (document: SketchFile) => void;
-  setRightToolbar: (element: ReactNode) => void;
+  name: string;
+  onChangeName: (name: string) => void;
 }): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const [viewType, setViewType] = useState<ViewType>('split');
+  const { setRightToolbar, setCenterToolbar } = useProject();
 
   const reducer = useCallback(
     (state: WorkspaceState, action: WorkspaceAction) =>
@@ -109,6 +120,9 @@ function Workspace({
           },
         ]}
         onSelect={setViewType}
+        onOpenChange={() => {
+          dispatch(['selectLayer', []]);
+        }}
       >
         <Button>
           View
@@ -118,6 +132,23 @@ function Workspace({
       </DropdownMenu>,
     );
   }, [setRightToolbar, viewType]);
+
+  useLayoutEffect(() => {
+    setCenterToolbar(
+      <StateProvider state={state} dispatch={dispatch}>
+        <Popover
+          trigger={<ProjectTitle>{name}</ProjectTitle>}
+          onOpenChange={() => {
+            dispatch(['selectLayer', []]);
+          }}
+        >
+          <Stack.V width={240}>
+            <ProjectMenu name={name} onChangeName={onChangeName} />
+          </Stack.V>
+        </Popover>
+      </StateProvider>,
+    );
+  }, [name, onChangeName, setCenterToolbar, state]);
 
   return (
     <StateProvider state={state} dispatch={dispatch}>

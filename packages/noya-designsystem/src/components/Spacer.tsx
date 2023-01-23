@@ -2,14 +2,15 @@ import styled from 'styled-components';
 
 interface Props {
   size?: number | string;
+  inline?: boolean;
 }
 
 /* ----------------------------------------------------------------------------
  * Vertical
  * ------------------------------------------------------------------------- */
 
-const SpacerVertical = styled.span<Props>(({ size }) => ({
-  display: 'block',
+const SpacerVertical = styled.span<Props>(({ size, inline }) => ({
+  display: inline ? 'inline-block' : 'block',
   ...(size === undefined ? { flex: 1 } : { minHeight: size }),
 }));
 
@@ -17,8 +18,8 @@ const SpacerVertical = styled.span<Props>(({ size }) => ({
  * Horizontal
  * ------------------------------------------------------------------------- */
 
-const SpacerHorizontal = styled.span<Props>(({ size }) => ({
-  display: 'block',
+const SpacerHorizontal = styled.span<Props>(({ size, inline }) => ({
+  display: inline ? 'inline-block' : 'block',
   ...(size === undefined ? { flex: 1 } : { minWidth: size }),
 }));
 

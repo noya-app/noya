@@ -31,8 +31,18 @@ export type LayerPropertyAction =
   | [type: 'setConstrainProportions', value: boolean]
   | [type: 'setLayerX', value: number, mode?: SetNumberMode]
   | [type: 'setLayerY', value: number, mode?: SetNumberMode]
-  | [type: 'setLayerWidth', value: number, mode?: SetNumberMode]
-  | [type: 'setLayerHeight', value: number, mode?: SetNumberMode]
+  | [
+      type: 'setLayerWidth',
+      layerId: string | string[] | undefined,
+      value: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setLayerHeight',
+      layerId: string | string[] | undefined,
+      value: number,
+      mode?: SetNumberMode,
+    ]
   | [type: 'setLayerRotation', value: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setIsClosed', value: boolean]
@@ -203,9 +213,19 @@ export function layerPropertyReducer(
     }
     case 'setLayerWidth':
     case 'setLayerHeight': {
-      const [type, amount, mode = 'replace'] = action;
+      const [type, id, amount, mode = 'replace'] = action;
+
+      const ids =
+        id === undefined
+          ? state.selectedLayerIds
+          : typeof id === 'string'
+          ? [id]
+          : id;
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
-      const indexPaths = getSelectedLayerIndexPaths(state);
+      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+        ids.includes(layer.do_objectID),
+      );
 
       const property =
         type === 'setLayerWidth' ? ('width' as const) : ('height' as const);

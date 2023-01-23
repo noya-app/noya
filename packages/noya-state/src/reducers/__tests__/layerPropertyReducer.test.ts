@@ -59,7 +59,7 @@ describe('setLayerWidth', () => {
 
     const updated = layerPropertyReducer(
       state,
-      ['setLayerWidth', 200],
+      ['setLayerWidth', undefined, 200],
       CanvasKit,
     );
 

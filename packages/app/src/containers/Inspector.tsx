@@ -74,14 +74,14 @@ export default memo(function Inspector() {
 
   const handleSetWidth = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setLayerWidth', value, mode);
+      dispatch('setLayerWidth', undefined, value, mode);
     },
     [dispatch],
   );
 
   const handleSetHeight = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setLayerHeight', value, mode);
+      dispatch('setLayerHeight', undefined, value, mode);
     },
     [dispatch],
   );
