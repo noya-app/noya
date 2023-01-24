@@ -7,6 +7,7 @@ import {
   Checkbox,
   Flex,
   Heading,
+  HStack,
   IconButton,
   Image,
   Input,
@@ -19,6 +20,7 @@ import {
   SystemProps,
   Text,
   theme,
+  VStack,
 } from '@chakra-ui/react';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
@@ -45,6 +47,7 @@ import {
   heading4Symbol,
   heading5Symbol,
   heading6Symbol,
+  heroSymbol,
   iconButtonSymbol,
   imageSymbol,
   inputSymbol,
@@ -63,11 +66,12 @@ export function filterHashTags(text?: string): {
   content?: string;
   hashTags?: string[];
 } {
-  const words = text?.split(' ');
+  const lines = text?.split(/\r?\n/);
+  const words = lines?.map((line) => line.split(' ')).flat();
   const content = words?.filter((word) => !word.startsWith('#')).join(' ');
   const hashTags = words
     ?.filter((word) => word.startsWith('#'))
-    .map((word) => word.slice(1));
+    .map((word) => word.slice(1).trim());
   return {
     content,
     hashTags,
@@ -82,6 +86,7 @@ function filterTextPropertyHashTags(text?: string): {
   fontWeight?: string;
   fontSize?: string;
   align?: string;
+  textAlign?: SystemProps['textAlign'];
 } {
   const { content, hashTags } = filterHashTags(text);
   const colorByHashTag = hashTags?.find((hashTag) =>
@@ -103,6 +108,9 @@ function filterTextPropertyHashTags(text?: string): {
   const align = hashTags?.find((hashTag) =>
     ['left', 'center', 'right'].includes(hashTag),
   );
+  const textAlign = hashTags?.find((hashTag) =>
+    ['left', 'center', 'right'].includes(hashTag),
+  ) as SystemProps['textAlign'];
   return {
     content,
     hashTags,
@@ -111,6 +119,7 @@ function filterTextPropertyHashTags(text?: string): {
     fontWeight,
     fontSize,
     align,
+    textAlign,
   };
 }
 
@@ -389,6 +398,114 @@ export const symbolIdToElement = {
           </InputGroup>
         )}
         <Avatar size={props.frame.height < 60 ? 'xs' : 'sm'} marginX="10px" />
+      </Flex>
+    );
+  },
+  [heroSymbol.symbolID]: (props: DOMElementsProps) => {
+    const { align, textAlign } = filterTextPropertyHashTags(props.blockText);
+    const blockText = props.blockText
+      ? props.blockText.split(/\n/)
+      : [
+          'Create, iterate, inspire.',
+          'Turn great ideas into new possibilities.',
+          'Get started',
+          'Learn more',
+        ];
+
+    let headline,
+      subheadline,
+      button,
+      button2,
+      defaultHeadlineSize = 'xl',
+      defaultSubheadlineSize = 'md',
+      defaultButtonSize = 'sm',
+      defaultSpacing = 2;
+
+    if (props.frame.width > 800 && props.frame.height > 370) {
+      defaultHeadlineSize = '3xl';
+      defaultSubheadlineSize = '2xl';
+      defaultButtonSize = 'lg';
+      defaultSpacing = 4;
+    } else if (props.frame.width > 500 && props.frame.height > 270) {
+      defaultHeadlineSize = '2xl';
+      defaultSubheadlineSize = 'lg';
+      defaultButtonSize = 'md';
+      defaultSpacing = 3;
+    }
+
+    if (blockText[0]) {
+      headline = filterTextPropertyHashTags(blockText[0]);
+    }
+
+    if (blockText[1]) {
+      subheadline = filterTextPropertyHashTags(blockText[1]);
+    }
+
+    if (blockText[2]) {
+      button = filterTextPropertyHashTags(blockText[2]);
+    }
+
+    if (blockText[3]) {
+      button2 = filterTextPropertyHashTags(blockText[3]);
+    }
+    return (
+      <Flex
+        flexDirection="column"
+        height="100%"
+        justifyContent="center"
+        paddingX={8}
+      >
+        <VStack align={align ?? 'center'} spacing={defaultSpacing}>
+          {headline && (
+            <Heading
+              size={defaultHeadlineSize}
+              color={headline.color}
+              fontWeight={headline.fontWeight}
+              fontSize={headline.fontSize}
+              textAlign={textAlign ?? 'center'}
+            >
+              {headline.content}
+            </Heading>
+          )}
+          {subheadline && (
+            <Text
+              color={subheadline.color}
+              fontWeight={subheadline.fontWeight}
+              fontSize={defaultSubheadlineSize ?? subheadline.fontSize}
+              textAlign={textAlign ?? 'center'}
+            >
+              {subheadline.content}
+            </Text>
+          )}
+          <HStack
+            paddingTop={defaultSpacing * 2}
+            spacing={4}
+            justifyContent={align}
+          >
+            {button && (
+              <Button
+                size={defaultButtonSize}
+                colorScheme={button.colorScheme ?? 'green'}
+                fontWeight={button.fontWeight}
+                fontSize={button.fontSize}
+                alignSelf="flex-start"
+              >
+                {button.content}
+              </Button>
+            )}
+            {button2 && (
+              <Button
+                size={defaultButtonSize}
+                colorScheme={button2.colorScheme}
+                fontWeight={button2.fontWeight}
+                fontSize={button2.fontSize}
+                alignSelf="flex-start"
+              >
+                {button2.content}
+              </Button>
+            )}
+          </HStack>
+        </VStack>
       </Flex>
     );
   },

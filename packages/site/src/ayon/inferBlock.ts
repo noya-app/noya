@@ -13,6 +13,7 @@ import {
   heading4Symbol,
   heading5Symbol,
   heading6Symbol,
+  heroSymbol,
   iconButtonSymbol,
   imageSymbol,
   inputSymbol,
@@ -82,6 +83,12 @@ export const BLOCK_TYPE_HEURISTICS = {
       isWithinRectRange(rect, 400, 30, 2000, 100) && rect.x < 30 && rect.y < 30
         ? 1
         : 0,
+      0.1,
+    ),
+  [heroSymbol.symbolID]: ({ rect, text }: BlockHeuristicInput) =>
+    Math.max(
+      scoreCommandMatch(heroSymbol, text),
+      isWithinRectRange(rect, 400, 200, 2000, 550) && rect.y < 180 ? 1 : 0,
       0.1,
     ),
 };
