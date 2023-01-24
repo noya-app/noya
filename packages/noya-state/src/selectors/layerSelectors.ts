@@ -546,3 +546,25 @@ export function getConstrainedScaling(
       true)
   );
 }
+
+/**
+ * Returns the children blocks of the current artboard, excluding the selected blocks.
+ */
+export function getSiblingBlocks(state: ApplicationState) {
+  const artboard = Layers.find(
+    getCurrentPage(state),
+    (layer) => layer.do_objectID === state.isolatedLayerId,
+  );
+
+  if (!artboard || !Layers.isArtboard(artboard)) return [];
+
+  return artboard.layers
+    .filter(Layers.isSymbolInstance)
+    .filter((layer) => !state.selectedLayerIds.includes(layer.do_objectID))
+    .map((layer) => ({
+      id: layer.do_objectID,
+      symbolId: layer.symbolID,
+      blockText: layer.blockText,
+      frame: layer.frame,
+    }));
+}

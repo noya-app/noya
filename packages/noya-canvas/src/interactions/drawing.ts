@@ -43,7 +43,8 @@ export const createDrawingInteraction =
 
           startDrawing(
             options.inferBlockType({
-              rect: createRect(canvasPoint, canvasPoint),
+              frame: createRect(canvasPoint, canvasPoint),
+              siblingBlocks: api.siblingBlocks,
             }),
             canvasPoint,
           );
@@ -85,10 +86,11 @@ export const createDrawingInteraction =
           updateDrawing(
             canvasPoint,
             options.inferBlockType?.({
-              rect: createRect(
+              frame: createRect(
                 interactionState.origin,
                 interactionState.current,
               ),
+              siblingBlocks: api.siblingBlocks,
             }) ?? interactionState.shapeType,
           );
 

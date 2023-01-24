@@ -7,6 +7,7 @@ import {
   LayerTraversalOptions,
   LayerType,
   SelectedGradient,
+  SiblingBlockProps,
   TextSelection,
 } from 'noya-state';
 import React from 'react';
@@ -23,6 +24,7 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   zoomValue: number;
   canUndo: boolean;
   canRedo: boolean;
+  siblingBlocks: SiblingBlockProps[];
   getClickCount: () => number;
   convertPoint: (point: Point, to: 'screen' | 'canvas') => Point;
   getScreenPoint: (input: OffsetPoint) => Point;

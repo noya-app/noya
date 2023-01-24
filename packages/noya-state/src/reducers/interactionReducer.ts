@@ -31,7 +31,23 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type InferBlockType = ({ rect }: { rect: Rect }) => DrawableLayerType;
+export type SiblingBlockProps = {
+  symbolId: string;
+  frame: Rect;
+  blockText?: string;
+};
+
+export type BlockProps = SiblingBlockProps & {
+  resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
+};
+
+export type InferBlockProps = {
+  frame: Rect;
+  blockText?: string;
+  siblingBlocks: SiblingBlockProps[];
+};
+
+export type InferBlockType = (props: InferBlockProps) => DrawableLayerType;
 
 export type DrawableLayerType =
   | 'rectangle'

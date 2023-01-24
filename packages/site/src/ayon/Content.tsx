@@ -209,9 +209,7 @@ export const Content = memo(function Content({
                     uploadAsset={uploadAsset}
                   />
                 ))}
-                {state.interactionState.type === 'drawing' && (
-                  <DrawingWidget inferBlockType={inferBlockType} />
-                )}
+                {state.interactionState.type === 'drawing' && <DrawingWidget />}
               </>
             }
           >

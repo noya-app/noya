@@ -51,6 +51,7 @@ import {
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSiblingBlocks,
   getSymbolMaster,
   moveControlPoints,
   moveLayer,
@@ -989,7 +990,11 @@ export function canvasReducer(
                 Layers.isSymbolInstance(draftLayer) &&
                 !draftLayer.symbolIDIsFixed
               ) {
-                const newType = inferBlockType({ rect: draftLayer.frame });
+                const newType = inferBlockType({
+                  frame: draftLayer.frame,
+                  blockText: draftLayer.blockText,
+                  siblingBlocks: getSiblingBlocks(state),
+                });
 
                 if (typeof newType !== 'string') {
                   draftLayer.symbolID = newType.symbolId;
@@ -1181,7 +1186,11 @@ export function canvasReducer(
                 Layers.isSymbolInstance(newLayer) &&
                 !newLayer.symbolIDIsFixed
               ) {
-                const newType = inferBlockType({ rect: newLayer.frame });
+                const newType = inferBlockType({
+                  frame: newLayer.frame,
+                  blockText: newLayer.blockText,
+                  siblingBlocks: getSiblingBlocks(state),
+                });
 
                 if (typeof newType !== 'string') {
                   newLayer = produce(newLayer, (draft) => {

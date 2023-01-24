@@ -27,14 +27,13 @@ import Sketch from 'noya-file-format';
 import {
   createRect,
   createResizeTransform,
-  Rect,
   Size,
   transformRect,
 } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
-import { Layers, Selectors } from 'noya-state';
+import { BlockProps, Layers, Selectors } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import React, { useEffect, useRef } from 'react';
+import React, { ReactNode, useEffect, useRef } from 'react';
 import {
   avatarSymbol,
   boxSymbol,
@@ -55,12 +54,6 @@ import {
   textSymbol,
   writeSymbol,
 } from './symbols';
-
-type DOMElementsProps = {
-  frame: Rect;
-  blockText?: string;
-  resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
-};
 
 export function filterHashTagsAndSlashCommands(text?: string): {
   content?: string;
@@ -131,8 +124,11 @@ function filterTextPropertyHashTags(text?: string): {
   };
 }
 
-export const symbolIdToElement = {
-  [buttonSymbol.symbolID]: (props: DOMElementsProps) => {
+export const symbolIdToElement: Record<
+  string,
+  (props: BlockProps) => ReactNode
+> = {
+  [buttonSymbol.symbolID]: (props) => {
     const { content, colorScheme, fontWeight, fontSize } =
       filterTextPropertyHashTags(props.blockText);
     let size;
@@ -155,8 +151,8 @@ export const symbolIdToElement = {
       </Button>
     );
   },
-  [avatarSymbol.symbolID]: (props: DOMElementsProps) => <Avatar size="full" />,
-  [boxSymbol.symbolID]: (props: DOMElementsProps) => {
+  [avatarSymbol.symbolID]: (props) => <Avatar size="full" />,
+  [boxSymbol.symbolID]: (props) => {
     const { content, hashTags } = filterHashTagsAndSlashCommands(
       props.blockText,
     );
@@ -166,11 +162,9 @@ export const symbolIdToElement = {
         .find((value) => CSS.supports('color', `${value}`)) ?? '#ebfdff';
     return <Box bg={color} w="100%" h="100%" />;
   },
-  [checkboxSymbol.symbolID]: (props: DOMElementsProps) => <Checkbox />,
-  [iconButtonSymbol.symbolID]: (props: DOMElementsProps) => (
-    <IconButton aria-label={''} />
-  ),
-  [inputSymbol.symbolID]: (props: DOMElementsProps) => {
+  [checkboxSymbol.symbolID]: (props) => <Checkbox />,
+  [iconButtonSymbol.symbolID]: (props) => <IconButton aria-label={''} />,
+  [inputSymbol.symbolID]: (props) => {
     const [value, setValue] = React.useState(props.blockText ?? '');
 
     useEffect(() => {
@@ -186,8 +180,8 @@ export const symbolIdToElement = {
       />
     );
   },
-  [switchSymbol.symbolID]: (props: DOMElementsProps) => <Switch />,
-  [textSymbol.symbolID]: (props: DOMElementsProps) => {
+  [switchSymbol.symbolID]: (props) => <Switch />,
+  [textSymbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -201,7 +195,7 @@ export const symbolIdToElement = {
       </Text>
     );
   },
-  [imageSymbol.symbolID]: (props: DOMElementsProps) => (
+  [imageSymbol.symbolID]: (props) => (
     <Image
       src={
         props.blockText && isExternalUrl(props.blockText)
@@ -214,7 +208,7 @@ export const symbolIdToElement = {
       h="100%"
     />
   ),
-  [heading1Symbol.symbolID]: (props: DOMElementsProps) => {
+  [heading1Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -230,7 +224,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [heading2Symbol.symbolID]: (props: DOMElementsProps) => {
+  [heading2Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -246,7 +240,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [heading3Symbol.symbolID]: (props: DOMElementsProps) => {
+  [heading3Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -262,7 +256,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [heading4Symbol.symbolID]: (props: DOMElementsProps) => {
+  [heading4Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -278,7 +272,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [heading5Symbol.symbolID]: (props: DOMElementsProps) => {
+  [heading5Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -294,7 +288,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [heading6Symbol.symbolID]: (props: DOMElementsProps) => {
+  [heading6Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);
     return (
@@ -310,7 +304,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [writeSymbol.symbolID]: (props: DOMElementsProps) => {
+  [writeSymbol.symbolID]: (props) => {
     const { color, fontWeight, fontSize, align } = filterTextPropertyHashTags(
       props.blockText,
     );
@@ -340,7 +334,7 @@ export const symbolIdToElement = {
       </Text>
     );
   },
-  [headerBarNavUserSymbol.symbolID]: (props: DOMElementsProps) => {
+  [headerBarNavUserSymbol.symbolID]: (props) => {
     const { content, hashTags } = filterHashTagsAndSlashCommands(
       props.blockText,
     );
@@ -413,7 +407,7 @@ export const symbolIdToElement = {
       </Flex>
     );
   },
-  [heroSymbol.symbolID]: (props: DOMElementsProps) => {
+  [heroSymbol.symbolID]: (props) => {
     const { align, textAlign } = filterTextPropertyHashTags(props.blockText);
     const blockText = props.blockText
       ? props.blockText.split(/\r?\n/)
@@ -528,7 +522,7 @@ function SymbolRenderer({
   symbolId,
   blockText,
   resolvedBlockData,
-}: { symbolId: string } & DOMElementsProps) {
+}: { symbolId: string } & BlockProps) {
   return (
     <div
       style={{
@@ -539,7 +533,12 @@ function SymbolRenderer({
         height: frame.height,
       }}
     >
-      {symbolIdToElement[symbolId]({ frame, blockText, resolvedBlockData })}
+      {symbolIdToElement[symbolId]({
+        symbolId,
+        frame,
+        blockText,
+        resolvedBlockData,
+      })}
     </div>
   );
 }

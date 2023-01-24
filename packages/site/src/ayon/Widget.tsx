@@ -18,7 +18,13 @@ import {
   transformRect,
 } from 'noya-geometry';
 import { ChevronDownIcon } from 'noya-icons';
-import { DrawableLayerType, Layers, Selectors } from 'noya-state';
+import {
+  DrawableLayerType,
+  getSiblingBlocks,
+  InferBlockProps,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import styled from 'styled-components';
@@ -35,7 +41,7 @@ import {
   imageSymbolId,
   textSymbolId,
 } from './symbols';
-import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
+import { InferredBlockTypeResult } from './types';
 
 const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
@@ -128,7 +134,7 @@ export function Widget({
   uploadAsset,
 }: {
   layer: Sketch.AnyLayer;
-  inferBlockTypes: (input: BlockHeuristicInput) => InferredBlockTypeResult[];
+  inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
   onChangeBlockType: (type: DrawableLayerType) => void;
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
 }) {
@@ -142,7 +148,7 @@ export function Widget({
     page,
     (l) => l.do_objectID === layer.do_objectID,
   )!;
-  const parent = Selectors.getParentLayer(page, indexPath);
+  const parent = Selectors.getParentLayer(page, indexPath) as Sketch.Artboard;
 
   const symbol = Layers.isSymbolInstance(layer)
     ? Selectors.getSymbolMaster(state, layer.symbolID)
@@ -186,7 +192,11 @@ export function Widget({
 
   const blockText = layer.blockText ?? '';
 
-  const blockTypes = inferBlockTypes({ rect, text: blockText });
+  const blockTypes = inferBlockTypes({
+    frame: rect,
+    blockText,
+    siblingBlocks: getSiblingBlocks(state),
+  });
 
   const showWidgetUI =
     isSelected &&
@@ -521,23 +531,14 @@ export function Widget({
   );
 }
 
-export function DrawingWidget({
-  inferBlockType,
-}: {
-  inferBlockType: ({ rect }: { rect: Rect }) => DrawableLayerType;
-}) {
+export function DrawingWidget() {
   const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
   const transform = Selectors.getCanvasTransform(state, canvasInsets);
 
   if (state.interactionState.type !== 'drawing') return null;
 
-  const block = inferBlockType({
-    rect: createRect(
-      state.interactionState.origin,
-      state.interactionState.current,
-    ),
-  });
+  const block = state.interactionState.shapeType;
 
   if (typeof block === 'string') return null;
 

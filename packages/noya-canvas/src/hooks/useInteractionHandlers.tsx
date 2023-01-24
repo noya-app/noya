@@ -195,6 +195,7 @@ export function useInteractionHandlers({
       textSelection,
       canRedo,
       canUndo,
+      siblingBlocks: Selectors.getSiblingBlocks(state),
       convertPoint: (point, system) =>
         convertPoint(scrollOrigin, zoomValue, point, system),
       getScreenPoint: getPoint,

@@ -39,10 +39,11 @@ export const createInsertModeInteraction =
           if (event[api.platformModKey]) {
             enterInsertMode(
               inferBlockType({
-                rect: createRect(
+                frame: createRect(
                   api.getCanvasPoint(event.nativeEvent),
                   api.getCanvasPoint(event.nativeEvent),
                 ),
+                siblingBlocks: api.siblingBlocks,
               }),
             );
           }
@@ -51,10 +52,11 @@ export const createInsertModeInteraction =
           if (isModKeyPressed(event, api.platformModKey)) {
             enterInsertMode(
               inferBlockType({
-                rect: createRect(
+                frame: createRect(
                   api.getCanvasPoint({ offsetX: 0, offsetY: 0 }),
                   api.getCanvasPoint({ offsetX: 0, offsetY: 0 }),
                 ),
+                siblingBlocks: api.siblingBlocks,
               }),
             );
           }
