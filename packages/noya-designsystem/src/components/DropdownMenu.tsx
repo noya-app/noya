@@ -151,11 +151,13 @@ function DropdownMenuRoot<T extends string>({
     : RadixDropdownMenu.Trigger;
   const ContentComponent = isNested ? SubContent : Content;
 
+  const contentStyle = useMemo(() => ({ zIndex: 1000 }), []);
+
   return (
     <RootComponent onOpenChange={onOpenChange}>
       <TriggerComponent asChild>{children}</TriggerComponent>
       <RadixDropdownMenu.Portal>
-        <ContentComponent sideOffset={4}>
+        <ContentComponent sideOffset={4} style={contentStyle}>
           {items.map((item, index) =>
             item === SEPARATOR_ITEM ? (
               <SeparatorElement key={index} />
