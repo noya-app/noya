@@ -12,6 +12,7 @@ import {
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { filterHashTagsAndSlashCommands } from './DOMRenderer';
 import { Stacking } from './stacking';
 import {
   allAyonSymbols,
@@ -239,7 +240,11 @@ export function Widget({
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             } else if (
               blockTypes.length > 0 &&
@@ -249,7 +254,11 @@ export function Widget({
                 symbolId: blockTypes[0].type.symbolId,
               });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             }
           }
@@ -269,7 +278,11 @@ export function Widget({
               symbolId: BLOCK_TYPE_TEXT_SHORTCUTS[words[0]],
             });
             dispatch('setSymbolIdIsFixed', true);
-            dispatch('setBlockText', words.slice(1).join(' '));
+            dispatch(
+              'setBlockText',
+              words.slice(1).join(' '),
+              filterHashTagsAndSlashCommands(words.slice(1).join(' ')).content,
+            );
             return;
           }
 
@@ -294,7 +307,11 @@ export function Widget({
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             } else if (
               blockTypes.length > 0 &&
@@ -304,12 +321,20 @@ export function Widget({
                 symbolId: blockTypes[0].type.symbolId,
               });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             }
           }
 
-          dispatch('setBlockText', text);
+          dispatch(
+            'setBlockText',
+            text,
+            filterHashTagsAndSlashCommands(text).content,
+          );
         }}
         onFocusCapture={(event) => {
           event.stopPropagation();
@@ -361,7 +386,11 @@ export function Widget({
 
                     const url = await uploadAsset(await file.arrayBuffer());
 
-                    dispatch('setBlockText', url);
+                    dispatch(
+                      'setBlockText',
+                      url,
+                      filterHashTagsAndSlashCommands(url).content,
+                    );
                     dispatch('setSymbolIdIsFixed', true);
                   }}
                 />
@@ -424,7 +453,17 @@ export function Widget({
                     onChangeBlockType(blockType.type);
 
                     // Remove any slash commands
-                    dispatch('setBlockText', blockText.replace(/^\/\w+/, ''));
+                    const blockTextWithoutSlashCommands = blockText.replace(
+                      /^\/\w+/,
+                      '',
+                    );
+                    dispatch(
+                      'setBlockText',
+                      blockTextWithoutSlashCommands,
+                      filterHashTagsAndSlashCommands(
+                        blockTextWithoutSlashCommands,
+                      ).content,
+                    );
                     dispatch('setSymbolIdIsFixed', true);
                   }}
                   style={{
