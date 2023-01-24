@@ -110,7 +110,7 @@ const StackBase = forwardRef(function StackBase(
   );
 });
 
-type StackProps = Omit<Props, 'separator' | 'flexDirection'>;
+type StackProps = Omit<Props, 'flexDirection'>;
 
 const VerticalStack = memo(
   forwardRef(function VStack(

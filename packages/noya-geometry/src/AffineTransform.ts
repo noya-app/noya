@@ -186,6 +186,8 @@ export class AffineTransform {
     return rest.reduce((result, item) => result.prepend(item), first);
   }
 
+  // Web-compatible getters
+
   get a() {
     return this.m00;
   }
@@ -208,6 +210,18 @@ export class AffineTransform {
 
   get ty() {
     return this.m12;
+  }
+
+  get scaleComponents(): Point {
+    return { x: this.a, y: this.d };
+  }
+
+  get translationComponents(): Point {
+    return { x: this.tx, y: this.ty };
+  }
+
+  get skewComponents(): Point {
+    return { x: this.c, y: this.b };
   }
 
   /**
