@@ -404,7 +404,7 @@ export const symbolIdToElement = {
   [heroSymbol.symbolID]: (props: DOMElementsProps) => {
     const { align, textAlign } = filterTextPropertyHashTags(props.blockText);
     const blockText = props.blockText
-      ? props.blockText.split(/\n/)
+      ? props.blockText.split(/\r?\n/)
       : [
           'Create, iterate, inspire.',
           'Turn great ideas into new possibilities.',
