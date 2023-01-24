@@ -15,7 +15,7 @@ import { isExternalUrl } from 'noya-utils';
 import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
-import { DOMRenderer, filterHashTags } from './DOMRenderer';
+import { DOMRenderer, filterHashTagsAndSlashCommands } from './DOMRenderer';
 import { GenerateResolver } from './GenerateResolver';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
@@ -101,8 +101,8 @@ export const Content = memo(function Content({
 
       if (typeof blockText !== 'string') return;
 
-      const { content } = filterHashTags(blockText);
-      const originalText = content?.trim();
+      const { content: originalText } =
+        filterHashTagsAndSlashCommands(blockText);
 
       // Already resolved
       if (

@@ -51,7 +51,7 @@ export type LayerPropertyAction =
   | [type: 'setHasClippingMask', value: boolean]
   | [type: 'setShouldBreakMaskChain', value: boolean]
   | [type: 'setMaskMode', value: 'alpha' | 'outline']
-  | [type: 'setBlockText', value: string]
+  | [type: 'setBlockText', value: string, normalizedText?: string]
   | [
       type: 'setResolvedBlockData',
       layerId: string,
@@ -353,7 +353,7 @@ export function layerPropertyReducer(
       });
     }
     case 'setBlockText': {
-      const [, value] = action;
+      const [, value, normalizedText] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
@@ -365,7 +365,7 @@ export function layerPropertyReducer(
 
           if (
             layer.resolvedBlockData &&
-            layer.resolvedBlockData.originalText !== value
+            layer.resolvedBlockData.originalText !== (normalizedText ?? value)
           ) {
             delete layer.resolvedBlockData;
           }
