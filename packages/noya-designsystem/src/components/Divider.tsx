@@ -7,13 +7,14 @@ import styled from 'styled-components';
 
 type DividerVariant = 'normal' | 'strong' | 'subtle';
 
-const DividerContainer = styled.div<{
-  variant: DividerVariant;
-  orientation: 'horizontal' | 'vertical';
-}>(({ theme, variant, orientation }) => ({
+const DividerContainer = styled.div<
+  DividerProps & {
+    orientation: 'horizontal' | 'vertical';
+  }
+>(({ theme, variant = 'normal', orientation, overflow = 0 }) => ({
   ...(orientation === 'horizontal'
-    ? { height: '1px', minHeight: '1px' }
-    : { width: '1px', minWidth: '1px' }),
+    ? { height: '1px', minHeight: '1px', margin: `0px -${overflow}px` }
+    : { width: '1px', minWidth: '1px', margin: `-${overflow}px 0px` }),
   background:
     variant === 'strong'
       ? theme.colors.dividerStrong
@@ -25,16 +26,15 @@ const DividerContainer = styled.div<{
 
 interface DividerProps {
   variant?: DividerVariant;
+  overflow?: number;
 }
 
-export const Divider = memo(function Divider({
-  variant = 'normal',
-}: DividerProps) {
-  return <DividerContainer variant={variant} orientation="horizontal" />;
+export const Divider = memo(function Divider(props: DividerProps) {
+  return <DividerContainer orientation="horizontal" {...props} />;
 });
 
-export const DividerVertical = memo(function DividerVertical({
-  variant = 'normal',
-}: DividerProps) {
-  return <DividerContainer variant={variant} orientation="vertical" />;
+export const DividerVertical = memo(function DividerVertical(
+  props: DividerProps,
+) {
+  return <DividerContainer orientation="vertical" {...props} />;
 });

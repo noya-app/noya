@@ -62,19 +62,27 @@ type DOMElementsProps = {
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
 };
 
-export function filterHashTags(text?: string): {
+export function filterHashTagsAndSlashCommands(text?: string): {
   content?: string;
   hashTags?: string[];
+  slashCommands?: string[];
 } {
   const lines = text?.split(/\r?\n/);
   const words = lines?.map((line) => line.split(' ')).flat();
-  const content = words?.filter((word) => !word.startsWith('#')).join(' ');
+  const content = words
+    ?.filter((word) => !word.startsWith('#') && !word.startsWith('/'))
+    .join(' ')
+    .trim();
   const hashTags = words
     ?.filter((word) => word.startsWith('#'))
+    .map((word) => word.slice(1).trim());
+  const slashCommands = words
+    ?.filter((word) => word.startsWith('/'))
     .map((word) => word.slice(1).trim());
   return {
     content,
     hashTags,
+    slashCommands,
   };
 }
 
@@ -88,7 +96,7 @@ function filterTextPropertyHashTags(text?: string): {
   align?: string;
   textAlign?: SystemProps['textAlign'];
 } {
-  const { content, hashTags } = filterHashTags(text);
+  const { content, hashTags } = filterHashTagsAndSlashCommands(text);
   const colorByHashTag = hashTags?.find((hashTag) =>
     CSS.supports('color', hashTag),
   );
@@ -149,7 +157,9 @@ export const symbolIdToElement = {
   },
   [avatarSymbol.symbolID]: (props: DOMElementsProps) => <Avatar size="full" />,
   [boxSymbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, hashTags } = filterHashTags(props.blockText);
+    const { content, hashTags } = filterHashTagsAndSlashCommands(
+      props.blockText,
+    );
     const color =
       [content]
         .concat(hashTags)
@@ -331,7 +341,9 @@ export const symbolIdToElement = {
     );
   },
   [headerBarNavUserSymbol.symbolID]: (props: DOMElementsProps) => {
-    const { content, hashTags } = filterHashTags(props.blockText);
+    const { content, hashTags } = filterHashTagsAndSlashCommands(
+      props.blockText,
+    );
     const backgroundColor = hashTags?.includes('dark')
       ? 'rgba(11,21,48,0.9)'
       : 'rgba(255,255,255,0.9)';

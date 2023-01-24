@@ -1,17 +1,28 @@
 import { fileOpen } from 'browser-fs-access';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { DividerVertical, Spacer } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
-import { createRect, Rect, transformRect } from 'noya-geometry';
 import {
-  LockClosedIcon,
-  MagicWandIcon,
-  ReloadIcon,
-  UploadIcon,
-} from 'noya-icons';
+  Button,
+  Divider,
+  DividerVertical,
+  DropdownMenu,
+  IconButton,
+  Small,
+  Spacer,
+  Stack,
+} from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import {
+  AffineTransform,
+  createRect,
+  Rect,
+  transformRect,
+} from 'noya-geometry';
+import { ChevronDownIcon } from 'noya-icons';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import styled from 'styled-components';
+import { filterHashTagsAndSlashCommands } from './DOMRenderer';
 import { Stacking } from './stacking';
 import {
   allAyonSymbols,
@@ -26,23 +37,33 @@ import {
 } from './symbols';
 import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
+const ContentElement = styled.div(({ theme }) => ({
+  ...theme.textStyles.small,
+  borderRadius: 4,
+  backgroundColor: theme.colors.popover.background,
+  boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
+  color: theme.colors.textMuted,
+}));
+
 function WidgetContainer({
   frame,
   children,
   transform,
   zIndex,
+  footer,
 }: {
   frame: Rect;
-  children: React.ReactNode;
-  transform?: string;
+  children?: React.ReactNode;
+  transform?: AffineTransform;
   zIndex?: number;
+  footer?: React.ReactNode;
 }) {
   return (
     <div
       style={{
         position: 'absolute',
         pointerEvents: 'none',
-        transform,
+        transform: transform?.toString(),
         zIndex,
       }}
     >
@@ -57,42 +78,35 @@ function WidgetContainer({
         }}
       >
         {children}
+        {footer && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100%)',
+              right: 0,
+              pointerEvents: 'all',
+              cursor: 'default',
+              whiteSpace: 'pre',
+              display: 'flex',
+              transformOrigin: 'top right',
+              transform: AffineTransform.scale(
+                transform ? 1 / transform.scaleComponents.x : 1,
+                transform ? 1 / transform.scaleComponents.y : 1,
+              )
+                .translate(0, 6)
+                .toString(),
+            }}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onPointerMove={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            {footer}
+          </div>
+        )}
       </div>
-    </div>
-  );
-}
-
-function WidgetLabel({
-  children,
-  onPointerDown,
-}: {
-  children: React.ReactNode;
-  onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
-}) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 'calc(100% + 6px)',
-        right: 0,
-        background: 'whitesmoke',
-        border: '1px solid rgba(0,0,0,0.1)',
-        color: 'black',
-        pointerEvents: 'all',
-        padding: '2px 4px',
-        whiteSpace: 'pre',
-        borderRadius: '2px',
-        fontSize: 13,
-        display: 'flex',
-        lineHeight: '1.2',
-        cursor: 'default',
-      }}
-      onPointerDown={(event) => {
-        event.stopPropagation();
-        onPointerDown?.(event);
-      }}
-    >
-      {children}
     </div>
   );
 }
@@ -185,8 +199,154 @@ export function Widget({
   return (
     <WidgetContainer
       frame={rect}
-      transform={canvasTransform.toString()}
+      transform={canvasTransform}
       zIndex={showWidgetUI ? Stacking.level.interactive : undefined}
+      footer={
+        showWidgetUI && (
+          <Stack.V gap={6} alignItems="flex-end">
+            <ContentElement>
+              <Stack.H
+                flex="1"
+                padding={'4px 6px'}
+                gap={6}
+                separator={<DividerVertical variant="strong" overflow={4} />}
+              >
+                {layer.symbolID === imageSymbolId && layer.resolvedBlockData && (
+                  <IconButton
+                    key="reload"
+                    iconName="ReloadIcon"
+                    onClick={(event) => {
+                      event.preventDefault();
+
+                      dispatch(
+                        'setResolvedBlockData',
+                        layer.do_objectID,
+                        undefined,
+                      );
+                    }}
+                  />
+                )}
+                {layer.symbolID === imageSymbolId && (
+                  <IconButton
+                    iconName="UploadIcon"
+                    onPointerDown={async (event) => {
+                      event.preventDefault();
+
+                      const file = await fileOpen({
+                        extensions: ['.png', '.jpg', '.webp'],
+                        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+                      });
+
+                      const url = await uploadAsset(await file.arrayBuffer());
+
+                      dispatch(
+                        'setBlockText',
+                        url,
+                        filterHashTagsAndSlashCommands(url).content,
+                      );
+                      dispatch('setSymbolIdIsFixed', true);
+                    }}
+                  />
+                )}
+                <Stack.H>
+                  {layer.symbolIDIsFixed ? (
+                    <IconButton
+                      iconName="LockClosedIcon"
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+
+                        dispatch('setSymbolIdIsFixed', false);
+                      }}
+                    />
+                  ) : (
+                    <IconButton
+                      iconName="MagicWandIcon"
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+
+                        dispatch('setSymbolIdIsFixed', true);
+                      }}
+                    />
+                  )}
+                  <Spacer.Horizontal size={6} />
+                  <DropdownMenu
+                    items={blockTypes
+                      .flatMap(({ type }) =>
+                        typeof type === 'string' ? [] : [type.symbolId],
+                      )
+                      .map((symbolId) => {
+                        const symbolMaster = Selectors.getSymbolMaster(
+                          state,
+                          symbolId,
+                        );
+
+                        return { title: symbolMaster.name, value: symbolId };
+                      })}
+                    onSelect={(symbolId) => {
+                      onChangeBlockType({ symbolId });
+                      dispatch('setSymbolIdIsFixed', true);
+                    }}
+                  >
+                    <Button variant="none">
+                      {symbol?.name ?? layer.name}
+                      <Spacer.Horizontal size={4} />
+                      <ChevronDownIcon />
+                    </Button>
+                  </DropdownMenu>
+                </Stack.H>
+              </Stack.H>
+            </ContentElement>
+            {(slashWords.length > 0 || !layer.symbolIDIsFixed) && (
+              <ContentElement>
+                <Stack.V padding={'0 8px'}>
+                  <Small color="textSubtle" padding={'4px 0px'}>
+                    Top Alternatives
+                  </Small>
+                  <Divider overflow={8} />
+                  {blockTypes.slice(0, 3).map((blockType, index) => {
+                    const name =
+                      typeof blockType.type === 'string'
+                        ? blockType.type
+                        : Selectors.getSymbolMaster(
+                            state,
+                            blockType.type.symbolId,
+                          ).name;
+
+                    return (
+                      <Button
+                        key={name}
+                        variant="thin"
+                        onPointerDown={(event) => {
+                          // Prevent default so the textarea doesn't lose focus
+                          event.preventDefault();
+                          event.stopPropagation();
+                          onChangeBlockType(blockType.type);
+
+                          // Remove any slash commands
+                          const blockTextWithoutSlashCommands =
+                            blockText.replace(/^\/\w+/, '');
+                          dispatch(
+                            'setBlockText',
+                            blockTextWithoutSlashCommands,
+                            filterHashTagsAndSlashCommands(
+                              blockTextWithoutSlashCommands,
+                            ).content,
+                          );
+                          dispatch('setSymbolIdIsFixed', true);
+                        }}
+                        active={index === 0 && slashWords.length > 0}
+                      >
+                        {name}
+                        <Spacer.Horizontal />
+                      </Button>
+                    );
+                  })}
+                </Stack.V>
+              </ContentElement>
+            )}
+          </Stack.V>
+        )
+      }
     >
       <textarea
         ref={textareaRef}
@@ -239,7 +399,11 @@ export function Widget({
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             } else if (
               blockTypes.length > 0 &&
@@ -249,7 +413,11 @@ export function Widget({
                 symbolId: blockTypes[0].type.symbolId,
               });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             }
           }
@@ -269,7 +437,11 @@ export function Widget({
               symbolId: BLOCK_TYPE_TEXT_SHORTCUTS[words[0]],
             });
             dispatch('setSymbolIdIsFixed', true);
-            dispatch('setBlockText', words.slice(1).join(' '));
+            dispatch(
+              'setBlockText',
+              words.slice(1).join(' '),
+              filterHashTagsAndSlashCommands(words.slice(1).join(' ')).content,
+            );
             return;
           }
 
@@ -294,7 +466,11 @@ export function Widget({
             if (symbol) {
               onChangeBlockType({ symbolId: symbol.symbolID });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             } else if (
               blockTypes.length > 0 &&
@@ -304,12 +480,20 @@ export function Widget({
                 symbolId: blockTypes[0].type.symbolId,
               });
               dispatch('setSymbolIdIsFixed', true);
-              dispatch('setBlockText', newText);
+              dispatch(
+                'setBlockText',
+                newText,
+                filterHashTagsAndSlashCommands(newText).content,
+              );
               return;
             }
           }
 
-          dispatch('setBlockText', text);
+          dispatch(
+            'setBlockText',
+            text,
+            filterHashTagsAndSlashCommands(text).content,
+          );
         }}
         onFocusCapture={(event) => {
           event.stopPropagation();
@@ -325,126 +509,6 @@ export function Widget({
         }}
         value={blockText}
       />
-      {showWidgetUI && (
-        <>
-          <WidgetLabel>
-            {layer.symbolID === imageSymbolId && (
-              <>
-                {layer.resolvedBlockData && (
-                  <>
-                    <ReloadIcon
-                      style={{ cursor: 'pointer' }}
-                      onClick={(event) => {
-                        event.preventDefault();
-
-                        dispatch(
-                          'setResolvedBlockData',
-                          layer.do_objectID,
-                          undefined,
-                        );
-                      }}
-                    />
-                    <Spacer.Horizontal size={4} />
-                    <DividerVertical variant="strong" />
-                    <Spacer.Horizontal size={4} />
-                  </>
-                )}
-                <UploadIcon
-                  style={{ cursor: 'pointer' }}
-                  onPointerDown={async (event) => {
-                    event.preventDefault();
-
-                    const file = await fileOpen({
-                      extensions: ['.png', '.jpg', '.webp'],
-                      mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
-                    });
-
-                    const url = await uploadAsset(await file.arrayBuffer());
-
-                    dispatch('setBlockText', url);
-                    dispatch('setSymbolIdIsFixed', true);
-                  }}
-                />
-                <Spacer.Horizontal size={4} />
-                <DividerVertical variant="strong" />
-                <Spacer.Horizontal size={4} />
-              </>
-            )}
-            {layer.symbolIDIsFixed ? (
-              <LockClosedIcon
-                style={{ cursor: 'pointer' }}
-                onPointerDown={(event) => {
-                  event.preventDefault();
-
-                  dispatch('setSymbolIdIsFixed', false);
-                }}
-              />
-            ) : (
-              <MagicWandIcon
-                style={{ position: 'relative', top: '1px', cursor: 'pointer' }}
-                onPointerDown={(event) => {
-                  event.preventDefault();
-
-                  dispatch('setSymbolIdIsFixed', true);
-                }}
-              />
-            )}
-            <Spacer.Horizontal size={4} />
-            {symbol?.name ?? layer.name}
-          </WidgetLabel>
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 36px)',
-              right: 0,
-              background: 'whitesmoke',
-              border: '1px solid rgba(0,0,0,0.1)',
-              color: 'black',
-              pointerEvents: 'all',
-              whiteSpace: 'pre',
-              borderRadius: '2px',
-              fontSize: 13,
-              cursor: 'default',
-            }}
-          >
-            {blockTypes.map((blockType, index) => {
-              const name =
-                typeof blockType.type === 'string'
-                  ? blockType.type
-                  : Selectors.getSymbolMaster(state, blockType.type.symbolId)
-                      .name;
-
-              return (
-                <div
-                  key={name}
-                  onPointerDown={(event) => {
-                    // Prevent default so the textarea doesn't lose focus
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onChangeBlockType(blockType.type);
-
-                    // Remove any slash commands
-                    dispatch('setBlockText', blockText.replace(/^\/\w+/, ''));
-                    dispatch('setSymbolIdIsFixed', true);
-                  }}
-                  style={{
-                    padding: '1px 4px',
-                    backgroundColor:
-                      index === 0 && slashWords.length > 0
-                        ? 'rgb(132,63,255)'
-                        : 'transparent',
-                    color:
-                      index === 0 && slashWords.length > 0 ? '#fff' : '#000',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {blockType.score.toFixed(2)} {name}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
     </WidgetContainer>
   );
 }
@@ -477,8 +541,22 @@ export function DrawingWidget({
   );
 
   return (
-    <WidgetContainer frame={rect}>
-      <WidgetLabel>✨ {symbol.name}</WidgetLabel>
-    </WidgetContainer>
+    <WidgetContainer
+      frame={rect}
+      zIndex={Stacking.level.interactive}
+      footer={
+        <ContentElement>
+          <Stack.H flex="1" padding={'4px 6px'}>
+            <IconButton iconName="MagicWandIcon" />
+            <Spacer.Horizontal size={6} />
+            <Button variant="none">
+              {symbol?.name}
+              <Spacer.Horizontal size={4} />
+              <ChevronDownIcon />
+            </Button>
+          </Stack.H>
+        </ContentElement>
+      }
+    />
   );
 }

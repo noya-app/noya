@@ -87,6 +87,7 @@ export interface ButtonRootProps {
   variant?: ButtonVariant;
   tooltip?: ReactNode;
   onClick?: (event: React.MouseEvent) => void;
+  onPointerDown?: (event: React.PointerEvent) => void;
 }
 
 export const Button = forwardRef(function Button(
