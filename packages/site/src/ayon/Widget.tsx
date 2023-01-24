@@ -303,44 +303,52 @@ export function Widget({
                     Top Alternatives
                   </Small>
                   <Divider overflow={8} />
-                  {blockTypes.slice(0, 3).map((blockType, index) => {
-                    const name =
-                      typeof blockType.type === 'string'
-                        ? blockType.type
-                        : Selectors.getSymbolMaster(
-                            state,
-                            blockType.type.symbolId,
-                          ).name;
+                  {blockTypes
+                    // Remove the current block type
+                    .filter(
+                      (blockType) =>
+                        typeof blockType.type === 'string' ||
+                        blockType.type.symbolId !== layer.symbolID,
+                    )
+                    .slice(0, 3)
+                    .map((blockType, index) => {
+                      const name =
+                        typeof blockType.type === 'string'
+                          ? blockType.type
+                          : Selectors.getSymbolMaster(
+                              state,
+                              blockType.type.symbolId,
+                            ).name;
 
-                    return (
-                      <Button
-                        key={name}
-                        variant="thin"
-                        onPointerDown={(event) => {
-                          // Prevent default so the textarea doesn't lose focus
-                          event.preventDefault();
-                          event.stopPropagation();
-                          onChangeBlockType(blockType.type);
+                      return (
+                        <Button
+                          key={name}
+                          variant="thin"
+                          onPointerDown={(event) => {
+                            // Prevent default so the textarea doesn't lose focus
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onChangeBlockType(blockType.type);
 
-                          // Remove any slash commands
-                          const blockTextWithoutSlashCommands =
-                            blockText.replace(/^\/\w+/, '');
-                          dispatch(
-                            'setBlockText',
-                            blockTextWithoutSlashCommands,
-                            filterHashTagsAndSlashCommands(
+                            // Remove any slash commands
+                            const blockTextWithoutSlashCommands =
+                              blockText.replace(/^\/\w+/, '');
+                            dispatch(
+                              'setBlockText',
                               blockTextWithoutSlashCommands,
-                            ).content,
-                          );
-                          dispatch('setSymbolIdIsFixed', true);
-                        }}
-                        active={index === 0 && slashWords.length > 0}
-                      >
-                        {name}
-                        <Spacer.Horizontal />
-                      </Button>
-                    );
-                  })}
+                              filterHashTagsAndSlashCommands(
+                                blockTextWithoutSlashCommands,
+                              ).content,
+                            );
+                            dispatch('setSymbolIdIsFixed', true);
+                          }}
+                          active={index === 0 && slashWords.length > 0}
+                        >
+                          {name}
+                          <Spacer.Horizontal />
+                        </Button>
+                      );
+                    })}
                 </Stack.V>
               </ContentElement>
             )}
