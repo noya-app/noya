@@ -20,6 +20,25 @@ function createExpressionCode(value: unknown) {
   }
 }
 
+function createJsxElement(
+  openingElement: ts.JsxOpeningElement,
+  children: readonly ts.JsxChild[],
+) {
+  if (children.length === 0) {
+    return ts.factory.createJsxSelfClosingElement(
+      openingElement.tagName,
+      openingElement.typeArguments,
+      openingElement.attributes,
+    );
+  }
+
+  return ts.factory.createJsxElement(
+    openingElement,
+    children,
+    ts.factory.createJsxClosingElement(openingElement.tagName),
+  );
+}
+
 function createElementCode({
   name,
   props,
@@ -29,7 +48,7 @@ function createElementCode({
   props: Record<string, unknown>;
   frame: Rect;
 }) {
-  return ts.factory.createJsxElement(
+  return createJsxElement(
     ts.factory.createJsxOpeningElement(
       ts.factory.createIdentifier(name),
       undefined,
@@ -39,26 +58,20 @@ function createElementCode({
 
           if (!expression) return [];
 
-          if (expression.kind === ts.SyntaxKind.TrueKeyword) {
-            return [
-              ts.factory.createJsxAttribute(
-                ts.factory.createIdentifier(key),
-                undefined,
-              ),
-            ];
-          }
-
           return [
             ts.factory.createJsxAttribute(
               ts.factory.createIdentifier(key),
-              ts.factory.createJsxExpression(undefined, expression),
+              expression.kind === ts.SyntaxKind.TrueKeyword
+                ? undefined
+                : expression.kind === ts.SyntaxKind.StringLiteral
+                ? expression
+                : ts.factory.createJsxExpression(undefined, expression),
             ),
           ];
         }),
       ),
     ),
     [],
-    ts.factory.createJsxClosingElement(ts.factory.createIdentifier(name)),
   );
 }
 

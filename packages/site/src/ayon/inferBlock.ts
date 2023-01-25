@@ -1,10 +1,9 @@
 import { DrawableLayerType, InferBlockProps, InferBlockType } from 'noya-state';
+import { AvatarBlock } from './blocks/AvatarBlock';
+import { BoxBlock } from './blocks/BoxBlock';
 import { ButtonBlock } from './blocks/ButtonBlock';
-import {
-  isApproximatelySquare,
-  isWithinRectRange,
-  scoreCommandMatch,
-} from './blocks/score';
+import { CheckboxBlock } from './blocks/CheckboxBlock';
+import { isWithinRectRange, scoreCommandMatch } from './blocks/score';
 import {
   avatarSymbol,
   boxSymbol,
@@ -32,33 +31,18 @@ export const BLOCK_TYPE_HEURISTICS: Record<
   (props: InferBlockProps) => number
 > = {
   [buttonSymbol.symbolID]: ButtonBlock.infer,
-  [avatarSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(
-      scoreCommandMatch(avatarSymbol, blockText),
-      isWithinRectRange(frame, 30, 30, 120, 120) &&
-        isApproximatelySquare(frame, 0.2)
-        ? 0.8
-        : 0,
-    ),
-  [boxSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(boxSymbol, blockText), 0.1),
-  [checkboxSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(
-      scoreCommandMatch(checkboxSymbol, blockText),
-      isWithinRectRange(frame, 10, 10, 20, 20) &&
-        isApproximatelySquare(frame, 0.1)
-        ? 0.8
-        : 0,
-    ),
+  [avatarSymbol.symbolID]: AvatarBlock.infer,
+  [boxSymbol.symbolID]: BoxBlock.infer,
+  [checkboxSymbol.symbolID]: CheckboxBlock.infer,
   [iconButtonSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(iconButtonSymbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(iconButtonSymbol.name, blockText), 0.1),
   [inputSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(inputSymbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(inputSymbol.name, blockText), 0.1),
   [switchSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(switchSymbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(switchSymbol.name, blockText), 0.1),
   [textSymbol.symbolID]: ({ frame, blockText }) =>
     Math.max(
-      scoreCommandMatch(textSymbol, blockText),
+      scoreCommandMatch(textSymbol.name, blockText),
       blockText &&
         blockText.split(' ').filter((word) => word[0] !== '#').length > 0
         ? 0.7
@@ -66,21 +50,21 @@ export const BLOCK_TYPE_HEURISTICS: Record<
       0.1,
     ),
   [imageSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(imageSymbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(imageSymbol.name, blockText), 0.1),
   [heading1Symbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(heading1Symbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(heading1Symbol.name, blockText), 0.1),
   [heading2Symbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(heading2Symbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(heading2Symbol.name, blockText), 0.1),
   [heading3Symbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(heading3Symbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(heading3Symbol.name, blockText), 0.1),
   [heading4Symbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(heading4Symbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(heading4Symbol.name, blockText), 0.1),
   [heading5Symbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(heading5Symbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(heading5Symbol.name, blockText), 0.1),
   [heading6Symbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(heading6Symbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(heading6Symbol.name, blockText), 0.1),
   [writeSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(writeSymbol, blockText), 0.1),
+    Math.max(scoreCommandMatch(writeSymbol.name, blockText), 0.1),
   [headerBarNavUserSymbol.symbolID]: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find(
@@ -91,7 +75,7 @@ export const BLOCK_TYPE_HEURISTICS: Record<
     }
 
     return Math.max(
-      scoreCommandMatch(headerBarNavUserSymbol, blockText),
+      scoreCommandMatch(headerBarNavUserSymbol.name, blockText),
       isWithinRectRange(frame, 400, 30, 2000, 100) &&
         frame.x < 30 &&
         frame.y < 30
@@ -106,7 +90,7 @@ export const BLOCK_TYPE_HEURISTICS: Record<
     }
 
     return Math.max(
-      scoreCommandMatch(heroSymbol, blockText),
+      scoreCommandMatch(heroSymbol.name, blockText),
       isWithinRectRange(frame, 400, 200, 2000, 550) && frame.y < 180 ? 1 : 0,
       0.1,
     );
@@ -123,7 +107,7 @@ export function inferBlockTypes(
   )) {
     results.push({
       type: { symbolId },
-      score: heuristicFunction(input) ?? 0,
+      score: heuristicFunction(input),
     });
   }
 

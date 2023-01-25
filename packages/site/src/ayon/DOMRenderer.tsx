@@ -1,15 +1,12 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import {
   Avatar,
-  Box,
   Button,
   ChakraProvider,
-  Checkbox,
   Flex,
   Heading,
   HStack,
   IconButton,
-  Image,
   Input,
   InputGroup,
   InputLeftElement,
@@ -31,9 +28,12 @@ import {
 } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { BlockProps, Layers, Selectors } from 'noya-state';
-import { isExternalUrl } from 'noya-utils';
 import React, { ComponentProps, ReactNode, useEffect, useRef } from 'react';
+import { AvatarBlock } from './blocks/AvatarBlock';
+import { BoxBlock } from './blocks/BoxBlock';
 import { ButtonBlock } from './blocks/ButtonBlock';
+import { CheckboxBlock } from './blocks/CheckboxBlock';
+import { ImageBlock } from './blocks/ImageBlock';
 import {
   avatarSymbol,
   boxSymbol,
@@ -64,18 +64,9 @@ export const symbolIdToElement: Record<
   (props: BlockProps) => ReactNode
 > = {
   [buttonSymbol.symbolID]: ButtonBlock.render,
-  [avatarSymbol.symbolID]: (props) => <Avatar size="full" />,
-  [boxSymbol.symbolID]: (props) => {
-    const { content, hashTags } = filterHashTagsAndSlashCommands(
-      props.blockText,
-    );
-    const color =
-      [content]
-        .concat(hashTags)
-        .find((value) => CSS.supports('color', `${value}`)) ?? '#ebfdff';
-    return <Box bg={color} w="100%" h="100%" />;
-  },
-  [checkboxSymbol.symbolID]: (props) => <Checkbox />,
+  [avatarSymbol.symbolID]: AvatarBlock.render,
+  [boxSymbol.symbolID]: BoxBlock.render,
+  [checkboxSymbol.symbolID]: CheckboxBlock.render,
   [iconButtonSymbol.symbolID]: (props) => <IconButton aria-label={''} />,
   [inputSymbol.symbolID]: (props) => {
     const [value, setValue] = React.useState(props.blockText ?? '');
@@ -108,19 +99,7 @@ export const symbolIdToElement: Record<
       </Text>
     );
   },
-  [imageSymbol.symbolID]: (props) => (
-    <Image
-      src={
-        props.blockText && isExternalUrl(props.blockText)
-          ? props.blockText
-          : props.resolvedBlockData?.resolvedText
-      }
-      fit="cover"
-      align="middle"
-      w="100%"
-      h="100%"
-    />
-  ),
+  [imageSymbol.symbolID]: ImageBlock.render,
   [heading1Symbol.symbolID]: (props) => {
     const { content, color, fontWeight, fontSize, align } =
       filterTextPropertyHashTags(props.blockText);

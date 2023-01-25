@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 
 export function isWithinRectRange(
@@ -36,11 +35,8 @@ export function commonPrefixLength(a?: string, b?: string) {
   return firstDiffCharIndex === -1 ? 0 : firstDiffCharIndex;
 }
 
-export function scoreCommandMatch(
-  symbolMaster: Sketch.SymbolMaster,
-  text?: string,
-) {
-  const command = `/${symbolMaster.name.toLowerCase()}`;
+export function scoreCommandMatch(blockName: string, text?: string) {
+  const command = `/${blockName.toLowerCase()}`;
   const words = text?.split(/\s/);
   const slashWords = words?.filter((word) => word[0] === '/' && word !== '/');
 

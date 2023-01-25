@@ -2,13 +2,14 @@ import { Button } from '@chakra-ui/react';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { isWithinRectRange, scoreCommandMatch } from './score';
-import { buttonSymbol } from './symbols';
+import { buttonSymbol, buttonSymbolId } from './symbols';
 import { BlockDefinition } from './types';
 
 export const ButtonBlock: BlockDefinition = {
+  id: buttonSymbolId,
   infer: ({ frame, blockText }) =>
     Math.max(
-      scoreCommandMatch(buttonSymbol, blockText),
+      scoreCommandMatch(buttonSymbol.name, blockText),
       isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
     ),
   render: (props) => {
