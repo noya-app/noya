@@ -9,6 +9,12 @@ const networkClient = host
         if (error instanceof NoyaAPI.Error && error.type === 'unauthorized') {
           window.location.href = host;
           return true;
+        } else if (
+          error instanceof NoyaAPI.Error &&
+          error.type === 'internalServerError'
+        ) {
+          window.location.reload();
+          return true;
         } else {
           return false;
         }

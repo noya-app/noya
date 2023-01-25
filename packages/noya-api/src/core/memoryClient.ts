@@ -3,7 +3,11 @@ import { INoyaNetworkClient } from './networkClient';
 import { NoyaFile, noyaFileListSchema } from './schema';
 
 const fileReducer = makeCollectionReducer<NoyaFile>({
-  createItem: (parameters) => ({ ...parameters, userId: 'johndoe' }),
+  createItem: (parameters) => ({
+    ...parameters,
+    userId: 'johndoe',
+    version: 0,
+  }),
 });
 
 export type NoyaMemoryClientData = {

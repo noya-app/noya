@@ -101,11 +101,14 @@ export class NoyaNetworkClient {
     return parsed;
   };
 
-  #updateFile = async (id: string, data: NoyaFileData) => {
+  #updateFile = async (id: string, data: NoyaFileData, version?: number) => {
     const response = await fetch(`${this.baseURI}/files/${id}`, {
       method: 'PUT',
       credentials: 'include',
-      body: JSON.stringify({ data }),
+      body: JSON.stringify({
+        data,
+        ...(version !== undefined && { version }),
+      }),
     });
 
     this.#ensureAuthorized(response);
@@ -159,7 +162,9 @@ export class NoyaNetworkClient {
       throw error;
     };
 
-    if (response.status === 401) {
+    if (response.status === 500) {
+      handleError(new NoyaAPIError('internalServerError', response.statusText));
+    } else if (response.status === 401) {
       handleError(new NoyaAPIError('unauthorized', response.statusText));
     } else if (response.status >= 400) {
       handleError(new NoyaAPIError('unknown', response.statusText));

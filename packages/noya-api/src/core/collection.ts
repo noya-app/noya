@@ -21,6 +21,7 @@ type BaseItem<Data> = {
   data: Data;
   updatedAt: string;
   createdAt: string;
+  version: number;
 };
 
 export const makeCollectionReducer = <Item extends BaseItem<unknown>>({
@@ -38,6 +39,7 @@ export const makeCollectionReducer = <Item extends BaseItem<unknown>>({
           data: action.data,
           updatedAt: date,
           createdAt: date,
+          version: 0,
         });
 
         return produce<Item[], Item[]>(collection, (draft) => {
@@ -53,6 +55,7 @@ export const makeCollectionReducer = <Item extends BaseItem<unknown>>({
             return produce<Item, Item>(item, (draft) => {
               draft.data = action.data;
               draft.updatedAt = new Date().toISOString();
+              draft.version += 1;
             });
           }
 

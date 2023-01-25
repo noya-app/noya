@@ -9,7 +9,7 @@ type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 type NoyaFetchPolicy = 'no-cache' | 'cache-and-network';
 
 const fileReducer = makeCollectionReducer<NoyaFile>({
-  createItem: (parameters) => ({ ...parameters, userId: 'unused' }),
+  createItem: (parameters) => ({ ...parameters, userId: 'unused', version: 0 }),
 });
 
 export class NoyaClient {
@@ -68,15 +68,24 @@ export class NoyaClient {
     return result;
   };
 
-  #updateFile: NoyaNetworkClient['files']['update'] = async (...args) => {
-    const [id, data] = args;
+  #updateFile = async (id: string, data: NoyaFileData) => {
+    // There might be a race condition here if we try to update a file before
+    // it exists on the backend, but that shouldn't happen yet. In that case
+    // we'll send the update without a version and it will always win.
+    const version = this.files$.get().find((file) => file.id === id)?.version;
 
     this.files$.set((files) =>
       fileReducer(files, { type: 'update', id, data }),
     );
 
-    const result = await this.networkClient.files.update(...args);
+    const result = await this.networkClient.files.update(
+      id,
+      data,
+      version !== undefined ? version + 1 : undefined,
+    );
+
     this.#fetchFiles();
+
     return result;
   };
 

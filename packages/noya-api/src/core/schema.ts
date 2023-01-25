@@ -34,6 +34,7 @@ export const noyaFileSchema = z.object({
   userId: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  version: z.number(),
 });
 
 export const noyaFileListSchema = z.array(noyaFileSchema);
