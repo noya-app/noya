@@ -47,16 +47,20 @@ function Workspace({
   onChangeDocument,
   name,
   onChangeName,
+  viewType: initialViewType = 'split',
+  padding,
 }: {
   uploadAsset: ComponentProps<typeof Content>['uploadAsset'];
   initialDocument: SketchFile;
-  onChangeDocument: (document: SketchFile) => void;
+  onChangeDocument?: (document: SketchFile) => void;
   name: string;
-  onChangeName: (name: string) => void;
+  onChangeName?: (name: string) => void;
+  viewType?: ViewType;
+  padding?: number;
 }): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const [viewType, setViewType] = useState<ViewType>('split');
+  const [viewType, setViewType] = useState<ViewType>(initialViewType);
   const { setRightToolbar, setCenterToolbar } = useProject();
 
   const reducer = useCallback(
@@ -99,7 +103,7 @@ function Workspace({
       },
     );
 
-    onChangeDocument(documentWithoutForeignSymbols);
+    onChangeDocument?.(documentWithoutForeignSymbols);
   }, [state.history.present.sketch, onChangeDocument]);
 
   useLayoutEffect(() => {
@@ -143,7 +147,10 @@ function Workspace({
           }}
         >
           <Stack.V width={240}>
-            <ProjectMenu name={name} onChangeName={onChangeName} />
+            <ProjectMenu
+              name={name}
+              onChangeName={onChangeName || (() => {})}
+            />
           </Stack.V>
         </Popover>
       </StateProvider>,
@@ -152,7 +159,11 @@ function Workspace({
 
   return (
     <StateProvider state={state} dispatch={dispatch}>
-      <Content uploadAsset={uploadAsset} viewType={viewType} />
+      <Content
+        uploadAsset={uploadAsset}
+        viewType={viewType}
+        padding={padding}
+      />
     </StateProvider>
   );
 }

@@ -128,6 +128,7 @@ function FileEditor({ id }: { id: string }) {
 
   return (
     <Ayon
+      padding={20}
       uploadAsset={uploadAsset}
       name={cachedFile.data.name}
       initialDocument={initialFile.data.document}

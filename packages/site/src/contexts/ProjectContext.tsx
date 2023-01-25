@@ -5,18 +5,13 @@ export type ProjectContextValue = {
   setCenterToolbar: (value: ReactNode) => void;
 };
 
-const ProjectContext = createContext<ProjectContextValue | undefined>(
-  undefined,
-);
+const ProjectContext = createContext<ProjectContextValue>({
+  setCenterToolbar: () => {},
+  setRightToolbar: () => {},
+});
 
 export const ProjectProvider = ProjectContext.Provider;
 
 export function useProject() {
-  const value = useContext(ProjectContext);
-
-  if (!value) {
-    throw new Error('Missing ProjectContextValue');
-  }
-
-  return value;
+  return useContext(ProjectContext);
 }

@@ -20,6 +20,7 @@ interface Props {
   children: CanvasElementProps['children'];
   widgets?: CanvasElementProps['widgets'];
   interactions?: Interaction[];
+  padding?: number;
 }
 
 export const SimpleCanvas = memo(function SimpleCanvas({
@@ -27,6 +28,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   interactions,
   widgets,
   rendererZIndex = 0,
+  padding = 0,
 }: Props) {
   const ref = useRef<ICanvasElement>(null);
   const [state, dispatch] = useApplicationState();
@@ -65,9 +67,9 @@ export const SimpleCanvas = memo(function SimpleCanvas({
     dispatch(
       'zoomToFit*',
       { type: 'layer', value: state.isolatedLayerId },
-      { padding: 20, max: 1, position: 'top' },
+      { padding, max: 1, position: 'top' },
     );
-  }, [canvasSize, state.isolatedLayerId, dispatch]);
+  }, [canvasSize, state.isolatedLayerId, dispatch, padding]);
 
   return (
     <ContextMenu

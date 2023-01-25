@@ -33,7 +33,7 @@ import {
 import { useSize } from 'noya-react-utils';
 import { BlockProps, Layers, Selectors } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import React, { ReactNode, useEffect, useRef } from 'react';
+import React, { ComponentProps, ReactNode, useEffect, useRef } from 'react';
 import {
   avatarSymbol,
   boxSymbol,
@@ -546,9 +546,11 @@ function SymbolRenderer({
 function DOMRendererContent({
   size,
   resizeBehavior,
+  padding = 0,
 }: {
   size: Size;
   resizeBehavior: ResizeBehavior;
+  padding?: number;
 }): JSX.Element {
   const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
@@ -559,7 +561,7 @@ function DOMRendererContent({
   const containerTransform = createResizeTransform(artboard.frame, size, {
     scalingMode: 'down',
     resizePosition: 'top',
-    padding: 20,
+    padding,
   });
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const transform =
@@ -619,20 +621,16 @@ function DOMRendererContent({
 
 type ResizeBehavior = 'match-canvas' | 'fit-container';
 
-export function DOMRenderer({
-  resizeBehavior,
-}: {
-  resizeBehavior: ResizeBehavior;
-}): JSX.Element {
+export function DOMRenderer(
+  props: Omit<ComponentProps<typeof DOMRendererContent>, 'size'>,
+): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const size = useSize(containerRef);
 
   return (
     <div style={{ display: 'flex', flex: 1 }}>
       <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
-        {size && (
-          <DOMRendererContent size={size} resizeBehavior={resizeBehavior} />
-        )}
+        {size && <DOMRendererContent size={size} {...props} />}
       </div>
     </div>
   );

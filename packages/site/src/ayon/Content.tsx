@@ -39,9 +39,11 @@ export type ViewType = 'split' | 'combined';
 export const Content = memo(function Content({
   uploadAsset,
   viewType,
+  padding,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
+  padding?: number;
 }) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -169,6 +171,7 @@ export const Content = memo(function Content({
           onDropFiles={addImageFiles}
         >
           <SimpleCanvas
+            padding={padding}
             interactions={[
               Interactions.duplicate,
               Interactions.reorder,
@@ -269,7 +272,7 @@ export const Content = memo(function Content({
         <>
           <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
           <Panel.Item collapsible>
-            <DOMRenderer resizeBehavior="fit-container" />
+            <DOMRenderer padding={padding} resizeBehavior="fit-container" />
           </Panel.Item>
         </>
       )}
