@@ -1,8 +1,10 @@
 import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import { ApplicationState, Layers, Selectors } from 'noya-state';
+import prettier from 'prettier';
+import prettierTypeScript from 'prettier/parser-typescript';
 import { isValidElement } from 'react';
-import ts, { SourceFile } from 'typescript';
+import ts from 'typescript';
 import { Blocks } from './blocks';
 
 function createExpressionCode(value: unknown) {
@@ -94,14 +96,6 @@ export function generateCode(state: ApplicationState) {
       ];
     });
 
-  const sourceFile = ts.createSourceFile(
-    'App.tsx',
-    '',
-    ts.ScriptTarget.Latest,
-    false,
-    ts.ScriptKind.TSX,
-  );
-
   const componentCode = components.map(createElementCode);
 
   const func = ts.factory.createFunctionDeclaration(
@@ -122,15 +116,36 @@ export function generateCode(state: ApplicationState) {
     ]),
   );
 
-  return printSourceFile(sourceFile, func);
+  return format(printNode(func));
 }
 
-export function printSourceFile(sourceFile: SourceFile, node?: ts.Node) {
+function printNode(node: ts.Node) {
+  const sourceFile = ts.createSourceFile(
+    'App.tsx',
+    '',
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TSX,
+  );
+
   const printer = ts.createPrinter();
 
-  return printer.printNode(
+  const source = printer.printNode(
     ts.EmitHint.Unspecified,
     node ?? sourceFile,
     sourceFile,
   );
+
+  return source;
+}
+
+function format(text: string) {
+  return prettier.format(text, {
+    singleQuote: true,
+    trailingComma: 'es5',
+    printWidth: 80,
+    proseWrap: 'always',
+    parser: 'typescript',
+    plugins: [prettierTypeScript],
+  });
 }
