@@ -26,6 +26,7 @@ function Content({ id }: { id: string }) {
       name={initialFile.data.name}
       uploadAsset={async () => ''}
       viewType="combined"
+      canvasRendererType="svg"
     />
   );
 }

@@ -36,14 +36,18 @@ const generateResolver = new GenerateResolver();
 
 export type ViewType = 'split' | 'combined';
 
+type CanvasRendererType = 'canvas' | 'svg';
+
 export const Content = memo(function Content({
   uploadAsset,
   viewType,
   padding,
+  canvasRendererType = 'canvas',
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
   padding?: number;
+  canvasRendererType?: CanvasRendererType;
 }) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -159,6 +163,9 @@ export const Content = memo(function Content({
     };
   }, [dispatch, layers]);
 
+  const CanvasRenderer =
+    canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
+
   return (
     <Panel.Root direction="horizontal" autoSaveId="ayon-canvas">
       <Panel.Item ref={panelRef} collapsible defaultSize={75}>
@@ -218,7 +225,7 @@ export const Content = memo(function Content({
           >
             {({ size }) => (
               <>
-                <CanvasKitRenderer size={size}>
+                <CanvasRenderer size={size}>
                   <RenderingModeProvider value="interactive">
                     <Design.Root>
                       <Design.Background />
@@ -231,7 +238,7 @@ export const Content = memo(function Content({
                       <Design.EditPath />
                     </Design.Root>
                   </RenderingModeProvider>
-                </CanvasKitRenderer>
+                </CanvasRenderer>
               </>
             )}
           </SimpleCanvas>

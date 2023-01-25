@@ -49,15 +49,17 @@ function Workspace({
   onChangeName,
   viewType: initialViewType = 'split',
   padding,
+  canvasRendererType,
 }: {
-  uploadAsset: ComponentProps<typeof Content>['uploadAsset'];
   initialDocument: SketchFile;
   onChangeDocument?: (document: SketchFile) => void;
   name: string;
   onChangeName?: (name: string) => void;
   viewType?: ViewType;
-  padding?: number;
-}): JSX.Element {
+} & Pick<
+  ComponentProps<typeof Content>,
+  'uploadAsset' | 'padding' | 'canvasRendererType'
+>): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const [viewType, setViewType] = useState<ViewType>(initialViewType);
@@ -160,6 +162,7 @@ function Workspace({
   return (
     <StateProvider state={state} dispatch={dispatch}>
       <Content
+        canvasRendererType={canvasRendererType}
         uploadAsset={uploadAsset}
         viewType={viewType}
         padding={padding}
