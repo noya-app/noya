@@ -1,5 +1,4 @@
 import Sketch from 'noya-file-format';
-import { Rect } from 'noya-geometry';
 import { ApplicationState, Layers, Selectors } from 'noya-state';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
@@ -39,15 +38,17 @@ function createJsxElement(
   );
 }
 
+type SimpleElement = {
+  name: string;
+  props: Record<string, unknown>;
+  children: SimpleElement[];
+};
+
 function createElementCode({
   name,
   props,
-  frame,
-}: {
-  name: string;
-  props: Record<string, unknown>;
-  frame: Rect;
-}) {
+  children,
+}: SimpleElement): ts.JsxElement | ts.JsxSelfClosingElement {
   return createJsxElement(
     ts.factory.createJsxOpeningElement(
       ts.factory.createIdentifier(name),
@@ -71,7 +72,7 @@ function createElementCode({
         }),
       ),
     ),
-    [],
+    children.map(createElementCode),
   );
 }
 
@@ -97,19 +98,36 @@ export function generateCode(state: ApplicationState) {
 
       return [
         {
-          name: (element.type as any).displayName,
-          // Filter out undefined props
-          props: Object.fromEntries(
-            Object.entries(element.props).filter(
-              ([key, value]) => value !== undefined,
-            ),
-          ),
-          frame: layer.frame,
+          name: 'Frame',
+          props: {
+            left: layer.frame.x,
+            top: layer.frame.y,
+            width: layer.frame.width,
+            height: layer.frame.height,
+          },
+          children: [
+            {
+              name: (element.type as any).displayName,
+              // Filter out children prop and undefined props
+              props: Object.fromEntries(
+                Object.entries(element.props).filter(
+                  ([key, value]) => key !== 'children' && value !== undefined,
+                ),
+              ),
+              frame: layer.frame,
+              children: [],
+            },
+          ],
         },
       ];
     });
 
   const componentCode = components.map(createElementCode);
+
+  const frameComponent = `
+function Frame(props: React.ComponentProps<typeof Box>) {
+  return <Box pos="absolute" {...props} />
+}`;
 
   const func = ts.factory.createFunctionDeclaration(
     undefined,
@@ -129,10 +147,10 @@ export function generateCode(state: ApplicationState) {
     ]),
   );
 
-  return format(printNode(func));
+  return format([frameComponent, printNodes([func])].join('\n\n'));
 }
 
-function printNode(node: ts.Node) {
+function printNodes(nodes: ts.Node[]) {
   const sourceFile = ts.createSourceFile(
     'App.tsx',
     '',
@@ -143,9 +161,9 @@ function printNode(node: ts.Node) {
 
   const printer = ts.createPrinter();
 
-  const source = printer.printNode(
-    ts.EmitHint.Unspecified,
-    node ?? sourceFile,
+  const source = printer.printList(
+    ts.ListFormat.MultiLine,
+    ts.factory.createNodeArray(nodes),
     sourceFile,
   );
 
