@@ -28,8 +28,6 @@ import {
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { filterHashTagsAndSlashCommands } from './DOMRenderer';
-import { Stacking } from './stacking';
 import {
   allAyonSymbols,
   heading1SymbolId,
@@ -40,7 +38,9 @@ import {
   heading6SymbolId,
   imageSymbolId,
   textSymbolId,
-} from './symbols';
+} from './blocks/symbols';
+import { filterHashTagsAndSlashCommands } from './parse';
+import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 
 const ContentElement = styled.div(({ theme }) => ({

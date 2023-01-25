@@ -15,13 +15,14 @@ import { isExternalUrl } from 'noya-utils';
 import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
-import { DOMRenderer, filterHashTagsAndSlashCommands } from './DOMRenderer';
+import { buttonSymbol, imageSymbolId, writeSymbolId } from './blocks/symbols';
+import { DOMRenderer } from './DOMRenderer';
 import { GenerateResolver } from './GenerateResolver';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
+import { filterHashTagsAndSlashCommands } from './parse';
 import { RedirectResolver } from './RedirectResolver';
 import { Stacking } from './stacking';
-import { buttonSymbol, imageSymbolId, writeSymbolId } from './symbols';
 import { DrawingWidget, Widget } from './Widget';
 
 const Overlay = styled.div({

@@ -1,6 +1,10 @@
-import Sketch from 'noya-file-format';
-import { Rect } from 'noya-geometry';
 import { DrawableLayerType, InferBlockProps, InferBlockType } from 'noya-state';
+import { ButtonBlock } from './blocks/ButtonBlock';
+import {
+  isApproximatelySquare,
+  isWithinRectRange,
+  scoreCommandMatch,
+} from './blocks/score';
 import {
   avatarSymbol,
   boxSymbol,
@@ -20,18 +24,14 @@ import {
   switchSymbol,
   textSymbol,
   writeSymbol,
-} from './symbols';
+} from './blocks/symbols';
 import { InferredBlockTypeResult } from './types';
 
 export const BLOCK_TYPE_HEURISTICS: Record<
   string,
   (props: InferBlockProps) => number
 > = {
-  [buttonSymbol.symbolID]: ({ frame, blockText }) =>
-    Math.max(
-      scoreCommandMatch(buttonSymbol, blockText),
-      isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
-    ),
+  [buttonSymbol.symbolID]: ButtonBlock.infer,
   [avatarSymbol.symbolID]: ({ frame, blockText }) =>
     Math.max(
       scoreCommandMatch(avatarSymbol, blockText),
@@ -112,51 +112,6 @@ export const BLOCK_TYPE_HEURISTICS: Record<
     );
   },
 };
-
-function isWithinRectRange(
-  rect: Rect,
-  minWidth?: number,
-  minHeight?: number,
-  maxWidth?: number,
-  maxHeight?: number,
-) {
-  return (
-    (!minWidth || rect.width >= minWidth) &&
-    (!maxWidth || rect.width <= maxWidth) &&
-    (!minHeight || rect.height >= minHeight) &&
-    (!maxHeight || rect.height <= maxHeight)
-  );
-}
-
-function isApproximatelySquare(rect: Rect, tolerance: number) {
-  return (
-    Math.abs(rect.width - rect.height) <=
-    tolerance * Math.min(rect.width, rect.height)
-  );
-}
-
-function commonPrefixLength(a?: string, b?: string) {
-  if (!a || !b) {
-    return 0;
-  }
-  if (a === b) {
-    return a.length;
-  }
-  const firstDiffCharIndex = [...a].findIndex(
-    (character, index) => character !== b[index],
-  );
-  return firstDiffCharIndex === -1 ? 0 : firstDiffCharIndex;
-}
-
-function scoreCommandMatch(symbolMaster: Sketch.SymbolMaster, text?: string) {
-  const command = `/${symbolMaster.name.toLowerCase()}`;
-  const words = text?.split(/\s/);
-  const slashWords = words?.filter((word) => word[0] === '/' && word !== '/');
-
-  return (slashWords ?? [])
-    .map((word) => commonPrefixLength(command, word) - 1)
-    .reduce((a, b) => Math.max(a, b), -1);
-}
 
 export function inferBlockTypes(
   input: InferBlockProps,

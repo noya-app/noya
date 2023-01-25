@@ -7,7 +7,13 @@ import {
   Spacer,
   Stack,
 } from 'noya-designsystem';
-import { BoxIcon, ChevronDownIcon, ViewVerticalIcon } from 'noya-icons';
+import {
+  BoxIcon,
+  ChevronDownIcon,
+  CodeIcon,
+  ImageIcon,
+  ViewVerticalIcon,
+} from 'noya-icons';
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
@@ -35,11 +41,14 @@ import React, {
   useReducer,
   useState,
 } from 'react';
+import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
-import { allAyonSymbols, ayonLibraryId } from '../ayon/symbols';
+import { generateCode } from '../ayon/generateCode';
 import { useProject } from '../contexts/ProjectContext';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
+
+export type ExportType = 'png' | 'react';
 
 function Workspace({
   uploadAsset,
@@ -110,34 +119,63 @@ function Workspace({
 
   useLayoutEffect(() => {
     setRightToolbar(
-      <DropdownMenu<ViewType>
-        items={[
-          {
-            value: 'split',
-            title: 'Split View',
-            icon: <ViewVerticalIcon />,
-            checked: viewType === 'split',
-          },
-          {
-            value: 'combined',
-            title: 'Combined View',
-            icon: <BoxIcon />,
-            checked: viewType === 'combined',
-          },
-        ]}
-        onSelect={setViewType}
-        onOpenChange={() => {
-          dispatch(['selectLayer', []]);
-        }}
-      >
-        <Button>
-          View
-          <Spacer.Horizontal size={4} />
-          <ChevronDownIcon />
-        </Button>
-      </DropdownMenu>,
+      <Stack.H gap={8}>
+        <DropdownMenu<ExportType>
+          items={[
+            {
+              value: 'png',
+              title: 'Image',
+              icon: <ImageIcon />,
+            },
+            {
+              value: 'react',
+              title: 'React Code',
+              icon: <CodeIcon />,
+            },
+          ]}
+          onSelect={() => {
+            const result = generateCode(state.history.present);
+            console.info('export', result);
+          }}
+          onOpenChange={() => {
+            dispatch(['selectLayer', []]);
+          }}
+        >
+          <Button>
+            Export
+            <Spacer.Horizontal size={4} />
+            <ChevronDownIcon />
+          </Button>
+        </DropdownMenu>
+        <DropdownMenu<ViewType>
+          items={[
+            {
+              value: 'split',
+              title: 'Split View',
+              icon: <ViewVerticalIcon />,
+              checked: viewType === 'split',
+            },
+            {
+              value: 'combined',
+              title: 'Combined View',
+              icon: <BoxIcon />,
+              checked: viewType === 'combined',
+            },
+          ]}
+          onSelect={setViewType}
+          onOpenChange={() => {
+            dispatch(['selectLayer', []]);
+          }}
+        >
+          <Button>
+            View
+            <Spacer.Horizontal size={4} />
+            <ChevronDownIcon />
+          </Button>
+        </DropdownMenu>
+      </Stack.H>,
     );
-  }, [setRightToolbar, viewType]);
+  }, [setRightToolbar, state.history.present, viewType]);
 
   useLayoutEffect(() => {
     setCenterToolbar(
