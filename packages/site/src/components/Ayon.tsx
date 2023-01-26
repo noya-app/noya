@@ -43,7 +43,6 @@ import React, {
 } from 'react';
 import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
-import { generateCode } from '../ayon/generateCode';
 import { useProject } from '../contexts/ProjectContext';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
@@ -134,6 +133,7 @@ function Workspace({
             },
           ]}
           onSelect={async () => {
+            const { generateCode } = await import('../ayon/generateCode');
             const result = generateCode(state.history.present);
             console.info('export', result);
           }}

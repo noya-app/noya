@@ -1,3 +1,4 @@
+import * as ChakraUI from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
 import { ApplicationState, Layers, Selectors } from 'noya-state';
 import prettier from 'prettier';
@@ -5,6 +6,12 @@ import prettierTypeScript from 'prettier/parser-typescript';
 import React, { isValidElement } from 'react';
 import ts from 'typescript';
 import { Blocks } from './blocks';
+
+const Components = new Map<unknown, string>();
+
+Object.entries(ChakraUI).forEach(([key, value]) => {
+  Components.set(value, key);
+});
 
 function createExpressionCode(value: unknown) {
   switch (typeof value) {
@@ -96,9 +103,15 @@ export function generateCode(state: ApplicationState) {
 
       if (!element || !isValidElement(element)) return [];
 
-      function createSimpleElement(element: React.ReactElement): SimpleElement {
+      function createSimpleElement(
+        element: React.ReactElement,
+      ): SimpleElement | undefined {
+        const name = Components.get(element.type);
+
+        if (!name) return;
+
         return {
-          name: (element.type as any).displayName || 'Unknown',
+          name,
           // Filter out children prop and undefined props
           props: Object.fromEntries(
             Object.entries(element.props).filter(
@@ -107,9 +120,16 @@ export function generateCode(state: ApplicationState) {
           ),
           children: React.Children.toArray(element.props.children)
             .filter(React.isValidElement)
-            .map(createSimpleElement),
+            .flatMap((element) => {
+              const mapped = createSimpleElement(element);
+              return mapped ? [mapped] : [];
+            }),
         };
       }
+
+      const root = createSimpleElement(element);
+
+      if (!root) return [];
 
       return [
         {
@@ -120,7 +140,7 @@ export function generateCode(state: ApplicationState) {
             width: layer.frame.width,
             height: layer.frame.height,
           },
-          children: [createSimpleElement(element)],
+          children: [root],
         },
       ];
     });
