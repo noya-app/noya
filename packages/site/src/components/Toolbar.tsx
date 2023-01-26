@@ -12,6 +12,7 @@ import {
 } from 'noya-designsystem';
 import {
   ChevronDownIcon,
+  DiscordLogoIcon,
   EnvelopeClosedIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
@@ -49,6 +50,7 @@ export function Toolbar({ children, right }: Props) {
   const userMenuItems = createSectionedMenu(
     [{ title: 'Sign out', value: 'signOut', icon: <PersonIcon /> }],
     [
+      { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
       { title: 'Contact us', value: 'contact', icon: <EnvelopeClosedIcon /> },
       { title: 'Get help', value: 'help', icon: <QuestionMarkCircledIcon /> },
     ],
@@ -83,6 +85,9 @@ export function Toolbar({ children, right }: Props) {
               switch (value) {
                 case 'signOut':
                   window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
+                  return;
+                case 'discord':
+                  window.location.href = 'https://discord.gg/NPGAwyEBJw';
                   return;
                 case 'contact':
                   window.location.href =

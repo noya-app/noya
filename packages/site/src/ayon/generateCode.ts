@@ -2,7 +2,7 @@ import Sketch from 'noya-file-format';
 import { ApplicationState, Layers, Selectors } from 'noya-state';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
-import { isValidElement } from 'react';
+import React, { isValidElement } from 'react';
 import ts from 'typescript';
 import { Blocks } from './blocks';
 
@@ -96,6 +96,21 @@ export function generateCode(state: ApplicationState) {
 
       if (!element || !isValidElement(element)) return [];
 
+      function createSimpleElement(element: React.ReactElement): SimpleElement {
+        return {
+          name: (element.type as any).displayName,
+          // Filter out children prop and undefined props
+          props: Object.fromEntries(
+            Object.entries(element.props).filter(
+              ([key, value]) => key !== 'children' && value !== undefined,
+            ),
+          ),
+          children: React.Children.toArray(element.props.children)
+            .filter(React.isValidElement)
+            .map(createSimpleElement),
+        };
+      }
+
       return [
         {
           name: 'Frame',
@@ -105,19 +120,7 @@ export function generateCode(state: ApplicationState) {
             width: layer.frame.width,
             height: layer.frame.height,
           },
-          children: [
-            {
-              name: (element.type as any).displayName,
-              // Filter out children prop and undefined props
-              props: Object.fromEntries(
-                Object.entries(element.props).filter(
-                  ([key, value]) => key !== 'children' && value !== undefined,
-                ),
-              ),
-              frame: layer.frame,
-              children: [],
-            },
-          ],
+          children: [createSimpleElement(element)],
         },
       ];
     });

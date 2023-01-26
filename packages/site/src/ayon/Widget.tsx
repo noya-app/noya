@@ -310,7 +310,7 @@ export function Widget({
               <ContentElement>
                 <Stack.V padding={'0 8px'}>
                   <Small color="textSubtle" padding={'4px 0px'}>
-                    Top Alternatives
+                    Top Suggestions
                   </Small>
                   <Divider overflow={8} />
                   {blockTypes
