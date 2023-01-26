@@ -98,7 +98,7 @@ export function generateCode(state: ApplicationState) {
 
       function createSimpleElement(element: React.ReactElement): SimpleElement {
         return {
-          name: (element.type as any).displayName,
+          name: (element.type as any).displayName || 'Unknown',
           // Filter out children prop and undefined props
           props: Object.fromEntries(
             Object.entries(element.props).filter(
