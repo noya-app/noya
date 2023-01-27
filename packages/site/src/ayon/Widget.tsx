@@ -57,12 +57,14 @@ function WidgetContainer({
   transform,
   zIndex,
   footer,
+  label,
 }: {
   frame: Rect;
   children?: React.ReactNode;
   transform?: AffineTransform;
   zIndex?: number;
   footer?: React.ReactNode;
+  label?: React.ReactNode;
 }) {
   return (
     <div
@@ -112,6 +114,24 @@ function WidgetContainer({
             {footer}
           </div>
         )}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            whiteSpace: 'pre',
+            display: 'flex',
+            transformOrigin: 'bottom right',
+            transform: AffineTransform.scale(
+              transform ? 1 / transform.scaleComponents.x : 1,
+              transform ? 1 / transform.scaleComponents.y : 1,
+            )
+              .translate(-8, -4)
+              .toString(),
+          }}
+        >
+          {label}
+        </div>
       </div>
     </div>
   );
@@ -211,6 +231,11 @@ export function Widget({
       frame={rect}
       transform={canvasTransform}
       zIndex={showWidgetUI ? Stacking.level.interactive : undefined}
+      label={
+        !showWidgetUI && (
+          <Small opacity={0.5}>{symbol?.name ?? layer.name}</Small>
+        )
+      }
       footer={
         showWidgetUI && (
           <Stack.V gap={6} alignItems="flex-end">
