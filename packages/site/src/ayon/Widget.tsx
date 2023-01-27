@@ -413,6 +413,15 @@ export function Widget({
             return;
           }
 
+          if (
+            (event.key === 'Delete' || event.key === 'Backspace') &&
+            !blockText
+          ) {
+            dispatch('deleteLayer', layer.do_objectID);
+            event.preventDefault();
+            return;
+          }
+
           if (event.key !== 'Tab') {
             return;
           }
