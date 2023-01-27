@@ -9,6 +9,8 @@ import { createInitialWorkspaceState, Layers, Selectors } from 'noya-state';
 import path from 'path';
 import React from 'react';
 
+const PORT = process.env.PORT || 4000;
+
 const wasmPath = path.join(
   __dirname,
   '..',
@@ -113,7 +115,7 @@ async function main() {
 
   const server = new ApolloServer({ typeDefs, resolvers });
 
-  server.listen().then(({ url }) => {
+  server.listen({ port: PORT }).then(({ url }) => {
     if (process.send) {
       process.send('ready');
     } else {

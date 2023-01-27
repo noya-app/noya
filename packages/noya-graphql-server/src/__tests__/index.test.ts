@@ -6,11 +6,13 @@ jest.setTimeout(90000);
 
 const root = path.join(__dirname, '../..');
 
+const port = 4040;
+
 function makeGraphQLQuery({ query }: { query: string }) {
   return new Promise<unknown>((resolve, reject) => {
     const options: http.RequestOptions = {
       host: 'localhost',
-      port: 4000,
+      port,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     };
@@ -34,10 +36,13 @@ function makeGraphQLQuery({ query }: { query: string }) {
 }
 
 test('server runs', async () => {
-  execSync('npm run build --scripts-prepend-node-path', { cwd: root });
+  execSync('npm run build --scripts-prepend-node-path', {
+    cwd: root,
+  });
 
   const child = fork(path.join(root, 'build', 'bundle.js'), {
     cwd: root,
+    env: { ...process.env, PORT: port.toString() },
   });
 
   await new Promise<void>((resolve) => {
