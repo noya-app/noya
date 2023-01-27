@@ -108,3 +108,5 @@ export const createMoveInteraction = (
       }),
     });
   };
+
+export const moveInteraction = createMoveInteraction();

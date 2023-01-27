@@ -7,8 +7,8 @@ import {
 } from 'noya-state';
 import { defaultCursorInteraction } from './defaultCursor';
 import { createDrawingInteraction, DrawingActions } from './drawing';
-import { createMoveInteraction, MoveActions } from './move';
-import { createScaleInteraction, ScaleActions } from './scale';
+import { MoveActions, moveInteraction } from './move';
+import { ScaleActions, scaleInteraction } from './scale';
 import { SelectionActions, selectionInteraction } from './selection';
 import { InteractionAPI } from './types';
 
@@ -73,9 +73,9 @@ export const createEditBlockInteraction = ({
       }),
       editingBlock: (interactionState, api) => {
         const handlers = [
-          createScaleInteraction({ inferBlockType }),
+          scaleInteraction,
           selectionInteraction,
-          createMoveInteraction({ inferBlockType }),
+          moveInteraction,
           createDrawingInteraction({
             allowDrawingFromNoneState: true,
             inferBlockType,

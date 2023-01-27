@@ -93,3 +93,5 @@ export const createScaleInteraction = (
       }),
     });
   };
+
+export const scaleInteraction = createScaleInteraction();
