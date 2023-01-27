@@ -38,6 +38,9 @@ export class NoyaClient {
       update: this.#updateFile,
       delete: this.#deleteFile,
       refetch: this.#fetchFiles,
+      download: {
+        url: this.networkClient.files.download.url,
+      },
     });
   }
 

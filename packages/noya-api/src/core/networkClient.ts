@@ -1,7 +1,9 @@
+import { Size } from 'noya-geometry';
 import { z } from 'zod';
 import { NoyaAPIError } from './error';
 import {
   noyaAssetSchema,
+  NoyaExportFormat,
   NoyaFileData,
   noyaFileListSchema,
   noyaFileSchema,
@@ -51,6 +53,9 @@ export class NoyaNetworkClient {
       update: this.#updateFile,
       delete: this.#deleteFile,
       list: this.#listFiles,
+      download: {
+        url: this.downloadURL,
+      },
     };
   }
 
@@ -60,6 +65,9 @@ export class NoyaNetworkClient {
       url: this.#assetURL,
     };
   }
+
+  downloadURL = (id: string, format: NoyaExportFormat, size: Size) =>
+    `${this.baseURI}/files/${id}.${format}?width=${size.width}&height=${size.height}`;
 
   #assetURL = (id: string) => `${this.baseURI}/assets/${id}`;
 

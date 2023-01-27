@@ -44,3 +44,5 @@ export type NoyaSession = z.infer<typeof noyaSessionSchema>;
 export type NoyaFileData = z.infer<typeof noyaFileDataSchema>;
 export type NoyaFile = z.infer<typeof noyaFileSchema>;
 export type NoyaFileList = z.infer<typeof noyaFileListSchema>;
+
+export type NoyaExportFormat = 'png' | 'pdf' | 'svg';

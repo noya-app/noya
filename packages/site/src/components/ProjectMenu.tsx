@@ -8,7 +8,7 @@ import {
 } from 'noya-designsystem';
 import { ChevronDownIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
-import { Layers } from 'noya-state';
+import { Layers, Selectors } from 'noya-state';
 import React from 'react';
 
 export function ProjectMenu({
@@ -20,7 +20,10 @@ export function ProjectMenu({
 }) {
   const [state, dispatch] = useApplicationState();
 
-  const artboard = Layers.find(state.sketch.pages[0], Layers.isArtboard);
+  const artboard = Layers.find(
+    Selectors.getCurrentPage(state),
+    Layers.isArtboard,
+  );
 
   if (!artboard) return null;
 

@@ -8,6 +8,7 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { Size } from 'noya-geometry';
 import { getCurrentPlatform } from 'noya-keymap';
 import { SketchFile } from 'noya-sketch-file';
 import { debounce } from 'noya-utils';
@@ -27,6 +28,19 @@ import {
 } from '../../contexts/ProjectContext';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
+
+function downloadBlob(blob: Blob, name: string) {
+  const exportUrl = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = exportUrl;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(exportUrl);
+}
 
 function FileTitle({ id }: { id: string }) {
   const files = useNoyaFiles();
@@ -124,6 +138,16 @@ function FileEditor({ id }: { id: string }) {
     return client.assets.url(fileId);
   };
 
+  const downloadFile = useCallback(
+    async (format: NoyaAPI.ExportFormat, size: Size) => {
+      const url = client.files.download.url(id, format, size);
+      const response = await fetch(url, { credentials: 'include' });
+      const blob = await response.blob();
+      downloadBlob(blob, `download.${format}`);
+    },
+    [id, client.files.download],
+  );
+
   if (!initialFile || !cachedFile) return null;
 
   return (
@@ -134,6 +158,7 @@ function FileEditor({ id }: { id: string }) {
       initialDocument={initialFile.data.document}
       onChangeDocument={updateDocument}
       onChangeName={updateName}
+      downloadFile={downloadFile}
     />
   );
 }

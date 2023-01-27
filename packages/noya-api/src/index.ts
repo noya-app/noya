@@ -3,7 +3,13 @@ import { NoyaAPIError } from './core/error';
 import { NoyaLocalStorageClient } from './core/localStorageClient';
 import { NoyaMemoryClient } from './core/memoryClient';
 import { NoyaNetworkClient } from './core/networkClient';
-import { NoyaFile, NoyaFileList, NoyaSession, NoyaUser } from './core/schema';
+import {
+  NoyaExportFormat,
+  NoyaFile,
+  NoyaFileList,
+  NoyaSession,
+  NoyaUser,
+} from './core/schema';
 
 export * from './react/context';
 export * from './react/hooks';
@@ -19,4 +25,5 @@ export namespace NoyaAPI {
   export type FileList = NoyaFileList;
   export type User = NoyaUser;
   export type Session = NoyaSession;
+  export type ExportFormat = NoyaExportFormat;
 }

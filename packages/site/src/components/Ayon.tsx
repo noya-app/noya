@@ -1,17 +1,22 @@
 import produce from 'immer';
+import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import {
   Button,
   DropdownMenu,
   Popover,
+  SEPARATOR_ITEM,
   Spacer,
   Stack,
 } from 'noya-designsystem';
+import { Size } from 'noya-geometry';
 import {
   BoxIcon,
   ChevronDownIcon,
   CodeIcon,
+  FileIcon,
   ImageIcon,
+  TransformIcon,
   ViewVerticalIcon,
 } from 'noya-icons';
 import { setPublicPath } from 'noya-public-path';
@@ -27,6 +32,7 @@ import { SketchModel } from 'noya-sketch-model';
 import {
   createInitialWorkspaceState,
   Layers,
+  Selectors,
   WorkspaceAction,
   workspaceReducer,
   WorkspaceState,
@@ -47,7 +53,7 @@ import { useProject } from '../contexts/ProjectContext';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 
-export type ExportType = 'png' | 'react';
+export type ExportType = NoyaAPI.ExportFormat | 'react';
 
 function Workspace({
   uploadAsset,
@@ -58,12 +64,14 @@ function Workspace({
   viewType: initialViewType = 'split',
   padding,
   canvasRendererType,
+  downloadFile,
 }: {
   initialDocument: SketchFile;
   onChangeDocument?: (document: SketchFile) => void;
   name: string;
   onChangeName?: (name: string) => void;
   viewType?: ViewType;
+  downloadFile?: (type: NoyaAPI.ExportFormat, size: Size) => void;
 } & Pick<
   ComponentProps<typeof Content>,
   'uploadAsset' | 'padding' | 'canvasRendererType'
@@ -116,6 +124,11 @@ function Workspace({
     onChangeDocument?.(documentWithoutForeignSymbols);
   }, [state.history.present.sketch, onChangeDocument]);
 
+  const artboard = Layers.find(
+    Selectors.getCurrentPage(state.history.present),
+    Layers.isArtboard,
+  );
+
   useLayoutEffect(() => {
     setRightToolbar(
       <Stack.H gap={8}>
@@ -123,19 +136,40 @@ function Workspace({
           items={[
             {
               value: 'png',
-              title: 'Image',
+              title: 'PNG',
               icon: <ImageIcon />,
             },
+            {
+              value: 'pdf',
+              title: 'PDF',
+              icon: <FileIcon />,
+            },
+            {
+              value: 'svg',
+              title: 'SVG',
+              icon: <TransformIcon />,
+            },
+            SEPARATOR_ITEM,
             {
               value: 'react',
               title: 'React Code',
               icon: <CodeIcon />,
             },
           ]}
-          onSelect={async () => {
-            const { generateCode } = await import('../ayon/generateCode');
-            const result = generateCode(state.history.present);
-            console.info('export', result);
+          onSelect={async (value) => {
+            switch (value) {
+              case 'png':
+              case 'pdf':
+              case 'svg':
+                if (!artboard) return;
+                downloadFile?.(value, artboard.frame);
+                return;
+              case 'react': {
+                const { generateCode } = await import('../ayon/generateCode');
+                const result = generateCode(state.history.present);
+                console.info('export', result);
+              }
+            }
           }}
           onOpenChange={() => {
             dispatch(['selectLayer', []]);
@@ -175,7 +209,13 @@ function Workspace({
         </DropdownMenu>
       </Stack.H>,
     );
-  }, [setRightToolbar, state.history.present, viewType]);
+  }, [
+    downloadFile,
+    setRightToolbar,
+    state.history.present,
+    viewType,
+    artboard,
+  ]);
 
   useLayoutEffect(() => {
     setCenterToolbar(

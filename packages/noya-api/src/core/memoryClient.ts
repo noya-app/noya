@@ -78,6 +78,11 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     delete: async (id) => {
       this.data.files = fileReducer(this.data.files, { type: 'delete', id });
     },
+    download: {
+      url: (id, format, size) => {
+        return '';
+      },
+    },
   };
 
   stringify() {
