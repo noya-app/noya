@@ -10,6 +10,7 @@ import {
   Spacer,
   Stack,
 } from 'noya-designsystem';
+import { toZipFile } from 'noya-filesystem';
 import { Size } from 'noya-geometry';
 import {
   BoxIcon,
@@ -38,6 +39,7 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
+import { UTF16 } from 'noya-utils';
 import React, {
   ComponentProps,
   memo,
@@ -52,6 +54,7 @@ import { Blocks } from '../ayon/blocks';
 import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
+import { downloadBlob } from '../utils/download';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 
@@ -179,7 +182,15 @@ function Workspace({
                   Blocks,
                   Components,
                 });
-                console.info('export', result);
+                const zipFile = await toZipFile(
+                  {
+                    'App.tsx': UTF16.toUTF8(result['App.tsx']),
+                    'package.json': UTF16.toUTF8(result['package.json']),
+                  },
+                  'App.zip',
+                );
+                downloadBlob(zipFile);
+                return;
               }
             }
           }}

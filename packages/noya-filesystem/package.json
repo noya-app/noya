@@ -1,0 +1,13 @@
+{
+  "name": "noya-filesystem",
+  "private": false,
+  "modular": {
+    "type": "package"
+  },
+  "main": "./src/index.ts",
+  "version": "1.0.0",
+  "dependencies": {
+    "fflate": "^0.7.4",
+    "imfs": "^0.1.0"
+  }
+}

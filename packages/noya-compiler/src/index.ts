@@ -5,9 +5,11 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
+import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
 import React, { isValidElement } from 'react';
+import { flat } from 'tree-visit';
 import ts from 'typescript';
 
 function createExpressionCode(value: unknown) {
@@ -148,12 +150,43 @@ export function compile({ state, Blocks, Components }: CompilerConfiguration) {
       ];
     });
 
+  const getChildren = (element: SimpleElement) => {
+    return element.children;
+  };
+  const fakeRoot: SimpleElement = {
+    name: 'Frame',
+    children: components,
+    props: {},
+  };
+
   const componentCode = components.map(createElementCode);
 
   const frameComponent = `
 function Frame(props: React.ComponentProps<typeof Box>) {
   return <Box pos="absolute" {...props} />
 }`;
+
+  const imports = ts.factory.createImportDeclaration(
+    undefined,
+    ts.factory.createImportClause(
+      false,
+      undefined,
+      ts.factory.createNamedImports(
+        unique(
+          flat(fakeRoot, { getChildren })
+            .map((element) => element.name)
+            .filter((name) => name !== 'Frame'),
+        ).map((name) =>
+          ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier(name),
+          ),
+        ),
+      ),
+    ),
+    ts.factory.createStringLiteral('@chakra-ui/react'),
+  );
 
   const func = ts.factory.createFunctionDeclaration(
     undefined,
@@ -173,7 +206,46 @@ function Frame(props: React.ComponentProps<typeof Box>) {
     ]),
   );
 
-  return format([frameComponent, printNodes([func])].join('\n\n'));
+  const exports = ts.factory.createExportDeclaration(
+    undefined,
+    false,
+    ts.factory.createNamedExports([
+      ts.factory.createExportSpecifier(
+        false,
+        undefined,
+        ts.factory.createIdentifier('App'),
+      ),
+    ]),
+  );
+
+  const files = {
+    'App.tsx': format(
+      [
+        printNodes([imports]),
+        `import * as React from "react";`,
+        frameComponent,
+        printNodes([func, exports]),
+      ].join('\n\n'),
+    ),
+    'package.json': JSON.stringify(
+      {
+        name: 'app',
+        dependencies: {
+          react: '^18',
+          '@chakra-ui/icons': '^2',
+          '@chakra-ui/react': '^1',
+          '@emotion/react': '^11',
+          '@emotion/styled': '^11',
+        },
+      },
+      null,
+      2,
+    ),
+  };
+
+  console.info(files);
+
+  return files;
 }
 
 function printNodes(nodes: ts.Node[]) {

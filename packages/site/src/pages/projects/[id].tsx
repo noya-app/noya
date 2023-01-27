@@ -26,22 +26,9 @@ import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
+import { downloadUrl } from '../../utils/download';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
-
-function downloadBlob(blob: Blob, name: string) {
-  const exportUrl = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = exportUrl;
-  a.download = name;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-
-  document.body.removeChild(a);
-  URL.revokeObjectURL(exportUrl);
-}
 
 function FileTitle({ id }: { id: string }) {
   const files = useNoyaFiles();
@@ -142,9 +129,7 @@ function FileEditor({ id }: { id: string }) {
   const downloadFile = useCallback(
     async (format: NoyaAPI.ExportFormat, size: Size) => {
       const url = client.files.download.url(id, format, size);
-      const response = await fetch(url, { credentials: 'include' });
-      const blob = await response.blob();
-      downloadBlob(blob, `download.${format}`);
+      downloadUrl(url, `download.${format}`);
     },
     [id, client.files.download],
   );
