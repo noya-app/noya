@@ -49,7 +49,7 @@ exports[`addLayer some layer is selected 1`] = `
 exports[`deleteLayer delete multiple bad nesting 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
-│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
 └── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
@@ -59,7 +59,7 @@ exports[`deleteLayer delete multiple bad nesting 1`] = `
 exports[`deleteLayer delete multiple within different parents 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
-│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
 └── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
@@ -69,7 +69,7 @@ exports[`deleteLayer delete multiple within different parents 1`] = `
 exports[`deleteLayer delete multiple within same parent 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
-│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
 └── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }"
@@ -136,8 +136,8 @@ exports[`grouping Group & ungroup layers 1`] = `
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Bottom { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 100, y: 100, w: 250, h: 250 }
-│   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
-│   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
+│   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+│   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
 └── <Rectangle> Top { x: 0, y: 0, w: 0, h: 0 }"
 `;
 
@@ -145,8 +145,8 @@ exports[`grouping Group & ungroup layers 2`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Bottom { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 100, y: 100, w: 250, h: 250 }
-│   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
-│   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
+│   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+│   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
 └── <Rectangle> Top { x: 0, y: 0, w: 0, h: 0 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
@@ -168,8 +168,8 @@ exports[`grouping Group & ungroup nested layers 1`] = `
 └── <Artboard> Artboard { x: 100, y: 100, w: 300, h: 300 }
     ├── <Rectangle> Bottom { x: 0, y: 0, w: 0, h: 0 }
     ├── <Group> Group { x: 100, y: 100, w: 250, h: 250 }
-    │   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
-    │   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
+    │   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+    │   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
     └── <Rectangle> Top { x: 0, y: 0, w: 0, h: 0 }"
 `;
 
@@ -178,8 +178,8 @@ exports[`grouping Group & ungroup nested layers 2`] = `
 └── <Artboard> Artboard { x: 100, y: 100, w: 300, h: 300 }
     ├── <Rectangle> Bottom { x: 0, y: 0, w: 0, h: 0 }
     ├── <Group> Group { x: 100, y: 100, w: 250, h: 250 }
-    │   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
-    │   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
+    │   ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+    │   └── <Oval> Oval { x: 150, y: 150, w: 100, h: 100 }
     └── <Rectangle> Top { x: 0, y: 0, w: 0, h: 0 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
@@ -194,12 +194,12 @@ exports[`grouping Ungroup multiple groups 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
 ├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
-│   ├── <Rectangle> 1 { x: 0, y: 0, w: 0, h: 0 }
-│   └── <Rectangle> 2 { x: 0, y: 0, w: 0, h: 0 }
+│   ├── <Rectangle> 1 { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> 2 { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Middle { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
-│   ├── <Rectangle> 3 { x: 0, y: 0, w: 0, h: 0 }
-│   └── <Rectangle> 4 { x: 0, y: 0, w: 0, h: 0 }
+│   ├── <Rectangle> 3 { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> 4 { x: 0, y: 0, w: 0, h: 0 }
 └── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
