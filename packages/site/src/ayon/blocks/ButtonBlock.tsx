@@ -1,9 +1,9 @@
 import { Button } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { isWithinRectRange, scoreCommandMatch } from './score';
 import { buttonSymbol, buttonSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const ButtonBlock: BlockDefinition = {
   id: buttonSymbolId,

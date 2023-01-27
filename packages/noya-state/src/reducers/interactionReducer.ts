@@ -6,7 +6,7 @@ import {
   TextSelectionRange,
   UUID,
 } from 'noya-state';
-import { CSSProperties } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -45,6 +45,12 @@ export type InferBlockProps = {
   frame: Rect;
   blockText?: string;
   siblingBlocks: SiblingBlockProps[];
+};
+
+export type BlockDefinition = {
+  id: string;
+  infer: (props: InferBlockProps) => number;
+  render: (props: BlockProps) => ReactNode;
 };
 
 export type InferBlockType = (props: InferBlockProps) => DrawableLayerType;

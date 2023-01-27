@@ -1,9 +1,9 @@
 import { Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { isWithinRectRange, scoreCommandMatch } from './score';
 import { heroSymbol, heroSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const HeroBlock: BlockDefinition = {
   id: heroSymbolId,

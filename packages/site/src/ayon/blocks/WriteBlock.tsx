@@ -1,9 +1,9 @@
 import { Flex, Spinner, SystemProps, Text } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { scoreCommandMatch } from './score';
 import { writeSymbol, writeSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const WriteBlock: BlockDefinition = {
   id: writeSymbolId,

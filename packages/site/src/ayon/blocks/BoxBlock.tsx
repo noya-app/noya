@@ -1,9 +1,9 @@
 import { Box } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { scoreCommandMatch } from './score';
 import { boxSymbol, boxSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const BoxBlock: BlockDefinition = {
   id: boxSymbolId,

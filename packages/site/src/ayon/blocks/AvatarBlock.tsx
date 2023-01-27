@@ -1,4 +1,5 @@
 import { Avatar } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import {
   isApproximatelySquare,
@@ -6,7 +7,6 @@ import {
   scoreCommandMatch,
 } from './score';
 import { avatarSymbol, avatarSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const AvatarBlock: BlockDefinition = {
   id: avatarSymbolId,

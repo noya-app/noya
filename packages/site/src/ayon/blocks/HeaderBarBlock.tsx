@@ -8,11 +8,11 @@ import {
   Link,
   Spacer,
 } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { isWithinRectRange, scoreCommandMatch } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,

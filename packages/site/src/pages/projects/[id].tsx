@@ -35,6 +35,7 @@ function downloadBlob(blob: Blob, name: string) {
   const a = document.createElement('a');
   a.href = exportUrl;
   a.download = name;
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
 

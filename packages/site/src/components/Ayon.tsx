@@ -1,3 +1,4 @@
+import * as ChakraUI from '@chakra-ui/react';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -47,11 +48,18 @@ import React, {
   useReducer,
   useState,
 } from 'react';
+import { Blocks } from '../ayon/blocks';
 import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
+
+const Components = new Map<unknown, string>();
+
+Object.entries(ChakraUI).forEach(([key, value]) => {
+  Components.set(value, key);
+});
 
 export type ExportType = NoyaAPI.ExportFormat | 'react';
 
@@ -165,8 +173,12 @@ function Workspace({
                 downloadFile?.(value, artboard.frame);
                 return;
               case 'react': {
-                const { generateCode } = await import('../ayon/generateCode');
-                const result = generateCode(state.history.present);
+                const { compile } = await import('noya-compiler');
+                const result = compile({
+                  state: state.history.present,
+                  Blocks,
+                  Components,
+                });
                 console.info('export', result);
               }
             }

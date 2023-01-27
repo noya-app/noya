@@ -1,9 +1,9 @@
 import { Image } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import React from 'react';
 import { scoreCommandMatch } from './score';
 import { imageSymbol, imageSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const ImageBlock: BlockDefinition = {
   id: imageSymbolId,

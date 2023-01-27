@@ -1,17 +1,14 @@
-import * as ChakraUI from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
-import { ApplicationState, Layers, Selectors } from 'noya-state';
+import {
+  ApplicationState,
+  BlockDefinition,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
 import React, { isValidElement } from 'react';
 import ts from 'typescript';
-import { Blocks } from './blocks';
-
-const Components = new Map<unknown, string>();
-
-Object.entries(ChakraUI).forEach(([key, value]) => {
-  Components.set(value, key);
-});
 
 function createExpressionCode(value: unknown) {
   switch (typeof value) {
@@ -83,7 +80,13 @@ function createElementCode({
   );
 }
 
-export function generateCode(state: ApplicationState) {
+export interface CompilerConfiguration {
+  state: ApplicationState;
+  Blocks: Record<string, BlockDefinition>;
+  Components: Map<unknown, string>;
+}
+
+export function compile({ state, Blocks, Components }: CompilerConfiguration) {
   const page = Selectors.getCurrentPage(state);
   const artboard = page.layers[0] as Sketch.Artboard;
 

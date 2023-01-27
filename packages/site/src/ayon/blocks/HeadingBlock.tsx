@@ -1,5 +1,6 @@
 import { Flex, Heading, ThemingProps } from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { scoreCommandMatch } from './score';
@@ -11,7 +12,6 @@ import {
   heading5Symbol,
   heading6Symbol,
 } from './symbols';
-import { BlockDefinition } from './types';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,

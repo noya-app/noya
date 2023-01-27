@@ -1,9 +1,9 @@
 import { SystemProps, Text } from '@chakra-ui/react';
+import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { scoreCommandMatch } from './score';
 import { textSymbol, textSymbolId } from './symbols';
-import { BlockDefinition } from './types';
 
 export const TextBlock: BlockDefinition = {
   id: textSymbolId,

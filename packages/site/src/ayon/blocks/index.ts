@@ -1,3 +1,4 @@
+import { BlockDefinition } from 'noya-state';
 import { AvatarBlock } from './AvatarBlock';
 import { BoxBlock } from './BoxBlock';
 import { ButtonBlock } from './ButtonBlock';
@@ -16,7 +17,6 @@ import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TextBlock } from './TextBlock';
-import { BlockDefinition } from './types';
 import { WriteBlock } from './WriteBlock';
 
 export const Blocks: Record<string, BlockDefinition> = {
