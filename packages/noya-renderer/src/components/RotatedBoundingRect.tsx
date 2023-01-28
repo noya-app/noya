@@ -38,6 +38,9 @@ export const RotatedBoundingRect = memo(function RotatedBoundingRect({
 
   const path = useMemo(() => {
     const path = new CanvasKit.Path();
+
+    if (boundingPoints.length === 0) return path;
+
     path.moveTo(boundingPoints[0].x, boundingPoints[0].y);
     path.lineTo(boundingPoints[1].x, boundingPoints[1].y);
     path.lineTo(boundingPoints[2].x, boundingPoints[2].y);
