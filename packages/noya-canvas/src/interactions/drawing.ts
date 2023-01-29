@@ -58,7 +58,7 @@ export const createDrawingInteraction =
             api.getScreenPoint(event.nativeEvent),
             {
               groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardOrChildren',
+              artboards: 'childrenOnly',
               includeLockedLayers: false,
             },
           );
