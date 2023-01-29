@@ -4,6 +4,7 @@ import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { scoreCommandMatch } from './score';
 import { boxSymbol, boxSymbolId } from './symbols';
+import { isSupportedTailwindClass } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   id: boxSymbolId,
@@ -13,10 +14,23 @@ export const BoxBlock: BlockDefinition = {
     const { content, hashTags } = filterHashTagsAndSlashCommands(
       props.blockText,
     );
+
     const color =
       [content]
         .concat(hashTags)
         .find((value) => CSS.supports('color', `${value}`)) ?? '#ebfdff';
-    return <Box bg={color} w="100%" h="100%" />;
+
+    const hasTailwindBackground = hashTags.some((value) =>
+      value.startsWith('bg-'),
+    );
+
+    return (
+      <Box
+        bg={hasTailwindBackground ? undefined : color}
+        w="100%"
+        h="100%"
+        className={hashTags.filter(isSupportedTailwindClass).join(' ')}
+      />
+    );
   },
 };

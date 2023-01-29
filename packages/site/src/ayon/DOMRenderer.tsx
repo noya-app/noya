@@ -85,6 +85,7 @@ function DOMRendererContent({
           background: 'white',
           width: rect.width,
           height: rect.height,
+          overflow: 'hidden',
         }}
       >
         {artboard.layers.filter(Layers.isSymbolInstance).map((layer) => (

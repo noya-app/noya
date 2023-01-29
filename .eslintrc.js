@@ -3,7 +3,13 @@ module.exports = {
   plugins: ['@shopify'],
   overrides: [
     {
-      files: ['**/next.config.js', '**/webpack.config.js', '**/.eslintrc.js'],
+      files: [
+        '**/next.config.js',
+        '**/webpack.config.js',
+        '**/.eslintrc.js',
+        '**/tailwind.config.js',
+        '**/postcss.config.js',
+      ],
       parserOptions: {
         requireConfigFile: false,
       },
