@@ -25,6 +25,9 @@
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.7",
-    "@types/logrocket-react": "^3.0.0"
+    "@types/logrocket-react": "^3.0.0",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4"
   }
 }

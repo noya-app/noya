@@ -1,22 +1,23 @@
 import { SystemProps, theme } from '@chakra-ui/react';
 
-export function filterHashTagsAndSlashCommands(text?: string): {
-  content?: string;
-  hashTags?: string[];
-  slashCommands?: string[];
+export function filterHashTagsAndSlashCommands(text: string = ''): {
+  content: string;
+  hashTags: string[];
+  slashCommands: string[];
 } {
-  const lines = text?.split(/\r?\n/);
-  const words = lines?.map((line) => line.split(' ')).flat();
+  const lines = text.split(/\r?\n/);
+  const words = lines.map((line) => line.split(' ')).flat();
   const content = words
-    ?.filter((word) => !word.startsWith('#') && !word.startsWith('/'))
+    .filter((word) => !word.startsWith('#') && !word.startsWith('/'))
     .join(' ')
     .trim();
   const hashTags = words
-    ?.filter((word) => word.startsWith('#'))
+    .filter((word) => word.startsWith('#'))
     .map((word) => word.slice(1).trim());
   const slashCommands = words
-    ?.filter((word) => word.startsWith('/'))
+    .filter((word) => word.startsWith('/'))
     .map((word) => word.slice(1).trim());
+
   return {
     content,
     hashTags,
@@ -26,7 +27,7 @@ export function filterHashTagsAndSlashCommands(text?: string): {
 
 export function filterTextPropertyHashTags(text?: string): {
   content?: string;
-  hashTags?: string[];
+  hashTags: string[];
   color?: string;
   colorScheme?: string;
   fontWeight?: string;
