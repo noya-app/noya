@@ -4,7 +4,7 @@ import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { scoreCommandMatch } from './score';
 import { boxSymbol, boxSymbolId } from './symbols';
-import { isSupportedTailwindClass } from './tailwind';
+import { getBlockClassName } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   id: boxSymbolId,
@@ -29,7 +29,7 @@ export const BoxBlock: BlockDefinition = {
         bg={hasTailwindBackground ? undefined : color}
         w="100%"
         h="100%"
-        className={hashTags.filter(isSupportedTailwindClass).join(' ')}
+        className={getBlockClassName(hashTags)}
       />
     );
   },
