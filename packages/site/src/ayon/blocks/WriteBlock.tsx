@@ -4,21 +4,27 @@ import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { scoreCommandMatch } from './score';
 import { writeSymbol, writeSymbolId } from './symbols';
+import { getBlockClassName } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
   id: writeSymbolId,
   infer: ({ frame, blockText }) =>
     Math.max(scoreCommandMatch(writeSymbol.name, blockText), 0.1),
   render: (props) => {
-    const { color, fontWeight, fontSize, align } = filterTextPropertyHashTags(
-      props.blockText,
+    const { color, fontWeight, fontSize, align, hashTags } =
+      filterTextPropertyHashTags(props.blockText);
+
+    const hasTailwindColor = hashTags.some((value) =>
+      value.startsWith('text-'),
     );
+
     return (
       <Text
-        color={color}
+        color={hasTailwindColor ? undefined : color}
         fontWeight={fontWeight}
         fontSize={fontSize}
         align={align as SystemProps['textAlign']}
+        className={getBlockClassName(hashTags)}
       >
         {props.resolvedBlockData?.resolvedText ?? (
           <Flex align="center">
