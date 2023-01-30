@@ -15,9 +15,15 @@ import { isExternalUrl } from 'noya-utils';
 import React, { memo, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
-import { buttonSymbol, imageSymbolId, writeSymbolId } from './blocks/symbols';
+import {
+  buttonSymbol,
+  iconSymbolId,
+  imageSymbolId,
+  writeSymbolId,
+} from './blocks/symbols';
 import { DOMRenderer } from './DOMRenderer';
 import { GenerateResolver } from './GenerateResolver';
+import { IconResolver } from './IconResolver';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
 import { filterHashTagsAndSlashCommands } from './parse';
@@ -34,6 +40,7 @@ const Overlay = styled.div({
 
 const redirectResolver = new RedirectResolver();
 const generateResolver = new GenerateResolver();
+const iconResolver = new IconResolver();
 
 export type ViewType = 'split' | 'combined';
 
@@ -125,7 +132,9 @@ export const Content = memo(function Content({
       }
 
       if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
-        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${frame.height}?${originalText}`;
+        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${
+          frame.height
+        }?${encodeURIComponent(originalText)}`;
 
         subscriptions.push(
           redirectResolver.addListener(layerId, unsplashUrl, (resolvedUrl) => {
@@ -156,6 +165,18 @@ export const Content = memo(function Content({
         );
 
         generateResolver.resolve(layerId, originalText);
+      } else if (symbolID === iconSymbolId) {
+        subscriptions.push(
+          iconResolver.addListener(layerId, originalText, (resolvedUrl) => {
+            dispatch('setResolvedBlockData', layerId, {
+              originalText,
+              resolvedText: resolvedUrl,
+              symbolID: symbolID,
+            });
+          }),
+        );
+
+        iconResolver.resolve(layerId, originalText);
       }
     });
 
