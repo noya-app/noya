@@ -14,6 +14,7 @@ import { panInteraction } from './pan';
 import { reorderInteraction } from './reorder';
 import { createScaleInteraction, scaleInteraction } from './scale';
 import { selectionInteraction } from './selection';
+import { selectionModeInteraction } from './selectionMode';
 import { zoomInteraction } from './zoom';
 
 export namespace Interactions {
@@ -34,6 +35,7 @@ export namespace Interactions {
   export const reorder = reorderInteraction;
   export const duplicate = duplicateInteraction;
   export const defaultCursor = defaultCursorInteraction;
+  export const selectionMode = selectionModeInteraction;
   export const scale = scaleInteraction;
   export const createScale = createScaleInteraction;
 }

@@ -406,6 +406,10 @@ export function Widget({
         }}
         disabled={!isEditing}
         onKeyDown={(event) => {
+          if (event.key === 'Shift') {
+            dispatch('interaction', ['setCursor', 'cell']);
+          }
+
           if (event.key === 'Escape') {
             dispatch('interaction', ['reset']);
             dispatch('selectLayer', []);

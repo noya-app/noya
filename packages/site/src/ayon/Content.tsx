@@ -181,6 +181,7 @@ export const Content = memo(function Content({
           <SimpleCanvas
             padding={padding}
             interactions={[
+              Interactions.selectionMode,
               Interactions.duplicate,
               Interactions.reorder,
               Interactions.zoom,
@@ -232,7 +233,6 @@ export const Content = memo(function Content({
                       <Design.Background />
                       <Design.Page />
                       <Design.PixelGrid />
-                      <Design.Marquee />
                       <Design.GradientEditor />
                       <Design.InsertSymbol />
                       <Design.DrawPath />
@@ -271,6 +271,7 @@ export const Content = memo(function Content({
                 <Design.SnapGuides />
                 <Design.MeasurementGuides />
                 <Design.DragHandles />
+                <Design.Marquee />
               </Design.Root>
             </RenderingModeProvider>
           </SVGRenderer>

@@ -9,7 +9,7 @@ import {
   Point,
   Rect,
   rectContainsPoint,
-  rectsContainsRect,
+  rectContainsRect,
   rectsIntersect,
   rotatedRectContainsPoint,
   Size,
@@ -19,9 +19,10 @@ import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { ScalingOptions } from 'noya-state';
 import { SKIP, STOP, VisitOptions } from 'tree-visit';
+import { Layers } from '../layer';
 import { PageLayer, visitReversed } from '../layers';
-import { CompassDirection } from '../reducers/interactionReducer';
 import type { ApplicationState } from '../reducers/applicationReducer';
+import { CompassDirection } from '../reducers/interactionReducer';
 import { getDragHandles } from '../selection';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import {
@@ -41,7 +42,6 @@ import {
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
 } from './transformSelectors';
-import { Layers } from '../layer';
 
 export type LayerTraversalOptions = {
   /**
@@ -53,6 +53,11 @@ export type LayerTraversalOptions = {
    * The default is true
    */
   includeLockedLayers?: boolean;
+
+  /**
+   * The default is true
+   */
+  includePartiallyContainedLayers?: boolean;
 
   /**
    * The default is `groupOnly`
@@ -76,6 +81,7 @@ export type LayerTraversalOptions = {
 const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
   includeHiddenLayers: false,
   includeLockedLayers: true,
+  includePartiallyContainedLayers: true,
   groups: 'groupOnly',
   artboards: 'childrenOnly',
 };
@@ -162,7 +168,7 @@ export function getLayersInRect(
     const transformedFrame = transformRect(layer.frame, transform);
 
     // TODO: Handle rotated rectangle collision
-    const hasIntersect = rectsIntersect(transformedFrame, screenRect);
+    const hasIntersect = rectsIntersect(screenRect, transformedFrame);
 
     if (!hasIntersect) return SKIP;
 
@@ -172,10 +178,17 @@ export function getLayersInRect(
         (options.artboards === 'artboardAndChildren' ||
           (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
             (layer.layers.length === 0 ||
-              rectsContainsRect(screenRect, transformedFrame)))));
+              rectContainsRect(screenRect, transformedFrame)))));
 
     // Traverse into children and return some of them, instead of returning this layer
     if (!includeSelf && shouldVisitChildren(layer, options)) return;
+
+    if (
+      options.includePartiallyContainedLayers === false &&
+      !rectContainsRect(screenRect, transformedFrame)
+    ) {
+      return;
+    }
 
     found.push(layer);
   });

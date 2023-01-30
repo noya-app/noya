@@ -410,7 +410,11 @@ export const Canvas = memo(function Canvas({
               dispatch('interaction', ['maybeMove', point]);
             } else {
               dispatch('selectLayer', undefined);
-              dispatch('interaction', ['startMarquee', rawPoint]);
+              dispatch('interaction', [
+                'startMarquee',
+                rawPoint,
+                state.selectedLayerIds,
+              ]);
             }
           }
 

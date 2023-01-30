@@ -102,6 +102,8 @@ export function getCursor(state: ApplicationState): CSSProperties['cursor'] {
       if (!direction) return 'default';
 
       return getCursorForDirection(direction, state);
+    case 'selectionMode':
+      return 'cell';
     case 'editingBlock':
     case 'none':
       return state.interactionState.cursor ?? 'default';

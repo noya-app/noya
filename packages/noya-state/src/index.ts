@@ -27,4 +27,4 @@ export * from './snapping';
 export * from './types';
 export * from './utils/getMultiNumberValue';
 export * from './utils/getMultiValue';
-export type { SelectionType } from './utils/selection';
+export * from './utils/selection';

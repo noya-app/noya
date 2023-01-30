@@ -45,6 +45,7 @@ import { PanActions } from '../interactions/pan';
 import { ReorderActions } from '../interactions/reorder';
 import { ScaleActions } from '../interactions/scale';
 import { SelectionActions } from '../interactions/selection';
+import { SelectionModeActions } from '../interactions/selectionMode';
 import { InteractionAPI } from '../interactions/types';
 import { ZoomActions } from '../interactions/zoom';
 import { convertPoint } from '../utils/convertPoint';
@@ -67,7 +68,8 @@ export type Actions = MarqueeActions &
   HistoryActions &
   ZoomActions &
   DuplicateActions &
-  InsertModeActions;
+  InsertModeActions &
+  SelectionModeActions;
 
 export type Interaction = (
   actions: Actions,
@@ -105,7 +107,8 @@ export function useInteractionHandlers({
       zoomActualSize: () => dispatch('setZoom*', 1),
       undo: () => dispatch('undo'),
       redo: () => dispatch('redo'),
-      startMarquee: (point) => dispatch('interaction', ['startMarquee', point]),
+      startMarquee: (point, selectedIds) =>
+        dispatch('interaction', ['startMarquee', point, selectedIds]),
       updateMarquee: (point) =>
         dispatch('interaction', ['updateMarquee', point]),
       reset: () => dispatch('interaction', ['reset']),
@@ -171,6 +174,8 @@ export function useInteractionHandlers({
         dispatch('highlightLayer', layerHighlight),
       enterInsertMode: (layerType) =>
         dispatch('interaction', ['insert', layerType]),
+      enterSelectionMode: () =>
+        dispatch('interaction', ['enableSelectionMode']),
       bringToFront: (id: string[]) => dispatch('bringToFront', id),
       sendToBack: (id: string[]) => dispatch('sendToBack', id),
       duplicateLayer: (id: string[]) => dispatch('duplicateLayer', id),

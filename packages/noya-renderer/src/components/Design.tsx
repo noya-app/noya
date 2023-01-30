@@ -401,6 +401,8 @@ const DesignLayerHighlight = memo(function DesignLayerHighlight() {
   if (
     renderingMode !== 'interactive' ||
     interactionState.type === 'drawingShapePath' ||
+    interactionState.type === 'selectionMode' ||
+    interactionState.type === 'marquee' ||
     isEditingPath ||
     interactionState.type === 'drawing' ||
     interactionState.type === 'insert' ||

@@ -85,7 +85,7 @@ export type InteractionAction =
   | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
   | [type: 'updateDrawing', point: Point, shapeType?: DrawableLayerType]
-  | [type: 'startMarquee', point: Point]
+  | [type: 'startMarquee', point: Point, selectedIdsSnapshot: string[]]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction?: CompassDirection]
   | [type: 'startPanning', point: Point]
@@ -93,6 +93,7 @@ export type InteractionAction =
   | [type: 'updateScaling', point: Point, inferBlockType?: InferBlockType]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
+  | [type: 'enableSelectionMode']
   | [type: 'maybePan', origin: Point]
   | [type: 'maybeConvertCurveMode', origin: Point]
   | [type: 'movingPoint', origin: Point, current: Point]
@@ -137,9 +138,13 @@ export type InteractionState =
       shapeType: DrawableLayerType;
     }
   | {
+      type: 'selectionMode';
+    }
+  | {
       type: 'marquee';
       origin: Point;
       current: Point;
+      selectedIdsSnapshot: string[];
     }
   | {
       type: 'maybeMove';
@@ -248,12 +253,13 @@ export function interactionReducer(
       return { type: 'insertingSymbol', symbolID, point };
     }
     case 'startMarquee': {
-      const [, point] = action;
+      const [, point, selectedIdsSnapshot] = action;
 
       return {
         type: 'marquee',
         origin: point,
         current: point,
+        selectedIdsSnapshot,
       };
     }
     case 'updateMarquee': {
@@ -431,6 +437,8 @@ export function interactionReducer(
     }
     case 'enablePanMode':
       return { type: 'panMode' };
+    case 'enableSelectionMode':
+      return { type: 'selectionMode' };
     case 'maybePan': {
       const [, origin] = action;
 

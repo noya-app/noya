@@ -10,9 +10,15 @@ import { createDrawingInteraction, DrawingActions } from './drawing';
 import { MoveActions, moveInteraction } from './move';
 import { ScaleActions, scaleInteraction } from './scale';
 import { SelectionActions, selectionInteraction } from './selection';
+import { SelectionModeActions } from './selectionMode';
 import { InteractionAPI } from './types';
 
-export interface EditBlockActions {
+export interface EditBlockActions
+  extends SelectionActions,
+    MoveActions,
+    DrawingActions,
+    ScaleActions,
+    SelectionModeActions {
   startEditingBlock: (id: string) => void;
   reset: () => void;
   selectLayer: (id: string[], selectionType?: SelectionType) => void;
@@ -23,13 +29,7 @@ export const createEditBlockInteraction = ({
 }: {
   inferBlockType: InferBlockType;
 }) =>
-  function editBlockInteraction(
-    actions: EditBlockActions &
-      SelectionActions &
-      MoveActions &
-      DrawingActions &
-      ScaleActions,
-  ) {
+  function editBlockInteraction(actions: EditBlockActions) {
     const { startEditingBlock, reset } = actions;
 
     return handleActionType<
@@ -73,6 +73,7 @@ export const createEditBlockInteraction = ({
       }),
       editingBlock: (interactionState, api) => {
         const handlers = [
+          editBlockSelectionMode,
           scaleInteraction,
           selectionInteraction,
           moveInteraction,
@@ -100,3 +101,33 @@ export const createEditBlockInteraction = ({
       },
     });
   };
+
+function editBlockSelectionMode(actions: EditBlockActions) {
+  return handleActionType<
+    InteractionState,
+    [InteractionAPI],
+    ReactEventHandlers
+  >({
+    none: (interactionState, api) => ({
+      onPointerDown: (event) => {
+        if (!event.shiftKey) return;
+
+        actions.startMarquee(
+          api.getScreenPoint(event.nativeEvent),
+          // Feels more natural to deselect
+          [],
+        );
+
+        event.preventDefault();
+      },
+
+      // We don't actually want to change mode, just the cursor
+      onPointerMove: (event) => {
+        if (!event.shiftKey) return;
+
+        actions.setCursor('cell');
+        event.preventDefault();
+      },
+    }),
+  });
+}
