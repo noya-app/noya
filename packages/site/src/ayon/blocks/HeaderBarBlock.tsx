@@ -2,6 +2,7 @@ import { SearchIcon } from '@chakra-ui/icons';
 import {
   Avatar,
   Flex,
+  Heading,
   Input,
   InputGroup,
   InputLeftElement,
@@ -13,6 +14,7 @@ import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { isWithinRectRange, scoreCommandMatch } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
+import { getBlockClassName } from './tailwind';
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
@@ -53,17 +55,30 @@ export const HeaderBarBlock: BlockDefinition = {
     if (links.filter((link) => link[0] === '*').length === 0) {
       links[0] = `*${links[0]}`;
     }
+    const hasTitle = hashTags.includes('title');
+
+    const hasTailwindBackground = hashTags.some((value) =>
+      value.startsWith('bg-'),
+    );
+    const hasTailwindColor = hashTags.some((value) =>
+      value.startsWith('text-'),
+    );
+    const hasTailwindBorder = hashTags.some((value) =>
+      value.startsWith('border-'),
+    );
+
     return (
       <Flex
         alignItems="center"
-        borderBottomWidth={1}
-        borderBottomColor={borderBottomColor}
+        borderBottomWidth={hasTailwindBorder ? undefined : 1}
+        borderBottomColor={hasTailwindBorder ? undefined : borderBottomColor}
         height={`${props.frame.height}px`}
         paddingX="5px"
-        backgroundColor={backgroundColor}
+        backgroundColor={hasTailwindBackground ? undefined : backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"
         overflow="hidden"
+        className={getBlockClassName(hashTags)}
       >
         {links.map((link, index) => {
           let backgroundColor = 'transparent';
@@ -73,6 +88,20 @@ export const HeaderBarBlock: BlockDefinition = {
               : 'rgba(0,0,0,0.1)';
           }
           const [, linkText] = /^\*?(.*)/.exec(link) || [];
+
+          if (hasTitle && index === 0) {
+            return (
+              <Heading
+                color={hasTailwindColor ? undefined : color}
+                fontWeight="semibold"
+                size="sm"
+                margin="0 18px 0 15px"
+              >
+                {linkText}
+              </Heading>
+            );
+          }
+
           return (
             <Link
               marginX="5px"
@@ -81,7 +110,7 @@ export const HeaderBarBlock: BlockDefinition = {
               fontSize="12px"
               fontWeight="medium"
               backgroundColor={backgroundColor}
-              color={color}
+              color={hasTailwindColor ? undefined : color}
             >
               {linkText}
             </Link>
@@ -98,9 +127,17 @@ export const HeaderBarBlock: BlockDefinition = {
           >
             <InputLeftElement
               pointerEvents="none"
-              children={<SearchIcon color={color} />}
+              children={
+                <SearchIcon
+                  color={hasTailwindColor ? undefined : color}
+                  opacity={0.8}
+                />
+              }
             />
-            <Input placeholder="Search" />
+            <Input
+              placeholder="Search"
+              _placeholder={{ color: 'rgba(0,0,0,0.3)' }}
+            />
           </InputGroup>
         )}
         <Avatar size={props.frame.height < 60 ? 'xs' : 'sm'} marginX="10px" />

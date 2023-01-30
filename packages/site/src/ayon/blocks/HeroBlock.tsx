@@ -4,6 +4,7 @@ import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { isWithinRectRange, scoreCommandMatch } from './score';
 import { heroSymbol, heroSymbolId } from './symbols';
+import { getBlockClassName } from './tailwind';
 
 export const HeroBlock: BlockDefinition = {
   id: heroSymbolId,
@@ -19,7 +20,9 @@ export const HeroBlock: BlockDefinition = {
     );
   },
   render: (props) => {
-    const { align, textAlign } = filterTextPropertyHashTags(props.blockText);
+    const { align, textAlign, hashTags } = filterTextPropertyHashTags(
+      props.blockText,
+    );
     const blockText = props.blockText
       ? props.blockText.split(/\r?\n/)
       : [
@@ -65,12 +68,14 @@ export const HeroBlock: BlockDefinition = {
     if (blockText[3]) {
       button2 = filterTextPropertyHashTags(blockText[3]);
     }
+
     return (
       <Flex
         flexDirection="column"
         height="100%"
         justifyContent="center"
         paddingX={8}
+        className={getBlockClassName(hashTags)}
       >
         <VStack align={align ?? 'center'} spacing={defaultSpacing}>
           {headline && (

@@ -12,6 +12,7 @@ import {
   heading5Symbol,
   heading6Symbol,
 } from './symbols';
+import { getBlockClassName } from './tailwind';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
@@ -21,13 +22,17 @@ const createHeadingBlock = (
   infer: ({ frame, blockText }) =>
     Math.max(scoreCommandMatch(symbol.name, blockText), 0.1),
   render: (props) => {
-    const { content, color, fontWeight, fontSize, align } =
+    const { content, color, fontWeight, fontSize, align, hashTags } =
       filterTextPropertyHashTags(props.blockText);
+    const hasTailwindColor = hashTags.some((value) =>
+      value.startsWith('text-'),
+    );
+
     return (
-      <Flex justify={align}>
+      <Flex justify={align} className={getBlockClassName(hashTags)}>
         <Heading
           size={size}
-          color={color}
+          color={hasTailwindColor ? undefined : color}
           fontWeight={fontWeight}
           fontSize={fontSize}
         >

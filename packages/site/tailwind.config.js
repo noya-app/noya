@@ -6,7 +6,7 @@ module.exports = {
   },
   safelist: [
     {
-      pattern: /(shadow|border|rounded|opacity|bg|blur).*/,
+      pattern: /(shadow|border|rounded|opacity|bg|blur|text).*/,
     },
   ],
   plugins: [],
