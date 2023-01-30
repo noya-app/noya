@@ -59,10 +59,11 @@ export const HeaderBarBlock: BlockDefinition = {
         borderBottomWidth={1}
         borderBottomColor={borderBottomColor}
         height={`${props.frame.height}px`}
-        paddingX="10px"
+        paddingX="5px"
         backgroundColor={backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"
+        overflow="hidden"
       >
         {links.map((link, index) => {
           let backgroundColor = 'transparent';
@@ -74,8 +75,8 @@ export const HeaderBarBlock: BlockDefinition = {
           const [, linkText] = /^\*?(.*)/.exec(link) || [];
           return (
             <Link
-              marginX="10px"
-              padding="5px 10px"
+              marginX="5px"
+              padding="8px 14px"
               borderRadius="3px"
               fontSize="12px"
               fontWeight="medium"
