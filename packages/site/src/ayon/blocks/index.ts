@@ -18,6 +18,7 @@ import { InputBlock } from './InputBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TextBlock } from './TextBlock';
 import { WriteBlock } from './WriteBlock';
+import { IconBlock } from './IconBlock';
 
 export const Blocks: Record<string, BlockDefinition> = {
   [AvatarBlock.id]: AvatarBlock,
@@ -37,4 +38,5 @@ export const Blocks: Record<string, BlockDefinition> = {
   [SwitchBlock.id]: SwitchBlock,
   [TextBlock.id]: TextBlock,
   [WriteBlock.id]: WriteBlock,
+  [IconBlock.id]: IconBlock,
 };

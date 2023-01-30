@@ -20,6 +20,7 @@ export const heading6SymbolId = '467ed35a-0351-4997-ab1e-44b2c6779111';
 export const writeSymbolId = 'a0951cdf-6023-4cda-b5fc-8c2a8d0d9986';
 export const headerBarSymbolId = 'ab3fbd14-5b81-4c58-873c-95683f4b03d7';
 export const heroSymbolId = 'd15edd3e-df47-438a-9c92-059b4c14915d';
+export const iconSymbolId = '18682473-676a-46d3-8faf-68dc5b1c204f';
 
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
@@ -111,6 +112,11 @@ export const heroSymbol = SketchModel.symbolMaster({
   name: 'Hero',
 });
 
+export const iconSymbol = SketchModel.symbolMaster({
+  symbolID: iconSymbolId,
+  name: 'Icon',
+});
+
 export const allAyonSymbols = [
   buttonSymbol,
   avatarSymbol,
@@ -130,4 +136,5 @@ export const allAyonSymbols = [
   writeSymbol,
   headerBarSymbol,
   heroSymbol,
+  iconSymbol,
 ];
