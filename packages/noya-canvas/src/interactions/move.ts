@@ -1,5 +1,6 @@
 import { ReactEventHandlers } from 'noya-designsystem';
 import { Point } from 'noya-geometry';
+import { KeyMap } from 'noya-keymap';
 import {
   handleActionType,
   InferBlockType,
@@ -31,6 +32,17 @@ export const createMoveInteraction = (
     moveLayersIntoParentAtPoint,
     reset,
   }: MoveActions) {
+    const shortcuts: KeyMap = {
+      ArrowLeft: () => setLayerX(-1, 'adjust'),
+      ArrowRight: () => setLayerX(1, 'adjust'),
+      ArrowUp: () => setLayerY(-1, 'adjust'),
+      ArrowDown: () => setLayerY(1, 'adjust'),
+      'Shift-ArrowLeft': () => setLayerX(-10, 'adjust'),
+      'Shift-ArrowRight': () => setLayerX(10, 'adjust'),
+      'Shift-ArrowUp': () => setLayerY(-10, 'adjust'),
+      'Shift-ArrowDown': () => setLayerY(10, 'adjust'),
+    };
+
     return handleActionType<
       InteractionState,
       [InteractionAPI],
@@ -55,16 +67,10 @@ export const createMoveInteraction = (
             event.preventDefault();
           }
         },
-        onKeyDown: api.handleKeyboardEvent({
-          ArrowLeft: () => setLayerX(-1, 'adjust'),
-          ArrowRight: () => setLayerX(1, 'adjust'),
-          ArrowUp: () => setLayerY(-1, 'adjust'),
-          ArrowDown: () => setLayerY(1, 'adjust'),
-          'Shift-ArrowLeft': () => setLayerX(-10, 'adjust'),
-          'Shift-ArrowRight': () => setLayerX(10, 'adjust'),
-          'Shift-ArrowUp': () => setLayerY(-10, 'adjust'),
-          'Shift-ArrowDown': () => setLayerY(10, 'adjust'),
-        }),
+        onKeyDown: api.handleKeyboardEvent(shortcuts),
+      }),
+      selectionMode: (interactionState, api) => ({
+        onKeyDown: api.handleKeyboardEvent(shortcuts),
       }),
       maybeMove: (interactionState, api) => ({
         onPointerMove: (event) => {
