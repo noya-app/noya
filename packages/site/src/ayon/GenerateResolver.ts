@@ -32,9 +32,12 @@ export class GenerateResolver {
 
     if (cacheKey in this.cache) return this.cache[cacheKey];
 
-    const response = await fetch(`${host}/api/generate?prompt=${prompt}`, {
-      credentials: 'include',
-    });
+    const response = await fetch(
+      `${host}/api/generate?prompt=${encodeURIComponent(prompt)}`,
+      {
+        credentials: 'include',
+      },
+    );
     const resolved = response.json();
 
     this.cache[key] = resolved;
@@ -47,13 +50,17 @@ export class GenerateResolver {
     return resolved;
   }
 
-  addListener(key: string, prompt: string, callback: (url: string) => void) {
+  addListener(key: string, prompt: string, callback: (text: string) => void) {
     const emitter = this.getEmitter(key, prompt);
 
     return emitter.addListener(callback);
   }
 
-  removeListener(key: string, prompt: string, callback: (url: string) => void) {
+  removeListener(
+    key: string,
+    prompt: string,
+    callback: (text: string) => void,
+  ) {
     const emitter = this.getEmitter(key, prompt);
 
     emitter.removeListener(callback);

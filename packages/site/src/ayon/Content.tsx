@@ -132,7 +132,9 @@ export const Content = memo(function Content({
       }
 
       if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
-        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${frame.height}?${originalText}`;
+        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${
+          frame.height
+        }?${encodeURIComponent(originalText)}`;
 
         subscriptions.push(
           redirectResolver.addListener(layerId, unsplashUrl, (resolvedUrl) => {
