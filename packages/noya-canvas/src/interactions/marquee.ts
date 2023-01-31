@@ -39,7 +39,7 @@ export function marqueeInteraction({
     }),
     marquee: (interactionState, api) => ({
       onPointerMove: (event) => {
-        const { origin, current, selectedIdsSnapshot } = interactionState;
+        const { origin, current } = interactionState;
 
         const layerIds = api.getLayerIdsInRect(createRect(origin, current), {
           groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
@@ -48,9 +48,7 @@ export function marqueeInteraction({
           includePartiallyContainedLayers: origin.x > current.x,
         });
 
-        selectLayer(
-          makeSelection(selectedIdsSnapshot, layerIds, 'symmetricDifference'),
-        );
+        selectLayer(layerIds);
         updateMarquee(api.getScreenPoint(event.nativeEvent));
 
         api.setPointerCapture?.(event.pointerId);
@@ -59,8 +57,6 @@ export function marqueeInteraction({
       onPointerUp: (event) => {
         const { origin, current, selectedIdsSnapshot } = interactionState;
 
-        let layerIds: string[];
-
         if (!isMoving(origin, current, api.zoomValue)) {
           const layerId = api.getLayerIdAtPoint(createRect(origin, current), {
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
@@ -68,20 +64,23 @@ export function marqueeInteraction({
             includeLockedLayers: false,
           });
 
-          layerIds = layerId ? [layerId] : [];
+          const layerIds = layerId ? [layerId] : [];
+
+          reset();
+          selectLayer(
+            makeSelection(selectedIdsSnapshot, layerIds, 'symmetricDifference'),
+          );
         } else {
-          layerIds = api.getLayerIdsInRect(createRect(origin, current), {
+          const layerIds = api.getLayerIdsInRect(createRect(origin, current), {
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'childrenOnly',
             includeLockedLayers: false,
             includePartiallyContainedLayers: origin.x > current.x,
           });
-        }
 
-        reset();
-        selectLayer(
-          makeSelection(selectedIdsSnapshot, layerIds, 'symmetricDifference'),
-        );
+          reset();
+          selectLayer(layerIds);
+        }
 
         api.releasePointerCapture?.(event.pointerId);
         event.preventDefault();
