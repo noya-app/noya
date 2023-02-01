@@ -40,13 +40,13 @@ import type {
   WebGLContextHandle,
   WebGLOptions,
 } from 'canvaskit';
-import parseColor from 'color-parse';
 import { constants } from './constants';
 import { JSEmbindObject } from './Embind';
 import { JSMaskFilter } from './JSMaskFilter';
 import { JSPaint } from './JSPaint';
 import { JSParagraphBuilder } from './JSParagraphBuilder';
 import { JSShaderFactory } from './JSShaderFactory';
+import parseColor from './parseColor';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
