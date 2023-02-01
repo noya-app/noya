@@ -28,19 +28,10 @@ import {
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  allAyonSymbols,
-  heading1SymbolId,
-  heading2SymbolId,
-  heading3SymbolId,
-  heading4SymbolId,
-  heading5SymbolId,
-  heading6SymbolId,
-  imageSymbolId,
-  textSymbolId,
-} from './blocks/symbols';
+import { imageSymbolId } from './blocks/symbols';
 import { filterHashTagsAndSlashCommands } from './parse';
 import { Stacking } from './stacking';
+import { TextArea } from './TextArea';
 import { InferredBlockTypeResult } from './types';
 
 const ContentElement = styled.div(({ theme }) => ({
@@ -136,16 +127,6 @@ function WidgetContainer({
     </div>
   );
 }
-
-const BLOCK_TYPE_TEXT_SHORTCUTS: { [shortcut: string]: string } = {
-  '#': heading1SymbolId,
-  '##': heading2SymbolId,
-  '###': heading3SymbolId,
-  '####': heading4SymbolId,
-  '#####': heading5SymbolId,
-  '######': heading6SymbolId,
-  '"': textSymbolId,
-};
 
 export function Widget({
   layer,
@@ -392,183 +373,27 @@ export function Widget({
         )
       }
     >
-      <textarea
-        ref={textareaRef}
+      <div
         style={{
           position: 'absolute',
-          inset: 1,
-          background: isEditing ? '#fff' : '#eee',
-          // If the layer is selected, we render an outline at the canvas
-          // level already and don't need one here
-          outline: isSelected ? 'none' : `1px solid #ddd`,
-          pointerEvents: isEditing ? 'all' : 'none',
-          padding: 4,
-          resize: 'none',
-          // Children of the page don't appear in the rendered output,
-          // so we make them partially transparent
-          opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
+          inset: 0,
         }}
-        disabled={!isEditing}
-        onKeyDown={(event) => {
-          if (event.key === 'Shift') {
-            dispatch('interaction', ['setCursor', 'cell']);
-          }
-
-          if (event.key === 'Escape') {
-            dispatch('interaction', ['reset']);
-            dispatch('selectLayer', []);
-            event.preventDefault();
-            return;
-          }
-
-          if (
-            (event.key === 'Delete' || event.key === 'Backspace') &&
-            !blockText
-          ) {
-            dispatch('deleteLayer', layer.do_objectID);
-            event.preventDefault();
-            return;
-          }
-
-          if (event.key !== 'Tab') {
-            return;
-          }
-
-          event.preventDefault();
-
-          const words = blockText.split(/\s/);
-          const slashWords = words.filter(
-            (word) => word[0] === '/' && word !== '/',
-          );
-
-          if (slashWords.length > 0) {
-            const symbol = allAyonSymbols.find(
-              (symbol) =>
-                symbol.name.toLowerCase() ===
-                slashWords[slashWords.length - 1].substring(1).toLowerCase(),
-            );
-            const newText = blockText
-              .split(/\r?\n/)
-              .map((line) =>
-                line
-                  .split(' ')
-                  .filter((word) => word[0] !== '/' || word === '/')
-                  .join(' '),
-              )
-              .join('\n');
-            if (symbol) {
-              onChangeBlockType({ symbolId: symbol.symbolID });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            } else if (
-              blockTypes.length > 0 &&
-              typeof blockTypes[0].type !== 'string'
-            ) {
-              onChangeBlockType({
-                symbolId: blockTypes[0].type.symbolId,
-              });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            }
-          }
-        }}
-        onChange={(event) => {
-          const text = event.target.value;
-          const words = text.split(/\s/);
-          const slashWords = words.filter(
-            (word) => word[0] === '/' && word !== '/',
-          );
-
-          if (
-            words.length > blockText.split(' ').length &&
-            Object.keys(BLOCK_TYPE_TEXT_SHORTCUTS).includes(words[0])
-          ) {
-            onChangeBlockType({
-              symbolId: BLOCK_TYPE_TEXT_SHORTCUTS[words[0]],
-            });
-            dispatch('setSymbolIdIsFixed', true);
-            dispatch(
-              'setBlockText',
-              words.slice(1).join(' '),
-              filterHashTagsAndSlashCommands(words.slice(1).join(' ')).content,
-            );
-            return;
-          }
-
-          if (
-            slashWords.length > 0 &&
-            words.length > blockText.split(/\s/).length
-          ) {
-            const symbol = allAyonSymbols.find(
-              (symbol) =>
-                symbol.name.toLowerCase() ===
-                slashWords[slashWords.length - 1].substring(1).toLowerCase(),
-            );
-            const newText = text
-              .split(/\r?\n/)
-              .map((line) =>
-                line
-                  .split(' ')
-                  .filter((word) => word[0] !== '/' || word === '/')
-                  .join(' '),
-              )
-              .join('\n');
-            if (symbol) {
-              onChangeBlockType({ symbolId: symbol.symbolID });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            } else if (
-              blockTypes.length > 0 &&
-              typeof blockTypes[0].type !== 'string'
-            ) {
-              onChangeBlockType({
-                symbolId: blockTypes[0].type.symbolId,
-              });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            }
-          }
-
-          dispatch(
-            'setBlockText',
-            text,
-            filterHashTagsAndSlashCommands(text).content,
-          );
-        }}
-        onFocusCapture={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerDownCapture={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerMoveCapture={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerUpCapture={(event) => {
-          event.stopPropagation();
-        }}
-        value={blockText}
-      />
+        onFocusCapture={(event) => event.stopPropagation()}
+        onPointerDownCapture={(event) => event.stopPropagation()}
+        onPointerMoveCapture={(event) => event.stopPropagation()}
+        onPointerUpCapture={(event) => event.stopPropagation()}
+      >
+        <TextArea
+          ref={textareaRef}
+          isEditing={isEditing}
+          isSelected={isSelected}
+          blockTypes={blockTypes}
+          blockText={blockText}
+          layer={layer}
+          parent={parent}
+          onChangeBlockType={onChangeBlockType}
+        />
+      </div>
     </WidgetContainer>
   );
 }
