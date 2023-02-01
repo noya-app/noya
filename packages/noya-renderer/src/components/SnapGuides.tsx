@@ -141,7 +141,11 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   );
 });
 
-export default memo(function SnapGuides() {
+export default memo(function SnapGuides({
+  showLabels = true,
+}: {
+  showLabels?: boolean;
+}) {
   const { canvasSize } = useWorkspace();
   const [state] = useApplicationState();
   const zoom = useZoom();
@@ -242,6 +246,8 @@ export default memo(function SnapGuides() {
   const areaSize = adjustedSource?.areaSize;
 
   const areaMeasurementLabel = useMemo(() => {
+    if (!showLabels) return null;
+
     if (
       !areaSize ||
       (interactionState.type !== 'drawing' &&
@@ -270,7 +276,7 @@ export default memo(function SnapGuides() {
         />
       </Group>
     );
-  }, [areaSize, interactionState, zoom]);
+  }, [areaSize, interactionState, showLabels, zoom]);
 
   if (!snapRect) return null;
 
@@ -292,7 +298,7 @@ export default memo(function SnapGuides() {
           targetLayers={targetLayers}
           sourceRect={snapRect}
           page={page}
-          showLabels={interactionState.type === 'moving'}
+          showLabels={showLabels && interactionState.type === 'moving'}
         />
       ))}
       {areaMeasurementLabel}

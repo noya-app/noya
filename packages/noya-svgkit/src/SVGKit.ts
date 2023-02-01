@@ -23,26 +23,30 @@ import type {
   PathEffect,
   Rect,
   RRect,
+  RuntimeEffect,
+  Shader,
   SkottieAnimation,
   SkPicture,
+  SkSLUniform,
   SoundMap,
   Surface,
   TextStyle,
   TonalColorsInput,
   TonalColorsOutput,
   TypedArrayConstructor,
+  TypefaceFontProvider,
   VertexMode,
   Vertices,
   WebGLContextHandle,
   WebGLOptions,
 } from 'canvaskit';
-import parseColor from 'color-parse';
 import { constants } from './constants';
 import { JSEmbindObject } from './Embind';
 import { JSMaskFilter } from './JSMaskFilter';
 import { JSPaint } from './JSPaint';
 import { JSParagraphBuilder } from './JSParagraphBuilder';
 import { JSShaderFactory } from './JSShaderFactory';
+import parseColor from './parseColor';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
@@ -63,6 +67,61 @@ class JSPathEffect extends JSEmbindObject implements PathEffect {
     seedAssist: number,
   ): PathEffect {
     return new JSPathEffect();
+  }
+}
+
+class JSTypefaceFontProvider
+  extends JSEmbindObject
+  implements TypefaceFontProvider
+{
+  static Make(): TypefaceFontProvider {
+    return new JSTypefaceFontProvider();
+  }
+
+  registerFont(bytes: Uint8Array | ArrayBuffer, family: string): void {}
+}
+
+class JSShader extends JSEmbindObject implements Shader {}
+
+class JSRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
+  static Make(
+    sksl: string,
+    callback?: ((err: string) => void) | undefined,
+  ): RuntimeEffect | null {
+    return new JSRuntimeEffect();
+  }
+
+  makeShader(
+    uniforms: number[] | Float32Array,
+    isOpaque?: boolean | undefined,
+    localMatrix?: InputMatrix | undefined,
+  ): Shader {
+    return new JSShader();
+  }
+
+  makeShaderWithChildren(
+    uniforms: number[] | Float32Array,
+    isOpaque?: boolean | undefined,
+    children?: Shader[] | undefined,
+    localMatrix?: InputMatrix | undefined,
+  ): Shader {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniform(index: number): SkSLUniform {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniformCount(): number {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniformFloatCount(): number {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniformName(index: number): string {
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -271,11 +330,11 @@ export const SVGKit: CanvasKit = {
   ImageFilter: 0 as any,
   MaskFilter: JSMaskFilter,
   PathEffect: JSPathEffect,
-  RuntimeEffect: 0 as any,
+  RuntimeEffect: JSRuntimeEffect,
   Shader: JSShaderFactory,
   TextBlob: 0 as any,
   Typeface: 0 as any,
-  TypefaceFontProvider: 0 as any,
+  TypefaceFontProvider: JSTypefaceFontProvider,
 
   // Misc
   ColorMatrix: 0 as any,

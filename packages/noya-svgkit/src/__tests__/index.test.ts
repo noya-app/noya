@@ -1,6 +1,6 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
-import loadSVGKit from '..';
+import { loadSVGKit } from '..';
 
 let CanvasKit: CanvasKitType;
 let SVGKit: CanvasKitType;

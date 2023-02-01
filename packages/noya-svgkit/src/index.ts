@@ -5,7 +5,7 @@ import { SVGKit } from './SVGKit';
 
 let loadingPromise: Promise<typeof SVGKit> | undefined = undefined;
 
-export default function loadSVGKit() {
+export function loadSVGKit() {
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = new Promise(async (resolve) => {

@@ -285,7 +285,11 @@ export default memo(function Ayon(
   return (
     <Suspense fallback={null}>
       <ImageCacheProvider>
-        <CanvasKitProvider>
+        <CanvasKitProvider
+          library={
+            props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
+          }
+        >
           <FontManagerProvider>
             <Workspace {...props} />
           </FontManagerProvider>
