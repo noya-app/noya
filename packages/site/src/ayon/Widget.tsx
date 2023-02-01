@@ -398,16 +398,15 @@ export function Widget({
           position: 'absolute',
           inset: 1,
           background: isEditing ? '#fff' : '#eee',
-          // If the layer is selected, we render a border at the canvas
+          // If the layer is selected, we render an outline at the canvas
           // level already and don't need one here
-          border: `1px solid ${isSelected ? 'transparent' : 'rgba(0,0,0,0.1)'}`,
+          outline: isSelected ? 'none' : `1px solid #ddd`,
           pointerEvents: isEditing ? 'all' : 'none',
           padding: 4,
           resize: 'none',
           // Children of the page don't appear in the rendered output,
           // so we make them partially transparent
           opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
-          outline: 'none',
         }}
         disabled={!isEditing}
         onKeyDown={(event) => {
