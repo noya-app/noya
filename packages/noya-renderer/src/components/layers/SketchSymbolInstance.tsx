@@ -1,8 +1,8 @@
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { AffineTransform, insetRect } from 'noya-geometry';
-import { useColorFill, useFill, useStroke } from 'noya-react-canvaskit';
+import { AffineTransform } from 'noya-geometry';
+import { useFill } from 'noya-react-canvaskit';
 import {
   Layers,
   Overrides,
@@ -151,22 +151,7 @@ const Symbol = memo(function Symbol({
     firstFill && firstFill.isEnabled ? firstFill.color : undefined;
   const colorFilter = useTintColorFilter(tintColor);
 
-  const greyFill = useColorFill('#eee');
-  const greyStroke = useStroke({ color: '#000', opacity: 0.1 });
-
-  if (wireframe) {
-    const rect = { ...layer.frame, x: 0, y: 0 };
-
-    return (
-      <Group transform={transform} opacity={opacity}>
-        <Rect paint={greyFill} rect={Primitives.rect(CanvasKit, rect)} />
-        <Rect
-          paint={greyStroke}
-          rect={Primitives.rect(CanvasKit, insetRect(rect, 0.5))}
-        />
-      </Group>
-    );
-  }
+  if (wireframe) return null;
 
   return (
     <Group transform={transform} opacity={opacity} colorFilter={colorFilter}>
