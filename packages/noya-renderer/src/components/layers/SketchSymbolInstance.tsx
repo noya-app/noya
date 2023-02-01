@@ -162,7 +162,7 @@ const Symbol = memo(function Symbol({
         <Rect paint={greyFill} rect={Primitives.rect(CanvasKit, rect)} />
         <Rect
           paint={greyStroke}
-          rect={Primitives.rect(CanvasKit, insetRect(rect, -0.5))}
+          rect={Primitives.rect(CanvasKit, insetRect(rect, 0.5))}
         />
       </Group>
     );
