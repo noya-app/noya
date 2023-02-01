@@ -13,14 +13,14 @@ export const BoundingRect = memo(function BoundingRect({
   rect: Rect;
 }) {
   const {
-    canvas: { dragHandleStroke },
+    canvas: { selectionStroke },
   } = useTheme().colors;
   const zoom = useZoom();
 
   const strokeWidth = 1 / zoom;
 
   const paint = useStroke({
-    color: dragHandleStroke,
+    color: selectionStroke,
     strokeWidth,
   });
 

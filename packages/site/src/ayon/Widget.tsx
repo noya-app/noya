@@ -174,7 +174,8 @@ export function Widget({
     ? Selectors.getSymbolMaster(state, layer.symbolID)
     : undefined;
 
-  const isSelected = state.selectedLayerIds[0] === layer.do_objectID;
+  const isPrimarySelected = state.selectedLayerIds[0] === layer.do_objectID;
+  const isSelected = state.selectedLayerIds.includes(layer.do_objectID);
 
   const isEditing =
     state.interactionState.type === 'editingBlock' &&
@@ -219,7 +220,7 @@ export function Widget({
   });
 
   const showWidgetUI =
-    isSelected &&
+    isPrimarySelected &&
     !isContextMenuOpen &&
     state.interactionState.type !== 'drawing';
 
@@ -395,14 +396,15 @@ export function Widget({
         ref={textareaRef}
         style={{
           position: 'absolute',
-          inset: 0,
-          background: isEditing ? '#fff' : '#eee',
+          inset: 1,
+          background: isEditing ? '#fff' : isSelected ? '#eee' : 'none',
           pointerEvents: isEditing ? 'all' : 'none',
           padding: 4,
           resize: 'none',
-          border: '1px solid rgba(0,0,0,0.1)',
           // Children of the page don't appear in the rendered output, so we make them transparent.
-          opacity: Layers.isPageLayer(parent) ? 0.3 : 0.8,
+          opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
+          border: `none`,
+          outline: 'none',
         }}
         disabled={!isEditing}
         onKeyDown={(event) => {

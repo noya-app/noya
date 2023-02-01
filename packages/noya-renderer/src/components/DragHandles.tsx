@@ -1,9 +1,10 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { Rect } from 'noya-geometry';
-import { DropShadow, useColorFill } from 'noya-react-canvaskit';
+import { insetRect, Rect } from 'noya-geometry';
+import { useFill, useStroke } from 'noya-react-canvaskit';
 import { getDragHandles, Primitives } from 'noya-state';
-import React, { memo, useMemo } from 'react';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
+import React, { memo } from 'react';
+import { useTheme } from 'styled-components';
+import { Rect as RCKRect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { pixelAlignRect } from '../pixelAlignment';
 import { useZoom } from '../ZoomContext';
@@ -16,31 +17,39 @@ export default memo(function DragHandles({ rect }: Props) {
   const CanvasKit = useCanvasKit();
   const [state] = useApplicationState();
   const zoom = useZoom();
+  const {
+    canvas: { selectionStroke },
+  } = useTheme().colors;
 
-  const dragHandleFill = useColorFill('#FFF');
+  const dragHandleFill = useFill({
+    color: '#FFFFFF',
+    strokeWidth: 1 / zoom,
+  });
+  const dragHandleStroke = useStroke({
+    color: selectionStroke,
+    strokeWidth: 1 / zoom,
+  });
 
   const dragHandles = getDragHandles(state, rect, zoom);
 
-  const dropShadow = useMemo(
-    (): DropShadow => ({
-      type: 'dropShadow',
-      color: CanvasKit.Color(0, 0, 0, 0.5),
-      offset: { x: 0, y: 0 },
-      radius: 1 / zoom,
-    }),
-    [CanvasKit, zoom],
-  );
-
   return (
-    <Group imageFilter={dropShadow}>
-      {dragHandles.map((handle, index) => (
-        <React.Fragment key={index}>
-          <RCKRect
-            rect={Primitives.rect(CanvasKit, pixelAlignRect(handle.rect, zoom))}
-            paint={dragHandleFill}
-          />
-        </React.Fragment>
-      ))}
-    </Group>
+    <>
+      {dragHandles.map((handle, index) => {
+        const rect = pixelAlignRect(handle.rect, zoom);
+
+        return (
+          <React.Fragment key={index}>
+            <RCKRect
+              rect={Primitives.rect(CanvasKit, rect)}
+              paint={dragHandleFill}
+            />
+            <RCKRect
+              rect={Primitives.rect(CanvasKit, insetRect(rect, -0.5 / zoom))}
+              paint={dragHandleStroke}
+            />
+          </React.Fragment>
+        );
+      })}
+    </>
   );
 });

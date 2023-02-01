@@ -145,7 +145,7 @@ function getOverrideElements(
           Overrides.getOverrideValue(overrideValues, 'symbolID', key) ??
           layer.symbolID;
 
-        const symbolMaster = Selectors.findSymbolMaster(state, symbolID);
+        const symbolMaster = Selectors.getSymbolMaster(state, symbolID);
         if (!symbolMaster && symbolID !== 'none') return [];
 
         const nestedOverrides =

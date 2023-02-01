@@ -16,13 +16,13 @@ export const RotatedBoundingRect = memo(function RotatedBoundingRect({
   const CanvasKit = useCanvasKit();
   const [state] = useApplicationState();
   const {
-    canvas: { dragHandleStroke },
+    canvas: { selectionStroke },
   } = useTheme().colors;
   const zoom = useZoom();
 
   const strokeWidth = 2 / zoom;
   const paint = useFill({
-    color: dragHandleStroke,
+    color: selectionStroke,
     strokeWidth,
   });
 

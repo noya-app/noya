@@ -1,8 +1,8 @@
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { AffineTransform } from 'noya-geometry';
-import { useColorFill, useFill } from 'noya-react-canvaskit';
+import { AffineTransform, insetRect } from 'noya-geometry';
+import { useColorFill, useFill, useStroke } from 'noya-react-canvaskit';
 import {
   Layers,
   Overrides,
@@ -151,18 +151,18 @@ const Symbol = memo(function Symbol({
     firstFill && firstFill.isEnabled ? firstFill.color : undefined;
   const colorFilter = useTintColorFilter(tintColor);
 
-  const greyFill = useColorFill('#DDD');
+  const greyFill = useColorFill('#eee');
+  const greyStroke = useStroke({ color: '#000', opacity: 0.1 });
 
   if (wireframe) {
+    const rect = { ...layer.frame, x: 0, y: 0 };
+
     return (
       <Group transform={transform} opacity={opacity}>
+        <Rect paint={greyFill} rect={Primitives.rect(CanvasKit, rect)} />
         <Rect
-          paint={greyFill}
-          rect={Primitives.rect(CanvasKit, {
-            ...layer.frame,
-            x: 0,
-            y: 0,
-          })}
+          paint={greyStroke}
+          rect={Primitives.rect(CanvasKit, insetRect(rect, -0.5))}
         />
       </Group>
     );
@@ -192,13 +192,8 @@ export default memo(function SketchSymbolInstance({
   const [state] = useApplicationState();
 
   const symbolMaster = useMemo(
-    () =>
-      Layers.findInArray(
-        state.sketch.pages,
-        (child) =>
-          Layers.isSymbolMaster(child) && layer.symbolID === child.symbolID,
-      ) as Sketch.SymbolMaster | undefined,
-    [layer.symbolID, state.sketch.pages],
+    () => Selectors.getSymbolMaster(state, layer.symbolID),
+    [layer.symbolID, state],
   );
 
   if (!symbolMaster) return null;

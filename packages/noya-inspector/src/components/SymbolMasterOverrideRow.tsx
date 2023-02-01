@@ -41,7 +41,7 @@ function getOverrideElements(
 
     switch (layer._class) {
       case 'symbolInstance': {
-        const symbolMaster = Selectors.findSymbolMaster(state, layer.symbolID);
+        const symbolMaster = Selectors.getSymbolMaster(state, layer.symbolID);
 
         if (!symbolMaster) return [];
 
