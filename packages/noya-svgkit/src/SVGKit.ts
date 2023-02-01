@@ -31,6 +31,7 @@ import type {
   TonalColorsInput,
   TonalColorsOutput,
   TypedArrayConstructor,
+  TypefaceFontProvider,
   VertexMode,
   Vertices,
   WebGLContextHandle,
@@ -64,6 +65,17 @@ class JSPathEffect extends JSEmbindObject implements PathEffect {
   ): PathEffect {
     return new JSPathEffect();
   }
+}
+
+class JSTypefaceFontProvider
+  extends JSEmbindObject
+  implements TypefaceFontProvider
+{
+  static Make(): TypefaceFontProvider {
+    return new JSTypefaceFontProvider();
+  }
+
+  registerFont(bytes: Uint8Array | ArrayBuffer, family: string): void {}
 }
 
 export const SVGKit: CanvasKit = {
@@ -275,7 +287,7 @@ export const SVGKit: CanvasKit = {
   Shader: JSShaderFactory,
   TextBlob: 0 as any,
   Typeface: 0 as any,
-  TypefaceFontProvider: 0 as any,
+  TypefaceFontProvider: JSTypefaceFontProvider,
 
   // Misc
   ColorMatrix: 0 as any,

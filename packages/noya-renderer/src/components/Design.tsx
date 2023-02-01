@@ -459,7 +459,11 @@ const DesignDrawLayer = memo(function DesignDrawLayer() {
   );
 });
 
-const DesignSnapGuides = memo(function DesignSnapGuides() {
+const DesignSnapGuides = memo(function DesignSnapGuides({
+  showLabels = true,
+}: {
+  showLabels?: boolean;
+}) {
   const { canvasInsets } = useWorkspace();
   const [state] = useApplicationState();
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
@@ -477,12 +481,16 @@ const DesignSnapGuides = memo(function DesignSnapGuides() {
 
   return (
     <Group transform={canvasTransform}>
-      <SnapGuides />
+      <SnapGuides showLabels={showLabels} />
     </Group>
   );
 });
 
-const DesignMeasurementGuides = memo(function DesignMeasurementGuides() {
+const DesignMeasurementGuides = memo(function DesignMeasurementGuides({
+  showLabels = true,
+}: {
+  showLabels?: boolean;
+}) {
   const { canvasInsets, highlightedLayer } = useWorkspace();
   const [state] = useApplicationState();
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
@@ -540,12 +548,23 @@ const DesignMeasurementGuides = memo(function DesignMeasurementGuides() {
         {guides.map((guide, index) => (
           <>
             <MeasurementGuide key={index} points={guide.measurement} />
-            <DistanceMeasurementLabel key={index} points={guide.measurement} />
+            {showLabels && (
+              <DistanceMeasurementLabel
+                key={index}
+                points={guide.measurement}
+              />
+            )}
           </>
         ))}
       </>
     );
-  }, [highlightedLayer, page, state.selectedLayerIds, boundingRect]);
+  }, [
+    highlightedLayer,
+    boundingRect,
+    state.selectedLayerIds,
+    page,
+    showLabels,
+  ]);
 
   if (
     renderingMode !== 'interactive' ||

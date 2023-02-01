@@ -289,8 +289,8 @@ export const Content = memo(function Content({
             <RenderingModeProvider value="interactive">
               <Design.Root>
                 <Design.DrawLayer />
-                <Design.SnapGuides />
-                <Design.MeasurementGuides />
+                <Design.SnapGuides showLabels={false} />
+                <Design.MeasurementGuides showLabels={false} />
                 <Design.DragHandles />
                 <Design.Marquee />
               </Design.Root>

@@ -1,9 +1,11 @@
-import { CanvasKitInit, Paint, PaintStyle } from 'canvaskit';
+import type { CanvasKitInit, Paint, PaintStyle } from 'canvaskit';
 import { getPublicPath } from 'noya-public-path';
 
 declare module 'canvaskit' {
+  // Exposed for svgkit, where we need to be able to introspect the paint
   interface Paint {
     style?: PaintStyle;
+    _alpha?: number;
   }
 }
 
@@ -15,7 +17,9 @@ export function loadCanvasKit() {
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = new Promise(async (resolve) => {
-    const CanvasKit = await CanvasKitInit({
+    const module = await import('canvaskit');
+
+    const CanvasKit = await module.CanvasKitInit({
       locateFile: (file: string) => getPublicPath() + 'wasm/' + file,
     });
 

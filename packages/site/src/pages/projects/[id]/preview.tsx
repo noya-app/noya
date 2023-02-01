@@ -22,11 +22,11 @@ function Content({ id }: { id: string }) {
 
   return (
     <Ayon
+      canvasRendererType="svg"
       initialDocument={initialFile.data.document}
       name={initialFile.data.name}
       uploadAsset={async () => ''}
       viewType="combined"
-      canvasRendererType="svg"
     />
   );
 }

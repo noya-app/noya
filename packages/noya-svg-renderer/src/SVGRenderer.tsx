@@ -60,11 +60,13 @@ function usePaintProps(paint: Paint): React.SVGProps<any> {
       stroke: color,
       strokeWidth: paint.getStrokeWidth(),
       fill: 'none',
+      opacity: paint._alpha,
     };
   }
 
   return {
     fill: color,
+    opacity: paint._alpha,
   };
 }
 
