@@ -65,7 +65,7 @@ function usePaintProps(paint: Paint): React.SVGProps<any> {
   }
 
   return {
-    fill: color,
+    fill: paint._shader ? `url(#pattern-dot-fill)` : color,
     opacity: paint._alpha,
   };
 }
@@ -295,6 +295,16 @@ export default memo(function SVGRenderer({ size, children, idPrefix }: Props) {
         height={size.height}
         xmlns="http://www.w3.org/2000/svg"
       >
+        <pattern
+          id="pattern-dot-fill"
+          x="0"
+          y="0"
+          width="10"
+          height="10"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect fill="rgba(0,0,0,0.2)" x="0" width="1" height="1" y="0"></rect>
+        </pattern>
         <ComponentsProvider value={SVGComponents}>
           {children}
         </ComponentsProvider>

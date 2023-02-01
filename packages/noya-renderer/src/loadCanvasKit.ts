@@ -6,6 +6,7 @@ declare module 'canvaskit' {
   interface Paint {
     style?: PaintStyle;
     _alpha?: number;
+    _shader?: Shader;
   }
 }
 

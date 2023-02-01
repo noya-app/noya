@@ -23,8 +23,11 @@ import type {
   PathEffect,
   Rect,
   RRect,
+  RuntimeEffect,
+  Shader,
   SkottieAnimation,
   SkPicture,
+  SkSLUniform,
   SoundMap,
   Surface,
   TextStyle,
@@ -76,6 +79,50 @@ class JSTypefaceFontProvider
   }
 
   registerFont(bytes: Uint8Array | ArrayBuffer, family: string): void {}
+}
+
+class JSShader extends JSEmbindObject implements Shader {}
+
+class JSRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
+  static Make(
+    sksl: string,
+    callback?: ((err: string) => void) | undefined,
+  ): RuntimeEffect | null {
+    return new JSRuntimeEffect();
+  }
+
+  makeShader(
+    uniforms: number[] | Float32Array,
+    isOpaque?: boolean | undefined,
+    localMatrix?: InputMatrix | undefined,
+  ): Shader {
+    return new JSShader();
+  }
+
+  makeShaderWithChildren(
+    uniforms: number[] | Float32Array,
+    isOpaque?: boolean | undefined,
+    children?: Shader[] | undefined,
+    localMatrix?: InputMatrix | undefined,
+  ): Shader {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniform(index: number): SkSLUniform {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniformCount(): number {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniformFloatCount(): number {
+    throw new Error('Method not implemented.');
+  }
+
+  getUniformName(index: number): string {
+    throw new Error('Method not implemented.');
+  }
 }
 
 export const SVGKit: CanvasKit = {
@@ -283,7 +330,7 @@ export const SVGKit: CanvasKit = {
   ImageFilter: 0 as any,
   MaskFilter: JSMaskFilter,
   PathEffect: JSPathEffect,
-  RuntimeEffect: 0 as any,
+  RuntimeEffect: JSRuntimeEffect,
   Shader: JSShaderFactory,
   TextBlob: 0 as any,
   Typeface: 0 as any,

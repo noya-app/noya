@@ -16,7 +16,8 @@ import { JSParagraph } from './JSParagraph';
 
 export class JSParagraphBuilder
   extends JSEmbindObject
-  implements ParagraphBuilder {
+  implements ParagraphBuilder
+{
   _parts: {
     text: string;
     style?: TextStyle;
@@ -63,7 +64,7 @@ export class JSParagraphBuilder
     style: ParagraphStyle,
     fontSrc: TypefaceFontProvider,
   ): ParagraphBuilder {
-    throw new Error('Not implemented');
+    return new JSParagraphBuilder();
   }
 
   static ShapeText(

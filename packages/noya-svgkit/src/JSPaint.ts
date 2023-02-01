@@ -31,6 +31,7 @@ export class JSPaint extends JSEmbindObject implements Paint {
   _strokeMiter: number = 0;
   _strokeWidth: number = 0;
   _style: PaintStyle = constants.PaintStyle.Fill;
+  _shader?: Shader;
 
   copy(): Paint {
     const properties: SerializableProperties<Omit<JSPaint, 'style'>> = {
@@ -44,6 +45,7 @@ export class JSPaint extends JSEmbindObject implements Paint {
       _strokeMiter: this._strokeMiter,
       _strokeWidth: this._strokeWidth,
       _style: this._style,
+      _shader: this._shader,
     };
 
     const copy = new JSPaint();
@@ -132,7 +134,7 @@ export class JSPaint extends JSEmbindObject implements Paint {
   }
 
   setShader(shader: Shader): void {
-    console.info('setShader() not implemented by SVGKit');
+    this._shader = shader;
   }
 
   setStrokeCap(cap: StrokeCap): void {
