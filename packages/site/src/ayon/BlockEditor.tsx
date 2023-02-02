@@ -23,13 +23,32 @@ import {
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 
-import { allAyonSymbols } from './blocks/symbols';
+import {
+  allAyonSymbols,
+  heading1SymbolId,
+  heading2SymbolId,
+  heading3SymbolId,
+  heading4SymbolId,
+  heading5SymbolId,
+  heading6SymbolId,
+  textSymbolId,
+} from './blocks/symbols';
 import { filterHashTagsAndSlashCommands } from './parse';
 import { InferredBlockTypeResult } from './types';
 
 export interface IBlockEditor {
   focus: () => void;
 }
+
+const BLOCK_TYPE_SHORTCUTS: { [shortcut: string]: string } = {
+  '#': heading1SymbolId,
+  '##': heading2SymbolId,
+  '###': heading3SymbolId,
+  '####': heading4SymbolId,
+  '#####': heading5SymbolId,
+  '######': heading6SymbolId,
+  '"': textSymbolId,
+};
 
 function textCommand(
   triggerPrefix: string,
@@ -50,6 +69,45 @@ function textCommand(
   const beforeText = Editor.string(
     editor,
     Editor.range(editor, lineStart, start),
+  );
+
+  const beforeMatch = beforeText.match(triggerRegex);
+
+  if (!beforeMatch) return;
+
+  const match = beforeMatch[1];
+
+  const rangeStart = Editor.before(editor, start, {
+    unit: 'character',
+    distance: match.length + 1,
+  });
+
+  if (!rangeStart) return;
+
+  const range = Editor.range(editor, rangeStart, start);
+
+  return { range, match };
+}
+
+function textShortcut(
+  triggerPrefix: string,
+  editor: Editor,
+): { range: Range; match: string } | undefined {
+  const { selection } = editor;
+
+  if (!selection || !Range.isCollapsed(selection)) return;
+
+  const triggerRegex = new RegExp(`(${triggerPrefix}) $`);
+
+  const [start] = Range.edges(selection);
+
+  const editorStart = Editor.start(editor, []);
+
+  if (!editorStart) return;
+
+  const beforeText = Editor.string(
+    editor,
+    Editor.range(editor, editorStart, start),
   );
 
   const beforeMatch = beforeText.match(triggerRegex);
@@ -99,12 +157,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
-  const descendants = useMemo((): Descendant[] => {
-    return blockText.split('\n').map((line) => ({
-      type: 'paragraph',
-      children: [{ text: line }],
-    }));
-  }, [blockText]);
+  const descendants = useMemo(() => fromString(blockText), [blockText]);
 
   useImperativeHandle(forwardedRef, () => ({
     focus: () => {
@@ -170,7 +223,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
             const item = items[index];
 
             Transforms.delete(editor, { at: target });
-            const newText = Editor.string(editor, []);
+            const newText = toString(editor.children);
 
             onChangeBlockType({ symbolId: item.symbolID });
             dispatch('setSymbolIdIsFixed', true);
@@ -220,9 +273,30 @@ export const BlockEditor = forwardRef(function BlockEditor(
       // This can fire after the selection has changed, so we need to be explicit
       // about which layer we're modifying when dispatching actions
       onChange={(value) => {
-        const text = value
-          .map((descendant) => Node.string(descendant))
-          .join('\n');
+        const text = toString(value);
+
+        const mdCommand = textShortcut(
+          Object.keys(BLOCK_TYPE_SHORTCUTS).join('|'),
+          editor,
+        );
+
+        if (mdCommand) {
+          const { range, match } = mdCommand;
+
+          Transforms.delete(editor, { at: range });
+          const newText = toString(editor.children);
+
+          onChangeBlockType({ symbolId: BLOCK_TYPE_SHORTCUTS[match] });
+          dispatch('setSymbolIdIsFixed', true);
+          dispatch(
+            'setBlockText',
+            layer.do_objectID,
+            newText,
+            filterHashTagsAndSlashCommands(newText).content,
+          );
+
+          return;
+        }
 
         const slashCommand = textCommand('/', editor);
 
@@ -286,6 +360,17 @@ export const BlockEditor = forwardRef(function BlockEditor(
     </Slate>
   );
 });
+
+function toString(value: Descendant[]): string {
+  return value.map((n) => Node.string(n)).join('\n');
+}
+
+function fromString(value: string): Descendant[] {
+  return value.split('\n').map((line) => ({
+    type: 'paragraph',
+    children: [{ text: line }],
+  }));
+}
 
 export type ParagraphElement = {
   type: 'paragraph';
