@@ -3,7 +3,6 @@ import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
-import { scoreCommandMatch } from './score';
 import {
   heading1Symbol,
   heading2Symbol,
@@ -19,8 +18,7 @@ const createHeadingBlock = (
   size: ThemingProps['size'],
 ): BlockDefinition => ({
   id: symbol.symbolID,
-  infer: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(symbol.name, blockText), 0.1),
+  infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { content, color, fontWeight, fontSize, align, hashTags } =
       filterTextPropertyHashTags(props.blockText);

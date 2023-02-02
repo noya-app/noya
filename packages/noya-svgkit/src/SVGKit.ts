@@ -141,9 +141,12 @@ export const SVGKit: CanvasKit = {
     throw new Error('Not implemented');
   },
   parseColorString(color: string, colorMap?: object): Color {
-    const [r, g, b, a = 1] = parseColor(color).values;
+    const {
+      values: [r, g, b],
+      alpha,
+    } = parseColor(color);
 
-    return new Float32Array([r / 255, g / 255, b / 255, a]);
+    return new Float32Array([r / 255, g / 255, b / 255, alpha]);
   },
   multiplyByAlpha(c: Color, alpha: number): Color {
     throw new Error('Not implemented');

@@ -16,7 +16,7 @@ module.exports = {
     },
   ],
   rules: {
-    'import/no-cycle': 'error',
+    // 'import/no-cycle': 'error',
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/ban-types': 'off',

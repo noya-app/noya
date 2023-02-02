@@ -17,6 +17,13 @@ describe('color', () => {
 
     expect(s).toEqual(c);
   });
+
+  test('parses color', () => {
+    const s = SVGKit.parseColorString('rgba(0, 100, 200, 0.5)');
+    const c = CanvasKit.parseColorString('rgba(0, 100, 200, 0.5)');
+
+    expect(s).toEqual(c);
+  });
 });
 
 describe('paint', () => {

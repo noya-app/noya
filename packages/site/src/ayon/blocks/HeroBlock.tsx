@@ -2,7 +2,7 @@ import { Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
-import { isWithinRectRange, scoreCommandMatch } from './score';
+import { isWithinRectRange } from './score';
 import { heroSymbol, heroSymbolId } from './symbols';
 import { getBlockClassName } from './tailwind';
 
@@ -14,7 +14,6 @@ export const HeroBlock: BlockDefinition = {
     }
 
     return Math.max(
-      scoreCommandMatch(heroSymbol.name, blockText),
       isWithinRectRange(frame, 400, 200, 2000, 550) && frame.y < 180 ? 1 : 0,
       0.1,
     );

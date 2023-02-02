@@ -1,7 +1,15 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import React, { memo, useLayoutEffect, useMemo, useRef } from 'react';
+import React, {
+  ForwardedRef,
+  forwardRef,
+  memo,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { useCopyHandler } from '../hooks/useCopyHandler';
 import {
   Interaction,
@@ -23,74 +31,81 @@ interface Props {
   padding?: number;
 }
 
-export const SimpleCanvas = memo(function SimpleCanvas({
-  children,
-  interactions,
-  widgets,
-  rendererZIndex = 0,
-  padding = 0,
-}: Props) {
-  const ref = useRef<ICanvasElement>(null);
-  const [state, dispatch] = useApplicationState();
-  const { setIsContextMenuOpen } = useWorkspace();
-  const { canvasSize } = useWorkspace();
+export interface ISimpleCanvas {
+  focus: () => void;
+}
 
-  const { actions, handlers, getMenuItems, onSelectMenuItem } =
-    useInteractionHandlers({
-      interactions,
-      elementInterface: {
-        focus: () => ref.current?.focus(),
-        releasePointerCapture: (pointerId) =>
-          ref.current?.releasePointerCapture(pointerId),
-        setPointerCapture: (pointerId) =>
-          ref.current?.setPointerCapture(pointerId),
-      },
+export const SimpleCanvas = memo(
+  forwardRef(function SimpleCanvas(
+    { children, interactions, widgets, rendererZIndex = 0, padding = 0 }: Props,
+    forwardedRef: ForwardedRef<ISimpleCanvas>,
+  ) {
+    const ref = useRef<ICanvasElement>(null);
+    const [state, dispatch] = useApplicationState();
+    const { setIsContextMenuOpen } = useWorkspace();
+    const { canvasSize } = useWorkspace();
+
+    useImperativeHandle(forwardedRef, () => ({
+      focus: () => ref.current?.focus(),
+    }));
+
+    const { actions, handlers, getMenuItems, onSelectMenuItem } =
+      useInteractionHandlers({
+        interactions,
+        elementInterface: {
+          focus: () => ref.current?.focus(),
+          releasePointerCapture: (pointerId) =>
+            ref.current?.releasePointerCapture(pointerId),
+          setPointerCapture: (pointerId) =>
+            ref.current?.setPointerCapture(pointerId),
+        },
+      });
+
+    const cursor = useMemo(() => Selectors.getCursor(state), [state]);
+    const items = getMenuItems();
+
+    useCopyHandler();
+
+    usePasteHandler<SupportedImageUploadType>({
+      onPasteLayers: actions.addLayer,
     });
 
-  const cursor = useMemo(() => Selectors.getCursor(state), [state]);
-  const items = getMenuItems();
+    // When canvasSize changes, zoom to fit the isolated layer
+    useLayoutEffect(() => {
+      if (!state.isolatedLayerId) return;
 
-  useCopyHandler();
+      // canvasSize always exists, but we include it here so it's automatically added
+      // as a dependency of useLayoutEffect
+      if (!canvasSize) return;
 
-  usePasteHandler<SupportedImageUploadType>({
-    onPasteLayers: actions.addLayer,
-  });
+      dispatch(
+        'zoomToFit*',
+        { type: 'layer', value: state.isolatedLayerId },
+        { padding, max: 1, position: 'top' },
+      );
+    }, [canvasSize, state.isolatedLayerId, dispatch, padding]);
 
-  // When canvasSize changes, zoom to fit the isolated layer
-  useLayoutEffect(() => {
-    if (!state.isolatedLayerId) return;
-
-    // canvasSize always exists, but we include it here so it's automatically added
-    // as a dependency of useLayoutEffect
-    if (!canvasSize) return;
-
-    dispatch(
-      'zoomToFit*',
-      { type: 'layer', value: state.isolatedLayerId },
-      { padding, max: 1, position: 'top' },
-    );
-  }, [canvasSize, state.isolatedLayerId, dispatch, padding]);
-
-  return (
-    <ContextMenu
-      items={items}
-      onSelect={(id) => {
-        onSelectMenuItem?.(id);
-      }}
-      onOpenChange={(isOpen) => {
-        setIsContextMenuOpen(isOpen);
-      }}
-    >
-      <CanvasElement
-        ref={ref}
-        {...handlers}
-        onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
-        rendererZIndex={rendererZIndex}
-        widgets={widgets}
-        cursor={cursor}
+    return (
+      <ContextMenu
+        items={items}
+        onSelect={(id) => {
+          onSelectMenuItem?.(id);
+        }}
+        onOpenChange={(isOpen) => {
+          setIsContextMenuOpen(isOpen);
+        }}
       >
-        {children}
-      </CanvasElement>
-    </ContextMenu>
-  );
-});
+        <CanvasElement
+          ref={ref}
+          {...handlers}
+          onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
+          rendererZIndex={rendererZIndex}
+          widgets={widgets}
+          cursor={cursor}
+        >
+          {children}
+        </CanvasElement>
+      </ContextMenu>
+    );
+  }),
+);

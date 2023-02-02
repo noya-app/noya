@@ -2,14 +2,12 @@ import { Flex, Spinner, SystemProps, Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
-import { scoreCommandMatch } from './score';
-import { writeSymbol, writeSymbolId } from './symbols';
+import { writeSymbolId } from './symbols';
 import { getBlockClassName } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
   id: writeSymbolId,
-  infer: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(writeSymbol.name, blockText), 0.1),
+  infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { color, fontWeight, fontSize, align, hashTags } =
       filterTextPropertyHashTags(props.blockText);

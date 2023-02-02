@@ -3,6 +3,7 @@ import {
   CanvasKitRenderer,
   convertPoint,
   Interactions,
+  ISimpleCanvas,
   SimpleCanvas,
 } from 'noya-canvas';
 import { roundPoint } from 'noya-geometry';
@@ -12,7 +13,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { isExternalUrl } from 'noya-utils';
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import {
@@ -185,6 +186,12 @@ export const Content = memo(function Content({
     };
   }, [dispatch, layers]);
 
+  const canvasRef = useRef<ISimpleCanvas>(null);
+
+  const onFocusCanvas = useCallback(() => {
+    canvasRef.current?.focus();
+  }, []);
+
   const CanvasRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
@@ -200,6 +207,7 @@ export const Content = memo(function Content({
           onDropFiles={addImageFiles}
         >
           <SimpleCanvas
+            ref={canvasRef}
             padding={padding}
             interactions={[
               Interactions.selectionMode,
@@ -230,6 +238,7 @@ export const Content = memo(function Content({
                     key={layer.do_objectID}
                     layer={layer}
                     inferBlockTypes={inferBlockTypes}
+                    onFocusCanvas={onFocusCanvas}
                     onChangeBlockType={(type: DrawableLayerType) => {
                       dispatch(
                         'setSymbolInstanceSource',

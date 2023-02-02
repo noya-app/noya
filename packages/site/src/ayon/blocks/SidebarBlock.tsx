@@ -2,7 +2,7 @@ import { Heading, Link, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
-import { isWithinRectRange, scoreCommandMatch } from './score';
+import { isWithinRectRange } from './score';
 import { sidebarSymbol, sidebarSymbolId } from './symbols';
 import { getBlockClassName } from './tailwind';
 
@@ -15,11 +15,7 @@ export const SidebarBlock: BlockDefinition = {
       return 0;
     }
 
-    return Math.max(
-      scoreCommandMatch(sidebarSymbol.name, blockText),
-      isWithinRectRange(frame, 200, 400, 360, 2000) ? 1 : 0,
-      0.1,
-    );
+    return Math.max(isWithinRectRange(frame, 200, 400, 360, 2000) ? 1 : 0, 0.1);
   },
   render: (props) => {
     const { hashTags } = filterHashTagsAndSlashCommands(props.blockText);

@@ -26,19 +26,10 @@ import {
   Selectors,
 } from 'noya-state';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  allAyonSymbols,
-  heading1SymbolId,
-  heading2SymbolId,
-  heading3SymbolId,
-  heading4SymbolId,
-  heading5SymbolId,
-  heading6SymbolId,
-  imageSymbolId,
-  textSymbolId,
-} from './blocks/symbols';
+import { BlockEditor, IBlockEditor } from './BlockEditor';
+import { imageSymbolId } from './blocks/symbols';
 import { filterHashTagsAndSlashCommands } from './parse';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
@@ -137,26 +128,18 @@ function WidgetContainer({
   );
 }
 
-const BLOCK_TYPE_TEXT_SHORTCUTS: { [shortcut: string]: string } = {
-  '#': heading1SymbolId,
-  '##': heading2SymbolId,
-  '###': heading3SymbolId,
-  '####': heading4SymbolId,
-  '#####': heading5SymbolId,
-  '######': heading6SymbolId,
-  '"': textSymbolId,
-};
-
 export function Widget({
   layer,
   inferBlockTypes,
   onChangeBlockType,
   uploadAsset,
+  onFocusCanvas,
 }: {
   layer: Sketch.AnyLayer;
   inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
   onChangeBlockType: (type: DrawableLayerType) => void;
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
+  onFocusCanvas: () => void;
 }) {
   const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -181,33 +164,13 @@ export function Widget({
     state.interactionState.type === 'editingBlock' &&
     state.interactionState.layerId === layer.do_objectID;
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const blockEditorRef = useRef<IBlockEditor>(null);
 
   useEffect(() => {
     if (isEditing) {
-      textareaRef.current?.focus();
+      blockEditorRef.current?.focus();
     }
   }, [isEditing]);
-
-  useLayoutEffect(() => {
-    const handler = (event: FocusEvent) => {
-      if (event.target !== textareaRef.current) return;
-
-      const canvasInput = document.querySelector('#hidden-canvas-input');
-
-      if (canvasInput instanceof HTMLInputElement) {
-        canvasInput.focus();
-      }
-
-      event.preventDefault();
-    };
-
-    window.addEventListener('blur', handler, { capture: true });
-
-    return () => {
-      window.removeEventListener('blur', handler, { capture: true });
-    };
-  }, []);
 
   if (!Layers.isSymbolInstance(layer)) return null;
 
@@ -223,9 +186,6 @@ export function Widget({
     isPrimarySelected &&
     !isContextMenuOpen &&
     state.interactionState.type !== 'drawing';
-
-  const words = blockText.split(/\s/);
-  const slashWords = words.filter((word) => word[0] === '/' && word !== '/');
 
   return (
     <WidgetContainer
@@ -277,10 +237,11 @@ export function Widget({
 
                       dispatch(
                         'setBlockText',
+                        undefined,
                         url,
                         filterHashTagsAndSlashCommands(url).content,
                       );
-                      dispatch('setSymbolIdIsFixed', true);
+                      dispatch('setSymbolIdIsFixed', undefined, true);
                     }}
                   />
                 )}
@@ -291,7 +252,7 @@ export function Widget({
                       onPointerDown={(event) => {
                         event.preventDefault();
 
-                        dispatch('setSymbolIdIsFixed', false);
+                        dispatch('setSymbolIdIsFixed', undefined, false);
                       }}
                     />
                   ) : (
@@ -300,7 +261,7 @@ export function Widget({
                       onPointerDown={(event) => {
                         event.preventDefault();
 
-                        dispatch('setSymbolIdIsFixed', true);
+                        dispatch('setSymbolIdIsFixed', undefined, true);
                       }}
                     />
                   )}
@@ -320,7 +281,7 @@ export function Widget({
                       })}
                     onSelect={(symbolId) => {
                       onChangeBlockType({ symbolId });
-                      dispatch('setSymbolIdIsFixed', true);
+                      dispatch('setSymbolIdIsFixed', undefined, true);
                     }}
                   >
                     <Button variant="none">
@@ -332,7 +293,7 @@ export function Widget({
                 </Stack.H>
               </Stack.H>
             </ContentElement>
-            {(slashWords.length > 0 || !layer.symbolIDIsFixed) && (
+            {!layer.symbolIDIsFixed && (
               <ContentElement>
                 <Stack.V padding={'0 8px'}>
                   <Small color="textSubtle" padding={'4px 0px'}>
@@ -371,14 +332,14 @@ export function Widget({
                               blockText.replace(/^\/\w+/, '');
                             dispatch(
                               'setBlockText',
+                              undefined,
                               blockTextWithoutSlashCommands,
                               filterHashTagsAndSlashCommands(
                                 blockTextWithoutSlashCommands,
                               ).content,
                             );
-                            dispatch('setSymbolIdIsFixed', true);
+                            dispatch('setSymbolIdIsFixed', undefined, true);
                           }}
-                          active={index === 0 && slashWords.length > 0}
                         >
                           {name}
                           <Spacer.Horizontal />
@@ -392,8 +353,7 @@ export function Widget({
         )
       }
     >
-      <textarea
-        ref={textareaRef}
+      <div
         style={{
           position: 'absolute',
           inset: 1,
@@ -402,173 +362,29 @@ export function Widget({
           // level already and don't need one here
           outline: isSelected ? 'none' : `1px solid #ddd`,
           pointerEvents: isEditing ? 'all' : 'none',
-          padding: 4,
-          resize: 'none',
           // Children of the page don't appear in the rendered output,
           // so we make them partially transparent
           opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
+          overflow: 'hidden',
+          cursor: isEditing ? 'text' : 'pointer',
         }}
-        disabled={!isEditing}
-        onKeyDown={(event) => {
-          if (event.key === 'Shift') {
-            dispatch('interaction', ['setCursor', 'cell']);
-          }
-
-          if (event.key === 'Escape') {
-            dispatch('interaction', ['reset']);
-            dispatch('selectLayer', []);
-            event.preventDefault();
-            return;
-          }
-
-          if (
-            (event.key === 'Delete' || event.key === 'Backspace') &&
-            !blockText
-          ) {
-            dispatch('deleteLayer', layer.do_objectID);
-            event.preventDefault();
-            return;
-          }
-
-          if (event.key !== 'Tab') {
-            return;
-          }
-
-          event.preventDefault();
-
-          const words = blockText.split(/\s/);
-          const slashWords = words.filter(
-            (word) => word[0] === '/' && word !== '/',
-          );
-
-          if (slashWords.length > 0) {
-            const symbol = allAyonSymbols.find(
-              (symbol) =>
-                symbol.name.toLowerCase() ===
-                slashWords[slashWords.length - 1].substring(1).toLowerCase(),
-            );
-            const newText = blockText
-              .split(/\r?\n/)
-              .map((line) =>
-                line
-                  .split(' ')
-                  .filter((word) => word[0] !== '/' || word === '/')
-                  .join(' '),
-              )
-              .join('\n');
-            if (symbol) {
-              onChangeBlockType({ symbolId: symbol.symbolID });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            } else if (
-              blockTypes.length > 0 &&
-              typeof blockTypes[0].type !== 'string'
-            ) {
-              onChangeBlockType({
-                symbolId: blockTypes[0].type.symbolId,
-              });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            }
-          }
-        }}
-        onChange={(event) => {
-          const text = event.target.value;
-          const words = text.split(/\s/);
-          const slashWords = words.filter(
-            (word) => word[0] === '/' && word !== '/',
-          );
-
-          if (
-            words.length > blockText.split(' ').length &&
-            Object.keys(BLOCK_TYPE_TEXT_SHORTCUTS).includes(words[0])
-          ) {
-            onChangeBlockType({
-              symbolId: BLOCK_TYPE_TEXT_SHORTCUTS[words[0]],
-            });
-            dispatch('setSymbolIdIsFixed', true);
-            dispatch(
-              'setBlockText',
-              words.slice(1).join(' '),
-              filterHashTagsAndSlashCommands(words.slice(1).join(' ')).content,
-            );
-            return;
-          }
-
-          if (
-            slashWords.length > 0 &&
-            words.length > blockText.split(/\s/).length
-          ) {
-            const symbol = allAyonSymbols.find(
-              (symbol) =>
-                symbol.name.toLowerCase() ===
-                slashWords[slashWords.length - 1].substring(1).toLowerCase(),
-            );
-            const newText = text
-              .split(/\r?\n/)
-              .map((line) =>
-                line
-                  .split(' ')
-                  .filter((word) => word[0] !== '/' || word === '/')
-                  .join(' '),
-              )
-              .join('\n');
-            if (symbol) {
-              onChangeBlockType({ symbolId: symbol.symbolID });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            } else if (
-              blockTypes.length > 0 &&
-              typeof blockTypes[0].type !== 'string'
-            ) {
-              onChangeBlockType({
-                symbolId: blockTypes[0].type.symbolId,
-              });
-              dispatch('setSymbolIdIsFixed', true);
-              dispatch(
-                'setBlockText',
-                newText,
-                filterHashTagsAndSlashCommands(newText).content,
-              );
-              return;
-            }
-          }
-
-          dispatch(
-            'setBlockText',
-            text,
-            filterHashTagsAndSlashCommands(text).content,
-          );
-        }}
-        onFocusCapture={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerDownCapture={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerMoveCapture={(event) => {
-          event.stopPropagation();
-        }}
-        onPointerUpCapture={(event) => {
-          event.stopPropagation();
-        }}
-        value={blockText}
-      />
+        onFocusCapture={(event) => event.stopPropagation()}
+        onPointerDownCapture={(event) => event.stopPropagation()}
+        onPointerMoveCapture={(event) => event.stopPropagation()}
+        onPointerUpCapture={(event) => event.stopPropagation()}
+      >
+        <BlockEditor
+          ref={blockEditorRef}
+          isEditing={isEditing}
+          isSelected={isSelected}
+          blockTypes={blockTypes}
+          blockText={blockText}
+          layer={layer}
+          parent={parent}
+          onChangeBlockType={onChangeBlockType}
+          onFocusCanvas={onFocusCanvas}
+        />
+      </div>
     </WidgetContainer>
   );
 }

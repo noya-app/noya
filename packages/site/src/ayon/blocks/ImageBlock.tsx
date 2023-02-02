@@ -3,14 +3,12 @@ import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
-import { scoreCommandMatch } from './score';
-import { imageSymbol, imageSymbolId } from './symbols';
+import { imageSymbolId } from './symbols';
 import { getBlockClassName } from './tailwind';
 
 export const ImageBlock: BlockDefinition = {
   id: imageSymbolId,
-  infer: ({ frame, blockText }) =>
-    Math.max(scoreCommandMatch(imageSymbol.name, blockText), 0.1),
+  infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { content, hashTags } = filterHashTagsAndSlashCommands(
       props.blockText,
