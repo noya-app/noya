@@ -112,6 +112,7 @@ export const TextArea = forwardRef(function TextArea(
             dispatch('setSymbolIdIsFixed', true);
             dispatch(
               'setBlockText',
+              undefined,
               newText,
               filterHashTagsAndSlashCommands(newText).content,
             );
@@ -126,6 +127,7 @@ export const TextArea = forwardRef(function TextArea(
             dispatch('setSymbolIdIsFixed', true);
             dispatch(
               'setBlockText',
+              undefined,
               newText,
               filterHashTagsAndSlashCommands(newText).content,
             );
@@ -150,6 +152,7 @@ export const TextArea = forwardRef(function TextArea(
           dispatch('setSymbolIdIsFixed', true);
           dispatch(
             'setBlockText',
+            undefined,
             words.slice(1).join(' '),
             filterHashTagsAndSlashCommands(words.slice(1).join(' ')).content,
           );
@@ -179,6 +182,7 @@ export const TextArea = forwardRef(function TextArea(
             dispatch('setSymbolIdIsFixed', true);
             dispatch(
               'setBlockText',
+              undefined,
               newText,
               filterHashTagsAndSlashCommands(newText).content,
             );
@@ -193,6 +197,7 @@ export const TextArea = forwardRef(function TextArea(
             dispatch('setSymbolIdIsFixed', true);
             dispatch(
               'setBlockText',
+              undefined,
               newText,
               filterHashTagsAndSlashCommands(newText).content,
             );
@@ -202,6 +207,7 @@ export const TextArea = forwardRef(function TextArea(
 
         dispatch(
           'setBlockText',
+          undefined,
           text,
           filterHashTagsAndSlashCommands(text).content,
         );

@@ -127,8 +127,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
     .filter((c) => c.name.toLowerCase().startsWith(search.toLowerCase()))
     .slice(0, 10);
 
-  // console.log({ blockText });
-
   const onKeyDown = useCallback(
     (event) => {
       switch (event.key) {
@@ -178,6 +176,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
             dispatch('setSymbolIdIsFixed', true);
             dispatch(
               'setBlockText',
+              layer.do_objectID,
               newText,
               filterHashTagsAndSlashCommands(newText).content,
             );
@@ -218,6 +217,8 @@ export const BlockEditor = forwardRef(function BlockEditor(
     <Slate
       editor={editor}
       value={descendants}
+      // This can fire after the selection has changed, so we need to be explicit
+      // about which layer we're modifying when dispatching actions
       onChange={(value) => {
         const text = value
           .map((descendant) => Node.string(descendant))
@@ -237,6 +238,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
         dispatch(
           'setBlockText',
+          layer.do_objectID,
           text,
           filterHashTagsAndSlashCommands(text).content,
         );

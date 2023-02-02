@@ -238,6 +238,7 @@ export function Widget({
 
                       dispatch(
                         'setBlockText',
+                        undefined,
                         url,
                         filterHashTagsAndSlashCommands(url).content,
                       );
@@ -332,6 +333,7 @@ export function Widget({
                               blockText.replace(/^\/\w+/, '');
                             dispatch(
                               'setBlockText',
+                              undefined,
                               blockTextWithoutSlashCommands,
                               filterHashTagsAndSlashCommands(
                                 blockTextWithoutSlashCommands,

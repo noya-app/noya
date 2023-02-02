@@ -51,7 +51,12 @@ export type LayerPropertyAction =
   | [type: 'setHasClippingMask', value: boolean]
   | [type: 'setShouldBreakMaskChain', value: boolean]
   | [type: 'setMaskMode', value: 'alpha' | 'outline']
-  | [type: 'setBlockText', value: string, normalizedText?: string]
+  | [
+      type: 'setBlockText',
+      layerId: string | string[] | undefined,
+      value: string,
+      normalizedText?: string,
+    ]
   | [
       type: 'setResolvedBlockData',
       layerId: string,
@@ -64,6 +69,25 @@ export function layerPropertyReducer(
   action: LayerPropertyAction,
   CanvasKit: CanvasKit,
 ): ApplicationState {
+  function getTargetIds(id: string | string[] | undefined) {
+    return id === undefined
+      ? state.selectedLayerIds
+      : typeof id === 'string'
+      ? [id]
+      : id;
+  }
+
+  function getTargetIndexPaths(id: string | string[] | undefined) {
+    const ids = getTargetIds(id);
+    const page = getCurrentPage(state);
+    const pageIndex = getCurrentPageIndex(state);
+    const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+      ids.includes(layer.do_objectID),
+    );
+
+    return { pageIndex, indexPaths };
+  }
+
   switch (action[0]) {
     case 'setLayerName': {
       const [, layerId, name] = action;
@@ -214,18 +238,7 @@ export function layerPropertyReducer(
     case 'setLayerWidth':
     case 'setLayerHeight': {
       const [type, id, amount, mode = 'replace'] = action;
-
-      const ids =
-        id === undefined
-          ? state.selectedLayerIds
-          : typeof id === 'string'
-          ? [id]
-          : id;
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
-        ids.includes(layer.do_objectID),
-      );
+      const { pageIndex, indexPaths } = getTargetIndexPaths(id);
 
       const property =
         type === 'setLayerWidth' ? ('width' as const) : ('height' as const);
@@ -353,12 +366,11 @@ export function layerPropertyReducer(
       });
     }
     case 'setBlockText': {
-      const [, value, normalizedText] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const [, id, value, normalizedText] = action;
+      const { pageIndex, indexPaths } = getTargetIndexPaths(id);
 
       return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+        accessPageLayers(draft, pageIndex, indexPaths).forEach((layer) => {
           if (!Layers.isSymbolInstance(layer)) return;
 
           layer.blockText = value;
