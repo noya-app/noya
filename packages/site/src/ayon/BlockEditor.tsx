@@ -147,9 +147,6 @@ function textShortcut(
   return { range, match };
 }
 
-// TODO:
-// Markdown heading shortcuts
-// Improve suggestion design
 export const BlockEditor = forwardRef(function BlockEditor(
   {
     isEditing,
