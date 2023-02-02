@@ -97,7 +97,7 @@ function textShortcut(
 
   if (!selection || !Range.isCollapsed(selection)) return;
 
-  const triggerRegex = new RegExp(`(${triggerPrefix}) $`);
+  const triggerRegex = new RegExp(`^(${triggerPrefix}) $`);
 
   const [start] = Range.edges(selection);
 
@@ -275,13 +275,13 @@ export const BlockEditor = forwardRef(function BlockEditor(
       onChange={(value) => {
         const text = toString(value);
 
-        const mdCommand = textShortcut(
+        const mdShortcut = textShortcut(
           Object.keys(BLOCK_TYPE_SHORTCUTS).join('|'),
           editor,
         );
 
-        if (mdCommand) {
-          const { range, match } = mdCommand;
+        if (mdShortcut) {
+          const { range, match } = mdShortcut;
 
           Transforms.delete(editor, { at: range });
           const newText = toString(editor.children);
