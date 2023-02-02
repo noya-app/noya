@@ -2,16 +2,13 @@ import { Button } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
-import { isWithinRectRange, scoreCommandMatch } from './score';
-import { buttonSymbol, buttonSymbolId } from './symbols';
+import { isWithinRectRange } from './score';
+import { buttonSymbolId } from './symbols';
 
 export const ButtonBlock: BlockDefinition = {
   id: buttonSymbolId,
   infer: ({ frame, blockText }) =>
-    Math.max(
-      scoreCommandMatch(buttonSymbol.name, blockText),
-      isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
-    ),
+    isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
   render: (props) => {
     const { content, colorScheme, fontWeight, fontSize } =
       filterTextPropertyHashTags(props.blockText);

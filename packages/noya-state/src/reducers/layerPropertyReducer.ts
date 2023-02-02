@@ -62,7 +62,11 @@ export type LayerPropertyAction =
       layerId: string,
       value: Sketch.SymbolInstance['resolvedBlockData'],
     ]
-  | [type: 'setSymbolIdIsFixed', value: boolean];
+  | [
+      type: 'setSymbolIdIsFixed',
+      layerId: string | string[] | undefined,
+      value: boolean,
+    ];
 
 export function layerPropertyReducer(
   state: ApplicationState,
@@ -405,12 +409,11 @@ export function layerPropertyReducer(
       });
     }
     case 'setSymbolIdIsFixed': {
-      const [, value] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const [, id, value] = action;
+      const { pageIndex, indexPaths } = getTargetIndexPaths(id);
 
       return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+        accessPageLayers(draft, pageIndex, indexPaths).forEach((layer) => {
           if (Layers.isSymbolInstance(layer)) {
             layer.symbolIDIsFixed = value;
           }

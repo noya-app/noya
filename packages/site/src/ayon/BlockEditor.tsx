@@ -216,7 +216,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
       const newText = toString(editor.children);
 
       onChangeBlockType({ symbolId: item.symbolID });
-      dispatch('setSymbolIdIsFixed', true);
+      dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
       dispatch(
         'setBlockText',
         layer.do_objectID,
@@ -331,7 +331,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           const newText = toString(editor.children);
 
           onChangeBlockType({ symbolId: BLOCK_TYPE_SHORTCUTS[match] });
-          dispatch('setSymbolIdIsFixed', true);
+          dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
           dispatch(
             'setBlockText',
             layer.do_objectID,
@@ -360,6 +360,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
           text,
           filterHashTagsAndSlashCommands(text).content,
         );
+
+        // Lock the block type when the user starts editing the text
+        if (text) {
+          dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
+        }
       }}
     >
       <Editable

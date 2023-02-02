@@ -187,9 +187,6 @@ export function Widget({
     !isContextMenuOpen &&
     state.interactionState.type !== 'drawing';
 
-  const words = blockText.split(/\s/);
-  const slashWords = words.filter((word) => word[0] === '/' && word !== '/');
-
   return (
     <WidgetContainer
       frame={rect}
@@ -244,7 +241,7 @@ export function Widget({
                         url,
                         filterHashTagsAndSlashCommands(url).content,
                       );
-                      dispatch('setSymbolIdIsFixed', true);
+                      dispatch('setSymbolIdIsFixed', undefined, true);
                     }}
                   />
                 )}
@@ -255,7 +252,7 @@ export function Widget({
                       onPointerDown={(event) => {
                         event.preventDefault();
 
-                        dispatch('setSymbolIdIsFixed', false);
+                        dispatch('setSymbolIdIsFixed', undefined, false);
                       }}
                     />
                   ) : (
@@ -264,7 +261,7 @@ export function Widget({
                       onPointerDown={(event) => {
                         event.preventDefault();
 
-                        dispatch('setSymbolIdIsFixed', true);
+                        dispatch('setSymbolIdIsFixed', undefined, true);
                       }}
                     />
                   )}
@@ -284,7 +281,7 @@ export function Widget({
                       })}
                     onSelect={(symbolId) => {
                       onChangeBlockType({ symbolId });
-                      dispatch('setSymbolIdIsFixed', true);
+                      dispatch('setSymbolIdIsFixed', undefined, true);
                     }}
                   >
                     <Button variant="none">
@@ -296,7 +293,7 @@ export function Widget({
                 </Stack.H>
               </Stack.H>
             </ContentElement>
-            {(slashWords.length > 0 || !layer.symbolIDIsFixed) && (
+            {!layer.symbolIDIsFixed && (
               <ContentElement>
                 <Stack.V padding={'0 8px'}>
                   <Small color="textSubtle" padding={'4px 0px'}>
@@ -341,7 +338,7 @@ export function Widget({
                                 blockTextWithoutSlashCommands,
                               ).content,
                             );
-                            dispatch('setSymbolIdIsFixed', true);
+                            dispatch('setSymbolIdIsFixed', undefined, true);
                           }}
                         >
                           {name}

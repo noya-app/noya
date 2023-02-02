@@ -34,13 +34,3 @@ export function commonPrefixLength(a?: string, b?: string) {
   );
   return firstDiffCharIndex === -1 ? 0 : firstDiffCharIndex;
 }
-
-export function scoreCommandMatch(blockName: string, text?: string) {
-  const command = `/${blockName.toLowerCase()}`;
-  const words = text?.split(/\s/);
-  const slashWords = words?.filter((word) => word[0] === '/' && word !== '/');
-
-  return (slashWords ?? [])
-    .map((word) => commonPrefixLength(command, word) - 1)
-    .reduce((a, b) => Math.max(a, b), -1);
-}

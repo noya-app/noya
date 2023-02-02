@@ -12,7 +12,7 @@ import {
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
-import { isWithinRectRange, scoreCommandMatch } from './score';
+import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
 import { getBlockClassName } from './tailwind';
 
@@ -26,7 +26,6 @@ export const HeaderBarBlock: BlockDefinition = {
     }
 
     return Math.max(
-      scoreCommandMatch(headerBarSymbol.name, blockText),
       isWithinRectRange(frame, 400, 30, 2000, 100) &&
         frame.x < 30 &&
         frame.y < 30
