@@ -1,6 +1,4 @@
-import * as Portal from '@radix-ui/react-portal';
 import { useDispatch } from 'noya-app-state-context';
-import { ListView } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   FALLTHROUGH,
@@ -15,7 +13,6 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useState,
 } from 'react';
 import {
   BaseEditor,
@@ -43,15 +40,16 @@ import {
 import { filterHashTagsAndSlashCommands } from './parse';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
+import { useCompletionMenu } from './useCompletionMenu';
 
-const PositioningElement = styled.div({
+export const PositioningElement = styled.div({
   top: '-9999px',
   left: '-9999px',
   position: 'absolute',
   zIndex: Stacking.level.menu,
 });
 
-const ContentElement = styled.div(({ theme }) => ({
+export const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
   borderRadius: 4,
   overflow: 'hidden',
@@ -176,9 +174,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
 ) {
   const dispatch = useDispatch();
 
-  const menuPositionRef = React.useRef<HTMLDivElement>(null);
-  const menuItemsRef = React.useRef<ListView.VirtualizedList>(null);
-
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const descendants = useMemo(() => fromString(blockText), [blockText]);
@@ -196,28 +191,19 @@ export const BlockEditor = forwardRef(function BlockEditor(
     ReactEditor.deselect(editor);
   }, [editor, isEditing]);
 
-  const [target, setTarget] = useState<Range | null>(null);
-  const [index, setIndex] = useState(0);
-  const [search, setSearch] = useState('');
+  const symbolItems = allAyonSymbols.map((symbol) => ({
+    name: symbol.name,
+    id: symbol.symbolID,
+  }));
 
-  useEffect(() => {
-    if (!target) return;
-
-    menuItemsRef.current?.scrollToIndex(index);
-  }, [index, target]);
-
-  const items = allAyonSymbols.filter((c) =>
-    c.name.toLowerCase().startsWith(search.toLowerCase()),
-  );
-
-  const confirmItem = useCallback(
-    (target: Range, index: number) => {
-      const item = items[index];
-
+  const symbolCompletionMenu = useCompletionMenu({
+    editor,
+    possibleItems: symbolItems,
+    onSelect: (target, item) => {
       Transforms.delete(editor, { at: target });
       const newText = toString(editor.children);
 
-      onChangeBlockType({ symbolId: item.symbolID });
+      onChangeBlockType({ symbolId: item.id });
       dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
       dispatch(
         'setBlockText',
@@ -225,11 +211,29 @@ export const BlockEditor = forwardRef(function BlockEditor(
         newText,
         filterHashTagsAndSlashCommands(newText).content,
       );
-
-      setTarget(null);
     },
-    [dispatch, editor, items, layer.do_objectID, onChangeBlockType],
-  );
+  });
+
+  const hashCompletionMenu = useCompletionMenu<{
+    name: string;
+    id: string;
+  }>({
+    editor,
+    possibleItems: [],
+    onSelect: (target, item) => {
+      Transforms.delete(editor, { at: target });
+      Transforms.insertText(editor, item.id, { at: target.anchor });
+
+      const newText = toString(editor.children);
+
+      dispatch(
+        'setBlockText',
+        layer.do_objectID,
+        newText,
+        filterHashTagsAndSlashCommands(newText).content,
+      );
+    },
+  });
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -249,57 +253,25 @@ export const BlockEditor = forwardRef(function BlockEditor(
           return FALLTHROUGH;
         },
         Escape: () => {
-          if (target) {
-            setTarget(null);
-          } else {
-            dispatch('interaction', ['reset']);
-            dispatch('selectLayer', []);
-          }
+          dispatch('interaction', ['reset']);
+          dispatch('selectLayer', []);
         },
         Backspace: handleDelete,
         Delete: handleDelete,
-        ...(target &&
-          items.length > 0 && {
-            ArrowUp: () => {
-              const nextIndex = index <= 0 ? items.length - 1 : index - 1;
-              setIndex(nextIndex);
-            },
-            ArrowDown: () => {
-              const prevIndex = index >= items.length - 1 ? 0 : index + 1;
-              setIndex(prevIndex);
-            },
-            Tab: () => confirmItem(target, index),
-            Enter: () => confirmItem(target, index),
-          }),
+        // These may override the Escape shortcut
+        ...symbolCompletionMenu.keyMap,
+        ...hashCompletionMenu.keyMap,
       });
     },
     [
+      symbolCompletionMenu.keyMap,
+      hashCompletionMenu.keyMap,
       blockText,
-      confirmItem,
       dispatch,
-      index,
-      items.length,
       layer.do_objectID,
       onFocusCanvas,
-      target,
     ],
   );
-
-  useEffect(() => {
-    const el = menuPositionRef.current;
-
-    if (!target || !items.length || !el) return;
-
-    const domRange = ReactEditor.toDOMRange(editor, target);
-    const rect = domRange.getBoundingClientRect();
-    el.style.top = `${rect.top + window.pageYOffset + 24}px`;
-    el.style.left = `${rect.left + window.pageXOffset}px`;
-  }, [items.length, editor, index, search, target]);
-
-  const listSize = {
-    width: 200,
-    height: Math.min(items.length * 31, 31 * 6.5),
-  };
 
   return (
     <Slate
@@ -338,11 +310,19 @@ export const BlockEditor = forwardRef(function BlockEditor(
         if (slashCommand) {
           const { range, match } = slashCommand;
 
-          setTarget(range);
-          setSearch(match);
-          setIndex(0);
+          symbolCompletionMenu.open(range, match);
         } else {
-          setTarget(null);
+          symbolCompletionMenu.close();
+        }
+
+        const hashCommand = textCommand('#', editor);
+
+        if (hashCommand) {
+          const { range, match } = hashCommand;
+
+          hashCompletionMenu.open(range, match);
+        } else {
+          hashCompletionMenu.close();
         }
 
         dispatch(
@@ -360,43 +340,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
     >
       <Editable
         onKeyDown={onKeyDown}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          padding: 4,
-        }}
+        style={{ position: 'absolute', inset: 0, padding: 4 }}
       />
-      {target && items.length > 0 && (
-        <Portal.Root asChild>
-          <PositioningElement ref={menuPositionRef}>
-            <ContentElement style={{ ...listSize, display: 'flex' }}>
-              <ListView.Root<Sketch.SymbolMaster>
-                ref={menuItemsRef}
-                scrollable
-                virtualized={listSize}
-                keyExtractor={(item) => item.do_objectID}
-                data={items}
-                renderItem={(item, i) => {
-                  return (
-                    <ListView.Row
-                      key={item.do_objectID}
-                      selected={i === index}
-                      onPress={() => confirmItem(target, i)}
-                      onHoverChange={(hovered) => {
-                        if (hovered) {
-                          setIndex(i);
-                        }
-                      }}
-                    >
-                      {item.name}
-                    </ListView.Row>
-                  );
-                }}
-              />
-            </ContentElement>
-          </PositioningElement>
-        </Portal.Root>
-      )}
+      {symbolCompletionMenu.element}
+      {hashCompletionMenu.element}
     </Slate>
   );
 });
