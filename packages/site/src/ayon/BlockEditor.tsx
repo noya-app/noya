@@ -1,5 +1,6 @@
 import * as Portal from '@radix-ui/react-portal';
 import { useDispatch } from 'noya-app-state-context';
+import { ListView } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { DrawableLayerType, ParentLayer } from 'noya-state';
 import React, {
@@ -22,6 +23,7 @@ import {
 } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
+import styled from 'styled-components';
 
 import {
   allAyonSymbols,
@@ -34,7 +36,24 @@ import {
   textSymbolId,
 } from './blocks/symbols';
 import { filterHashTagsAndSlashCommands } from './parse';
+import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
+
+const PositioningElement = styled.div({
+  top: '-9999px',
+  left: '-9999px',
+  position: 'absolute',
+  zIndex: Stacking.level.menu,
+});
+
+const ContentElement = styled.div(({ theme }) => ({
+  ...theme.textStyles.small,
+  borderRadius: 4,
+  overflow: 'hidden',
+  backgroundColor: theme.colors.popover.background,
+  boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
+  color: theme.colors.textMuted,
+}));
 
 export interface IBlockEditor {
   focus: () => void;
@@ -140,6 +159,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     blockText,
     blockTypes,
     onChangeBlockType,
+    onFocusCanvas,
   }: {
     isEditing: boolean;
     isSelected: boolean;
@@ -148,12 +168,14 @@ export const BlockEditor = forwardRef(function BlockEditor(
     blockText: string;
     blockTypes: InferredBlockTypeResult[];
     onChangeBlockType: (type: DrawableLayerType) => void;
+    onFocusCanvas: () => void;
   },
   forwardedRef: ForwardedRef<IBlockEditor>,
 ) {
   const dispatch = useDispatch();
 
-  const menuRef = React.useRef<HTMLDivElement>(null);
+  const menuPositionRef = React.useRef<HTMLDivElement>(null);
+  const menuItemsRef = React.useRef<ListView.VirtualizedList>(null);
 
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
@@ -176,9 +198,36 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const [index, setIndex] = useState(0);
   const [search, setSearch] = useState('');
 
-  const items = allAyonSymbols
-    .filter((c) => c.name.toLowerCase().startsWith(search.toLowerCase()))
-    .slice(0, 10);
+  useEffect(() => {
+    if (!target) return;
+
+    menuItemsRef.current?.scrollToIndex(index);
+  }, [index, target]);
+
+  const items = allAyonSymbols.filter((c) =>
+    c.name.toLowerCase().startsWith(search.toLowerCase()),
+  );
+
+  const confirmItem = useCallback(
+    (target: Range, index: number) => {
+      const item = items[index];
+
+      Transforms.delete(editor, { at: target });
+      const newText = toString(editor.children);
+
+      onChangeBlockType({ symbolId: item.symbolID });
+      dispatch('setSymbolIdIsFixed', true);
+      dispatch(
+        'setBlockText',
+        layer.do_objectID,
+        newText,
+        filterHashTagsAndSlashCommands(newText).content,
+      );
+
+      setTarget(null);
+    },
+    [dispatch, editor, items, layer.do_objectID, onChangeBlockType],
+  );
 
   const onKeyDown = useCallback(
     (event) => {
@@ -199,6 +248,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
           if (blockText) break;
 
           dispatch('deleteLayer', layer.do_objectID);
+          dispatch('interaction', ['reset']);
+
+          onFocusCanvas();
+
           event.preventDefault();
           return;
         }
@@ -220,21 +273,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           case 'Enter':
             event.preventDefault();
 
-            const item = items[index];
-
-            Transforms.delete(editor, { at: target });
-            const newText = toString(editor.children);
-
-            onChangeBlockType({ symbolId: item.symbolID });
-            dispatch('setSymbolIdIsFixed', true);
-            dispatch(
-              'setBlockText',
-              layer.do_objectID,
-              newText,
-              filterHashTagsAndSlashCommands(newText).content,
-            );
-
-            setTarget(null);
+            confirmItem(target, index);
             break;
           case 'Escape':
             event.preventDefault();
@@ -245,18 +284,18 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
     [
       blockText,
+      confirmItem,
       dispatch,
-      editor,
       index,
-      items,
+      items.length,
       layer.do_objectID,
-      onChangeBlockType,
+      onFocusCanvas,
       target,
     ],
   );
 
   useEffect(() => {
-    const el = menuRef.current;
+    const el = menuPositionRef.current;
 
     if (!target || !items.length || !el) return;
 
@@ -265,6 +304,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
     el.style.top = `${rect.top + window.pageYOffset + 24}px`;
     el.style.left = `${rect.left + window.pageXOffset}px`;
   }, [items.length, editor, index, search, target]);
+
+  const listSize = {
+    width: 200,
+    height: Math.min(items.length * 31, 31 * 6.5),
+  };
 
   return (
     <Slate
@@ -328,33 +372,33 @@ export const BlockEditor = forwardRef(function BlockEditor(
       />
       {target && items.length > 0 && (
         <Portal.Root asChild>
-          <div
-            ref={menuRef}
-            style={{
-              top: '-9999px',
-              left: '-9999px',
-              position: 'absolute',
-              zIndex: 1,
-              padding: '3px',
-              background: 'white',
-              borderRadius: '4px',
-              boxShadow: '0 1px 5px rgba(0,0,0,.2)',
-            }}
-            data-cy="mentions-portal"
-          >
-            {items.map((item, i) => (
-              <div
-                key={item.name}
-                style={{
-                  padding: '1px 3px',
-                  borderRadius: '3px',
-                  background: i === index ? '#B4D5FF' : 'transparent',
+          <PositioningElement ref={menuPositionRef}>
+            <ContentElement style={{ ...listSize, display: 'flex' }}>
+              <ListView.Root<Sketch.SymbolMaster>
+                ref={menuItemsRef}
+                scrollable
+                virtualized={listSize}
+                keyExtractor={(item) => item.do_objectID}
+                data={items}
+                renderItem={(item, i) => {
+                  return (
+                    <ListView.Row
+                      key={item.do_objectID}
+                      selected={i === index}
+                      onPress={() => confirmItem(target, i)}
+                      onHoverChange={(hovered) => {
+                        if (hovered) {
+                          setIndex(i);
+                        }
+                      }}
+                    >
+                      {item.name}
+                    </ListView.Row>
+                  );
                 }}
-              >
-                {item.name}
-              </div>
-            ))}
-          </div>
+              />
+            </ContentElement>
+          </PositioningElement>
         </Portal.Root>
       )}
     </Slate>

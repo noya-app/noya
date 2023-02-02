@@ -133,11 +133,13 @@ export function Widget({
   inferBlockTypes,
   onChangeBlockType,
   uploadAsset,
+  onFocusCanvas,
 }: {
   layer: Sketch.AnyLayer;
   inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
   onChangeBlockType: (type: DrawableLayerType) => void;
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
+  onFocusCanvas: () => void;
 }) {
   const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -383,6 +385,7 @@ export function Widget({
           layer={layer}
           parent={parent}
           onChangeBlockType={onChangeBlockType}
+          onFocusCanvas={onFocusCanvas}
         />
       </div>
     </WidgetContainer>
