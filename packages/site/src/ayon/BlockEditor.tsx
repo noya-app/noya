@@ -2,6 +2,11 @@ import * as Portal from '@radix-ui/react-portal';
 import { useDispatch } from 'noya-app-state-context';
 import { ListView } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import {
+  FALLTHROUGH,
+  getCurrentPlatform,
+  handleKeyboardEvent,
+} from 'noya-keymap';
 import { DrawableLayerType, ParentLayer } from 'noya-state';
 import React, {
   ForwardedRef,
@@ -227,57 +232,46 @@ export const BlockEditor = forwardRef(function BlockEditor(
   );
 
   const onKeyDown = useCallback(
-    (event) => {
-      switch (event.key) {
-        case 'Shift': {
+    (event: React.KeyboardEvent) => {
+      const handleDelete = () => {
+        // If there's text, don't delete the layer
+        if (blockText) return FALLTHROUGH;
+
+        dispatch('deleteLayer', layer.do_objectID);
+        dispatch('interaction', ['reset']);
+
+        onFocusCanvas();
+      };
+
+      handleKeyboardEvent(event.nativeEvent, getCurrentPlatform(), {
+        Shift: () => {
           dispatch('interaction', ['setCursor', 'cell']);
-          break;
-        }
-        case 'Escape': {
-          dispatch('interaction', ['reset']);
-          dispatch('selectLayer', []);
-          event.preventDefault();
-          return;
-        }
-        case 'Backspace':
-        case 'Delete': {
-          // If there's text, don't delete the layer
-          if (blockText) break;
-
-          dispatch('deleteLayer', layer.do_objectID);
-          dispatch('interaction', ['reset']);
-
-          onFocusCanvas();
-
-          event.preventDefault();
-          return;
-        }
-      }
-
-      if (target && items.length > 0) {
-        switch (event.key) {
-          case 'ArrowDown':
-            event.preventDefault();
-            const prevIndex = index >= items.length - 1 ? 0 : index + 1;
-            setIndex(prevIndex);
-            break;
-          case 'ArrowUp':
-            event.preventDefault();
-            const nextIndex = index <= 0 ? items.length - 1 : index - 1;
-            setIndex(nextIndex);
-            break;
-          case 'Tab':
-          case 'Enter':
-            event.preventDefault();
-
-            confirmItem(target, index);
-            break;
-          case 'Escape':
-            event.preventDefault();
+          return FALLTHROUGH;
+        },
+        Escape: () => {
+          if (target) {
             setTarget(null);
-            break;
-        }
-      }
+          } else {
+            dispatch('interaction', ['reset']);
+            dispatch('selectLayer', []);
+          }
+        },
+        Backspace: handleDelete,
+        Delete: handleDelete,
+        ...(target &&
+          items.length > 0 && {
+            ArrowUp: () => {
+              const nextIndex = index <= 0 ? items.length - 1 : index - 1;
+              setIndex(nextIndex);
+            },
+            ArrowDown: () => {
+              const prevIndex = index >= items.length - 1 ? 0 : index + 1;
+              setIndex(prevIndex);
+            },
+            Tab: () => confirmItem(target, index),
+            Enter: () => confirmItem(target, index),
+          }),
+      });
     },
     [
       blockText,
