@@ -14,6 +14,7 @@
     "@chakra-ui/react": "^1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@radix-ui/react-portal": "^1.0.1",
     "@types/styled-components": "^5.1.14",
     "date-fns": "^2.29.3",
     "framer-motion": "^6",
@@ -21,7 +22,10 @@
     "logrocket": "^3.0.1",
     "logrocket-react": "^5.0.1",
     "next": "^12",
-    "react-resizable-panels": "^0.0.33"
+    "react-resizable-panels": "^0.0.33",
+    "slate": "^0.90.0",
+    "slate-history": "^0.86.0",
+    "slate-react": "^0.90.0"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.7",

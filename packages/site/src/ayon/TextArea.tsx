@@ -1,6 +1,6 @@
 import { useDispatch } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { DrawableLayerType, Layers, ParentLayer } from 'noya-state';
+import { DrawableLayerType, ParentLayer } from 'noya-state';
 import React, { forwardRef } from 'react';
 import {
   allAyonSymbols,
@@ -53,17 +53,11 @@ export const TextArea = forwardRef(function TextArea(
       value={blockText}
       style={{
         position: 'absolute',
-        inset: 1,
-        background: isEditing ? '#fff' : '#eee',
-        // If the layer is selected, we render an outline at the canvas
-        // level already and don't need one here
-        outline: isSelected ? 'none' : `1px solid #ddd`,
-        pointerEvents: isEditing ? 'all' : 'none',
-        padding: 4,
+        inset: 0,
+        border: 'none',
+        background: 'none',
+        outline: 'none',
         resize: 'none',
-        // Children of the page don't appear in the rendered output,
-        // so we make them partially transparent
-        opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
       }}
       disabled={!isEditing}
       onKeyDown={(event) => {

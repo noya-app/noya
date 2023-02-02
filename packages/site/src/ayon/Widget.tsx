@@ -26,12 +26,12 @@ import {
   Selectors,
 } from 'noya-state';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { BlockEditor, IBlockEditor } from './BlockEditor';
 import { imageSymbolId } from './blocks/symbols';
 import { filterHashTagsAndSlashCommands } from './parse';
 import { Stacking } from './stacking';
-import { TextArea } from './TextArea';
 import { InferredBlockTypeResult } from './types';
 
 const ContentElement = styled.div(({ theme }) => ({
@@ -162,33 +162,13 @@ export function Widget({
     state.interactionState.type === 'editingBlock' &&
     state.interactionState.layerId === layer.do_objectID;
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const blockEditorRef = useRef<IBlockEditor>(null);
 
   useEffect(() => {
     if (isEditing) {
-      textareaRef.current?.focus();
+      blockEditorRef.current?.focus();
     }
   }, [isEditing]);
-
-  useLayoutEffect(() => {
-    const handler = (event: FocusEvent) => {
-      if (event.target !== textareaRef.current) return;
-
-      const canvasInput = document.querySelector('#hidden-canvas-input');
-
-      if (canvasInput instanceof HTMLInputElement) {
-        canvasInput.focus();
-      }
-
-      event.preventDefault();
-    };
-
-    window.addEventListener('blur', handler, { capture: true });
-
-    return () => {
-      window.removeEventListener('blur', handler, { capture: true });
-    };
-  }, []);
 
   if (!Layers.isSymbolInstance(layer)) return null;
 
@@ -359,7 +339,6 @@ export function Widget({
                             );
                             dispatch('setSymbolIdIsFixed', true);
                           }}
-                          active={index === 0 && slashWords.length > 0}
                         >
                           {name}
                           <Spacer.Horizontal />
@@ -376,15 +355,25 @@ export function Widget({
       <div
         style={{
           position: 'absolute',
-          inset: 0,
+          inset: 1,
+          background: isEditing ? '#fff' : '#eee',
+          // If the layer is selected, we render an outline at the canvas
+          // level already and don't need one here
+          outline: isSelected ? 'none' : `1px solid #ddd`,
+          pointerEvents: isEditing ? 'all' : 'none',
+          // Children of the page don't appear in the rendered output,
+          // so we make them partially transparent
+          opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
+          overflow: 'hidden',
+          cursor: isEditing ? 'text' : 'pointer',
         }}
         onFocusCapture={(event) => event.stopPropagation()}
         onPointerDownCapture={(event) => event.stopPropagation()}
         onPointerMoveCapture={(event) => event.stopPropagation()}
         onPointerUpCapture={(event) => event.stopPropagation()}
       >
-        <TextArea
-          ref={textareaRef}
+        <BlockEditor
+          ref={blockEditorRef}
           isEditing={isEditing}
           isSelected={isSelected}
           blockTypes={blockTypes}
