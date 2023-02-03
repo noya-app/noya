@@ -57,9 +57,12 @@ export function useCompletionMenu({
   const isExactMatch =
     filteredItems.length === 1 && filteredItems[0].name === search;
 
+  const shouldShow =
+    range && filteredItems.length > 0 && (showExactMatch || !isExactMatch);
+
   const element = (
     <>
-      {range && filteredItems.length > 0 && (showExactMatch || !isExactMatch) && (
+      {shouldShow && (
         <Portal.Root asChild>
           <PositioningElement ref={menuPositionRef}>
             <ContentElement style={{ ...listSize, display: 'flex' }}>
@@ -110,7 +113,7 @@ export function useCompletionMenu({
     el.style.left = `${rect.left + window.pageXOffset}px`;
   }, [editor, filteredItems.length, index, search, range]);
 
-  const keyMap: KeyMap = range
+  const keyMap: KeyMap = shouldShow
     ? {
         ArrowUp: () => {
           const nextIndex = index <= 0 ? filteredItems.length - 1 : index - 1;
