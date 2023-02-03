@@ -24,6 +24,10 @@ module.exports = {
           test: /\.svg$/,
           use: 'url-loader',
         },
+        {
+          test: /\.txt$/,
+          use: 'raw-loader',
+        },
       ],
     };
 

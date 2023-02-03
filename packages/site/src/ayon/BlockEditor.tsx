@@ -1,7 +1,10 @@
-import * as Portal from '@radix-ui/react-portal';
 import { useDispatch } from 'noya-app-state-context';
-import { ListView } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import {
+  FALLTHROUGH,
+  getCurrentPlatform,
+  handleKeyboardEvent,
+} from 'noya-keymap';
 import { DrawableLayerType, ParentLayer } from 'noya-state';
 import React, {
   ForwardedRef,
@@ -10,7 +13,6 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useState,
 } from 'react';
 import {
   BaseEditor,
@@ -24,6 +26,7 @@ import {
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import styled from 'styled-components';
+import { Blocks } from './blocks';
 
 import {
   allAyonSymbols,
@@ -38,15 +41,16 @@ import {
 import { filterHashTagsAndSlashCommands } from './parse';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
+import { useCompletionMenu } from './useCompletionMenu';
 
-const PositioningElement = styled.div({
+export const PositioningElement = styled.div({
   top: '-9999px',
   left: '-9999px',
   position: 'absolute',
   zIndex: Stacking.level.menu,
 });
 
-const ContentElement = styled.div(({ theme }) => ({
+export const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
   borderRadius: 4,
   overflow: 'hidden',
@@ -77,7 +81,7 @@ function textCommand(
 
   if (!selection || !Range.isCollapsed(selection)) return;
 
-  const triggerRegex = new RegExp(`\\${triggerPrefix}(\\w*)$`);
+  const triggerRegex = new RegExp(`\\${triggerPrefix}([A-Za-z0-9\\-]*)$`);
 
   const [start] = Range.edges(selection);
 
@@ -171,9 +175,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
 ) {
   const dispatch = useDispatch();
 
-  const menuPositionRef = React.useRef<HTMLDivElement>(null);
-  const menuItemsRef = React.useRef<ListView.VirtualizedList>(null);
-
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   const descendants = useMemo(() => fromString(blockText), [blockText]);
@@ -191,28 +192,19 @@ export const BlockEditor = forwardRef(function BlockEditor(
     ReactEditor.deselect(editor);
   }, [editor, isEditing]);
 
-  const [target, setTarget] = useState<Range | null>(null);
-  const [index, setIndex] = useState(0);
-  const [search, setSearch] = useState('');
+  const symbolItems = allAyonSymbols.map((symbol) => ({
+    name: symbol.name,
+    id: symbol.symbolID,
+  }));
 
-  useEffect(() => {
-    if (!target) return;
-
-    menuItemsRef.current?.scrollToIndex(index);
-  }, [index, target]);
-
-  const items = allAyonSymbols.filter((c) =>
-    c.name.toLowerCase().startsWith(search.toLowerCase()),
-  );
-
-  const confirmItem = useCallback(
-    (target: Range, index: number) => {
-      const item = items[index];
-
+  const symbolCompletionMenu = useCompletionMenu({
+    editor,
+    possibleItems: symbolItems,
+    onSelect: (target, item) => {
       Transforms.delete(editor, { at: target });
       const newText = toString(editor.children);
 
-      onChangeBlockType({ symbolId: item.symbolID });
+      onChangeBlockType({ symbolId: item.id });
       dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
       dispatch(
         'setBlockText',
@@ -220,92 +212,87 @@ export const BlockEditor = forwardRef(function BlockEditor(
         newText,
         filterHashTagsAndSlashCommands(newText).content,
       );
-
-      setTarget(null);
     },
-    [dispatch, editor, items, layer.do_objectID, onChangeBlockType],
-  );
+  });
+
+  const hashCompletionMenu = useCompletionMenu({
+    editor,
+    showExactMatch: false,
+    possibleItems: (Blocks[layer.symbolID]?.globalHashtags ?? []).map(
+      (item) => ({
+        name: item,
+        id: item,
+        icon: (
+          <div
+            style={{
+              width: 19,
+              height: 19,
+              borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
+              background: /^rounded/.test(item)
+                ? 'rgb(148 163 184)'
+                : /^opacity/.test(item)
+                ? 'black'
+                : undefined,
+            }}
+            className={item}
+          >
+            {item.startsWith('text') ? 'Tt' : null}
+          </div>
+        ),
+      }),
+    ),
+    onSelect: (target, item) => {
+      Transforms.delete(editor, { at: target });
+      Transforms.insertText(editor, `#${item.id} `, { at: target.anchor });
+
+      const newText = toString(editor.children);
+
+      dispatch(
+        'setBlockText',
+        layer.do_objectID,
+        newText,
+        filterHashTagsAndSlashCommands(newText).content,
+      );
+    },
+  });
 
   const onKeyDown = useCallback(
-    (event) => {
-      switch (event.key) {
-        case 'Shift': {
+    (event: React.KeyboardEvent) => {
+      const handleDelete = () => {
+        // If there's text, don't delete the layer
+        if (blockText) return FALLTHROUGH;
+
+        dispatch('deleteLayer', layer.do_objectID);
+        dispatch('interaction', ['reset']);
+
+        onFocusCanvas();
+      };
+
+      handleKeyboardEvent(event.nativeEvent, getCurrentPlatform(), {
+        Shift: () => {
           dispatch('interaction', ['setCursor', 'cell']);
-          break;
-        }
-        case 'Escape': {
+          return FALLTHROUGH;
+        },
+        Escape: () => {
           dispatch('interaction', ['reset']);
           dispatch('selectLayer', []);
-          event.preventDefault();
-          return;
-        }
-        case 'Backspace':
-        case 'Delete': {
-          // If there's text, don't delete the layer
-          if (blockText) break;
-
-          dispatch('deleteLayer', layer.do_objectID);
-          dispatch('interaction', ['reset']);
-
-          onFocusCanvas();
-
-          event.preventDefault();
-          return;
-        }
-      }
-
-      if (target && items.length > 0) {
-        switch (event.key) {
-          case 'ArrowDown':
-            event.preventDefault();
-            const prevIndex = index >= items.length - 1 ? 0 : index + 1;
-            setIndex(prevIndex);
-            break;
-          case 'ArrowUp':
-            event.preventDefault();
-            const nextIndex = index <= 0 ? items.length - 1 : index - 1;
-            setIndex(nextIndex);
-            break;
-          case 'Tab':
-          case 'Enter':
-            event.preventDefault();
-
-            confirmItem(target, index);
-            break;
-          case 'Escape':
-            event.preventDefault();
-            setTarget(null);
-            break;
-        }
-      }
+        },
+        Backspace: handleDelete,
+        Delete: handleDelete,
+        // These may override the Escape shortcut
+        ...symbolCompletionMenu.keyMap,
+        ...hashCompletionMenu.keyMap,
+      });
     },
     [
+      symbolCompletionMenu.keyMap,
+      hashCompletionMenu.keyMap,
       blockText,
-      confirmItem,
       dispatch,
-      index,
-      items.length,
       layer.do_objectID,
       onFocusCanvas,
-      target,
     ],
   );
-
-  useEffect(() => {
-    const el = menuPositionRef.current;
-
-    if (!target || !items.length || !el) return;
-
-    const domRange = ReactEditor.toDOMRange(editor, target);
-    const rect = domRange.getBoundingClientRect();
-    el.style.top = `${rect.top + window.pageYOffset + 24}px`;
-    el.style.left = `${rect.left + window.pageXOffset}px`;
-  }, [items.length, editor, index, search, target]);
-
-  const listSize = {
-    width: 200,
-    height: Math.min(items.length * 31, 31 * 6.5),
-  };
 
   return (
     <Slate
@@ -344,11 +331,19 @@ export const BlockEditor = forwardRef(function BlockEditor(
         if (slashCommand) {
           const { range, match } = slashCommand;
 
-          setTarget(range);
-          setSearch(match);
-          setIndex(0);
+          symbolCompletionMenu.open(range, match);
         } else {
-          setTarget(null);
+          symbolCompletionMenu.close();
+        }
+
+        const hashCommand = textCommand('#', editor);
+
+        if (hashCommand) {
+          const { range, match } = hashCommand;
+
+          hashCompletionMenu.open(range, match);
+        } else {
+          hashCompletionMenu.close();
         }
 
         dispatch(
@@ -366,43 +361,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
     >
       <Editable
         onKeyDown={onKeyDown}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          padding: 4,
-        }}
+        style={{ position: 'absolute', inset: 0, padding: 4 }}
       />
-      {target && items.length > 0 && (
-        <Portal.Root asChild>
-          <PositioningElement ref={menuPositionRef}>
-            <ContentElement style={{ ...listSize, display: 'flex' }}>
-              <ListView.Root<Sketch.SymbolMaster>
-                ref={menuItemsRef}
-                scrollable
-                virtualized={listSize}
-                keyExtractor={(item) => item.do_objectID}
-                data={items}
-                renderItem={(item, i) => {
-                  return (
-                    <ListView.Row
-                      key={item.do_objectID}
-                      selected={i === index}
-                      onPress={() => confirmItem(target, i)}
-                      onHoverChange={(hovered) => {
-                        if (hovered) {
-                          setIndex(i);
-                        }
-                      }}
-                    >
-                      {item.name}
-                    </ListView.Row>
-                  );
-                }}
-              />
-            </ContentElement>
-          </PositioningElement>
-        </Portal.Root>
-      )}
+      {symbolCompletionMenu.element}
+      {hashCompletionMenu.element}
     </Slate>
   );
 });

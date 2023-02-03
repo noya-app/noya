@@ -11,13 +11,14 @@ import {
   heading5Symbol,
   heading6Symbol,
 } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
   size: ThemingProps['size'],
 ): BlockDefinition => ({
   id: symbol.symbolID,
+  globalHashtags: getTailwindClasses(),
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { content, color, fontWeight, fontSize, align, hashTags } =

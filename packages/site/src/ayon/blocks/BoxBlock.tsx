@@ -3,11 +3,14 @@ import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { boxSymbolId } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   id: boxSymbolId,
   infer: ({ frame, blockText }) => 0.1,
+  globalHashtags: getTailwindClasses([
+    { pattern: /^(shadow|border|rounded|opacity|bg|blur).*/ },
+  ]),
   render: (props) => {
     const { content, hashTags } = filterHashTagsAndSlashCommands(
       props.blockText,
