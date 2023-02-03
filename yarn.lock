@@ -16385,6 +16385,14 @@ raw-body@2.5.1:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
+raw-loader@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/raw-loader/-/raw-loader-4.0.2.tgz#1aac6b7d1ad1501e66efdac1522c73e59a584eb6"
+  integrity sha512-ZnScIV3ag9A4wPX/ZayxL/jZH+euYb6FcUinPcgiQW0+UBtEv0O6Q3lGd3cqJ+GHH+rksEv3Pj99oxJ3u3VIKA==
+  dependencies:
+    loader-utils "^2.0.0"
+    schema-utils "^3.0.0"
+
 rc@^1.2.8:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/rc/-/rc-1.2.8.tgz#cd924bf5200a075b83c188cd6b9e211b7fc0d3ed"
@@ -18468,6 +18476,11 @@ table@^6.0.9:
     slice-ansi "^4.0.0"
     string-width "^4.2.0"
     strip-ansi "^6.0.0"
+
+tailwind-safelist-generator@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/tailwind-safelist-generator/-/tailwind-safelist-generator-1.0.0.tgz#0726a2c84a5506eeb5ef9c7e41706b7f2a148356"
+  integrity sha512-3SmQijeTyEkP+z5UdOhygUJTm/iA0ic0eaM5O0cmGWyjABfTr/XwcY4nCIA09A4otPz1Ms6tqTCZ/DSRkg3M8A==
 
 tailwindcss@^3.2.4:
   version "3.2.4"

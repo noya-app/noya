@@ -26,6 +26,7 @@ import {
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import styled from 'styled-components';
+import { Blocks } from './blocks';
 
 import {
   allAyonSymbols,
@@ -80,7 +81,7 @@ function textCommand(
 
   if (!selection || !Range.isCollapsed(selection)) return;
 
-  const triggerRegex = new RegExp(`\\${triggerPrefix}(\\w*)$`);
+  const triggerRegex = new RegExp(`\\${triggerPrefix}([A-Za-z0-9\\-]*)$`);
 
   const [start] = Range.edges(selection);
 
@@ -214,15 +215,35 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
   });
 
-  const hashCompletionMenu = useCompletionMenu<{
-    name: string;
-    id: string;
-  }>({
+  const hashCompletionMenu = useCompletionMenu({
     editor,
-    possibleItems: [],
+    showExactMatch: false,
+    possibleItems: (Blocks[layer.symbolID]?.globalHashtags ?? []).map(
+      (item) => ({
+        name: item,
+        id: item,
+        icon: (
+          <div
+            style={{
+              width: 19,
+              height: 19,
+              borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
+              background: /^rounded/.test(item)
+                ? 'rgb(148 163 184)'
+                : /^opacity/.test(item)
+                ? 'black'
+                : undefined,
+            }}
+            className={item}
+          >
+            {item.startsWith('text') ? 'Tt' : null}
+          </div>
+        ),
+      }),
+    ),
     onSelect: (target, item) => {
       Transforms.delete(editor, { at: target });
-      Transforms.insertText(editor, item.id, { at: target.anchor });
+      Transforms.insertText(editor, `#${item.id} `, { at: target.anchor });
 
       const newText = toString(editor.children);
 

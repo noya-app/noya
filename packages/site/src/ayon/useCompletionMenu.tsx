@@ -1,19 +1,29 @@
 import * as Portal from '@radix-ui/react-portal';
-import { ListView } from 'noya-designsystem';
+import { ListView, Spacer } from 'noya-designsystem';
 import { KeyMap } from 'noya-keymap';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Editor, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { ContentElement, PositioningElement } from './BlockEditor';
 
-export function useCompletionMenu<T extends { id: string; name: string }>({
+type CompletionItem = { id: string; name: string; icon?: ReactNode };
+
+export function useCompletionMenu({
   possibleItems,
   onSelect,
   editor,
+  showExactMatch = true,
 }: {
   editor: Editor;
-  possibleItems: T[];
-  onSelect: (range: Range, item: T) => void;
+  possibleItems: CompletionItem[];
+  onSelect: (range: Range, item: CompletionItem) => void;
+  /**
+   * Whether to show the completion menu when there is a single result that's an exact match.
+   * If the completion is a command, this should probably be true, while if it inserts text
+   * it should probably be false, since otherwise completions will show anytime the cursor
+   * is at the end of the text.
+   */
+  showExactMatch?: boolean;
 }) {
   const [range, setRange] = useState<Range | null>(null);
   const [index, setIndex] = useState(0);
@@ -22,7 +32,7 @@ export function useCompletionMenu<T extends { id: string; name: string }>({
   const menuItemsRef = React.useRef<ListView.VirtualizedList>(null);
 
   const select = useCallback(
-    (target: Range, item: T) => {
+    (target: Range, item: CompletionItem) => {
       onSelect(target, item);
       setRange(null);
     },
@@ -44,13 +54,16 @@ export function useCompletionMenu<T extends { id: string; name: string }>({
     height: Math.min(filteredItems.length * 31, 31 * 6.5),
   };
 
+  const isExactMatch =
+    filteredItems.length === 1 && filteredItems[0].name === search;
+
   const element = (
     <>
-      {range && filteredItems.length > 0 && (
+      {range && filteredItems.length > 0 && (showExactMatch || !isExactMatch) && (
         <Portal.Root asChild>
           <PositioningElement ref={menuPositionRef}>
             <ContentElement style={{ ...listSize, display: 'flex' }}>
-              <ListView.Root<T>
+              <ListView.Root<CompletionItem>
                 ref={menuItemsRef}
                 scrollable
                 virtualized={listSize}
@@ -69,6 +82,12 @@ export function useCompletionMenu<T extends { id: string; name: string }>({
                       }}
                     >
                       {item.name}
+                      {item.icon && (
+                        <>
+                          <Spacer.Horizontal />
+                          {item.icon}
+                        </>
+                      )}
                     </ListView.Row>
                   );
                 }}
