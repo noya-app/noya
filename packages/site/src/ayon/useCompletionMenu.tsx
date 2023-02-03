@@ -122,6 +122,7 @@ export function useCompletionMenu({
         },
         Tab: () => select(range, filteredItems[index]),
         Enter: () => select(range, filteredItems[index]),
+        Escape: () => setRange(null),
       }
     : {};
 
