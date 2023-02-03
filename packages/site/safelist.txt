@@ -719,3 +719,12 @@ text-rose-600
 text-rose-700
 text-rose-800
 text-rose-900
+font-thin
+font-extralight
+font-light
+font-normal
+font-medium
+font-semibold
+font-bold
+font-extrabold
+font-black

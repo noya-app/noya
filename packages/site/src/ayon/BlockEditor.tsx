@@ -5,6 +5,7 @@ import {
   getCurrentPlatform,
   handleKeyboardEvent,
 } from 'noya-keymap';
+import { useLazyValue } from 'noya-react-utils';
 import { DrawableLayerType, ParentLayer } from 'noya-state';
 import React, {
   ForwardedRef,
@@ -179,7 +180,8 @@ export const BlockEditor = forwardRef(function BlockEditor(
 ) {
   const dispatch = useDispatch();
 
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  // Creating an editor ref with useLazyValue fixes hot reload
+  const editor = useLazyValue(() => withHistory(withReact(createEditor())));
 
   const descendants = useMemo(() => fromString(blockText), [blockText]);
 

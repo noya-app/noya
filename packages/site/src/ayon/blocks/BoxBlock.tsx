@@ -21,13 +21,9 @@ export const BoxBlock: BlockDefinition = {
         .concat(hashTags)
         .find((value) => CSS.supports('color', `${value}`)) ?? '#ebfdff';
 
-    const hasTailwindBackground = hashTags.some((value) =>
-      value.startsWith('bg-'),
-    );
-
     return (
       <Box
-        bg={hasTailwindBackground ? undefined : color}
+        bg={color}
         w="100%"
         h="100%"
         className={getBlockClassName(hashTags)}

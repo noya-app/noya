@@ -4,10 +4,11 @@ import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { isWithinRectRange } from './score';
 import { sidebarSymbol, sidebarSymbolId } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 export const SidebarBlock: BlockDefinition = {
   id: sidebarSymbolId,
+  globalHashtags: getTailwindClasses(),
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === sidebarSymbol.symbolID)

@@ -1,9 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  important: true,
   content: [],
   safelist: [
     {
-      pattern: /^(shadow|border|rounded|opacity|bg|blur|text).*/,
+      pattern: /^(shadow|border|rounded|opacity|bg|blur|text|font).*/,
     },
   ],
   plugins: [
@@ -17,6 +18,7 @@ module.exports = {
         'bg-{colors}',
         'blur-{blur}',
         'text-{colors}',
+        'font-{fontWeight}',
       ],
     }),
   ],

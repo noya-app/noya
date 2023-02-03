@@ -23,17 +23,15 @@ const createHeadingBlock = (
   render: (props) => {
     const { content, color, fontWeight, fontSize, align, hashTags } =
       filterTextPropertyHashTags(props.blockText);
-    const hasTailwindColor = hashTags.some((value) =>
-      value.startsWith('text-'),
-    );
 
     return (
       <Flex justify={align} className={getBlockClassName(hashTags)}>
         <Heading
           size={size}
-          color={hasTailwindColor ? undefined : color}
+          color={color}
           fontWeight={fontWeight}
           fontSize={fontSize}
+          className={getBlockClassName(hashTags)}
         >
           {content}
         </Heading>

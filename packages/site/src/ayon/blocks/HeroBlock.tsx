@@ -4,10 +4,11 @@ import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { isWithinRectRange } from './score';
 import { heroSymbol, heroSymbolId } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 export const HeroBlock: BlockDefinition = {
   id: heroSymbolId,
+  globalHashtags: getTailwindClasses(),
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (siblingBlocks.find((block) => block.symbolId === heroSymbol.symbolID)) {
       return 0;

@@ -14,10 +14,11 @@ import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
+  globalHashtags: getTailwindClasses(),
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === headerBarSymbol.symbolID)

@@ -3,22 +3,19 @@ import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { filterTextPropertyHashTags } from '../parse';
 import { writeSymbolId } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
   id: writeSymbolId,
+  globalHashtags: getTailwindClasses(),
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { color, fontWeight, fontSize, align, hashTags } =
       filterTextPropertyHashTags(props.blockText);
 
-    const hasTailwindColor = hashTags.some((value) =>
-      value.startsWith('text-'),
-    );
-
     return (
       <Text
-        color={hasTailwindColor ? undefined : color}
+        color={color}
         fontWeight={fontWeight}
         fontSize={fontSize}
         align={align as SystemProps['textAlign']}
