@@ -6,9 +6,17 @@ import { isWithinRectRange } from './score';
 import { sidebarSymbol, sidebarSymbolId } from './symbols';
 import { getBlockClassName, getTailwindClasses } from './tailwind';
 
+const placeholderText = `
+*Dashboard 
+Updates
+Billing
+Settings
+`.trim();
+
 export const SidebarBlock: BlockDefinition = {
   id: sidebarSymbolId,
   globalHashtags: ['dark', 'title', ...getTailwindClasses()],
+  placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === sidebarSymbol.symbolID)
@@ -24,11 +32,15 @@ export const SidebarBlock: BlockDefinition = {
       ? 'rgba(11,21,48,0.85)'
       : 'rgba(240,240,240,0.85)';
     const color = hashTags.includes('dark') ? '#fff' : '#000';
-    let links = props.blockText
-      ?.split(/\r?\n/)
-      .map((link) => filterHashTagsAndSlashCommands(link).content.trim());
-    if (!links || links.join('') === '') {
-      links = ['*Dashboard', 'Updates', 'Billing', 'Settings'];
+
+    const splitLinks = (text: string) =>
+      text
+        .split(/\r?\n/)
+        .map((link) => filterHashTagsAndSlashCommands(link).content.trim());
+
+    let links = splitLinks(props.blockText ?? placeholderText);
+    if (links.join('') === '') {
+      links = splitLinks(placeholderText);
     }
     if (links.filter((link) => link[0] === '*').length === 0) {
       links[0] = `*${links[0]}`;

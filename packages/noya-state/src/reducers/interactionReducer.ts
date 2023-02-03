@@ -52,6 +52,7 @@ export type BlockDefinition = {
   infer: (props: InferBlockProps) => number;
   render: (props: BlockProps) => ReactNode;
   globalHashtags?: string[];
+  placeholderText?: string;
 };
 
 export type InferBlockType = (props: InferBlockProps) => DrawableLayerType;

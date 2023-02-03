@@ -16,9 +16,12 @@ import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
 import { getBlockClassName, getTailwindClasses } from './tailwind';
 
+const placeholderText = `*Home, Projects, Team, FAQ`;
+
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
   globalHashtags: ['dark', 'search', 'title', ...getTailwindClasses()],
+  placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === headerBarSymbol.symbolID)
@@ -49,9 +52,9 @@ export const HeaderBarBlock: BlockDefinition = {
       ? 'rgba(0,0,0,0.2)'
       : 'rgba(0,0,0,0.02)';
     const color = hashTags?.includes('dark') ? '#fff' : '#000';
-    const links = content
-      ? content.split(',').map((link) => link.trim())
-      : ['*Home', 'Projects', 'Team', 'FAQ'];
+    const links = (content || placeholderText)
+      .split(',')
+      .map((link) => link.trim());
     if (links.filter((link) => link[0] === '*').length === 0) {
       links[0] = `*${links[0]}`;
     }

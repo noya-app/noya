@@ -6,9 +6,17 @@ import { isWithinRectRange } from './score';
 import { heroSymbol, heroSymbolId } from './symbols';
 import { getBlockClassName, getTailwindClasses } from './tailwind';
 
+const placeholderText = `
+Create, iterate, inspire.
+Turn great ideas into new possibilities.
+Get started
+Learn more
+`.trim();
+
 export const HeroBlock: BlockDefinition = {
   id: heroSymbolId,
   globalHashtags: getTailwindClasses(),
+  placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (siblingBlocks.find((block) => block.symbolId === heroSymbol.symbolID)) {
       return 0;
@@ -23,14 +31,7 @@ export const HeroBlock: BlockDefinition = {
     const { align, textAlign, hashTags } = filterTextPropertyHashTags(
       props.blockText,
     );
-    const blockText = props.blockText
-      ? props.blockText.split(/\r?\n/)
-      : [
-          'Create, iterate, inspire.',
-          'Turn great ideas into new possibilities.',
-          'Get started',
-          'Learn more',
-        ];
+    const blockText = (props.blockText || placeholderText).split(/\r?\n/);
 
     let headline,
       subheadline,

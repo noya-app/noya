@@ -221,32 +221,32 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
   });
 
+  const blockDefinition = Blocks[layer.symbolID];
+
   const hashCompletionMenu = useCompletionMenu({
     editor,
     showExactMatch: false,
-    possibleItems: (Blocks[layer.symbolID]?.globalHashtags ?? []).map(
-      (item) => ({
-        name: item,
-        id: item,
-        icon: (
-          <div
-            style={{
-              width: 19,
-              height: 19,
-              borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
-              background: /^rounded/.test(item)
-                ? 'rgb(148 163 184)'
-                : /^opacity/.test(item)
-                ? 'black'
-                : undefined,
-            }}
-            className={item}
-          >
-            {/^(text|font)/.test(item) ? 'Tt' : null}
-          </div>
-        ),
-      }),
-    ),
+    possibleItems: (blockDefinition?.globalHashtags ?? []).map((item) => ({
+      name: item,
+      id: item,
+      icon: (
+        <div
+          style={{
+            width: 19,
+            height: 19,
+            borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
+            background: /^rounded/.test(item)
+              ? 'rgb(148 163 184)'
+              : /^opacity/.test(item)
+              ? 'black'
+              : undefined,
+          }}
+          className={item}
+        >
+          {/^(text|font)/.test(item) ? 'Tt' : null}
+        </div>
+      ),
+    })),
     onSelect: (target, item) => {
       Transforms.delete(editor, { at: target });
       Transforms.insertText(editor, `#${item.id} `, { at: target.anchor });
@@ -369,6 +369,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         onKeyDown={onKeyDown}
         style={{ position: 'absolute', inset: 0, padding: 4 }}
         spellCheck={false}
+        placeholder={blockDefinition.placeholderText}
       />
       {symbolCompletionMenu.element}
       {hashCompletionMenu.element}
