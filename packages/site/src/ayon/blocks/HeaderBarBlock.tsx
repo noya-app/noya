@@ -18,7 +18,7 @@ import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
-  globalHashtags: getTailwindClasses(),
+  globalHashtags: ['dark', 'search', 'title', ...getTailwindClasses()],
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === headerBarSymbol.symbolID)
