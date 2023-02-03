@@ -7859,6 +7859,11 @@ core-js-pure@^3.10.2, core-js-pure@^3.16.0:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.16.2.tgz#0ef4b79cabafb251ea86eb7d139b42bd98c533e8"
   integrity sha512-oxKe64UH049mJqrKkynWp6Vu0Rlm/BTXO/bJZuN2mmR3RtOFNepLlSWDd1eo16PzHpQAoNG97rLU1V/YxesJjw==
 
+core-js@^3.6.5:
+  version "3.27.2"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.27.2.tgz#85b35453a424abdcacb97474797815f4d62ebbf7"
+  integrity sha512-9ashVQskuh5AZEZ1JdQWp1GqSoC1e1G87MzRqg2gIfVAQ7Qn9K+uFj8EcniUFA4P2NLZfV+TOlX1SzoKfo+s7w==
+
 core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
@@ -19480,6 +19485,13 @@ vm-browserify@1.1.2, vm-browserify@^1.0.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
+
+vscode-fuzzy-scorer@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/vscode-fuzzy-scorer/-/vscode-fuzzy-scorer-0.0.4.tgz#259f06a29f78c41d8a353cfe9a2c32ea254f7c11"
+  integrity sha512-nXMU/ys6pGQ4+b8uwWmq+emv7ASQGmpMJA6Yntqw/510fBqBOe42OC3j7p0gqVFpu75yexYIIPnb/LhcejOFZw==
+  dependencies:
+    core-js "^3.6.5"
 
 w3c-hr-time@^1.0.2:
   version "1.0.2"

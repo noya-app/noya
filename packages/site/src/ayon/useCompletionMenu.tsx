@@ -4,9 +4,15 @@ import { KeyMap } from 'noya-keymap';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Editor, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
+import styled from 'styled-components';
 import { ContentElement, PositioningElement } from './BlockEditor';
+import { fuzzyFilter, fuzzyTokenize, IToken } from './fuzzyScorer';
 
 type CompletionItem = { id: string; name: string; icon?: ReactNode };
+
+const Token = styled.span<{ type: IToken['type'] }>(({ type }) => ({
+  fontWeight: type === 'match' ? 'bold' : 'normal',
+}));
 
 export function useCompletionMenu({
   possibleItems,
@@ -45,20 +51,20 @@ export function useCompletionMenu({
     menuItemsRef.current?.scrollToIndex(index);
   }, [index, range]);
 
-  const filteredItems = possibleItems.filter((item) =>
-    item.name.toLowerCase().startsWith(search.toLowerCase()),
-  );
+  const results = fuzzyFilter({
+    items: possibleItems.map((item) => item.name),
+    query: search,
+  }).map((item) => ({ ...item, ...possibleItems[item.index] }));
 
   const listSize = {
     width: 200,
-    height: Math.min(filteredItems.length * 31, 31 * 6.5),
+    height: Math.min(results.length * 31, 31 * 6.5),
   };
 
-  const isExactMatch =
-    filteredItems.length === 1 && filteredItems[0].name === search;
+  const isExactMatch = results.length === 1 && results[0].name === search;
 
   const shouldShow =
-    range && filteredItems.length > 0 && (showExactMatch || !isExactMatch);
+    range && results.length > 0 && (showExactMatch || !isExactMatch);
 
   const element = (
     <>
@@ -66,13 +72,18 @@ export function useCompletionMenu({
         <Portal.Root asChild>
           <PositioningElement ref={menuPositionRef}>
             <ContentElement style={{ ...listSize, display: 'flex' }}>
-              <ListView.Root<CompletionItem>
+              <ListView.Root
                 ref={menuItemsRef}
                 scrollable
                 virtualized={listSize}
                 keyExtractor={(item) => item.id}
-                data={filteredItems}
+                data={results}
                 renderItem={(item, i) => {
+                  const tokens = fuzzyTokenize({
+                    item: item.name,
+                    itemScore: item,
+                  });
+
                   return (
                     <ListView.Row
                       key={item.id}
@@ -84,7 +95,11 @@ export function useCompletionMenu({
                         }
                       }}
                     >
-                      {item.name}
+                      {tokens.map((token, j) => (
+                        <Token key={j} type={token.type}>
+                          {token.text}
+                        </Token>
+                      ))}
                       {item.icon && (
                         <>
                           <Spacer.Horizontal />
@@ -113,20 +128,20 @@ export function useCompletionMenu({
       el.style.top = `${rect.top + window.pageYOffset + 24}px`;
       el.style.left = `${rect.left + window.pageXOffset}px`;
     } catch {}
-  }, [editor, filteredItems.length, index, search, range, shouldShow]);
+  }, [editor, results.length, index, search, range, shouldShow]);
 
   const keyMap: KeyMap = shouldShow
     ? {
         ArrowUp: () => {
-          const nextIndex = index <= 0 ? filteredItems.length - 1 : index - 1;
+          const nextIndex = index <= 0 ? results.length - 1 : index - 1;
           setIndex(nextIndex);
         },
         ArrowDown: () => {
-          const prevIndex = index >= filteredItems.length - 1 ? 0 : index + 1;
+          const prevIndex = index >= results.length - 1 ? 0 : index + 1;
           setIndex(prevIndex);
         },
-        Tab: () => select(range, filteredItems[index]),
-        Enter: () => select(range, filteredItems[index]),
+        Tab: () => select(range, results[index]),
+        Enter: () => select(range, results[index]),
         Escape: () => setRange(null),
       }
     : {};

@@ -242,7 +242,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
             }}
             className={item}
           >
-            {item.startsWith('text') ? 'Tt' : null}
+            {/^(text|font)/.test(item) ? 'Tt' : null}
           </div>
         ),
       }),
@@ -368,6 +368,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
       <Editable
         onKeyDown={onKeyDown}
         style={{ position: 'absolute', inset: 0, padding: 4 }}
+        spellCheck={false}
       />
       {symbolCompletionMenu.element}
       {hashCompletionMenu.element}
