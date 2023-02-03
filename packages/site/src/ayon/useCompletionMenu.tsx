@@ -105,13 +105,15 @@ export function useCompletionMenu({
   useEffect(() => {
     const el = menuPositionRef.current;
 
-    if (!range || !filteredItems.length || !el) return;
+    if (!shouldShow || !el) return;
 
-    const domRange = ReactEditor.toDOMRange(editor, range);
-    const rect = domRange.getBoundingClientRect();
-    el.style.top = `${rect.top + window.pageYOffset + 24}px`;
-    el.style.left = `${rect.left + window.pageXOffset}px`;
-  }, [editor, filteredItems.length, index, search, range]);
+    try {
+      const domRange = ReactEditor.toDOMRange(editor, range);
+      const rect = domRange.getBoundingClientRect();
+      el.style.top = `${rect.top + window.pageYOffset + 24}px`;
+      el.style.left = `${rect.left + window.pageXOffset}px`;
+    } catch {}
+  }, [editor, filteredItems.length, index, search, range, shouldShow]);
 
   const keyMap: KeyMap = shouldShow
     ? {
