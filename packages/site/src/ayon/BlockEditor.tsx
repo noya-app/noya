@@ -82,10 +82,12 @@ function textCommand(
   if (!selection || !Range.isCollapsed(selection)) return;
 
   const triggerRegex = new RegExp(`\\${triggerPrefix}([A-Za-z0-9\\-]*)$`);
+  const afterRegex = /^(\s|$)/;
 
   const [start] = Range.edges(selection);
 
   const lineStart = Editor.before(editor, start, { unit: 'line' });
+  const lineEnd = Editor.after(editor, start, { unit: 'line' });
 
   if (!lineStart) return;
 
@@ -93,10 +95,12 @@ function textCommand(
     editor,
     Editor.range(editor, lineStart, start),
   );
+  const afterText = Editor.string(editor, Editor.range(editor, start, lineEnd));
 
   const beforeMatch = beforeText.match(triggerRegex);
+  const afterMatch = afterText.match(afterRegex);
 
-  if (!beforeMatch) return;
+  if (!beforeMatch || !afterMatch) return;
 
   const match = beforeMatch[1];
 
