@@ -12,13 +12,55 @@ import {
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
+import { accentColor } from './blockTheme';
 import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
-const globalHashtags = ['dark', 'search', 'title', ...getTailwindClasses()];
+const globalHashtags = ['dark', 'accent', 'search', 'title'];
+
+function getColors({ dark, accent }: { dark: boolean; accent: boolean }) {
+  const permutation = `${dark ? 'dark' : 'light'}${
+    accent ? '-accent' : ''
+  }` as const;
+
+  switch (permutation) {
+    case 'dark':
+      return {
+        backgroundColor: 'rgba(11,21,48,0.9)',
+        borderBottomColor: 'transparent',
+        searchBackgroundColor: 'rgba(0,0,0,0.2)',
+        color: '#fff',
+        activeLinkBackgroundColor: 'rgba(255,255,255,0.1)',
+      };
+    case 'light':
+      return {
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        borderBottomColor: '#eee',
+        searchBackgroundColor: 'rgba(0,0,0,0.02)',
+        color: '#000',
+        activeLinkBackgroundColor: 'rgba(0,0,0,0.1)',
+      };
+    case 'dark-accent':
+      return {
+        backgroundColor: accentColor[800],
+        borderBottomColor: 'transparent',
+        searchBackgroundColor: 'rgba(0,0,0,0.2)',
+        color: '#fff',
+        activeLinkBackgroundColor: 'rgba(255,255,255,0.1)',
+      };
+    case 'light-accent':
+      return {
+        backgroundColor: accentColor[50],
+        borderBottomColor: 'rgba(0,0,0,0.05)',
+        searchBackgroundColor: 'rgba(0,0,0,0.02)',
+        color: 'rgba(0,0,0,0.8)',
+        activeLinkBackgroundColor: accentColor[100],
+      };
+  }
+}
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
@@ -43,7 +85,7 @@ export const HeaderBarBlock: BlockDefinition = {
   render: (props) => {
     const {
       items,
-      globalParameters: { dark, title, search, ...globalParameters },
+      globalParameters: { dark, title, accent, search, ...globalParameters },
     } = parseBlock(props.blockText, 'commaSeparated', {
       placeholder: placeholderText,
       isGlobalParameter: (key) =>
@@ -53,12 +95,13 @@ export const HeaderBarBlock: BlockDefinition = {
     const hashTags = Object.keys(globalParameters);
     const hasActiveItem = items.some((item) => item.parameters.active);
 
-    const backgroundColor = dark
-      ? 'rgba(11,21,48,0.9)'
-      : 'rgba(255,255,255,0.9)';
-    const borderBottomColor = dark ? 'transparent' : '#eee';
-    const searchBackgroundColor = dark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)';
-    const color = dark ? '#fff' : '#000';
+    const {
+      backgroundColor,
+      borderBottomColor,
+      searchBackgroundColor,
+      color,
+      activeLinkBackgroundColor,
+    } = getColors({ dark: !!dark, accent: !!accent });
 
     const hasTailwindBackground = hashTags.some((value) =>
       value.startsWith('bg-'),
@@ -89,7 +132,7 @@ export const HeaderBarBlock: BlockDefinition = {
           let backgroundColor = 'transparent';
 
           if (active || (!hasActiveItem && index === 0)) {
-            backgroundColor = dark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)';
+            backgroundColor = activeLinkBackgroundColor;
           }
 
           if (title && index === 0) {
