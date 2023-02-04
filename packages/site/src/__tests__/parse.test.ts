@@ -1,4 +1,10 @@
-import { filterSlashCommands, parseBlock, ParsedBlock } from '../ayon/parse';
+import {
+  filterSlashCommands,
+  getGlobalBlockParameters,
+  parseBlock,
+  ParsedBlockItem,
+  ParsedCompositeBlock,
+} from '../ayon/parse';
 
 test('remove slash commands', () => {
   expect(filterSlashCommands('/hello ')).toEqual(' ');
@@ -14,33 +20,88 @@ Projects
 #globalParameter
 `.trim();
 
+const sidebarBlock: ParsedCompositeBlock = {
+  content: 'Dashboard\nUpdates\n\nProjects',
+  items: [
+    {
+      content: 'Dashboard',
+      parameters: {
+        active: true,
+        booleanParameter: true,
+        keywordParameter: 'value',
+      },
+    },
+    {
+      content: 'Updates',
+      parameters: {},
+    },
+    {
+      content: 'Projects',
+      parameters: {},
+    },
+  ],
+  globalParameters: {
+    globalParameter: true,
+  },
+};
+
 test('newline separated', () => {
+  expect(parseBlock(sidebarText, 'newlineSeparated')).toEqual(sidebarBlock);
+});
+
+test('get global block parameters', () => {
   expect(
-    parseBlock(sidebarText, {
-      type: 'newlineSeparated',
-    }),
-  ).toEqual<ParsedBlock>({
-    content: 'Dashboard\nUpdates\n\nProjects',
-    positionalItems: [
+    getGlobalBlockParameters(sidebarBlock, (key) =>
+      ['active', 'globalParameter'].includes(key),
+    ),
+  ).toEqual({
+    active: true,
+    globalParameter: true,
+  });
+});
+
+const headerbarText = `Home #booleanParameter, *Projects ,     Team
+#globalParameter
+`.trim();
+
+test('comma separated', () => {
+  expect(
+    parseBlock(headerbarText, 'commaSeparated'),
+  ).toEqual<ParsedCompositeBlock>({
+    content: 'Home,Projects,Team',
+    items: [
       {
-        content: 'Dashboard',
+        content: 'Home',
         parameters: {
-          active: true,
           booleanParameter: true,
-          keywordParameter: 'value',
         },
       },
       {
-        content: 'Updates',
-        parameters: {},
+        content: 'Projects',
+        parameters: {
+          active: true,
+        },
       },
       {
-        content: 'Projects',
+        content: 'Team',
         parameters: {},
       },
     ],
     globalParameters: {
       globalParameter: true,
+    },
+  });
+});
+
+const buttonText = `Hello #keywordParameter=value
+#booleanParameter`;
+
+test('regular block', () => {
+  expect(parseBlock(buttonText, 'regular')).toEqual<ParsedBlockItem>({
+    content: 'Hello',
+    parameters: {
+      booleanParameter: true,
+      keywordParameter: 'value',
     },
   });
 });
