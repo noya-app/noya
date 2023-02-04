@@ -43,11 +43,13 @@ export const HeaderBarBlock: BlockDefinition = {
   render: (props) => {
     const {
       items,
-      globalParameters: { dark, title, ...globalParameters },
+      globalParameters: { dark, title, search, ...globalParameters },
     } = parseBlock(props.blockText, 'commaSeparated', {
       placeholder: placeholderText,
-      isGlobalParameter: (key) => globalHashtags.includes(key),
+      isGlobalParameter: (key) =>
+        !/^(font|text)/.test(key) && globalHashtags.includes(key),
     });
+
     const hashTags = Object.keys(globalParameters);
     const hasActiveItem = items.some((item) => item.parameters.active);
 
@@ -81,7 +83,9 @@ export const HeaderBarBlock: BlockDefinition = {
         overflow="hidden"
         className={getBlockClassName(hashTags)}
       >
-        {items.map(({ content: link, parameters: { active } }, index) => {
+        {items.map(({ content, parameters: { active, ...rest } }, index) => {
+          const className = getBlockClassName(Object.keys(rest));
+
           let backgroundColor = 'transparent';
 
           if (active || (!hasActiveItem && index === 0)) {
@@ -95,8 +99,9 @@ export const HeaderBarBlock: BlockDefinition = {
                 fontWeight="semibold"
                 size="sm"
                 margin="0 18px 0 15px"
+                className={className}
               >
-                {link}
+                {content}
               </Heading>
             );
           }
@@ -110,13 +115,14 @@ export const HeaderBarBlock: BlockDefinition = {
               fontWeight="medium"
               backgroundColor={backgroundColor}
               color={hasTailwindColor ? undefined : color}
+              className={className}
             >
-              {link}
+              {content}
             </Link>
           );
         })}
         <Spacer />
-        {hashTags?.includes('search') && (
+        {search && (
           <InputGroup
             flex="0.35"
             marginX="10px"

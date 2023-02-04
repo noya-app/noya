@@ -1,7 +1,7 @@
 import { Heading, Link, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterHashTagsAndSlashCommands } from '../parse';
+import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
 import { sidebarSymbol, sidebarSymbolId } from './symbols';
 import { getBlockClassName, getTailwindClasses } from './tailwind';
@@ -13,9 +13,11 @@ Billing
 Settings
 `.trim();
 
+const globalHashtags = ['dark', 'title', ...getTailwindClasses()];
+
 export const SidebarBlock: BlockDefinition = {
   id: sidebarSymbolId,
-  globalHashtags: ['dark', 'title', ...getTailwindClasses()],
+  globalHashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
@@ -27,25 +29,21 @@ export const SidebarBlock: BlockDefinition = {
     return Math.max(isWithinRectRange(frame, 200, 400, 360, 2000) ? 1 : 0, 0.1);
   },
   render: (props) => {
-    const { hashTags } = filterHashTagsAndSlashCommands(props.blockText);
-    const backgroundColor = hashTags?.includes('dark')
+    const {
+      items,
+      globalParameters: { dark, title, ...globalParameters },
+    } = parseBlock(props.blockText, 'newlineSeparated', {
+      placeholder: placeholderText,
+      isGlobalParameter: (key) => globalHashtags.includes(key),
+    });
+
+    const hashTags = Object.keys(globalParameters);
+    const hasActiveItem = items.some((item) => item.parameters.active);
+
+    const backgroundColor = dark
       ? 'rgba(11,21,48,0.85)'
       : 'rgba(240,240,240,0.85)';
-    const color = hashTags.includes('dark') ? '#fff' : '#000';
-
-    const splitLinks = (text: string) =>
-      text
-        .split(/\r?\n/)
-        .map((link) => filterHashTagsAndSlashCommands(link).content.trim());
-
-    let links = splitLinks(props.blockText ?? placeholderText);
-    if (links.join('') === '') {
-      links = splitLinks(placeholderText);
-    }
-    if (links.filter((link) => link[0] === '*').length === 0) {
-      links[0] = `*${links[0]}`;
-    }
-    const hasTitle = hashTags.includes('title');
+    const color = dark ? '#fff' : '#000';
 
     const hasTailwindBackground = hashTags.some((value) =>
       value.startsWith('bg-'),
@@ -66,18 +64,16 @@ export const SidebarBlock: BlockDefinition = {
         backdropBlur="10px"
         className={getBlockClassName(hashTags)}
       >
-        {links.map((link, index) => {
+        {items.map(({ content, parameters: { active } }, index) => {
           let backgroundColor = 'transparent';
           let fontWeight = 'normal';
-          if (link[0] === '*') {
-            backgroundColor = hashTags?.includes('dark')
-              ? 'rgba(0,0,0,0.5)'
-              : 'rgba(0,0,0,0.1)';
+
+          if (active || (!hasActiveItem && index === 0)) {
+            backgroundColor = dark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)';
             fontWeight = 'medium';
           }
-          const [, linkText] = /^\*?(.*)/.exec(link) || [];
 
-          if (hasTitle && index === 0) {
+          if (title && index === 0) {
             return (
               <Heading
                 color={hasTailwindColor ? undefined : color}
@@ -85,7 +81,7 @@ export const SidebarBlock: BlockDefinition = {
                 size="md"
                 padding="12px 10px"
               >
-                {linkText}
+                {content}
               </Heading>
             );
           }
@@ -99,7 +95,7 @@ export const SidebarBlock: BlockDefinition = {
               backgroundColor={backgroundColor}
               color={hasTailwindColor ? undefined : color}
             >
-              {linkText}
+              {content}
             </Link>
           );
         })}

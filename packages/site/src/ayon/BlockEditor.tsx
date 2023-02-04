@@ -83,7 +83,7 @@ function textCommand(
   if (!selection || !Range.isCollapsed(selection)) return;
 
   const triggerRegex = new RegExp(`\\${triggerPrefix}([A-Za-z0-9\\-]*)$`);
-  const afterRegex = /^(\s|$)/;
+  const afterRegex = /^(,|\s|$)/;
 
   const [start] = Range.edges(selection);
 
