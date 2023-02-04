@@ -1,13 +1,12 @@
 import { SafelistConfig } from 'tailwindcss/types/config';
-import tailwindConfig from '../../../tailwind.config';
 
 const allClassNames = (
   require('../../../safelist.txt').default as string
 ).split('\n');
 
-type SafelistPattern = SafelistConfig[0];
+const allClassNamesSet = new Set(allClassNames);
 
-const safelistPatterns = tailwindConfig.safelist ?? [];
+type SafelistPattern = SafelistConfig[0];
 
 function isSafe(className: string, item?: SafelistPattern) {
   return !item
@@ -26,7 +25,7 @@ export function getTailwindClasses(filters?: SafelistConfig[0][]) {
 }
 
 export function isSupportedTailwindClass(className: string) {
-  return safelistPatterns.some((item) => isSafe(className, item));
+  return allClassNamesSet.has(className);
 }
 
 export function getBlockClassName(hashTags: string[]) {
