@@ -50,8 +50,8 @@ export function parseBlockLine(text: string): ParsedBlockItem {
   };
 }
 
-export function parseBlock<K extends keyof ParsedBlockTypeMap>(
-  text: string,
+function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
+  text: string = '',
   type: K,
 ): ParsedBlockTypeMap[K] {
   text = filterSlashCommands(text);
@@ -93,6 +93,17 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
         parseBlockLine,
       );
 
+      // If there's only one positional item, and it's empty, treat its parameters as global
+      if (positionalItems.length === 1 && positionalItems[0].content === '') {
+        const block: ParsedCompositeBlock = {
+          content: '',
+          items: [],
+          globalParameters: positionalItems[0].parameters,
+        };
+
+        return block as ParsedBlockTypeMap[K];
+      }
+
       const globalParameters = mergeObjects<ParsedBlockItemParameters>(
         lines
           .slice(1)
@@ -119,23 +130,59 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
   }
 }
 
-/**
- * Some block parameters are applied globally even if used after an individual item.
- * This function returns the all global parameters for a block, regardless of where
- * they are written.
- */
-export function getGlobalBlockParameters(
-  block: ParsedCompositeBlock,
-  isGlobalParameter: (key: string) => boolean,
-): ParsedBlockItemParameters {
-  const parameters = mergeObjects<ParsedBlockItemParameters>([
-    ...block.items.map((item) => item.parameters),
-    block.globalParameters,
-  ]);
+export function parseBlock<K extends keyof ParsedBlockTypeMap>(
+  text: string = '',
+  type: K,
+  {
+    placeholder,
+    isGlobalParameter,
+  }: {
+    placeholder?: string;
+    isGlobalParameter?: (key: string) => boolean;
+  } = {},
+): ParsedBlockTypeMap[K] {
+  switch (type) {
+    case 'regular': {
+      return parseBlockInner(text, type);
+    }
+    case 'commaSeparated':
+    case 'newlineSeparated': {
+      const block = parseBlockInner(text, type) as ParsedCompositeBlock;
 
-  return Object.fromEntries(
-    Object.entries(parameters).filter(([key]) => isGlobalParameter(key)),
-  );
+      // If empty or parameters-only, merge placeholder content into the block
+      if (placeholder && block.content === '') {
+        const parsedPlaceholder = parseBlockInner(
+          placeholder,
+          type,
+        ) as ParsedCompositeBlock;
+
+        // console.log('orig', placeholder, block.items);
+
+        block.content = parsedPlaceholder.content;
+        block.items = parsedPlaceholder.items;
+        block.globalParameters = mergeObjects([
+          parsedPlaceholder.globalParameters,
+          block.globalParameters,
+        ]);
+      }
+
+      if (isGlobalParameter) {
+        for (const item of block.items) {
+          for (const [key, value] of Object.entries(item.parameters)) {
+            if (isGlobalParameter(key)) {
+              block.globalParameters[key] = value;
+              delete item.parameters[key];
+            }
+          }
+        }
+      }
+
+      return block as ParsedBlockTypeMap[K];
+    }
+    default: {
+      throw new Error('Invalid block parse type');
+    }
+  }
 }
 
 export function extractHashtagParameters(text: string) {

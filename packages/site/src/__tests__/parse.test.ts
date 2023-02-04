@@ -1,6 +1,5 @@
 import {
   filterSlashCommands,
-  getGlobalBlockParameters,
   parseBlock,
   ParsedBlockItem,
   ParsedCompositeBlock,
@@ -17,7 +16,8 @@ const sidebarText = `
 Updates
 
 Projects
-#globalParameter
+#globalParameter #globalParameter2
+#globalParameter3
 `.trim();
 
 const sidebarBlock: ParsedCompositeBlock = {
@@ -42,6 +42,8 @@ const sidebarBlock: ParsedCompositeBlock = {
   ],
   globalParameters: {
     globalParameter: true,
+    globalParameter2: true,
+    globalParameter3: true,
   },
 };
 
@@ -49,19 +51,78 @@ test('newline separated', () => {
   expect(parseBlock(sidebarText, 'newlineSeparated')).toEqual(sidebarBlock);
 });
 
-test('get global block parameters', () => {
+test('newline separated with placeholder', () => {
   expect(
-    getGlobalBlockParameters(sidebarBlock, (key) =>
-      ['active', 'globalParameter'].includes(key),
+    parseBlock('', 'newlineSeparated', {
+      placeholder: '*Dashboard',
+    }),
+  ).toEqual<ParsedCompositeBlock>({
+    content: 'Dashboard',
+    items: [
+      {
+        content: 'Dashboard',
+        parameters: {
+          active: true,
+        },
+      },
+    ],
+    globalParameters: {},
+  });
+});
+
+test('newline separated with placeholder and global parameter', () => {
+  expect(
+    parseBlock('#dark', 'newlineSeparated', {
+      placeholder: '*Dashboard',
+    }),
+  ).toEqual<ParsedCompositeBlock>({
+    content: 'Dashboard',
+    items: [
+      {
+        content: 'Dashboard',
+        parameters: {
+          active: true,
+        },
+      },
+    ],
+    globalParameters: {
+      dark: true,
+    },
+  });
+});
+
+test('list item parameters to global', () => {
+  expect(
+    parseBlock(
+      'Dashboard #booleanParameter #dark\nPlatform',
+      'newlineSeparated',
+      {
+        isGlobalParameter: (parameter) => parameter === 'dark',
+      },
     ),
-  ).toEqual({
-    active: true,
-    globalParameter: true,
+  ).toEqual<ParsedCompositeBlock>({
+    content: 'Dashboard\nPlatform',
+    items: [
+      {
+        content: 'Dashboard',
+        parameters: {
+          booleanParameter: true,
+        },
+      },
+      {
+        content: 'Platform',
+        parameters: {},
+      },
+    ],
+    globalParameters: {
+      dark: true,
+    },
   });
 });
 
 const headerbarText = `Home #booleanParameter, *Projects ,     Team
-#globalParameter
+#globalParameter #globalParameter2
+#globalParameter3
 `.trim();
 
 test('comma separated', () => {
@@ -89,6 +150,37 @@ test('comma separated', () => {
     ],
     globalParameters: {
       globalParameter: true,
+      globalParameter2: true,
+      globalParameter3: true,
+    },
+  });
+});
+
+test('comma separated parameters-only', () => {
+  expect(parseBlock('#dark', 'commaSeparated')).toEqual<ParsedCompositeBlock>({
+    content: '',
+    items: [],
+    globalParameters: {
+      dark: true,
+    },
+  });
+});
+
+test('comma separated with placeholder', () => {
+  expect(
+    parseBlock('#dark', 'commaSeparated', {
+      placeholder: 'Home',
+    }),
+  ).toEqual<ParsedCompositeBlock>({
+    content: 'Home',
+    items: [
+      {
+        content: 'Home',
+        parameters: {},
+      },
+    ],
+    globalParameters: {
+      dark: true,
     },
   });
 });

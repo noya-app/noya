@@ -11,16 +11,18 @@ import {
 } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterHashTagsAndSlashCommands } from '../parse';
+import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
 import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
+const globalHashtags = ['dark', 'search', 'title', ...getTailwindClasses()];
+
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
-  globalHashtags: ['dark', 'search', 'title', ...getTailwindClasses()],
+  globalHashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
@@ -39,26 +41,22 @@ export const HeaderBarBlock: BlockDefinition = {
     );
   },
   render: (props) => {
-    const { content, hashTags } = filterHashTagsAndSlashCommands(
-      props.blockText,
-    );
-    const backgroundColor = hashTags?.includes('dark')
+    const {
+      items,
+      globalParameters: { dark, title, ...globalParameters },
+    } = parseBlock(props.blockText, 'commaSeparated', {
+      placeholder: placeholderText,
+      isGlobalParameter: (key) => globalHashtags.includes(key),
+    });
+    const hashTags = Object.keys(globalParameters);
+    const hasActiveItem = items.some((item) => item.parameters.active);
+
+    const backgroundColor = dark
       ? 'rgba(11,21,48,0.9)'
       : 'rgba(255,255,255,0.9)';
-    const borderBottomColor = hashTags?.includes('dark')
-      ? 'transparent'
-      : '#eee';
-    const searchBackgroundColor = hashTags?.includes('dark')
-      ? 'rgba(0,0,0,0.2)'
-      : 'rgba(0,0,0,0.02)';
-    const color = hashTags?.includes('dark') ? '#fff' : '#000';
-    const links = (content || placeholderText)
-      .split(',')
-      .map((link) => link.trim());
-    if (links.filter((link) => link[0] === '*').length === 0) {
-      links[0] = `*${links[0]}`;
-    }
-    const hasTitle = hashTags.includes('title');
+    const borderBottomColor = dark ? 'transparent' : '#eee';
+    const searchBackgroundColor = dark ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.02)';
+    const color = dark ? '#fff' : '#000';
 
     const hasTailwindBackground = hashTags.some((value) =>
       value.startsWith('bg-'),
@@ -83,16 +81,14 @@ export const HeaderBarBlock: BlockDefinition = {
         overflow="hidden"
         className={getBlockClassName(hashTags)}
       >
-        {links.map((link, index) => {
+        {items.map(({ content: link, parameters: { active } }, index) => {
           let backgroundColor = 'transparent';
-          if (link[0] === '*') {
-            backgroundColor = hashTags?.includes('dark')
-              ? 'rgba(0,0,0,0.5)'
-              : 'rgba(0,0,0,0.1)';
-          }
-          const [, linkText] = /^\*?(.*)/.exec(link) || [];
 
-          if (hasTitle && index === 0) {
+          if (active || (!hasActiveItem && index === 0)) {
+            backgroundColor = dark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)';
+          }
+
+          if (title && index === 0) {
             return (
               <Heading
                 color={hasTailwindColor ? undefined : color}
@@ -100,7 +96,7 @@ export const HeaderBarBlock: BlockDefinition = {
                 size="sm"
                 margin="0 18px 0 15px"
               >
-                {linkText}
+                {link}
               </Heading>
             );
           }
@@ -115,7 +111,7 @@ export const HeaderBarBlock: BlockDefinition = {
               backgroundColor={backgroundColor}
               color={hasTailwindColor ? undefined : color}
             >
-              {linkText}
+              {link}
             </Link>
           );
         })}
