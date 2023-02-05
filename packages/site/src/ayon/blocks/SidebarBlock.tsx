@@ -1,10 +1,10 @@
 import { Heading, Link, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterHashTagsAndSlashCommands } from '../parse';
+import { parseBlock } from '../parse';
+import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { sidebarSymbol, sidebarSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 const placeholderText = `
 *Dashboard 
@@ -13,9 +13,14 @@ Billing
 Settings
 `.trim();
 
+const globalHashtags = ['dark', 'accent', 'title'];
+
+const parser = 'newlineSeparated';
+
 export const SidebarBlock: BlockDefinition = {
   id: sidebarSymbolId,
-  globalHashtags: ['dark', 'title', ...getTailwindClasses()],
+  parser,
+  hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
@@ -27,32 +32,17 @@ export const SidebarBlock: BlockDefinition = {
     return Math.max(isWithinRectRange(frame, 200, 400, 360, 2000) ? 1 : 0, 0.1);
   },
   render: (props) => {
-    const { hashTags } = filterHashTagsAndSlashCommands(props.blockText);
-    const backgroundColor = hashTags?.includes('dark')
-      ? 'rgba(11,21,48,0.85)'
-      : 'rgba(240,240,240,0.85)';
-    const color = hashTags.includes('dark') ? '#fff' : '#000';
+    const {
+      items,
+      parameters: { dark, accent, title },
+    } = parseBlock(props.blockText, parser, {
+      placeholder: placeholderText,
+    });
 
-    const splitLinks = (text: string) =>
-      text
-        .split(/\r?\n/)
-        .map((link) => filterHashTagsAndSlashCommands(link).content.trim());
+    const hasActiveItem = items.some((item) => item.parameters.active);
 
-    let links = splitLinks(props.blockText ?? placeholderText);
-    if (links.join('') === '') {
-      links = splitLinks(placeholderText);
-    }
-    if (links.filter((link) => link[0] === '*').length === 0) {
-      links[0] = `*${links[0]}`;
-    }
-    const hasTitle = hashTags.includes('title');
-
-    const hasTailwindBackground = hashTags.some((value) =>
-      value.startsWith('bg-'),
-    );
-    const hasTailwindColor = hashTags.some((value) =>
-      value.startsWith('text-'),
-    );
+    const { backgroundColor, color, activeLinkBackgroundColor } =
+      getBlockThemeColors({ dark, accent });
 
     return (
       <VStack
@@ -61,31 +51,28 @@ export const SidebarBlock: BlockDefinition = {
         spacing="5px"
         paddingY="10px"
         paddingX="10px"
-        backgroundColor={hasTailwindBackground ? undefined : backgroundColor}
+        backgroundColor={backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"
-        className={getBlockClassName(hashTags)}
       >
-        {links.map((link, index) => {
+        {items.map(({ content, parameters: { active } }, index) => {
           let backgroundColor = 'transparent';
           let fontWeight = 'normal';
-          if (link[0] === '*') {
-            backgroundColor = hashTags?.includes('dark')
-              ? 'rgba(0,0,0,0.5)'
-              : 'rgba(0,0,0,0.1)';
+
+          if (active || (!hasActiveItem && index === 0)) {
+            backgroundColor = activeLinkBackgroundColor;
             fontWeight = 'medium';
           }
-          const [, linkText] = /^\*?(.*)/.exec(link) || [];
 
-          if (hasTitle && index === 0) {
+          if (title && index === 0) {
             return (
               <Heading
-                color={hasTailwindColor ? undefined : color}
+                color={color}
                 fontWeight="semibold"
                 size="md"
                 padding="12px 10px"
               >
-                {linkText}
+                {content}
               </Heading>
             );
           }
@@ -97,9 +84,9 @@ export const SidebarBlock: BlockDefinition = {
               fontSize="12px"
               fontWeight={fontWeight}
               backgroundColor={backgroundColor}
-              color={hasTailwindColor ? undefined : color}
+              color={color}
             >
-              {linkText}
+              {content}
             </Link>
           );
         })}

@@ -1,13 +1,14 @@
-import { SystemProps, Text } from '@chakra-ui/react';
+import { Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterTextPropertyHashTags } from '../parse';
+import { getTextAlign, parseBlock } from '../parse';
 import { textSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const TextBlock: BlockDefinition = {
   id: textSymbolId,
-  globalHashtags: getTailwindClasses(),
+  parser: 'regular',
+  hashtags: ['left', 'center', 'right', ...tailwindTextClasses],
   infer: ({ frame, blockText }) =>
     Math.max(
       blockText &&
@@ -17,16 +18,14 @@ export const TextBlock: BlockDefinition = {
       0.1,
     ),
   render: (props) => {
-    const { content, color, fontWeight, fontSize, align, hashTags } =
-      filterTextPropertyHashTags(props.blockText);
+    const { content, parameters } = parseBlock(props.blockText, 'regular');
+
+    const hashtags = Object.keys(parameters);
 
     return (
       <Text
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-        align={align as SystemProps['textAlign']}
-        className={getBlockClassName(hashTags)}
+        textAlign={getTextAlign(parameters)}
+        className={getBlockClassName(hashtags)}
       >
         {content}
       </Text>

@@ -16,6 +16,7 @@ import { isExternalUrl } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
+import { Blocks } from './blocks';
 import {
   buttonSymbol,
   iconSymbolId,
@@ -27,7 +28,7 @@ import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
-import { filterHashTagsAndSlashCommands } from './parse';
+import { parseBlock } from './parse';
 import { RedirectResolver } from './RedirectResolver';
 import { Stacking } from './stacking';
 import { DrawingWidget, Widget } from './Widget';
@@ -116,8 +117,14 @@ export const Content = memo(function Content({
 
       if (typeof blockText !== 'string') return;
 
-      const { content: originalText } =
-        filterHashTagsAndSlashCommands(blockText);
+      const BlockDefinition = Blocks[symbolID];
+
+      if (!BlockDefinition) return;
+
+      const { content: originalText } = parseBlock(
+        blockText,
+        BlockDefinition.parser,
+      );
 
       // Already resolved
       if (

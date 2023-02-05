@@ -2,7 +2,7 @@ import { Flex, Heading, ThemingProps } from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterTextPropertyHashTags } from '../parse';
+import { getTextAlign, parseBlock } from '../parse';
 import {
   heading1Symbol,
   heading2Symbol,
@@ -11,27 +11,28 @@ import {
   heading5Symbol,
   heading6Symbol,
 } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
   size: ThemingProps['size'],
 ): BlockDefinition => ({
   id: symbol.symbolID,
-  globalHashtags: getTailwindClasses(),
+  parser: 'regular',
+  hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
-    const { content, color, fontWeight, fontSize, align, hashTags } =
-      filterTextPropertyHashTags(props.blockText);
+    const { content, parameters } = parseBlock(props.blockText, 'regular');
+
+    const hashtags = Object.keys(parameters);
 
     return (
-      <Flex justify={align} className={getBlockClassName(hashTags)}>
+      <Flex>
         <Heading
+          flex="1"
           size={size}
-          color={color}
-          fontWeight={fontWeight}
-          fontSize={fontSize}
-          className={getBlockClassName(hashTags)}
+          className={getBlockClassName(hashtags)}
+          textAlign={getTextAlign(parameters)}
         >
           {content}
         </Heading>

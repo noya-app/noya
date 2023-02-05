@@ -6,6 +6,7 @@ import { checkboxSymbolId } from './symbols';
 
 export const CheckboxBlock: BlockDefinition = {
   id: checkboxSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 10, 10, 20, 20) &&
     isApproximatelySquare(frame, 0.1)

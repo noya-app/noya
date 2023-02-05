@@ -1,37 +1,33 @@
-import { Flex, Spinner, SystemProps, Text } from '@chakra-ui/react';
+import { Flex, Spinner, Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterTextPropertyHashTags } from '../parse';
+import { getTextAlign, parseBlock } from '../parse';
 import { writeSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
   id: writeSymbolId,
-  globalHashtags: getTailwindClasses(),
+  parser: 'regular',
+  hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
-    const { color, fontWeight, fontSize, align, hashTags } =
-      filterTextPropertyHashTags(props.blockText);
+    const { content, parameters } = parseBlock(props.blockText, 'regular');
+
+    const hashtags = Object.keys(parameters);
 
     return (
       <Text
-        color={color}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-        align={align as SystemProps['textAlign']}
-        className={getBlockClassName(hashTags)}
+        textAlign={getTextAlign(parameters)}
+        className={getBlockClassName(hashtags)}
       >
         {props.resolvedBlockData?.resolvedText ?? (
           <Flex align="center">
             {props.blockText && (
               <>
-                <Spinner
-                  thickness="3px"
-                  color="gray"
-                  size={fontSize}
-                  speed="1.5s"
-                />
-                <span style={{ marginLeft: 10 }}>Thinking...</span>
+                <Spinner thickness="3px" color="gray" speed="1.5s" />
+                <span style={{ marginLeft: 10 }}>
+                  Writing about {content}...
+                </span>
               </>
             )}
             {!props.blockText && 'Waiting for input...'}

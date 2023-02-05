@@ -29,8 +29,9 @@ import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { BlockEditor, IBlockEditor } from './BlockEditor';
+import { Blocks } from './blocks';
 import { imageSymbolId } from './blocks/symbols';
-import { filterHashTagsAndSlashCommands } from './parse';
+import { parseBlock } from './parse';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 
@@ -235,12 +236,7 @@ export function Widget({
 
                       const url = await uploadAsset(await file.arrayBuffer());
 
-                      dispatch(
-                        'setBlockText',
-                        undefined,
-                        url,
-                        filterHashTagsAndSlashCommands(url).content,
-                      );
+                      dispatch('setBlockText', undefined, url);
                       dispatch('setSymbolIdIsFixed', undefined, true);
                     }}
                   />
@@ -322,21 +318,19 @@ export function Widget({
                           key={name}
                           variant="thin"
                           onPointerDown={(event) => {
+                            const BlockDefinition = Blocks[layer.symbolID];
+
                             // Prevent default so the textarea doesn't lose focus
                             event.preventDefault();
                             event.stopPropagation();
                             onChangeBlockType(blockType.type);
 
-                            // Remove any slash commands
-                            const blockTextWithoutSlashCommands =
-                              blockText.replace(/^\/\w+/, '');
                             dispatch(
                               'setBlockText',
                               undefined,
-                              blockTextWithoutSlashCommands,
-                              filterHashTagsAndSlashCommands(
-                                blockTextWithoutSlashCommands,
-                              ).content,
+                              blockText,
+                              parseBlock(blockText, BlockDefinition.parser)
+                                .content,
                             );
                             dispatch('setSymbolIdIsFixed', undefined, true);
                           }}

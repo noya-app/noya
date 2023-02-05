@@ -1,10 +1,10 @@
 import { Button, Flex, Heading, HStack, Text, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterTextPropertyHashTags } from '../parse';
+import { getTextAlign, parseBlock } from '../parse';
+import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { heroSymbol, heroSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 const placeholderText = `
 Create, iterate, inspire.
@@ -13,9 +13,12 @@ Get started
 Learn more
 `.trim();
 
+const parser = 'newlineSeparated';
+
 export const HeroBlock: BlockDefinition = {
   id: heroSymbolId,
-  globalHashtags: getTailwindClasses(),
+  parser,
+  hashtags: ['left', 'right', 'center', 'dark', 'accent'],
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (siblingBlocks.find((block) => block.symbolId === heroSymbol.symbolID)) {
@@ -28,46 +31,36 @@ export const HeroBlock: BlockDefinition = {
     );
   },
   render: (props) => {
-    const { align, textAlign, hashTags } = filterTextPropertyHashTags(
-      props.blockText,
-    );
-    const blockText = (props.blockText || placeholderText).split(/\r?\n/);
+    const {
+      items,
+      parameters: { dark, accent, ...parameters },
+    } = parseBlock(props.blockText, parser, {
+      placeholder: placeholderText,
+    });
 
-    let headline,
-      subheadline,
-      button,
-      button2,
-      defaultHeadlineSize = 'xl',
-      defaultSubheadlineSize = 'md',
-      defaultButtonSize = 'sm',
-      defaultSpacing = 2;
+    const { backgroundColor, color } = getBlockThemeColors({ dark, accent });
+
+    const textAlign = getTextAlign(parameters) ?? 'center';
+
+    const [headline, subheadline, button, button2] = items.map(
+      (item) => item.content,
+    );
+
+    let headlineSize = 'xl';
+    let subheadlineSize = 'md';
+    let buttonSize = 'sm';
+    let spacing = 2;
 
     if (props.frame.width > 800 && props.frame.height > 370) {
-      defaultHeadlineSize = '3xl';
-      defaultSubheadlineSize = '2xl';
-      defaultButtonSize = 'lg';
-      defaultSpacing = 4;
+      headlineSize = '3xl';
+      subheadlineSize = '2xl';
+      buttonSize = 'lg';
+      spacing = 4;
     } else if (props.frame.width > 500 && props.frame.height > 270) {
-      defaultHeadlineSize = '2xl';
-      defaultSubheadlineSize = 'lg';
-      defaultButtonSize = 'md';
-      defaultSpacing = 3;
-    }
-
-    if (blockText[0]) {
-      headline = filterTextPropertyHashTags(blockText[0]);
-    }
-
-    if (blockText[1]) {
-      subheadline = filterTextPropertyHashTags(blockText[1]);
-    }
-
-    if (blockText[2]) {
-      button = filterTextPropertyHashTags(blockText[2]);
-    }
-
-    if (blockText[3]) {
-      button2 = filterTextPropertyHashTags(blockText[3]);
+      headlineSize = '2xl';
+      subheadlineSize = 'lg';
+      buttonSize = 'md';
+      spacing = 3;
     }
 
     return (
@@ -75,56 +68,42 @@ export const HeroBlock: BlockDefinition = {
         flexDirection="column"
         height="100%"
         justifyContent="center"
-        paddingX={8}
-        className={getBlockClassName(hashTags)}
+        paddingX={20}
+        backgroundColor={dark || accent ? backgroundColor : undefined}
+        color={color}
       >
-        <VStack align={align ?? 'center'} spacing={defaultSpacing}>
+        <VStack spacing={spacing} align={textAlign}>
           {headline && (
-            <Heading
-              size={defaultHeadlineSize}
-              color={headline.color}
-              fontWeight={headline.fontWeight}
-              fontSize={headline.fontSize}
-              textAlign={textAlign ?? 'center'}
-            >
-              {headline.content}
+            <Heading size={headlineSize} textAlign={textAlign}>
+              {headline}
             </Heading>
           )}
           {subheadline && (
-            <Text
-              color={subheadline.color}
-              fontWeight={subheadline.fontWeight}
-              fontSize={defaultSubheadlineSize ?? subheadline.fontSize}
-              textAlign={textAlign ?? 'center'}
-            >
-              {subheadline.content}
+            <Text fontSize={subheadlineSize} textAlign={textAlign}>
+              {subheadline}
             </Text>
           )}
           <HStack
-            paddingTop={defaultSpacing * 2}
+            paddingTop={spacing * 2}
             spacing={4}
-            justifyContent={align}
+            justifyContent={textAlign}
           >
             {button && (
               <Button
-                size={defaultButtonSize}
-                colorScheme={button.colorScheme ?? 'green'}
-                fontWeight={button.fontWeight}
-                fontSize={button.fontSize}
+                size={buttonSize}
+                colorScheme="green"
                 alignSelf="flex-start"
               >
-                {button.content}
+                {button}
               </Button>
             )}
             {button2 && (
               <Button
-                size={defaultButtonSize}
-                colorScheme={button2.colorScheme}
-                fontWeight={button2.fontWeight}
-                fontSize={button2.fontSize}
+                size={buttonSize}
                 alignSelf="flex-start"
+                color={dark ? 'rgba(0,0,0,0.8)' : undefined}
               >
-                {button2.content}
+                {button2}
               </Button>
             )}
           </HStack>

@@ -11,17 +11,21 @@ import {
 } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterHashTagsAndSlashCommands } from '../parse';
+import { parseBlock } from '../parse';
+import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
+const parser = 'commaSeparated';
+
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
-  globalHashtags: ['dark', 'search', 'title', ...getTailwindClasses()],
+  hashtags: ['dark', 'accent', 'search', 'title'],
   placeholderText,
+  parser,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === headerBarSymbol.symbolID)
@@ -39,68 +43,56 @@ export const HeaderBarBlock: BlockDefinition = {
     );
   },
   render: (props) => {
-    const { content, hashTags } = filterHashTagsAndSlashCommands(
-      props.blockText,
-    );
-    const backgroundColor = hashTags?.includes('dark')
-      ? 'rgba(11,21,48,0.9)'
-      : 'rgba(255,255,255,0.9)';
-    const borderBottomColor = hashTags?.includes('dark')
-      ? 'transparent'
-      : '#eee';
-    const searchBackgroundColor = hashTags?.includes('dark')
-      ? 'rgba(0,0,0,0.2)'
-      : 'rgba(0,0,0,0.02)';
-    const color = hashTags?.includes('dark') ? '#fff' : '#000';
-    const links = (content || placeholderText)
-      .split(',')
-      .map((link) => link.trim());
-    if (links.filter((link) => link[0] === '*').length === 0) {
-      links[0] = `*${links[0]}`;
-    }
-    const hasTitle = hashTags.includes('title');
+    const {
+      items,
+      parameters: { dark, title, accent, search, ...globalParameters },
+    } = parseBlock(props.blockText, parser, {
+      placeholder: placeholderText,
+    });
 
-    const hasTailwindBackground = hashTags.some((value) =>
-      value.startsWith('bg-'),
-    );
-    const hasTailwindColor = hashTags.some((value) =>
-      value.startsWith('text-'),
-    );
-    const hasTailwindBorder = hashTags.some((value) =>
-      value.startsWith('border-'),
-    );
+    const hashtags = Object.keys(globalParameters);
+    const hasActiveItem = items.some((item) => item.parameters.active);
+
+    const {
+      backgroundColor,
+      borderBottomColor,
+      searchBackgroundColor,
+      color,
+      activeLinkBackgroundColor,
+    } = getBlockThemeColors({ dark, accent });
 
     return (
       <Flex
         alignItems="center"
-        borderBottomWidth={hasTailwindBorder ? undefined : 1}
-        borderBottomColor={hasTailwindBorder ? undefined : borderBottomColor}
+        borderBottomWidth={1}
+        borderBottomColor={borderBottomColor}
         height={`${props.frame.height}px`}
         paddingX="5px"
-        backgroundColor={hasTailwindBackground ? undefined : backgroundColor}
+        backgroundColor={backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"
         overflow="hidden"
-        className={getBlockClassName(hashTags)}
+        className={getBlockClassName(hashtags)}
       >
-        {links.map((link, index) => {
-          let backgroundColor = 'transparent';
-          if (link[0] === '*') {
-            backgroundColor = hashTags?.includes('dark')
-              ? 'rgba(0,0,0,0.5)'
-              : 'rgba(0,0,0,0.1)';
-          }
-          const [, linkText] = /^\*?(.*)/.exec(link) || [];
+        {items.map(({ content, parameters: { active, ...rest } }, index) => {
+          const className = getBlockClassName(Object.keys(rest));
 
-          if (hasTitle && index === 0) {
+          let backgroundColor = 'transparent';
+
+          if (active || (!hasActiveItem && index === 0)) {
+            backgroundColor = activeLinkBackgroundColor;
+          }
+
+          if (title && index === 0) {
             return (
               <Heading
-                color={hasTailwindColor ? undefined : color}
+                color={color}
                 fontWeight="semibold"
                 size="sm"
                 margin="0 18px 0 15px"
+                className={className}
               >
-                {linkText}
+                {content}
               </Heading>
             );
           }
@@ -113,14 +105,15 @@ export const HeaderBarBlock: BlockDefinition = {
               fontSize="12px"
               fontWeight="medium"
               backgroundColor={backgroundColor}
-              color={hasTailwindColor ? undefined : color}
+              color={color}
+              className={className}
             >
-              {linkText}
+              {content}
             </Link>
           );
         })}
         <Spacer />
-        {hashTags?.includes('search') && (
+        {search && (
           <InputGroup
             flex="0.35"
             marginX="10px"
@@ -130,17 +123,9 @@ export const HeaderBarBlock: BlockDefinition = {
           >
             <InputLeftElement
               pointerEvents="none"
-              children={
-                <SearchIcon
-                  color={hasTailwindColor ? undefined : color}
-                  opacity={0.8}
-                />
-              }
+              children={<SearchIcon color={color} opacity={0.8} />}
             />
-            <Input
-              placeholder="Search"
-              _placeholder={{ color: 'rgba(0,0,0,0.3)' }}
-            />
+            <Input placeholder="Search" />
           </InputGroup>
         )}
         <Avatar size={props.frame.height < 60 ? 'xs' : 'sm'} marginX="10px" />
