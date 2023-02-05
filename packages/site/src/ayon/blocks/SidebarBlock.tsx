@@ -34,7 +34,6 @@ export const SidebarBlock: BlockDefinition = {
       globalParameters: { dark, title, ...globalParameters },
     } = parseBlock(props.blockText, 'newlineSeparated', {
       placeholder: placeholderText,
-      isGlobalParameter: (key) => globalHashtags.includes(key),
     });
 
     const hashTags = Object.keys(globalParameters);

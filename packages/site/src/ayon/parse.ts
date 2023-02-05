@@ -1,5 +1,4 @@
 import { SystemProps, theme } from '@chakra-ui/react';
-import { partition } from 'noya-utils';
 
 export type ParsedBlockItemParameters = Record<string, string | boolean>;
 
@@ -30,7 +29,7 @@ function splitItems(text: string, type: 'commaSeparated' | 'newlineSeparated') {
   return items.map((item) => item.trim());
 }
 
-export function parseBlockLine(text: string): ParsedBlockItem {
+export function parseBlockItem(text: string): ParsedBlockItem {
   text = text.trim();
 
   const active = text.startsWith('*');
@@ -39,13 +38,10 @@ export function parseBlockLine(text: string): ParsedBlockItem {
     text = text.slice(1);
   }
 
-  const withHashtags = extractHashtagParameters(text);
-
   return {
-    content: withHashtags.content,
+    content: text,
     parameters: {
       ...(active && { active }),
-      ...withHashtags.parameters,
     },
   };
 }
@@ -56,31 +52,26 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
 ): ParsedBlockTypeMap[K] {
   text = filterSlashCommands(text);
 
+  const extracted = extractHashtagParameters(text);
+
+  text = extracted.content;
+
+  const globalParameters = extracted.parameters;
+
   switch (type) {
     case 'newlineSeparated': {
-      const positionalItems = splitItems(text, 'newlineSeparated').map(
-        parseBlockLine,
-      );
-
-      const [nonEmptyItems, emptyItems] = partition(
-        positionalItems,
-        (item) => item.content !== '',
-      );
-
-      const globalParameters = mergeObjects<ParsedBlockItemParameters>(
-        emptyItems.map((item) => item.parameters),
-      );
+      const items = splitItems(text, 'newlineSeparated').map(parseBlockItem);
 
       // We include empty positional items to preserve empty lines between lines with content.
       // Empty lines at the end are still trimmed
-      const content = positionalItems
+      const content = items
         .map((item) => item.content)
         .join('\n')
         .trimEnd();
 
       const block: ParsedCompositeBlock = {
         content,
-        items: nonEmptyItems,
+        items,
         globalParameters,
       };
 
@@ -89,38 +80,34 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
     case 'commaSeparated': {
       const lines = splitItems(text, 'newlineSeparated');
 
-      const positionalItems = splitItems(lines[0], 'commaSeparated').map(
-        parseBlockLine,
-      );
+      const items = splitItems(lines[0], 'commaSeparated').map(parseBlockItem);
 
-      // If there's only one positional item, and it's empty, treat its parameters as global
-      if (positionalItems.length === 1 && positionalItems[0].content === '') {
+      // If there's only one positional item and it's empty, ignore it
+      if (items.length === 1 && items[0].content === '') {
         const block: ParsedCompositeBlock = {
           content: '',
           items: [],
-          globalParameters: positionalItems[0].parameters,
+          globalParameters,
         };
 
         return block as ParsedBlockTypeMap[K];
       }
 
-      const globalParameters = mergeObjects<ParsedBlockItemParameters>(
-        lines
-          .slice(1)
-          .map(parseBlockLine)
-          .map((item) => item.parameters),
-      );
-
       const block: ParsedCompositeBlock = {
-        content: positionalItems.map((item) => item.content).join(','),
-        items: positionalItems,
+        content: items.map((item) => item.content).join(','),
+        items,
         globalParameters,
       };
 
       return block as ParsedBlockTypeMap[K];
     }
     case 'regular': {
-      const block = parseBlockLine(text);
+      const item = parseBlockItem(text);
+
+      const block: ParsedBlockItem = {
+        content: item.content,
+        parameters: mergeObjects([globalParameters, item.parameters]),
+      };
 
       return block as ParsedBlockTypeMap[K];
     }
@@ -135,10 +122,8 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
   type: K,
   {
     placeholder,
-    isGlobalParameter,
   }: {
     placeholder?: string;
-    isGlobalParameter?: (key: string) => boolean;
   } = {},
 ): ParsedBlockTypeMap[K] {
   switch (type) {
@@ -156,25 +141,12 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
           type,
         ) as ParsedCompositeBlock;
 
-        // console.log('orig', placeholder, block.items);
-
         block.content = parsedPlaceholder.content;
         block.items = parsedPlaceholder.items;
         block.globalParameters = mergeObjects([
           parsedPlaceholder.globalParameters,
           block.globalParameters,
         ]);
-      }
-
-      if (isGlobalParameter) {
-        for (const item of block.items) {
-          for (const [key, value] of Object.entries(item.parameters)) {
-            if (isGlobalParameter(key)) {
-              block.globalParameters[key] = value;
-              delete item.parameters[key];
-            }
-          }
-        }
       }
 
       return block as ParsedBlockTypeMap[K];

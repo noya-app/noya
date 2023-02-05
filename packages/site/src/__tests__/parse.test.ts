@@ -27,12 +27,14 @@ const sidebarBlock: ParsedCompositeBlock = {
       content: 'Dashboard',
       parameters: {
         active: true,
-        booleanParameter: true,
-        keywordParameter: 'value',
       },
     },
     {
       content: 'Updates',
+      parameters: {},
+    },
+    {
+      content: '',
       parameters: {},
     },
     {
@@ -41,6 +43,8 @@ const sidebarBlock: ParsedCompositeBlock = {
     },
   ],
   globalParameters: {
+    booleanParameter: true,
+    keywordParameter: 'value',
     globalParameter: true,
     globalParameter2: true,
     globalParameter3: true,
@@ -91,35 +95,6 @@ test('newline separated with placeholder and global parameter', () => {
   });
 });
 
-test('list item parameters to global', () => {
-  expect(
-    parseBlock(
-      'Dashboard #booleanParameter #dark\nPlatform',
-      'newlineSeparated',
-      {
-        isGlobalParameter: (parameter) => parameter === 'dark',
-      },
-    ),
-  ).toEqual<ParsedCompositeBlock>({
-    content: 'Dashboard\nPlatform',
-    items: [
-      {
-        content: 'Dashboard',
-        parameters: {
-          booleanParameter: true,
-        },
-      },
-      {
-        content: 'Platform',
-        parameters: {},
-      },
-    ],
-    globalParameters: {
-      dark: true,
-    },
-  });
-});
-
 const headerbarText = `Home #booleanParameter, *Projects ,     Team
 #globalParameter #globalParameter2
 #globalParameter3
@@ -133,9 +108,7 @@ test('comma separated', () => {
     items: [
       {
         content: 'Home',
-        parameters: {
-          booleanParameter: true,
-        },
+        parameters: {},
       },
       {
         content: 'Projects',
@@ -149,6 +122,7 @@ test('comma separated', () => {
       },
     ],
     globalParameters: {
+      booleanParameter: true,
       globalParameter: true,
       globalParameter2: true,
       globalParameter3: true,
@@ -166,7 +140,7 @@ test('comma separated parameters-only', () => {
   });
 });
 
-test('comma separated with placeholder', () => {
+test('comma separated parameters-only with placeholder', () => {
   expect(
     parseBlock('#dark', 'commaSeparated', {
       placeholder: 'Home',

@@ -88,8 +88,6 @@ export const HeaderBarBlock: BlockDefinition = {
       globalParameters: { dark, title, accent, search, ...globalParameters },
     } = parseBlock(props.blockText, 'commaSeparated', {
       placeholder: placeholderText,
-      isGlobalParameter: (key) =>
-        !/^(font|text)/.test(key) && globalHashtags.includes(key),
     });
 
     const hashTags = Object.keys(globalParameters);
