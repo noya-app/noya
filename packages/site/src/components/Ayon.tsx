@@ -16,8 +16,10 @@ import {
   BoxIcon,
   ChevronDownIcon,
   CodeIcon,
+  FigmaLogoIcon,
   FileIcon,
   ImageIcon,
+  SketchLogoIcon,
   TransformIcon,
   ViewVerticalIcon,
 } from 'noya-icons';
@@ -64,7 +66,7 @@ Object.entries(ChakraUI).forEach(([key, value]) => {
   Components.set(value, key);
 });
 
-export type ExportType = NoyaAPI.ExportFormat | 'react';
+export type ExportType = NoyaAPI.ExportFormat | 'figma' | 'sketch' | 'react';
 
 function Workspace({
   uploadAsset,
@@ -82,7 +84,7 @@ function Workspace({
   name: string;
   onChangeName?: (name: string) => void;
   viewType?: ViewType;
-  downloadFile?: (type: NoyaAPI.ExportFormat, size: Size) => void;
+  downloadFile?: (type: NoyaAPI.ExportFormat, size: Size, name: string) => void;
 } & Pick<
   ComponentProps<typeof Content>,
   'uploadAsset' | 'padding' | 'canvasRendererType'
@@ -162,18 +164,36 @@ function Workspace({
             },
             SEPARATOR_ITEM,
             {
+              value: 'figma',
+              title: 'Figma',
+              icon: <FigmaLogoIcon />,
+            },
+            {
+              value: 'sketch',
+              title: 'Sketch',
+              icon: <SketchLogoIcon />,
+            },
+            SEPARATOR_ITEM,
+            {
               value: 'react',
               title: 'React Code',
               icon: <CodeIcon />,
             },
           ]}
           onSelect={async (value) => {
+            if (!artboard) return;
+
             switch (value) {
               case 'png':
               case 'pdf':
               case 'svg':
-                if (!artboard) return;
-                downloadFile?.(value, artboard.frame);
+                downloadFile?.(value, artboard.frame, `Design.${value}`);
+                return;
+              case 'figma':
+                downloadFile?.('svg', artboard.frame, `Drag into Figma.svg`);
+                return;
+              case 'sketch':
+                downloadFile?.('pdf', artboard.frame, `Drag into Sketch.pdf`);
                 return;
               case 'react': {
                 const { compile } = await import('noya-compiler');

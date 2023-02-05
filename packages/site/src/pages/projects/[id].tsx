@@ -127,9 +127,9 @@ function FileEditor({ id }: { id: string }) {
   };
 
   const downloadFile = useCallback(
-    async (format: NoyaAPI.ExportFormat, size: Size) => {
+    async (format: NoyaAPI.ExportFormat, size: Size, name: string) => {
       const url = client.files.download.url(id, format, size);
-      downloadUrl(url, `download.${format}`);
+      downloadUrl(url, name);
     },
     [id, client.files.download],
   );
