@@ -18,7 +18,8 @@ const createHeadingBlock = (
   size: ThemingProps['size'],
 ): BlockDefinition => ({
   id: symbol.symbolID,
-  globalHashtags: ['left', 'right', 'center', ...tailwindTextClasses],
+  parser: 'regular',
+  hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');

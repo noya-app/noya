@@ -5,6 +5,7 @@ import { inputSymbolId } from './symbols';
 
 export const InputBlock: BlockDefinition = {
   id: inputSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     return <Input value={props.blockText} />;

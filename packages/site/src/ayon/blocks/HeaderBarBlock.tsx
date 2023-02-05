@@ -19,12 +19,13 @@ import { getBlockClassName } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
-const globalHashtags = ['dark', 'accent', 'search', 'title'];
+const parser = 'commaSeparated';
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
-  globalHashtags,
+  hashtags: ['dark', 'accent', 'search', 'title'],
   placeholderText,
+  parser,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === headerBarSymbol.symbolID)
@@ -45,11 +46,11 @@ export const HeaderBarBlock: BlockDefinition = {
     const {
       items,
       parameters: { dark, title, accent, search, ...globalParameters },
-    } = parseBlock(props.blockText, 'commaSeparated', {
+    } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
 
-    const hashTags = Object.keys(globalParameters);
+    const hashtags = Object.keys(globalParameters);
     const hasActiveItem = items.some((item) => item.parameters.active);
 
     const {
@@ -60,28 +61,18 @@ export const HeaderBarBlock: BlockDefinition = {
       activeLinkBackgroundColor,
     } = getBlockThemeColors({ dark, accent });
 
-    const hasTailwindBackground = hashTags.some((value) =>
-      value.startsWith('bg-'),
-    );
-    const hasTailwindColor = hashTags.some((value) =>
-      value.startsWith('text-'),
-    );
-    const hasTailwindBorder = hashTags.some((value) =>
-      value.startsWith('border-'),
-    );
-
     return (
       <Flex
         alignItems="center"
-        borderBottomWidth={hasTailwindBorder ? undefined : 1}
-        borderBottomColor={hasTailwindBorder ? undefined : borderBottomColor}
+        borderBottomWidth={1}
+        borderBottomColor={borderBottomColor}
         height={`${props.frame.height}px`}
         paddingX="5px"
-        backgroundColor={hasTailwindBackground ? undefined : backgroundColor}
+        backgroundColor={backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"
         overflow="hidden"
-        className={getBlockClassName(hashTags)}
+        className={getBlockClassName(hashtags)}
       >
         {items.map(({ content, parameters: { active, ...rest } }, index) => {
           const className = getBlockClassName(Object.keys(rest));
@@ -95,7 +86,7 @@ export const HeaderBarBlock: BlockDefinition = {
           if (title && index === 0) {
             return (
               <Heading
-                color={hasTailwindColor ? undefined : color}
+                color={color}
                 fontWeight="semibold"
                 size="sm"
                 margin="0 18px 0 15px"
@@ -114,7 +105,7 @@ export const HeaderBarBlock: BlockDefinition = {
               fontSize="12px"
               fontWeight="medium"
               backgroundColor={backgroundColor}
-              color={hasTailwindColor ? undefined : color}
+              color={color}
               className={className}
             >
               {content}
@@ -132,17 +123,9 @@ export const HeaderBarBlock: BlockDefinition = {
           >
             <InputLeftElement
               pointerEvents="none"
-              children={
-                <SearchIcon
-                  color={hasTailwindColor ? undefined : color}
-                  opacity={0.8}
-                />
-              }
+              children={<SearchIcon color={color} opacity={0.8} />}
             />
-            <Input
-              placeholder="Search"
-              _placeholder={{ color: 'rgba(0,0,0,0.3)' }}
-            />
+            <Input placeholder="Search" />
           </InputGroup>
         )}
         <Avatar size={props.frame.height < 60 ? 'xs' : 'sm'} marginX="10px" />

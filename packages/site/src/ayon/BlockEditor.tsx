@@ -26,7 +26,6 @@ import {
 } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import styled from 'styled-components';
 import { Blocks } from './blocks';
 
 import {
@@ -39,26 +38,9 @@ import {
   heading6SymbolId,
   textSymbolId,
 } from './blocks/symbols';
-import { filterHashTagsAndSlashCommands } from './parse';
-import { Stacking } from './stacking';
+import { parseBlock } from './parse';
 import { InferredBlockTypeResult } from './types';
 import { useCompletionMenu } from './useCompletionMenu';
-
-export const PositioningElement = styled.div({
-  top: '-9999px',
-  left: '-9999px',
-  position: 'absolute',
-  zIndex: Stacking.level.menu,
-});
-
-export const ContentElement = styled.div(({ theme }) => ({
-  ...theme.textStyles.small,
-  borderRadius: 4,
-  overflow: 'hidden',
-  backgroundColor: theme.colors.popover.background,
-  boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
-  color: theme.colors.textMuted,
-}));
 
 export interface IBlockEditor {
   focus: () => void;
@@ -203,6 +185,8 @@ export const BlockEditor = forwardRef(function BlockEditor(
     id: symbol.symbolID,
   }));
 
+  const blockDefinition = Blocks[layer.symbolID];
+
   const symbolCompletionMenu = useCompletionMenu({
     editor,
     possibleItems: symbolItems,
@@ -216,17 +200,15 @@ export const BlockEditor = forwardRef(function BlockEditor(
         'setBlockText',
         layer.do_objectID,
         newText,
-        filterHashTagsAndSlashCommands(newText).content,
+        parseBlock(newText, blockDefinition.parser).content,
       );
     },
   });
 
-  const blockDefinition = Blocks[layer.symbolID];
-
   const hashCompletionMenu = useCompletionMenu({
     editor,
     showExactMatch: false,
-    possibleItems: (blockDefinition?.globalHashtags ?? []).map((item) => ({
+    possibleItems: (blockDefinition?.hashtags ?? []).map((item) => ({
       name: item,
       id: item,
       icon: (
@@ -257,7 +239,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         'setBlockText',
         layer.do_objectID,
         newText,
-        filterHashTagsAndSlashCommands(newText).content,
+        parseBlock(newText, blockDefinition.parser).content,
       );
     },
   });
@@ -326,7 +308,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
             'setBlockText',
             layer.do_objectID,
             newText,
-            filterHashTagsAndSlashCommands(newText).content,
+            parseBlock(newText, blockDefinition.parser).content,
           );
 
           return;
@@ -356,7 +338,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           'setBlockText',
           layer.do_objectID,
           text,
-          filterHashTagsAndSlashCommands(text).content,
+          parseBlock(text, blockDefinition.parser).content,
         );
 
         // Lock the block type when the user starts editing the text

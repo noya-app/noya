@@ -5,8 +5,8 @@ import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Editor, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
-import { ContentElement, PositioningElement } from './BlockEditor';
 import { fuzzyFilter, fuzzyTokenize, IToken } from './fuzzyScorer';
+import { IModalMenu, ModalMenu } from './ModalMenu';
 
 type CompletionItem = { id: string; name: string; icon?: ReactNode };
 
@@ -34,8 +34,8 @@ export function useCompletionMenu({
   const [range, setRange] = useState<Range | null>(null);
   const [index, setIndex] = useState(0);
   const [search, setSearch] = useState('');
-  const menuPositionRef = React.useRef<HTMLDivElement>(null);
-  const menuItemsRef = React.useRef<ListView.VirtualizedList>(null);
+  const modalMenuRef = React.useRef<IModalMenu>(null);
+  const listRef = React.useRef<ListView.VirtualizedList>(null);
 
   const select = useCallback(
     (target: Range, item: CompletionItem) => {
@@ -48,7 +48,7 @@ export function useCompletionMenu({
   useEffect(() => {
     if (!range) return;
 
-    menuItemsRef.current?.scrollToIndex(index);
+    listRef.current?.scrollToIndex(index);
   }, [index, range]);
 
   const results = fuzzyFilter({
@@ -70,63 +70,59 @@ export function useCompletionMenu({
     <>
       {shouldShow && (
         <Portal.Root asChild>
-          <PositioningElement ref={menuPositionRef}>
-            <ContentElement style={{ ...listSize, display: 'flex' }}>
-              <ListView.Root
-                ref={menuItemsRef}
-                scrollable
-                virtualized={listSize}
-                keyExtractor={(item) => item.id}
-                data={results}
-                renderItem={(item, i) => {
-                  const tokens = fuzzyTokenize({
-                    item: item.name,
-                    itemScore: item,
-                  });
+          <ModalMenu ref={modalMenuRef} size={listSize}>
+            <ListView.Root
+              ref={listRef}
+              scrollable
+              virtualized={listSize}
+              keyExtractor={(item) => item.id}
+              data={results}
+              renderItem={(item, i) => {
+                const tokens = fuzzyTokenize({
+                  item: item.name,
+                  itemScore: item,
+                });
 
-                  return (
-                    <ListView.Row
-                      key={item.id}
-                      selected={i === index}
-                      onPress={() => select(range, item)}
-                      onHoverChange={(hovered) => {
-                        if (hovered) {
-                          setIndex(i);
-                        }
-                      }}
-                    >
-                      {tokens.map((token, j) => (
-                        <Token key={j} type={token.type}>
-                          {token.text}
-                        </Token>
-                      ))}
-                      {item.icon && (
-                        <>
-                          <Spacer.Horizontal />
-                          {item.icon}
-                        </>
-                      )}
-                    </ListView.Row>
-                  );
-                }}
-              />
-            </ContentElement>
-          </PositioningElement>
+                return (
+                  <ListView.Row
+                    key={item.id}
+                    selected={i === index}
+                    onPress={() => select(range, item)}
+                    onHoverChange={(hovered) => {
+                      if (hovered) {
+                        setIndex(i);
+                      }
+                    }}
+                  >
+                    {tokens.map((token, j) => (
+                      <Token key={j} type={token.type}>
+                        {token.text}
+                      </Token>
+                    ))}
+                    {item.icon && (
+                      <>
+                        <Spacer.Horizontal />
+                        {item.icon}
+                      </>
+                    )}
+                  </ListView.Row>
+                );
+              }}
+            />
+          </ModalMenu>
         </Portal.Root>
       )}
     </>
   );
 
   useEffect(() => {
-    const el = menuPositionRef.current;
-
-    if (!shouldShow || !el) return;
+    if (!shouldShow || !modalMenuRef.current) return;
 
     try {
       const domRange = ReactEditor.toDOMRange(editor, range);
       const rect = domRange.getBoundingClientRect();
-      el.style.top = `${rect.top + window.pageYOffset + 24}px`;
-      el.style.left = `${rect.left + window.pageXOffset}px`;
+
+      modalMenuRef.current.setPosition({ x: rect.left, y: rect.top });
     } catch {}
   }, [editor, results.length, index, search, range, shouldShow]);
 

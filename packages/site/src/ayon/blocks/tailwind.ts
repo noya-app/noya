@@ -36,7 +36,7 @@ export const [tailwindTextClasses, tailwindBlockClasses] = partition(
   (item) => isTextClassRE.test(item),
 );
 
-export function getBlockClassName(hashTags: string[]) {
-  const className = hashTags.filter(isSupportedTailwindClass).join(' ');
+export function getBlockClassName(hashtags: string[]) {
+  const className = hashtags.filter(isSupportedTailwindClass).join(' ');
   return className || undefined;
 }

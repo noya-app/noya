@@ -4,14 +4,13 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { accentColor } from './blockTheme';
 import { boxSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName, tailwindBlockClasses } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   id: boxSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
-  globalHashtags: getTailwindClasses([
-    { pattern: /^(shadow|border|rounded|opacity|bg|blur).*/ },
-  ]),
+  hashtags: tailwindBlockClasses,
   render: (props) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);

@@ -15,9 +15,12 @@ Settings
 
 const globalHashtags = ['dark', 'accent', 'title'];
 
+const parser = 'newlineSeparated';
+
 export const SidebarBlock: BlockDefinition = {
   id: sidebarSymbolId,
-  globalHashtags,
+  parser,
+  hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
@@ -32,7 +35,7 @@ export const SidebarBlock: BlockDefinition = {
     const {
       items,
       parameters: { dark, accent, title },
-    } = parseBlock(props.blockText, 'newlineSeparated', {
+    } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
 

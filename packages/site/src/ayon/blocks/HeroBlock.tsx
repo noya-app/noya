@@ -13,9 +13,12 @@ Get started
 Learn more
 `.trim();
 
+const parser = 'newlineSeparated';
+
 export const HeroBlock: BlockDefinition = {
   id: heroSymbolId,
-  globalHashtags: ['left', 'right', 'center', 'dark', 'accent'],
+  parser,
+  hashtags: ['left', 'right', 'center', 'dark', 'accent'],
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (siblingBlocks.find((block) => block.symbolId === heroSymbol.symbolID)) {
@@ -31,7 +34,7 @@ export const HeroBlock: BlockDefinition = {
     const {
       items,
       parameters: { dark, accent, ...parameters },
-    } = parseBlock(props.blockText, 'newlineSeparated', {
+    } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
 

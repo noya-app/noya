@@ -6,6 +6,7 @@ import { avatarSymbolId } from './symbols';
 
 export const AvatarBlock: BlockDefinition = {
   id: avatarSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 30, 30, 120, 120) &&
     isApproximatelySquare(frame, 0.2)

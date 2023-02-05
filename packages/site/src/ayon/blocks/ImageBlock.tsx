@@ -2,18 +2,21 @@ import { Image } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import React from 'react';
-import { filterHashTagsAndSlashCommands } from '../parse';
+import { parseBlock } from '../parse';
 import { imageSymbolId } from './symbols';
 import { getBlockClassName, tailwindBlockClasses } from './tailwind';
 
 export const ImageBlock: BlockDefinition = {
   id: imageSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
-  globalHashtags: tailwindBlockClasses,
+  hashtags: ['contain', 'fill', ...tailwindBlockClasses],
   render: (props) => {
-    const { content, hashTags } = filterHashTagsAndSlashCommands(
-      props.blockText,
-    );
+    const {
+      content,
+      parameters: { contain, fill, ...parameters },
+    } = parseBlock(props.blockText, 'regular');
+    const hashtags = Object.keys(parameters);
 
     return (
       <Image
@@ -22,11 +25,11 @@ export const ImageBlock: BlockDefinition = {
             ? content
             : props.resolvedBlockData?.resolvedText
         }
-        fit="cover"
+        fit={contain ? 'contain' : fill ? 'fill' : 'cover'}
         align="middle"
         w="100%"
         h="100%"
-        className={getBlockClassName(hashTags)}
+        className={getBlockClassName(hashtags)}
       />
     );
   },

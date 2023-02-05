@@ -6,6 +6,7 @@ import { iconSymbolId } from './symbols';
 
 export const IconBlock: BlockDefinition = {
   id: iconSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 10, 10, 90, 90) &&
     isApproximatelySquare(frame, 0.2)

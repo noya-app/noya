@@ -5,6 +5,7 @@ import { switchSymbolId } from './symbols';
 
 export const SwitchBlock: BlockDefinition = {
   id: switchSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => <Switch />,
 };

@@ -49,9 +49,10 @@ export type InferBlockProps = {
 
 export type BlockDefinition = {
   id: string;
+  parser: 'regular' | 'newlineSeparated' | 'commaSeparated';
   infer: (props: InferBlockProps) => number;
   render: (props: BlockProps) => ReactNode;
-  globalHashtags?: string[];
+  hashtags?: string[];
   placeholderText?: string;
 };
 

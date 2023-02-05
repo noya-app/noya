@@ -7,6 +7,7 @@ import { buttonSymbolId } from './symbols';
 
 export const ButtonBlock: BlockDefinition = {
   id: buttonSymbolId,
+  parser: 'regular',
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
   render: (props) => {
