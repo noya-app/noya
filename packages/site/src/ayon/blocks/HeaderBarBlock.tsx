@@ -12,7 +12,7 @@ import {
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
-import { accentColor } from './blockTheme';
+import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { headerBarSymbol, headerBarSymbolId } from './symbols';
 import { getBlockClassName } from './tailwind';
@@ -20,47 +20,6 @@ import { getBlockClassName } from './tailwind';
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
 const globalHashtags = ['dark', 'accent', 'search', 'title'];
-
-function getColors({ dark, accent }: { dark: boolean; accent: boolean }) {
-  const permutation = `${dark ? 'dark' : 'light'}${
-    accent ? '-accent' : ''
-  }` as const;
-
-  switch (permutation) {
-    case 'dark':
-      return {
-        backgroundColor: 'rgba(11,21,48,0.9)',
-        borderBottomColor: 'transparent',
-        searchBackgroundColor: 'rgba(0,0,0,0.2)',
-        color: '#fff',
-        activeLinkBackgroundColor: 'rgba(255,255,255,0.1)',
-      };
-    case 'light':
-      return {
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        borderBottomColor: '#eee',
-        searchBackgroundColor: 'rgba(0,0,0,0.02)',
-        color: '#000',
-        activeLinkBackgroundColor: 'rgba(0,0,0,0.1)',
-      };
-    case 'dark-accent':
-      return {
-        backgroundColor: accentColor[800],
-        borderBottomColor: 'transparent',
-        searchBackgroundColor: 'rgba(0,0,0,0.2)',
-        color: '#fff',
-        activeLinkBackgroundColor: 'rgba(255,255,255,0.1)',
-      };
-    case 'light-accent':
-      return {
-        backgroundColor: accentColor[50],
-        borderBottomColor: 'rgba(0,0,0,0.05)',
-        searchBackgroundColor: 'rgba(0,0,0,0.02)',
-        color: 'rgba(0,0,0,0.8)',
-        activeLinkBackgroundColor: accentColor[100],
-      };
-  }
-}
 
 export const HeaderBarBlock: BlockDefinition = {
   id: headerBarSymbolId,
@@ -85,7 +44,7 @@ export const HeaderBarBlock: BlockDefinition = {
   render: (props) => {
     const {
       items,
-      globalParameters: { dark, title, accent, search, ...globalParameters },
+      parameters: { dark, title, accent, search, ...globalParameters },
     } = parseBlock(props.blockText, 'commaSeparated', {
       placeholder: placeholderText,
     });
@@ -99,7 +58,7 @@ export const HeaderBarBlock: BlockDefinition = {
       searchBackgroundColor,
       color,
       activeLinkBackgroundColor,
-    } = getColors({ dark: !!dark, accent: !!accent });
+    } = getBlockThemeColors({ dark, accent });
 
     const hasTailwindBackground = hashTags.some((value) =>
       value.startsWith('bg-'),

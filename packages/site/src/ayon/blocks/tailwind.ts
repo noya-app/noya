@@ -1,3 +1,4 @@
+import { partition } from 'noya-utils';
 import { SafelistConfig } from 'tailwindcss/types/config';
 
 const allClassNames = (
@@ -28,6 +29,14 @@ export function isSupportedTailwindClass(className: string) {
   return allClassNamesSet.has(className);
 }
 
+const isTextClassRE = /^(text|font)/;
+
+export const [tailwindTextClasses, tailwindBlockClasses] = partition(
+  allClassNames,
+  (item) => isTextClassRE.test(item),
+);
+
 export function getBlockClassName(hashTags: string[]) {
-  return hashTags.filter(isSupportedTailwindClass).join(' ');
+  const className = hashTags.filter(isSupportedTailwindClass).join(' ');
+  return className || undefined;
 }

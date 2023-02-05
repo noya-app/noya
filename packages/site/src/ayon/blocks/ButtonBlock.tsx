@@ -1,7 +1,7 @@
 import { Button } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterTextPropertyHashTags } from '../parse';
+import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
 import { buttonSymbolId } from './symbols';
 
@@ -10,8 +10,8 @@ export const ButtonBlock: BlockDefinition = {
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
   render: (props) => {
-    const { content, colorScheme, fontWeight, fontSize } =
-      filterTextPropertyHashTags(props.blockText);
+    const { content } = parseBlock(props.blockText, 'regular');
+
     let size;
     if (props.frame.height < 30) {
       size = 'xs' as const;
@@ -20,14 +20,9 @@ export const ButtonBlock: BlockDefinition = {
     } else {
       size = 'md' as const;
     }
+
     return (
-      <Button
-        colorScheme={colorScheme}
-        fontWeight={fontWeight}
-        fontSize={fontSize}
-        size={size}
-        isFullWidth
-      >
+      <Button size={size} isFullWidth>
         {content}
       </Button>
     );

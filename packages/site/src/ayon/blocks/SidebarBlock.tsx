@@ -2,9 +2,9 @@ import { Heading, Link, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
+import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { sidebarSymbol, sidebarSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
 
 const placeholderText = `
 *Dashboard 
@@ -13,7 +13,7 @@ Billing
 Settings
 `.trim();
 
-const globalHashtags = ['dark', 'title', ...getTailwindClasses()];
+const globalHashtags = ['dark', 'accent', 'title'];
 
 export const SidebarBlock: BlockDefinition = {
   id: sidebarSymbolId,
@@ -31,25 +31,15 @@ export const SidebarBlock: BlockDefinition = {
   render: (props) => {
     const {
       items,
-      globalParameters: { dark, title, ...globalParameters },
+      parameters: { dark, accent, title },
     } = parseBlock(props.blockText, 'newlineSeparated', {
       placeholder: placeholderText,
     });
 
-    const hashTags = Object.keys(globalParameters);
     const hasActiveItem = items.some((item) => item.parameters.active);
 
-    const backgroundColor = dark
-      ? 'rgba(11,21,48,0.85)'
-      : 'rgba(240,240,240,0.85)';
-    const color = dark ? '#fff' : '#000';
-
-    const hasTailwindBackground = hashTags.some((value) =>
-      value.startsWith('bg-'),
-    );
-    const hasTailwindColor = hashTags.some((value) =>
-      value.startsWith('text-'),
-    );
+    const { backgroundColor, color, activeLinkBackgroundColor } =
+      getBlockThemeColors({ dark, accent });
 
     return (
       <VStack
@@ -58,24 +48,23 @@ export const SidebarBlock: BlockDefinition = {
         spacing="5px"
         paddingY="10px"
         paddingX="10px"
-        backgroundColor={hasTailwindBackground ? undefined : backgroundColor}
+        backgroundColor={backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"
-        className={getBlockClassName(hashTags)}
       >
         {items.map(({ content, parameters: { active } }, index) => {
           let backgroundColor = 'transparent';
           let fontWeight = 'normal';
 
           if (active || (!hasActiveItem && index === 0)) {
-            backgroundColor = dark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)';
+            backgroundColor = activeLinkBackgroundColor;
             fontWeight = 'medium';
           }
 
           if (title && index === 0) {
             return (
               <Heading
-                color={hasTailwindColor ? undefined : color}
+                color={color}
                 fontWeight="semibold"
                 size="md"
                 padding="12px 10px"
@@ -92,7 +81,7 @@ export const SidebarBlock: BlockDefinition = {
               fontSize="12px"
               fontWeight={fontWeight}
               backgroundColor={backgroundColor}
-              color={hasTailwindColor ? undefined : color}
+              color={color}
             >
               {content}
             </Link>

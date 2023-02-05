@@ -42,7 +42,7 @@ const sidebarBlock: ParsedCompositeBlock = {
       parameters: {},
     },
   ],
-  globalParameters: {
+  parameters: {
     booleanParameter: true,
     keywordParameter: 'value',
     globalParameter: true,
@@ -70,7 +70,7 @@ test('newline separated with placeholder', () => {
         },
       },
     ],
-    globalParameters: {},
+    parameters: {},
   });
 });
 
@@ -89,7 +89,7 @@ test('newline separated with placeholder and global parameter', () => {
         },
       },
     ],
-    globalParameters: {
+    parameters: {
       dark: true,
     },
   });
@@ -121,7 +121,7 @@ test('comma separated', () => {
         parameters: {},
       },
     ],
-    globalParameters: {
+    parameters: {
       booleanParameter: true,
       globalParameter: true,
       globalParameter2: true,
@@ -134,7 +134,7 @@ test('comma separated parameters-only', () => {
   expect(parseBlock('#dark', 'commaSeparated')).toEqual<ParsedCompositeBlock>({
     content: '',
     items: [],
-    globalParameters: {
+    parameters: {
       dark: true,
     },
   });
@@ -153,7 +153,7 @@ test('comma separated parameters-only with placeholder', () => {
         parameters: {},
       },
     ],
-    globalParameters: {
+    parameters: {
       dark: true,
     },
   });

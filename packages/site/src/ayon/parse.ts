@@ -1,6 +1,8 @@
 import { SystemProps, theme } from '@chakra-ui/react';
 
-export type ParsedBlockItemParameters = Record<string, string | boolean>;
+export type ParsedBlockParameter = string | boolean;
+
+export type ParsedBlockItemParameters = Record<string, ParsedBlockParameter>;
 
 export type ParsedBlockItem = {
   content: string;
@@ -10,7 +12,7 @@ export type ParsedBlockItem = {
 export type ParsedCompositeBlock = {
   content: string;
   items: ParsedBlockItem[];
-  globalParameters: ParsedBlockItemParameters;
+  parameters: ParsedBlockItemParameters;
 };
 
 type ParsedBlockTypeMap = {
@@ -56,7 +58,7 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
 
   text = extracted.content;
 
-  const globalParameters = extracted.parameters;
+  const parameters = extracted.parameters;
 
   switch (type) {
     case 'newlineSeparated': {
@@ -72,7 +74,7 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
       const block: ParsedCompositeBlock = {
         content,
         items,
-        globalParameters,
+        parameters: parameters,
       };
 
       return block as ParsedBlockTypeMap[K];
@@ -87,7 +89,7 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
         const block: ParsedCompositeBlock = {
           content: '',
           items: [],
-          globalParameters,
+          parameters: parameters,
         };
 
         return block as ParsedBlockTypeMap[K];
@@ -96,7 +98,7 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
       const block: ParsedCompositeBlock = {
         content: items.map((item) => item.content).join(','),
         items,
-        globalParameters,
+        parameters: parameters,
       };
 
       return block as ParsedBlockTypeMap[K];
@@ -106,7 +108,7 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
 
       const block: ParsedBlockItem = {
         content: item.content,
-        parameters: mergeObjects([globalParameters, item.parameters]),
+        parameters: mergeObjects([parameters, item.parameters]),
       };
 
       return block as ParsedBlockTypeMap[K];
@@ -143,9 +145,9 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 
         block.content = parsedPlaceholder.content;
         block.items = parsedPlaceholder.items;
-        block.globalParameters = mergeObjects([
-          parsedPlaceholder.globalParameters,
-          block.globalParameters,
+        block.parameters = mergeObjects([
+          parsedPlaceholder.parameters,
+          block.parameters,
         ]);
       }
 
@@ -181,6 +183,14 @@ export function extractHashtagParameters(text: string) {
 
 export function filterSlashCommands(text: string) {
   return text.replaceAll(/\/[A-Za-z0-9\\-]*/g, '');
+}
+
+export function getTextAlign({
+  left,
+  right,
+  center,
+}: ParsedBlockItemParameters) {
+  return left ? 'left' : right ? 'right' : center ? 'center' : undefined;
 }
 
 export function filterHashTagsAndSlashCommands(text: string = ''): {

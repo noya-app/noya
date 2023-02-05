@@ -728,3 +728,6 @@ font-semibold
 font-bold
 font-extrabold
 font-black
+text-left
+text-center
+text-right

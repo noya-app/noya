@@ -19,6 +19,13 @@ module.exports = {
         'blur-{blur}',
         'text-{colors}',
         'font-{fontWeight}',
+        // Text alignment
+        'text-left',
+        'text-center',
+        'text-right',
+        // 'text-justify',
+        // 'text-start',
+        // 'text-end',
       ],
     }),
   ],

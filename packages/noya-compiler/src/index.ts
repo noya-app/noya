@@ -47,10 +47,10 @@ function createJsxElement(
 type SimpleElement = {
   name: string;
   props: Record<string, unknown>;
-  children: SimpleElement[];
+  children: (SimpleElement | string)[];
 };
 
-function createElementCode({
+export function createElementCode({
   name,
   props,
   children,
@@ -78,7 +78,14 @@ function createElementCode({
         }),
       ),
     ),
-    children.map(createElementCode),
+    children.map((child) =>
+      typeof child === 'string'
+        ? ts.factory.createJsxExpression(
+            undefined,
+            ts.factory.createStringLiteral(child),
+          )
+        : createElementCode(child),
+    ),
   );
 }
 
@@ -88,71 +95,82 @@ export interface CompilerConfiguration {
   Components: Map<unknown, string>;
 }
 
-export function compile({ state, Blocks, Components }: CompilerConfiguration) {
+export function createElement(
+  { Blocks, Components }: Pick<CompilerConfiguration, 'Blocks' | 'Components'>,
+  layer: Sketch.SymbolInstance,
+): SimpleElement | undefined {
+  const block = Blocks[layer.symbolID];
+
+  if (!block) return;
+
+  const element = block.render({
+    frame: layer.frame,
+    symbolId: layer.symbolID,
+    blockText: layer.blockText,
+    resolvedBlockData: layer.resolvedBlockData,
+  });
+
+  if (!element || !isValidElement(element)) return;
+
+  function createSimpleElement(
+    element: React.ReactElement,
+  ): SimpleElement | undefined {
+    const name = Components.get(element.type);
+
+    if (!name) return;
+
+    return {
+      name,
+      // Filter out children prop and undefined props
+      props: Object.fromEntries(
+        Object.entries(element.props).filter(
+          ([key, value]) => key !== 'children' && value !== undefined,
+        ),
+      ),
+      children: React.Children.toArray(element.props.children).flatMap(
+        (element): (SimpleElement | string)[] => {
+          if (typeof element === 'string' && element !== '') return [element];
+          const validElement = React.isValidElement(element);
+          if (!validElement) return [];
+          const mapped = createSimpleElement(element);
+          return mapped ? [mapped] : [];
+        },
+      ),
+    };
+  }
+
+  const root = createSimpleElement(element);
+
+  if (!root) return;
+
+  return {
+    name: 'Frame',
+    props: {
+      ...(layer.frame.x !== 0 && { left: layer.frame.x }),
+      ...(layer.frame.y !== 0 && { top: layer.frame.y }),
+      width: layer.frame.width,
+      height: layer.frame.height,
+    },
+    children: [root],
+  };
+}
+
+export function compile(configuration: CompilerConfiguration) {
+  const { state } = configuration;
   const page = Selectors.getCurrentPage(state);
   const artboard = page.layers[0] as Sketch.Artboard;
 
   const components = artboard.layers
     .filter(Layers.isSymbolInstance)
     .flatMap((layer) => {
-      const block = Blocks[layer.symbolID];
-
-      if (!block) return [];
-
-      const element = block.render({
-        frame: layer.frame,
-        symbolId: layer.symbolID,
-        blockText: layer.blockText,
-        resolvedBlockData: layer.resolvedBlockData,
-      });
-
-      if (!element || !isValidElement(element)) return [];
-
-      function createSimpleElement(
-        element: React.ReactElement,
-      ): SimpleElement | undefined {
-        const name = Components.get(element.type);
-
-        if (!name) return;
-
-        return {
-          name,
-          // Filter out children prop and undefined props
-          props: Object.fromEntries(
-            Object.entries(element.props).filter(
-              ([key, value]) => key !== 'children' && value !== undefined,
-            ),
-          ),
-          children: React.Children.toArray(element.props.children)
-            .filter(React.isValidElement)
-            .flatMap((element) => {
-              const mapped = createSimpleElement(element);
-              return mapped ? [mapped] : [];
-            }),
-        };
-      }
-
-      const root = createSimpleElement(element);
-
-      if (!root) return [];
-
-      return [
-        {
-          name: 'Frame',
-          props: {
-            left: layer.frame.x,
-            top: layer.frame.y,
-            width: layer.frame.width,
-            height: layer.frame.height,
-          },
-          children: [root],
-        },
-      ];
+      const element = createElement(configuration, layer);
+      return element ? [element] : [];
     });
 
-  const getChildren = (element: SimpleElement) => {
-    return element.children;
+  const getChildren = (element: SimpleElement | string) => {
+    return typeof element === 'string' ? [] : element.children;
   };
+
   const fakeRoot: SimpleElement = {
     name: 'Frame',
     children: components,
@@ -174,7 +192,9 @@ function Frame(props: React.ComponentProps<typeof Box>) {
       ts.factory.createNamedImports(
         unique(
           flat(fakeRoot, { getChildren })
-            .map((element) => element.name)
+            .map((element) =>
+              typeof element === 'string' ? 'Frame' : element.name,
+            )
             .filter((name) => name !== 'Frame'),
         ).map((name) =>
           ts.factory.createImportSpecifier(
@@ -221,10 +241,10 @@ function Frame(props: React.ComponentProps<typeof Box>) {
   const files = {
     'App.tsx': format(
       [
-        printNodes([imports]),
+        print([imports]),
         `import * as React from "react";`,
         frameComponent,
-        printNodes([func, exports]),
+        print([func, exports]),
       ].join('\n\n'),
     ),
     'package.json': JSON.stringify(
@@ -248,7 +268,7 @@ function Frame(props: React.ComponentProps<typeof Box>) {
   return files;
 }
 
-function printNodes(nodes: ts.Node[]) {
+export function print(nodes: ts.Node | ts.Node[]) {
   const sourceFile = ts.createSourceFile(
     'App.tsx',
     '',
@@ -259,16 +279,18 @@ function printNodes(nodes: ts.Node[]) {
 
   const printer = ts.createPrinter();
 
-  const source = printer.printList(
-    ts.ListFormat.MultiLine,
-    ts.factory.createNodeArray(nodes),
-    sourceFile,
-  );
+  const source = Array.isArray(nodes)
+    ? printer.printList(
+        ts.ListFormat.MultiLine,
+        ts.factory.createNodeArray(nodes),
+        sourceFile,
+      )
+    : printer.printNode(ts.EmitHint.Unspecified, nodes, sourceFile);
 
   return source;
 }
 
-function format(text: string) {
+export function format(text: string) {
   return prettier.format(text, {
     singleQuote: true,
     trailingComma: 'es5',

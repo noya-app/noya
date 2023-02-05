@@ -1,7 +1,8 @@
 import { Box } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { filterHashTagsAndSlashCommands } from '../parse';
+import { parseBlock } from '../parse';
+import { accentColor } from './blockTheme';
 import { boxSymbolId } from './symbols';
 import { getBlockClassName, getTailwindClasses } from './tailwind';
 
@@ -12,21 +13,20 @@ export const BoxBlock: BlockDefinition = {
     { pattern: /^(shadow|border|rounded|opacity|bg|blur).*/ },
   ]),
   render: (props) => {
-    const { content, hashTags } = filterHashTagsAndSlashCommands(
-      props.blockText,
-    );
+    const { content, parameters } = parseBlock(props.blockText, 'regular');
+    const hashtags = Object.keys(parameters);
 
     const color =
       [content]
-        .concat(hashTags)
-        .find((value) => CSS.supports('color', `${value}`)) ?? '#ebfdff';
+        .concat(hashtags)
+        .find((value) => CSS.supports('color', `${value}`)) ?? accentColor[50];
 
     return (
       <Box
         bg={color}
         w="100%"
         h="100%"
-        className={getBlockClassName(hashTags)}
+        className={getBlockClassName(hashtags)}
       />
     );
   },

@@ -4,14 +4,12 @@ import { isExternalUrl } from 'noya-utils';
 import React from 'react';
 import { filterHashTagsAndSlashCommands } from '../parse';
 import { imageSymbolId } from './symbols';
-import { getBlockClassName, getTailwindClasses } from './tailwind';
+import { getBlockClassName, tailwindBlockClasses } from './tailwind';
 
 export const ImageBlock: BlockDefinition = {
   id: imageSymbolId,
   infer: ({ frame, blockText }) => 0.1,
-  globalHashtags: getTailwindClasses([
-    { pattern: /^(shadow|border|rounded|opacity|bg|blur).*/ },
-  ]),
+  globalHashtags: tailwindBlockClasses,
   render: (props) => {
     const { content, hashTags } = filterHashTagsAndSlashCommands(
       props.blockText,
