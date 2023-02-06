@@ -18,13 +18,13 @@ export const ImageBlock: BlockDefinition = {
     } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
 
+    const src = isExternalUrl(content)
+      ? content
+      : props.resolvedBlockData?.resolvedText;
+
     return (
       <Image
-        src={
-          isExternalUrl(content)
-            ? content
-            : props.resolvedBlockData?.resolvedText
-        }
+        src={src}
         fit={contain ? 'contain' : fill ? 'fill' : 'cover'}
         align="middle"
         w="100%"

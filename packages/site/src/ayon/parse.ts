@@ -181,8 +181,39 @@ export function extractHashtagParameters(text: string) {
   };
 }
 
+const urlRegex = /https?:\/\/(?:www\.)?\S*/g;
+const slashRegex = /\/[-a-zA-Z0-9]*/g;
+
 export function filterSlashCommands(text: string) {
-  return text.replaceAll(/\/[A-Za-z0-9\\-]*/g, '');
+  const urlMatches = [...text.matchAll(urlRegex)];
+  const slashMatches = [...text.matchAll(slashRegex)].reverse();
+
+  for (const match of slashMatches) {
+    // If the slash command is inside a URL, ignore it
+    if (
+      urlMatches.some(
+        (urlMatch) =>
+          urlMatch.index !== undefined &&
+          match.index !== undefined &&
+          match.index >= urlMatch.index &&
+          match.index <= urlMatch.index + urlMatch[0].length,
+      )
+    ) {
+      continue;
+    }
+
+    if (match.index !== undefined && match.index > 0) {
+      const previousCharacter = text[match.index - 1];
+
+      if (previousCharacter === '/' || previousCharacter === ':') {
+        continue;
+      }
+    }
+
+    text = text.replace(match[0], '');
+  }
+
+  return text;
 }
 
 export function getTextAlign({

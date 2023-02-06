@@ -14,6 +14,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useState,
 } from 'react';
 import {
   BaseEditor,
@@ -38,7 +39,6 @@ import {
   heading6SymbolId,
   textSymbolId,
 } from './blocks/symbols';
-import { parseBlock } from './parse';
 import { InferredBlockTypeResult } from './types';
 import { useCompletionMenu } from './useCompletionMenu';
 
@@ -147,6 +147,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     blockText,
     blockTypes,
     onChangeBlockType,
+    onChangeBlockText,
     onFocusCanvas,
   }: {
     isEditing: boolean;
@@ -156,6 +157,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     blockText: string;
     blockTypes: InferredBlockTypeResult[];
     onChangeBlockType: (type: DrawableLayerType) => void;
+    onChangeBlockText: (text: string) => void;
     onFocusCanvas: () => void;
   },
   forwardedRef: ForwardedRef<IBlockEditor>,
@@ -165,7 +167,23 @@ export const BlockEditor = forwardRef(function BlockEditor(
   // Creating an editor ref with useLazyValue fixes hot reload
   const editor = useLazyValue(() => withHistory(withReact(createEditor())));
 
-  const descendants = useMemo(() => fromString(blockText), [blockText]);
+  const [internalBlockText, setInternalBlockText] = useState(blockText);
+
+  const setBlockText = useCallback(
+    (text: string) => {
+      setInternalBlockText(text);
+      onChangeBlockText(text);
+    },
+    [onChangeBlockText],
+  );
+
+  const initialValue = useMemo(() => fromString(blockText), [blockText]);
+
+  useEffect(() => {
+    if (internalBlockText === blockText) return;
+
+    editor.children = initialValue;
+  }, [initialValue, editor, internalBlockText, blockText]);
 
   useImperativeHandle(forwardedRef, () => ({
     focus: () => {
@@ -195,13 +213,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
       const newText = toString(editor.children);
 
       onChangeBlockType({ symbolId: item.id });
-      dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
-      dispatch(
-        'setBlockText',
-        layer.do_objectID,
-        newText,
-        parseBlock(newText, blockDefinition.parser).content,
-      );
+      setBlockText(newText);
     },
   });
 
@@ -235,12 +247,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
       const newText = toString(editor.children);
 
-      dispatch(
-        'setBlockText',
-        layer.do_objectID,
-        newText,
-        parseBlock(newText, blockDefinition.parser).content,
-      );
+      setBlockText(newText);
     },
   });
 
@@ -285,10 +292,16 @@ export const BlockEditor = forwardRef(function BlockEditor(
   return (
     <Slate
       editor={editor}
-      value={descendants}
+      value={initialValue}
       // This can fire after the selection has changed, so we need to be explicit
       // about which layer we're modifying when dispatching actions
       onChange={(value) => {
+        const domNode = ReactEditor.toDOMNode(editor, editor);
+
+        // Slate fires a final change event after the editor is blurred.
+        // We should only handle change events if the editor is focused.
+        if (domNode !== document.activeElement) return;
+
         const text = toString(value);
 
         const mdShortcut = textShortcut(
@@ -303,13 +316,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           const newText = toString(editor.children);
 
           onChangeBlockType({ symbolId: BLOCK_TYPE_SHORTCUTS[match] });
-          dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
-          dispatch(
-            'setBlockText',
-            layer.do_objectID,
-            newText,
-            parseBlock(newText, blockDefinition.parser).content,
-          );
+          setBlockText(newText);
 
           return;
         }
@@ -334,12 +341,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           hashCompletionMenu.close();
         }
 
-        dispatch(
-          'setBlockText',
-          layer.do_objectID,
-          text,
-          parseBlock(text, blockDefinition.parser).content,
-        );
+        setBlockText(text);
 
         // Lock the block type when the user starts editing the text
         if (text) {

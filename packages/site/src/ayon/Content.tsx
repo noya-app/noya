@@ -16,6 +16,7 @@ import { isExternalUrl } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
+import { measureImage } from '../utils/measureImage';
 import { Blocks } from './blocks';
 import {
   buttonSymbol,
@@ -73,7 +74,10 @@ export const Content = memo(function Content({
     const images = await Promise.all(
       files.map(async (file) => {
         const data = await file.arrayBuffer();
-        const image = CanvasKit.MakeImageFromEncoded(data);
+        const image =
+          canvasRendererType === 'canvas'
+            ? CanvasKit.MakeImageFromEncoded(data)
+            : await measureImage(data);
         const url = await uploadAsset(data);
         const size = image
           ? { width: image.width(), height: image.height() }
@@ -255,6 +259,17 @@ export const Content = memo(function Content({
                           : buttonSymbol.symbolID,
                         'preserveCurrent',
                       );
+                    }}
+                    onChangeBlockText={(text: string) => {
+                      const BlockDefinition = Blocks[layer.symbolID];
+
+                      dispatch(
+                        'setBlockText',
+                        [layer.do_objectID],
+                        text,
+                        parseBlock(text, BlockDefinition.parser).content,
+                      );
+                      dispatch('setSymbolIdIsFixed', [layer.do_objectID], true);
                     }}
                     uploadAsset={uploadAsset}
                   />

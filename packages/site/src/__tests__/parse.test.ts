@@ -171,3 +171,12 @@ test('regular block', () => {
     },
   });
 });
+
+const imageText = 'http://localhost:31112/api/assets/cldt66zsr0006o21caj89335a';
+
+test('regular block with url', () => {
+  expect(parseBlock(imageText, 'regular')).toEqual<ParsedBlockItem>({
+    content: imageText,
+    parameters: {},
+  });
+});

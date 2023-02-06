@@ -25,9 +25,7 @@ import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { BlockEditor, IBlockEditor } from './BlockEditor';
-import { Blocks } from './blocks';
 import { imageSymbolId } from './blocks/symbols';
-import { parseBlock } from './parse';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 
@@ -129,12 +127,14 @@ export function Widget({
   layer,
   inferBlockTypes,
   onChangeBlockType,
+  onChangeBlockText,
   uploadAsset,
   onFocusCanvas,
 }: {
   layer: Sketch.AnyLayer;
   inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
   onChangeBlockType: (type: DrawableLayerType) => void;
+  onChangeBlockText: (text: string) => void;
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   onFocusCanvas: () => void;
 }) {
@@ -233,8 +233,9 @@ export function Widget({
 
                       const url = await uploadAsset(await file.arrayBuffer());
 
-                      dispatch('setBlockText', undefined, url);
-                      dispatch('setSymbolIdIsFixed', undefined, true);
+                      dispatch('interaction', ['reset']);
+                      dispatch('selectLayer', []);
+                      onChangeBlockText(url);
                     }}
                   />
                 )}
@@ -307,21 +308,12 @@ export function Widget({
                           key={name}
                           variant="thin"
                           onPointerDown={(event) => {
-                            const BlockDefinition = Blocks[layer.symbolID];
-
                             // Prevent default so the textarea doesn't lose focus
                             event.preventDefault();
                             event.stopPropagation();
-                            onChangeBlockType(blockType.type);
 
-                            dispatch(
-                              'setBlockText',
-                              undefined,
-                              blockText,
-                              parseBlock(blockText, BlockDefinition.parser)
-                                .content,
-                            );
-                            dispatch('setSymbolIdIsFixed', undefined, true);
+                            onChangeBlockType(blockType.type);
+                            onChangeBlockText(blockText);
                           }}
                         >
                           {name}
@@ -365,6 +357,7 @@ export function Widget({
           layer={layer}
           parent={parent}
           onChangeBlockType={onChangeBlockType}
+          onChangeBlockText={onChangeBlockText}
           onFocusCanvas={onFocusCanvas}
         />
       </div>
