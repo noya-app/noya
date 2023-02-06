@@ -1,12 +1,7 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import {
-  createRect,
-  createResizeTransform,
-  Size,
-  transformRect,
-} from 'noya-geometry';
+import { createResizeTransform, Size, transformRect } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { BlockProps, Layers, Selectors } from 'noya-state';
 import React, { ComponentProps, useRef } from 'react';
@@ -100,9 +95,10 @@ function DOMRendererContent({
         {state.interactionState.type === 'drawing' && (
           <SymbolRenderer
             key="drawing"
-            frame={createRect(
+            frame={Selectors.getDrawnLayerRect(
               state.interactionState.origin,
               state.interactionState.current,
+              state.interactionState.options,
             )}
             symbolId={
               typeof state.interactionState.shapeType === 'string'

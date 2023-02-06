@@ -1,7 +1,8 @@
 import { ReactEventHandlers } from 'noya-designsystem';
-import { createRect, Point } from 'noya-geometry';
+import { Point } from 'noya-geometry';
 import {
   DrawableLayerType,
+  getDrawnLayerRect,
   getScalingOptions,
   handleActionType,
   InferBlockType,
@@ -58,7 +59,11 @@ export const createDrawingInteraction =
           } else {
             startDrawing(
               options.inferBlockType({
-                frame: createRect(canvasPoint, canvasPoint),
+                frame: getDrawnLayerRect(
+                  canvasPoint,
+                  canvasPoint,
+                  getScalingOptions(event),
+                ),
                 siblingBlocks: api.siblingBlocks,
               }),
               canvasPoint,
@@ -93,7 +98,11 @@ export const createDrawingInteraction =
           if (isMoving(interactionState.origin, canvasPoint, api.zoomValue)) {
             startDrawing(
               options.inferBlockType?.({
-                frame: createRect(canvasPoint, canvasPoint),
+                frame: getDrawnLayerRect(
+                  canvasPoint,
+                  canvasPoint,
+                  getScalingOptions(event),
+                ),
                 siblingBlocks: api.siblingBlocks,
               }) ?? 'rectangle',
               interactionState.origin,
@@ -123,9 +132,10 @@ export const createDrawingInteraction =
             canvasPoint,
             getScalingOptions(event),
             options.inferBlockType?.({
-              frame: createRect(
+              frame: getDrawnLayerRect(
                 interactionState.origin,
                 interactionState.current,
+                getScalingOptions(event),
               ),
               siblingBlocks: api.siblingBlocks,
             }) ?? interactionState.shapeType,

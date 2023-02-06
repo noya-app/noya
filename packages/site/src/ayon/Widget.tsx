@@ -12,12 +12,7 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import {
-  AffineTransform,
-  createRect,
-  Rect,
-  transformRect,
-} from 'noya-geometry';
+import { AffineTransform, Rect, transformRect } from 'noya-geometry';
 import { ChevronDownIcon } from 'noya-icons';
 import {
   DrawableLayerType,
@@ -391,7 +386,11 @@ export function DrawingWidget() {
   const symbol = Selectors.getSymbolMaster(state, block.symbolId);
 
   const rect = transformRect(
-    createRect(state.interactionState.origin, state.interactionState.current),
+    Selectors.getDrawnLayerRect(
+      state.interactionState.origin,
+      state.interactionState.current,
+      state.interactionState.options,
+    ),
     transform,
   );
 
