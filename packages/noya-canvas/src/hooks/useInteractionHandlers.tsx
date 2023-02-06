@@ -127,6 +127,7 @@ export function useInteractionHandlers({
           inferBlockType,
         ]),
       addDrawnLayer: () => dispatch('addDrawnLayer'),
+      maybeDrawing: (point) => dispatch('interaction', ['maybeDrawing', point]),
       startDrawing: (layerType, point) =>
         dispatch('interaction', ['startDrawing', layerType, point]),
       updateDrawing: (point, options, layerType) =>

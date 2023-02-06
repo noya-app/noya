@@ -234,6 +234,7 @@ export const Content = memo(function Content({
               Interactions.move,
               Interactions.createDrawing({
                 allowDrawingFromNoneState: true,
+                hasMovementThreshold: true,
                 inferBlockType,
               }),
               Interactions.defaultCursor,

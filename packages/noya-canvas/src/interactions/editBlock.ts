@@ -80,6 +80,7 @@ export const createEditBlockInteraction = ({
           selectionInteraction,
           moveInteraction,
           createDrawingInteraction({
+            hasMovementThreshold: true,
             allowDrawingFromNoneState: true,
             inferBlockType,
           }),

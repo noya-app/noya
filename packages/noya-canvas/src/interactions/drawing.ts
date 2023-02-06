@@ -9,9 +9,11 @@ import {
   ScalingOptions,
 } from 'noya-state';
 import { CSSProperties } from 'react';
+import { isMoving } from '../utils/isMoving';
 import { InteractionAPI } from './types';
 
 export interface DrawingActions {
+  maybeDrawing: (point: Point) => void;
   startDrawing: (layerType: DrawableLayerType, point: Point) => void;
   updateDrawing: (
     point: Point,
@@ -20,20 +22,24 @@ export interface DrawingActions {
   ) => void;
   addDrawnLayer: () => void;
   setCursor: (cursor: CSSProperties['cursor'] | undefined) => void;
+  reset: () => void;
 }
 
 export const createDrawingInteraction =
   (
     options: {
       allowDrawingFromNoneState?: boolean;
+      hasMovementThreshold?: boolean;
       inferBlockType?: InferBlockType;
     } = {},
   ) =>
   ({
+    maybeDrawing,
     startDrawing,
     updateDrawing,
     addDrawnLayer,
     setCursor,
+    reset,
   }: DrawingActions) => {
     return handleActionType<
       InteractionState,
@@ -47,13 +53,17 @@ export const createDrawingInteraction =
 
           const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
-          startDrawing(
-            options.inferBlockType({
-              frame: createRect(canvasPoint, canvasPoint),
-              siblingBlocks: api.siblingBlocks,
-            }),
-            canvasPoint,
-          );
+          if (options.hasMovementThreshold) {
+            maybeDrawing(canvasPoint);
+          } else {
+            startDrawing(
+              options.inferBlockType({
+                frame: createRect(canvasPoint, canvasPoint),
+                siblingBlocks: api.siblingBlocks,
+              }),
+              canvasPoint,
+            );
+          }
 
           event.preventDefault();
         },
@@ -74,6 +84,26 @@ export const createDrawingInteraction =
 
             event.preventDefault();
           }
+        },
+      }),
+      maybeDrawing: (interactionState, api) => ({
+        onPointerMove: (event) => {
+          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
+
+          if (isMoving(interactionState.origin, canvasPoint, api.zoomValue)) {
+            startDrawing(
+              options.inferBlockType?.({
+                frame: createRect(canvasPoint, canvasPoint),
+                siblingBlocks: api.siblingBlocks,
+              }) ?? 'rectangle',
+              interactionState.origin,
+            );
+          }
+        },
+        onPointerUp: (event) => {
+          reset();
+
+          event.preventDefault();
         },
       }),
       insert: (interactionState, api) => ({

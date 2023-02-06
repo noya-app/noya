@@ -87,6 +87,7 @@ export type InteractionAction =
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
+  | [type: 'maybeDrawing', origin: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
   | [
       type: 'updateDrawing',
@@ -144,6 +145,10 @@ export type InteractionState =
   | {
       type: 'drawingShapePath';
       point?: Point;
+    }
+  | {
+      type: 'maybeDrawing';
+      origin: Point;
     }
   | {
       type: 'drawing';
@@ -293,6 +298,14 @@ export function interactionReducer(
       return {
         type,
         point,
+      };
+    }
+    case 'maybeDrawing': {
+      const [, origin] = action;
+
+      return {
+        type: 'maybeDrawing',
+        origin,
       };
     }
     case 'startDrawing': {
