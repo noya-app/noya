@@ -91,7 +91,6 @@ const StackBase = forwardRef(function StackBase(
   const styleProps: StyleProps = {
     display: 'flex',
     position: 'relative',
-    flexDirection: 'column',
     alignItems: 'stretch',
     ...rest,
   };
