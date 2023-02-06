@@ -9,6 +9,7 @@ import {
   Small,
   Spacer,
   Stack,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
@@ -142,6 +143,7 @@ export function Widget({
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   onFocusCanvas: () => void;
 }) {
+  const theme = useDesignSystemTheme();
   const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const { isContextMenuOpen } = useWorkspace();
@@ -242,26 +244,6 @@ export function Widget({
                   />
                 )}
                 <Stack.H>
-                  {layer.symbolIDIsFixed ? (
-                    <IconButton
-                      iconName="LockClosedIcon"
-                      onPointerDown={(event) => {
-                        event.preventDefault();
-
-                        dispatch('setSymbolIdIsFixed', undefined, false);
-                      }}
-                    />
-                  ) : (
-                    <IconButton
-                      iconName="MagicWandIcon"
-                      onPointerDown={(event) => {
-                        event.preventDefault();
-
-                        dispatch('setSymbolIdIsFixed', undefined, true);
-                      }}
-                    />
-                  )}
-                  <Spacer.Horizontal size={6} />
                   <DropdownMenu
                     items={blockTypes
                       .flatMap(({ type }) =>
@@ -291,10 +273,22 @@ export function Widget({
             </ContentElement>
             {!layer.symbolIDIsFixed && (
               <ContentElement>
-                <Stack.V padding={'0 8px'}>
-                  <Small color="textSubtle" padding={'4px 0px'}>
-                    Top Suggestions
-                  </Small>
+                <Stack.V padding={'0 6px'}>
+                  <Stack.H padding={'4px 0px'} gap={8}>
+                    <Small color="textSubtle" flex="1">
+                      Top Suggestions
+                    </Small>
+                    <IconButton
+                      iconName="Cross2Icon"
+                      color={theme.colors.textDisabled}
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+
+                        dispatch('setSymbolIdIsFixed', undefined, true);
+                      }}
+                    />
+                  </Stack.H>
+
                   <Divider overflow={8} />
                   {blockTypes
                     // Remove the current block type
@@ -408,8 +402,6 @@ export function DrawingWidget() {
       footer={
         <ContentElement>
           <Stack.H flex="1" padding={'4px 6px'}>
-            <IconButton iconName="MagicWandIcon" />
-            <Spacer.Horizontal size={6} />
             <Button variant="none">
               {symbol?.name}
               <Spacer.Horizontal size={4} />
