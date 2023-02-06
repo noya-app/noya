@@ -68,13 +68,18 @@ Object.entries(ChakraUI).forEach(([key, value]) => {
 
 export type ExportType = NoyaAPI.ExportFormat | 'figma' | 'sketch' | 'react';
 
+const persistedViewType =
+  (typeof localStorage !== 'undefined' &&
+    (localStorage.getItem('noya-ayon-preferred-view-type') as ViewType)) ||
+  'split';
+
 function Workspace({
   uploadAsset,
   initialDocument,
   onChangeDocument,
   name,
   onChangeName,
-  viewType: initialViewType = 'split',
+  viewType: initialViewType = persistedViewType,
   padding,
   canvasRendererType,
   downloadFile,
@@ -91,8 +96,19 @@ function Workspace({
 >): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const [viewType, setViewType] = useState<ViewType>(initialViewType);
+  const [viewType, setViewTypeMemory] = useState<ViewType>(initialViewType);
   const { setRightToolbar, setCenterToolbar } = useProject();
+
+  const setViewType = useCallback(
+    (type: ViewType) => {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('noya-ayon-preferred-view-type', type);
+      }
+
+      setViewTypeMemory(type);
+    },
+    [setViewTypeMemory],
+  );
 
   const reducer = useCallback(
     (state: WorkspaceState, action: WorkspaceAction) =>
@@ -258,6 +274,7 @@ function Workspace({
     state.history.present,
     viewType,
     artboard,
+    setViewType,
   ]);
 
   useLayoutEffect(() => {
