@@ -2,16 +2,22 @@ import { ReactEventHandlers } from 'noya-designsystem';
 import { createRect, Point } from 'noya-geometry';
 import {
   DrawableLayerType,
+  getScalingOptions,
   handleActionType,
   InferBlockType,
   InteractionState,
+  ScalingOptions,
 } from 'noya-state';
 import { CSSProperties } from 'react';
 import { InteractionAPI } from './types';
 
 export interface DrawingActions {
   startDrawing: (layerType: DrawableLayerType, point: Point) => void;
-  updateDrawing: (point: Point, layerType?: DrawableLayerType) => void;
+  updateDrawing: (
+    point: Point,
+    options?: ScalingOptions,
+    layerType?: DrawableLayerType,
+  ) => void;
   addDrawnLayer: () => void;
   setCursor: (cursor: CSSProperties['cursor'] | undefined) => void;
 }
@@ -85,6 +91,7 @@ export const createDrawingInteraction =
 
           updateDrawing(
             canvasPoint,
+            getScalingOptions(event),
             options.inferBlockType?.({
               frame: createRect(
                 interactionState.origin,
@@ -100,7 +107,7 @@ export const createDrawingInteraction =
         onPointerUp: (event) => {
           const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
-          updateDrawing(canvasPoint);
+          updateDrawing(canvasPoint, getScalingOptions(event));
           addDrawnLayer();
 
           api.releasePointerCapture?.(event.pointerId);

@@ -2,16 +2,22 @@ import { ReactEventHandlers } from 'noya-designsystem';
 import { Point } from 'noya-geometry';
 import {
   CompassDirection,
+  getScalingOptions,
   handleActionType,
   InferBlockType,
   InteractionState,
+  ScalingOptions,
 } from 'noya-state';
 import { isMoving } from '../utils/isMoving';
 import { InteractionAPI } from './types';
 
 export interface ScaleActions {
   maybeScale: (point: Point, direction: CompassDirection) => void;
-  updateScaling: (point: Point, inferBlockType?: InferBlockType) => void;
+  updateScaling: (
+    point: Point,
+    options?: ScalingOptions,
+    inferBlockType?: InferBlockType,
+  ) => void;
   hoverHandle: (direction: CompassDirection | undefined) => void;
   reset: () => void;
 }
@@ -62,7 +68,11 @@ export const createScaleInteraction = (
           const { origin } = interactionState;
 
           if (isMoving(canvasPoint, origin, api.zoomValue)) {
-            updateScaling(canvasPoint, options.inferBlockType);
+            updateScaling(
+              canvasPoint,
+              getScalingOptions(event),
+              options.inferBlockType,
+            );
           }
 
           api.setPointerCapture?.(event.pointerId);
@@ -79,7 +89,11 @@ export const createScaleInteraction = (
         onPointerMove: (event) => {
           const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
-          updateScaling(canvasPoint, options.inferBlockType);
+          updateScaling(
+            canvasPoint,
+            getScalingOptions(event),
+            options.inferBlockType,
+          );
 
           api.setPointerCapture?.(event.pointerId);
           event.preventDefault();

@@ -10,6 +10,7 @@ import {
   defaultBorderColor,
   encodeCurvePoint,
   getClippedLayerMap,
+  getScalingOptions,
   Layers,
   Selectors,
 } from 'noya-state';
@@ -445,10 +446,7 @@ const DesignDrawLayer = memo(function DesignDrawLayer() {
     interactionState.origin,
     interactionState.current,
     true,
-    {
-      constrainProportions: state.keyModifiers.shiftKey,
-      scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
-    },
+    interactionState.options ?? getScalingOptions(state.keyModifiers),
     state.lastEditedTextStyle,
   );
 

@@ -3,6 +3,7 @@ import Sketch from 'noya-file-format';
 import { Point, Rect } from 'noya-geometry';
 import {
   getCursorForCompassDirection,
+  ScalingOptions,
   TextSelectionRange,
   UUID,
 } from 'noya-state';
@@ -87,13 +88,23 @@ export type InteractionAction =
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
-  | [type: 'updateDrawing', point: Point, shapeType?: DrawableLayerType]
+  | [
+      type: 'updateDrawing',
+      point: Point,
+      options?: ScalingOptions,
+      shapeType?: DrawableLayerType,
+    ]
   | [type: 'startMarquee', point: Point, selectedIdsSnapshot: string[]]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction?: CompassDirection]
   | [type: 'startPanning', point: Point]
   | [type: 'updateMoving', point: Point, inferBlockType?: InferBlockType]
-  | [type: 'updateScaling', point: Point, inferBlockType?: InferBlockType]
+  | [
+      type: 'updateScaling',
+      point: Point,
+      options?: ScalingOptions,
+      inferBlockType?: InferBlockType,
+    ]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
   | [type: 'enableSelectionMode']
@@ -139,6 +150,7 @@ export type InteractionState =
       origin: Point;
       current: Point;
       shapeType: DrawableLayerType;
+      options?: ScalingOptions;
     }
   | {
       type: 'selectionMode';
@@ -197,6 +209,7 @@ export type InteractionState =
       origin: Point;
       current: Point;
       direction: CompassDirection;
+      options?: ScalingOptions;
       pageSnapshot: Sketch.Page;
     }
   | { type: 'panMode' }
@@ -295,11 +308,12 @@ export function interactionReducer(
     case 'updateDrawing': {
       if (state.type !== 'drawing') return state;
 
-      const [, point, shapeType] = action;
+      const [, point, options, shapeType] = action;
 
       return {
         ...state,
         current: point,
+        options,
         shapeType: shapeType ?? state.shapeType,
       };
     }
@@ -422,7 +436,7 @@ export function interactionReducer(
       };
     }
     case 'updateScaling': {
-      const [, point] = action;
+      const [, point, options] = action;
 
       if (state.type !== 'scaling' && state.type !== 'maybeScale') {
         throw new Error(
@@ -435,6 +449,7 @@ export function interactionReducer(
         origin: state.origin,
         current: point,
         direction: state.direction,
+        options,
         pageSnapshot: state.pageSnapshot,
       };
     }

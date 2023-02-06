@@ -16,7 +16,6 @@ import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   CompassDirection,
-  DrawableLayerType,
   getCurrentPage,
   InteractionState,
   Layers,
@@ -120,13 +119,18 @@ export function useInteractionHandlers({
         dispatch('interaction', ['updateMoving', point, inferBlockType]),
       maybeScale: (point, direction) =>
         dispatch('interaction', ['maybeScale', point, direction]),
-      updateScaling: (point, inferBlockType) =>
-        dispatch('interaction', ['updateScaling', point, inferBlockType]),
+      updateScaling: (point, options, inferBlockType) =>
+        dispatch('interaction', [
+          'updateScaling',
+          point,
+          options,
+          inferBlockType,
+        ]),
       addDrawnLayer: () => dispatch('addDrawnLayer'),
-      startDrawing: (layerType: DrawableLayerType, point: Point) =>
+      startDrawing: (layerType, point) =>
         dispatch('interaction', ['startDrawing', layerType, point]),
-      updateDrawing: (point: Point, layerType?: DrawableLayerType) =>
-        dispatch('interaction', ['updateDrawing', point, layerType]),
+      updateDrawing: (point, options, layerType) =>
+        dispatch('interaction', ['updateDrawing', point, options, layerType]),
       pan: (point) => dispatch('pan*', point),
       startPanning: (point) => dispatch('interaction', ['startPanning', point]),
       updatePanning: (point) =>

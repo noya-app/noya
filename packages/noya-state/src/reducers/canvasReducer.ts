@@ -33,7 +33,7 @@ import {
 } from 'noya-state';
 import { lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
-import { ScalingOptions } from '../primitives';
+import { getScalingOptions, ScalingOptions } from '../primitives';
 import { getLineDragHandleIndexForDirection } from '../selection';
 import {
   addToParentLayer,
@@ -352,15 +352,17 @@ export function canvasReducer(
                 draft.interactionState.origin,
                 draft.interactionState.current,
                 false,
-                {
-                  constrainProportions: state.keyModifiers.shiftKey,
-                  scalingOriginMode: state.keyModifiers.altKey
-                    ? 'center'
-                    : 'extent',
-                },
+                draft.interactionState.options ??
+                  getScalingOptions(state.keyModifiers),
                 state.lastEditedTextStyle,
               )
             : (() => {
+                const rect = Selectors.getDrawnLayerRect(
+                  draft.interactionState.origin,
+                  draft.interactionState.current,
+                  draft.interactionState.options,
+                );
+
                 const symbol = getSymbolMaster(state, shapeType.symbolId);
 
                 if (!symbol) return SketchModel.rectangle();
@@ -368,17 +370,7 @@ export function canvasReducer(
                 const layer = SketchModel.symbolInstance({
                   name: symbol.name,
                   symbolID: symbol.symbolID,
-                  frame: SketchModel.rect(
-                    createRect(
-                      draft.interactionState.current,
-                      draft.interactionState.origin,
-                    ),
-                  ),
-                  // frame: {
-                  //   ...symbol.frame,
-                  //   x: draft.interactionState.origin.x,
-                  //   y: draft.interactionState.origin.y,
-                  // },
+                  frame: SketchModel.rect(rect),
                 });
 
                 return layer;
@@ -1056,9 +1048,9 @@ export function canvasReducer(
           }
           case 'scaling': {
             const inferBlockType =
-              action[1][0] === 'updateScaling' ? action[1][2] : undefined;
+              action[1][0] === 'updateScaling' ? action[1][3] : undefined;
 
-            const { origin, current, pageSnapshot, direction } =
+            const { origin, current, pageSnapshot, direction, options } =
               interactionState;
 
             const delta = {
@@ -1093,6 +1085,17 @@ export function canvasReducer(
               return;
             }
 
+            const constrainProportions =
+              options?.constrainProportions ||
+              Selectors.getConstrainedScaling(
+                state,
+                pageSnapshot,
+                layerIndexPaths,
+              );
+            const scalingOriginMode =
+              options?.scalingOriginMode ||
+              (state.keyModifiers.altKey ? 'center' : 'extent');
+
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
               pageSnapshot,
@@ -1100,16 +1103,7 @@ export function canvasReducer(
               delta,
               context.canvasSize,
               direction,
-              {
-                constrainProportions: Selectors.getConstrainedScaling(
-                  state,
-                  pageSnapshot,
-                  layerIndexPaths,
-                ),
-                scalingOriginMode: state.keyModifiers.altKey
-                  ? 'center'
-                  : 'extent',
-              },
+              { constrainProportions, scalingOriginMode },
             );
 
             const originalTransform = AffineTransform.translate(

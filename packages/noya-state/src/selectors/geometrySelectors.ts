@@ -481,7 +481,10 @@ export function getClippedLayerMap(
 export function getDrawnLayerRect(
   origin: Point,
   current: Point,
-  { scalingOriginMode, constrainProportions }: ScalingOptions,
+  { scalingOriginMode, constrainProportions }: ScalingOptions = {
+    scalingOriginMode: 'extent',
+    constrainProportions: false,
+  },
 ): Rect {
   if (constrainProportions) {
     const delta = {

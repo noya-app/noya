@@ -42,6 +42,19 @@ export type ScalingOptions = {
   scalingOriginMode: ScalingOriginMode;
 };
 
+export function getScalingOptions({
+  shiftKey,
+  altKey,
+}: {
+  shiftKey: boolean;
+  altKey: boolean;
+}): ScalingOptions {
+  return {
+    constrainProportions: shiftKey,
+    scalingOriginMode: altKey ? 'center' : 'extent',
+  };
+}
+
 /**
  * Resize a rect in a compass direction
  */
