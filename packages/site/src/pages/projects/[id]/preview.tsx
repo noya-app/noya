@@ -27,7 +27,7 @@ function Content({ id }: { id: string }) {
       initialDocument={initialFile.data.document}
       name={initialFile.data.name}
       uploadAsset={async () => ''}
-      viewType="combined"
+      viewType="previewOnly"
     />
   );
 }

@@ -6,6 +6,7 @@ import React, {
   ForwardedRef,
   forwardRef,
   memo,
+  ReactNode,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -49,8 +50,8 @@ export interface CanvasElementProps extends ReactDOMEventHandlers {
   onChangeSize: (size: Size, insets: Insets) => void;
   insets?: Insets;
   rendererZIndex?: number;
-  children: ({ size }: { size: Size }) => JSX.Element;
-  widgets?: JSX.Element;
+  children: ({ size }: { size: Size }) => ReactNode;
+  widgets?: ReactNode;
   cursor?: CSSProperties['cursor'];
 }
 
