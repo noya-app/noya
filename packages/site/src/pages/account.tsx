@@ -22,7 +22,7 @@ function Card({
   periodEnd,
   cancelAtPeriodEnd,
   priceDescription,
-  callToActionPrimary,
+  callToActionAccented,
   callToActionText,
   callToActionUrl,
   children,
@@ -31,7 +31,7 @@ function Card({
   periodEnd?: string;
   cancelAtPeriodEnd?: boolean;
   priceDescription: string;
-  callToActionPrimary?: boolean;
+  callToActionAccented?: boolean;
   callToActionText?: string;
   callToActionUrl?: string | null;
   children?: ReactNode;
@@ -62,7 +62,7 @@ function Card({
             <Spacer.Vertical size={20} />
             <Stack.H>
               <Button
-                variant={callToActionPrimary ? 'primary' : 'normal'}
+                variant={callToActionAccented ? 'secondary' : 'normal'}
                 onClick={() => {
                   window.location.href = callToActionUrl;
                 }}
@@ -214,6 +214,7 @@ export default function Account() {
                       priceDescription={describePrice(price)}
                       callToActionUrl={price.url}
                       callToActionText="Subscribe"
+                      callToActionAccented
                     >
                       <ProfessionalPlanFeatures />
                     </Card>
