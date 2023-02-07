@@ -15,6 +15,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Analytics } from '../../components/Analytics';
 import { Toolbar } from '../../components/Toolbar';
+import { addShareCookie } from '../../utils/cookies';
 import { createNoyaClient, NOYA_HOST } from '../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
@@ -140,6 +141,8 @@ export default function Preview() {
   const id = query.id as string | undefined;
 
   if (!id) return null;
+
+  addShareCookie(id);
 
   return (
     <OptionalNoyaAPIProvider>
