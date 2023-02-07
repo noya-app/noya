@@ -2,30 +2,6 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import React from 'react';
 import styled from 'styled-components';
 
-interface Props {
-  value: boolean;
-  onChange: (value: boolean) => void;
-  variant?: SwitchVariant;
-}
-
-export const Switch = function Switch({
-  value,
-  onChange,
-  variant = 'normal',
-}: Props) {
-  return (
-    <SwitchRoot
-      variant={variant}
-      checked={value}
-      onCheckedChange={(newValue) => {
-        onChange(newValue);
-      }}
-    >
-      <SwitchThumb />
-    </SwitchRoot>
-  );
-};
-
 type SwitchVariant = 'normal' | 'primary' | 'secondary';
 
 const SwitchRoot = styled(SwitchPrimitive.Root)<{
@@ -63,3 +39,27 @@ const SwitchThumb = styled(SwitchPrimitive.Thumb)({
   willChange: 'transform',
   '&[data-state="checked"]': { transform: 'translateX(15px)' },
 });
+
+interface Props {
+  value: boolean;
+  onChange: (value: boolean) => void;
+  variant?: SwitchVariant;
+}
+
+export const Switch = function Switch({
+  value,
+  onChange,
+  variant = 'normal',
+}: Props) {
+  return (
+    <SwitchRoot
+      variant={variant}
+      checked={value}
+      onCheckedChange={(newValue) => {
+        onChange(newValue);
+      }}
+    >
+      <SwitchThumb />
+    </SwitchRoot>
+  );
+};

@@ -13,7 +13,7 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { CheckIcon } from 'noya-icons';
-import React from 'react';
+import React, { ReactNode, useState } from 'react';
 import { AppLayout } from '../components/AppLayout';
 import { Toolbar } from '../components/Toolbar';
 
@@ -34,7 +34,7 @@ function Card({
   callToActionPrimary?: boolean;
   callToActionText?: string;
   callToActionUrl?: string | null;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   const theme = useDesignSystemTheme();
 
@@ -83,7 +83,7 @@ function Card({
   );
 }
 
-function FeatureItem({ children }: { children: React.ReactNode }) {
+function FeatureItem({ children }: { children: ReactNode }) {
   return (
     <Small color="text" lineHeight="15px">
       <CheckIcon style={{ display: 'inline', verticalAlign: 'top' }} />
@@ -133,7 +133,7 @@ export default function Account() {
     (subscription) => subscription.status === 'active',
   );
 
-  const [isAnnualBilling, setIsAnnualBilling] = React.useState(true);
+  const [isAnnualBilling, setIsAnnualBilling] = useState(true);
 
   return (
     <AppLayout toolbar={<Toolbar />}>

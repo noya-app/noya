@@ -57,7 +57,15 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     },
   };
 
-  billing = 0 as any;
+  billing: INoyaNetworkClient['billing'] = {
+    read: async () => {
+      return {
+        availableProducts: [],
+        subscriptions: [],
+        portalUrl: null,
+      };
+    },
+  };
 
   files: INoyaNetworkClient['files'] = {
     list: async () => this.data.files,
