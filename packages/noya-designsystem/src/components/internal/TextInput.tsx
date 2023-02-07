@@ -29,6 +29,25 @@ type Props = {
   'autoComplete' | 'autoCapitalize' | 'autoCorrect' | 'spellCheck'
 >;
 
+type ReadOnlyProps = Props & {
+  readOnly: true;
+};
+
+const ReadOnlyTextInput = forwardRef(function ReadOnlyTextInput(
+  { onKeyDown, value, ...rest }: ReadOnlyProps,
+  forwardedRef: ForwardedRef<HTMLInputElement>,
+) {
+  return (
+    <input
+      ref={forwardedRef}
+      {...rest}
+      value={value}
+      onKeyDown={onKeyDown}
+      readOnly
+    />
+  );
+});
+
 type ControlledProps = Props & {
   onChange: (value: string) => void;
 };
@@ -141,7 +160,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   );
 });
 
-export type TextInputProps = ControlledProps | SubmittableProps;
+export type TextInputProps = ReadOnlyProps | ControlledProps | SubmittableProps;
 
 /**
  * This component shouldn't be used directly. Instead use the InputField components.
@@ -162,7 +181,9 @@ export default forwardRef(function TextInput(
     ...props,
   };
 
-  if ('onChange' in commonProps) {
+  if ('readOnly' in commonProps) {
+    return <ReadOnlyTextInput ref={forwardedRef} {...commonProps} readOnly />;
+  } else if ('onChange' in commonProps) {
     return <ControlledTextInput ref={forwardedRef} {...commonProps} />;
   } else {
     return <SubmittableTextInput ref={forwardedRef} {...commonProps} />;

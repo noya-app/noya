@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useNoyaSession } from 'noya-api';
+import { useOptionalNoyaSession } from 'noya-api';
 import {
   Button,
   createSectionedMenu,
@@ -20,6 +20,7 @@ import {
 } from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { NOYA_HOST } from '../utils/noyaClient';
 import { Logo } from './Logo';
 
 const LogoContainer = styled.div({
@@ -45,7 +46,7 @@ interface Props {
 
 export function Toolbar({ children, right }: Props) {
   const theme = useDesignSystemTheme();
-  const session = useNoyaSession();
+  const session = useOptionalNoyaSession();
   const router = useRouter();
 
   const userMenuItems = createSectionedMenu(
@@ -89,7 +90,7 @@ export function Toolbar({ children, right }: Props) {
                   router.push('/account');
                   return;
                 case 'signOut':
-                  window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
+                  window.location.href = `${NOYA_HOST}/api/auth/signout`;
                   return;
                 case 'discord':
                   window.location.href = 'https://discord.gg/NPGAwyEBJw';

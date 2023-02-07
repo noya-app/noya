@@ -10,14 +10,16 @@ const SwitchRoot = styled(SwitchPrimitive.Root)<{
   all: 'unset',
   width: 32,
   height: 19,
-  backgroundColor: theme.colors.inputBackground,
+  backgroundColor: theme.colors.activeBackground,
   borderRadius: '9999px',
   position: 'relative',
   WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
   cursor: 'pointer',
-  '&:focus': {
-    boxShadow: `0 0 0 1px ${theme.colors.primary}`,
-  },
+  // '&:focus': {
+  //   boxShadow: `0 0 0 1px ${
+  //     variant === 'secondary' ? theme.colors.secondary : theme.colors.primary
+  //   }`,
+  // },
   '&[data-state="checked"]': {
     backgroundColor:
       variant === 'primary'

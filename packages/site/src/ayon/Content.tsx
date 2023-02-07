@@ -45,7 +45,7 @@ const redirectResolver = new RedirectResolver();
 const generateResolver = new GenerateResolver();
 const iconResolver = new IconResolver();
 
-export type ViewType = 'split' | 'combined';
+export type ViewType = 'split' | 'combined' | 'previewOnly';
 
 type CanvasRendererType = 'canvas' | 'svg';
 
@@ -203,7 +203,7 @@ export const Content = memo(function Content({
     canvasRef.current?.focus();
   }, []);
 
-  const CanvasRenderer =
+  const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
   return (
@@ -244,91 +244,109 @@ export const Content = memo(function Content({
               Interactions.defaultCursor,
             ]}
             widgets={
-              <>
-                {layers.map((layer) => (
-                  <Widget
-                    key={layer.do_objectID}
-                    layer={layer}
-                    inferBlockTypes={inferBlockTypes}
-                    onFocusCanvas={onFocusCanvas}
-                    onChangeBlockType={(type: DrawableLayerType) => {
-                      dispatch(
-                        'setSymbolInstanceSource',
-                        typeof type !== 'string'
-                          ? type.symbolId
-                          : buttonSymbol.symbolID,
-                        'preserveCurrent',
-                      );
-                    }}
-                    onChangeBlockText={(text: string) => {
-                      const BlockDefinition = Blocks[layer.symbolID];
+              viewType !== 'previewOnly' && (
+                <>
+                  {layers.map((layer) => (
+                    <Widget
+                      key={layer.do_objectID}
+                      layer={layer}
+                      inferBlockTypes={inferBlockTypes}
+                      onFocusCanvas={onFocusCanvas}
+                      onChangeBlockType={(type: DrawableLayerType) => {
+                        dispatch(
+                          'setSymbolInstanceSource',
+                          typeof type !== 'string'
+                            ? type.symbolId
+                            : buttonSymbol.symbolID,
+                          'preserveCurrent',
+                        );
+                      }}
+                      onChangeBlockText={(text: string) => {
+                        const BlockDefinition = Blocks[layer.symbolID];
 
-                      dispatch(
-                        'setBlockText',
-                        [layer.do_objectID],
-                        text,
-                        parseBlock(text, BlockDefinition.parser).content,
-                      );
-                      dispatch('setSymbolIdIsFixed', [layer.do_objectID], true);
-                    }}
-                    uploadAsset={uploadAsset}
-                  />
-                ))}
-                {state.interactionState.type === 'drawing' && <DrawingWidget />}
-              </>
+                        dispatch(
+                          'setBlockText',
+                          [layer.do_objectID],
+                          text,
+                          parseBlock(text, BlockDefinition.parser).content,
+                        );
+                        dispatch(
+                          'setSymbolIdIsFixed',
+                          [layer.do_objectID],
+                          true,
+                        );
+                      }}
+                      uploadAsset={uploadAsset}
+                    />
+                  ))}
+                  {state.interactionState.type === 'drawing' && (
+                    <DrawingWidget />
+                  )}
+                </>
+              )
             }
           >
-            {({ size }) => (
-              <>
-                <CanvasRenderer size={size}>
-                  <RenderingModeProvider value="interactive">
-                    <Design.Root>
-                      <Design.Background />
-                      <Design.Page />
-                      <Design.PixelGrid />
-                      <Design.GradientEditor />
-                      <Design.InsertSymbol />
-                      <Design.DrawPath />
-                      <Design.EditPath />
-                    </Design.Root>
-                  </RenderingModeProvider>
-                </CanvasRenderer>
-              </>
-            )}
+            {({ size }) =>
+              viewType !== 'previewOnly' && (
+                <>
+                  <InteractiveRenderer size={size}>
+                    <RenderingModeProvider value="interactive">
+                      <Design.Root>
+                        <Design.Background />
+                        <Design.Page />
+                        <Design.PixelGrid />
+                        <Design.GradientEditor />
+                        <Design.InsertSymbol />
+                        <Design.DrawPath />
+                        <Design.EditPath />
+                      </Design.Root>
+                    </RenderingModeProvider>
+                  </InteractiveRenderer>
+                </>
+              )
+            }
           </SimpleCanvas>
         </FileDropTarget>
-        {viewType === 'combined' && (
-          <Overlay>
+        {(viewType === 'combined' || viewType === 'previewOnly') && (
+          <Overlay
+            style={
+              viewType === 'previewOnly' ? { pointerEvents: 'all' } : undefined
+            }
+          >
             <DOMRenderer resizeBehavior="match-canvas" />
           </Overlay>
         )}
-        <Overlay>
-          <SVGRenderer size={canvasSize}>
-            <RenderingModeProvider value="interactive">
-              <Design.Root>
-                <Design.BoundingRect />
-                <Design.LayerHighlight />
-              </Design.Root>
-            </RenderingModeProvider>
-          </SVGRenderer>
-        </Overlay>
-        <Overlay
-          style={{
-            zIndex: isContextMenuOpen ? undefined : Stacking.level.overlay,
-          }}
-        >
-          <SVGRenderer size={canvasSize}>
-            <RenderingModeProvider value="interactive">
-              <Design.Root>
-                <Design.DrawLayer />
-                <Design.SnapGuides showLabels={false} />
-                <Design.MeasurementGuides showLabels={false} />
-                <Design.DragHandles />
-                <Design.Marquee />
-              </Design.Root>
-            </RenderingModeProvider>
-          </SVGRenderer>
-        </Overlay>
+        {viewType !== 'previewOnly' && (
+          <>
+            <Overlay>
+              <SVGRenderer size={canvasSize}>
+                <RenderingModeProvider value="interactive">
+                  <Design.Root>
+                    <Design.BoundingRect />
+                    <Design.LayerHighlight />
+                  </Design.Root>
+                </RenderingModeProvider>
+              </SVGRenderer>
+            </Overlay>
+            <Overlay
+              style={{
+                zIndex: isContextMenuOpen ? undefined : Stacking.level.overlay,
+              }}
+            >
+              <SVGRenderer size={canvasSize}>
+                <RenderingModeProvider value="interactive">
+                  <Design.Root>
+                    <Design.DrawLayer />
+                    <Design.SnapGuides showLabels={false} />
+                    <Design.MeasurementGuides showLabels={false} />
+                    <Design.DragHandles />
+                    <Design.Marquee />
+                  </Design.Root>
+                </RenderingModeProvider>
+              </SVGRenderer>
+            </Overlay>
+          </>
+        )}
       </Panel.Item>
       {viewType === 'split' && (
         <>

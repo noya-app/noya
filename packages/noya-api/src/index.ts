@@ -10,13 +10,17 @@ import {
   NoyaPrice,
   NoyaProduct,
   NoyaSession,
+  NoyaShare,
+  NoyaSharedFile,
   NoyaSubscription,
   NoyaSubscriptionItem,
   NoyaUser,
 } from './core/schema';
 
+export type { INoyaNetworkClient } from './core/networkClient';
 export * from './react/context';
 export * from './react/hooks';
+export { NoyaAPIError, NoyaClient };
 
 export namespace NoyaAPI {
   export const NetworkClient = NoyaNetworkClient;
@@ -34,4 +38,6 @@ export namespace NoyaAPI {
   export type Product = NoyaProduct;
   export type Price = NoyaPrice;
   export type SubscriptionItem = NoyaSubscriptionItem;
+  export type Share = NoyaShare;
+  export type SharedFile = NoyaSharedFile;
 }
