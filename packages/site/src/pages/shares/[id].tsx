@@ -7,7 +7,7 @@ import {
 } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
 
-const Ayon = dynamic(() => import('../../../components/Ayon'), { ssr: false });
+const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
 function Content({ id }: { id: string }) {
   const client = useNoyaClient();
@@ -15,7 +15,7 @@ function Content({ id }: { id: string }) {
   const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
 
   useEffect(() => {
-    client.files.read(id).then(setInitialFile);
+    client.files.shares.read(id).then(setInitialFile);
   }, [client, id]);
 
   if (!initialFile) return null;

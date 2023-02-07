@@ -1,6 +1,6 @@
 import { makeCollectionReducer } from './collection';
 import { INoyaNetworkClient } from './networkClient';
-import { NoyaFile, noyaFileListSchema } from './schema';
+import { NoyaFile, noyaFileListSchema, NoyaShare } from './schema';
 
 const fileReducer = makeCollectionReducer<NoyaFile>({
   createItem: (parameters) => ({
@@ -92,6 +92,11 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
       url: (id, format, size) => {
         return '';
       },
+    },
+    shares: {
+      list: async () => [],
+      read: async (id) => 0 as unknown as NoyaFile,
+      create: async (data) => 0 as unknown as NoyaShare,
     },
   };
 

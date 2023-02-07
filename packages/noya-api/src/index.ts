@@ -10,6 +10,7 @@ import {
   NoyaPrice,
   NoyaProduct,
   NoyaSession,
+  NoyaShare,
   NoyaSubscription,
   NoyaSubscriptionItem,
   NoyaUser,
@@ -34,4 +35,5 @@ export namespace NoyaAPI {
   export type Product = NoyaProduct;
   export type Price = NoyaPrice;
   export type SubscriptionItem = NoyaSubscriptionItem;
+  export type Share = NoyaShare;
 }

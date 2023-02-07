@@ -59,6 +59,7 @@ import { useProject } from '../contexts/ProjectContext';
 import { downloadBlob } from '../utils/download';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
+import { ShareMenu } from './ShareMenu';
 
 const Components = new Map<unknown, string>();
 
@@ -74,6 +75,7 @@ const persistedViewType =
   'split';
 
 function Workspace({
+  fileId,
   uploadAsset,
   initialDocument,
   onChangeDocument,
@@ -84,6 +86,7 @@ function Workspace({
   canvasRendererType,
   downloadFile,
 }: {
+  fileId: string;
   initialDocument: SketchFile;
   onChangeDocument?: (document: SketchFile) => void;
   name: string;
@@ -161,6 +164,32 @@ function Workspace({
   useLayoutEffect(() => {
     setRightToolbar(
       <Stack.H gap={8}>
+        <DropdownMenu<ViewType>
+          items={[
+            {
+              value: 'split',
+              title: 'Split View',
+              icon: <ViewVerticalIcon />,
+              checked: viewType === 'split',
+            },
+            {
+              value: 'combined',
+              title: 'Combined View',
+              icon: <BoxIcon />,
+              checked: viewType === 'combined',
+            },
+          ]}
+          onSelect={setViewType}
+          onOpenChange={() => {
+            dispatch(['selectLayer', []]);
+          }}
+        >
+          <Button>
+            View
+            <Spacer.Horizontal size={4} />
+            <ChevronDownIcon />
+          </Button>
+        </DropdownMenu>
         <DropdownMenu<ExportType>
           items={[
             {
@@ -240,32 +269,22 @@ function Workspace({
             <ChevronDownIcon />
           </Button>
         </DropdownMenu>
-        <DropdownMenu<ViewType>
-          items={[
-            {
-              value: 'split',
-              title: 'Split View',
-              icon: <ViewVerticalIcon />,
-              checked: viewType === 'split',
-            },
-            {
-              value: 'combined',
-              title: 'Combined View',
-              icon: <BoxIcon />,
-              checked: viewType === 'combined',
-            },
-          ]}
-          onSelect={setViewType}
+        <Popover
+          trigger={
+            <Button>
+              Share
+              <Spacer.Horizontal size={4} />
+              <ChevronDownIcon />
+            </Button>
+          }
           onOpenChange={() => {
             dispatch(['selectLayer', []]);
           }}
         >
-          <Button>
-            View
-            <Spacer.Horizontal size={4} />
-            <ChevronDownIcon />
-          </Button>
-        </DropdownMenu>
+          <Stack.V width={240}>
+            <ShareMenu fileId={fileId} />
+          </Stack.V>
+        </Popover>
       </Stack.H>,
     );
   }, [
@@ -275,6 +294,9 @@ function Workspace({
     viewType,
     artboard,
     setViewType,
+    name,
+    onChangeName,
+    fileId,
   ]);
 
   useLayoutEffect(() => {

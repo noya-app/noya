@@ -48,6 +48,11 @@ export class NoyaClient {
       download: {
         url: this.networkClient.files.download.url,
       },
+      shares: {
+        read: this.networkClient.files.shares.read,
+        create: this.networkClient.files.shares.create,
+        list: this.networkClient.files.shares.list,
+      },
     });
   }
 

@@ -9,6 +9,7 @@ import {
   noyaFileListSchema,
   noyaFileSchema,
   noyaSessionSchema,
+  noyaShareSchema,
 } from './schema';
 
 /**
@@ -58,6 +59,11 @@ export class NoyaNetworkClient {
       download: {
         url: this.downloadURL,
       },
+      shares: {
+        read: this.#readShare,
+        create: this.#createShare,
+        list: this.#listShares,
+      },
     };
   }
 
@@ -73,6 +79,36 @@ export class NoyaNetworkClient {
       read: this.#readBilling,
     };
   }
+
+  get shares() {
+    return {
+      list: this.#listShares,
+    };
+  }
+
+  #listShares = async (fileId: string) => {
+    const response = await fetch(`${this.baseURI}/files/${fileId}/shares`, {
+      credentials: 'include',
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = z.array(noyaShareSchema).parse(json);
+    return parsed;
+  };
+
+  #readShare = async (shareId: string) => {
+    const response = await fetch(`${this.baseURI}/shares/${shareId}`, {
+      credentials: 'include',
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaFileSchema.parse(json);
+    return parsed;
+  };
 
   #readBilling = async () => {
     const response = await fetch(`${this.baseURI}/billing`, {
@@ -175,6 +211,28 @@ export class NoyaNetworkClient {
     });
 
     this.#ensureAuthorized(response);
+  };
+
+  #createShare = async (
+    fileId: string,
+    options: {
+      viewable?: boolean;
+      duplicable?: boolean;
+    } = {},
+  ) => {
+    const { viewable = true, duplicable = false } = options;
+
+    const response = await fetch(`${this.baseURI}/files/${fileId}/shares`, {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({ viewable, duplicable }),
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaShareSchema.parse(json);
+    return parsed;
   };
 
   #ensureAuthorized = (response: Response) => {

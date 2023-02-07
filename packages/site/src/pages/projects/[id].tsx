@@ -138,6 +138,7 @@ function FileEditor({ id }: { id: string }) {
 
   return (
     <Ayon
+      fileId={id}
       canvasRendererType="svg"
       padding={20}
       uploadAsset={uploadAsset}

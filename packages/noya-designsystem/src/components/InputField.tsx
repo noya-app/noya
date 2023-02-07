@@ -39,18 +39,19 @@ const InputFieldContext = createContext<{
  * ------------------------------------------------------------------------- */
 
 const LabelContainer = styled.label<{
+  pointerEvents: Property.PointerEvents;
   labelPosition: LabelPosition;
   hasDropdown: boolean;
-}>(({ theme, labelPosition, hasDropdown }) => ({
+}>(({ theme, labelPosition, hasDropdown, pointerEvents }) => ({
   color: theme.colors.textMuted,
   position: 'absolute',
   top: 0,
-  right: 0,
+  right: labelPosition === 'end' ? 0 : undefined,
   bottom: 0,
-  left: 0,
+  left: labelPosition === 'start' ? 0 : undefined,
   display: 'flex',
   alignItems: 'center',
-  pointerEvents: 'none',
+  pointerEvents,
   fontWeight: 'bold',
   fontSize: '60%',
   opacity: 0.5,
@@ -65,15 +66,21 @@ const LabelContainer = styled.label<{
 
 interface InputFieldLabelProps {
   children?: ReactNode;
+  pointerEvents?: Property.PointerEvents;
 }
 
 const InputFieldLabel = memo(function InputFieldLabel({
   children = false,
+  pointerEvents = 'none',
 }: InputFieldLabelProps) {
   const { labelPosition, hasDropdown } = useContext(InputFieldContext);
 
   return (
-    <LabelContainer labelPosition={labelPosition} hasDropdown={hasDropdown}>
+    <LabelContainer
+      pointerEvents={pointerEvents}
+      labelPosition={labelPosition}
+      hasDropdown={hasDropdown}
+    >
       {children}
     </LabelContainer>
   );
@@ -141,6 +148,7 @@ export const InputElement = styled(TextInput).withConfig({
   textAlign?: Property.TextAlign;
   disabled?: boolean;
   variant?: InputFieldVariant;
+  readOnly?: boolean;
 }>(
   ({
     theme,
@@ -150,10 +158,15 @@ export const InputElement = styled(TextInput).withConfig({
     textAlign,
     disabled,
     hasLabel,
+    readOnly,
     variant = 'normal',
   }) => ({
     ...theme.textStyles.small,
-    color: disabled ? theme.colors.textDisabled : theme.colors.text,
+    color: readOnly
+      ? theme.colors.textMuted
+      : disabled
+      ? theme.colors.textDisabled
+      : theme.colors.text,
     width: '0px', // Reset intrinsic width
     flex: '1 1 0px',
     position: 'relative',
