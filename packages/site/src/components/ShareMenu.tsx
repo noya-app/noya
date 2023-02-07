@@ -10,6 +10,7 @@ import {
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useEffect, useReducer } from 'react';
 import { useToggleTimer } from '../hooks/useToggleTimer';
+import { NOYA_HOST } from '../utils/noyaClient';
 
 type State =
   | {
@@ -64,7 +65,7 @@ export function ShareMenu({ fileId }: { fileId: string }) {
       if (share && share.viewable) {
         dispatch({
           type: 'startSharing',
-          url: `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/app/shares/${share.id}`,
+          url: `${NOYA_HOST}/app/shares/${share.id}`,
           duplicable: share.duplicable,
         });
       } else {
@@ -95,7 +96,7 @@ export function ShareMenu({ fileId }: { fileId: string }) {
 
                     dispatch({
                       type: 'startSharing',
-                      url: `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/app/shares/${share.id}`,
+                      url: `${NOYA_HOST}/app/shares/${share.id}`,
                       duplicable: share.duplicable,
                     });
                   } else {

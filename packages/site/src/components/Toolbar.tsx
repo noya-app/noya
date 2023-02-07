@@ -20,6 +20,7 @@ import {
 } from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { NOYA_HOST } from '../utils/noyaClient';
 import { Logo } from './Logo';
 
 const LogoContainer = styled.div({
@@ -89,7 +90,7 @@ export function Toolbar({ children, right }: Props) {
                   router.push('/account');
                   return;
                 case 'signOut':
-                  window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
+                  window.location.href = `${NOYA_HOST}/api/auth/signout`;
                   return;
                 case 'discord':
                   window.location.href = 'https://discord.gg/NPGAwyEBJw';

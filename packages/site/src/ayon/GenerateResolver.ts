@@ -1,6 +1,5 @@
 import { Emitter } from 'noya-fonts';
-
-const host = process.env.NEXT_PUBLIC_NOYA_WEB_URL;
+import { NOYA_HOST } from '../utils/noyaClient';
 
 export class GenerateResolver {
   cache: Record<string, Promise<string>> = {};
@@ -33,10 +32,8 @@ export class GenerateResolver {
     if (cacheKey in this.cache) return this.cache[cacheKey];
 
     const response = await fetch(
-      `${host}/api/generate?prompt=${encodeURIComponent(prompt)}`,
-      {
-        credentials: 'include',
-      },
+      `${NOYA_HOST}/api/generate?prompt=${encodeURIComponent(prompt)}`,
+      { credentials: 'include' },
     );
     const resolved = response.json();
 

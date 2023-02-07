@@ -1,42 +1,35 @@
-import { INoyaNetworkClient, NoyaAPI, NoyaAPIError } from 'noya-api';
+import { NoyaAPI } from 'noya-api';
 
-export const host = process.env.NEXT_PUBLIC_NOYA_WEB_URL;
+export const NOYA_HOST = process.env.NEXT_PUBLIC_NOYA_WEB_URL;
 
-if (host) {
-  console.info('INFO: Using Noya API at', host);
+if (NOYA_HOST) {
+  console.info('INFO: Using Noya API at', NOYA_HOST);
 } else {
   console.info('INFO: Using local storage');
 }
 
-function handleError(error: NoyaAPIError) {
-  if (error instanceof NoyaAPI.Error && error.type === 'unauthorized') {
-    if (host) {
-      window.location.href = host;
-    }
-    return true;
-  } else if (
-    error instanceof NoyaAPI.Error &&
-    error.type === 'internalServerError'
-  ) {
-    window.location.reload();
-    return true;
-  } else {
-    return false;
-  }
-}
-
-export function createNetworkClient({
-  onError = handleError,
-}: { onError?: (error: NoyaAPIError) => boolean } = {}): INoyaNetworkClient {
-  const networkClient = host
-    ? new NoyaAPI.NetworkClient({ baseURI: `${host}/api`, onError })
+export function createNoyaClient() {
+  const networkClient = NOYA_HOST
+    ? new NoyaAPI.NetworkClient({
+        baseURI: `${NOYA_HOST}/api`,
+        onError: (error) => {
+          if (error instanceof NoyaAPI.Error && error.type === 'unauthorized') {
+            if (NOYA_HOST) {
+              window.location.href = NOYA_HOST;
+            }
+            return true;
+          } else if (
+            error instanceof NoyaAPI.Error &&
+            error.type === 'internalServerError'
+          ) {
+            window.location.reload();
+            return true;
+          } else {
+            return false;
+          }
+        },
+      })
     : new NoyaAPI.LocalStorageClient();
 
-  return networkClient;
-}
-
-export function createNoyaClient() {
-  return new NoyaAPI.Client({
-    networkClient: createNetworkClient(),
-  });
+  return new NoyaAPI.Client({ networkClient });
 }

@@ -13,8 +13,9 @@ import {
 import { ArrowRightIcon } from 'noya-icons';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { Analytics } from '../../components/Analytics';
 import { Toolbar } from '../../components/Toolbar';
-import { createNetworkClient, createNoyaClient } from '../../utils/noyaClient';
+import { createNoyaClient, NOYA_HOST } from '../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
@@ -38,9 +39,11 @@ const Chip = styled.span<{ variant: 'primary' | 'secondary' }>(
 /**
  * This client throws errors if the user isn't logged in
  */
-const networkClient = createNetworkClient({
-  onError: () => false,
-});
+const networkClient = NOYA_HOST
+  ? new NoyaAPI.NetworkClient({
+      baseURI: `${NOYA_HOST}/api`,
+    })
+  : undefined;
 
 function Content({ id }: { id: string }) {
   const theme = useDesignSystemTheme();
@@ -51,6 +54,7 @@ function Content({ id }: { id: string }) {
   >();
 
   useEffect(() => {
+    if (!networkClient) return;
     networkClient.files.shares.readSharedFile(id).then(setInitialFile);
   }, [id]);
 
@@ -109,6 +113,7 @@ function OptionalNoyaAPIProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function main() {
       try {
+        if (!networkClient) return;
         await networkClient.auth.session();
         setClient(createNoyaClient());
       } catch {
@@ -120,7 +125,11 @@ function OptionalNoyaAPIProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (client) {
-    return <NoyaAPIProvider value={client}>{children}</NoyaAPIProvider>;
+    return (
+      <NoyaAPIProvider value={client}>
+        <Analytics>{children}</Analytics>
+      </NoyaAPIProvider>
+    );
   } else {
     return <>{children}</>;
   }
