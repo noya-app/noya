@@ -7,7 +7,11 @@ import {
   NoyaExportFormat,
   NoyaFile,
   NoyaFileList,
+  NoyaPrice,
+  NoyaProduct,
   NoyaSession,
+  NoyaSubscription,
+  NoyaSubscriptionItem,
   NoyaUser,
 } from './core/schema';
 
@@ -26,4 +30,8 @@ export namespace NoyaAPI {
   export type User = NoyaUser;
   export type Session = NoyaSession;
   export type ExportFormat = NoyaExportFormat;
+  export type Subscription = NoyaSubscription;
+  export type Product = NoyaProduct;
+  export type Price = NoyaPrice;
+  export type SubscriptionItem = NoyaSubscriptionItem;
 }

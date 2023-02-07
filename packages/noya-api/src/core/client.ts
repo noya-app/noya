@@ -16,10 +16,11 @@ export class NoyaClient {
   networkClient: INoyaNetworkClient;
   files$ = observable<NoyaFile[]>([]);
   session$ = observable<NoyaSession | null>(null);
-  billing$ = observable<NoyaBilling>({
+  billing$ = observable<NoyaBilling & { loading: boolean }>({
     availableProducts: [],
     portalUrl: null,
     subscriptions: [],
+    loading: true,
   });
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -65,7 +66,7 @@ export class NoyaClient {
 
   #fetchBilling = async () => {
     const billing = await this.networkClient.billing.read();
-    this.billing$.set(billing);
+    this.billing$.set({ ...billing, loading: false });
   };
 
   #fetchFiles = async () => {

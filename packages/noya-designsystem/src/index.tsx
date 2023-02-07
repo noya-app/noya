@@ -41,6 +41,7 @@ export * from './components/Sortable';
 export type { RelativeDropPosition } from './components/Sortable';
 export * from './components/Spacer';
 export * from './components/Stack';
+export * from './components/Switch';
 export * from './components/Text';
 export * from './components/Tooltip';
 export * from './components/TreeView';

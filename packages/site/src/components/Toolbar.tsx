@@ -14,6 +14,7 @@ import {
   ChevronDownIcon,
   DiscordLogoIcon,
   EnvelopeClosedIcon,
+  ExitIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
 } from 'noya-icons';
@@ -48,12 +49,13 @@ export function Toolbar({ children, right }: Props) {
   const router = useRouter();
 
   const userMenuItems = createSectionedMenu(
-    [{ title: 'Sign out', value: 'signOut', icon: <PersonIcon /> }],
+    [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
     [
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
       { title: 'Contact us', value: 'contact', icon: <EnvelopeClosedIcon /> },
       { title: 'Get help', value: 'help', icon: <QuestionMarkCircledIcon /> },
     ],
+    [{ title: 'Sign out', value: 'signOut', icon: <ExitIcon /> }],
   );
 
   return (
@@ -83,6 +85,9 @@ export function Toolbar({ children, right }: Props) {
             items={userMenuItems}
             onSelect={(value) => {
               switch (value) {
+                case 'account':
+                  router.push('/account');
+                  return;
                 case 'signOut':
                   window.location.href = `${process.env.NEXT_PUBLIC_NOYA_WEB_URL}/api/auth/signout`;
                   return;
