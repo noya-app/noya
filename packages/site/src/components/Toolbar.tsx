@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useNoyaSession } from 'noya-api';
+import { useOptionalNoyaSession } from 'noya-api';
 import {
   Button,
   createSectionedMenu,
@@ -45,7 +45,7 @@ interface Props {
 
 export function Toolbar({ children, right }: Props) {
   const theme = useDesignSystemTheme();
-  const session = useNoyaSession();
+  const session = useOptionalNoyaSession();
   const router = useRouter();
 
   const userMenuItems = createSectionedMenu(

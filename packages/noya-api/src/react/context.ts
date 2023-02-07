@@ -18,3 +18,7 @@ export function useNoyaClient() {
 
   return value;
 }
+
+export function useOptionalNoyaClient() {
+  return useContext(NoyaAPIContext);
+}

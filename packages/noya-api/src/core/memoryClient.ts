@@ -95,7 +95,7 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     },
     shares: {
       list: async () => [],
-      read: async (id) => 0 as unknown as NoyaFile,
+      readSharedFile: async (id) => 0 as unknown as NoyaFile,
       create: async (data) => 0 as unknown as NoyaShare,
     },
   };

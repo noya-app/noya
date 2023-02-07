@@ -31,7 +31,6 @@ export const noyaFileSchema = z.object({
   data: z
     .string()
     .transform((json) => noyaFileDataSchema.parse(JSON.parse(json))),
-  userId: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
   version: z.number(),
@@ -90,6 +89,10 @@ export const noyaBillingSchema = z.object({
   availableProducts: z.array(noyaProductSchema),
 });
 
+export const noyaSharedFileSchema = noyaFileSchema.extend({
+  fileId: z.optional(z.string()),
+});
+
 export const noyaShareSchema = z.object({
   id: z.string(),
   userId: z.string(),
@@ -111,5 +114,6 @@ export type NoyaSubscriptionItem = z.infer<typeof noyaSubscriptionItemSchema>;
 export type NoyaProduct = z.infer<typeof noyaProductSchema>;
 export type NoyaPrice = z.infer<typeof noyaPriceSchema>;
 export type NoyaShare = z.infer<typeof noyaShareSchema>;
+export type NoyaSharedFile = z.infer<typeof noyaSharedFileSchema>;
 
 export type NoyaExportFormat = 'png' | 'pdf' | 'svg';

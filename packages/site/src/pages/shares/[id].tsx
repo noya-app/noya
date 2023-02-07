@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { NoyaAPI, useNoyaClient } from 'noya-api';
+import { NoyaAPI, NoyaAPIProvider, NoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
   Divider,
@@ -10,30 +10,49 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { ArrowRightIcon } from 'noya-icons';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Toolbar } from '../../components/Toolbar';
+import { createNetworkClient, createNoyaClient } from '../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
-const Chip = styled.span(({ theme }) => ({
-  ...theme.textStyles.label,
-  padding: '4px',
-  color: theme.colors.secondary,
-  background: 'rgb(205, 238, 231)',
-  borderRadius: 4,
-  userSelect: 'none',
-}));
+const Chip = styled.span<{ variant: 'primary' | 'secondary' }>(
+  ({ theme, variant }) => ({
+    ...theme.textStyles.label,
+    padding: '4px',
+    borderRadius: 4,
+    userSelect: 'none',
+    ...(variant === 'primary' && {
+      color: theme.colors.primary,
+      background: 'rgb(238, 229, 255)',
+    }),
+    ...(variant === 'secondary' && {
+      color: theme.colors.secondary,
+      background: 'rgb(205, 238, 231)',
+    }),
+  }),
+);
+
+/**
+ * This client throws errors if the user isn't logged in
+ */
+const networkClient = createNetworkClient({
+  onError: () => false,
+});
 
 function Content({ id }: { id: string }) {
   const theme = useDesignSystemTheme();
-  const client = useNoyaClient();
+  const router = useRouter();
 
-  const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
+  const [initialFile, setInitialFile] = useState<
+    NoyaAPI.SharedFile | undefined
+  >();
 
   useEffect(() => {
-    client.files.shares.read(id).then(setInitialFile);
-  }, [client, id]);
+    networkClient.files.shares.readSharedFile(id).then(setInitialFile);
+  }, [id]);
 
   if (!initialFile) return null;
 
@@ -43,7 +62,32 @@ function Content({ id }: { id: string }) {
         <Small>
           {initialFile.data.name}
           <Spacer.Horizontal size={8} inline />
-          <Chip>VIEWING</Chip>
+          <Chip variant="secondary">VIEWING</Chip>
+          {initialFile.fileId && (
+            <>
+              <Spacer.Horizontal size={8} inline />
+              <Chip
+                variant="primary"
+                onClick={() => {
+                  router.push(`/projects/${initialFile.fileId}`);
+                }}
+                style={{
+                  cursor: 'pointer',
+                }}
+              >
+                GO TO PROJECT
+                <Spacer.Horizontal size={2} inline />
+                <ArrowRightIcon
+                  style={{
+                    position: 'relative',
+                    top: '-1px',
+                    transform: 'scale(0.75)',
+                    display: 'inline',
+                  }}
+                />
+              </Chip>
+            </>
+          )}
         </Small>
       </Toolbar>
       <Divider variant="strong" />
@@ -59,6 +103,29 @@ function Content({ id }: { id: string }) {
   );
 }
 
+function OptionalNoyaAPIProvider({ children }: { children: React.ReactNode }) {
+  const [client, setClient] = useState<NoyaClient | undefined>();
+
+  useEffect(() => {
+    async function main() {
+      try {
+        await networkClient.auth.session();
+        setClient(createNoyaClient());
+      } catch {
+        // Ignore
+      }
+    }
+
+    main();
+  }, []);
+
+  if (client) {
+    return <NoyaAPIProvider value={client}>{children}</NoyaAPIProvider>;
+  } else {
+    return <>{children}</>;
+  }
+}
+
 export default function Preview() {
   const { query } = useRouter();
   const id = query.id as string | undefined;
@@ -66,8 +133,10 @@ export default function Preview() {
   if (!id) return null;
 
   return (
-    <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-      <Content id={id} />
-    </DesignSystemConfigurationProvider>
+    <OptionalNoyaAPIProvider>
+      <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
+        <Content id={id} />
+      </DesignSystemConfigurationProvider>
+    </OptionalNoyaAPIProvider>
   );
 }

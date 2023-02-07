@@ -9,6 +9,7 @@ import {
   noyaFileListSchema,
   noyaFileSchema,
   noyaSessionSchema,
+  noyaSharedFileSchema,
   noyaShareSchema,
 } from './schema';
 
@@ -60,7 +61,7 @@ export class NoyaNetworkClient {
         url: this.downloadURL,
       },
       shares: {
-        read: this.#readShare,
+        readSharedFile: this.#readSharedFile,
         create: this.#createShare,
         list: this.#listShares,
       },
@@ -98,7 +99,7 @@ export class NoyaNetworkClient {
     return parsed;
   };
 
-  #readShare = async (shareId: string) => {
+  #readSharedFile = async (shareId: string) => {
     const response = await fetch(`${this.baseURI}/shares/${shareId}`, {
       credentials: 'include',
     });
@@ -106,7 +107,7 @@ export class NoyaNetworkClient {
     this.#ensureAuthorized(response);
 
     const json = await response.json();
-    const parsed = noyaFileSchema.parse(json);
+    const parsed = noyaSharedFileSchema.parse(json);
     return parsed;
   };
 

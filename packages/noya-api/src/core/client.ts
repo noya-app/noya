@@ -49,7 +49,7 @@ export class NoyaClient {
         url: this.networkClient.files.download.url,
       },
       shares: {
-        read: this.networkClient.files.shares.read,
+        readFile: this.networkClient.files.shares.readSharedFile,
         create: this.networkClient.files.shares.create,
         list: this.networkClient.files.shares.list,
       },
