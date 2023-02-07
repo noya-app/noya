@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { NoyaAPIError } from './error';
 import {
   noyaAssetSchema,
+  noyaBillingSchema,
   NoyaExportFormat,
   NoyaFileData,
   noyaFileListSchema,
@@ -26,6 +27,7 @@ export interface INoyaNetworkClient {
   auth: NoyaNetworkClient['auth'];
   files: NoyaNetworkClient['files'];
   assets: NoyaNetworkClient['assets'];
+  billing: NoyaNetworkClient['billing'];
 }
 
 export class NoyaNetworkClient {
@@ -65,6 +67,24 @@ export class NoyaNetworkClient {
       url: this.#assetURL,
     };
   }
+
+  get billing() {
+    return {
+      read: this.#readBilling,
+    };
+  }
+
+  #readBilling = async () => {
+    const response = await fetch(`${this.baseURI}/billing`, {
+      credentials: 'include',
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaBillingSchema.parse(json);
+    return parsed;
+  };
 
   downloadURL = (id: string, format: NoyaExportFormat, size: Size) =>
     `${this.baseURI}/files/${id}.${format}?width=${size.width}&height=${size.height}`;

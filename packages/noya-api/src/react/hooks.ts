@@ -11,3 +11,8 @@ export function useNoyaSession() {
   const session = useSelector(useNoyaClient().session$);
   return session;
 }
+
+export function useNoyaBilling() {
+  const billing = useSelector(useNoyaClient().billing$);
+  return billing;
+}

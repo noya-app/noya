@@ -8,7 +8,7 @@ import React, {
 import styled from 'styled-components';
 import { Tooltip } from './Tooltip';
 
-type ButtonVariant = 'normal' | 'thin' | 'none';
+type ButtonVariant = 'normal' | 'primary' | 'secondary' | 'thin' | 'none';
 
 /* ----------------------------------------------------------------------------
  * Element
@@ -45,9 +45,32 @@ const ButtonElement = styled.button<{
       boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
     },
   }),
+  '&:hover': {
+    background: theme.colors.inputBackgroundLight,
+  },
   '&:active': {
     background: theme.colors.activeBackground,
   },
+  ...(variant === 'primary' && {
+    background: theme.colors.primary,
+    color: 'white',
+    '&:hover': {
+      background: theme.colors.primaryLight,
+    },
+    '&:active': {
+      background: theme.colors.primary,
+    },
+  }),
+  ...(variant === 'secondary' && {
+    background: theme.colors.secondary,
+    color: 'white',
+    '&:hover': {
+      background: theme.colors.secondaryLight,
+    },
+    '&:active': {
+      background: theme.colors.secondary,
+    },
+  }),
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

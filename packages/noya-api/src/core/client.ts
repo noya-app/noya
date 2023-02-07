@@ -2,7 +2,7 @@ import { observable } from '@legendapp/state';
 import { memoizedGetter } from 'noya-utils';
 import { makeCollectionReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
-import { NoyaFile, NoyaFileData, NoyaSession } from './schema';
+import { NoyaBilling, NoyaFile, NoyaFileData, NoyaSession } from './schema';
 
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
@@ -16,6 +16,12 @@ export class NoyaClient {
   networkClient: INoyaNetworkClient;
   files$ = observable<NoyaFile[]>([]);
   session$ = observable<NoyaSession | null>(null);
+  billing$ = observable<NoyaBilling & { loading: boolean }>({
+    availableProducts: [],
+    portalUrl: null,
+    subscriptions: [],
+    loading: true,
+  });
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -23,6 +29,7 @@ export class NoyaClient {
     if (typeof window !== 'undefined') {
       this.#fetchSession();
       this.#fetchFiles();
+      this.#fetchBilling();
     }
   }
 
@@ -50,6 +57,17 @@ export class NoyaClient {
       url: this.networkClient.assets.url,
     });
   }
+
+  get billing() {
+    return memoizedGetter(this, 'billing', {
+      read: this.#fetchBilling,
+    });
+  }
+
+  #fetchBilling = async () => {
+    const billing = await this.networkClient.billing.read();
+    this.billing$.set({ ...billing, loading: false });
+  };
 
   #fetchFiles = async () => {
     const files = await this.networkClient.files.list();

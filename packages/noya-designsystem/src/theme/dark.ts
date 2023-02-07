@@ -8,6 +8,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.textMuted = 'rgb(180,179,182)';
   colors.textDisabled = 'rgb(100,99,102)';
   colors.inputBackground = 'rgba(181,178,255,0.08)';
+  colors.inputBackgroundLight = 'rgba(181,178,255,0.10)';
   colors.dividerSubtle = 'rgba(255,255,255,0.04)';
   colors.divider = 'rgba(255,255,255,0.08)';
   colors.dividerStrong = 'rgba(0,0,0,1)';
