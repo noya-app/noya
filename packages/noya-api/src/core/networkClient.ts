@@ -191,11 +191,13 @@ export class NoyaNetworkClient {
     return parsed;
   };
 
-  #createFile = async (data: NoyaFileData) => {
+  #createFile = async (
+    fields: { data: NoyaFileData } | { shareId: string } | { fileId: string },
+  ) => {
     const response = await fetch(`${this.baseURI}/files`, {
       method: 'POST',
       credentials: 'include',
-      body: JSON.stringify({ data }),
+      body: JSON.stringify(fields),
     });
 
     this.#ensureAuthorized(response);

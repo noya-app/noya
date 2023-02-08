@@ -1,9 +1,11 @@
 import { useNoyaClient } from 'noya-api';
 import {
+  Divider,
   IconButton,
   InputField,
   Small,
   Spacer,
+  Stack,
   Switch,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -30,12 +32,9 @@ type Action =
       url: string;
       duplicable: boolean;
     }
-  | {
-      type: 'stopSharing';
-    }
-  | {
-      type: 'loaded';
-    };
+  | { type: 'stopSharing' }
+  | { type: 'setDuplicable'; value: boolean }
+  | { type: 'loaded' };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -46,6 +45,13 @@ function reducer(state: State, action: Action): State {
       };
     case 'stopSharing':
       return { loading: false };
+    case 'setDuplicable':
+      if (state.loading || !state.sharing) return state;
+
+      return {
+        loading: false,
+        sharing: { ...state.sharing, duplicable: action.value },
+      };
     case 'loaded':
       return { loading: false };
   }
@@ -65,7 +71,7 @@ export function ShareMenu({ fileId }: { fileId: string }) {
       if (share && share.viewable) {
         dispatch({
           type: 'startSharing',
-          url: `${NOYA_HOST}/app/shares/${share.id}`,
+          url: `${NOYA_HOST}/app/share/${share.id}`,
           duplicable: share.duplicable,
         });
       } else {
@@ -96,7 +102,7 @@ export function ShareMenu({ fileId }: { fileId: string }) {
 
                     dispatch({
                       type: 'startSharing',
-                      url: `${NOYA_HOST}/app/shares/${share.id}`,
+                      url: `${NOYA_HOST}/app/share/${share.id}`,
                       duplicable: share.duplicable,
                     });
                   } else {
@@ -136,6 +142,34 @@ export function ShareMenu({ fileId }: { fileId: string }) {
                       />
                     </InputField.Label>
                   </InputField.Root>
+                </InspectorPrimitives.Row>
+                <InspectorPrimitives.VerticalSeparator />
+                <Divider overflow={10} />
+                <InspectorPrimitives.VerticalSeparator />
+                <InspectorPrimitives.Row>
+                  <Stack.V flex="1 1 0%">
+                    <Small color="text">Allow duplication</Small>
+                    <Spacer.Vertical size={4} />
+                    <Small color="textSubtle" fontSize="12px">
+                      People who view your project can duplicate it as a
+                      starting point for their own work
+                    </Small>
+                  </Stack.V>
+                  <Spacer.Horizontal size={8} />
+                  <Switch
+                    value={shareState.sharing.duplicable}
+                    variant="secondary"
+                    onChange={async (value) => {
+                      if (!shareState.sharing) return;
+
+                      await client.files.shares.create(fileId, {
+                        viewable: true,
+                        duplicable: value,
+                      });
+
+                      dispatch({ type: 'setDuplicable', value });
+                    }}
+                  />
                 </InspectorPrimitives.Row>
               </>
             )}

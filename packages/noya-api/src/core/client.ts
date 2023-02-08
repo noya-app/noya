@@ -80,12 +80,12 @@ export class NoyaClient {
   };
 
   #createFile = async (
-    data: NoyaFileData,
+    fields: { data: NoyaFileData } | { shareId: string } | { fileId: string },
     { fetchPolicy }: { fetchPolicy?: NoyaFetchPolicy } = {
       fetchPolicy: 'cache-and-network',
     },
   ) => {
-    const result = await this.networkClient.files.create(data);
+    const result = await this.networkClient.files.create(fields);
 
     if (fetchPolicy === 'cache-and-network') {
       this.#fetchFiles();

@@ -91,6 +91,7 @@ export const noyaBillingSchema = z.object({
 
 export const noyaSharedFileSchema = noyaFileSchema.extend({
   fileId: z.optional(z.string()),
+  duplicable: z.boolean(),
 });
 
 export const noyaShareSchema = z.object({

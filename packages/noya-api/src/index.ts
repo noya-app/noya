@@ -17,17 +17,24 @@ import {
   NoyaUser,
 } from './core/schema';
 
-export type { INoyaNetworkClient } from './core/networkClient';
 export * from './react/context';
 export * from './react/hooks';
-export { NoyaAPIError, NoyaClient };
 
 export namespace NoyaAPI {
   export const NetworkClient = NoyaNetworkClient;
-  export const MemoryClient = NoyaMemoryClient;
-  export const LocalStorageClient = NoyaLocalStorageClient;
+  export type NetworkClient = NoyaNetworkClient;
+
   export const Client = NoyaClient;
+  export type Client = NoyaClient;
+
   export const Error = NoyaAPIError;
+  export type Error = NoyaAPIError;
+
+  export const MemoryClient = NoyaMemoryClient;
+  export type MemoryClient = NoyaMemoryClient;
+
+  export const LocalStorageClient = NoyaLocalStorageClient;
+  export type LocalStorageClient = NoyaLocalStorageClient;
 
   export type File = NoyaFile;
   export type FileList = NoyaFileList;

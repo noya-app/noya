@@ -1,6 +1,11 @@
 import { makeCollectionReducer } from './collection';
 import { INoyaNetworkClient } from './networkClient';
-import { NoyaFile, noyaFileListSchema, NoyaShare } from './schema';
+import {
+  NoyaFile,
+  noyaFileListSchema,
+  NoyaShare,
+  NoyaSharedFile,
+} from './schema';
 
 const fileReducer = makeCollectionReducer<NoyaFile>({
   createItem: (parameters) => ({
@@ -74,8 +79,16 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
       if (!file) throw new Error('File not found');
       return file;
     },
-    create: async (data) => {
-      this.data.files = fileReducer(this.data.files, { type: 'create', data });
+    create: async (fields) => {
+      if ('shareId' in fields || 'fileId' in fields) {
+        throw new Error(
+          'Cannot create a file with a shareId or fileId using MemoryClient',
+        );
+      }
+      this.data.files = fileReducer(this.data.files, {
+        type: 'create',
+        data: fields.data,
+      });
       return this.data.files[this.data.files.length - 1].id;
     },
     update: async (id, data) => {
@@ -95,7 +108,7 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     },
     shares: {
       list: async () => [],
-      readSharedFile: async (id) => 0 as unknown as NoyaFile,
+      readSharedFile: async (id) => 0 as unknown as NoyaSharedFile,
       create: async (data) => 0 as unknown as NoyaShare,
     },
   };

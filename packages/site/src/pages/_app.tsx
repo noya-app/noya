@@ -24,7 +24,7 @@ amplitude.logEvent('App - Opened');
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
-  const isSessionRequired = !router.asPath.startsWith('/shares');
+  const isSessionRequired = !router.asPath.startsWith('/share');
 
   const noyaClient = useMemo(() => {
     return isSessionRequired ? createNoyaClient() : undefined;

@@ -40,10 +40,12 @@ export function Projects() {
               // if the list updates before transitioning to the new page
               .create(
                 {
-                  name: 'Untitled',
-                  type: 'io.noya.ayon',
-                  schemaVersion: '0.1.0',
-                  document,
+                  data: {
+                    name: 'Untitled',
+                    type: 'io.noya.ayon',
+                    schemaVersion: '0.1.0',
+                    document,
+                  },
                 },
                 { fetchPolicy: 'no-cache' },
               )
