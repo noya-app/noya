@@ -156,7 +156,7 @@ function Content({ shareId }: { shareId: string }) {
                 cursor: 'pointer',
               }}
             >
-              DUPLICATE PROJECT
+              DUPLICATE THIS PROJECT
               <Spacer.Horizontal size={2} inline />
               <ArrowRightIcon
                 style={{
