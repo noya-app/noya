@@ -4,7 +4,6 @@ import { AppLayout } from '../components/AppLayout';
 import { Projects } from '../components/Projects';
 import {
   getSubscriptionOverage,
-  getSubscriptionUsage,
   SubscriptionCard,
   SubscriptionUsageMeter,
 } from '../components/Subscription';
@@ -15,7 +14,7 @@ export default function App() {
   const { subscriptions, availableProducts } = useNoyaBilling();
 
   const overageItems = getSubscriptionOverage(
-    getSubscriptionUsage(files),
+    files,
     subscriptions,
     availableProducts,
   );

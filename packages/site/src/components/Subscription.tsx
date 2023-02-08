@@ -1,4 +1,5 @@
 import { isSameMonth, parseISO } from 'date-fns';
+import Link from 'next/link';
 import { NoyaAPI } from 'noya-api';
 import {
   Body,
@@ -14,6 +15,7 @@ import Sketch from 'noya-file-format';
 import { CheckIcon } from 'noya-icons';
 import { Layers } from 'noya-state';
 import React, { ReactNode } from 'react';
+import styled from 'styled-components';
 import { writeSymbolId } from '../ayon/blocks/symbols';
 
 export function SubscriptionCard({
@@ -172,6 +174,7 @@ export function SubscriptionUsageMeter({
           {items.map((item) => (
             <Stack.H key={item.name} height={15} alignItems="center">
               <Progress
+                flex="1"
                 value={(item.count / item.limit) * 100}
                 variant="warning"
               />
@@ -197,6 +200,58 @@ export function SubscriptionUsageMeter({
         </Stack.V>
       </Stack.H>
     </Stack.V>
+  );
+}
+
+const SubscriptionUsageMeterScallContainer = styled.a(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'stretch',
+  margin: '0 0 0 -10px',
+  '&:hover': {
+    opacity: 0.85,
+  },
+}));
+
+export function SubscriptionUsageMeterSmall({
+  item,
+}: {
+  item: SubscriptionUsageItem;
+}) {
+  const theme = useDesignSystemTheme();
+
+  return (
+    <Link href="/account" passHref>
+      <SubscriptionUsageMeterScallContainer>
+        <Spacer.Horizontal size={10} />
+        <Stack.H padding="0 4px" alignItems="center">
+          <Stack.V>
+            <span
+              style={{
+                color: theme.colors.textMuted,
+                letterSpacing: '0.3px',
+                fontSize: '11px',
+                lineHeight: '1',
+              }}
+            >
+              Current Plan
+              <Spacer.Horizontal size={4} inline />
+              <span style={{ opacity: 0.5 }}>⁠–</span>
+              <Spacer.Horizontal size={4} inline />
+              <span style={{ fontWeight: 500 }}>Upgrade</span>
+            </span>
+            <Spacer.Vertical size={6} />
+            <Progress
+              height={4}
+              value={(item.count / item.limit) * 100}
+              variant="warning"
+            />
+            <Spacer.Vertical size={2} />
+          </Stack.V>
+        </Stack.H>
+        <Spacer.Horizontal size={10} />
+        <DividerVertical />
+      </SubscriptionUsageMeterScallContainer>
+    </Link>
   );
 }
 
@@ -251,7 +306,7 @@ const FreePlanLimits = {
   generatedContent: 30,
 };
 
-export function getSubscriptionUsage(files: NoyaAPI.File[]) {
+function getSubscriptionUsage(files: NoyaAPI.File[]) {
   const projectsCount = files.length;
   const blocks = files.flatMap(getAllBlocks);
   const blocksCount = blocks.length;
@@ -281,7 +336,7 @@ export function getSubscriptionUsage(files: NoyaAPI.File[]) {
 }
 
 export function getSubscriptionOverage(
-  usage: SubscriptionUsageItem[],
+  files: NoyaAPI.File[],
   subscriptions: NoyaAPI.Subscription[],
   availableProducts: NoyaAPI.Product[],
 ) {
@@ -289,7 +344,9 @@ export function getSubscriptionOverage(
 
   if (product) return [];
 
-  const items = usage.filter((item) => item.count / item.limit > 0.25);
+  const items = getSubscriptionUsage(files).filter(
+    (item) => item.count / item.limit > 0.25,
+  );
 
   return items;
 }
