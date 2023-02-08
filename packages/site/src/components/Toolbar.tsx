@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useOptionalNoyaSession } from 'noya-api';
+import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
 import {
+  Avatar,
   Button,
   createSectionedMenu,
   DividerVertical,
@@ -42,6 +43,16 @@ const LogoContainer = styled.div({
 interface Props {
   children?: ReactNode;
   right?: ReactNode;
+}
+
+function getMonogram(session: NoyaAPI.Session) {
+  const text = session.user.name ?? session.user.email;
+
+  if (!text) return undefined;
+
+  const firstLetter = text[0].toLocaleUpperCase();
+
+  return firstLetter;
 }
 
 export function Toolbar({ children, right }: Props) {
@@ -107,7 +118,13 @@ export function Toolbar({ children, right }: Props) {
             }}
           >
             <Button id="insert-symbol" data-private>
-              {session.user.name ?? session.user.email}
+              {(session.user.name || session.user.email) && (
+                <Avatar
+                  size={21}
+                  overflow={-1}
+                  fallback={getMonogram(session)}
+                />
+              )}
               <Spacer.Horizontal size={4} />
               <ChevronDownIcon />
             </Button>

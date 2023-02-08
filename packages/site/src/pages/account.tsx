@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { NoyaAPI, useNoyaBilling } from 'noya-api';
+import { NoyaAPI, useNoyaBilling, useNoyaSession } from 'noya-api';
 import {
   Body,
   Button,
@@ -101,6 +101,17 @@ function describePrice(price: NoyaAPI.Price) {
   return `$${price.unitAmount / (100 * 12)} / month (billed annually)`;
 }
 
+function AccountDetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Stack.H>
+      <Small color="text" width={60} fontWeight="bold">
+        {label}
+      </Small>
+      <Small color="text">{value}</Small>
+    </Stack.H>
+  );
+}
+
 function ProfessionalPlanFeatures() {
   return (
     <Stack.V gap={8} padding={'0 20px'}>
@@ -128,6 +139,8 @@ function StarterPlanFeatures() {
 export default function Account() {
   const { portalUrl, subscriptions, availableProducts, loading } =
     useNoyaBilling();
+  const session = useNoyaSession();
+  const theme = useDesignSystemTheme();
 
   const activeSubscriptions = subscriptions.filter(
     (subscription) => subscription.status === 'active',
@@ -138,9 +151,24 @@ export default function Account() {
   return (
     <AppLayout toolbar={<Toolbar />}>
       <Stack.V flex="1" gap={44}>
-        <Stack.H alignItems="center">
-          <Heading2 color="text">Account</Heading2>
-        </Stack.H>
+        <Stack.V gap={20}>
+          <Stack.H alignItems="center">
+            <Heading2 color="text">Account</Heading2>
+          </Stack.H>
+          <Stack.V
+            border={`1px solid ${theme.colors.dividerSubtle}`}
+            padding={20}
+            background={theme.colors.sidebar.background}
+            gap={10}
+          >
+            {session?.user.name && (
+              <AccountDetailRow label="Name" value={session.user.name} />
+            )}
+            {session?.user.email && (
+              <AccountDetailRow label="Email" value={session.user.email} />
+            )}
+          </Stack.V>
+        </Stack.V>
         {!loading && (
           <>
             <Stack.V gap={20}>

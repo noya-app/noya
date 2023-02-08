@@ -5,6 +5,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@radix-ui/primitive": "^1.0.0",
+    "@radix-ui/react-avatar": "^1.0.1",
     "@radix-ui/react-compose-refs": "^1.0.0",
     "@radix-ui/react-context-menu": "^2.0.1",
     "@radix-ui/react-dialog": "^1.0.2",

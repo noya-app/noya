@@ -14,6 +14,7 @@ declare module 'react' {
 
 // Theme
 // Components
+export * from './components/Avatar';
 export * from './components/Button';
 export * from './components/ColorPicker';
 export * from './components/ContextMenu';
