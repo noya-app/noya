@@ -154,6 +154,7 @@ export const Content = memo(function Content({
               originalText,
               resolvedText: resolvedUrl,
               symbolID: symbolID,
+              resolvedAt: new Date().toISOString(),
             });
           }),
         );
@@ -171,6 +172,7 @@ export const Content = memo(function Content({
                 originalText,
                 resolvedText,
                 symbolID: symbolID,
+                resolvedAt: new Date().toISOString(),
               });
             },
           ),
@@ -184,6 +186,7 @@ export const Content = memo(function Content({
               originalText,
               resolvedText: resolvedUrl,
               symbolID: symbolID,
+              resolvedAt: new Date().toISOString(),
             });
           }),
         );

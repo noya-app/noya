@@ -1,9 +1,6 @@
 import { format } from 'date-fns';
-import { NoyaAPI, useNoyaBilling, useNoyaSession } from 'noya-api';
+import { useNoyaBilling, useNoyaSession } from 'noya-api';
 import {
-  Body,
-  Button,
-  DividerVertical,
   Heading2,
   Heading3,
   Small,
@@ -12,129 +9,18 @@ import {
   Switch,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { CheckIcon } from 'noya-icons';
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from '../components/AppLayout';
+import {
+  AccountDetailRow,
+  describePrice,
+  findSubscribedProduct,
+  isProfessionalPlan,
+  ProfessionalPlanFeatures,
+  StarterPlanFeatures,
+  SubscriptionCard,
+} from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
-
-function Card({
-  name,
-  periodEnd,
-  cancelAtPeriodEnd,
-  priceDescription,
-  callToActionAccented,
-  callToActionText,
-  callToActionUrl,
-  children,
-}: {
-  name: string;
-  periodEnd?: string;
-  cancelAtPeriodEnd?: boolean;
-  priceDescription: string;
-  callToActionAccented?: boolean;
-  callToActionText?: string;
-  callToActionUrl?: string | null;
-  children?: ReactNode;
-}) {
-  const theme = useDesignSystemTheme();
-
-  return (
-    <Stack.H
-      border={`1px solid ${theme.colors.dividerSubtle}`}
-      padding={20}
-      background={theme.colors.sidebar.background}
-    >
-      <Stack.V flex="1">
-        <Body color="text" fontWeight="bold">
-          {name}
-        </Body>
-        <Spacer.Vertical size={4} />
-        <Small color="text">{priceDescription}</Small>
-        <Spacer.Vertical size={4} />
-        {periodEnd && (
-          <Small color={cancelAtPeriodEnd ? 'primaryLight' : 'text'}>
-            {cancelAtPeriodEnd ? 'Ends' : 'Renews'} {periodEnd}
-          </Small>
-        )}
-        <Spacer.Vertical />
-        {callToActionUrl && (
-          <>
-            <Spacer.Vertical size={20} />
-            <Stack.H>
-              <Button
-                variant={callToActionAccented ? 'secondary' : 'normal'}
-                onClick={() => {
-                  window.location.href = callToActionUrl;
-                }}
-              >
-                {callToActionText}
-              </Button>
-            </Stack.H>
-          </>
-        )}
-      </Stack.V>
-      {children && (
-        <>
-          <DividerVertical />
-          <Stack.V flex="1">{children}</Stack.V>
-        </>
-      )}
-    </Stack.H>
-  );
-}
-
-function FeatureItem({ children }: { children: ReactNode }) {
-  return (
-    <Small color="text" lineHeight="15px">
-      <CheckIcon style={{ display: 'inline', verticalAlign: 'top' }} />
-      <Spacer.Horizontal size={6} inline />
-      {children}
-    </Small>
-  );
-}
-
-function describePrice(price: NoyaAPI.Price) {
-  if (price.recurringInterval === 'month') {
-    return `$${price.unitAmount / 100} / month`;
-  }
-
-  return `$${price.unitAmount / (100 * 12)} / month (billed annually)`;
-}
-
-function AccountDetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <Stack.H>
-      <Small color="text" width={60} fontWeight="bold">
-        {label}
-      </Small>
-      <Small color="text">{value}</Small>
-    </Stack.H>
-  );
-}
-
-function ProfessionalPlanFeatures() {
-  return (
-    <Stack.V gap={8} padding={'0 20px'}>
-      <FeatureItem>Unlimited projects</FeatureItem>
-      <FeatureItem>Unlimited blocks</FeatureItem>
-      <FeatureItem>3,000 AI-generated content/mo</FeatureItem>
-      <FeatureItem>Export to Figma or Sketch</FeatureItem>
-      <FeatureItem>Export React code</FeatureItem>
-      <FeatureItem>Priority support</FeatureItem>
-    </Stack.V>
-  );
-}
-
-function StarterPlanFeatures() {
-  return (
-    <Stack.V gap={8} padding={'0 20px'}>
-      <FeatureItem>10 projects</FeatureItem>
-      <FeatureItem>200 blocks</FeatureItem>
-      <FeatureItem>30 AI-generated content/mo</FeatureItem>
-      <FeatureItem>Export to Figma or Sketch</FeatureItem>
-    </Stack.V>
-  );
-}
 
 export default function Account() {
   const { portalUrl, subscriptions, availableProducts, loading } =
@@ -174,11 +60,9 @@ export default function Account() {
             <Stack.V gap={20}>
               <Heading3 color="text">Current Plan</Heading3>
               {activeSubscriptions.map((subscription) => {
-                const priceIds = subscription.items.map(
-                  (item) => item.price.id,
-                );
-                const product = availableProducts.find((product) =>
-                  product.prices.some((price) => priceIds.includes(price.id)),
+                const product = findSubscribedProduct(
+                  subscriptions,
+                  availableProducts,
                 );
 
                 if (!product) return null;
@@ -187,7 +71,7 @@ export default function Account() {
                 const price = subscription.items[0].price;
 
                 return (
-                  <Card
+                  <SubscriptionCard
                     name={product.name}
                     periodEnd={format(periodEnd, 'MMM d, yyyy')}
                     cancelAtPeriodEnd={subscription.cancelAtPeriodEnd}
@@ -195,18 +79,18 @@ export default function Account() {
                     callToActionText="Manage Subscription"
                     callToActionUrl={portalUrl}
                   >
-                    {product.name.includes('Professional') ? (
+                    {isProfessionalPlan(product) ? (
                       <ProfessionalPlanFeatures />
                     ) : (
                       <StarterPlanFeatures />
                     )}
-                  </Card>
+                  </SubscriptionCard>
                 );
               })}
               {activeSubscriptions.length === 0 && (
-                <Card name="Noya Starter" priceDescription="Free">
+                <SubscriptionCard name="Noya Starter" priceDescription="Free">
                   <StarterPlanFeatures />
-                </Card>
+                </SubscriptionCard>
               )}
             </Stack.V>
             {activeSubscriptions.length === 0 && availableProducts.length > 0 && (
@@ -236,7 +120,7 @@ export default function Account() {
                     product.prices[0];
 
                   return (
-                    <Card
+                    <SubscriptionCard
                       key={product.id}
                       name={product.name}
                       priceDescription={describePrice(price)}
@@ -245,7 +129,7 @@ export default function Account() {
                       callToActionAccented
                     >
                       <ProfessionalPlanFeatures />
-                    </Card>
+                    </SubscriptionCard>
                   );
                 })}
               </Stack.V>

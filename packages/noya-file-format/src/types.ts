@@ -1166,6 +1166,7 @@ export type SymbolInstance = {
     symbolID: string;
     originalText: string;
     resolvedText: string;
+    resolvedAt?: string;
   };
   symbolIDIsFixed?: boolean;
 };

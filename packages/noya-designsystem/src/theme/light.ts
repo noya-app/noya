@@ -17,6 +17,7 @@ export const colors = {
   primaryLight: 'rgb(147, 86, 255)',
   secondary: 'rgb(0, 151, 117)',
   secondaryLight: 'rgb(0, 160, 129)',
+  warning: 'rgb(251, 211, 0)',
   neutralBackground: 'rgb(222,223,232)',
   inputBackground: 'rgb(240, 240, 242)',
   inputBackgroundLight: 'rgb(243, 243, 245)',
