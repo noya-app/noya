@@ -50,7 +50,7 @@ export type InferBlockProps = {
 
 export type BlockDefinition = {
   id: string;
-  parser: 'regular' | 'newlineSeparated' | 'commaSeparated';
+  parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
   infer: (props: InferBlockProps) => number;
   render: (props: BlockProps) => ReactNode;
   hashtags?: string[];

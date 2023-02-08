@@ -16,7 +16,7 @@ export function getBlockThemeColors({
     case 'dark':
       return {
         backgroundColor: 'rgba(11,21,48,0.9)',
-        borderBottomColor: 'transparent',
+        borderColor: 'transparent',
         searchBackgroundColor: 'rgba(0,0,0,0.2)',
         color: '#fff',
         activeLinkBackgroundColor: 'rgba(255,255,255,0.1)',
@@ -24,7 +24,7 @@ export function getBlockThemeColors({
     case 'light':
       return {
         backgroundColor: 'rgba(255,255,255,0.9)',
-        borderBottomColor: '#eee',
+        borderColor: '#eee',
         searchBackgroundColor: 'rgba(0,0,0,0.02)',
         color: '#000',
         activeLinkBackgroundColor: 'rgba(0,0,0,0.1)',
@@ -32,7 +32,7 @@ export function getBlockThemeColors({
     case 'dark-accent':
       return {
         backgroundColor: accentColor[800],
-        borderBottomColor: 'transparent',
+        borderColor: 'transparent',
         searchBackgroundColor: 'rgba(0,0,0,0.2)',
         color: '#fff',
         activeLinkBackgroundColor: 'rgba(255,255,255,0.1)',
@@ -40,7 +40,7 @@ export function getBlockThemeColors({
     case 'light-accent':
       return {
         backgroundColor: accentColor[50],
-        borderBottomColor: 'rgba(0,0,0,0.05)',
+        borderColor: 'rgba(0,0,0,0.05)',
         searchBackgroundColor: 'rgba(0,0,0,0.02)',
         color: 'rgba(0,0,0,0.8)',
         activeLinkBackgroundColor: accentColor[100],

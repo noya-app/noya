@@ -13,10 +13,17 @@ export type ParsedCompositeBlock = {
   parameters: ParsedBlockItemParameters;
 };
 
+export type ParsedTableBlock = {
+  content: string;
+  rows: ParsedCompositeBlock[];
+  parameters: ParsedBlockItemParameters;
+};
+
 type ParsedBlockTypeMap = {
   regular: ParsedBlockItem;
   newlineSeparated: ParsedCompositeBlock;
   commaSeparated: ParsedCompositeBlock;
+  table: ParsedTableBlock;
 };
 
 export type ParsedBlockType = keyof ParsedBlockTypeMap;
@@ -26,7 +33,7 @@ function mergeObjects<T extends object>(objects: T[]): T {
 }
 
 function splitItems(text: string, type: 'commaSeparated' | 'newlineSeparated') {
-  const items = text.split(type === 'commaSeparated' ? /,\s*/ : /\r?\n/);
+  const items = text.split(type === 'commaSeparated' ? /[,\t]\s*/ : /\r?\n/);
 
   return items.map((item) => item.trim());
 }
@@ -113,6 +120,19 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
 
       return block as ParsedBlockTypeMap[K];
     }
+    case 'table': {
+      const lines = splitItems(text, 'newlineSeparated');
+
+      const rows = lines.map((line) => parseBlockInner(line, 'commaSeparated'));
+
+      const block: ParsedTableBlock = {
+        content: rows.map((row) => row.content).join('\n'),
+        rows,
+        parameters,
+      };
+
+      return block as ParsedBlockTypeMap[K];
+    }
     default: {
       throw new Error('Invalid block parse type');
     }
@@ -145,6 +165,26 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 
         block.content = parsedPlaceholder.content;
         block.items = parsedPlaceholder.items;
+        block.parameters = mergeObjects([
+          parsedPlaceholder.parameters,
+          block.parameters,
+        ]);
+      }
+
+      return block as ParsedBlockTypeMap[K];
+    }
+    case 'table': {
+      const block = parseBlockInner(text, type) as ParsedTableBlock;
+
+      // If empty or parameters-only, merge placeholder content into the block
+      if (placeholder && block.content === '') {
+        const parsedPlaceholder = parseBlockInner(
+          placeholder,
+          type,
+        ) as ParsedTableBlock;
+
+        block.content = parsedPlaceholder.content;
+        block.rows = parsedPlaceholder.rows;
         block.parameters = mergeObjects([
           parsedPlaceholder.parameters,
           block.parameters,

@@ -55,7 +55,7 @@ export const HeaderBarBlock: BlockDefinition = {
 
     const {
       backgroundColor,
-      borderBottomColor,
+      borderColor,
       searchBackgroundColor,
       color,
       activeLinkBackgroundColor,
@@ -65,7 +65,7 @@ export const HeaderBarBlock: BlockDefinition = {
       <Flex
         alignItems="center"
         borderBottomWidth={1}
-        borderBottomColor={borderBottomColor}
+        borderBottomColor={borderColor}
         height={`${props.frame.height}px`}
         paddingX="5px"
         backgroundColor={backgroundColor}

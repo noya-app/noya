@@ -13,13 +13,14 @@ import {
   Heading6Block,
 } from './HeadingBlock';
 import { HeroBlock } from './HeroBlock';
+import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
+import { SidebarBlock } from './SidebarBlock';
 import { SwitchBlock } from './SwitchBlock';
+import { TableBlock } from './TableBlock';
 import { TextBlock } from './TextBlock';
 import { WriteBlock } from './WriteBlock';
-import { IconBlock } from './IconBlock';
-import { SidebarBlock } from './SidebarBlock';
 
 export const Blocks: Record<string, BlockDefinition> = {
   [AvatarBlock.id]: AvatarBlock,
@@ -41,4 +42,5 @@ export const Blocks: Record<string, BlockDefinition> = {
   [WriteBlock.id]: WriteBlock,
   [IconBlock.id]: IconBlock,
   [SidebarBlock.id]: SidebarBlock,
+  [TableBlock.id]: TableBlock,
 };

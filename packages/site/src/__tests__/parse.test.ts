@@ -3,6 +3,7 @@ import {
   parseBlock,
   ParsedBlockItem,
   ParsedCompositeBlock,
+  ParsedTableBlock,
 } from '../ayon/parse';
 
 test('remove slash commands', () => {
@@ -178,5 +179,93 @@ test('regular block with url', () => {
   expect(parseBlock(imageText, 'regular')).toEqual<ParsedBlockItem>({
     content: imageText,
     parameters: {},
+  });
+});
+
+const tableText = `
+#globalParameter2 Name,Age,Twitter
+John,28,@john
+Jane,30,@jane
+#globalParameter
+`.trim();
+
+test('table block', () => {
+  expect(parseBlock(tableText, 'table')).toEqual<ParsedTableBlock>({
+    content: `Name,Age,Twitter\nJohn,28,@john\nJane,30,@jane`,
+    rows: [
+      {
+        content: 'Name,Age,Twitter',
+        items: [
+          { content: 'Name', parameters: {} },
+          { content: 'Age', parameters: {} },
+          { content: 'Twitter', parameters: {} },
+        ],
+        parameters: {},
+      },
+      {
+        content: 'John,28,@john',
+        items: [
+          { content: 'John', parameters: {} },
+          { content: '28', parameters: {} },
+          { content: '@john', parameters: {} },
+        ],
+        parameters: {},
+      },
+      {
+        content: 'Jane,30,@jane',
+        items: [
+          { content: 'Jane', parameters: {} },
+          { content: '30', parameters: {} },
+          { content: '@jane', parameters: {} },
+        ],
+        parameters: {},
+      },
+    ],
+    parameters: {
+      globalParameter: true,
+      globalParameter2: true,
+    },
+  });
+});
+
+test('table block with tab delimiters', () => {
+  expect(parseBlock(`Name\tAge\tTwitter`, 'table')).toEqual<ParsedTableBlock>({
+    content: `Name,Age,Twitter`,
+    rows: [
+      {
+        content: 'Name,Age,Twitter',
+        items: [
+          { content: 'Name', parameters: {} },
+          { content: 'Age', parameters: {} },
+          { content: 'Twitter', parameters: {} },
+        ],
+        parameters: {},
+      },
+    ],
+    parameters: {},
+  });
+});
+
+test('table block with placeholder', () => {
+  expect(
+    parseBlock('#globalParameter', 'table', {
+      placeholder: 'Name,Age,Twitter',
+    }),
+  ).toEqual<ParsedTableBlock>({
+    content: `Name,Age,Twitter`,
+    rows: [
+      {
+        content: 'Name,Age,Twitter',
+        items: [
+          { content: 'Name', parameters: {} },
+          { content: 'Age', parameters: {} },
+          { content: 'Twitter', parameters: {} },
+        ],
+        parameters: {},
+      },
+    ],
+    parameters: {
+      globalParameter: true,
+    },
   });
 });
