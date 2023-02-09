@@ -22,6 +22,7 @@ export const heroSymbolId = 'd15edd3e-df47-438a-9c92-059b4c14915d';
 export const iconSymbolId = '18682473-676a-46d3-8faf-68dc5b1c204f';
 export const sidebarSymbolId = '5733e3d6-9688-4c6d-b031-6be27d05767a';
 export const tableSymbolId = 'c152b560-d8af-4b16-8202-55111647d17a';
+export const selectSymbolId = '7e913e19-97c6-442f-8cc4-58c4f2e71e77';
 
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
@@ -123,6 +124,11 @@ export const tableSymbol = SketchModel.symbolMaster({
   name: 'Table',
 });
 
+export const selectSymbol = SketchModel.symbolMaster({
+  symbolID: selectSymbolId,
+  name: 'Select',
+});
+
 export const allAyonSymbols = [
   buttonSymbol,
   avatarSymbol,
@@ -144,4 +150,5 @@ export const allAyonSymbols = [
   iconSymbol,
   sidebarSymbol,
   tableSymbol,
+  selectSymbol,
 ];
