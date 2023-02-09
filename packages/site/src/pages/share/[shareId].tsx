@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { NoyaAPI, NoyaAPIProvider } from 'noya-api';
 import {
@@ -13,6 +14,7 @@ import {
 } from 'noya-designsystem';
 import { ArrowRightIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
+import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Analytics } from '../../components/Analytics';
@@ -114,8 +116,48 @@ function Content({ shareId }: { shareId: string }) {
     return null;
   }
 
+  const artboard = Layers.find(
+    initialFile.data.document.pages[0],
+    Layers.isArtboard,
+  );
+
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
+      <Head>
+        <meta name="description" content="Created with Noya" />
+        {artboard && (
+          <>
+            <meta
+              property="og:url"
+              content={`${NOYA_HOST}/app/share/${initialFile.id}`}
+            />
+            <meta property="og:title" content={initialFile.data.name} />
+            <meta property="og:description" content="Created with Noya" />
+            <meta
+              property="og:image"
+              content={`${networkClient?.baseURI}/shares/${initialFile.id}.png?width=${artboard.frame.width}&height=${artboard.frame.height}`}
+            />
+            <meta
+              property="og:image:width"
+              content={`${artboard.frame.width}`}
+            />
+            <meta
+              property="og:image:height"
+              content={`${artboard.frame.height}`}
+            />
+            <meta property="og:image:user_generated" content="true" />
+            <meta property="og:type" content="article" />
+            <meta
+              property="og:article:published_time"
+              content={`${initialFile.createdAt}`}
+            />
+            <meta
+              property="og:article:modified_time"
+              content={`${initialFile.updatedAt}`}
+            />
+          </>
+        )}
+      </Head>
       <Toolbar>
         <Small>{initialFile.data.name}</Small>
         <Spacer.Horizontal size={8} inline />
