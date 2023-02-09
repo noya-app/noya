@@ -34,7 +34,7 @@ module.exports = {
         patterns: ['*src*'],
       },
     ],
-
+    'jsx-a11y/anchor-is-valid': 'off',
     // TODO: We want to reconsider these
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unsafe-assignment': 'off',

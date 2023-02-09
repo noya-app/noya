@@ -42,6 +42,7 @@ const LogoContainer = styled.div({
 
 interface Props {
   children?: ReactNode;
+  left?: ReactNode;
   right?: ReactNode;
 }
 
@@ -55,7 +56,7 @@ function getMonogram(session: NoyaAPI.Session) {
   return firstLetter;
 }
 
-export function Toolbar({ children, right }: Props) {
+export function Toolbar({ children, left, right }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
   const router = useRouter();
@@ -89,7 +90,16 @@ export function Toolbar({ children, right }: Props) {
       </Link>
       <DividerVertical />
       <Spacer.Horizontal size={10} />
+      {left && (
+        <>
+          <Stack.H gap={theme.sizes.toolbar.itemSeparator} alignSelf="stretch">
+            {left}
+          </Stack.H>
+          <Spacer.Horizontal size={10} />
+        </>
+      )}
       <Spacer.Horizontal />
+      <Spacer.Horizontal size={10} />
       <Stack.H gap={theme.sizes.toolbar.itemSeparator}>
         {right}
         {session && (
@@ -121,7 +131,7 @@ export function Toolbar({ children, right }: Props) {
               {(session.user.name || session.user.email) && (
                 <Avatar
                   size={21}
-                  overflow={-1}
+                  overflow={1}
                   fallback={getMonogram(session)}
                 />
               )}

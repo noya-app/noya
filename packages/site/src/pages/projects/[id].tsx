@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
+import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
   Divider,
@@ -20,6 +20,10 @@ import React, {
   useState,
 } from 'react';
 import { ProjectTitle } from '../../components/ProjectTitle';
+import {
+  getSubscriptionOverage,
+  SubscriptionUsageMeterSmall,
+} from '../../components/Subscription';
 
 import { Toolbar } from '../../components/Toolbar';
 import {
@@ -153,6 +157,20 @@ function FileEditor({ id }: { id: string }) {
 
 function Content() {
   const { query } = useRouter();
+  const files = useNoyaFiles();
+  const { subscriptions, availableProducts } = useNoyaBilling();
+
+  const overageItems = getSubscriptionOverage(
+    files,
+    subscriptions,
+    availableProducts,
+    0.25,
+  );
+
+  const overageItem = overageItems.sort(
+    (a, b) => b.count / b.limit - a.count / a.limit,
+  )[0];
+
   const id = query.id as string | undefined;
   const theme = useDesignSystemTheme();
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
@@ -168,7 +186,12 @@ function Content() {
   return (
     <ProjectProvider value={project}>
       <Stack.V flex="1" background={theme.colors.canvas.background}>
-        <Toolbar right={rightToolbar}>
+        <Toolbar
+          right={rightToolbar}
+          left={
+            overageItem && <SubscriptionUsageMeterSmall item={overageItem} />
+          }
+        >
           {centerToolbar || <FileTitle id={id} />}
         </Toolbar>
         <Divider variant="strong" />
