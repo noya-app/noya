@@ -10,10 +10,10 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
+import { amplitude } from 'noya-log';
 import React, { useEffect, useReducer } from 'react';
 import { useToggleTimer } from '../hooks/useToggleTimer';
 import { NOYA_HOST } from '../utils/noyaClient';
-import { amplitude } from './Analytics';
 
 type State =
   | {

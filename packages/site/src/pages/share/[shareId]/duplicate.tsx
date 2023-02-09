@@ -8,9 +8,9 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { amplitude } from 'noya-log';
 import { encodeQueryParameters } from 'noya-utils';
 import React, { useEffect, useMemo } from 'react';
-import { amplitude } from '../../../components/Analytics';
 import { NOYA_HOST } from '../../../utils/noyaClient';
 
 function Content({

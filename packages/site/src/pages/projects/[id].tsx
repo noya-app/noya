@@ -10,6 +10,7 @@ import {
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { getCurrentPlatform } from 'noya-keymap';
+import { amplitude } from 'noya-log';
 import { SketchFile } from 'noya-sketch-file';
 import { debounce } from 'noya-utils';
 import React, {
@@ -19,7 +20,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { amplitude } from '../../components/Analytics';
 import { ProjectTitle } from '../../components/ProjectTitle';
 import {
   getSubscriptionOverage,

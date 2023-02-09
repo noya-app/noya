@@ -12,9 +12,10 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { ArrowRightIcon } from 'noya-icons';
+import { amplitude } from 'noya-log';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { amplitude, Analytics } from '../../components/Analytics';
+import { Analytics } from '../../components/Analytics';
 import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
 import { createNoyaClient, NOYA_HOST } from '../../utils/noyaClient';

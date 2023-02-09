@@ -10,9 +10,9 @@ import {
   Stack,
 } from 'noya-designsystem';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
+import { amplitude } from 'noya-log';
 import React, { useState } from 'react';
 import { createAyonDocument } from '../ayon/createAyonDocument';
-import { amplitude } from './Analytics';
 
 export function Projects() {
   const { push } = useRouter();

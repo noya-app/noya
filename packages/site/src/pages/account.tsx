@@ -9,8 +9,8 @@ import {
   Switch,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { amplitude } from 'noya-log';
 import React, { useEffect, useState } from 'react';
-import { amplitude } from '../components/Analytics';
 import { AppLayout } from '../components/AppLayout';
 import {
   AccountDetailRow,

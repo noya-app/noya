@@ -6,12 +6,9 @@ import {
   DesignSystemConfigurationProvider,
 } from 'noya-designsystem';
 import { getCurrentPlatform } from 'noya-keymap';
+import { amplitude } from 'noya-log';
 import React, { useMemo } from 'react';
-import {
-  amplitude,
-  Analytics,
-  installAnalytics,
-} from '../components/Analytics';
+import { Analytics, installAnalytics } from '../components/Analytics';
 import '../styles/index.css';
 import { createNoyaClient } from '../utils/noyaClient';
 

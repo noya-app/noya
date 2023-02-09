@@ -23,6 +23,7 @@ import {
   TransformIcon,
   ViewVerticalIcon,
 } from 'noya-icons';
+import { amplitude } from 'noya-log';
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
@@ -57,7 +58,6 @@ import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
 import { downloadBlob } from '../utils/download';
-import { amplitude } from './Analytics';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';

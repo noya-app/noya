@@ -7,6 +7,7 @@ import {
   SimpleCanvas,
 } from 'noya-canvas';
 import { roundPoint } from 'noya-geometry';
+import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -16,7 +17,6 @@ import { debounce, isExternalUrl } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
-import { amplitude } from '../components/Analytics';
 import { measureImage } from '../utils/measureImage';
 import { Blocks } from './blocks';
 import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbols';
