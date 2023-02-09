@@ -1,5 +1,6 @@
 import { Point, Rect } from 'noya-geometry';
 import { KeyMap, PlatformName } from 'noya-keymap';
+import { ILogEvent } from 'noya-log';
 import { OffsetPoint } from 'noya-react-utils';
 import {
   CharacterSelectionMode,
@@ -47,4 +48,5 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   ) => number | undefined;
   getTextLength: (layerId: string) => number;
   handleKeyboardEvent: (keyMap: KeyMap) => (event: React.KeyboardEvent) => void;
+  logEvent: ILogEvent;
 };

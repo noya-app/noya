@@ -13,6 +13,7 @@ import { InspectorPrimitives } from 'noya-inspector';
 import React, { useEffect, useReducer } from 'react';
 import { useToggleTimer } from '../hooks/useToggleTimer';
 import { NOYA_HOST } from '../utils/noyaClient';
+import { amplitude } from './Analytics';
 
 type State =
   | {
@@ -100,6 +101,8 @@ export function ShareMenu({ fileId }: { fileId: string }) {
                   if (value) {
                     const share = await client.files.shares.create(fileId);
 
+                    amplitude.logEvent('Project - Share - Enabled');
+
                     dispatch({
                       type: 'startSharing',
                       url: `${NOYA_HOST}/app/share/${share.id}`,
@@ -109,6 +112,8 @@ export function ShareMenu({ fileId }: { fileId: string }) {
                     await client.files.shares.create(fileId, {
                       viewable: false,
                     });
+
+                    amplitude.logEvent('Project - Share - Disabled');
 
                     dispatch({ type: 'stopSharing' });
                   }
@@ -166,6 +171,16 @@ export function ShareMenu({ fileId }: { fileId: string }) {
                         viewable: true,
                         duplicable: value,
                       });
+
+                      if (value) {
+                        amplitude.logEvent(
+                          'Project - Share - Duplication - Enabled',
+                        );
+                      } else {
+                        amplitude.logEvent(
+                          'Project - Share - Duplication - Disabled',
+                        );
+                      }
 
                       dispatch({ type: 'setDuplicable', value });
                     }}

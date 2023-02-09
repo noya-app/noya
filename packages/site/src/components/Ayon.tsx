@@ -57,6 +57,7 @@ import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
 import { downloadBlob } from '../utils/download';
+import { amplitude } from './Analytics';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';
@@ -104,6 +105,15 @@ function Workspace({
 
   const setViewType = useCallback(
     (type: ViewType) => {
+      switch (type) {
+        case 'split':
+          amplitude.logEvent('Project - View - Switched to Split View');
+          break;
+        case 'combined':
+          amplitude.logEvent('Project - View - Switched to Combined View');
+          break;
+      }
+
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('noya-ayon-preferred-view-type', type);
       }
@@ -232,15 +242,30 @@ function Workspace({
               case 'png':
               case 'pdf':
               case 'svg':
+                switch (value) {
+                  case 'png':
+                    amplitude.logEvent('Project - Export - Exported PNG');
+                    break;
+                  case 'pdf':
+                    amplitude.logEvent('Project - Export - Exported PDF');
+                    break;
+                  case 'svg':
+                    amplitude.logEvent('Project - Export - Exported SVG');
+                    break;
+                }
+
                 downloadFile?.(value, artboard.frame, `Design.${value}`);
                 return;
               case 'figma':
+                amplitude.logEvent('Project - Export - Exported Figma');
                 downloadFile?.('svg', artboard.frame, `Drag into Figma.svg`);
                 return;
               case 'sketch':
+                amplitude.logEvent('Project - Export - Exported Sketch');
                 downloadFile?.('pdf', artboard.frame, `Drag into Sketch.pdf`);
                 return;
               case 'react': {
+                amplitude.logEvent('Project - Export - Exported React Code');
                 const { compile } = await import('noya-compiler');
                 const result = compile({
                   state: state.history.present,

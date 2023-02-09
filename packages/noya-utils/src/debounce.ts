@@ -72,7 +72,7 @@ function isObject(value: unknown) {
  * // Check for pending invocations.
  * const status = debounced.pending() ? "Pending..." : "Ready"
  */
-export function debounce(func, wait, options) {
+export function debounce(func, wait, options = {}) {
   let lastArgs, lastThis, maxWait, result, timerId, lastCallTime;
 
   let lastInvokeTime = 0;

@@ -19,6 +19,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { amplitude } from '../../components/Analytics';
 import { ProjectTitle } from '../../components/ProjectTitle';
 import {
   getSubscriptionOverage,
@@ -206,6 +207,10 @@ const platform =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
 export default function Project(): JSX.Element {
+  useEffect(() => {
+    amplitude.logEvent('Project - Opened');
+  }, []);
+
   return (
     <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
       <Content />

@@ -43,12 +43,21 @@ export function zoomInteraction({
       onSelectMenuItem: (id) => {
         switch (id) {
           case 'zoomIn':
+            api.logEvent('Project - View - Zoomed Wireframe (In)', {
+              'Old Zoom Level': api.zoomValue,
+            });
             zoomIn();
             break;
           case 'zoomOut':
+            api.logEvent('Project - View - Zoomed Wireframe (Out)', {
+              'Old Zoom Level': api.zoomValue,
+            });
             zoomOut();
             break;
           case 'zoomActualSize':
+            api.logEvent('Project - View - Zoomed Wireframe (Actual Size)', {
+              'Old Zoom Level': api.zoomValue,
+            });
             zoomActualSize();
             break;
         }

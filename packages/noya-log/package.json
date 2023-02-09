@@ -1,0 +1,12 @@
+{
+  "name": "noya-log",
+  "private": false,
+  "modular": {
+    "type": "package"
+  },
+  "main": "./src/index.ts",
+  "version": "1.0.0",
+  "dependencies": {
+    "@amplitude/analytics-browser": "^1.8.0"
+  }
+}

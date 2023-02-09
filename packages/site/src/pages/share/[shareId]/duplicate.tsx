@@ -10,6 +10,7 @@ import {
 } from 'noya-designsystem';
 import { encodeQueryParameters } from 'noya-utils';
 import React, { useEffect, useMemo } from 'react';
+import { amplitude } from '../../../components/Analytics';
 import { NOYA_HOST } from '../../../utils/noyaClient';
 
 function Content({
@@ -26,6 +27,8 @@ function Content({
 
   useEffect(() => {
     networkClient.files.create({ shareId }).then((fileId) => {
+      amplitude.logEvent('Project - Created (From Share Duplication)');
+
       router.push(`/projects/${fileId}`);
     });
   }, [networkClient.files, router, shareId]);

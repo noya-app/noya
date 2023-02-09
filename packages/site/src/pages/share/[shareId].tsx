@@ -14,7 +14,7 @@ import {
 import { ArrowRightIcon } from 'noya-icons';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Analytics } from '../../components/Analytics';
+import { amplitude, Analytics } from '../../components/Analytics';
 import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
 import { createNoyaClient, NOYA_HOST } from '../../utils/noyaClient';
@@ -148,6 +148,8 @@ function Content({ shareId }: { shareId: string }) {
             <Chip
               variant="primary"
               onClick={() => {
+                amplitude.logEvent('Share - Started Duplication');
+
                 router.push(
                   `/share/${shareId}/duplicate?name=${initialFile.data.name}`,
                 );
@@ -212,6 +214,10 @@ function OptionalNoyaAPIProvider({ children }: { children: React.ReactNode }) {
 export default function Preview() {
   const { query } = useRouter();
   const shareId = query.shareId as string | undefined;
+
+  useEffect(() => {
+    amplitude.logEvent('Share - Opened');
+  }, []);
 
   if (!shareId) return null;
 

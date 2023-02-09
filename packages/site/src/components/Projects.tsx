@@ -12,6 +12,7 @@ import {
 import { DashboardIcon, PlusIcon } from 'noya-icons';
 import React, { useState } from 'react';
 import { createAyonDocument } from '../ayon/createAyonDocument';
+import { amplitude } from './Analytics';
 
 export function Projects() {
   const { push } = useRouter();
@@ -49,7 +50,11 @@ export function Projects() {
                 },
                 { fetchPolicy: 'no-cache' },
               )
-              .then((id) => push(`/projects/${id}`))
+              .then((id) => {
+                amplitude.logEvent('Project - Created');
+
+                push(`/projects/${id}`);
+              })
               .then(() => client.files.refetch());
           }}
         >

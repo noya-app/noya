@@ -12,6 +12,7 @@ import {
 } from 'noya-designsystem';
 import { Point, Rect } from 'noya-geometry';
 import { handleKeyboardEvent } from 'noya-keymap';
+import { ILogEvent } from 'noya-log';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
@@ -81,11 +82,13 @@ export type Interaction = (
 interface Props {
   interactions?: Interaction[];
   elementInterface: ICanvasElement;
+  logEvent: ILogEvent;
 }
 
 export function useInteractionHandlers({
   interactions = [],
   elementInterface,
+  logEvent,
 }: Props) {
   const [state, dispatch] = useApplicationState();
   const { highlightedLayer } = useWorkspace();
@@ -271,6 +274,7 @@ export function useInteractionHandlers({
           return 0;
         }
       },
+      logEvent,
     };
   }, [
     CanvasKit,
@@ -280,6 +284,7 @@ export function useInteractionHandlers({
     fontManager,
     getClickCount,
     highlightedLayer?.id,
+    logEvent,
     platform,
     platformModKey,
     scrollOrigin,

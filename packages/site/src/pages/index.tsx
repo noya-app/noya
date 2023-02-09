@@ -1,5 +1,6 @@
 import { useNoyaBilling, useNoyaFiles } from 'noya-api';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { amplitude } from '../components/Analytics';
 import { AppLayout } from '../components/AppLayout';
 import { Projects } from '../components/Projects';
 import {
@@ -10,7 +11,11 @@ import {
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
 
-export default function App() {
+export default function Project() {
+  useEffect(() => {
+    amplitude.logEvent('App - Projects List - Opened');
+  }, []);
+
   const files = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
 

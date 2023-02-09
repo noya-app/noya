@@ -104,6 +104,10 @@ export const createMoveInteraction = (
         onPointerUp: (event) => {
           const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
+          api.logEvent('Project - Block - Moved', {
+            'Block Count': api.selectedLayerIds.length,
+          });
+
           moveLayersIntoParentAtPoint(canvasPoint);
 
           reset();

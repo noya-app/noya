@@ -99,6 +99,10 @@ export const createScaleInteraction = (
           event.preventDefault();
         },
         onPointerUp: (event) => {
+          api.logEvent('Project - Block - Moved', {
+            'Block Count': api.selectedLayerIds.length,
+          });
+
           reset();
 
           api.releasePointerCapture?.(event.pointerId);
