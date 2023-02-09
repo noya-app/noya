@@ -17,6 +17,7 @@ export default function App() {
     files,
     subscriptions,
     availableProducts,
+    0.25,
   );
 
   return (

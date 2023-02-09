@@ -164,6 +164,7 @@ function Content() {
     files,
     subscriptions,
     availableProducts,
+    0.25,
   );
 
   const overageItem = overageItems.sort(

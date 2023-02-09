@@ -50,7 +50,7 @@ const ProgressIndicator = styled(ProgressPrimitive.Indicator)<{
       ? theme.colors.secondary
       : variant === 'warning'
       ? theme.colors.warning
-      : 'white',
+      : theme.colors.text,
   width: '100%',
   height: '100%',
   transition: 'transform 660ms cubic-bezier(0.65, 0, 0.35, 1)',

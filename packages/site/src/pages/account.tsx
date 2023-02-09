@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { useNoyaBilling, useNoyaSession } from 'noya-api';
+import { useNoyaBilling, useNoyaFiles, useNoyaSession } from 'noya-api';
 import {
   Heading2,
   Heading3,
@@ -15,10 +15,12 @@ import {
   AccountDetailRow,
   describePrice,
   findSubscribedProduct,
+  getSubscriptionOverage,
   isProfessionalPlan,
   ProfessionalPlanFeatures,
   StarterPlanFeatures,
   SubscriptionCard,
+  SubscriptionUsageMeter,
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
 
@@ -27,6 +29,13 @@ export default function Account() {
     useNoyaBilling();
   const session = useNoyaSession();
   const theme = useDesignSystemTheme();
+  const files = useNoyaFiles();
+  const overageItems = getSubscriptionOverage(
+    files,
+    subscriptions,
+    availableProducts,
+    0,
+  );
 
   const activeSubscriptions = subscriptions.filter(
     (subscription) => subscription.status === 'active',
@@ -89,7 +98,7 @@ export default function Account() {
               })}
               {activeSubscriptions.length === 0 && (
                 <SubscriptionCard name="Noya Starter" priceDescription="Free">
-                  <StarterPlanFeatures />
+                  <SubscriptionUsageMeter items={overageItems} />
                 </SubscriptionCard>
               )}
             </Stack.V>
