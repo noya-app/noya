@@ -69,9 +69,24 @@ export function zoomInteraction({
     return {
       ...handlers(interactionState, key, api),
       onKeyDown: api.handleKeyboardEvent({
-        'Mod-=': () => zoomIn(),
-        'Mod--': () => zoomOut(),
-        'Mod-0': () => zoomActualSize(),
+        'Mod-=': () => {
+          api.logEvent('Project - View - Zoomed Wireframe (In)', {
+            'Old Zoom Level': api.zoomValue,
+          });
+          zoomIn();
+        },
+        'Mod--': () => {
+          api.logEvent('Project - View - Zoomed Wireframe (Out)', {
+            'Old Zoom Level': api.zoomValue,
+          });
+          zoomOut();
+        },
+        'Mod-0': () => {
+          api.logEvent('Project - View - Zoomed Wireframe (Actual Size)', {
+            'Old Zoom Level': api.zoomValue,
+          });
+          zoomActualSize();
+        },
       }),
     };
   };
