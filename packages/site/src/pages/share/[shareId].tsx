@@ -1,3 +1,4 @@
+import { GetServerSidePropsContext } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -51,14 +52,45 @@ const networkClient = NOYA_HOST
     })
   : undefined;
 
-function Content({ shareId }: { shareId: string }) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  if (!networkClient) return;
+
+  let shareId: string | null = null,
+    initialFile: NoyaAPI.SharedFile | null = null,
+    error: Error | null = null;
+
+  try {
+    shareId = context.params!.shareId as string;
+    const file = await networkClient.files.shares.readSharedFile(shareId);
+    initialFile = file;
+  } catch (readFileError) {
+    if (readFileError instanceof Error) {
+      error = readFileError;
+    }
+  }
+
+  return {
+    props: {
+      shareId,
+      initialFile,
+      error,
+    },
+  };
+}
+
+function Content({
+  shareId,
+  initialFile,
+  error,
+}: {
+  shareId: string;
+  initialFile: NoyaAPI.SharedFile;
+  error: Error;
+}) {
   const theme = useDesignSystemTheme();
   const router = useRouter();
 
-  const [initialFile, setInitialFile] = useState<
-    NoyaAPI.SharedFile | undefined
-  >();
-  const [error, setError] = useState<Error | undefined>();
+  const [fileId, setFileId] = useState<string | undefined>();
 
   useEffect(() => {
     async function main() {
@@ -66,12 +98,8 @@ function Content({ shareId }: { shareId: string }) {
 
       try {
         const file = await networkClient.files.shares.readSharedFile(shareId);
-        setInitialFile(file);
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error);
-        }
-      }
+        setFileId(file.fileId);
+      } catch (error) {}
     }
 
     main();
@@ -162,13 +190,13 @@ function Content({ shareId }: { shareId: string }) {
         <Small>{initialFile.data.name}</Small>
         <Spacer.Horizontal size={8} inline />
         <Chip variant="secondary">VIEWING</Chip>
-        {initialFile.fileId && (
+        {fileId && (
           <>
             <Spacer.Horizontal size={8} inline />
             <Chip
               variant="primary"
               onClick={() => {
-                router.push(`/projects/${initialFile.fileId}`);
+                router.push(`/projects/${fileId}`);
               }}
               style={{
                 cursor: 'pointer',
@@ -185,7 +213,7 @@ function Content({ shareId }: { shareId: string }) {
             </Chip>
           </>
         )}
-        {!initialFile.fileId && initialFile.duplicable && (
+        {!fileId && initialFile.duplicable && (
           <>
             <Spacer.Horizontal size={8} inline />
             <Chip
@@ -254,10 +282,15 @@ function OptionalNoyaAPIProvider({ children }: { children: React.ReactNode }) {
   }
 }
 
-export default function Preview() {
-  const { query } = useRouter();
-  const shareId = query.shareId as string | undefined;
-
+export default function Preview({
+  shareId,
+  initialFile,
+  error,
+}: {
+  shareId: string;
+  initialFile: NoyaAPI.SharedFile;
+  error: Error;
+}) {
   useEffect(() => {
     amplitude.logEvent('Share - Opened');
   }, []);
@@ -269,7 +302,7 @@ export default function Preview() {
   return (
     <OptionalNoyaAPIProvider>
       <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-        <Content shareId={shareId} />
+        <Content shareId={shareId} initialFile={initialFile} error={error} />
       </DesignSystemConfigurationProvider>
     </OptionalNoyaAPIProvider>
   );
