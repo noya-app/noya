@@ -18,7 +18,7 @@ Grapes, $4, 15
 Strawberries, $3, 89
 `.trim();
 
-const globalHashtags = ['dark', 'accent'];
+const globalHashtags = ['dark', 'accent', 'sm', 'md', 'lg'];
 
 const parser = 'table';
 
@@ -33,7 +33,7 @@ export const TableBlock: BlockDefinition = {
   render: (props) => {
     const {
       rows,
-      parameters: { dark, accent },
+      parameters: { dark, accent, sm, md, lg },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
@@ -42,6 +42,8 @@ export const TableBlock: BlockDefinition = {
       dark,
       accent,
     });
+
+    const size = sm ? 'sm' : md ? 'md' : lg ? 'lg' : 'md';
 
     return (
       <VStack
@@ -54,7 +56,7 @@ export const TableBlock: BlockDefinition = {
         border={`1px solid ${borderColor}`}
         color={color}
       >
-        <Table>
+        <Table size={size}>
           {rows.length > 0 && (
             <Thead>
               <Tr>
