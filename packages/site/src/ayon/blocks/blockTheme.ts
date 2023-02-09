@@ -10,3 +10,34 @@ export const accentColor = {
   800: '#1e40af',
   900: '#1e3a8a',
 };
+
+export const buttonColors = {
+  default: {
+    backgroundColor: '#f1f5f9',
+    color: '#000',
+  },
+  light: {
+    backgroundColor: '#f1f5f9',
+    color: '#000',
+  },
+  dark: {
+    backgroundColor: '#475569',
+    color: '#fff',
+  },
+  primary: {
+    backgroundColor: '#15803d',
+    color: '#fff',
+  },
+  secondary: {
+    backgroundColor: '#94a3b8',
+    color: '#fff',
+  },
+  warning: {
+    backgroundColor: '#fde047',
+    color: '#000',
+  },
+  danger: {
+    backgroundColor: '#dc2626',
+    color: '#fff',
+  },
+};
