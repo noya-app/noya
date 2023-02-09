@@ -1,10 +1,14 @@
 import { ReactEventHandlers } from 'noya-designsystem';
-import { handleActionType, InteractionState } from 'noya-state';
+import {
+  handleActionType,
+  InteractionMethod,
+  InteractionState,
+} from 'noya-state';
 import { MarqueeActions, marqueeInteraction } from './marquee';
 import { InteractionAPI } from './types';
 
 export interface SelectionModeActions extends MarqueeActions {
-  enterSelectionMode: () => void;
+  enterSelectionMode: (method: InteractionMethod) => void;
   reset: () => void;
 }
 
@@ -18,12 +22,12 @@ export function selectionModeInteraction(actions: SelectionModeActions) {
   >({
     none: (interactionState, api) => ({
       onKeyDown: api.handleKeyboardEvent({
-        Shift: () => enterSelectionMode(),
+        Shift: () => enterSelectionMode('keyboard'),
       }),
       onPointerMove: (event) => {
         if (!event.shiftKey) return;
 
-        enterSelectionMode();
+        enterSelectionMode('keyboard');
         event.preventDefault();
       },
       onPointerDown: (event) => {
@@ -39,10 +43,14 @@ export function selectionModeInteraction(actions: SelectionModeActions) {
     selectionMode: (interactionState, api) => {
       return {
         onKeyUp: api.handleKeyboardEvent({
-          Shift: () => reset(),
+          Shift: () => {
+            if (interactionState.method === 'mouse') return;
+            reset();
+          },
         }),
         onPointerMove: (event) => {
           if (event.shiftKey) return;
+          if (interactionState.method === 'mouse') return;
 
           reset();
           event.preventDefault();

@@ -1,9 +1,21 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import React, { ComponentProps, memo, ReactNode, useCallback } from 'react';
+import React, {
+  ComponentProps,
+  createContext,
+  memo,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+} from 'react';
 import styled from 'styled-components';
 import { Tooltip } from './Tooltip';
 
-const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
+type RadioGroupVariant = 'primary' | 'secondary';
+
+const StyledRoot = styled(ToggleGroupPrimitive.Root)<{
+  variant?: RadioGroupVariant;
+}>(({ theme, variant = 'primary' }) => ({
   appearance: 'none',
   width: '0px', // Reset intrinsic width
   flex: '1 1 0px',
@@ -16,14 +28,16 @@ const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
   borderRadius: '4px',
   background: theme.colors.inputBackground,
   '&:focus': {
-    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors[variant]}`,
   },
   display: 'flex',
   alignItems: 'stretch',
   minHeight: '27px',
 }));
 
-const StyledItem = styled(ToggleGroupPrimitive.Item)(({ theme }) => ({
+const StyledItem = styled(ToggleGroupPrimitive.Item)<{
+  variant?: RadioGroupVariant;
+}>(({ theme, variant = 'primary' }) => ({
   position: 'relative',
   flex: '1 1 0',
   appearance: 'none',
@@ -39,10 +53,10 @@ const StyledItem = styled(ToggleGroupPrimitive.Item)(({ theme }) => ({
   verticalAlign: 'middle',
   '&:focus': {
     outline: 'none',
-    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors[variant]}`,
   },
   '&[aria-checked="true"]': {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors[variant],
     color: 'white',
   },
 }));
@@ -60,8 +74,10 @@ function ToggleGroupItem({
   children,
   disabled = false,
 }: Props) {
+  const { variant } = useContext(RadioGroupContext);
+
   const itemElement = (
-    <StyledItem value={value} disabled={disabled}>
+    <StyledItem value={value} disabled={disabled} variant={variant}>
       {children}
     </StyledItem>
   );
@@ -73,22 +89,35 @@ function ToggleGroupItem({
   );
 }
 
+type RadioGroupContextValue = {
+  variant: RadioGroupVariant;
+};
+
+const RadioGroupContext = createContext<RadioGroupContextValue>({
+  variant: 'primary',
+});
+
 function ToggleGroupRoot({
   onValueChange,
+  variant,
   ...props
 }: Omit<ComponentProps<typeof StyledRoot>, 'type'>) {
+  const contextValue = useMemo(() => ({ variant }), [variant]);
+
   return (
-    <StyledRoot
-      {...props}
-      type="single"
-      onValueChange={useCallback(
-        (value: string) => {
-          if (!value) return;
-          onValueChange?.(value);
-        },
-        [onValueChange],
-      )}
-    />
+    <RadioGroupContext.Provider value={contextValue}>
+      <StyledRoot
+        {...props}
+        type="single"
+        onValueChange={useCallback(
+          (value: string) => {
+            if (!value) return;
+            onValueChange?.(value);
+          },
+          [onValueChange],
+        )}
+      />
+    </RadioGroupContext.Provider>
   );
 }
 

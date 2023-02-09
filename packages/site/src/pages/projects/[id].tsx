@@ -175,11 +175,12 @@ function Content() {
 
   const id = query.id as string | undefined;
   const theme = useDesignSystemTheme();
+  const [leftToolbar, setLeftToolbar] = useState<ReactNode>(null);
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
   const [centerToolbar, setCenterToolbar] = useState<ReactNode>(null);
 
   const project: ProjectContextValue = useMemo(
-    () => ({ setCenterToolbar, setRightToolbar }),
+    () => ({ setLeftToolbar, setCenterToolbar, setRightToolbar }),
     [],
   );
 
@@ -191,7 +192,14 @@ function Content() {
         <Toolbar
           right={rightToolbar}
           left={
-            overageItem && <SubscriptionUsageMeterSmall item={overageItem} />
+            overageItem ? (
+              <>
+                <SubscriptionUsageMeterSmall item={overageItem} />
+                {leftToolbar}
+              </>
+            ) : (
+              leftToolbar
+            )
           }
         >
           {centerToolbar || <FileTitle id={id} />}

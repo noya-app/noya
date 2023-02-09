@@ -1,4 +1,5 @@
 import * as ChakraUI from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -6,7 +7,9 @@ import {
   Button,
   DropdownMenu,
   Popover,
+  RadioGroup,
   SEPARATOR_ITEM,
+  Small,
   Spacer,
   Stack,
 } from 'noya-designsystem';
@@ -18,7 +21,9 @@ import {
   CodeIcon,
   FigmaLogoIcon,
   FileIcon,
+  GroupIcon,
   ImageIcon,
+  PlusIcon,
   SketchLogoIcon,
   TransformIcon,
   ViewVerticalIcon,
@@ -54,7 +59,11 @@ import React, {
   useState,
 } from 'react';
 import { Blocks } from '../ayon/blocks';
-import { allAyonSymbols, ayonLibraryId } from '../ayon/blocks/symbols';
+import {
+  allAyonSymbols,
+  ayonLibraryId,
+  boxSymbolId,
+} from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
 import { downloadBlob } from '../utils/download';
@@ -101,7 +110,7 @@ function Workspace({
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const [viewType, setViewTypeMemory] = useState<ViewType>(initialViewType);
-  const { setRightToolbar, setCenterToolbar } = useProject();
+  const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
 
   const setViewType = useCallback(
     (type: ViewType) => {
@@ -170,6 +179,63 @@ function Workspace({
     Selectors.getCurrentPage(state.history.present),
     Layers.isArtboard,
   );
+
+  const interactionState = state.history.present.interactionState;
+  const cursorType =
+    interactionState.type === 'insert'
+      ? 'insert'
+      : interactionState.type === 'selectionMode'
+      ? 'region'
+      : 'none';
+
+  useEffect(() => {
+    setLeftToolbar(
+      <Stack.H alignSelf={'center'} width={60}>
+        <RadioGroup.Root
+          value={cursorType}
+          variant="secondary"
+          onValueChange={(value: typeof cursorType) => {
+            switch (value) {
+              case 'region': {
+                dispatch(['interaction', ['enableSelectionMode', 'mouse']]);
+                break;
+              }
+              case 'insert': {
+                dispatch([
+                  'interaction',
+                  ['insert', { symbolId: boxSymbolId }, 'mouse'],
+                ]);
+                break;
+              }
+            }
+          }}
+        >
+          <RadioGroup.Item
+            value="insert"
+            tooltip={
+              <VStack alignItems="start">
+                <Small fontWeight={600}>Insert over everything</Small>
+                <Small>Hold Cmd/Ctrl to activate</Small>
+              </VStack>
+            }
+          >
+            <PlusIcon />
+          </RadioGroup.Item>
+          <RadioGroup.Item
+            value="region"
+            tooltip={
+              <VStack alignItems="start">
+                <Small fontWeight={600}>Select region</Small>
+                <Small>Hold Shift to activate</Small>
+              </VStack>
+            }
+          >
+            <GroupIcon />
+          </RadioGroup.Item>
+        </RadioGroup.Root>
+      </Stack.H>,
+    );
+  }, [cursorType, setLeftToolbar]);
 
   useLayoutEffect(() => {
     setRightToolbar(

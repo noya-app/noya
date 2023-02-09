@@ -204,42 +204,42 @@ const ToolbarContent = memo(function ToolbarContent({
             if (isInsertArtboard) {
               dispatch('interaction', ['reset']);
             } else {
-              dispatch('interaction', ['insert', 'artboard']);
+              dispatch('interaction', ['insert', 'artboard', 'mouse']);
             }
             break;
           case 'rectangle':
             if (isInsertRectangle) {
               dispatch('interaction', ['reset']);
             } else {
-              dispatch('interaction', ['insert', 'rectangle']);
+              dispatch('interaction', ['insert', 'rectangle', 'mouse']);
             }
             break;
           case 'oval':
             if (isInsertOval) {
               dispatch('interaction', ['reset']);
             } else {
-              dispatch('interaction', ['insert', 'oval']);
+              dispatch('interaction', ['insert', 'oval', 'mouse']);
             }
             break;
           case 'line':
             if (isInsertLine) {
               dispatch('interaction', ['reset']);
             } else {
-              dispatch('interaction', ['insert', 'line']);
+              dispatch('interaction', ['insert', 'line', 'mouse']);
             }
             break;
           case 'text':
             if (isInsertText) {
               dispatch('interaction', ['reset']);
             } else {
-              dispatch('interaction', ['insert', 'text']);
+              dispatch('interaction', ['insert', 'text', 'mouse']);
             }
             break;
           case 'slice':
             if (isInsertSlice) {
               dispatch('interaction', ['reset']);
             } else {
-              dispatch('interaction', ['insert', 'slice']);
+              dispatch('interaction', ['insert', 'slice', 'mouse']);
             }
             break;
           case 'vector':
@@ -286,7 +286,7 @@ const ToolbarContent = memo(function ToolbarContent({
     if (isInsertArtboard) {
       dispatch('interaction', ['reset']);
     } else {
-      dispatch('interaction', ['insert', 'artboard']);
+      dispatch('interaction', ['insert', 'artboard', 'mouse']);
     }
   }, [dispatch, isInsertArtboard]);
 

@@ -4,12 +4,16 @@ import {
   DrawableLayerType,
   handleActionType,
   InferBlockType,
+  InteractionMethod,
   InteractionState,
 } from 'noya-state';
 import { InteractionAPI } from './types';
 
 export interface InsertModeActions {
-  enterInsertMode: (layerType: DrawableLayerType) => void;
+  enterInsertMode: (
+    layerType: DrawableLayerType,
+    method: InteractionMethod,
+  ) => void;
   reset: () => void;
 }
 
@@ -45,6 +49,7 @@ export const createInsertModeInteraction =
                 ),
                 siblingBlocks: api.siblingBlocks,
               }),
+              'keyboard',
             );
           }
         },
@@ -58,17 +63,20 @@ export const createInsertModeInteraction =
                 ),
                 siblingBlocks: api.siblingBlocks,
               }),
+              'keyboard',
             );
           }
         },
       }),
       insert: (interactionState, api) => ({
         onMouseMove: (event) => {
+          if (interactionState.method === 'mouse') return;
           if (!event[api.platformModKey]) {
             reset();
           }
         },
         onKeyUp: (event) => {
+          if (interactionState.method === 'mouse') return;
           if (isModKeyPressed(event, api.platformModKey)) {
             reset();
           }

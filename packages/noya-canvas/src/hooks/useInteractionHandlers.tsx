@@ -180,10 +180,10 @@ export function useInteractionHandlers({
       addLayer: (layer) => dispatch('addLayer', layer),
       highlightLayer: (layerHighlight) =>
         dispatch('highlightLayer', layerHighlight),
-      enterInsertMode: (layerType) =>
-        dispatch('interaction', ['insert', layerType]),
-      enterSelectionMode: () =>
-        dispatch('interaction', ['enableSelectionMode']),
+      enterInsertMode: (layerType, method) =>
+        dispatch('interaction', ['insert', layerType, method]),
+      enterSelectionMode: (method) =>
+        dispatch('interaction', ['enableSelectionMode', method]),
       bringToFront: (id: string[]) => dispatch('bringToFront', id),
       sendToBack: (id: string[]) => dispatch('sendToBack', id),
       duplicateLayer: (id: string[]) => dispatch('duplicateLayer', id),

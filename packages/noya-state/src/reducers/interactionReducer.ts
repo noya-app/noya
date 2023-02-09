@@ -57,6 +57,8 @@ export type BlockDefinition = {
   placeholderText?: string;
 };
 
+export type InteractionMethod = 'mouse' | 'keyboard';
+
 export type InferBlockType = (props: InferBlockProps) => DrawableLayerType;
 
 export type DrawableLayerType =
@@ -82,7 +84,12 @@ export type SnapshotInteractionAction =
 export type InteractionAction =
   | [type: 'reset']
   | [type: 'setCursor', cursor?: CSSProperties['cursor']]
-  | [type: 'insert', layerType: DrawableLayerType, current?: Point]
+  | [
+      type: 'insert',
+      layerType: DrawableLayerType,
+      method: InteractionMethod,
+      current?: Point,
+    ]
   | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
@@ -108,7 +115,7 @@ export type InteractionAction =
     ]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
-  | [type: 'enableSelectionMode']
+  | [type: 'enableSelectionMode', method: InteractionMethod]
   | [type: 'maybePan', origin: Point]
   | [type: 'maybeConvertCurveMode', origin: Point]
   | [type: 'movingPoint', origin: Point, current: Point]
@@ -131,6 +138,7 @@ export type InteractionState =
   | {
       type: 'insert';
       layerType: DrawableLayerType;
+      method: InteractionMethod;
       point?: Point;
     }
   | {
@@ -159,6 +167,7 @@ export type InteractionState =
     }
   | {
       type: 'selectionMode';
+      method: InteractionMethod;
     }
   | {
       type: 'marquee';
@@ -266,8 +275,8 @@ export function interactionReducer(
       return { type: 'editPath', point: point };
     }
     case 'insert': {
-      const [, layerType, point] = action;
-      return { type: action[0], layerType, point };
+      const [, layerType, method, point] = action;
+      return { type: action[0], layerType, method, point };
     }
     case 'insertingSymbol': {
       const [, symbolID, point] = action;
@@ -468,8 +477,11 @@ export function interactionReducer(
     }
     case 'enablePanMode':
       return { type: 'panMode' };
-    case 'enableSelectionMode':
-      return { type: 'selectionMode' };
+    case 'enableSelectionMode': {
+      const [, method] = action;
+
+      return { type: 'selectionMode', method };
+    }
     case 'maybePan': {
       const [, origin] = action;
 

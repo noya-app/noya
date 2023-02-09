@@ -511,6 +511,7 @@ export const Canvas = memo(function Canvas({
           dispatch('interaction', [
             state.interactionState.type,
             state.interactionState.layerType,
+            'mouse',
             point,
           ]);
           break;
