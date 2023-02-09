@@ -1,35 +1,21 @@
+<img width="1200" alt="Frame 1" src="https://user-images.githubusercontent.com/1198882/217942771-01367c66-6e4b-40f5-9427-caa42f53138a.png">
+
 # Noya
 
-The open interface design tool.
+The open design tools SDK.
 
-> Note: This project is actively under development and not ready for use yet!
-
-![Noya app screenshot](/docs/assets/noya-screenshot.png)
+- View our experimental wireframing tool at: https://www.noya.io
+- View our Sketch-compatible demo design tool: https://www.noya.design
 
 ## Why?
 
-The design tool ecosystem is mostly closed source, furthering the gap between
-design and engineering. This project aims to bridge that gap.
+Building a design tool today is like building a game without a game engine. It's too difficult and too much work for most developers to attempt. Generally, only specialized *design tools companies* can attempt it.
 
-## Packages
+We want there to be more design & creative tools in the world. If you have an idea for a tool, you should be able to build it with Noya.
 
-The project is broken up into packages that can be included indepently. Here's a
-quick summary of the key packages:
+## Contributing
 
-- [App](/packages/app) - The reference app of a design tool built with these
-  packages
-- [State](/packages/noya-state) - Manages the internal state of the UI and
-  design file
-- [Renderer](/packages/noya-renderer) - Render a design file to an HTML5 canvas
-  (via Google's
-  [Skia compiled to webassembly](https://www.npmjs.com/package/canvaskit-wasm))
-- [Design System](/packages/noya-designsystem) - Common UI components, like
-  buttons and inputs
-- [Sketch File](/packages/noya-sketch-file) - Parse a `.sketch` file into JSON
-- [Color Picker](/packages/noya-colorpicker) - A React component for picking
-  colors (based on [react-colorful](https://github.com/omgovich/react-colorful))
-- [Geometry](/packages/noya-geometry) - A library for working with shapes and
-  matrices
+We're not trying to grow the open source community at this time, but if you'd like to collaborate, feel free to reach out on Discord: https://discord.gg/NPGAwyEBJw
 
 ## Development Setup
 
@@ -56,8 +42,8 @@ To run tests for all packages, run:
 yarn test
 ```
 
-To run tests for a specific package, e.g. `noya-sketch-file`, run:
+To run tests for a specific package, e.g. `noya-utils`, run:
 
 ```
-yarn test noya-sketch-file
+yarn test noya-utils
 ```
