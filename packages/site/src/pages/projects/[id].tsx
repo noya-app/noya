@@ -10,6 +10,7 @@ import {
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { getCurrentPlatform } from 'noya-keymap';
+import { amplitude } from 'noya-log';
 import { SketchFile } from 'noya-sketch-file';
 import { debounce } from 'noya-utils';
 import React, {
@@ -206,6 +207,10 @@ const platform =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
 export default function Project(): JSX.Element {
+  useEffect(() => {
+    amplitude.logEvent('Project - Opened');
+  }, []);
+
   return (
     <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
       <Content />

@@ -9,7 +9,8 @@ import {
   Switch,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import React, { useState } from 'react';
+import { amplitude } from 'noya-log';
+import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../components/AppLayout';
 import {
   AccountDetailRow,
@@ -25,6 +26,10 @@ import {
 import { Toolbar } from '../components/Toolbar';
 
 export default function Account() {
+  useEffect(() => {
+    amplitude.logEvent('App - Account - Opened');
+  }, []);
+
   const { portalUrl, subscriptions, availableProducts, loading } =
     useNoyaBilling();
   const session = useNoyaSession();

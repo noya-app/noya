@@ -43,12 +43,21 @@ export function zoomInteraction({
       onSelectMenuItem: (id) => {
         switch (id) {
           case 'zoomIn':
+            api.logEvent('Project - View - Zoomed Wireframe (In)', {
+              'Old Zoom Level': api.zoomValue,
+            });
             zoomIn();
             break;
           case 'zoomOut':
+            api.logEvent('Project - View - Zoomed Wireframe (Out)', {
+              'Old Zoom Level': api.zoomValue,
+            });
             zoomOut();
             break;
           case 'zoomActualSize':
+            api.logEvent('Project - View - Zoomed Wireframe (Actual Size)', {
+              'Old Zoom Level': api.zoomValue,
+            });
             zoomActualSize();
             break;
         }
@@ -60,9 +69,24 @@ export function zoomInteraction({
     return {
       ...handlers(interactionState, key, api),
       onKeyDown: api.handleKeyboardEvent({
-        'Mod-=': () => zoomIn(),
-        'Mod--': () => zoomOut(),
-        'Mod-0': () => zoomActualSize(),
+        'Mod-=': () => {
+          api.logEvent('Project - View - Zoomed Wireframe (In)', {
+            'Old Zoom Level': api.zoomValue,
+          });
+          zoomIn();
+        },
+        'Mod--': () => {
+          api.logEvent('Project - View - Zoomed Wireframe (Out)', {
+            'Old Zoom Level': api.zoomValue,
+          });
+          zoomOut();
+        },
+        'Mod-0': () => {
+          api.logEvent('Project - View - Zoomed Wireframe (Actual Size)', {
+            'Old Zoom Level': api.zoomValue,
+          });
+          zoomActualSize();
+        },
       }),
     };
   };

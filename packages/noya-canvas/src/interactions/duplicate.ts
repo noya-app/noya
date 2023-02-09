@@ -23,6 +23,10 @@ export function duplicateInteraction({ duplicateLayer }: DuplicateActions) {
       onSelectMenuItem: (id) => {
         switch (id) {
           case 'duplicate':
+            api.logEvent('Project - Block - Duplicated', {
+              'Block Count': api.selectedLayerIds.length,
+            });
+
             duplicateLayer(api.selectedLayerIds);
             break;
         }

@@ -5,8 +5,10 @@ import {
   getCurrentPlatform,
   handleKeyboardEvent,
 } from 'noya-keymap';
+import { amplitude, ILogEvent } from 'noya-log';
 import { useLazyValue } from 'noya-react-utils';
 import { DrawableLayerType, ParentLayer } from 'noya-state';
+import { debounce } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -242,6 +244,15 @@ export const BlockEditor = forwardRef(function BlockEditor(
       ),
     })),
     onSelect: (target, item) => {
+      amplitude.logEvent('Project - Block - Inserted Hashtag', {
+        'Block Type': blockDefinition.id,
+        X: layer.frame.x,
+        Y: layer.frame.y,
+        Width: layer.frame.width,
+        Height: layer.frame.height,
+        Hashtag: item.id,
+      });
+
       Transforms.delete(editor, { at: target });
       Transforms.insertText(editor, `#${item.id} `, { at: target.anchor });
 
@@ -289,6 +300,14 @@ export const BlockEditor = forwardRef(function BlockEditor(
     ],
   );
 
+  const logEditedTextDebounced = useMemo(
+    () =>
+      debounce((...args: Parameters<ILogEvent>): void => {
+        amplitude.logEvent(...args);
+      }, 1000),
+    [],
+  );
+
   return (
     <Slate
       editor={editor}
@@ -301,6 +320,14 @@ export const BlockEditor = forwardRef(function BlockEditor(
         // Slate fires a final change event after the editor is blurred.
         // We should only handle change events if the editor is focused.
         if (domNode !== document.activeElement) return;
+
+        logEditedTextDebounced('Project - Block - Edited Text', {
+          'Block Type': blockDefinition.id,
+          X: layer.frame.x,
+          Y: layer.frame.y,
+          Width: layer.frame.width,
+          Height: layer.frame.height,
+        });
 
         const text = toString(value);
 

@@ -10,6 +10,7 @@ import {
   Stack,
 } from 'noya-designsystem';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
+import { amplitude } from 'noya-log';
 import React, { useState } from 'react';
 import { createAyonDocument } from '../ayon/createAyonDocument';
 
@@ -49,7 +50,11 @@ export function Projects() {
                 },
                 { fetchPolicy: 'no-cache' },
               )
-              .then((id) => push(`/projects/${id}`))
+              .then((id) => {
+                amplitude.logEvent('Project - Created');
+
+                push(`/projects/${id}`);
+              })
               .then(() => client.files.refetch());
           }}
         >

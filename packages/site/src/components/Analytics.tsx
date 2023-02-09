@@ -1,8 +1,8 @@
-import * as amplitude from '@amplitude/analytics-browser';
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import Script from 'next/script';
 import { NoyaAPI, useNoyaSession } from 'noya-api';
+import { amplitude } from 'noya-log';
 import React, { useEffect } from 'react';
 
 const IUBENDA_CS_CONFIGURATION = {
@@ -117,5 +117,3 @@ export function Analytics({ children }: { children: React.ReactNode }) {
     </>
   );
 }
-
-export { amplitude };

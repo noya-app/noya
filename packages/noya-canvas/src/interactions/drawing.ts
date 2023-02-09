@@ -147,6 +147,29 @@ export const createDrawingInteraction =
         onPointerUp: (event) => {
           const canvasPoint = api.getCanvasPoint(event.nativeEvent);
 
+          if (options.inferBlockType) {
+            const rect = getDrawnLayerRect(
+              interactionState.origin,
+              interactionState.current,
+              getScalingOptions(event),
+            );
+
+            const blockType = options.inferBlockType({
+              frame: rect,
+              siblingBlocks: api.siblingBlocks,
+            });
+
+            if (typeof blockType !== 'string') {
+              api.logEvent('Project - Block - Inserted', {
+                'Block Type': blockType.symbolId,
+                X: rect.x,
+                Y: rect.y,
+                Width: rect.width,
+                Height: rect.height,
+              });
+            }
+          }
+
           updateDrawing(canvasPoint, getScalingOptions(event));
           addDrawnLayer();
 

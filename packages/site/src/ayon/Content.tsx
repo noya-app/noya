@@ -7,23 +7,19 @@ import {
   SimpleCanvas,
 } from 'noya-canvas';
 import { roundPoint } from 'noya-geometry';
+import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import { isExternalUrl } from 'noya-utils';
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { debounce, isExternalUrl } from 'noya-utils';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { measureImage } from '../utils/measureImage';
 import { Blocks } from './blocks';
-import {
-  buttonSymbol,
-  iconSymbolId,
-  imageSymbolId,
-  writeSymbolId,
-} from './blocks/symbols';
+import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbols';
 import { DOMRenderer } from './DOMRenderer';
 import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';
@@ -209,8 +205,30 @@ export const Content = memo(function Content({
   const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
+  const onLayoutInitialized = useRef(false);
+  const onLayoutDebounced = useMemo(
+    () =>
+      debounce((sizes: number[]) => {
+        amplitude.logEvent('Project - View - Resized Split View', {
+          'Left Width': sizes[0],
+          'Right Width': sizes[1],
+        });
+      }, 1000),
+    [],
+  );
+
   return (
-    <Panel.Root direction="horizontal" autoSaveId="ayon-canvas">
+    <Panel.Root
+      direction="horizontal"
+      autoSaveId="ayon-canvas"
+      onLayout={(sizes) => {
+        if (onLayoutInitialized.current) {
+          onLayoutDebounced(sizes);
+        } else {
+          onLayoutInitialized.current = true;
+        }
+      }}
+    >
       <Panel.Item ref={panelRef} collapsible defaultSize={75}>
         <FileDropTarget
           supportedFileTypes={[
@@ -223,6 +241,7 @@ export const Content = memo(function Content({
           <SimpleCanvas
             ref={canvasRef}
             padding={padding}
+            logEvent={amplitude.logEvent}
             interactions={[
               Interactions.selectionMode,
               Interactions.duplicate,
@@ -256,11 +275,20 @@ export const Content = memo(function Content({
                       inferBlockTypes={inferBlockTypes}
                       onFocusCanvas={onFocusCanvas}
                       onChangeBlockType={(type: DrawableLayerType) => {
+                        if (typeof type === 'string') return;
+
+                        amplitude.logEvent('Project - Block - Changed Type', {
+                          'Old Block Type': layer.symbolID,
+                          'New Block Type': type.symbolId,
+                          X: layer.frame.x,
+                          Y: layer.frame.y,
+                          Width: layer.frame.width,
+                          Height: layer.frame.height,
+                        });
+
                         dispatch(
                           'setSymbolInstanceSource',
-                          typeof type !== 'string'
-                            ? type.symbolId
-                            : buttonSymbol.symbolID,
+                          type.symbolId,
                           'preserveCurrent',
                         );
                       }}

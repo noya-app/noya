@@ -44,6 +44,10 @@ export function selectionInteraction({
       onSelectMenuItem: (id) => {
         switch (id) {
           case 'delete':
+            api.logEvent('Project - Block - Deleted', {
+              'Block Count': api.selectedLayerIds.length,
+            });
+
             deleteLayer(api.selectedLayerIds);
             break;
           case 'selectAll':
@@ -114,8 +118,20 @@ export function selectionInteraction({
         }
       },
       onKeyDown: api.handleKeyboardEvent({
-        Backspace: () => deleteLayer(api.selectedLayerIds),
-        Delete: () => deleteLayer(api.selectedLayerIds),
+        Backspace: () => {
+          api.logEvent('Project - Block - Deleted', {
+            'Block Count': api.selectedLayerIds.length,
+          });
+
+          deleteLayer(api.selectedLayerIds);
+        },
+        Delete: () => {
+          api.logEvent('Project - Block - Deleted', {
+            'Block Count': api.selectedLayerIds.length,
+          });
+
+          deleteLayer(api.selectedLayerIds);
+        },
       }),
     }),
   });

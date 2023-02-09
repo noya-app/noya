@@ -1,5 +1,6 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
+import { ILogEvent } from 'noya-log';
 import { Selectors } from 'noya-state';
 import React, {
   ForwardedRef,
@@ -29,6 +30,7 @@ interface Props {
   widgets?: CanvasElementProps['widgets'];
   interactions?: Interaction[];
   padding?: number;
+  logEvent?: ILogEvent;
 }
 
 export interface ISimpleCanvas {
@@ -37,7 +39,14 @@ export interface ISimpleCanvas {
 
 export const SimpleCanvas = memo(
   forwardRef(function SimpleCanvas(
-    { children, interactions, widgets, rendererZIndex = 0, padding = 0 }: Props,
+    {
+      children,
+      interactions,
+      widgets,
+      rendererZIndex = 0,
+      padding = 0,
+      logEvent,
+    }: Props,
     forwardedRef: ForwardedRef<ISimpleCanvas>,
   ) {
     const ref = useRef<ICanvasElement>(null);
@@ -59,6 +68,7 @@ export const SimpleCanvas = memo(
           setPointerCapture: (pointerId) =>
             ref.current?.setPointerCapture(pointerId),
         },
+        logEvent: (...args) => logEvent?.(...args),
       });
 
     const cursor = useMemo(() => Selectors.getCursor(state), [state]);
