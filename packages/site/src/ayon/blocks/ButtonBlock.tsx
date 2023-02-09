@@ -6,6 +6,8 @@ import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
 import { buttonSymbolId } from './symbols';
 
+const placeholderText = 'Submit';
+
 const globalHashtags = [
   'light',
   'dark',
@@ -22,6 +24,7 @@ export const ButtonBlock: BlockDefinition = {
   id: buttonSymbolId,
   parser,
   hashtags: globalHashtags,
+  placeholderText,
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
   render: (props) => {
@@ -36,7 +39,7 @@ export const ButtonBlock: BlockDefinition = {
         danger,
         disabled,
       },
-    } = parseBlock(props.blockText, parser);
+    } = parseBlock(props.blockText, parser, { placeholder: placeholderText });
 
     const buttonColorKey = light
       ? 'light'
