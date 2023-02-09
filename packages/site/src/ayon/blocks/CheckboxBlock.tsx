@@ -17,7 +17,7 @@ export const CheckboxBlock: BlockDefinition = {
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 10, 10, 20, 20) &&
+    isWithinRectRange(frame, 10, 10, 30, 30) &&
     isApproximatelySquare(frame, 0.1)
       ? 0.8
       : 0,
