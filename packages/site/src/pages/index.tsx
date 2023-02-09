@@ -6,6 +6,7 @@ import {
   getSubscriptionOverage,
   SubscriptionCard,
   SubscriptionUsageMeter,
+  usageMeterThreshold,
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
 
@@ -17,7 +18,7 @@ export default function App() {
     files,
     subscriptions,
     availableProducts,
-    0.25,
+    usageMeterThreshold,
   );
 
   return (

@@ -149,6 +149,9 @@ export type SubscriptionUsageItem = {
   limit: number;
 };
 
+// Show usage meter after creating a 2nd project or a 21st block
+export const usageMeterThreshold = 0.11;
+
 export function SubscriptionUsageMeter({
   items,
 }: {
@@ -176,7 +179,11 @@ export function SubscriptionUsageMeter({
               <Progress
                 flex="1"
                 value={(item.count / item.limit) * 100}
-                variant={item.count / item.limit > 0.25 ? 'warning' : undefined}
+                variant={
+                  item.count / item.limit > usageMeterThreshold
+                    ? 'warning'
+                    : undefined
+                }
               />
             </Stack.H>
           ))}
@@ -186,7 +193,11 @@ export function SubscriptionUsageMeter({
           {items.map((item) => (
             <Stack.H key={item.name} height={15} alignItems="center">
               <Small
-                color={item.count / item.limit > 0.25 ? 'warning' : 'text'}
+                color={
+                  item.count / item.limit > usageMeterThreshold
+                    ? 'warning'
+                    : 'text'
+                }
                 lineHeight="15px"
                 fontSize="11px"
                 fontWeight={500}

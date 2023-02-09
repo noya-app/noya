@@ -23,6 +23,7 @@ import { ProjectTitle } from '../../components/ProjectTitle';
 import {
   getSubscriptionOverage,
   SubscriptionUsageMeterSmall,
+  usageMeterThreshold,
 } from '../../components/Subscription';
 
 import { Toolbar } from '../../components/Toolbar';
@@ -164,7 +165,7 @@ function Content() {
     files,
     subscriptions,
     availableProducts,
-    0.25,
+    usageMeterThreshold,
   );
 
   const overageItem = overageItems.sort(
