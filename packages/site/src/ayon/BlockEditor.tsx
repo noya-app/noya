@@ -368,6 +368,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
           hashCompletionMenu.close();
         }
 
+        // If the text hasn't changed, do nothing.
+        // When the block is focused, this handler will run and result
+        // in an unnecessary callback.
+        if (internalBlockText === text) return;
+
         setBlockText(text);
 
         // Lock the block type when the user starts editing the text
