@@ -16,6 +16,7 @@ import { HeroBlock } from './HeroBlock';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
+import { RadioBlock } from './RadioBlock';
 import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
 import { SwitchBlock } from './SwitchBlock';
@@ -45,4 +46,5 @@ export const Blocks: Record<string, BlockDefinition> = {
   [SidebarBlock.id]: SidebarBlock,
   [TableBlock.id]: TableBlock,
   [SelectBlock.id]: SelectBlock,
+  [RadioBlock.id]: RadioBlock,
 };
