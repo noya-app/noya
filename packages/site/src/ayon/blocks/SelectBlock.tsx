@@ -32,7 +32,7 @@ export const SelectBlock: BlockDefinition = {
     });
 
     const size =
-      props.frame.height >= 40 ? 'lg' : props.frame.height >= 30 ? 'md' : 'sm';
+      props.frame.height >= 45 ? 'lg' : props.frame.height >= 30 ? 'md' : 'sm';
 
     const { backgroundColor, color, borderColor } = getBlockThemeColors({
       dark,
