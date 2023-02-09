@@ -16,9 +16,12 @@ import { HeroBlock } from './HeroBlock';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
+import { RadioBlock } from './RadioBlock';
+import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TableBlock } from './TableBlock';
+import { TextareaBlock } from './TextareaBlock';
 import { TextBlock } from './TextBlock';
 import { WriteBlock } from './WriteBlock';
 
@@ -43,4 +46,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [IconBlock.id]: IconBlock,
   [SidebarBlock.id]: SidebarBlock,
   [TableBlock.id]: TableBlock,
+  [SelectBlock.id]: SelectBlock,
+  [RadioBlock.id]: RadioBlock,
+  [TextareaBlock.id]: TextareaBlock,
 };

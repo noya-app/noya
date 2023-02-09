@@ -150,7 +150,19 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 ): ParsedBlockTypeMap[K] {
   switch (type) {
     case 'regular': {
-      return parseBlockInner(text, type);
+      const block = parseBlockInner(text, type);
+
+      if (placeholder && block.content === '') {
+        const parsedPlaceholder = parseBlockInner(placeholder, type);
+
+        block.content = parsedPlaceholder.content;
+        block.parameters = mergeObjects([
+          parsedPlaceholder.parameters,
+          block.parameters,
+        ]);
+      }
+
+      return block;
     }
     case 'commaSeparated':
     case 'newlineSeparated': {

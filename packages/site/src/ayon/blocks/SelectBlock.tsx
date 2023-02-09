@@ -1,26 +1,35 @@
-import { Input } from '@chakra-ui/react';
+import { Select } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { inputSymbolId } from './symbols';
+import { selectSymbolId } from './symbols';
+
+const placeholderText = `
+Role
+Guest
+Member
+Admin`.trim();
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 
-const parser = 'regular';
+const parser = 'newlineSeparated';
 
-export const InputBlock: BlockDefinition = {
-  id: inputSymbolId,
+export const SelectBlock: BlockDefinition = {
+  id: selectSymbolId,
   parser,
   hashtags: globalHashtags,
+  placeholderText,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 60, 25, 600, 80) ? 0.75 : 0,
+    isWithinRectRange(frame, 60, 25, 400, 80) ? 0.7 : 0,
   render: (props) => {
     const {
-      content,
+      items,
       parameters: { dark, accent, disabled },
-    } = parseBlock(props.blockText, parser);
+    } = parseBlock(props.blockText, parser, {
+      placeholder: placeholderText,
+    });
 
     const size =
       props.frame.height >= 45 ? 'lg' : props.frame.height >= 30 ? 'md' : 'sm';
@@ -31,14 +40,18 @@ export const InputBlock: BlockDefinition = {
     });
 
     return (
-      <Input
-        value={content}
+      <Select
         size={size}
         backgroundColor={backgroundColor}
         color={color}
         borderColor={borderColor}
         isDisabled={!!disabled}
-      />
+        placeholder={items[0].content}
+      >
+        {items.slice(1).map((item, index) => (
+          <option key={item.content}>{item.content}</option>
+        ))}
+      </Select>
     );
   },
 };

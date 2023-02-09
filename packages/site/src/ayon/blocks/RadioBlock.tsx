@@ -1,18 +1,18 @@
-import { Checkbox } from '@chakra-ui/react';
+import { Radio } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
-import { checkboxSymbolId } from './symbols';
+import { radioSymbolId } from './symbols';
 
-const placeholderText = '#off Remember me';
+const placeholderText = '#on Daily';
 
 const globalHashtags = ['on', 'off', 'disabled'];
 
 const parser = 'regular';
 
-export const CheckboxBlock: BlockDefinition = {
-  id: checkboxSymbolId,
+export const RadioBlock: BlockDefinition = {
+  id: radioSymbolId,
   parser,
   hashtags: globalHashtags,
   placeholderText,
@@ -28,9 +28,9 @@ export const CheckboxBlock: BlockDefinition = {
     const size =
       props.frame.height >= 30 ? 'lg' : props.frame.height >= 20 ? 'md' : 'sm';
     return (
-      <Checkbox size={size} isChecked={!!on} isDisabled={!!disabled}>
+      <Radio size={size} isChecked={!!on} isDisabled={!!disabled}>
         {props.frame.width > 40 && content}
-      </Checkbox>
+      </Radio>
     );
   },
 };
