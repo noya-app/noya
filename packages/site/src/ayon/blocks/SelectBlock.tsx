@@ -12,7 +12,7 @@ Guest
 Member
 Admin`.trim();
 
-const globalHashtags = ['disabled'];
+const globalHashtags = ['dark', 'accent', 'disabled'];
 
 const parser = 'newlineSeparated';
 
