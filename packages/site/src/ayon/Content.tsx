@@ -301,11 +301,14 @@ export const Content = memo(function Content({
                           text,
                           parseBlock(text, BlockDefinition.parser).content,
                         );
-                        dispatch(
-                          'setSymbolIdIsFixed',
-                          [layer.do_objectID],
-                          true,
-                        );
+
+                        if (text !== '') {
+                          dispatch(
+                            'setSymbolIdIsFixed',
+                            [layer.do_objectID],
+                            true,
+                          );
+                        }
                       }}
                       uploadAsset={uploadAsset}
                     />
