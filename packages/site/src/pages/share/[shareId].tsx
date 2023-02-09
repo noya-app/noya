@@ -1,8 +1,9 @@
+import { GetServerSidePropsContext } from 'next';
 import dynamic from 'next/dynamic';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { NoyaAPI, NoyaAPIProvider } from 'noya-api';
+import { NoyaAPI } from 'noya-api';
 import {
-  Button,
   DesignSystemConfigurationProvider,
   Divider,
   lightTheme,
@@ -13,12 +14,14 @@ import {
 } from 'noya-designsystem';
 import { ArrowRightIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
+import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Analytics } from '../../components/Analytics';
+import { Interstitial } from '../../components/Interstitial';
+import { OptionalNoyaAPIProvider } from '../../components/OptionalNoyaAPIProvider';
 import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
-import { createNoyaClient, NOYA_HOST } from '../../utils/noyaClient';
+import { NOYA_HOST } from '../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
@@ -43,20 +46,51 @@ const Chip = styled.span<{ variant: 'primary' | 'secondary' }>(
 /**
  * This client throws errors if the user isn't logged in
  */
-const networkClient = NOYA_HOST
+export const networkClient = NOYA_HOST
   ? new NoyaAPI.NetworkClient({
       baseURI: `${NOYA_HOST}/api`,
     })
   : undefined;
 
-function Content({ shareId }: { shareId: string }) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  if (!networkClient) return;
+
+  let shareId: string | null = null,
+    initialFile: NoyaAPI.SharedFile | null = null,
+    error: string | null = null;
+
+  try {
+    shareId = context.params!.shareId as string;
+    const file = await networkClient.files.shares.readSharedFile(shareId);
+    initialFile = file;
+  } catch (readFileError) {
+    if (readFileError instanceof Error) {
+      error = readFileError.message;
+    }
+  }
+
+  return {
+    props: {
+      shareId,
+      initialFile,
+      error,
+    },
+  };
+}
+
+function Content({
+  shareId,
+  initialFile,
+  error,
+}: {
+  shareId: string;
+  initialFile: NoyaAPI.SharedFile;
+  error: string | null;
+}) {
   const theme = useDesignSystemTheme();
   const router = useRouter();
 
-  const [initialFile, setInitialFile] = useState<
-    NoyaAPI.SharedFile | undefined
-  >();
-  const [error, setError] = useState<Error | undefined>();
+  const [fileId, setFileId] = useState<string | undefined>();
 
   useEffect(() => {
     async function main() {
@@ -64,12 +98,8 @@ function Content({ shareId }: { shareId: string }) {
 
       try {
         const file = await networkClient.files.shares.readSharedFile(shareId);
-        setInitialFile(file);
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error);
-        }
-      }
+        setFileId(file.fileId);
+      } catch (error) {}
     }
 
     main();
@@ -77,56 +107,69 @@ function Content({ shareId }: { shareId: string }) {
 
   if (error) {
     return (
-      <Stack.V
-        flex="1"
-        alignItems="center"
-        justifyContent="center"
-        background={theme.colors.canvas.background}
-      >
-        <Stack.V
-          border={`1px solid ${theme.colors.dividerStrong}`}
-          padding={20}
-          background={theme.colors.sidebar.background}
-          maxWidth={300}
-        >
-          <Small color="text" fontWeight="bold">
-            Project not found
-          </Small>
-          <Spacer.Vertical size={4} />
-          <Small color="text">
-            This project may have been unshared. Contact the author to request
-            access.
-          </Small>
-          <Spacer.Vertical size={16} />
-          <Stack.H>
-            <Button variant="secondary" onClick={() => router.push('/')}>
-              Home
-              <Spacer.Horizontal size={6} inline />
-              <ArrowRightIcon />
-            </Button>
-          </Stack.H>
-        </Stack.V>
-      </Stack.V>
+      <Interstitial
+        title="Project not found"
+        description="This project may have been unshared. Contact the author to request access."
+        showHomeLink="Home"
+      />
     );
   }
 
-  if (!initialFile) {
-    return null;
-  }
+  if (!initialFile) return null;
+
+  const artboard = Layers.find(
+    initialFile.data.document.pages[0],
+    Layers.isArtboard,
+  );
 
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
+      <Head>
+        <meta name="description" content="Created with Noya" />
+        {artboard && (
+          <>
+            <meta
+              property="og:url"
+              content={`${NOYA_HOST}/app/share/${initialFile.id}`}
+            />
+            <meta property="og:title" content={initialFile.data.name} />
+            <meta property="og:description" content="Created with Noya" />
+            <meta
+              property="og:image"
+              content={`${networkClient?.baseURI}/shares/${initialFile.id}.png?width=${artboard.frame.width}&height=${artboard.frame.height}`}
+            />
+            <meta
+              property="og:image:width"
+              content={`${artboard.frame.width}`}
+            />
+            <meta
+              property="og:image:height"
+              content={`${artboard.frame.height}`}
+            />
+            <meta property="og:image:user_generated" content="true" />
+            <meta property="og:type" content="article" />
+            <meta
+              property="og:article:published_time"
+              content={`${initialFile.createdAt}`}
+            />
+            <meta
+              property="og:article:modified_time"
+              content={`${initialFile.updatedAt}`}
+            />
+          </>
+        )}
+      </Head>
       <Toolbar>
         <Small>{initialFile.data.name}</Small>
         <Spacer.Horizontal size={8} inline />
         <Chip variant="secondary">VIEWING</Chip>
-        {initialFile.fileId && (
+        {fileId && (
           <>
             <Spacer.Horizontal size={8} inline />
             <Chip
               variant="primary"
               onClick={() => {
-                router.push(`/projects/${initialFile.fileId}`);
+                router.push(`/projects/${fileId}`);
               }}
               style={{
                 cursor: 'pointer',
@@ -143,7 +186,7 @@ function Content({ shareId }: { shareId: string }) {
             </Chip>
           </>
         )}
-        {!initialFile.fileId && initialFile.duplicable && (
+        {!fileId && initialFile.duplicable && (
           <>
             <Spacer.Horizontal size={8} inline />
             <Chip
@@ -184,38 +227,15 @@ function Content({ shareId }: { shareId: string }) {
   );
 }
 
-function OptionalNoyaAPIProvider({ children }: { children: React.ReactNode }) {
-  const [client, setClient] = useState<NoyaAPI.Client | undefined>();
-
-  useEffect(() => {
-    async function main() {
-      try {
-        if (!networkClient) return;
-        await networkClient.auth.session();
-        setClient(createNoyaClient());
-      } catch {
-        // Ignore
-      }
-    }
-
-    main();
-  }, []);
-
-  if (client) {
-    return (
-      <NoyaAPIProvider value={client}>
-        <Analytics>{children}</Analytics>
-      </NoyaAPIProvider>
-    );
-  } else {
-    return <>{children}</>;
-  }
-}
-
-export default function Preview() {
-  const { query } = useRouter();
-  const shareId = query.shareId as string | undefined;
-
+export default function Preview({
+  shareId,
+  initialFile,
+  error,
+}: {
+  shareId: string;
+  initialFile: NoyaAPI.SharedFile;
+  error: string | null;
+}) {
   useEffect(() => {
     amplitude.logEvent('Share - Opened');
   }, []);
@@ -225,9 +245,9 @@ export default function Preview() {
   addShareCookie(shareId);
 
   return (
-    <OptionalNoyaAPIProvider>
+    <OptionalNoyaAPIProvider networkClient={networkClient}>
       <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-        <Content shareId={shareId} />
+        <Content shareId={shareId} initialFile={initialFile} error={error} />
       </DesignSystemConfigurationProvider>
     </OptionalNoyaAPIProvider>
   );
