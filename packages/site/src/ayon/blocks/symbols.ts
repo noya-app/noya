@@ -24,6 +24,7 @@ export const sidebarSymbolId = '5733e3d6-9688-4c6d-b031-6be27d05767a';
 export const tableSymbolId = 'c152b560-d8af-4b16-8202-55111647d17a';
 export const selectSymbolId = '7e913e19-97c6-442f-8cc4-58c4f2e71e77';
 export const radioSymbolId = 'e2fbabf8-81f4-4d43-a56d-6067737df0ea';
+export const textareaSymbolId = '7bcb8f7b-7645-429b-89f0-2298fef4ccb6';
 
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
@@ -135,6 +136,11 @@ export const radioSymbol = SketchModel.symbolMaster({
   name: 'Radio',
 });
 
+export const textareaSymbol = SketchModel.symbolMaster({
+  symbolID: textareaSymbolId,
+  name: 'Textarea',
+});
+
 export const allAyonSymbols = [
   buttonSymbol,
   avatarSymbol,
@@ -158,4 +164,5 @@ export const allAyonSymbols = [
   tableSymbol,
   selectSymbol,
   radioSymbol,
+  textareaSymbol,
 ];

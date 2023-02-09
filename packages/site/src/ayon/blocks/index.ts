@@ -21,6 +21,7 @@ import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TableBlock } from './TableBlock';
+import { TextareaBlock } from './TextareaBlock';
 import { TextBlock } from './TextBlock';
 import { WriteBlock } from './WriteBlock';
 
@@ -47,4 +48,5 @@ export const Blocks: Record<string, BlockDefinition> = {
   [TableBlock.id]: TableBlock,
   [SelectBlock.id]: SelectBlock,
   [RadioBlock.id]: RadioBlock,
+  [TextareaBlock.id]: TextareaBlock,
 };
