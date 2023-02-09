@@ -122,6 +122,8 @@ function Content({
     Layers.isArtboard,
   );
 
+  const screenshotUrl = `${networkClient?.baseURI}/shares/${initialFile.id}.png?width=${artboard?.frame.width}&height=${artboard?.frame.height}`;
+
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
       <Head>
@@ -134,10 +136,7 @@ function Content({
             />
             <meta property="og:title" content={initialFile.data.name} />
             <meta property="og:description" content="Created with Noya" />
-            <meta
-              property="og:image"
-              content={`${networkClient?.baseURI}/shares/${initialFile.id}.png?width=${artboard.frame.width}&height=${artboard.frame.height}`}
-            />
+            <meta property="og:image" content={screenshotUrl} />
             <meta
               property="og:image:width"
               content={`${artboard.frame.width}`}
@@ -156,6 +155,11 @@ function Content({
               property="og:article:modified_time"
               content={`${initialFile.updatedAt}`}
             />
+            <meta name="twitter:card" content="summary" />
+            <meta name="twitter:site" content="@noyasoftware" />
+            <meta name="twitter:title" content={initialFile.data.name} />
+            <meta name="twitter:description" content="Created with Noya" />
+            <meta name="twitter:image" content={screenshotUrl} />
           </>
         )}
       </Head>
