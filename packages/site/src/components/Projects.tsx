@@ -11,13 +11,33 @@ import {
 } from 'noya-designsystem';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/createAyonDocument';
+import { Card } from './Subscription';
+
+const welcomeCardStorageKey = 'noya-ayon-welcome-card-dismissed';
 
 export function Projects() {
   const { push } = useRouter();
   const files = useNoyaFiles();
   const client = useNoyaClient();
+
+  const [showWelcomeCard, _setShowWelcomeCard] = useState(false);
+  const hasFiles = files.length > 0;
+
+  // Show welcome card in a useEffect so it doesn't flash due to SSR
+  useEffect(() => {
+    const dismissed = !!localStorage.getItem(welcomeCardStorageKey);
+    _setShowWelcomeCard(!dismissed && !hasFiles);
+  }, [hasFiles]);
+
+  const setShowWelcomeCard = (value: boolean) => {
+    if (!value) {
+      localStorage.setItem(welcomeCardStorageKey, 'true');
+    }
+
+    _setShowWelcomeCard(value);
+  };
 
   const sortedFiles = files.sort(
     (a, b) => parseISO(b.updatedAt).valueOf() - parseISO(a.updatedAt).valueOf(),
@@ -27,43 +47,78 @@ export function Projects() {
   const [selected, setSelected] = useState<string | undefined>();
   const [renaming, setRenaming] = useState<string | undefined>();
 
+  const newProjectButton = (
+    <Button
+      variant="secondary"
+      onClick={() => {
+        const document = createAyonDocument();
+
+        client.files
+          // Wait till after navigating to refetch, since it looks bad
+          // if the list updates before transitioning to the new page
+          .create(
+            {
+              data: {
+                name: 'Untitled',
+                type: 'io.noya.ayon',
+                schemaVersion: '0.1.0',
+                document,
+              },
+            },
+            { fetchPolicy: 'no-cache' },
+          )
+          .then((id) => {
+            amplitude.logEvent('Project - Created');
+
+            return push(`/projects/${id}`);
+          })
+          .then(() => client.files.refetch());
+      }}
+    >
+      <PlusIcon />
+      <Spacer.Horizontal size={8} />
+      New Project
+    </Button>
+  );
+
   return (
     <Stack.V flex="1">
       <Stack.H alignItems="center">
         <Heading2 color="text">Projects</Heading2>
         <Spacer.Horizontal />
-        <Button
-          onClick={() => {
-            const document = createAyonDocument();
-
-            client.files
-              // Wait till after navigating to refetch, since it looks bad
-              // if the list updates before transitioning to the new page
-              .create(
-                {
-                  data: {
-                    name: 'Untitled',
-                    type: 'io.noya.ayon',
-                    schemaVersion: '0.1.0',
-                    document,
-                  },
-                },
-                { fetchPolicy: 'no-cache' },
-              )
-              .then((id) => {
-                amplitude.logEvent('Project - Created');
-
-                push(`/projects/${id}`);
-              })
-              .then(() => client.files.refetch());
-          }}
-        >
-          <PlusIcon />
-          <Spacer.Horizontal size={8} />
-          New Project
-        </Button>
+        {newProjectButton}
       </Stack.H>
       <Spacer.Vertical size={44} />
+      {showWelcomeCard && (
+        <>
+          <Card
+            title="Welcome to Noya!"
+            subtitle="Get started by creating a new project."
+            action={newProjectButton}
+            closable
+            onClose={() => {
+              amplitude.logEvent('Welcome Card - Dismissed');
+
+              setShowWelcomeCard(false);
+            }}
+          >
+            <Spacer.Vertical size={6} />
+            <Small color="text" fontWeight="bold">
+              Watch the Intro Video
+            </Small>
+            <Spacer.Vertical size={10} />
+            <iframe
+              src="https://player.vimeo.com/video/793181754?h=9da5d48d32&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              style={{ aspectRatio: '16/9' }}
+              title="Noya Demo Video"
+            />
+            <script src="https://player.vimeo.com/api/player.js"></script>
+          </Card>
+          <Spacer.Vertical size={44} />
+        </>
+      )}
       <Stack.V margin={'0 -12px'}>
         <ListView.Root>
           {sortedFiles.map((file) => {

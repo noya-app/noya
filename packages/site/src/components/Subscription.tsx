@@ -5,6 +5,7 @@ import {
   Body,
   Button,
   DividerVertical,
+  IconButton,
   Progress,
   Small,
   Spacer,
@@ -17,6 +18,67 @@ import { Layers } from 'noya-state';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { writeSymbolId } from '../ayon/blocks/symbols';
+
+const CloseButtonContainer = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: 4,
+  right: 4,
+}));
+
+export function Card({
+  title,
+  subtitle,
+  action,
+  children,
+  closable,
+  onClose,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+  children?: ReactNode;
+  closable?: boolean;
+  onClose?: () => void;
+}) {
+  const theme = useDesignSystemTheme();
+
+  return (
+    <Stack.H
+      border={`1px solid ${theme.colors.dividerSubtle}`}
+      padding={20}
+      background={theme.colors.sidebar.background}
+      gap={20}
+    >
+      <Stack.V flex="1">
+        <Body color="text" fontWeight="bold">
+          {title}
+        </Body>
+        <Spacer.Vertical size={4} />
+        <Small color="text">{subtitle}</Small>
+        {/* <Spacer.Vertical /> */}
+        {action && (
+          <>
+            <Spacer.Vertical size={20} />
+            <Stack.H>{action}</Stack.H>
+          </>
+        )}
+      </Stack.V>
+      {children && (
+        <>
+          <DividerVertical />
+          <Stack.V flex="1" position="relative">
+            {children}
+          </Stack.V>
+        </>
+      )}
+      {closable && (
+        <CloseButtonContainer>
+          <IconButton iconName="Cross2Icon" onClick={onClose} />
+        </CloseButtonContainer>
+      )}
+    </Stack.H>
+  );
+}
 
 export function SubscriptionCard({
   name,

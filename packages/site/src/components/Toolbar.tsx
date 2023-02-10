@@ -18,6 +18,7 @@ import {
   ExitIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
+  VideoIcon,
 } from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
@@ -56,6 +57,10 @@ function getMonogram(session: NoyaAPI.Session) {
   return firstLetter;
 }
 
+function openInNewTab(url: string) {
+  window?.open(url, '_blank')?.focus();
+}
+
 export function Toolbar({ children, left, right }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
@@ -64,6 +69,7 @@ export function Toolbar({ children, left, right }: Props) {
   const userMenuItems = createSectionedMenu(
     [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
     [
+      { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
       { title: 'Contact us', value: 'contact', icon: <EnvelopeClosedIcon /> },
       { title: 'Get help', value: 'help', icon: <QuestionMarkCircledIcon /> },
@@ -114,15 +120,22 @@ export function Toolbar({ children, left, right }: Props) {
                   window.location.href = `${NOYA_HOST}/api/auth/signout`;
                   return;
                 case 'discord':
-                  window.location.href = 'https://discord.gg/NPGAwyEBJw';
+                  openInNewTab('https://discord.gg/NPGAwyEBJw');
                   return;
                 case 'contact':
-                  window.location.href =
-                    'https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd';
+                  openInNewTab(
+                    'https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd',
+                  );
+                  return;
+                case 'introVideo':
+                  openInNewTab(
+                    'https://vimeo.com/noyasoftware/noya-intro-video',
+                  );
                   return;
                 case 'help':
-                  window.location.href =
-                    'https://noyasoftware.notion.site/Noya-Help-4344e26dc3394c7195305b15b050e616';
+                  openInNewTab(
+                    'https://noyasoftware.notion.site/Noya-Help-4344e26dc3394c7195305b15b050e616',
+                  );
                   return;
               }
             }}
