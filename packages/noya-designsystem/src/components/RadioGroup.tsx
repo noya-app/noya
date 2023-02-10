@@ -100,8 +100,11 @@ const RadioGroupContext = createContext<RadioGroupContextValue>({
 function ToggleGroupRoot({
   onValueChange,
   variant,
+  allowEmpty,
   ...props
-}: Omit<ComponentProps<typeof StyledRoot>, 'type'>) {
+}: Omit<ComponentProps<typeof StyledRoot>, 'type'> & {
+  allowEmpty?: boolean;
+}) {
   const contextValue = useMemo(() => ({ variant }), [variant]);
 
   return (
@@ -111,10 +114,10 @@ function ToggleGroupRoot({
         type="single"
         onValueChange={useCallback(
           (value: string) => {
-            if (!value) return;
+            if (!allowEmpty && !value) return;
             onValueChange?.(value);
           },
-          [onValueChange],
+          [allowEmpty, onValueChange],
         )}
       />
     </RadioGroupContext.Provider>

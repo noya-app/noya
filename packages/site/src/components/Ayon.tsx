@@ -187,7 +187,7 @@ function Workspace({
       ? 'insert'
       : interactionState.type === 'selectionMode'
       ? 'region'
-      : 'none';
+      : '';
 
   useEffect(() => {
     setLeftToolbar(
@@ -195,7 +195,13 @@ function Workspace({
         <RadioGroup.Root
           value={cursorType}
           variant="secondary"
+          allowEmpty
           onValueChange={(value: typeof cursorType) => {
+            if (!value) {
+              dispatch(['interaction', ['reset']]);
+              return;
+            }
+
             switch (value) {
               case 'region': {
                 dispatch(['interaction', ['enableSelectionMode', 'mouse']]);
