@@ -92,6 +92,7 @@ function Workspace({
   onChangeDocument,
   name,
   onChangeName,
+  onDuplicate,
   viewType: initialViewType = persistedViewType,
   padding,
   canvasRendererType,
@@ -100,6 +101,7 @@ function Workspace({
   fileId: string;
   initialDocument: SketchFile;
   onChangeDocument?: (document: SketchFile) => void;
+  onDuplicate?: () => void;
   name: string;
   onChangeName?: (name: string) => void;
   viewType?: ViewType;
@@ -410,12 +412,13 @@ function Workspace({
             <ProjectMenu
               name={name}
               onChangeName={onChangeName || (() => {})}
+              onDuplicate={onDuplicate || (() => {})}
             />
           </Stack.V>
         </Popover>
       </StateProvider>,
     );
-  }, [name, onChangeName, setCenterToolbar, state]);
+  }, [name, onChangeName, onDuplicate, setCenterToolbar, state]);
 
   return (
     <StateProvider state={state} dispatch={dispatch}>

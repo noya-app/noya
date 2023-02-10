@@ -14,9 +14,11 @@ import React from 'react';
 export function ProjectMenu({
   name,
   onChangeName,
+  onDuplicate,
 }: {
   name: string;
   onChangeName: (name: string) => void;
+  onDuplicate: () => void;
 }) {
   const [state, dispatch] = useApplicationState();
 
@@ -95,6 +97,14 @@ export function ProjectMenu({
             </Button>
           </DropdownMenu>
         </InspectorPrimitives.Row>
+      </InspectorPrimitives.Section>
+      <Divider />
+      <InspectorPrimitives.Section>
+        <InspectorPrimitives.SectionHeader>
+          <InspectorPrimitives.Title>Project Actions</InspectorPrimitives.Title>
+        </InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.VerticalSeparator />
+        <Button onClick={onDuplicate}>Duplicate Project</Button>
       </InspectorPrimitives.Section>
     </>
   );

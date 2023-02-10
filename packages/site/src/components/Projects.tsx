@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
+  createSectionedMenu,
   Heading2,
   ListView,
   Small,
@@ -127,17 +128,14 @@ export function Projects() {
                 key={file.id}
                 hovered={hovered === file.id}
                 selected={selected === file.id}
-                menuItems={[
-                  {
-                    title: 'Delete',
-                    value: 'delete',
-                  } as const,
-                  {
-                    title: 'Rename',
-                    value: 'rename',
-                  } as const,
-                ]}
-                onSelectMenuItem={(value) => {
+                menuItems={createSectionedMenu(
+                  [
+                    { title: 'Rename', value: 'rename' } as const,
+                    { title: 'Duplicate', value: 'duplicate' } as const,
+                  ],
+                  [{ title: 'Delete', value: 'delete' } as const],
+                )}
+                onSelectMenuItem={async (value) => {
                   switch (value) {
                     case 'delete':
                       client.files.delete(file.id);
@@ -145,6 +143,25 @@ export function Projects() {
                     case 'rename':
                       setRenaming(file.id);
                       return;
+                    case 'duplicate': {
+                      const newFileId = await client.files.create({
+                        fileId: file.id,
+                      });
+
+                      amplitude.logEvent(
+                        'Project - Created (From Duplication)',
+                      );
+
+                      // Update the name of the new file
+                      const newFile = await client.files.read(newFileId);
+
+                      await client.files.update(newFile.id, {
+                        ...newFile.data,
+                        name: `${file.data.name} Copy`,
+                      });
+
+                      setRenaming(newFile.id);
+                    }
                   }
                 }}
                 onHoverChange={(hovered) => {

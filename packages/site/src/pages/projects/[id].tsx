@@ -46,6 +46,7 @@ function FileTitle({ id }: { id: string }) {
 }
 
 function FileEditor({ id }: { id: string }) {
+  const router = useRouter();
   const client = useNoyaClient();
   const { files } = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
@@ -140,6 +141,12 @@ function FileEditor({ id }: { id: string }) {
     [id, client.files.download],
   );
 
+  const duplicateFile = useCallback(() => {
+    updateDebounced.flush();
+
+    router.push(`/projects/${id}/duplicate`);
+  }, [id, router, updateDebounced]);
+
   if (!initialFile || !cachedFile) return null;
 
   return (
@@ -152,6 +159,7 @@ function FileEditor({ id }: { id: string }) {
       initialDocument={initialFile.data.document}
       onChangeDocument={updateDocument}
       onChangeName={updateName}
+      onDuplicate={duplicateFile}
       downloadFile={downloadFile}
     />
   );
