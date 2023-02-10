@@ -14,7 +14,13 @@ const fileReducer = makeCollectionReducer<NoyaFile>({
 
 export class NoyaClient {
   networkClient: INoyaNetworkClient;
-  files$ = observable<NoyaFile[]>([]);
+  files$ = observable<{
+    files: NoyaFile[];
+    loading: boolean;
+  }>({
+    files: [],
+    loading: true,
+  });
   session$ = observable<NoyaSession | null>(null);
   billing$ = observable<NoyaBilling & { loading: boolean }>({
     availableProducts: [],
@@ -76,7 +82,10 @@ export class NoyaClient {
 
   #fetchFiles = async () => {
     const files = await this.networkClient.files.list();
-    this.files$.set(files);
+    this.files$.set({
+      files,
+      loading: false,
+    });
   };
 
   #createFile = async (
@@ -98,9 +107,11 @@ export class NoyaClient {
     // There might be a race condition here if we try to update a file before
     // it exists on the backend, but that shouldn't happen yet. In that case
     // we'll send the update without a version and it will always win.
-    const version = this.files$.get().find((file) => file.id === id)?.version;
+    const version = this.files$
+      .get()
+      .files.find((file) => file.id === id)?.version;
 
-    this.files$.set((files) =>
+    this.files$.files.set((files) =>
       fileReducer(files, { type: 'update', id, data }),
     );
 
@@ -116,7 +127,7 @@ export class NoyaClient {
   };
 
   #deleteFile: NoyaNetworkClient['files']['delete'] = async (...args) => {
-    this.files$.set((files) =>
+    this.files$.files.set((files) =>
       fileReducer(files, { type: 'delete', id: args[0] }),
     );
 

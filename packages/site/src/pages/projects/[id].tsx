@@ -37,7 +37,7 @@ import { downloadUrl } from '../../utils/download';
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
 function FileTitle({ id }: { id: string }) {
-  const files = useNoyaFiles();
+  const { files } = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
 
   if (!cachedFile) return null;
@@ -47,7 +47,7 @@ function FileTitle({ id }: { id: string }) {
 
 function FileEditor({ id }: { id: string }) {
   const client = useNoyaClient();
-  const files = useNoyaFiles();
+  const { files } = useNoyaFiles();
   const cachedFile = files.find((file) => file.id === id);
   const fileProperties = useMemo(() => {
     if (!cachedFile) return undefined;
@@ -159,7 +159,7 @@ function FileEditor({ id }: { id: string }) {
 
 function Content() {
   const { query } = useRouter();
-  const files = useNoyaFiles();
+  const { files } = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
 
   const overageItems = getSubscriptionOverage(

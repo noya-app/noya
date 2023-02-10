@@ -16,7 +16,7 @@ export default function Project() {
     amplitude.logEvent('App - Projects List - Opened');
   }, []);
 
-  const files = useNoyaFiles();
+  const { files } = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
 
   const overageItems = getSubscriptionOverage(

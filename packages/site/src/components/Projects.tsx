@@ -19,11 +19,11 @@ const welcomeCardStorageKey = 'noya-ayon-welcome-card-dismissed';
 
 export function Projects() {
   const { push } = useRouter();
-  const files = useNoyaFiles();
+  const { files, loading } = useNoyaFiles();
   const client = useNoyaClient();
 
   const [showWelcomeCard, _setShowWelcomeCard] = useState(false);
-  const hasFiles = files.length > 0;
+  const hasFiles = !loading && files.length > 0;
 
   // Show welcome card in a useEffect so it doesn't flash due to SSR
   useEffect(() => {

@@ -34,7 +34,7 @@ export default function Account() {
     useNoyaBilling();
   const session = useNoyaSession();
   const theme = useDesignSystemTheme();
-  const files = useNoyaFiles();
+  const { files } = useNoyaFiles();
   const overageItems = getSubscriptionOverage(
     files,
     subscriptions,

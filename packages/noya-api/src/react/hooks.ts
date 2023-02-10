@@ -1,9 +1,8 @@
 import { useSelector } from '@legendapp/state/react';
-import { NoyaFileList } from '../core/schema';
 import { useNoyaClient, useOptionalNoyaClient } from './context';
 
 export function useNoyaFiles() {
-  const files = useSelector(useNoyaClient().files$) as NoyaFileList;
+  const files = useSelector(useNoyaClient().files$);
   return files;
 }
 
