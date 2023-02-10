@@ -23,13 +23,13 @@ export function Projects() {
   const client = useNoyaClient();
 
   const [showWelcomeCard, _setShowWelcomeCard] = useState(false);
-  const hasFiles = !loading && files.length > 0;
+  const hasFiles = files.length > 0;
 
   // Show welcome card in a useEffect so it doesn't flash due to SSR
   useEffect(() => {
     const dismissed = !!localStorage.getItem(welcomeCardStorageKey);
-    _setShowWelcomeCard(!dismissed && !hasFiles);
-  }, [hasFiles]);
+    _setShowWelcomeCard(!dismissed && !loading && !hasFiles);
+  }, [hasFiles, loading]);
 
   const setShowWelcomeCard = (value: boolean) => {
     if (!value) {
