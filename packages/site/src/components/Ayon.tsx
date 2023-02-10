@@ -13,6 +13,7 @@ import {
   Spacer,
   Stack,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { toZipFile } from 'noya-filesystem';
 import { Size } from 'noya-geometry';
 import {
@@ -175,7 +176,7 @@ function Workspace({
     onChangeDocument?.(documentWithoutForeignSymbols);
   }, [state.history.present.sketch, onChangeDocument]);
 
-  const artboard = Layers.find(
+  const artboard = Layers.find<Sketch.Artboard>(
     Selectors.getCurrentPage(state.history.present),
     Layers.isArtboard,
   );
@@ -334,7 +335,7 @@ function Workspace({
                 amplitude.logEvent('Project - Export - Exported React Code');
                 const { compile } = await import('noya-compiler');
                 const result = compile({
-                  state: state.history.present,
+                  artboard,
                   Blocks,
                   Components,
                 });

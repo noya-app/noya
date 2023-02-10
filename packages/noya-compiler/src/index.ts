@@ -1,10 +1,5 @@
 import Sketch from 'noya-file-format';
-import {
-  ApplicationState,
-  BlockDefinition,
-  Layers,
-  Selectors,
-} from 'noya-state';
+import { BlockDefinition, Layers } from 'noya-state';
 import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
@@ -90,7 +85,7 @@ export function createElementCode({
 }
 
 export interface CompilerConfiguration {
-  state: ApplicationState;
+  artboard: Sketch.Artboard;
   Blocks: Record<string, BlockDefinition>;
   Components: Map<unknown, string>;
 }
@@ -156,9 +151,7 @@ export function createElement(
 }
 
 export function compile(configuration: CompilerConfiguration) {
-  const { state } = configuration;
-  const page = Selectors.getCurrentPage(state);
-  const artboard = page.layers[0] as Sketch.Artboard;
+  const { artboard } = configuration;
 
   const components = artboard.layers
     .filter(Layers.isSymbolInstance)
@@ -190,13 +183,14 @@ function Frame(props: React.ComponentProps<typeof Box>) {
       false,
       undefined,
       ts.factory.createNamedImports(
-        unique(
-          flat(fakeRoot, { getChildren })
+        unique([
+          'Box',
+          ...flat(fakeRoot, { getChildren })
             .map((element) =>
               typeof element === 'string' ? 'Frame' : element.name,
             )
             .filter((name) => name !== 'Frame'),
-        ).map((name) =>
+        ]).map((name) =>
           ts.factory.createImportSpecifier(
             false,
             undefined,

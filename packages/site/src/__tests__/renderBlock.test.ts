@@ -1,6 +1,12 @@
 import * as ChakraUI from '@chakra-ui/react';
 import { readFileSync } from 'fs';
-import { createElement, createElementCode, format, print } from 'noya-compiler';
+import {
+  compile,
+  createElement,
+  createElementCode,
+  format,
+  print,
+} from 'noya-compiler';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import path from 'path';
@@ -52,5 +58,24 @@ describe('text', () => {
     });
 
     expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('generate file', () => {
+  test('base', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        width: 100,
+        height: 100,
+      }),
+    });
+
+    expect(
+      compile({
+        artboard,
+        Blocks,
+        Components,
+      }),
+    ).toMatchSnapshot();
   });
 });
