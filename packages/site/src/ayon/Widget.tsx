@@ -183,7 +183,9 @@ export function Widget({
   const showWidgetUI =
     isPrimarySelected &&
     !isContextMenuOpen &&
-    state.interactionState.type !== 'drawing';
+    state.interactionState.type !== 'drawing' &&
+    state.interactionState.type !== 'marquee' &&
+    state.selectedLayerIds.length === 1;
 
   return (
     <WidgetContainer
