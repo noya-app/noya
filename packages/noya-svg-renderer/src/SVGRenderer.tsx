@@ -130,6 +130,9 @@ const Text: ComponentsContextValue['Text'] = memo(({ rect, paragraph }) => {
 
   const shapedLines = useMemo(() => paragraph.getShapedLines(), [paragraph]);
 
+  const inputColor = paragraph._parts?.[0].style?.color;
+  const color = inputColor ? stringifyColor(inputColor as any) : 'white';
+
   return (
     <g transform={transform}>
       {shapedLines.map((shapedLine, s) =>
@@ -153,7 +156,7 @@ const Text: ComponentsContextValue['Text'] = memo(({ rect, paragraph }) => {
           return info.map(([position, string], i) => (
             <text
               fontSize={run.size}
-              fill="white"
+              fill={color}
               key={`${s}-${r}-${i}`}
               x={position.x}
               y={shapedLine.top + position.y}

@@ -48,7 +48,11 @@ import { JSParagraphBuilder } from './JSParagraphBuilder';
 import { JSShaderFactory } from './JSShaderFactory';
 import parseColor from './parseColor';
 
-class JSParagraphStyle implements ParagraphStyle {}
+class JSParagraphStyle implements ParagraphStyle {
+  constructor(ps: ParagraphStyle) {
+    Object.assign(this, ps);
+  }
+}
 
 class JSTextStyle implements TextStyle {}
 

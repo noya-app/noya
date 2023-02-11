@@ -45,7 +45,7 @@ export function marqueeInteraction({
           groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
           artboards: 'childrenOnly',
           includeLockedLayers: false,
-          includePartiallyContainedLayers: origin.x > current.x,
+          includePartiallyContainedLayers: origin.x < current.x,
         });
 
         selectLayer(layerIds);
@@ -75,7 +75,7 @@ export function marqueeInteraction({
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'childrenOnly',
             includeLockedLayers: false,
-            includePartiallyContainedLayers: origin.x > current.x,
+            includePartiallyContainedLayers: origin.x < current.x,
           });
 
           reset();

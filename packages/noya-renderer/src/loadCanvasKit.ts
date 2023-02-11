@@ -15,6 +15,12 @@ declare module 'canvaskit' {
     _alpha?: number;
     _shader?: Shader;
   }
+  interface Paragraph {
+    _parts?: {
+      text: string;
+      style?: TextStyle;
+    }[];
+  }
 }
 
 // Using `var` avoids this being uninitialized, maybe due to circular dependencies

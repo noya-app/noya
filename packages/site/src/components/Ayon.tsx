@@ -185,9 +185,10 @@ function Workspace({
 
   const interactionState = state.history.present.interactionState;
   const cursorType =
-    interactionState.type === 'insert'
+    interactionState.type === 'insert' || interactionState.type === 'drawing'
       ? 'insert'
-      : interactionState.type === 'selectionMode'
+      : interactionState.type === 'selectionMode' ||
+        interactionState.type === 'marquee'
       ? 'region'
       : '';
 

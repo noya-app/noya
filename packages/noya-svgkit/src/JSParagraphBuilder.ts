@@ -39,7 +39,9 @@ export class JSParagraphBuilder
   }
 
   build(): Paragraph {
-    return new JSParagraph();
+    const paragraph = new JSParagraph();
+    paragraph._parts = this._parts;
+    return paragraph;
   }
 
   pop(): void {
@@ -56,7 +58,7 @@ export class JSParagraphBuilder
 
   static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
     const builder = new JSParagraphBuilder();
-    builder.pushStyle(style);
+    builder.pushStyle(style.textStyle ?? {});
     return builder;
   }
 
@@ -64,7 +66,9 @@ export class JSParagraphBuilder
     style: ParagraphStyle,
     fontSrc: TypefaceFontProvider,
   ): ParagraphBuilder {
-    return new JSParagraphBuilder();
+    const builder = new JSParagraphBuilder();
+    builder.pushStyle(style.textStyle ?? {});
+    return builder;
   }
 
   static ShapeText(
