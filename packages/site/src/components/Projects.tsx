@@ -10,13 +10,19 @@ import {
   Spacer,
   Stack,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { resize } from 'noya-geometry';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
+import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/createAyonDocument';
+import { NOYA_HOST } from '../utils/noyaClient';
 import { Card } from './Subscription';
 
 const welcomeCardStorageKey = 'noya-ayon-welcome-card-dismissed';
+
+const thumbnailSize = { width: 64, height: 64 };
 
 export function Projects() {
   const { push } = useRouter();
@@ -120,9 +126,19 @@ export function Projects() {
           <Spacer.Vertical size={44} />
         </>
       )}
-      <Stack.V margin={'0 -12px'}>
-        <ListView.Root>
+      <Stack.V>
+        <ListView.Root divider>
           {sortedFiles.map((file) => {
+            const artboard = Layers.find<Sketch.Artboard>(
+              file.data.document.pages[0],
+              Layers.isArtboard,
+            );
+            const scaledThumbnailSize = artboard
+              ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
+              : thumbnailSize;
+            scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
+            scaledThumbnailSize.height = Math.round(scaledThumbnailSize.height);
+
             return (
               <ListView.Row
                 key={file.id}
@@ -174,34 +190,53 @@ export function Projects() {
                   setSelected(open ? file.id : undefined);
                 }}
               >
-                <Stack.H padding={'8px 0'} alignItems="center" flex="1">
-                  <DashboardIcon />
-                  <Spacer.Horizontal size={10} />
-                  {renaming === file.id ? (
-                    <ListView.EditableRowTitle
-                      value={file.data.name}
-                      autoFocus
-                      onSubmitEditing={(value) => {
-                        setRenaming(undefined);
+                <Stack.H
+                  gap={12}
+                  padding={'8px 0'}
+                  margin={'0 -10px'}
+                  alignItems="center"
+                  flex="1"
+                >
+                  <img
+                    src={`${NOYA_HOST}/api/files/${file.id}/thumbnail.png?width=${scaledThumbnailSize.width}&height=${scaledThumbnailSize.height}&deviceScaleFactor=1`}
+                    alt=""
+                    style={{
+                      ...thumbnailSize,
+                      objectFit: 'contain',
+                      background: '#eee',
+                    }}
+                  />
+                  <Stack.V flex="1">
+                    <Stack.H alignItems="center">
+                      <DashboardIcon />
+                      <Spacer.Horizontal size={10} />
+                      {renaming === file.id ? (
+                        <ListView.EditableRowTitle
+                          value={file.data.name}
+                          autoFocus
+                          onSubmitEditing={(value) => {
+                            setRenaming(undefined);
 
-                        if (value === file.data.name) return;
+                            if (value === file.data.name) return;
 
-                        client.files.update(file.id, {
-                          ...file.data,
-                          name: value,
-                        });
-                      }}
-                    />
-                  ) : (
-                    <ListView.RowTitle>{file.data.name}</ListView.RowTitle>
-                  )}
-                  <Spacer.Horizontal size={10} />
-                  <Small>
-                    {'edited '}
-                    {formatDistance(parseISO(file.updatedAt), new Date(), {
-                      addSuffix: true,
-                    }).replace('less than a minute ago', 'just now')}
-                  </Small>
+                            client.files.update(file.id, {
+                              ...file.data,
+                              name: value,
+                            });
+                          }}
+                        />
+                      ) : (
+                        <ListView.RowTitle>{file.data.name}</ListView.RowTitle>
+                      )}
+                      <Spacer.Horizontal size={10} />
+                      <Small color="textMuted">
+                        {'Edited '}
+                        {formatDistance(parseISO(file.updatedAt), new Date(), {
+                          addSuffix: true,
+                        }).replace('less than a minute ago', 'just now')}
+                      </Small>
+                    </Stack.H>
+                  </Stack.V>
                 </Stack.H>
               </ListView.Row>
             );

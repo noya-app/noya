@@ -42,6 +42,7 @@ type ListRowContextValue = {
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
+  divider: boolean;
   padded: boolean;
   indentation: number;
   pressEventName: PressEventName;
@@ -52,6 +53,7 @@ const ListRowContext = createContext<ListRowContextValue>({
   selectedPosition: 'only',
   sortable: false,
   expandable: true,
+  divider: true,
   padded: false,
   indentation: 12,
   pressEventName: 'onClick',
@@ -128,6 +130,7 @@ const RowContainer = styled.div<{
   disabled: boolean;
   hovered: boolean;
   padded: boolean;
+  divider: boolean;
   isSectionHeader: boolean;
   showsActiveState: boolean;
 }>(
@@ -139,6 +142,7 @@ const RowContainer = styled.div<{
     disabled,
     hovered,
     padded,
+    divider,
     isSectionHeader,
     showsActiveState,
   }) => {
@@ -196,6 +200,9 @@ const RowContainer = styled.div<{
             ? theme.colors.primaryLight
             : theme.colors.activeBackground,
         },
+      }),
+      ...(divider && {
+        borderBottom: `1px solid ${theme.colors.dividerSubtle}`,
       }),
     };
   },
@@ -280,6 +287,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     indentation,
     pressEventName,
     padded,
+    divider,
   } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
@@ -333,6 +341,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         selectedPosition={selectedPosition}
         showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
+        divider={divider}
         {...renderProps}
         {...mergeEventHandlers(
           { onPointerDown: renderProps.onPointerDown },
@@ -547,6 +556,7 @@ type ListViewRootProps = {
   acceptsDrop?: DropValidator;
   pressEventName?: PressEventName;
   variant?: ListViewVariant;
+  divider?: boolean;
 };
 
 const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
@@ -555,6 +565,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     scrollable = false,
     expandable = true,
     sortable = false,
+    divider = false,
     onMoveItem,
     indentation = 12,
     acceptsDrop,
@@ -650,6 +661,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
         selectedPosition,
         sortable,
         expandable,
+        divider,
         indentation,
         pressEventName,
         padded: variant === 'padded',
@@ -660,6 +672,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       data.length,
       sortable,
       expandable,
+      divider,
       indentation,
       pressEventName,
       variant,
