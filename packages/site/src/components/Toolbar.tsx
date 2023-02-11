@@ -129,7 +129,7 @@ export function Toolbar({ children, left, right }: Props) {
                   return;
                 case 'introVideo':
                   openInNewTab(
-                    'https://vimeo.com/noyasoftware/noya-intro-video',
+                    'https://vimeo.com/noyasoftware/noya-welcome-video',
                   );
                   return;
                 case 'help':
