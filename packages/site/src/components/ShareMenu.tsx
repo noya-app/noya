@@ -58,6 +58,10 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+function getShareUrl(shareId: string) {
+  return `${NOYA_HOST!.replace('www.', '')}/share/${shareId}`;
+}
+
 export function ShareMenu({ fileId }: { fileId: string }) {
   const client = useNoyaClient();
   const [shareState, dispatch] = useReducer(reducer, { loading: false });
@@ -72,7 +76,7 @@ export function ShareMenu({ fileId }: { fileId: string }) {
       if (share && share.viewable) {
         dispatch({
           type: 'startSharing',
-          url: `${NOYA_HOST}/app/share/${share.id}`,
+          url: getShareUrl(share.id),
           duplicable: share.duplicable,
         });
       } else {
@@ -103,13 +107,9 @@ export function ShareMenu({ fileId }: { fileId: string }) {
 
                     amplitude.logEvent('Project - Share - Enabled');
 
-                    const shareUrl = `${NOYA_HOST!.replace('www.', '')}/share/${
-                      share.id
-                    }`;
-
                     dispatch({
                       type: 'startSharing',
-                      url: shareUrl,
+                      url: getShareUrl(share.id),
                       duplicable: share.duplicable,
                     });
                   } else {
