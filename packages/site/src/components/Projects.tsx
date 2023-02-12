@@ -17,10 +17,9 @@ import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/createAyonDocument';
+import { ClientStorage } from '../utils/clientStorage';
 import { NOYA_HOST } from '../utils/noyaClient';
 import { Card } from './Subscription';
-
-const welcomeCardStorageKey = 'noya-ayon-welcome-card-dismissed';
 
 const thumbnailSize = { width: 64, height: 64 };
 
@@ -34,13 +33,13 @@ export function Projects() {
 
   // Show welcome card in a useEffect so it doesn't flash due to SSR
   useEffect(() => {
-    const dismissed = !!localStorage.getItem(welcomeCardStorageKey);
+    const dismissed = !!ClientStorage.getItem('welcomeCardDismissed');
     _setShowWelcomeCard(!dismissed && !loading && !hasFiles);
   }, [hasFiles, loading]);
 
   const setShowWelcomeCard = (value: boolean) => {
     if (!value) {
-      localStorage.setItem(welcomeCardStorageKey, 'true');
+      ClientStorage.setItem('welcomeCardDismissed', 'true');
     }
 
     _setShowWelcomeCard(value);

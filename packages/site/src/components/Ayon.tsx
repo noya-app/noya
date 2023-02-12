@@ -70,6 +70,7 @@ import {
 } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
+import { ClientStorage, usePersistentState } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
@@ -84,9 +85,7 @@ Object.entries(ChakraUI).forEach(([key, value]) => {
 export type ExportType = NoyaAPI.ExportFormat | 'figma' | 'sketch' | 'react';
 
 const persistedViewType =
-  (typeof localStorage !== 'undefined' &&
-    (localStorage.getItem('noya-ayon-preferred-view-type') as ViewType)) ||
-  'split';
+  (ClientStorage.getItem('preferredViewType') as ViewType) || 'split';
 
 function Workspace({
   fileId,
@@ -129,9 +128,7 @@ function Workspace({
           break;
       }
 
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('noya-ayon-preferred-view-type', type);
-      }
+      ClientStorage.setItem('preferredViewType', type);
 
       setViewTypeMemory(type);
     },
@@ -202,6 +199,10 @@ function Workspace({
       ? 'region'
       : 'pointer';
 
+  const [insertBlockOnboardingDismissed, setInsertBlockOnboardingDismissed] =
+    usePersistentState('insertBlockOnboardingDismissed');
+  const showInsertBlockOnboarding = !insertBlockOnboardingDismissed;
+
   useEffect(() => {
     setLeftToolbar(
       <Stack.H alignSelf={'center'} width={99}>
@@ -221,6 +222,7 @@ function Workspace({
                 break;
               }
               case 'insert': {
+                setInsertBlockOnboardingDismissed('true');
                 dispatch([
                   'interaction',
                   ['insert', { symbolId: boxSymbolId }, 'mouse'],
@@ -241,24 +243,73 @@ function Workspace({
           >
             <CursorArrowIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item
-            value="insert"
-            tooltip={
-              <VStack alignItems="start">
-                <Small fontWeight={600}>Insert Tool</Small>
-                <Small>Click and drag to draw a block.</Small>
-                <Small>
-                  Hold{' '}
-                  <Chip variant="secondary">
-                    {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
-                  </Chip>{' '}
-                  to activate.
-                </Small>
-              </VStack>
+          <Popover
+            sideOffset={0}
+            open={showInsertBlockOnboarding}
+            onOpenChange={(value) => {
+              if (!value) {
+                setInsertBlockOnboardingDismissed('true');
+              }
+            }}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+            }}
+            onInteractOutside={(event) => {
+              event.preventDefault();
+            }}
+            onPointerDownOutside={(event) => {
+              event.preventDefault();
+            }}
+            onFocusOutside={(event) => {
+              event.preventDefault();
+            }}
+            closable
+            trigger={
+              <RadioGroup.Item
+                value="insert"
+                tooltip={
+                  !showInsertBlockOnboarding && (
+                    <VStack alignItems="start">
+                      <Small fontWeight={600}>Insert Tool</Small>
+                      <Small>Click and drag to draw a block.</Small>
+                      <Small>
+                        Hold{' '}
+                        <Chip variant="secondary">
+                          {getCurrentPlatform(navigator) === 'mac'
+                            ? 'Cmd ⌘'
+                            : 'Ctrl'}
+                        </Chip>{' '}
+                        to activate.
+                      </Small>
+                    </VStack>
+                  )
+                }
+              >
+                <PlusIcon />
+              </RadioGroup.Item>
             }
           >
-            <PlusIcon />
-          </RadioGroup.Item>
+            <Stack.V width={300} padding={10} gap={8} alignItems="start">
+              <Small fontWeight={'bold'}>Step 1: Insert a block</Small>
+              <Small>
+                Use the insert tool{' '}
+                <PlusIcon
+                  style={{
+                    display: 'inline-block',
+                    verticalAlign: 'text-bottom',
+                    scale: 0.85,
+                  }}
+                />{' '}
+                to draw a block on the left canvas.
+              </Small>
+              <Small>
+                You can activate this tool at any time by holding{' '}
+                <Chip variant="secondary">
+                  {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
+                </Chip>
+              </Small>
+            </Stack.V>
+          </Popover>
           <RadioGroup.Item
             value="region"
             tooltip={
@@ -276,7 +327,13 @@ function Workspace({
         </RadioGroup.Root>
       </Stack.H>,
     );
-  }, [cursorType, setLeftToolbar]);
+  }, [
+    cursorType,
+    insertBlockOnboardingDismissed,
+    setInsertBlockOnboardingDismissed,
+    setLeftToolbar,
+    showInsertBlockOnboarding,
+  ]);
 
   useLayoutEffect(() => {
     setRightToolbar(

@@ -157,7 +157,11 @@ function DropdownMenuRoot<T extends string>({
     <RootComponent onOpenChange={onOpenChange}>
       <TriggerComponent asChild>{children}</TriggerComponent>
       <RadixDropdownMenu.Portal>
-        <ContentComponent sideOffset={4} style={contentStyle}>
+        <ContentComponent
+          sideOffset={4}
+          style={contentStyle}
+          collisionPadding={8}
+        >
           {items.map((item, index) =>
             item === SEPARATOR_ITEM ? (
               <SeparatorElement key={index} />
