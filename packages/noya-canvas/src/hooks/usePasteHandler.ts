@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
+import { elementShouldHandleOwnShortcut } from 'noya-keymap';
 import { isSupportedFile, TypedFile } from 'noya-react-utils';
 import { ClipboardUtils } from 'noya-utils';
 import { useEffect } from 'react';
@@ -16,12 +16,7 @@ export function usePasteHandler<T extends string>({
 }) {
   useEffect(() => {
     const handler = (event: ClipboardEvent) => {
-      if (
-        (event.target instanceof HTMLInputElement ||
-          event.target instanceof HTMLTextAreaElement) &&
-        !event.target.classList.contains(IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS)
-      )
-        return;
+      if (elementShouldHandleOwnShortcut(event.target)) return;
 
       const encodedHTML = event.clipboardData?.getData('text/html');
       const decodedData = encodedHTML

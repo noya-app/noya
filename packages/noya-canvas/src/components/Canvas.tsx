@@ -28,7 +28,7 @@ import {
   Point,
   Size,
 } from 'noya-geometry';
-import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
+import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
@@ -1013,7 +1013,7 @@ export const Canvas = memo(function Canvas({
         >
           <HiddenInputTarget
             id="hidden-canvas-input"
-            className={IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS}
+            className={KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS}
             ref={inputRef}
             type="text"
           />
