@@ -16,6 +16,7 @@ import {
   DiscordLogoIcon,
   EnvelopeClosedIcon,
   ExitIcon,
+  InfoCircledIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
   VideoIcon,
@@ -72,6 +73,11 @@ export function Toolbar({ children, left, right }: Props) {
       { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
       { title: 'Contact us', value: 'contact', icon: <EnvelopeClosedIcon /> },
+      {
+        title: 'Report an issue',
+        value: 'reportIssue',
+        icon: <InfoCircledIcon />,
+      },
       { title: 'Get help', value: 'help', icon: <QuestionMarkCircledIcon /> },
     ],
     [{ title: 'Sign out', value: 'signOut', icon: <ExitIcon /> }],
@@ -136,6 +142,9 @@ export function Toolbar({ children, left, right }: Props) {
                   openInNewTab(
                     'https://noyasoftware.notion.site/Noya-Help-4344e26dc3394c7195305b15b050e616',
                   );
+                  return;
+                case 'reportIssue':
+                  openInNewTab('https://airtable.com/shrtIsWGdVjSPZSbo');
                   return;
               }
             }}

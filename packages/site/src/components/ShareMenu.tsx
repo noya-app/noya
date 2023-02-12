@@ -103,9 +103,13 @@ export function ShareMenu({ fileId }: { fileId: string }) {
 
                     amplitude.logEvent('Project - Share - Enabled');
 
+                    const shareUrl = `${NOYA_HOST!.replace('www.', '')}/share/${
+                      share.id
+                    }`;
+
                     dispatch({
                       type: 'startSharing',
-                      url: `${NOYA_HOST}/app/share/${share.id}`,
+                      url: shareUrl,
                       duplicable: share.duplicable,
                     });
                   } else {
