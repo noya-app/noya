@@ -102,6 +102,7 @@ export type InteractionAction =
       options?: ScalingOptions,
       shapeType?: DrawableLayerType,
     ]
+  | [type: 'maybeMarquee', point: Point, method: InteractionMethod]
   | [type: 'startMarquee', point: Point, selectedIdsSnapshot: string[]]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction?: CompassDirection]
@@ -167,6 +168,11 @@ export type InteractionState =
     }
   | {
       type: 'selectionMode';
+      method: InteractionMethod;
+    }
+  | {
+      type: 'maybeMarquee';
+      origin: Point;
       method: InteractionMethod;
     }
   | {
@@ -281,6 +287,15 @@ export function interactionReducer(
     case 'insertingSymbol': {
       const [, symbolID, point] = action;
       return { type: 'insertingSymbol', symbolID, point };
+    }
+    case 'maybeMarquee': {
+      const [, origin, method] = action;
+
+      return {
+        type: 'maybeMarquee',
+        origin,
+        method,
+      };
     }
     case 'startMarquee': {
       const [, point, selectedIdsSnapshot] = action;

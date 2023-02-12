@@ -20,6 +20,7 @@ import {
   BoxIcon,
   ChevronDownIcon,
   CodeIcon,
+  CursorArrowIcon,
   FigmaLogoIcon,
   FileIcon,
   GroupIcon,
@@ -185,22 +186,29 @@ function Workspace({
 
   const interactionState = state.history.present.interactionState;
   const cursorType =
-    interactionState.type === 'insert' || interactionState.type === 'drawing'
+    interactionState.type === 'insert' ||
+    interactionState.type === 'drawing' ||
+    (interactionState.type === 'editingBlock' &&
+      interactionState.cursor === 'crosshair')
       ? 'insert'
       : interactionState.type === 'selectionMode' ||
-        interactionState.type === 'marquee'
+        interactionState.type === 'marquee' ||
+        (interactionState.type === 'maybeMarquee' &&
+          interactionState.method === 'mouse') ||
+        (interactionState.type === 'editingBlock' &&
+          interactionState.cursor === 'cell')
       ? 'region'
-      : '';
+      : 'pointer';
 
   useEffect(() => {
     setLeftToolbar(
-      <Stack.H alignSelf={'center'} width={60}>
+      <Stack.H alignSelf={'center'} width={90}>
         <RadioGroup.Root
           value={cursorType}
           variant="secondary"
           allowEmpty
           onValueChange={(value: typeof cursorType) => {
-            if (!value) {
+            if (!value || value === 'pointer') {
               dispatch(['interaction', ['reset']]);
               return;
             }
@@ -221,11 +229,23 @@ function Workspace({
           }}
         >
           <RadioGroup.Item
+            value="pointer"
+            tooltip={
+              <VStack alignItems="start">
+                <Small fontWeight={600}>Pointer Tool</Small>
+                <Small>Click to select and drag blocks.</Small>
+              </VStack>
+            }
+          >
+            <CursorArrowIcon />
+          </RadioGroup.Item>
+          <RadioGroup.Item
             value="insert"
             tooltip={
               <VStack alignItems="start">
-                <Small fontWeight={600}>Insert over everything</Small>
-                <Small>Hold Cmd/Ctrl to activate</Small>
+                <Small fontWeight={600}>Insert Tool</Small>
+                <Small>Click and drag to draw a block.</Small>
+                <Small>Hold Cmd/Ctrl to activate.</Small>
               </VStack>
             }
           >
@@ -235,8 +255,9 @@ function Workspace({
             value="region"
             tooltip={
               <VStack alignItems="start">
-                <Small fontWeight={600}>Select region</Small>
-                <Small>Hold Shift to activate</Small>
+                <Small fontWeight={600}>Region Tool</Small>
+                <Small>Click and drag to draw a region.</Small>
+                <Small>Hold Shift to activate.</Small>
               </VStack>
             }
           >

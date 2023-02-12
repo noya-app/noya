@@ -274,9 +274,13 @@ export const BlockEditor = forwardRef(function BlockEditor(
         onFocusCanvas();
       };
 
-      handleKeyboardEvent(event.nativeEvent, getCurrentPlatform(), {
+      handleKeyboardEvent(event.nativeEvent, getCurrentPlatform(navigator), {
         Shift: () => {
           dispatch('interaction', ['setCursor', 'cell']);
+          return FALLTHROUGH;
+        },
+        Mod: () => {
+          dispatch('interaction', ['setCursor', 'crosshair']);
           return FALLTHROUGH;
         },
         Escape: () => {

@@ -258,8 +258,9 @@ export const Content = memo(function Content({
               Interactions.createInsertMode({ inferBlockType }),
               Interactions.selection,
               Interactions.move,
+              Interactions.marquee,
               Interactions.createDrawing({
-                allowDrawingFromNoneState: true,
+                allowDrawingFromNoneState: false,
                 hasMovementThreshold: true,
                 inferBlockType,
               }),
