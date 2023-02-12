@@ -262,6 +262,16 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
   });
 
+  const [isMouseWithinEditor, setIsMouseWithinEditor] = useState(false);
+
+  const onMouseEnter = useCallback(() => {
+    setIsMouseWithinEditor(true);
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    setIsMouseWithinEditor(false);
+  }, []);
+
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       const handleDelete = () => {
@@ -275,14 +285,18 @@ export const BlockEditor = forwardRef(function BlockEditor(
       };
 
       handleKeyboardEvent(event.nativeEvent, getCurrentPlatform(navigator), {
-        Shift: () => {
-          dispatch('interaction', ['setCursor', 'cell']);
-          return FALLTHROUGH;
-        },
-        Mod: () => {
-          dispatch('interaction', ['setCursor', 'crosshair']);
-          return FALLTHROUGH;
-        },
+        // If the mouse is inside the editor, we'll always be showing the text cursor anyway,
+        // so it's just distracting to change this (which updates the tool icons in the UI)
+        ...(!isMouseWithinEditor && {
+          Shift: () => {
+            dispatch('interaction', ['setCursor', 'cell']);
+            return FALLTHROUGH;
+          },
+          Mod: () => {
+            dispatch('interaction', ['setCursor', 'crosshair']);
+            return FALLTHROUGH;
+          },
+        }),
         Escape: () => {
           dispatch('interaction', ['reset']);
           dispatch('selectLayer', []);
@@ -295,6 +309,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
       });
     },
     [
+      isMouseWithinEditor,
       symbolCompletionMenu.keyMap,
       hashCompletionMenu.keyMap,
       blockText,
@@ -302,6 +317,22 @@ export const BlockEditor = forwardRef(function BlockEditor(
       layer.do_objectID,
       onFocusCanvas,
     ],
+  );
+
+  const onKeyUp = useCallback(
+    (event: React.KeyboardEvent) => {
+      handleKeyboardEvent(event.nativeEvent, getCurrentPlatform(navigator), {
+        Shift: () => {
+          dispatch('interaction', ['setCursor', undefined]);
+          return FALLTHROUGH;
+        },
+        Mod: () => {
+          dispatch('interaction', ['setCursor', undefined]);
+          return FALLTHROUGH;
+        },
+      });
+    },
+    [dispatch],
   );
 
   const logEditedTextDebounced = useMemo(
@@ -382,6 +413,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
     >
       <Editable
         onKeyDown={onKeyDown}
+        onKeyUp={onKeyUp}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         style={{ position: 'absolute', inset: 0, padding: 4 }}
         spellCheck={false}
         placeholder={blockDefinition.placeholderText}
