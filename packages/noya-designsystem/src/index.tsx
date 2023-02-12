@@ -16,6 +16,7 @@ declare module 'react' {
 // Components
 export * from './components/Avatar';
 export * from './components/Button';
+export * from './components/Chip';
 export * from './components/ColorPicker';
 export * from './components/ContextMenu';
 export * from './components/Dialog';
@@ -28,7 +29,7 @@ export * from './components/Grid';
 export * from './components/GridView';
 export * from './components/IconButton';
 export * from './components/InputField';
-export { SEPARATOR_ITEM } from './components/internal/Menu';
+export { SEPARATOR_ITEM, KeyboardShortcut } from './components/internal/Menu';
 export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 export * from './components/Label';
 export * from './components/LabeledElementView';

@@ -5,6 +5,7 @@ import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import {
   Button,
+  Chip,
   DropdownMenu,
   Popover,
   RadioGroup,
@@ -30,6 +31,7 @@ import {
   TransformIcon,
   ViewVerticalIcon,
 } from 'noya-icons';
+import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -202,7 +204,7 @@ function Workspace({
 
   useEffect(() => {
     setLeftToolbar(
-      <Stack.H alignSelf={'center'} width={90}>
+      <Stack.H alignSelf={'center'} width={99}>
         <RadioGroup.Root
           value={cursorType}
           variant="secondary"
@@ -245,7 +247,13 @@ function Workspace({
               <VStack alignItems="start">
                 <Small fontWeight={600}>Insert Tool</Small>
                 <Small>Click and drag to draw a block.</Small>
-                <Small>Hold Cmd/Ctrl to activate.</Small>
+                <Small>
+                  Hold{' '}
+                  <Chip variant="secondary">
+                    {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
+                  </Chip>{' '}
+                  to activate.
+                </Small>
               </VStack>
             }
           >
@@ -257,7 +265,9 @@ function Workspace({
               <VStack alignItems="start">
                 <Small fontWeight={600}>Region Tool</Small>
                 <Small>Click and drag to draw a region.</Small>
-                <Small>Hold Shift to activate.</Small>
+                <Small>
+                  Hold <Chip variant="secondary">Shift</Chip> to activate.
+                </Small>
               </VStack>
             }
           >
