@@ -285,6 +285,10 @@ export const Content = memo(function Content({
                       onChangeBlockType={(type: DrawableLayerType) => {
                         if (typeof type === 'string') return;
 
+                        if (onboardingStep === 'insertedBlock') {
+                          setOnboardingStep?.('configuredBlockType');
+                        }
+
                         amplitude.logEvent('Project - Block - Changed Type', {
                           'Old Block Type': layer.symbolID,
                           'New Block Type': type.symbolId,

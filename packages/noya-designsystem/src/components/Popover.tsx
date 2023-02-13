@@ -88,6 +88,11 @@ export function Popover({
           onFocusOutside={onFocusOutside}
           onPointerDownOutside={onPointerDownOutside}
           collisionPadding={8}
+          // Don't propagate pointer down events to the canvas
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
         >
           {children}
           <ArrowElement />
