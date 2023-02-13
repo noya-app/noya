@@ -40,10 +40,12 @@ const PopoverClose = styled(PopoverPrimitive.Close)(({ theme }) => ({
 interface Props
   extends Pick<
     ComponentProps<typeof PopoverPrimitive['Content']>,
-    | 'onPointerDownOutside'
+    | 'onOpenAutoFocus'
     | 'onCloseAutoFocus'
+    | 'onPointerDownOutside'
     | 'onInteractOutside'
     | 'onFocusOutside'
+    | 'side'
   > {
   children: React.ReactNode;
   trigger: React.ReactNode;
@@ -52,6 +54,7 @@ interface Props
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   sideOffset?: number;
+  onClickClose?: () => void;
 }
 
 export function Popover({
@@ -60,12 +63,15 @@ export function Popover({
   variant,
   closable,
   open,
+  side,
   sideOffset = 4,
   onOpenChange,
-  onInteractOutside,
+  onOpenAutoFocus,
   onCloseAutoFocus,
-  onFocusOutside,
   onPointerDownOutside,
+  onInteractOutside,
+  onFocusOutside,
+  onClickClose,
 }: Props) {
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -73,9 +79,10 @@ export function Popover({
       <PopoverPrimitive.Portal>
         <ContentElement
           variant={variant}
-          side="bottom"
+          side={side}
           align="center"
           sideOffset={sideOffset}
+          onOpenAutoFocus={onOpenAutoFocus}
           onCloseAutoFocus={onCloseAutoFocus}
           onInteractOutside={onInteractOutside}
           onFocusOutside={onFocusOutside}
@@ -86,7 +93,7 @@ export function Popover({
           <ArrowElement />
           {closable && (
             <PopoverClose>
-              <IconButton iconName="Cross2Icon" />
+              <IconButton iconName="Cross2Icon" onClick={onClickClose} />
             </PopoverClose>
           )}
         </ContentElement>

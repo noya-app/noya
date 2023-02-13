@@ -17,6 +17,7 @@ import { debounce, isExternalUrl } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
+import { AyonOnboardingStep } from '../utils/clientStorage';
 import { measureImage } from '../utils/measureImage';
 import { Blocks } from './blocks';
 import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbols';
@@ -50,11 +51,15 @@ export const Content = memo(function Content({
   viewType,
   padding,
   canvasRendererType = 'canvas',
+  onboardingStep,
+  setOnboardingStep,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
   padding?: number;
   canvasRendererType?: CanvasRendererType;
+  onboardingStep?: AyonOnboardingStep;
+  setOnboardingStep?: (step: AyonOnboardingStep) => void;
 }) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -273,6 +278,8 @@ export const Content = memo(function Content({
                     <Widget
                       key={layer.do_objectID}
                       layer={layer}
+                      onboardingStep={onboardingStep}
+                      setOnboardingStep={setOnboardingStep}
                       inferBlockTypes={inferBlockTypes}
                       onFocusCanvas={onFocusCanvas}
                       onChangeBlockType={(type: DrawableLayerType) => {

@@ -2,9 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const ClientStorageDefinitions = {
   preferredViewType: 'noya-ayon-preferred-view-type',
-  insertBlockOnboardingDismissed: 'noya-ayon-insert-block-onboarding-dismissed',
+  ayonOnboardingStep: 'noya-ayon-onboarding-step',
   welcomeCardDismissed: 'noya-ayon-welcome-card-dismissed',
 };
+
+export type AyonOnboardingStep =
+  | 'started'
+  | 'insertedBlock'
+  | 'configuredBlockType'
+  | 'configuredBlockText';
 
 type ClientStorageKey = keyof typeof ClientStorageDefinitions;
 
@@ -36,14 +42,15 @@ export const ClientStorage = {
 
 export function usePersistentState<T extends string = string>(
   storageKey: ClientStorageKey,
+  defaultValue?: T,
 ) {
   const [state, setState] = useState<T | null>(null);
 
   useEffect(() => {
     const value = ClientStorage.getItem(storageKey) as T | null;
 
-    setState(value);
-  }, [storageKey]);
+    setState(value ?? defaultValue ?? null);
+  }, [defaultValue, storageKey]);
 
   const setValue = useCallback(
     (newValue: T) => {

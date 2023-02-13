@@ -70,7 +70,7 @@ import {
 } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useProject } from '../contexts/ProjectContext';
-import { ClientStorage, usePersistentState } from '../utils/clientStorage';
+import { ClientStorage } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
@@ -99,6 +99,8 @@ function Workspace({
   padding,
   canvasRendererType,
   downloadFile,
+  onboardingStep,
+  setOnboardingStep,
 }: {
   fileId: string;
   initialDocument: SketchFile;
@@ -110,7 +112,11 @@ function Workspace({
   downloadFile?: (type: NoyaAPI.ExportFormat, size: Size, name: string) => void;
 } & Pick<
   ComponentProps<typeof Content>,
-  'uploadAsset' | 'padding' | 'canvasRendererType'
+  | 'uploadAsset'
+  | 'padding'
+  | 'canvasRendererType'
+  | 'onboardingStep'
+  | 'setOnboardingStep'
 >): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
@@ -183,6 +189,8 @@ function Workspace({
     Layers.isArtboard,
   );
 
+  const showInsertBlockOnboarding = onboardingStep === 'started';
+
   const interactionState = state.history.present.interactionState;
   const cursorType =
     interactionState.type === 'insert' ||
@@ -197,11 +205,10 @@ function Workspace({
         (interactionState.type === 'editingBlock' &&
           interactionState.cursor === 'cell')
       ? 'region'
+      : // Don't show the pointer button active during onboarding, since it's distracting
+      showInsertBlockOnboarding
+      ? ''
       : 'pointer';
-
-  const [insertBlockOnboardingDismissed, setInsertBlockOnboardingDismissed] =
-    usePersistentState('insertBlockOnboardingDismissed');
-  const showInsertBlockOnboarding = !insertBlockOnboardingDismissed;
 
   useEffect(() => {
     setLeftToolbar(
@@ -222,7 +229,7 @@ function Workspace({
                 break;
               }
               case 'insert': {
-                setInsertBlockOnboardingDismissed('true');
+                setOnboardingStep?.('insertedBlock');
                 dispatch([
                   'interaction',
                   ['insert', { symbolId: boxSymbolId }, 'mouse'],
@@ -246,21 +253,10 @@ function Workspace({
           <Popover
             sideOffset={0}
             open={showInsertBlockOnboarding}
-            onOpenChange={(value) => {
-              if (!value) {
-                setInsertBlockOnboardingDismissed('true');
-              }
+            onClickClose={() => {
+              setOnboardingStep?.('insertedBlock');
             }}
             onCloseAutoFocus={(event) => {
-              event.preventDefault();
-            }}
-            onInteractOutside={(event) => {
-              event.preventDefault();
-            }}
-            onPointerDownOutside={(event) => {
-              event.preventDefault();
-            }}
-            onFocusOutside={(event) => {
               event.preventDefault();
             }}
             closable
@@ -289,7 +285,7 @@ function Workspace({
               </RadioGroup.Item>
             }
           >
-            <Stack.V width={300} padding={10} gap={8} alignItems="start">
+            <Stack.V width={300} padding={20} gap={10}>
               <Small fontWeight={'bold'}>Step 1: Insert a block</Small>
               <Small>
                 Use the insert tool{' '}
@@ -329,9 +325,8 @@ function Workspace({
     );
   }, [
     cursorType,
-    insertBlockOnboardingDismissed,
-    setInsertBlockOnboardingDismissed,
     setLeftToolbar,
+    setOnboardingStep,
     showInsertBlockOnboarding,
   ]);
 
@@ -516,6 +511,8 @@ function Workspace({
         uploadAsset={uploadAsset}
         viewType={viewType}
         padding={padding}
+        onboardingStep={onboardingStep}
+        setOnboardingStep={setOnboardingStep}
       />
     </StateProvider>
   );

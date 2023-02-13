@@ -32,6 +32,10 @@ import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
+import {
+  AyonOnboardingStep,
+  usePersistentState,
+} from '../../utils/clientStorage';
 import { downloadUrl } from '../../utils/download';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
@@ -147,6 +151,9 @@ function FileEditor({ id }: { id: string }) {
     router.push(`/projects/${id}/duplicate`);
   }, [id, router, updateDebounced]);
 
+  const [onboardingStep, setOnboardingStep] =
+    usePersistentState<AyonOnboardingStep>('ayonOnboardingStep', 'started');
+
   if (!initialFile || !cachedFile) return null;
 
   return (
@@ -161,6 +168,8 @@ function FileEditor({ id }: { id: string }) {
       onChangeName={updateName}
       onDuplicate={duplicateFile}
       downloadFile={downloadFile}
+      onboardingStep={onboardingStep ?? undefined}
+      setOnboardingStep={setOnboardingStep}
     />
   );
 }
