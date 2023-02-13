@@ -13,6 +13,7 @@ import {
   Small,
   Spacer,
   Stack,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { toZipFile } from 'noya-filesystem';
@@ -62,6 +63,7 @@ import React, {
   useReducer,
   useState,
 } from 'react';
+import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Blocks } from '../ayon/blocks';
 import {
   allAyonSymbols,
@@ -73,6 +75,7 @@ import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
 import { ClientStorage } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
+import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';
@@ -118,6 +121,7 @@ function Workspace({
   const [viewType, setViewTypeMemory] = useState<ViewType>(initialViewType);
   const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
   const { onboardingStep, setOnboardingStep } = useOnboarding();
+  const theme = useDesignSystemTheme();
 
   const setViewType = useCallback(
     (type: ViewType) => {
@@ -300,6 +304,7 @@ function Workspace({
                   {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
                 </Chip>
               </Small>
+              <OnboardingAnimation src={InsertBlockWebp.src} />
             </Stack.V>
           </Popover>
           <RadioGroup.Item
@@ -324,6 +329,8 @@ function Workspace({
     setLeftToolbar,
     setOnboardingStep,
     showInsertBlockOnboarding,
+    theme.colors.divider,
+    theme.colors.dividerStrong,
   ]);
 
   useLayoutEffect(() => {

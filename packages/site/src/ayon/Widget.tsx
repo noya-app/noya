@@ -26,6 +26,9 @@ import {
 import * as React from 'react';
 import { forwardRef, ReactNode, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
+import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
+import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { BlockEditor, IBlockEditor } from './BlockEditor';
 import { imageSymbolId } from './blocks/symbols';
@@ -164,6 +167,7 @@ function BlockTypeOnboardingPopover({
           </Chip>{' '}
           within the block to search block types.
         </Small>
+        <OnboardingAnimation src={ConfigureBlockTypeWebp.src} />
       </Stack.V>
     </Popover>
   );
@@ -206,6 +210,7 @@ function BlockContentOnboardingPopover({
           You can also type hashtag <Chip variant="secondary">#</Chip> commands
           to change the block's style.
         </Small>
+        <OnboardingAnimation src={ConfigureBlockTextWebp.src} />
       </Stack.V>
     </Popover>
   );
