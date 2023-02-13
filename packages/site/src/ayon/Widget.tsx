@@ -355,8 +355,9 @@ export const Widget = forwardRef(function Widget(
     state.interactionState.type !== 'marquee' &&
     state.selectedLayerIds.length === 1;
 
-  const showTypeOnboarding = onboardingStep === 'insertedBlock';
-  const showTextOnboarding = onboardingStep === 'configuredBlockType';
+  const showTypeOnboarding = showWidgetUI && onboardingStep === 'insertedBlock';
+  const showTextOnboarding =
+    showWidgetUI && onboardingStep === 'configuredBlockType';
 
   return (
     <WidgetContainer

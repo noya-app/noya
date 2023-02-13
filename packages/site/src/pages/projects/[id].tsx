@@ -33,6 +33,7 @@ import {
   ProjectProvider,
 } from '../../contexts/ProjectContext';
 import {
+  ayonOnboardingStep,
   AyonOnboardingStep,
   usePersistentState,
 } from '../../utils/clientStorage';
@@ -151,8 +152,22 @@ function FileEditor({ id }: { id: string }) {
     router.push(`/projects/${id}/duplicate`);
   }, [id, router, updateDebounced]);
 
-  const [onboardingStep, setOnboardingStep] =
+  const [onboardingStep, _setOnboardingStep] =
     usePersistentState<AyonOnboardingStep>('ayonOnboardingStep', 'started');
+
+  const setOnboardingStep = useCallback(
+    (step: AyonOnboardingStep) => {
+      if (!onboardingStep) return;
+
+      const currentIndex = ayonOnboardingStep.indexOf(onboardingStep);
+      const nextIndex = ayonOnboardingStep.indexOf(step);
+
+      if (nextIndex > currentIndex) {
+        _setOnboardingStep(step);
+      }
+    },
+    [_setOnboardingStep, onboardingStep],
+  );
 
   if (!initialFile || !cachedFile) return null;
 

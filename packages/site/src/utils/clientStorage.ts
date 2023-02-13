@@ -6,11 +6,14 @@ const ClientStorageDefinitions = {
   welcomeCardDismissed: 'noya-ayon-welcome-card-dismissed',
 };
 
-export type AyonOnboardingStep =
-  | 'started'
-  | 'insertedBlock'
-  | 'configuredBlockType'
-  | 'configuredBlockText';
+export const ayonOnboardingStep = [
+  'started',
+  'insertedBlock',
+  'configuredBlockType',
+  'configuredBlockText',
+] as const;
+
+export type AyonOnboardingStep = typeof ayonOnboardingStep[number];
 
 type ClientStorageKey = keyof typeof ClientStorageDefinitions;
 
