@@ -69,6 +69,7 @@ import {
   boxSymbolId,
 } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
+import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
 import { ClientStorage } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
@@ -99,8 +100,6 @@ function Workspace({
   padding,
   canvasRendererType,
   downloadFile,
-  onboardingStep,
-  setOnboardingStep,
 }: {
   fileId: string;
   initialDocument: SketchFile;
@@ -112,16 +111,13 @@ function Workspace({
   downloadFile?: (type: NoyaAPI.ExportFormat, size: Size, name: string) => void;
 } & Pick<
   ComponentProps<typeof Content>,
-  | 'uploadAsset'
-  | 'padding'
-  | 'canvasRendererType'
-  | 'onboardingStep'
-  | 'setOnboardingStep'
+  'uploadAsset' | 'padding' | 'canvasRendererType'
 >): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const [viewType, setViewTypeMemory] = useState<ViewType>(initialViewType);
   const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
+  const { onboardingStep, setOnboardingStep } = useOnboarding();
 
   const setViewType = useCallback(
     (type: ViewType) => {
@@ -511,8 +507,6 @@ function Workspace({
         uploadAsset={uploadAsset}
         viewType={viewType}
         padding={padding}
-        onboardingStep={onboardingStep}
-        setOnboardingStep={setOnboardingStep}
       />
     </StateProvider>
   );

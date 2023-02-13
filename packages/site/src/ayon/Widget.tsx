@@ -26,7 +26,7 @@ import {
 import * as React from 'react';
 import { forwardRef, ReactNode, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { AyonOnboardingStep } from '../utils/clientStorage';
+import { useOnboarding } from '../contexts/OnboardingContext';
 import { BlockEditor, IBlockEditor } from './BlockEditor';
 import { imageSymbolId } from './blocks/symbols';
 import { Stacking } from './stacking';
@@ -128,11 +128,11 @@ function WidgetContainer({
 
 function BlockTypeOnboardingPopover({
   show,
-  setOnboardingStep,
+  dismiss,
   trigger,
 }: {
   show: boolean;
-  setOnboardingStep?: (step: AyonOnboardingStep) => void;
+  dismiss?: () => void;
   trigger: ReactNode;
 }) {
   if (!show) return <>{trigger}</>;
@@ -150,7 +150,7 @@ function BlockTypeOnboardingPopover({
         event.preventDefault();
       }}
       onClickClose={() => {
-        setOnboardingStep?.('configuredBlockType');
+        dismiss?.();
       }}
     >
       <Stack.V width={300} padding={20} gap={10} alignItems="start">
@@ -171,11 +171,11 @@ function BlockTypeOnboardingPopover({
 
 function BlockContentOnboardingPopover({
   show,
-  setOnboardingStep,
+  dismiss,
   trigger,
 }: {
   show: boolean;
-  setOnboardingStep?: (step: AyonOnboardingStep) => void;
+  dismiss?: () => void;
   trigger: ReactNode;
 }) {
   if (!show) return <>{trigger}</>;
@@ -193,7 +193,7 @@ function BlockContentOnboardingPopover({
         event.preventDefault();
       }}
       onClickClose={() => {
-        setOnboardingStep?.('configuredBlockText');
+        dismiss?.();
       }}
     >
       <Stack.V width={300} padding={20} gap={10} alignItems="start">
@@ -293,8 +293,6 @@ export const Widget = forwardRef(function Widget(
     onChangeBlockText,
     uploadAsset,
     onFocusCanvas,
-    onboardingStep,
-    setOnboardingStep,
   }: {
     layer: Sketch.AnyLayer;
     inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
@@ -302,14 +300,13 @@ export const Widget = forwardRef(function Widget(
     onChangeBlockText: (text: string) => void;
     uploadAsset: (file: ArrayBuffer) => Promise<string>;
     onFocusCanvas: () => void;
-    onboardingStep?: AyonOnboardingStep;
-    setOnboardingStep?: (step: AyonOnboardingStep) => void;
   },
   forwardedRef: React.Ref<HTMLDivElement>,
 ) {
   const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const { isContextMenuOpen } = useWorkspace();
+  const { onboardingStep, setOnboardingStep } = useOnboarding();
   const page = Selectors.getCurrentPage(state);
   const rect = Selectors.getBoundingRect(page, [layer.do_objectID])!;
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
@@ -374,7 +371,7 @@ export const Widget = forwardRef(function Widget(
           <Stack.V gap={6} alignItems="flex-end">
             <BlockTypeOnboardingPopover
               show={showTypeOnboarding}
-              setOnboardingStep={setOnboardingStep}
+              dismiss={() => setOnboardingStep('configuredBlockType')}
               trigger={
                 <ContentElement>
                   <Stack.H
@@ -476,7 +473,7 @@ export const Widget = forwardRef(function Widget(
     >
       <BlockContentOnboardingPopover
         show={showTextOnboarding}
-        setOnboardingStep={setOnboardingStep}
+        dismiss={() => setOnboardingStep('configuredBlockText')}
         trigger={
           <div
             ref={forwardedRef}

@@ -25,6 +25,7 @@ import {
 } from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { useOnboarding } from '../contexts/OnboardingContext';
 import { NOYA_HOST } from '../utils/noyaClient';
 import { Logo } from './Logo';
 
@@ -66,13 +67,7 @@ function openInNewTab(url: string) {
   window?.open(url, '_blank')?.focus();
 }
 
-export function Toolbar({
-  children,
-  left,
-  right,
-  showOnboarding = false,
-  dismissOnboarding,
-}: Props) {
+export function Toolbar({ children, left, right }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
   const router = useRouter();
@@ -92,6 +87,10 @@ export function Toolbar({
     ],
     [{ title: 'Sign out', value: 'signOut', icon: <ExitIcon /> }],
   );
+
+  const { onboardingStep, setOnboardingStep } = useOnboarding();
+  const showOnboarding = onboardingStep === 'configuredBlockText';
+  const dismissOnboarding = () => setOnboardingStep('dismissedSupportInfo');
 
   return (
     <Stack.H
@@ -131,6 +130,11 @@ export function Toolbar({
             trigger={
               <DropdownMenu
                 items={userMenuItems}
+                onOpenChange={(isOpen) => {
+                  if (showOnboarding && isOpen) {
+                    dismissOnboarding();
+                  }
+                }}
                 onSelect={(value) => {
                   switch (value) {
                     case 'account':

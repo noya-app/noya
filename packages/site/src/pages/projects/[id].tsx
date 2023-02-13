@@ -28,15 +28,11 @@ import {
 } from '../../components/Subscription';
 
 import { Toolbar } from '../../components/Toolbar';
+import { OnboardingProvider } from '../../contexts/OnboardingContext';
 import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
-import {
-  ayonOnboardingStep,
-  AyonOnboardingStep,
-  usePersistentState,
-} from '../../utils/clientStorage';
 import { downloadUrl } from '../../utils/download';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
@@ -50,15 +46,7 @@ function FileTitle({ id }: { id: string }) {
   return <ProjectTitle>{cachedFile.data.name}</ProjectTitle>;
 }
 
-function FileEditor({
-  id,
-  onboardingStep,
-  setOnboardingStep,
-}: {
-  id: string;
-  onboardingStep?: AyonOnboardingStep;
-  setOnboardingStep: (step: AyonOnboardingStep) => void;
-}) {
+function FileEditor({ id }: { id: string }) {
   const router = useRouter();
   const client = useNoyaClient();
   const { files } = useNoyaFiles();
@@ -174,8 +162,6 @@ function FileEditor({
       onChangeName={updateName}
       onDuplicate={duplicateFile}
       downloadFile={downloadFile}
-      onboardingStep={onboardingStep}
-      setOnboardingStep={setOnboardingStep}
     />
   );
 }
@@ -207,53 +193,32 @@ function Content() {
     [],
   );
 
-  const [onboardingStep, _setOnboardingStep] =
-    usePersistentState<AyonOnboardingStep>('ayonOnboardingStep', 'started');
-
-  const setOnboardingStep = useCallback(
-    (step: AyonOnboardingStep) => {
-      if (!onboardingStep) return;
-
-      const currentIndex = ayonOnboardingStep.indexOf(onboardingStep);
-      const nextIndex = ayonOnboardingStep.indexOf(step);
-
-      if (nextIndex > currentIndex) {
-        _setOnboardingStep(step);
-      }
-    },
-    [_setOnboardingStep, onboardingStep],
-  );
-
   if (!id) return null;
 
   return (
-    <ProjectProvider value={project}>
-      <Stack.V flex="1" background={theme.colors.canvas.background}>
-        <Toolbar
-          showOnboarding={onboardingStep === 'configuredBlockText'}
-          dismissOnboarding={() => setOnboardingStep('dismissedSupportInfo')}
-          right={rightToolbar}
-          left={
-            overageItem ? (
-              <>
-                <SubscriptionUsageMeterSmall item={overageItem} />
-                {leftToolbar}
-              </>
-            ) : (
-              leftToolbar
-            )
-          }
-        >
-          {centerToolbar || <FileTitle id={id} />}
-        </Toolbar>
-        <Divider variant="strong" />
-        <FileEditor
-          id={id}
-          onboardingStep={onboardingStep ?? undefined}
-          setOnboardingStep={setOnboardingStep}
-        />
-      </Stack.V>
-    </ProjectProvider>
+    <OnboardingProvider>
+      <ProjectProvider value={project}>
+        <Stack.V flex="1" background={theme.colors.canvas.background}>
+          <Toolbar
+            right={rightToolbar}
+            left={
+              overageItem ? (
+                <>
+                  <SubscriptionUsageMeterSmall item={overageItem} />
+                  {leftToolbar}
+                </>
+              ) : (
+                leftToolbar
+              )
+            }
+          >
+            {centerToolbar || <FileTitle id={id} />}
+          </Toolbar>
+          <Divider variant="strong" />
+          <FileEditor id={id} />
+        </Stack.V>
+      </ProjectProvider>
+    </OnboardingProvider>
   );
 }
 
