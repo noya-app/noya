@@ -28,6 +28,7 @@ import {
 } from '../../components/Subscription';
 
 import { Toolbar } from '../../components/Toolbar';
+import { OnboardingProvider } from '../../contexts/OnboardingContext';
 import {
   ProjectContextValue,
   ProjectProvider,
@@ -195,27 +196,29 @@ function Content() {
   if (!id) return null;
 
   return (
-    <ProjectProvider value={project}>
-      <Stack.V flex="1" background={theme.colors.canvas.background}>
-        <Toolbar
-          right={rightToolbar}
-          left={
-            overageItem ? (
-              <>
-                <SubscriptionUsageMeterSmall item={overageItem} />
-                {leftToolbar}
-              </>
-            ) : (
-              leftToolbar
-            )
-          }
-        >
-          {centerToolbar || <FileTitle id={id} />}
-        </Toolbar>
-        <Divider variant="strong" />
-        <FileEditor id={id} />
-      </Stack.V>
-    </ProjectProvider>
+    <OnboardingProvider>
+      <ProjectProvider value={project}>
+        <Stack.V flex="1" background={theme.colors.canvas.background}>
+          <Toolbar
+            right={rightToolbar}
+            left={
+              overageItem ? (
+                <>
+                  <SubscriptionUsageMeterSmall item={overageItem} />
+                  {leftToolbar}
+                </>
+              ) : (
+                leftToolbar
+              )
+            }
+          >
+            {centerToolbar || <FileTitle id={id} />}
+          </Toolbar>
+          <Divider variant="strong" />
+          <FileEditor id={id} />
+        </Stack.V>
+      </ProjectProvider>
+    </OnboardingProvider>
   );
 }
 

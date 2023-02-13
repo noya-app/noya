@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { NoyaAPI } from 'noya-api';
 import {
+  Chip,
   DesignSystemConfigurationProvider,
   Divider,
   lightTheme,
@@ -16,7 +17,6 @@ import { ArrowRightIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { Interstitial } from '../../components/Interstitial';
 import { OptionalNoyaAPIProvider } from '../../components/OptionalNoyaAPIProvider';
 import { Toolbar } from '../../components/Toolbar';
@@ -24,24 +24,6 @@ import { addShareCookie } from '../../utils/cookies';
 import { NOYA_HOST } from '../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
-
-const Chip = styled.span<{ variant: 'primary' | 'secondary' }>(
-  ({ theme, variant }) => ({
-    ...theme.textStyles.label,
-    lineHeight: 'inherit',
-    padding: '4px',
-    borderRadius: 4,
-    userSelect: 'none',
-    ...(variant === 'primary' && {
-      color: theme.colors.primary,
-      background: 'rgb(238, 229, 255)',
-    }),
-    ...(variant === 'secondary' && {
-      color: theme.colors.secondary,
-      background: 'rgb(205, 238, 231)',
-    }),
-  }),
-);
 
 /**
  * This client throws errors if the user isn't logged in

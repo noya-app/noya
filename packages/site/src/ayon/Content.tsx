@@ -17,6 +17,7 @@ import { debounce, isExternalUrl } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
+import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
 import { Blocks } from './blocks';
 import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbols';
@@ -61,6 +62,7 @@ export const Content = memo(function Content({
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
   );
+  const { onboardingStep, setOnboardingStep } = useOnboarding();
   const panelRef = useRef<ImperativePanelHandle>(null);
   const CanvasKit = useCanvasKit();
   const meta = Selectors.getCurrentPageMetadata(state);
@@ -258,8 +260,9 @@ export const Content = memo(function Content({
               Interactions.createInsertMode({ inferBlockType }),
               Interactions.selection,
               Interactions.move,
+              Interactions.marquee,
               Interactions.createDrawing({
-                allowDrawingFromNoneState: true,
+                allowDrawingFromNoneState: false,
                 hasMovementThreshold: true,
                 inferBlockType,
               }),
@@ -276,6 +279,10 @@ export const Content = memo(function Content({
                       onFocusCanvas={onFocusCanvas}
                       onChangeBlockType={(type: DrawableLayerType) => {
                         if (typeof type === 'string') return;
+
+                        if (onboardingStep === 'insertedBlock') {
+                          setOnboardingStep?.('configuredBlockType');
+                        }
 
                         amplitude.logEvent('Project - Block - Changed Type', {
                           'Old Block Type': layer.symbolID,

@@ -109,6 +109,8 @@ export function useInteractionHandlers({
       zoomActualSize: () => dispatch('setZoom*', 1),
       undo: () => dispatch('undo'),
       redo: () => dispatch('redo'),
+      maybeMarquee: (point, method) =>
+        dispatch('interaction', ['maybeMarquee', point, method]),
       startMarquee: (point, selectedIds) =>
         dispatch('interaction', ['startMarquee', point, selectedIds]),
       updateMarquee: (point) =>
@@ -143,8 +145,10 @@ export function useInteractionHandlers({
       enablePanMode: () => dispatch('interaction', ['enablePanMode']),
       hoverHandle: (direction?: CompassDirection) =>
         dispatch('interaction', ['hoverHandle', direction]),
-      startEditingBlock: (layerId) =>
-        dispatch('interaction', ['editingBlock', layerId]),
+      startEditingBlock: (layerId) => {
+        dispatch('selectLayer', [layerId]);
+        dispatch('interaction', ['editingBlock', layerId]);
+      },
       startEditingText: (id: string, range: TextSelectionRange) =>
         dispatch('interaction', ['editingText', id, range]),
       setTextSelection: (range: TextSelectionRange) =>

@@ -2,6 +2,7 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import React, {
   ComponentProps,
   createContext,
+  forwardRef,
   memo,
   ReactNode,
   useCallback,
@@ -68,16 +69,19 @@ interface Props {
   disabled?: boolean;
 }
 
-function ToggleGroupItem({
-  value,
-  tooltip,
-  children,
-  disabled = false,
-}: Props) {
+const ToggleGroupItem = forwardRef(function ToggleGroupItem(
+  { value, tooltip, children, disabled = false }: Props,
+  forwardedRef: React.ForwardedRef<HTMLButtonElement>,
+) {
   const { variant } = useContext(RadioGroupContext);
 
   const itemElement = (
-    <StyledItem value={value} disabled={disabled} variant={variant}>
+    <StyledItem
+      ref={forwardedRef}
+      value={value}
+      disabled={disabled}
+      variant={variant}
+    >
       {children}
     </StyledItem>
   );
@@ -87,7 +91,7 @@ function ToggleGroupItem({
   ) : (
     itemElement
   );
-}
+});
 
 type RadioGroupContextValue = {
   variant: RadioGroupVariant;

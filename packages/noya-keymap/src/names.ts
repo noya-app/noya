@@ -10,31 +10,40 @@ export function parseKeyName(
 
   if (result === 'Space') result = ' ';
 
-  let alt = false;
-  let ctrl = false;
-  let shift = false;
-  let meta = false;
+  const modifiers: KeyModifiers = {
+    altKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    metaKey: false,
+  };
+
+  if (parts.length === 1) {
+    if (/^(cmd|meta)$/i.test(result)) return { key: 'Meta', modifiers };
+    else if (/^alt$/i.test(result)) return { key: 'Alt', modifiers };
+    else if (/^(ctrl|control)$/i.test(result))
+      return { key: 'Ctrl', modifiers };
+    else if (/^shift$/i.test(result)) return { key: 'Shift', modifiers };
+    else if (/^mod$/i.test(result)) {
+      if (platform === 'mac') return { key: 'Meta', modifiers };
+      else return { key: 'Ctrl', modifiers };
+    }
+  }
 
   for (let i = 0; i < parts.length - 1; ++i) {
     const mod = parts[i];
-    if (/^(cmd|meta|m)$/i.test(mod)) meta = true;
-    else if (/^a(lt)?$/i.test(mod)) alt = true;
-    else if (/^(c|ctrl|control)$/i.test(mod)) ctrl = true;
-    else if (/^s(hift)?$/i.test(mod)) shift = true;
+    if (/^(cmd|meta)$/i.test(mod)) modifiers.metaKey = true;
+    else if (/^alt$/i.test(mod)) modifiers.altKey = true;
+    else if (/^(ctrl|control)$/i.test(mod)) modifiers.ctrlKey = true;
+    else if (/^shift$/i.test(mod)) modifiers.shiftKey = true;
     else if (/^mod$/i.test(mod)) {
-      if (platform === 'mac') meta = true;
-      else ctrl = true;
+      if (platform === 'mac') modifiers.metaKey = true;
+      else modifiers.ctrlKey = true;
     } else throw new Error('Unrecognized modifier name: ' + mod);
   }
 
   return {
     key: result,
-    modifiers: {
-      altKey: alt,
-      ctrlKey: ctrl,
-      shiftKey: shift,
-      metaKey: meta,
-    },
+    modifiers,
   };
 }
 

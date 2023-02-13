@@ -5,6 +5,7 @@ import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import {
   Button,
+  Chip,
   DropdownMenu,
   Popover,
   RadioGroup,
@@ -12,6 +13,7 @@ import {
   Small,
   Spacer,
   Stack,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { toZipFile } from 'noya-filesystem';
@@ -20,6 +22,7 @@ import {
   BoxIcon,
   ChevronDownIcon,
   CodeIcon,
+  CursorArrowIcon,
   FigmaLogoIcon,
   FileIcon,
   GroupIcon,
@@ -29,6 +32,7 @@ import {
   TransformIcon,
   ViewVerticalIcon,
 } from 'noya-icons';
+import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -59,6 +63,7 @@ import React, {
   useReducer,
   useState,
 } from 'react';
+import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Blocks } from '../ayon/blocks';
 import {
   allAyonSymbols,
@@ -66,8 +71,11 @@ import {
   boxSymbolId,
 } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
+import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
+import { ClientStorage } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
+import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';
@@ -81,9 +89,7 @@ Object.entries(ChakraUI).forEach(([key, value]) => {
 export type ExportType = NoyaAPI.ExportFormat | 'figma' | 'sketch' | 'react';
 
 const persistedViewType =
-  (typeof localStorage !== 'undefined' &&
-    (localStorage.getItem('noya-ayon-preferred-view-type') as ViewType)) ||
-  'split';
+  (ClientStorage.getItem('preferredViewType') as ViewType) || 'split';
 
 function Workspace({
   fileId,
@@ -114,6 +120,8 @@ function Workspace({
   const fontManager = useFontManager();
   const [viewType, setViewTypeMemory] = useState<ViewType>(initialViewType);
   const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
+  const { onboardingStep, setOnboardingStep } = useOnboarding();
+  const theme = useDesignSystemTheme();
 
   const setViewType = useCallback(
     (type: ViewType) => {
@@ -126,9 +134,7 @@ function Workspace({
           break;
       }
 
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('noya-ayon-preferred-view-type', type);
-      }
+      ClientStorage.setItem('preferredViewType', type);
 
       setViewTypeMemory(type);
     },
@@ -183,24 +189,36 @@ function Workspace({
     Layers.isArtboard,
   );
 
+  const showInsertBlockOnboarding = onboardingStep === 'started';
+
   const interactionState = state.history.present.interactionState;
   const cursorType =
-    interactionState.type === 'insert' || interactionState.type === 'drawing'
+    interactionState.type === 'insert' ||
+    interactionState.type === 'drawing' ||
+    (interactionState.type === 'editingBlock' &&
+      interactionState.cursor === 'crosshair')
       ? 'insert'
       : interactionState.type === 'selectionMode' ||
-        interactionState.type === 'marquee'
+        interactionState.type === 'marquee' ||
+        (interactionState.type === 'maybeMarquee' &&
+          interactionState.method === 'mouse') ||
+        (interactionState.type === 'editingBlock' &&
+          interactionState.cursor === 'cell')
       ? 'region'
-      : '';
+      : // Don't show the pointer button active during onboarding, since it's distracting
+      showInsertBlockOnboarding
+      ? ''
+      : 'pointer';
 
   useEffect(() => {
     setLeftToolbar(
-      <Stack.H alignSelf={'center'} width={60}>
+      <Stack.H alignSelf={'center'} width={99}>
         <RadioGroup.Root
           value={cursorType}
           variant="secondary"
           allowEmpty
           onValueChange={(value: typeof cursorType) => {
-            if (!value) {
+            if (!value || value === 'pointer') {
               dispatch(['interaction', ['reset']]);
               return;
             }
@@ -211,6 +229,7 @@ function Workspace({
                 break;
               }
               case 'insert': {
+                setOnboardingStep?.('insertedBlock');
                 dispatch([
                   'interaction',
                   ['insert', { symbolId: boxSymbolId }, 'mouse'],
@@ -221,22 +240,82 @@ function Workspace({
           }}
         >
           <RadioGroup.Item
-            value="insert"
+            value="pointer"
             tooltip={
               <VStack alignItems="start">
-                <Small fontWeight={600}>Insert over everything</Small>
-                <Small>Hold Cmd/Ctrl to activate</Small>
+                <Small fontWeight={600}>Pointer Tool</Small>
+                <Small>Click to select and drag blocks.</Small>
               </VStack>
             }
           >
-            <PlusIcon />
+            <CursorArrowIcon />
           </RadioGroup.Item>
+          <Popover
+            sideOffset={0}
+            open={showInsertBlockOnboarding}
+            onClickClose={() => {
+              setOnboardingStep?.('insertedBlock');
+            }}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+            }}
+            closable
+            trigger={
+              <RadioGroup.Item
+                value="insert"
+                tooltip={
+                  !showInsertBlockOnboarding && (
+                    <VStack alignItems="start">
+                      <Small fontWeight={600}>Insert Tool</Small>
+                      <Small>Click and drag to draw a block.</Small>
+                      <Small>
+                        Hold{' '}
+                        <Chip variant="secondary">
+                          {getCurrentPlatform(navigator) === 'mac'
+                            ? 'Cmd ⌘'
+                            : 'Ctrl'}
+                        </Chip>{' '}
+                        to activate.
+                      </Small>
+                    </VStack>
+                  )
+                }
+              >
+                <PlusIcon />
+              </RadioGroup.Item>
+            }
+          >
+            <Stack.V width={300} padding={20} gap={10}>
+              <Small fontWeight={'bold'}>Step 1: Insert a block</Small>
+              <Small>
+                Use the insert tool{' '}
+                <PlusIcon
+                  style={{
+                    display: 'inline-block',
+                    verticalAlign: 'text-bottom',
+                    scale: 0.85,
+                  }}
+                />{' '}
+                to draw a block on the left canvas.
+              </Small>
+              <Small>
+                You can activate this tool at any time by holding{' '}
+                <Chip variant="secondary">
+                  {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
+                </Chip>
+              </Small>
+              <OnboardingAnimation src={InsertBlockWebp.src} />
+            </Stack.V>
+          </Popover>
           <RadioGroup.Item
             value="region"
             tooltip={
               <VStack alignItems="start">
-                <Small fontWeight={600}>Select region</Small>
-                <Small>Hold Shift to activate</Small>
+                <Small fontWeight={600}>Region Tool</Small>
+                <Small>Click and drag to draw a region.</Small>
+                <Small>
+                  Hold <Chip variant="secondary">Shift</Chip> to activate.
+                </Small>
               </VStack>
             }
           >
@@ -245,7 +324,14 @@ function Workspace({
         </RadioGroup.Root>
       </Stack.H>,
     );
-  }, [cursorType, setLeftToolbar]);
+  }, [
+    cursorType,
+    setLeftToolbar,
+    setOnboardingStep,
+    showInsertBlockOnboarding,
+    theme.colors.divider,
+    theme.colors.dividerStrong,
+  ]);
 
   useLayoutEffect(() => {
     setRightToolbar(

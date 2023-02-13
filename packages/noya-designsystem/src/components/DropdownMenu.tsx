@@ -1,7 +1,13 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, {
+  ForwardedRef,
+  forwardRef,
+  memo,
+  useCallback,
+  useMemo,
+} from 'react';
 import styled from 'styled-components';
 import { MenuItemProps, MenuProps } from './ContextMenu';
 import {
@@ -121,14 +127,17 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
 const Content = styled(RadixDropdownMenu.Content)(styles.contentStyle);
 const SubContent = styled(RadixDropdownMenu.SubContent)(styles.contentStyle);
 
-function DropdownMenuRoot<T extends string>({
-  items,
-  children,
-  onSelect,
-  isNested,
-  shouldBindKeyboardShortcuts,
-  onOpenChange,
-}: MenuProps<T>) {
+const DropdownMenuRoot = forwardRef(function DropdownMenuRoot<T extends string>(
+  {
+    items,
+    children,
+    onSelect,
+    isNested,
+    shouldBindKeyboardShortcuts,
+    onOpenChange,
+  }: MenuProps<T>,
+  forwardedRef: ForwardedRef<HTMLElement>,
+) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
@@ -155,9 +164,15 @@ function DropdownMenuRoot<T extends string>({
 
   return (
     <RootComponent onOpenChange={onOpenChange}>
-      <TriggerComponent asChild>{children}</TriggerComponent>
+      <TriggerComponent ref={forwardedRef as ForwardedRef<any>} asChild>
+        {children}
+      </TriggerComponent>
       <RadixDropdownMenu.Portal>
-        <ContentComponent sideOffset={4} style={contentStyle}>
+        <ContentComponent
+          sideOffset={4}
+          style={contentStyle}
+          collisionPadding={8}
+        >
           {items.map((item, index) =>
             item === SEPARATOR_ITEM ? (
               <SeparatorElement key={index} />
@@ -181,6 +196,6 @@ function DropdownMenuRoot<T extends string>({
       </RadixDropdownMenu.Portal>
     </RootComponent>
   );
-}
+});
 
 export const DropdownMenu = memo(DropdownMenuRoot);

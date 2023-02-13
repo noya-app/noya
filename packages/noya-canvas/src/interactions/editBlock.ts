@@ -8,6 +8,7 @@ import {
 import { defaultCursorInteraction } from './defaultCursor';
 import { createDrawingInteraction, DrawingActions } from './drawing';
 import { focusInteraction } from './focus';
+import { marqueeInteraction } from './marquee';
 import { MoveActions, moveInteraction } from './move';
 import { ScaleActions, scaleInteraction } from './scale';
 import { SelectionActions, selectionInteraction } from './selection';
@@ -76,14 +77,18 @@ export const createEditBlockInteraction = ({
         const handlers = [
           focusInteraction,
           editBlockSelectionMode,
+          createEditBlockInsertMode({
+            inferBlockType,
+          }),
           scaleInteraction,
           selectionInteraction,
           moveInteraction,
-          createDrawingInteraction({
-            hasMovementThreshold: true,
-            allowDrawingFromNoneState: true,
-            inferBlockType,
-          }),
+          marqueeInteraction,
+          // createDrawingInteraction({
+          //   hasMovementThreshold: true,
+          //   allowDrawingFromNoneState: true,
+          //   inferBlockType,
+          // }),
           defaultCursorInteraction,
         ].map((interaction) =>
           interaction(actions)(interactionState, 'none', api),
@@ -133,4 +138,44 @@ function editBlockSelectionMode(actions: EditBlockActions) {
       },
     }),
   });
+}
+
+function createEditBlockInsertMode({
+  inferBlockType,
+}: {
+  inferBlockType: InferBlockType;
+}) {
+  return (actions: EditBlockActions) => {
+    const drawingInteraction = createDrawingInteraction({
+      hasMovementThreshold: true,
+      allowDrawingFromNoneState: true,
+      inferBlockType,
+    });
+
+    return handleActionType<
+      InteractionState,
+      [InteractionAPI],
+      ReactEventHandlers
+    >({
+      none: (interactionState, api) => ({
+        onPointerDown: (event) => {
+          if (!event[api.platformModKey]) return;
+
+          drawingInteraction(actions)(
+            interactionState,
+            'none',
+            api,
+          )?.onPointerDown?.(event);
+        },
+
+        // We don't actually want to change mode, just the cursor
+        onPointerMove: (event) => {
+          if (!event[api.platformModKey]) return;
+
+          actions.setCursor('crosshair');
+          event.preventDefault();
+        },
+      }),
+    });
+  };
 }

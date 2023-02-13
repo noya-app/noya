@@ -1,4 +1,5 @@
 import { ReactEventHandlers } from 'noya-designsystem';
+import { Point } from 'noya-geometry';
 import {
   handleActionType,
   InteractionMethod,
@@ -8,12 +9,13 @@ import { MarqueeActions, marqueeInteraction } from './marquee';
 import { InteractionAPI } from './types';
 
 export interface SelectionModeActions extends MarqueeActions {
+  maybeMarquee: (point: Point, method: InteractionMethod) => void;
   enterSelectionMode: (method: InteractionMethod) => void;
   reset: () => void;
 }
 
 export function selectionModeInteraction(actions: SelectionModeActions) {
-  const { enterSelectionMode, reset } = actions;
+  const { maybeMarquee, enterSelectionMode, reset } = actions;
 
   return handleActionType<
     InteractionState,
@@ -55,11 +57,11 @@ export function selectionModeInteraction(actions: SelectionModeActions) {
           reset();
           event.preventDefault();
         },
-        onPointerDown: marqueeInteraction(actions)(
-          interactionState,
-          'none',
-          api,
-        ).onPointerDown,
+        onPointerDown: (event) => {
+          maybeMarquee(api.getScreenPoint(event.nativeEvent), 'mouse');
+
+          event.preventDefault();
+        },
       };
     },
     marquee: (interactionState, api) =>

@@ -27,7 +27,12 @@ export const Tooltip = memo(function Tooltip({ children, content }: Props) {
       <TooltipPrimitive.Root>
         <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
         <TooltipPrimitive.Portal>
-          <Content side="bottom" align="center" sideOffset={2}>
+          <Content
+            side="bottom"
+            align="center"
+            sideOffset={2}
+            collisionPadding={8}
+          >
             {content}
             {/* <Arrow /> */}
           </Content>

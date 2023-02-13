@@ -22,6 +22,7 @@ type StyleProps = {
   borderRadius?: CSSProperties['borderRadius'];
   textAlign?: CSSProperties['textAlign'];
   fontWeight?: CSSProperties['fontWeight'];
+  fontStyle?: CSSProperties['fontStyle'];
   fontSize?: CSSProperties['fontSize'];
   lineHeight?: CSSProperties['lineHeight'];
   fontFamily?: CSSProperties['fontFamily'];
