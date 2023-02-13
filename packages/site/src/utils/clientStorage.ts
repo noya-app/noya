@@ -11,6 +11,7 @@ export const ayonOnboardingStep = [
   'insertedBlock',
   'configuredBlockType',
   'configuredBlockText',
+  'dismissedSupportInfo',
 ] as const;
 
 export type AyonOnboardingStep = typeof ayonOnboardingStep[number];

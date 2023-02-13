@@ -90,7 +90,6 @@ export function Popover({
           collisionPadding={8}
           // Don't propagate pointer down events to the canvas
           onPointerDown={(event) => {
-            event.preventDefault();
             event.stopPropagation();
           }}
         >

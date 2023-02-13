@@ -50,7 +50,15 @@ function FileTitle({ id }: { id: string }) {
   return <ProjectTitle>{cachedFile.data.name}</ProjectTitle>;
 }
 
-function FileEditor({ id }: { id: string }) {
+function FileEditor({
+  id,
+  onboardingStep,
+  setOnboardingStep,
+}: {
+  id: string;
+  onboardingStep?: AyonOnboardingStep;
+  setOnboardingStep: (step: AyonOnboardingStep) => void;
+}) {
   const router = useRouter();
   const client = useNoyaClient();
   const { files } = useNoyaFiles();
@@ -152,23 +160,6 @@ function FileEditor({ id }: { id: string }) {
     router.push(`/projects/${id}/duplicate`);
   }, [id, router, updateDebounced]);
 
-  const [onboardingStep, _setOnboardingStep] =
-    usePersistentState<AyonOnboardingStep>('ayonOnboardingStep', 'started');
-
-  const setOnboardingStep = useCallback(
-    (step: AyonOnboardingStep) => {
-      if (!onboardingStep) return;
-
-      const currentIndex = ayonOnboardingStep.indexOf(onboardingStep);
-      const nextIndex = ayonOnboardingStep.indexOf(step);
-
-      if (nextIndex > currentIndex) {
-        _setOnboardingStep(step);
-      }
-    },
-    [_setOnboardingStep, onboardingStep],
-  );
-
   if (!initialFile || !cachedFile) return null;
 
   return (
@@ -183,7 +174,7 @@ function FileEditor({ id }: { id: string }) {
       onChangeName={updateName}
       onDuplicate={duplicateFile}
       downloadFile={downloadFile}
-      onboardingStep={onboardingStep ?? undefined}
+      onboardingStep={onboardingStep}
       setOnboardingStep={setOnboardingStep}
     />
   );
@@ -216,12 +207,31 @@ function Content() {
     [],
   );
 
+  const [onboardingStep, _setOnboardingStep] =
+    usePersistentState<AyonOnboardingStep>('ayonOnboardingStep', 'started');
+
+  const setOnboardingStep = useCallback(
+    (step: AyonOnboardingStep) => {
+      if (!onboardingStep) return;
+
+      const currentIndex = ayonOnboardingStep.indexOf(onboardingStep);
+      const nextIndex = ayonOnboardingStep.indexOf(step);
+
+      if (nextIndex > currentIndex) {
+        _setOnboardingStep(step);
+      }
+    },
+    [_setOnboardingStep, onboardingStep],
+  );
+
   if (!id) return null;
 
   return (
     <ProjectProvider value={project}>
       <Stack.V flex="1" background={theme.colors.canvas.background}>
         <Toolbar
+          showOnboarding={onboardingStep === 'configuredBlockText'}
+          dismissOnboarding={() => setOnboardingStep('dismissedSupportInfo')}
           right={rightToolbar}
           left={
             overageItem ? (
@@ -237,7 +247,11 @@ function Content() {
           {centerToolbar || <FileTitle id={id} />}
         </Toolbar>
         <Divider variant="strong" />
-        <FileEditor id={id} />
+        <FileEditor
+          id={id}
+          onboardingStep={onboardingStep ?? undefined}
+          setOnboardingStep={setOnboardingStep}
+        />
       </Stack.V>
     </ProjectProvider>
   );
