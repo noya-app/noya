@@ -4,7 +4,7 @@ export function fuzzyScore({ item, query }: { item: string; query: string }) {
   return scoreFilePathFuzzy({ path: item, query });
 }
 
-type IScoredItem = IItemScore & {
+export type IScoredItem = IItemScore & {
   index: number;
 };
 

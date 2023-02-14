@@ -5,7 +5,6 @@ import {
   Chip,
   Divider,
   DividerVertical,
-  DropdownMenu,
   IconButton,
   Popover,
   Small,
@@ -24,16 +23,17 @@ import {
   Selectors,
 } from 'noya-state';
 import * as React from 'react';
-import { forwardRef, ReactNode, useEffect, useRef } from 'react';
+import { forwardRef, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { BlockEditor, IBlockEditor } from './BlockEditor';
-import { imageSymbolId } from './blocks/symbols';
+import { allAyonSymbols, imageSymbolId } from './blocks/symbols';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
+import { SearchCompletionMenu } from './useCompletionMenu';
 
 const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
@@ -340,15 +340,12 @@ export const Widget = forwardRef(function Widget(
     }
   }, [isEditing]);
 
-  if (!Layers.isSymbolInstance(layer)) return null;
+  const symbolItems = allAyonSymbols.map((symbol) => ({
+    name: symbol.name,
+    id: symbol.symbolID,
+  }));
 
-  const blockText = layer.blockText ?? '';
-
-  const blockTypes = inferBlockTypes({
-    frame: rect,
-    blockText,
-    siblingBlocks: getSiblingBlocks(state),
-  });
+  const [showBlockPicker, setShowBlockPicker] = useState(false);
 
   const showWidgetUI =
     isPrimarySelected &&
@@ -360,6 +357,25 @@ export const Widget = forwardRef(function Widget(
   const showTypeOnboarding = showWidgetUI && onboardingStep === 'insertedBlock';
   const showTextOnboarding =
     showWidgetUI && onboardingStep === 'configuredBlockType';
+
+  // Hide the block picker if whenever the widget UI is hidden
+  useEffect(() => {
+    const shouldHide = !showWidgetUI;
+
+    if (shouldHide) {
+      setShowBlockPicker(false);
+    }
+  }, [showWidgetUI, isEditing]);
+
+  if (!Layers.isSymbolInstance(layer)) return null;
+
+  const blockText = layer.blockText ?? '';
+
+  const blockTypes = inferBlockTypes({
+    frame: rect,
+    blockText,
+    siblingBlocks: getSiblingBlocks(state),
+  });
 
   return (
     <WidgetContainer
@@ -429,33 +445,43 @@ export const Widget = forwardRef(function Widget(
                       />
                     )}
                     <Stack.H>
-                      <DropdownMenu
-                        items={blockTypes
-                          .flatMap(({ type }) =>
-                            typeof type === 'string' ? [] : [type.symbolId],
-                          )
-                          .map((symbolId) => {
-                            const symbolMaster = Selectors.getSymbolMaster(
-                              state,
-                              symbolId,
-                            );
-
-                            return {
-                              title: symbolMaster.name,
-                              value: symbolId,
-                            };
-                          })}
-                        onSelect={(symbolId) => {
-                          onChangeBlockType({ symbolId });
-                          dispatch('setSymbolIdIsFixed', undefined, true);
+                      <Popover
+                        open={showBlockPicker}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setShowBlockPicker(true);
+                          }
                         }}
+                        onInteractOutside={(event) => {
+                          event.preventDefault();
+                        }}
+                        onPointerDownOutside={(event) => {
+                          setShowBlockPicker(false);
+                        }}
+                        trigger={
+                          <Button
+                            variant="none"
+                            onClick={() => {
+                              setShowBlockPicker(!showBlockPicker);
+                            }}
+                          >
+                            {symbol?.name ?? layer.name}
+                            <Spacer.Horizontal size={4} />
+                            <ChevronDownIcon />
+                          </Button>
+                        }
                       >
-                        <Button variant="none">
-                          {symbol?.name ?? layer.name}
-                          <Spacer.Horizontal size={4} />
-                          <ChevronDownIcon />
-                        </Button>
-                      </DropdownMenu>
+                        <SearchCompletionMenu
+                          items={symbolItems}
+                          onClose={() => {
+                            setShowBlockPicker(false);
+                          }}
+                          onSelect={(item) => {
+                            setShowBlockPicker(false);
+                            onChangeBlockType({ symbolId: item.id });
+                          }}
+                        />
+                      </Popover>
                     </Stack.H>
                   </Stack.H>
                 </ContentElement>

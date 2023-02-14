@@ -207,8 +207,17 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const blockDefinition = Blocks[layer.symbolID];
 
+  const getRangeDOMPosition = useCallback(
+    (range: Range) => {
+      const domRange = ReactEditor.toDOMRange(editor, range);
+      const rect = domRange.getBoundingClientRect();
+      return { x: rect.left, y: rect.top };
+    },
+    [editor],
+  );
+
   const symbolCompletionMenu = useCompletionMenu({
-    editor,
+    getPosition: getRangeDOMPosition,
     possibleItems: symbolItems,
     onSelect: (target, item) => {
       Transforms.delete(editor, { at: target });
@@ -220,7 +229,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
   });
 
   const hashCompletionMenu = useCompletionMenu({
-    editor,
+    getPosition: getRangeDOMPosition,
     showExactMatch: false,
     possibleItems: (blockDefinition?.hashtags ?? []).map((item) => ({
       name: item,

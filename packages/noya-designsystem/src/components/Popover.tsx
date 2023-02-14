@@ -17,6 +17,7 @@ const ContentElement = styled(PopoverPrimitive.Content)<{
   color: theme.colors.textMuted,
   ...(variant === 'large' && { width: '680px' }),
   ...(variant === 'normal' && { width: '240px' }),
+  zIndex: 1000,
 }));
 
 const ArrowElement = styled(PopoverPrimitive.Arrow)(({ theme }) => ({
@@ -90,6 +91,9 @@ export function Popover({
           collisionPadding={8}
           // Don't propagate pointer down events to the canvas
           onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+          onWheel={(event) => {
             event.stopPropagation();
           }}
         >

@@ -1,5 +1,6 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
 import React, {
+  FocusEventHandler,
   ForwardedRef,
   forwardRef,
   InputHTMLAttributes,
@@ -24,6 +25,8 @@ type Props = {
   onKeyDown?: KeyboardEventHandler;
   onClick?: MouseEventHandler;
   onPointerDown?: PointerEventHandler;
+  onFocusCapture?: FocusEventHandler;
+  onBlur?: FocusEventHandler;
 } & Pick<
   InputHTMLAttributes<HTMLInputElement>,
   'autoComplete' | 'autoCapitalize' | 'autoCorrect' | 'spellCheck'
@@ -81,6 +84,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     onKeyDown,
     value,
     onSubmit,
+    onBlur,
     allowSubmittingWithSameValue = false,
     ...rest
   }: SubmittableProps,
@@ -148,6 +152,15 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     [],
   );
 
+  const handleBlur = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onBlur?.(event);
+
+      handleSubmit();
+    },
+    [onBlur, handleSubmit],
+  );
+
   return (
     <input
       ref={composeRefs(ref, forwardedRef)}
@@ -155,7 +168,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       value={internalValue}
       onKeyDown={handleKeyDown}
       onChange={handleChange}
-      onBlur={handleSubmit}
+      onBlur={handleBlur}
     />
   );
 });
