@@ -1,7 +1,14 @@
 import { Emitter } from 'noya-fonts';
+import { z } from 'zod';
+
+const responseSchema = z.object({
+  icons: z.array(z.string()),
+});
+
+type Response = z.infer<typeof responseSchema>;
 
 export class IconResolver {
-  cache: Record<string, Promise<string>> = {};
+  cache: Record<string, Promise<Response>> = {};
   emitters: Record<string, Emitter<[string]>> = {};
 
   cacheKey(key: string, query: string) {
@@ -28,14 +35,25 @@ export class IconResolver {
         query,
       )}`,
     );
-    const resolved = response.json();
+    const resolved = response.json() as Promise<Response>;
 
     this.cache[key] = resolved;
 
     resolved.then((resolvedResponse) => {
+      // Validate response
+      responseSchema.parse(resolvedResponse);
+
       const emitter = this.getEmitter(key, query);
-      if (resolvedResponse.icons.length > 0) {
-        const [iconPrefix, iconName] = resolvedResponse.icons[0].split(':');
+
+      // icon looks like "mdi:icon-name"
+      const icon =
+        resolvedResponse.icons.find((icon) => icon === query) ??
+        resolvedResponse.icons.find((icon) => icon.split(':')[1] === query) ??
+        resolvedResponse.icons.at(0);
+
+      if (icon) {
+        const [iconPrefix, iconName] = icon.split(':');
+
         emitter.emit(
           `https://api.iconify.design/${iconPrefix}/${iconName}.svg`,
         );
