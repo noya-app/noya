@@ -45,6 +45,10 @@ export type BlockProps = {
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
   getBlock: (symbolId: string) => BlockDefinition;
   children?: ReactNode;
+  dataSet?: {
+    id: string;
+    parentId: string;
+  };
 };
 
 export type InferBlockProps = {

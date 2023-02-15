@@ -27,7 +27,12 @@ const createHeadingBlock = (
     const hashtags = Object.keys(parameters);
 
     return (
-      <Flex>
+      <Flex
+        {...(props.dataSet && {
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
+      >
         <Heading
           flex="1"
           size={size}

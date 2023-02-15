@@ -22,6 +22,10 @@ export const BoxBlock: BlockDefinition = {
 
     return (
       <Flex
+        {...(props.dataSet && {
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
         {...(props.frame && {
           width: `${props.frame.width}px`,
           height: `${props.frame.height}px`,

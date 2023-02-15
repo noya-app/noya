@@ -299,5 +299,5 @@ export function encodeBlockItem(blockItem: ParsedBlockItem) {
     }
   });
 
-  return [content, ...encodedParameters].join(' ');
+  return [content, ...encodedParameters].filter((x) => !!x).join(' ');
 }

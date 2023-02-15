@@ -24,6 +24,10 @@ export const TextBlock: BlockDefinition = {
 
     return (
       <Text
+        {...(props.dataSet && {
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
         textAlign={getTextAlign(parameters)}
         className={getBlockClassName(hashtags)}
       >

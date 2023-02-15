@@ -13,9 +13,16 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { AffineTransform, Rect, transformRect } from 'noya-geometry';
-import { ChevronDownIcon } from 'noya-icons';
 import {
+  AffineTransform,
+  createBounds,
+  Rect,
+  transformRect,
+} from 'noya-geometry';
+import { ChevronDownIcon } from 'noya-icons';
+import { SketchModel } from 'noya-sketch-model';
+import {
+  BlockProps,
   DrawableLayerType,
   getSiblingBlocks,
   InferBlockProps,
@@ -30,11 +37,22 @@ import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { BlockEditor, IBlockEditor } from './BlockEditor';
-import { imageSymbolId } from './blocks/symbolIds';
+import { Blocks } from './blocks';
+import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
+import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
 import { allAyonSymbols } from './blocks/symbols';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 import { SearchCompletionMenu } from './useCompletionMenu';
+
+function getElementRect(element: HTMLElement) {
+  const style = window.getComputedStyle(element);
+  const width = parseFloat(style.width);
+  const height = parseFloat(style.height);
+  const left = element.offsetLeft;
+  const top = element.offsetTop;
+  return { width, height, x: left, y: top };
+}
 
 const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
@@ -368,6 +386,77 @@ export const Widget = forwardRef(function Widget(
     }
   }, [showWidgetUI, isEditing]);
 
+  const onDetach = () => {
+    if (!Layers.isSymbolInstance(layer)) return;
+
+    const Block = Blocks[layer.symbolID];
+
+    const blockProps: BlockProps = {
+      getBlock: (id) => Blocks[id],
+      symbolId: layer.symbolID,
+      frame: layer.frame,
+      resolvedBlockData: layer.resolvedBlockData,
+      blockText: layer.blockText,
+      dataSet: {
+        id: layer.do_objectID,
+        parentId: layer.do_objectID,
+      },
+    };
+
+    const containerBlockProps = getContainerBlockProps({
+      props: blockProps,
+      block: Block,
+    });
+
+    const containerLayer = SketchModel.symbolInstance({
+      symbolID: boxSymbolId,
+      blockText: containerBlockProps.blockText,
+      frame: layer.frame,
+    });
+
+    const children = getChildrenBlockProps({
+      props: blockProps,
+      block: Block,
+    });
+
+    const layers = children.flatMap((child) => {
+      if (!child.dataSet) return [];
+
+      const element = document.querySelector<HTMLElement>(
+        `[data-noya-id="${child.dataSet.id}"][data-noya-parent-id="${child.dataSet.parentId}"]`,
+      );
+
+      if (!element) return [];
+
+      const elementRect = getElementRect(element);
+
+      const clone = SketchModel.symbolInstance({
+        symbolID: child.symbolId,
+        blockText: child.blockText,
+        frame: SketchModel.rect({
+          x: layer.frame.x + Math.round(elementRect.x),
+          y: layer.frame.y + Math.round(elementRect.y),
+          width: Math.ceil(elementRect.width),
+          height: Math.ceil(elementRect.height),
+        }),
+      });
+
+      return [clone];
+    });
+
+    dispatch('deleteLayer', layer.do_objectID);
+
+    const layersToInsert = [containerLayer, ...layers];
+
+    // console.log(layersToInsert);
+
+    layersToInsert.forEach((child) => {
+      const bounds = createBounds(child.frame);
+
+      dispatch('addLayer', child, { x: bounds.midX, y: bounds.midY });
+    });
+  };
+
   if (!Layers.isSymbolInstance(layer)) return null;
 
   const blockText = layer.blockText ?? '';
@@ -442,6 +531,16 @@ export const Widget = forwardRef(function Widget(
                           dispatch('interaction', ['reset']);
                           dispatch('selectLayer', []);
                           onChangeBlockText(url);
+                        }}
+                      />
+                    )}
+                    {layer.symbolID === heroSymbolV2Id && (
+                      <IconButton
+                        iconName="LinkBreak2Icon"
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+
+                          onDetach();
                         }}
                       />
                     )}

@@ -116,11 +116,11 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
   defaultBlockText:
-    '#flex-col #items-center #justify-center #text-center #bg-transparent #p-4 #gap-3',
+    '#flex-col #items-center #justify-center #bg-transparent #p-4 #gap-3',
   layers: [
     SketchModel.symbolInstance({
       symbolID: heading2SymbolId,
-      blockText: 'Create, iterate, inspire.',
+      blockText: 'Create, iterate, inspire. #text-center',
     }),
     SketchModel.symbolInstance({
       symbolID: textSymbolId,

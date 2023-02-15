@@ -14,6 +14,7 @@ import { Blocks } from './blocks';
 import { buttonSymbol } from './blocks/symbols';
 
 function SymbolRenderer({
+  dataSet,
   frame,
   symbolId,
   blockText,
@@ -31,6 +32,7 @@ function SymbolRenderer({
       }}
     >
       {getBlock(symbolId).render({
+        dataSet,
         symbolId,
         frame,
         blockText,
@@ -94,6 +96,10 @@ function DOMRendererContent({
       >
         {artboard.layers.filter(Layers.isSymbolInstance).map((layer) => (
           <SymbolRenderer
+            dataSet={{
+              id: layer.do_objectID,
+              parentId: layer.do_objectID,
+            }}
             key={layer.do_objectID}
             frame={layer.frame}
             symbolId={layer.symbolID}
