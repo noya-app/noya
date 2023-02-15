@@ -1,13 +1,13 @@
-import { Box } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { accentColor } from './blockTheme';
-import { boxSymbolId } from './symbols';
+import { boxSymbol } from './symbols';
 import { getBlockClassName, tailwindBlockClasses } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
-  id: boxSymbolId,
+  symbol: boxSymbol,
   parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   hashtags: tailwindBlockClasses,
@@ -21,8 +21,7 @@ export const BoxBlock: BlockDefinition = {
         .find((value) => CSS.supports('color', `${value}`)) ?? accentColor[50];
 
     return (
-      <Box
-        display="flex"
+      <Flex
         {...(props.frame && {
           width: `${props.frame.width}px`,
           height: `${props.frame.height}px`,
@@ -31,7 +30,7 @@ export const BoxBlock: BlockDefinition = {
         className={getBlockClassName(hashtags)}
       >
         {props.children}
-      </Box>
+      </Flex>
     );
   },
 };

@@ -4,7 +4,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { sidebarSymbol, sidebarSymbolId } from './symbols';
+import { sidebarSymbol } from './symbols';
 
 const placeholderText = `
 *Dashboard 
@@ -18,7 +18,7 @@ const globalHashtags = ['dark', 'accent', 'title'];
 const parser = 'newlineSeparated';
 
 export const SidebarBlock: BlockDefinition = {
-  id: sidebarSymbolId,
+  symbol: sidebarSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,

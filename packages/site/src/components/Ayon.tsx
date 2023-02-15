@@ -65,11 +65,8 @@ import React, {
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Blocks } from '../ayon/blocks';
-import {
-  allAyonSymbols,
-  ayonLibraryId,
-  boxSymbolId,
-} from '../ayon/blocks/symbols';
+import { ayonLibraryId, boxSymbolId } from '../ayon/blocks/symbolIds';
+import { allAyonSymbols } from '../ayon/blocks/symbols';
 import { Content, ViewType } from '../ayon/Content';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';

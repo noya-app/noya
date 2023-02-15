@@ -4,7 +4,7 @@ import React from 'react';
 import { getTextAlign, parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { heroSymbol, heroSymbolId } from './symbols';
+import { heroSymbol } from './symbols';
 
 const placeholderText = `
 Create, iterate, inspire.
@@ -16,7 +16,7 @@ Learn more
 const parser = 'newlineSeparated';
 
 export const HeroBlock: BlockDefinition = {
-  id: heroSymbolId,
+  symbol: heroSymbol,
   parser,
   hashtags: ['left', 'right', 'center', 'dark', 'accent'],
   placeholderText,

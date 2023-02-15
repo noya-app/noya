@@ -3,8 +3,8 @@
 exports[`button default 1`] = `
 "<Frame width={100} height={40}>
   <Button
+    width=\\"100px\\"
     size=\\"md\\"
-    isFullWidth
     backgroundColor=\\"#f1f5f9\\"
     color=\\"#000\\"
     isDisabled={false}

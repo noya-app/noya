@@ -4,7 +4,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { selectSymbolId } from './symbols';
+import { selectSymbol } from './symbols';
 
 const placeholderText = `
 Role
@@ -17,7 +17,7 @@ const globalHashtags = ['dark', 'accent', 'disabled'];
 const parser = 'newlineSeparated';
 
 export const SelectBlock: BlockDefinition = {
-  id: selectSymbolId,
+  symbol: selectSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,

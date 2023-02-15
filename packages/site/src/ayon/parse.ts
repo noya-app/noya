@@ -139,6 +139,22 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
   }
 }
 
+export function mergeBlock({
+  block,
+  fallback,
+}: {
+  block: ParsedBlockItem;
+  fallback: ParsedBlockItem;
+}) {
+  return {
+    content: block.content || fallback.content,
+    parameters: {
+      ...fallback.parameters,
+      ...block.parameters,
+    },
+  };
+}
+
 export function parseBlock<K extends keyof ParsedBlockTypeMap>(
   text: string = '',
   type: K,
@@ -150,19 +166,15 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 ): ParsedBlockTypeMap[K] {
   switch (type) {
     case 'regular': {
-      const block = parseBlockInner(text, type);
+      let block = parseBlockInner(text, type) as ParsedBlockItem;
 
-      if (placeholder && block.content === '') {
-        const parsedPlaceholder = parseBlockInner(placeholder, type);
+      if (placeholder) {
+        const fallback = parseBlockInner(placeholder, type);
 
-        block.content = parsedPlaceholder.content;
-        block.parameters = mergeObjects([
-          parsedPlaceholder.parameters,
-          block.parameters,
-        ]);
+        block = mergeBlock({ block, fallback });
       }
 
-      return block;
+      return block as ParsedBlockTypeMap[K];
     }
     case 'commaSeparated':
     case 'newlineSeparated': {

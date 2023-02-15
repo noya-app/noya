@@ -3,7 +3,7 @@ import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
-import { checkboxSymbolId } from './symbols';
+import { checkboxSymbol } from './symbols';
 
 const placeholderText = '#off Remember me';
 
@@ -12,7 +12,7 @@ const globalHashtags = ['on', 'off', 'disabled'];
 const parser = 'regular';
 
 export const CheckboxBlock: BlockDefinition = {
-  id: checkboxSymbolId,
+  symbol: checkboxSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,

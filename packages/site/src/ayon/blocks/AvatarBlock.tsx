@@ -4,14 +4,14 @@ import { isExternalUrl } from 'noya-utils';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { isApproximatelySquare, isWithinRectRange } from './score';
-import { avatarSymbolId } from './symbols';
+import { avatarSymbol } from './symbols';
 
 const AVATAR_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'];
 
 const parser = 'regular';
 
 export const AvatarBlock: BlockDefinition = {
-  id: avatarSymbolId,
+  symbol: avatarSymbol,
   parser,
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 30, 30, 120, 120) &&

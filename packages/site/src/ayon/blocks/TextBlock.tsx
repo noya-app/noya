@@ -2,11 +2,11 @@ import { Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { getTextAlign, parseBlock } from '../parse';
-import { textSymbolId } from './symbols';
+import { textSymbol } from './symbols';
 import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const TextBlock: BlockDefinition = {
-  id: textSymbolId,
+  symbol: textSymbol,
   parser: 'regular',
   hashtags: ['left', 'center', 'right', ...tailwindTextClasses],
   infer: ({ frame, blockText }) =>

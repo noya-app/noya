@@ -2,11 +2,11 @@ import { Spacer } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
-import { spacerSymbolId } from './symbols';
+import { spacerSymbol } from './symbols';
 import { getBlockClassName } from './tailwind';
 
 export const SpacerBlock: BlockDefinition = {
-  id: spacerSymbolId,
+  symbol: spacerSymbol,
   parser: 'regular',
   infer: ({ frame, blockText }) => 0,
   render: (props) => {

@@ -32,7 +32,6 @@ import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import { Blocks } from './blocks';
 
 import {
-  allAyonSymbols,
   heading1SymbolId,
   heading2SymbolId,
   heading3SymbolId,
@@ -40,7 +39,8 @@ import {
   heading5SymbolId,
   heading6SymbolId,
   textSymbolId,
-} from './blocks/symbols';
+} from './blocks/symbolIds';
+import { allAyonSymbols } from './blocks/symbols';
 import { InferredBlockTypeResult } from './types';
 import { useCompletionMenu } from './useCompletionMenu';
 
@@ -254,7 +254,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     })),
     onSelect: (target, item) => {
       amplitude.logEvent('Project - Block - Inserted Hashtag', {
-        'Block Type': blockDefinition.id,
+        'Block Type': blockDefinition.symbol.symbolID,
         X: layer.frame.x,
         Y: layer.frame.y,
         Width: layer.frame.width,
@@ -366,7 +366,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         if (domNode !== document.activeElement) return;
 
         logEditedTextDebounced('Project - Block - Edited Text', {
-          'Block Type': blockDefinition.id,
+          'Block Type': blockDefinition.symbol.symbolID,
           X: layer.frame.x,
           Y: layer.frame.y,
           Width: layer.frame.width,

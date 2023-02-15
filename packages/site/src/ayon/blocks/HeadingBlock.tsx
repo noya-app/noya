@@ -17,7 +17,7 @@ const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
   size: ThemingProps['size'],
 ): BlockDefinition => ({
-  id: symbol.symbolID,
+  symbol,
   parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   infer: ({ frame, blockText }) => 0.1,

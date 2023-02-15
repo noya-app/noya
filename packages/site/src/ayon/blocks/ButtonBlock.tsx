@@ -4,7 +4,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
-import { buttonSymbolId } from './symbols';
+import { buttonSymbol } from './symbols';
 
 const placeholderText = 'Submit';
 
@@ -24,7 +24,7 @@ const globalHashtags = [
 const parser = 'regular';
 
 export const ButtonBlock: BlockDefinition = {
-  id: buttonSymbolId,
+  symbol: buttonSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,

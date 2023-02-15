@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
 import { Blocks } from './blocks';
-import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbols';
+import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbolIds';
 import { DOMRenderer } from './DOMRenderer';
 import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';

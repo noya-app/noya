@@ -535,6 +535,7 @@ export type SymbolMaster = {
     | Hotspot
     | Bitmap
   )[];
+  defaultBlockText?: string;
 };
 /**
  * Enumeration of the boolean operations that can be applied to combine shapes

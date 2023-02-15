@@ -4,14 +4,14 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { inputSymbolId } from './symbols';
+import { inputSymbol } from './symbols';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 
 const parser = 'regular';
 
 export const InputBlock: BlockDefinition = {
-  id: inputSymbolId,
+  symbol: inputSymbol,
   parser,
   hashtags: globalHashtags,
   infer: ({ frame, blockText }) =>

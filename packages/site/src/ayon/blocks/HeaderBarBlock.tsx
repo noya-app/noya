@@ -14,7 +14,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { headerBarSymbol, headerBarSymbolId } from './symbols';
+import { headerBarSymbol } from './symbols';
 import { getBlockClassName } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
@@ -22,7 +22,7 @@ const placeholderText = `*Home, Projects, Team, FAQ`;
 const parser = 'commaSeparated';
 
 export const HeaderBarBlock: BlockDefinition = {
-  id: headerBarSymbolId,
+  symbol: headerBarSymbol,
   hashtags: ['dark', 'accent', 'search', 'title'],
   placeholderText,
   parser,

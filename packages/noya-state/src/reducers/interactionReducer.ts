@@ -54,7 +54,7 @@ export type InferBlockProps = {
 };
 
 export type BlockDefinition = {
-  id: string;
+  symbol: Sketch.SymbolMaster;
   parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
   infer: (props: InferBlockProps) => number;
   render: (props: BlockProps) => ReactNode;

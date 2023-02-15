@@ -3,7 +3,7 @@ import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
-import { radioSymbolId } from './symbols';
+import { radioSymbol } from './symbols';
 
 const placeholderText = '#on Daily';
 
@@ -12,7 +12,7 @@ const globalHashtags = ['on', 'off', 'disabled'];
 const parser = 'regular';
 
 export const RadioBlock: BlockDefinition = {
-  id: radioSymbolId,
+  symbol: radioSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,

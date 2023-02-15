@@ -3,7 +3,7 @@ import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
-import { tableSymbolId } from './symbols';
+import { tableSymbol } from './symbols';
 
 const placeholderText = `
 Products, Price, Quantity 
@@ -23,7 +23,7 @@ const globalHashtags = ['dark', 'accent', 'sm', 'md', 'lg'];
 const parser = 'table';
 
 export const TableBlock: BlockDefinition = {
-  id: tableSymbolId,
+  symbol: tableSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,
