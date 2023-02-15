@@ -51,12 +51,15 @@ export const HeroBlock: BlockDefinition = {
     let buttonSize = 'sm';
     let spacing = 2;
 
-    if (props.frame.width > 800 && props.frame.height > 370) {
+    const height = props.frame?.height ?? 500;
+    const width = props.frame?.width ?? 350;
+
+    if (width > 800 && height > 370) {
       headlineSize = '3xl';
       subheadlineSize = '2xl';
       buttonSize = 'lg';
       spacing = 4;
-    } else if (props.frame.width > 500 && props.frame.height > 270) {
+    } else if (width > 500 && height > 270) {
       headlineSize = '2xl';
       subheadlineSize = 'lg';
       buttonSize = 'md';

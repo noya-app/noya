@@ -4,7 +4,8 @@ module.exports = {
   content: [],
   safelist: [
     {
-      pattern: /^(shadow|border|rounded|opacity|bg|blur|text|font).*/,
+      pattern:
+        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis).*/,
     },
   ],
   plugins: [
@@ -23,6 +24,17 @@ module.exports = {
         'text-left',
         'text-center',
         'text-right',
+        'flex-row',
+        'flex-col',
+        'items-start',
+        'items-center',
+        'items-end',
+        'justify-start',
+        'justify-center',
+        'justify-end',
+        'p-{spacing}',
+        'gap-{spacing}',
+        'basis-{spacing}',
         // 'text-justify',
         // 'text-start',
         // 'text-end',

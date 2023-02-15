@@ -31,8 +31,9 @@ export const SelectBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const size =
-      props.frame.height >= 45 ? 'lg' : props.frame.height >= 30 ? 'md' : 'sm';
+    const height = props.frame?.height ?? 30;
+
+    const size = height >= 45 ? 'lg' : height >= 30 ? 'md' : 'sm';
 
     const { backgroundColor, color, borderColor } = getBlockThemeColors({
       dark,

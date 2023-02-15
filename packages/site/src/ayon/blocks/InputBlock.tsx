@@ -22,8 +22,9 @@ export const InputBlock: BlockDefinition = {
       parameters: { dark, accent, disabled },
     } = parseBlock(props.blockText, parser);
 
-    const size =
-      props.frame.height >= 45 ? 'lg' : props.frame.height >= 30 ? 'md' : 'sm';
+    const height = props.frame?.height ?? 30;
+
+    const size = height >= 45 ? 'lg' : height >= 30 ? 'md' : 'sm';
 
     const { backgroundColor, color, borderColor } = getBlockThemeColors({
       dark,

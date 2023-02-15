@@ -24,13 +24,14 @@ export const AvatarBlock: BlockDefinition = {
     const name = !src ? content : undefined;
 
     // Size up in 14px increments
-    const size =
-      AVATAR_SIZES[
-        Math.min(
-          Math.floor(Math.max(props.frame.width, props.frame.height) / 14),
-          AVATAR_SIZES.length - 1,
-        )
-      ];
+    const size = props.frame
+      ? AVATAR_SIZES[
+          Math.min(
+            Math.floor(Math.max(props.frame.width, props.frame.height) / 14),
+            AVATAR_SIZES.length - 1,
+          )
+        ]
+      : 'md';
 
     return <Avatar size={size} name={name} src={src} />;
   },

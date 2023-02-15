@@ -22,11 +22,16 @@ export const BoxBlock: BlockDefinition = {
 
     return (
       <Box
+        display="flex"
+        {...(props.frame && {
+          width: `${props.frame.width}px`,
+          height: `${props.frame.height}px`,
+        })}
         bg={color}
-        w="100%"
-        h="100%"
         className={getBlockClassName(hashtags)}
-      />
+      >
+        {props.children}
+      </Box>
     );
   },
 };

@@ -22,8 +22,8 @@ export const SwitchBlock: BlockDefinition = {
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
-    const size =
-      props.frame.height >= 35 ? 'lg' : props.frame.height >= 25 ? 'md' : 'sm';
+    const height = props.frame?.height ?? 25;
+    const size = height >= 35 ? 'lg' : height >= 25 ? 'md' : 'sm';
     return <Switch size={size} isChecked={!!on} isDisabled={!!disabled} />;
   },
 };

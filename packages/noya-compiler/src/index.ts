@@ -103,6 +103,7 @@ export function createElement(
     symbolId: layer.symbolID,
     blockText: layer.blockText,
     resolvedBlockData: layer.resolvedBlockData,
+    getBlock: (id) => Blocks[id],
   });
 
   if (!element || !isValidElement(element)) return;

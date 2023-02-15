@@ -48,7 +48,7 @@ export const TableBlock: BlockDefinition = {
     return (
       <VStack
         alignItems="left"
-        height={`${props.frame.height}px`}
+        height={`100%`}
         backgroundColor={backgroundColor}
         backdropFilter="auto"
         backdropBlur="10px"

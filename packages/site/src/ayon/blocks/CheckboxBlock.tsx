@@ -25,11 +25,16 @@ export const CheckboxBlock: BlockDefinition = {
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
-    const size =
-      props.frame.height >= 30 ? 'lg' : props.frame.height >= 20 ? 'md' : 'sm';
+    const size = !props.frame
+      ? 'md'
+      : props.frame.height >= 30
+      ? 'lg'
+      : props.frame.height >= 20
+      ? 'md'
+      : 'sm';
     return (
       <Checkbox size={size} isChecked={!!on} isDisabled={!!disabled}>
-        {props.frame.width > 40 && content}
+        {props.frame ? props.frame.width > 40 && content : content}
       </Checkbox>
     );
   },

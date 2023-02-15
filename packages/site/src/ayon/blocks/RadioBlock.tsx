@@ -25,11 +25,15 @@ export const RadioBlock: BlockDefinition = {
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
-    const size =
-      props.frame.height >= 30 ? 'lg' : props.frame.height >= 20 ? 'md' : 'sm';
+
+    const height = props.frame ? props.frame.height : 20;
+    const width = props.frame ? props.frame.width : 40;
+
+    const size = height >= 30 ? 'lg' : height >= 20 ? 'md' : 'sm';
+
     return (
       <Radio size={size} isChecked={!!on} isDisabled={!!disabled}>
-        {props.frame.width > 40 && content}
+        {width >= 40 && content}
       </Radio>
     );
   },

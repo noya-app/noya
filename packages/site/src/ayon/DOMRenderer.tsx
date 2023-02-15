@@ -1,7 +1,12 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { createResizeTransform, Size, transformRect } from 'noya-geometry';
+import {
+  createResizeTransform,
+  Rect,
+  Size,
+  transformRect,
+} from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { BlockProps, Layers, Selectors } from 'noya-state';
 import React, { ComponentProps, useRef } from 'react';
@@ -13,7 +18,8 @@ function SymbolRenderer({
   symbolId,
   blockText,
   resolvedBlockData,
-}: { symbolId: string } & BlockProps) {
+  getBlock,
+}: BlockProps & { frame: Rect; symbolId: string }) {
   return (
     <div
       style={{
@@ -24,11 +30,12 @@ function SymbolRenderer({
         height: frame.height,
       }}
     >
-      {Blocks[symbolId].render({
+      {getBlock(symbolId).render({
         symbolId,
         frame,
         blockText,
         resolvedBlockData,
+        getBlock,
       })}
     </div>
   );
@@ -60,6 +67,8 @@ function DOMRendererContent({
 
   const paddedRect = transformRect(rect, transform);
 
+  const getBlock = (symbolId: string) => Blocks[symbolId];
+
   return (
     <ChakraProvider>
       <div
@@ -90,6 +99,7 @@ function DOMRendererContent({
             symbolId={layer.symbolID}
             blockText={layer.blockText}
             resolvedBlockData={layer.resolvedBlockData}
+            getBlock={getBlock}
           />
         ))}
         {state.interactionState.type === 'drawing' && (
@@ -105,6 +115,7 @@ function DOMRendererContent({
                 ? buttonSymbol.symbolID
                 : state.interactionState.shapeType.symbolId
             }
+            getBlock={getBlock}
           />
         )}
       </div>

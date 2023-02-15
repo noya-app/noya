@@ -275,3 +275,17 @@ export function getTextAlign({
 }: ParsedBlockItemParameters) {
   return left ? 'left' : right ? 'right' : center ? 'center' : undefined;
 }
+
+export function encodeBlockItem(blockItem: ParsedBlockItem) {
+  const { content, parameters } = blockItem;
+
+  const encodedParameters = Object.entries(parameters).map(([key, value]) => {
+    if (value === true) {
+      return `#${key}`;
+    } else {
+      return `#${key}=${value}`;
+    }
+  });
+
+  return [content, ...encodedParameters].join(' ');
+}

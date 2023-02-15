@@ -47,7 +47,7 @@ export const SidebarBlock: BlockDefinition = {
     return (
       <VStack
         alignItems="left"
-        height={`${props.frame.height}px`}
+        height={'100%'}
         spacing="5px"
         paddingY="10px"
         paddingX="10px"

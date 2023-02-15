@@ -38,8 +38,13 @@ export type SiblingBlockProps = {
   blockText?: string;
 };
 
-export type BlockProps = SiblingBlockProps & {
+export type BlockProps = {
+  symbolId: string;
+  frame?: Rect;
+  blockText?: string;
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
+  getBlock: (symbolId: string) => BlockDefinition;
+  children?: ReactNode;
 };
 
 export type InferBlockProps = {

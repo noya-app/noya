@@ -19,12 +19,14 @@ export const heading6SymbolId = '467ed35a-0351-4997-ab1e-44b2c6779111';
 export const writeSymbolId = 'a0951cdf-6023-4cda-b5fc-8c2a8d0d9986';
 export const headerBarSymbolId = 'ab3fbd14-5b81-4c58-873c-95683f4b03d7';
 export const heroSymbolId = 'd15edd3e-df47-438a-9c92-059b4c14915d';
+export const heroSymbolV2Id = '61eb943b-7ee7-4b33-9315-aac7cb2d2764';
 export const iconSymbolId = '18682473-676a-46d3-8faf-68dc5b1c204f';
 export const sidebarSymbolId = '5733e3d6-9688-4c6d-b031-6be27d05767a';
 export const tableSymbolId = 'c152b560-d8af-4b16-8202-55111647d17a';
 export const selectSymbolId = '7e913e19-97c6-442f-8cc4-58c4f2e71e77';
 export const radioSymbolId = 'e2fbabf8-81f4-4d43-a56d-6067737df0ea';
 export const textareaSymbolId = '7bcb8f7b-7645-429b-89f0-2298fef4ccb6';
+export const spacerSymbolId = '15907162-13f5-4366-81af-19ced2192245';
 
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
@@ -108,7 +110,26 @@ export const headerBarSymbol = SketchModel.symbolMaster({
 
 export const heroSymbol = SketchModel.symbolMaster({
   symbolID: heroSymbolId,
+  name: 'HeroLegacyV1',
+});
+
+export const heroSymbolV2 = SketchModel.symbolMaster({
+  symbolID: heroSymbolV2Id,
   name: 'Hero',
+  layers: [
+    SketchModel.symbolInstance({
+      symbolID: heading2SymbolId,
+    }),
+    SketchModel.symbolInstance({
+      symbolID: textSymbolId,
+    }),
+    SketchModel.symbolInstance({
+      symbolID: spacerSymbolId,
+    }),
+    SketchModel.symbolInstance({
+      symbolID: buttonSymbolId,
+    }),
+  ],
 });
 
 export const iconSymbol = SketchModel.symbolMaster({
@@ -141,6 +162,11 @@ export const textareaSymbol = SketchModel.symbolMaster({
   name: 'Textarea',
 });
 
+export const spacerSymbol = SketchModel.symbolMaster({
+  symbolID: spacerSymbolId,
+  name: 'Spacer',
+});
+
 export const allAyonSymbols = [
   buttonSymbol,
   avatarSymbol,
@@ -159,10 +185,12 @@ export const allAyonSymbols = [
   writeSymbol,
   headerBarSymbol,
   heroSymbol,
+  heroSymbolV2,
   iconSymbol,
   sidebarSymbol,
   tableSymbol,
   selectSymbol,
   radioSymbol,
   textareaSymbol,
+  // spacerSymbol,
 ];

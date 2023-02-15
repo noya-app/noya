@@ -16,6 +16,9 @@ const globalHashtags = [
   'warning',
   'danger',
   'disabled',
+  'xs',
+  'md',
+  'lg',
 ];
 
 const parser = 'regular';
@@ -38,6 +41,9 @@ export const ButtonBlock: BlockDefinition = {
         warning,
         danger,
         disabled,
+        xs,
+        lg,
+        md,
       },
     } = parseBlock(props.blockText, parser, { placeholder: placeholderText });
 
@@ -57,19 +63,24 @@ export const ButtonBlock: BlockDefinition = {
 
     const colors = buttonColors[buttonColorKey];
 
-    let size;
-    if (props.frame.height < 30) {
-      size = 'xs' as const;
-    } else if (props.frame.height > 50) {
-      size = 'lg' as const;
-    } else {
-      size = 'md' as const;
+    let size = xs ? 'xs' : lg ? 'lg' : md ? 'md' : undefined;
+
+    if (props.frame && size === undefined) {
+      if (props.frame.height < 30) {
+        size = 'xs' as const;
+      } else if (props.frame.height > 50) {
+        size = 'lg' as const;
+      } else {
+        size = 'md' as const;
+      }
     }
 
     return (
       <Button
+        {...(props.frame && {
+          width: `${props.frame.width}px`,
+        })}
         size={size}
-        isFullWidth
         backgroundColor={colors.backgroundColor}
         color={colors.color}
         isDisabled={!!disabled}
