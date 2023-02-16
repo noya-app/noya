@@ -1,5 +1,6 @@
 import { BlockDefinition, Layers } from 'noya-state';
 import { parseBlock } from '../parse';
+import { BoxBlock } from './BoxBlock';
 import { renderNewlineSeparated } from './render';
 import { isWithinRectRange } from './score';
 import { spacerSymbolId } from './symbolIds';
@@ -23,7 +24,7 @@ const placeholderText = heroSymbolV2.layers
 export const HeroBlockV2: BlockDefinition = {
   symbol: heroSymbolV2,
   parser,
-  hashtags: ['dark'],
+  hashtags: BoxBlock.hashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (

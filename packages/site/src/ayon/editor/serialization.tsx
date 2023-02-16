@@ -53,12 +53,14 @@ export function fromSymbol(
       type: 'paragraph',
       children: [{ text: value ?? '' }],
       label: name,
+      symbolId: layer.symbolID,
     };
   });
 
   const rootNode: ParagraphElement = {
     type: 'paragraph',
     children: [{ text: instance.blockText ?? '' }],
+    symbolId: instance.symbolID,
   };
 
   return [...layerNodes, rootNode];

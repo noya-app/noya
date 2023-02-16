@@ -560,7 +560,6 @@ export const Widget = forwardRef(function Widget(
               isEditing={isEditing}
               isSelected={isSelected}
               blockTypes={blockTypes}
-              blockText={blockText}
               layer={layer}
               parent={parent}
               onChangeBlockContent={onChangeBlockContent}

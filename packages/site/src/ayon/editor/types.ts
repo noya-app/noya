@@ -5,6 +5,7 @@ import { ReactEditor } from 'slate-react';
 export type ParagraphElement = {
   type: 'paragraph';
   label?: string;
+  symbolId: string;
   children: Descendant[];
 };
 

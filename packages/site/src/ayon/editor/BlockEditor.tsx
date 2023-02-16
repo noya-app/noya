@@ -19,7 +19,14 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { createEditor, Descendant, Editor, Range, Transforms } from 'slate';
+import {
+  createEditor,
+  Descendant,
+  Editor,
+  Element as SlateElement,
+  Range,
+  Transforms,
+} from 'slate';
 import { withHistory } from 'slate-history';
 import {
   Editable,
@@ -30,12 +37,12 @@ import {
 import { Blocks } from '../blocks';
 import { allAyonSymbols } from '../blocks/symbols';
 import { InferredBlockTypeResult } from '../types';
-import { useCompletionMenu } from '../useCompletionMenu';
+import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
 import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { fromSymbol, toContent } from './serialization';
-import { CustomEditor } from './types';
+import { CustomEditor, ParagraphElement } from './types';
 import { withLayout } from './withLayout';
 
 export interface IBlockEditor {
@@ -48,7 +55,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
     isSelected,
     layer,
     parent,
-    blockText,
     blockTypes,
     onChangeBlockContent,
     onFocusCanvas,
@@ -57,7 +63,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
     isSelected: boolean;
     layer: Sketch.SymbolInstance;
     parent: ParentLayer;
-    blockText: string;
     blockTypes: InferredBlockTypeResult[];
     onChangeBlockContent: (content: BlockContent) => void;
     onFocusCanvas: () => void;
@@ -128,30 +133,12 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
   });
 
+  const [hashtagItems, setHashtagItems] = useState<CompletionItem[]>([]);
+
   const hashCompletionMenu = useCompletionMenu({
     getPosition: getRangeDOMPosition,
     showExactMatch: false,
-    possibleItems: (blockDefinition?.hashtags ?? []).map((item) => ({
-      name: item,
-      id: item,
-      icon: (
-        <div
-          style={{
-            width: 19,
-            height: 19,
-            borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
-            background: /^rounded/.test(item)
-              ? 'rgb(148 163 184)'
-              : /^opacity/.test(item)
-              ? 'black'
-              : undefined,
-          }}
-          className={item}
-        >
-          {/^(text|font)/.test(item) ? 'Tt' : null}
-        </div>
-      ),
-    })),
+    possibleItems: hashtagItems,
     onSelect: (target, item) => {
       amplitude.logEvent('Project - Block - Inserted Hashtag', {
         'Block Type': blockDefinition.symbol.symbolID,
@@ -181,9 +168,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
+      const isEmpty = Editor.string(editor, []).trim() === '';
+
       const handleDelete = () => {
         // If there's text, don't delete the layer
-        if (blockText) return FALLTHROUGH;
+        if (!isEmpty) return FALLTHROUGH;
 
         dispatch('deleteLayer', layer.do_objectID);
         dispatch('interaction', ['reset']);
@@ -210,16 +199,28 @@ export const BlockEditor = forwardRef(function BlockEditor(
         },
         Backspace: handleDelete,
         Delete: handleDelete,
+        Tab: () => {
+          Transforms.move(editor, { distance: 1, unit: 'line' });
+
+          const block = Editor.above(editor, {
+            match: (node) =>
+              SlateElement.isElement(node) && Editor.isBlock(editor, node),
+          });
+
+          if (!block) return;
+
+          Transforms.select(editor, Editor.end(editor, block[1]));
+        },
         // These may override the Escape shortcut
         ...symbolCompletionMenu.keyMap,
         ...hashCompletionMenu.keyMap,
       });
     },
     [
+      editor,
       isMouseWithinEditor,
       symbolCompletionMenu.keyMap,
       hashCompletionMenu.keyMap,
-      blockText,
       dispatch,
       layer.do_objectID,
       onFocusCanvas,
@@ -308,7 +309,25 @@ export const BlockEditor = forwardRef(function BlockEditor(
         if (hashCommand) {
           const { range, match } = hashCommand;
 
-          hashCompletionMenu.open(range, match);
+          const elementPair = Editor.above<ParagraphElement>(editor, {
+            at: range,
+            match: (n) => SlateElement.isElement(n) && n.type === 'paragraph',
+          });
+
+          if (elementPair) {
+            const [element] = elementPair;
+            const blockDefinition = Blocks[element.symbolId];
+
+            setHashtagItems(
+              (blockDefinition?.hashtags ?? []).map((item) => ({
+                name: item,
+                id: item,
+                icon: <HashtagIcon item={item} />,
+              })),
+            );
+
+            hashCompletionMenu.open(range, match);
+          }
         } else {
           hashCompletionMenu.close();
         }
@@ -338,3 +357,23 @@ export const BlockEditor = forwardRef(function BlockEditor(
     </ControlledEditor>
   );
 });
+
+function HashtagIcon({ item }: { item: string }) {
+  return (
+    <div
+      style={{
+        width: 19,
+        height: 19,
+        borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
+        background: /^rounded/.test(item)
+          ? 'rgb(148 163 184)'
+          : /^opacity/.test(item)
+          ? 'black'
+          : undefined,
+      }}
+      className={item}
+    >
+      {/^(text|font)/.test(item) ? 'Tt' : null}
+    </div>
+  );
+}
