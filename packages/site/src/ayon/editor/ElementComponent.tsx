@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import React from 'react';
 import {
   DefaultElement,
@@ -7,12 +6,7 @@ import {
   useSelected,
 } from 'slate-react';
 
-export function ElementComponent({
-  symbol,
-  ...props
-}: RenderElementProps & {
-  symbol: Sketch.SymbolMaster;
-}) {
+export function ElementComponent(props: RenderElementProps) {
   const selected = useSelected();
   const focused = useFocused();
 

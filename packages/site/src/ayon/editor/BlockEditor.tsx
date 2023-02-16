@@ -7,6 +7,7 @@ import {
   handleKeyboardEvent,
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
+import { useLazyValue } from 'noya-react-utils';
 import { BlockContent, DrawableLayerType, ParentLayer } from 'noya-state';
 import { debounce } from 'noya-utils';
 import React, {
@@ -16,7 +17,6 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { createEditor, Descendant, Editor, Range, Transforms } from 'slate';
@@ -25,7 +25,6 @@ import {
   Editable,
   ReactEditor,
   RenderElementProps,
-  Slate,
   withReact,
 } from 'slate-react';
 import { Blocks } from '../blocks';
@@ -33,6 +32,7 @@ import { allAyonSymbols } from '../blocks/symbols';
 import { InferredBlockTypeResult } from '../types';
 import { useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
+import { ControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { fromSymbol, toContent, toString } from './serialization';
 import { CustomEditor } from './types';
@@ -71,63 +71,25 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const blockDefinition = Blocks[layer.symbolID];
 
-  const editorRef = useRef<CustomEditor>();
-
-  // Creating an editor ref with useLazyValue fixes hot reload
-  // TODO: Swap editor or validation when component type changes?
-  if (!editorRef.current) {
-    const newEditor = withLayout(
-      blockDefinition.symbol,
-      withHistory(withReact(createEditor())),
-    );
-    newEditor.blockDefinition = blockDefinition;
-    editorRef.current = newEditor;
-  }
-
-  useEffect(() => {
-    if (!editorRef.current) return;
-
-    if (editorRef.current.blockDefinition === blockDefinition) return;
-
-    const newEditor = withLayout(
-      blockDefinition.symbol,
-      withHistory(withReact(createEditor())),
-    );
-    newEditor.blockDefinition = blockDefinition;
-    editorRef.current = newEditor;
-  }, [blockDefinition]);
-
-  const editor = editorRef.current;
-
-  const initialNodes = useMemo(
-    () => fromSymbol(blockDefinition.symbol, layer),
-    [blockDefinition.symbol, layer],
+  const editor = useLazyValue<CustomEditor>(() =>
+    withLayout(layer.symbolID, withHistory(withReact(createEditor()))),
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [internalNodes, setInternalNodes] = useState(
-    fromSymbol(blockDefinition.symbol, layer),
-  );
+  const initialNodes = fromSymbol(blockDefinition.symbol, layer);
 
   const setBlockNodes = useCallback(
     (nodes: Descendant[]) => {
-      setInternalNodes(nodes);
-      onChangeBlockContent(toContent(blockDefinition.symbol, nodes));
+      const content = toContent(blockDefinition.symbol, nodes);
+
+      onChangeBlockContent(content);
     },
     [blockDefinition.symbol, onChangeBlockContent],
   );
-
-  // useEffect(() => {
-  //   if (isDeepEqual(internalNodes, initialNodes)) return;
-
-  //   editor.children = initialNodes;
-  // }, [editor, internalNodes, blockText, initialNodes]);
 
   useImperativeHandle(forwardedRef, () => ({
     focus: () => {
       ReactEditor.focus(editor);
       Transforms.select(editor, Editor.start(editor, []));
-      // Transforms.select(editor, Editor.range(editor, []));
     },
   }));
 
@@ -285,14 +247,14 @@ export const BlockEditor = forwardRef(function BlockEditor(
   );
 
   const renderElement = useCallback(
-    (props: RenderElementProps) => (
-      <ElementComponent symbol={blockDefinition.symbol} {...props} />
-    ),
-    [blockDefinition.symbol],
+    (props: RenderElementProps) => <ElementComponent {...props} />,
+    [],
   );
 
   return (
-    <Slate
+    <ControlledEditor
+      key={layer.symbolID}
+      symbolId={layer.symbolID}
       editor={editor}
       value={initialNodes}
       // This can fire after the selection has changed, so we need to be explicit
@@ -378,6 +340,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
       />
       {symbolCompletionMenu.element}
       {hashCompletionMenu.element}
-    </Slate>
+    </ControlledEditor>
   );
 });

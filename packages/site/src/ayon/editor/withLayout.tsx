@@ -1,20 +1,27 @@
-import Sketch from 'noya-file-format';
 import { Element as SlateElement, Node, Transforms } from 'slate';
 import { Blocks } from '../blocks';
 import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
 import { CustomEditor, ParagraphElement } from './types';
 
-export function withLayout(symbol: Sketch.SymbolMaster, editor: CustomEditor) {
+export function withLayout(initialSymbolId: string, editor: CustomEditor) {
   const { normalizeNode } = editor;
 
-  const layers = layersWithoutSpacers(symbol);
+  editor.symbolId = initialSymbolId;
 
   editor.normalizeNode = ([node, path]) => {
+    const symbol = Blocks[editor.symbolId].symbol;
+
+    const layers = layersWithoutSpacers(symbol);
+
     // If this is the editor
     if (path.length === 0) {
       // Ensure there's a node for each layer and the container
       while (editor.children.length < layers.length + 1) {
-        const block = Blocks[layers[editor.children.length - 1].symbolID];
+        const layer = layers[editor.children.length - 1];
+
+        const childLayer = layer ? layer.symbolID : symbol.symbolID;
+
+        const block = Blocks[childLayer];
 
         const paragraph: ParagraphElement = {
           type: 'paragraph',

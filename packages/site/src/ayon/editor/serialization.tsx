@@ -1,7 +1,6 @@
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { BlockContent, Overrides } from 'noya-state';
-import { zip } from 'noya-utils';
 import { Descendant, Node } from 'slate';
 import { Blocks } from '../blocks';
 import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
@@ -9,27 +8,27 @@ import { ParagraphElement } from './types';
 
 export function toContent(
   symbol: Sketch.SymbolMaster,
-  value: Descendant[],
+  nodes: Descendant[],
 ): BlockContent {
-  const last = value[value.length - 1];
-  const rest = value.slice(0, -1);
-
   const layers = layersWithoutSpacers(symbol);
+  const overrides: Sketch.OverrideValue[] = [];
 
-  const overrides = zip(layers, rest).map(
-    ([layer, node]): Sketch.OverrideValue => {
-      const key = Overrides.encodeName([layer.do_objectID], 'blockText');
-      const value = Node.string(node);
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    const key = Overrides.encodeName([layer.do_objectID], 'blockText');
+    const value = nodes[i] ? Node.string(nodes[i]) : '';
 
-      return SketchModel.overrideValue({
+    overrides.push(
+      SketchModel.overrideValue({
         overrideName: key,
         value,
-      });
-    },
-  );
+      }),
+    );
+  }
 
   return {
-    blockText: Node.string(last),
+    blockText:
+      nodes.length > layers.length ? Node.string(nodes[layers.length]) : '',
     overrides: overrides,
   };
 }
