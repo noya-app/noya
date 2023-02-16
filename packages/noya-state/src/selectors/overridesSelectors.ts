@@ -91,6 +91,8 @@ export function applyOverrides({
             break;
           }
           case 'blockText':
+            if (!override.value) return;
+
             override.layer.blockText = override.value;
             break;
         }

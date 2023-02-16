@@ -7,15 +7,8 @@ import {
   handleKeyboardEvent,
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
-import { SketchModel } from 'noya-sketch-model';
-import {
-  BlockContent,
-  BlockDefinition,
-  DrawableLayerType,
-  Overrides,
-  ParentLayer,
-} from 'noya-state';
-import { debounce, zip } from 'noya-utils';
+import { BlockContent, DrawableLayerType, ParentLayer } from 'noya-state';
+import { debounce } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -26,199 +19,27 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { createEditor, Descendant, Editor, Range, Transforms } from 'slate';
+import { withHistory } from 'slate-history';
 import {
-  BaseEditor,
-  createEditor,
-  Descendant,
-  Editor,
-  Element as SlateElement,
-  Node,
-  Range,
-  Transforms,
-} from 'slate';
-import { HistoryEditor, withHistory } from 'slate-history';
-import {
-  DefaultElement,
   Editable,
   ReactEditor,
   RenderElementProps,
   Slate,
-  useFocused,
-  useSelected,
   withReact,
 } from 'slate-react';
-import { Blocks } from './blocks';
-
-import {
-  heading1SymbolId,
-  heading2SymbolId,
-  heading3SymbolId,
-  heading4SymbolId,
-  heading5SymbolId,
-  heading6SymbolId,
-  textSymbolId,
-} from './blocks/symbolIds';
-import { allAyonSymbols } from './blocks/symbols';
-import { layersWithoutSpacers } from './blocks/zipWithoutSpacers';
-import { InferredBlockTypeResult } from './types';
-import { useCompletionMenu } from './useCompletionMenu';
+import { Blocks } from '../blocks';
+import { allAyonSymbols } from '../blocks/symbols';
+import { InferredBlockTypeResult } from '../types';
+import { useCompletionMenu } from '../useCompletionMenu';
+import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
+import { ElementComponent } from './ElementComponent';
+import { fromSymbol, toContent, toString } from './serialization';
+import { CustomEditor } from './types';
+import { withLayout } from './withLayout';
 
 export interface IBlockEditor {
   focus: () => void;
-}
-
-const BLOCK_TYPE_SHORTCUTS: { [shortcut: string]: string } = {
-  '#': heading1SymbolId,
-  '##': heading2SymbolId,
-  '###': heading3SymbolId,
-  '####': heading4SymbolId,
-  '#####': heading5SymbolId,
-  '######': heading6SymbolId,
-  '"': textSymbolId,
-};
-
-function textCommand(
-  triggerPrefix: string,
-  editor: Editor,
-): { range: Range; match: string } | undefined {
-  const { selection } = editor;
-
-  if (!selection || !Range.isCollapsed(selection)) return;
-
-  const triggerRegex = new RegExp(`\\${triggerPrefix}([A-Za-z0-9\\-]*)$`);
-  const afterRegex = /^(,|\s|$)/;
-
-  const [start] = Range.edges(selection);
-
-  const lineStart = Editor.before(editor, start, { unit: 'line' });
-  const lineEnd = Editor.after(editor, start, { unit: 'line' });
-
-  if (!lineStart) return;
-
-  const beforeText = Editor.string(
-    editor,
-    Editor.range(editor, lineStart, start),
-  );
-  const afterText = Editor.string(editor, Editor.range(editor, start, lineEnd));
-
-  const beforeMatch = beforeText.match(triggerRegex);
-  const afterMatch = afterText.match(afterRegex);
-
-  if (!beforeMatch || !afterMatch) return;
-
-  const match = beforeMatch[1];
-
-  const rangeStart = Editor.before(editor, start, {
-    unit: 'character',
-    distance: match.length + 1,
-  });
-
-  if (!rangeStart) return;
-
-  const range = Editor.range(editor, rangeStart, start);
-
-  return { range, match };
-}
-
-function textShortcut(
-  triggerPrefix: string,
-  editor: Editor,
-): { range: Range; match: string } | undefined {
-  const { selection } = editor;
-
-  if (!selection || !Range.isCollapsed(selection)) return;
-
-  const triggerRegex = new RegExp(`^(${triggerPrefix}) $`);
-
-  const [start] = Range.edges(selection);
-
-  const editorStart = Editor.start(editor, []);
-
-  if (!editorStart) return;
-
-  const beforeText = Editor.string(
-    editor,
-    Editor.range(editor, editorStart, start),
-  );
-
-  const beforeMatch = beforeText.match(triggerRegex);
-
-  if (!beforeMatch) return;
-
-  const match = beforeMatch[1];
-
-  const rangeStart = Editor.before(editor, start, {
-    unit: 'character',
-    distance: match.length + 1,
-  });
-
-  if (!rangeStart) return;
-
-  const range = Editor.range(editor, rangeStart, start);
-
-  return { range, match };
-}
-
-function fromSymbol(
-  symbol: Sketch.SymbolMaster,
-  instance: Sketch.SymbolInstance,
-): Descendant[] {
-  const layers = layersWithoutSpacers(symbol);
-
-  const layerNodes = layers.map((layer): ParagraphElement => {
-    const block = layer ? Blocks[layer.symbolID] : undefined;
-    const name = block ? block.symbol.name : undefined;
-
-    const value = Overrides.getOverrideValue(
-      instance.overrideValues,
-      layer.do_objectID,
-      'blockText',
-    );
-
-    return {
-      type: 'paragraph',
-      children: [{ text: value ?? '' }],
-      label: name,
-    };
-  });
-
-  const rootNode: ParagraphElement = {
-    type: 'paragraph',
-    children: [{ text: instance.blockText ?? '' }],
-  };
-
-  return [...layerNodes, rootNode];
-}
-
-function toString(value: Descendant[]): string {
-  return value.map((n) => Node.string(n)).join('\n');
-}
-
-function toContent(
-  symbol: Sketch.SymbolMaster,
-  value: Descendant[],
-): BlockContent {
-  const last = value[value.length - 1];
-  const rest = value.slice(0, -1);
-
-  const layers = layersWithoutSpacers(symbol);
-
-  const overrides = zip(layers, rest).map(
-    ([layer, node]): Sketch.OverrideValue => {
-      const key = Overrides.encodeName([layer.do_objectID], 'blockText');
-      const value = Node.string(node);
-
-      return SketchModel.overrideValue({
-        overrideName: key,
-        value,
-      });
-    },
-  );
-
-  return {
-    blockText: Node.string(last),
-    overrides: overrides,
-  };
 }
 
 export const BlockEditor = forwardRef(function BlockEditor(
@@ -560,143 +381,3 @@ export const BlockEditor = forwardRef(function BlockEditor(
     </Slate>
   );
 });
-
-function ElementComponent({
-  symbol,
-  ...props
-}: RenderElementProps & {
-  symbol: Sketch.SymbolMaster;
-}) {
-  const selected = useSelected();
-  const focused = useFocused();
-
-  if (focused && props.element.label) {
-    return (
-      <div
-        style={{
-          background: selected ? 'white' : 'rgba(0,0,0,0.05)',
-          border: `1px solid ${selected ? 'black' : 'transparent'}`,
-          padding: '4px 8px',
-          display: 'flex',
-          alignItems: 'end',
-        }}
-      >
-        <div style={{ flex: '1' }}>
-          <DefaultElement {...props} />
-        </div>
-        <span
-          contentEditable={false}
-          style={{
-            color: 'rgba(0,0,0,0.4)',
-            userSelect: 'none',
-            // TODO: Click should focus the end of the line
-            pointerEvents: 'none',
-          }}
-        >
-          {props.element.label}
-        </span>
-      </div>
-    );
-  }
-
-  return <DefaultElement {...props} />;
-}
-
-export type ParagraphElement = {
-  type: 'paragraph';
-  label?: string;
-  children: Descendant[];
-};
-
-type CustomElement = ParagraphElement;
-
-export type CustomText = {
-  bold?: boolean;
-  italic?: boolean;
-  code?: boolean;
-  text: string;
-};
-
-export type EmptyText = {
-  text: string;
-};
-
-export type CustomEditor = BaseEditor &
-  ReactEditor &
-  HistoryEditor & {
-    blockDefinition: BlockDefinition;
-  };
-
-declare module 'slate' {
-  interface CustomTypes {
-    Editor: CustomEditor;
-    Element: CustomElement;
-    Text: CustomText | EmptyText;
-  }
-}
-
-function withLayout(symbol: Sketch.SymbolMaster, editor: CustomEditor) {
-  const { normalizeNode } = editor;
-
-  const layers = layersWithoutSpacers(symbol);
-
-  editor.normalizeNode = ([node, path]) => {
-    // If this is the editor
-    if (path.length === 0) {
-      // Ensure there's a node for each layer and the container
-      while (editor.children.length < layers.length + 1) {
-        const block = Blocks[layers[editor.children.length - 1].symbolID];
-
-        const paragraph: ParagraphElement = {
-          type: 'paragraph',
-          children: [{ text: '' }],
-          label: block.symbol.name,
-        };
-
-        Transforms.insertNodes(editor, paragraph, {
-          at: path.concat(editor.children.length),
-        });
-      }
-
-      while (editor.children.length > layers.length + 1) {
-        Transforms.removeNodes(editor, {
-          at: path.concat(editor.children.length - 1),
-        });
-      }
-
-      for (const [child, childPath] of Node.children(editor, path)) {
-        if (!SlateElement.isElement(child)) continue;
-
-        const slateIndex = childPath[0];
-
-        const layer = layers[slateIndex];
-
-        if (layer) {
-          const block = Blocks[layer.symbolID];
-
-          const label = block.symbol.name;
-
-          if (child.label === label) continue;
-
-          const newProperties: Partial<SlateElement> = { label };
-
-          Transforms.setNodes<SlateElement>(editor, newProperties, {
-            at: childPath,
-          });
-        } else {
-          if (!child.label) continue;
-
-          const newProperties: Partial<SlateElement> = { label: undefined };
-
-          Transforms.setNodes<SlateElement>(editor, newProperties, {
-            at: childPath,
-          });
-        }
-      }
-    }
-
-    return normalizeNode([node, path]);
-  };
-
-  return editor;
-}
