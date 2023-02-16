@@ -124,7 +124,7 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       symbolID: textSymbolId,
-      blockText: 'Turn great ideas into new possibilities.',
+      blockText: 'Turn great ideas into new possibilities. #text-center',
     }),
     SketchModel.symbolInstance({
       symbolID: spacerSymbolId,

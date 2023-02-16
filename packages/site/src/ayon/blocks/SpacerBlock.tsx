@@ -13,6 +13,14 @@ export const SpacerBlock: BlockDefinition = {
     const { parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
 
-    return <Spacer flex="0" className={getBlockClassName(hashtags)} />;
+    return (
+      <Spacer
+        {...(props.dataSet && {
+          key: props.dataSet.id,
+        })}
+        flex="0"
+        className={getBlockClassName(hashtags)}
+      />
+    );
   },
 };

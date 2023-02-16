@@ -1,16 +1,8 @@
-import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
-import {
-  Layers,
-  Overrides,
-  PageLayer,
-  Primitives,
-  replaceTextInRange,
-  Selectors,
-} from 'noya-state';
+import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { Group, Rect } from '../../ComponentsContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
@@ -58,91 +50,16 @@ const Symbol = memo(function Symbol({
     [layer.frame, symbolMaster.frame],
   );
 
-  const overriddenSymbolMaster = useMemo(() => {
-    return produce(symbolMaster, (draft) => {
-      layer.overrideValues.forEach(({ overrideName, value }) => {
-        const {
-          layerIdPath: [layerId, ...remainingLayerIdPath],
-          propertyType,
-        } = Overrides.decodeName(overrideName);
-
-        const targetLayer = Layers.find(
-          draft,
-          (l) => l.do_objectID === layerId,
-        ) as PageLayer;
-
-        if (!targetLayer) return;
-
-        if (remainingLayerIdPath.length > 0) {
-          if (!Layers.isSymbolInstance(targetLayer)) return;
-
-          // Propagate the override into the nested symbol and handle it there instead
-          targetLayer.overrideValues.push({
-            _class: 'overrideValue',
-            overrideName: Overrides.encodeName(
-              remainingLayerIdPath,
-              propertyType,
-            ),
-            value,
-          });
-        } else {
-          const override = Overrides.getLayerOverride(
-            targetLayer,
-            propertyType,
-            value,
-          );
-
-          if (!override) return;
-
-          switch (override.type) {
-            case 'stringValue':
-              override.layer.attributedString = replaceTextInRange(
-                override.layer.attributedString,
-                [0, override.layer.attributedString.string.length],
-                override.value,
-                Selectors.getEncodedStringAttributes(override.layer.style),
-              );
-              break;
-            case 'symbolID':
-              override.layer.symbolID = override.value;
-              break;
-            case 'image':
-              override.layer.image = override.value;
-              break;
-            case 'textStyle': {
-              const style = layerTextStyles.objects.find(
-                (obj) => obj.do_objectID === override.value,
-              )?.value;
-
-              if (!style || !style.textStyle) return;
-
-              override.layer.style = style;
-              override.layer.attributedString.attributes = [
-                {
-                  _class: 'stringAttribute',
-                  location: 0,
-                  length: override.layer.attributedString.string.length,
-                  attributes: style.textStyle.encodedAttributes,
-                },
-              ];
-              break;
-            }
-            case 'layerStyle': {
-              override.layer.style = layerStyles.objects.find(
-                (obj) => obj.do_objectID === override.value,
-              )?.value;
-              break;
-            }
-          }
-        }
-      });
-    });
-  }, [
-    symbolMaster,
-    layer.overrideValues,
-    layerStyles.objects,
-    layerTextStyles.objects,
-  ]);
+  const overriddenSymbolMaster = useMemo(
+    () =>
+      Selectors.applyOverrides({
+        overrideValues: layer.overrideValues,
+        symbolMaster,
+        layerStyles,
+        layerTextStyles,
+      }),
+    [layer.overrideValues, symbolMaster, layerStyles, layerTextStyles],
+  );
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 

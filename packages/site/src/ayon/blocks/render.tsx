@@ -29,9 +29,7 @@ export function getContainerBlockProps({
     frame: props.frame,
     getBlock: props.getBlock,
     symbolId: boxSymbol.symbolID,
-    ...(props.dataSet && {
-      dataSet: props.dataSet,
-    }),
+    dataSet: props.dataSet,
     blockText: encodeBlockItem(
       mergeBlock({
         block: {

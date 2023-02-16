@@ -1,4 +1,5 @@
 import { useDispatch } from 'noya-app-state-context';
+import { useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   FALLTHROUGH,
@@ -6,8 +7,7 @@ import {
   handleKeyboardEvent,
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
-import { useLazyValue } from 'noya-react-utils';
-import { DrawableLayerType, ParentLayer } from 'noya-state';
+import { BlockDefinition, DrawableLayerType, ParentLayer } from 'noya-state';
 import { debounce } from 'noya-utils';
 import React, {
   ForwardedRef,
@@ -16,6 +16,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -23,12 +24,22 @@ import {
   createEditor,
   Descendant,
   Editor,
+  Element as SlateElement,
   Node,
   Range,
   Transforms,
 } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
-import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
+import {
+  DefaultElement,
+  Editable,
+  ReactEditor,
+  RenderElementProps,
+  Slate,
+  useFocused,
+  useSelected,
+  withReact,
+} from 'slate-react';
 import { Blocks } from './blocks';
 
 import {
@@ -41,6 +52,7 @@ import {
   textSymbolId,
 } from './blocks/symbolIds';
 import { allAyonSymbols } from './blocks/symbols';
+import { layersWithoutSpacers } from './blocks/zipWithoutSpacers';
 import { InferredBlockTypeResult } from './types';
 import { useCompletionMenu } from './useCompletionMenu';
 
@@ -164,10 +176,38 @@ export const BlockEditor = forwardRef(function BlockEditor(
   },
   forwardedRef: ForwardedRef<IBlockEditor>,
 ) {
+  const theme = useDesignSystemTheme();
   const dispatch = useDispatch();
 
+  const blockDefinition = Blocks[layer.symbolID];
+
+  const editorRef = useRef<CustomEditor>();
+
   // Creating an editor ref with useLazyValue fixes hot reload
-  const editor = useLazyValue(() => withHistory(withReact(createEditor())));
+  // TODO: Swap editor or validation when component type changes?
+  if (!editorRef.current) {
+    const newEditor = withLayout(
+      blockDefinition.symbol,
+      withHistory(withReact(createEditor())),
+    );
+    newEditor.blockDefinition = blockDefinition;
+    editorRef.current = newEditor;
+  }
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    if (editorRef.current.blockDefinition === blockDefinition) return;
+
+    const newEditor = withLayout(
+      blockDefinition.symbol,
+      withHistory(withReact(createEditor())),
+    );
+    newEditor.blockDefinition = blockDefinition;
+    editorRef.current = newEditor;
+  }, [blockDefinition]);
+
+  const editor = editorRef.current;
 
   const [internalBlockText, setInternalBlockText] = useState(blockText);
 
@@ -204,8 +244,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
     name: symbol.name,
     id: symbol.symbolID,
   }));
-
-  const blockDefinition = Blocks[layer.symbolID];
 
   const getRangeDOMPosition = useCallback(
     (range: Range) => {
@@ -352,6 +390,13 @@ export const BlockEditor = forwardRef(function BlockEditor(
     [],
   );
 
+  const renderElement = useCallback(
+    (props: RenderElementProps) => (
+      <ElementComponent symbol={blockDefinition.symbol} {...props} />
+    ),
+    [blockDefinition.symbol],
+  );
+
   return (
     <Slate
       editor={editor}
@@ -425,15 +470,65 @@ export const BlockEditor = forwardRef(function BlockEditor(
         onKeyUp={onKeyUp}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        style={{ position: 'absolute', inset: 0, padding: 4 }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          padding: 4,
+          gap: '2px',
+          display: 'flex',
+          flexDirection: 'column',
+          ...theme.textStyles.small,
+        }}
         spellCheck={false}
         placeholder={blockDefinition.placeholderText}
+        renderElement={renderElement}
       />
       {symbolCompletionMenu.element}
       {hashCompletionMenu.element}
     </Slate>
   );
 });
+
+function ElementComponent({
+  symbol,
+  ...props
+}: RenderElementProps & {
+  symbol: Sketch.SymbolMaster;
+}) {
+  const selected = useSelected();
+  const focused = useFocused();
+
+  if (focused && props.element.label) {
+    return (
+      <div
+        style={{
+          background: selected ? 'white' : 'rgba(0,0,0,0.05)',
+          border: `1px solid ${selected ? 'black' : 'transparent'}`,
+          padding: '4px 8px',
+          display: 'flex',
+          alignItems: 'end',
+        }}
+      >
+        <div style={{ flex: '1' }}>
+          <DefaultElement {...props} />
+        </div>
+        <span
+          contentEditable={false}
+          style={{
+            color: 'rgba(0,0,0,0.4)',
+            userSelect: 'none',
+            // TODO: Click should focus the end of the line
+            pointerEvents: 'none',
+          }}
+        >
+          {props.element.label}
+        </span>
+      </div>
+    );
+  }
+
+  return <DefaultElement {...props} />;
+}
 
 function toString(value: Descendant[]): string {
   return value.map((n) => Node.string(n)).join('\n');
@@ -448,7 +543,7 @@ function fromString(value: string): Descendant[] {
 
 export type ParagraphElement = {
   type: 'paragraph';
-  align?: string;
+  label?: string;
   children: Descendant[];
 };
 
@@ -465,7 +560,11 @@ export type EmptyText = {
   text: string;
 };
 
-export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
+export type CustomEditor = BaseEditor &
+  ReactEditor &
+  HistoryEditor & {
+    blockDefinition: BlockDefinition;
+  };
 
 declare module 'slate' {
   interface CustomTypes {
@@ -473,4 +572,70 @@ declare module 'slate' {
     Element: CustomElement;
     Text: CustomText | EmptyText;
   }
+}
+
+function withLayout(symbol: Sketch.SymbolMaster, editor: CustomEditor) {
+  const { normalizeNode } = editor;
+
+  const layers = layersWithoutSpacers(symbol);
+
+  editor.normalizeNode = ([node, path]) => {
+    // If this is the editor
+    if (path.length === 0) {
+      // Ensure there's a node for each layer and the container
+      while (editor.children.length < layers.length + 1) {
+        const block = Blocks[layers[editor.children.length - 1].symbolID];
+
+        const paragraph: ParagraphElement = {
+          type: 'paragraph',
+          children: [{ text: '' }],
+          label: block.symbol.name,
+        };
+
+        Transforms.insertNodes(editor, paragraph, {
+          at: path.concat(editor.children.length),
+        });
+      }
+
+      while (editor.children.length > layers.length + 1) {
+        Transforms.removeNodes(editor, {
+          at: path.concat(editor.children.length - 1),
+        });
+      }
+
+      for (const [child, childPath] of Node.children(editor, path)) {
+        if (!SlateElement.isElement(child)) continue;
+
+        const slateIndex = childPath[0];
+
+        const layer = layers[slateIndex];
+
+        if (layer) {
+          const block = Blocks[layer.symbolID];
+
+          const label = block.symbol.name;
+
+          if (child.label === label) continue;
+
+          const newProperties: Partial<SlateElement> = { label };
+
+          Transforms.setNodes<SlateElement>(editor, newProperties, {
+            at: childPath,
+          });
+        } else {
+          if (!child.label) continue;
+
+          const newProperties: Partial<SlateElement> = { label: undefined };
+
+          Transforms.setNodes<SlateElement>(editor, newProperties, {
+            at: childPath,
+          });
+        }
+      }
+    }
+
+    return normalizeNode([node, path]);
+  };
+
+  return editor;
 }

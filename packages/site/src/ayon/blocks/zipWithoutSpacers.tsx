@@ -3,6 +3,15 @@ import { Layers } from 'noya-state';
 import { ParsedBlockItem } from '../parse';
 import { spacerSymbolId } from './symbolIds';
 
+export function layersWithoutSpacers(
+  symbolMaster: Sketch.SymbolMaster,
+): Sketch.SymbolInstance[] {
+  return symbolMaster.layers.filter(
+    (layer): layer is Sketch.SymbolInstance =>
+      Layers.isSymbolInstance(layer) && layer.symbolID !== spacerSymbolId,
+  );
+}
+
 export function zipWithoutSpacers(
   layers: Sketch.AnyLayer[],
   items: ParsedBlockItem[],
