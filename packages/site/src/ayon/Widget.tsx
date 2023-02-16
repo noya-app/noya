@@ -563,7 +563,6 @@ export const Widget = forwardRef(function Widget(
               blockText={blockText}
               layer={layer}
               parent={parent}
-              onChangeBlockType={onChangeBlockType}
               onChangeBlockContent={onChangeBlockContent}
               onFocusCanvas={onFocusCanvas}
             />

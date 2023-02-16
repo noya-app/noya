@@ -8,6 +8,7 @@ export type BlockContent = {
   blockText: string;
   normalizedText?: string;
   overrides?: Sketch.OverrideValue[];
+  symbolId?: string;
 };
 
 export type BlockAction =
@@ -20,7 +21,15 @@ export function blockReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'setBlockContent': {
-      const [, id, { blockText, normalizedText, overrides }] = action;
+      const [, id, { blockText, normalizedText, overrides, symbolId }] = action;
+
+      if (symbolId) {
+        state = symbolsReducer(state, [
+          'setSymbolInstanceSource',
+          symbolId,
+          'preserveCurrent',
+        ]);
+      }
 
       state = layerPropertyReducer(
         state,

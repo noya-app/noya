@@ -1,3 +1,4 @@
+import debounce from 'lodash.debounce';
 import { useDispatch } from 'noya-app-state-context';
 import { useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -8,8 +9,7 @@ import {
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
 import { useLazyValue } from 'noya-react-utils';
-import { BlockContent, DrawableLayerType, ParentLayer } from 'noya-state';
-import { debounce } from 'noya-utils';
+import { BlockContent, ParentLayer } from 'noya-state';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -32,9 +32,9 @@ import { allAyonSymbols } from '../blocks/symbols';
 import { InferredBlockTypeResult } from '../types';
 import { useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
-import { ControlledEditor } from './ControlledEditor';
+import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
-import { fromSymbol, toContent, toString } from './serialization';
+import { fromSymbol, toContent } from './serialization';
 import { CustomEditor } from './types';
 import { withLayout } from './withLayout';
 
@@ -50,7 +50,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
     parent,
     blockText,
     blockTypes,
-    onChangeBlockType,
     onChangeBlockContent,
     onFocusCanvas,
   }: {
@@ -60,7 +59,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
     parent: ParentLayer;
     blockText: string;
     blockTypes: InferredBlockTypeResult[];
-    onChangeBlockType: (type: DrawableLayerType) => void;
     onChangeBlockContent: (content: BlockContent) => void;
     onFocusCanvas: () => void;
   },
@@ -78,9 +76,14 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const initialNodes = fromSymbol(blockDefinition.symbol, layer);
 
   const setBlockNodes = useCallback(
-    (nodes: Descendant[]) => {
+    (nodes: Descendant[], symbolId?: string) => {
       const content = toContent(blockDefinition.symbol, nodes);
 
+      if (symbolId) {
+        content.symbolId = symbolId;
+      }
+
+      controlledEditorRef.current?.updateInternal(nodes, symbolId);
       onChangeBlockContent(content);
     },
     [blockDefinition.symbol, onChangeBlockContent],
@@ -113,14 +116,15 @@ export const BlockEditor = forwardRef(function BlockEditor(
     [editor],
   );
 
+  const controlledEditorRef = React.useRef<IControlledEditor>(null);
+
   const symbolCompletionMenu = useCompletionMenu({
     getPosition: getRangeDOMPosition,
     possibleItems: symbolItems,
     onSelect: (target, item) => {
+      Transforms.select(editor, Editor.start(editor, []));
       Transforms.delete(editor, { at: target });
-
-      onChangeBlockType({ symbolId: item.id });
-      setBlockNodes(editor.children);
+      setBlockNodes(editor.children, item.id);
     },
   });
 
@@ -250,9 +254,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
     (props: RenderElementProps) => <ElementComponent {...props} />,
     [],
   );
-
   return (
     <ControlledEditor
+      ref={controlledEditorRef}
       key={layer.symbolID}
       symbolId={layer.symbolID}
       editor={editor}
@@ -274,8 +278,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
           Height: layer.frame.height,
         });
 
-        const text = toString(value);
-
         const mdShortcut = textShortcut(
           Object.keys(BLOCK_TYPE_SHORTCUTS).join('|'),
           editor,
@@ -286,8 +288,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
           Transforms.delete(editor, { at: range });
 
-          onChangeBlockType({ symbolId: BLOCK_TYPE_SHORTCUTS[match] });
-          setBlockNodes(editor.children);
+          setBlockNodes(editor.children, BLOCK_TYPE_SHORTCUTS[match]);
 
           return;
         }
@@ -313,11 +314,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
         }
 
         setBlockNodes(editor.children);
-
-        // Lock the block type when the user starts editing the text
-        if (text) {
-          dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
-        }
       }}
     >
       <Editable
@@ -335,7 +331,6 @@ export const BlockEditor = forwardRef(function BlockEditor(
           ...theme.textStyles.small,
         }}
         spellCheck={false}
-        placeholder={blockDefinition.placeholderText}
         renderElement={renderElement}
       />
       {symbolCompletionMenu.element}

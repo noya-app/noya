@@ -1,19 +1,33 @@
 import { isDeepEqual } from 'noya-utils';
-import React, { ComponentProps, useEffect, useState } from 'react';
-import { Editor, Node, Point, Transforms } from 'slate';
+import React, {
+  ComponentProps,
+  ForwardedRef,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
+import { Descendant, Editor, Node, Point, Transforms } from 'slate';
 import { Slate } from 'slate-react';
 import { CustomEditor } from './types';
 
-export const ControlledEditor = function ControlledEditor({
-  value: initialValue,
-  onChange,
-  symbolId,
-  editor,
-  children,
-}: Omit<ComponentProps<typeof Slate>, 'editor'> & {
-  editor: CustomEditor;
-  symbolId: string;
-}) {
+export interface IControlledEditor {
+  updateInternal(value: Node[], symbolId?: string): void;
+}
+
+export const ControlledEditor = forwardRef(function ControlledEditor(
+  {
+    value: initialValue,
+    onChange,
+    symbolId,
+    editor,
+    children,
+  }: Omit<ComponentProps<typeof Slate>, 'editor'> & {
+    editor: CustomEditor;
+    symbolId: string;
+  },
+  forwardedRef: ForwardedRef<IControlledEditor>,
+) {
   const [internalNodes, setInternalNodes] = useState(initialValue);
 
   useEffect(() => {
@@ -29,6 +43,15 @@ export const ControlledEditor = function ControlledEditor({
     resetNodes(editor, { nodes: initialValue });
   }, [initialValue, internalNodes, editor, symbolId]);
 
+  useImperativeHandle(forwardedRef, () => ({
+    updateInternal(value: Descendant[], symbolId?: string) {
+      if (symbolId) {
+        editor.symbolId = symbolId;
+      }
+      setInternalNodes(value);
+    },
+  }));
+
   return (
     <Slate
       editor={editor}
@@ -41,7 +64,7 @@ export const ControlledEditor = function ControlledEditor({
       {children}
     </Slate>
   );
-};
+});
 
 function resetNodes(
   editor: CustomEditor,
