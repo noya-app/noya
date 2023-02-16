@@ -11,7 +11,7 @@ import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import { DrawableLayerType, Layers, Selectors } from 'noya-state';
+import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce, isExternalUrl } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -299,17 +299,10 @@ export const Content = memo(function Content({
                           'preserveCurrent',
                         );
                       }}
-                      onChangeBlockText={(text: string) => {
-                        const BlockDefinition = Blocks[layer.symbolID];
+                      onChangeBlockContent={(content: BlockContent) => {
+                        dispatch('setBlockContent', layer.do_objectID, content);
 
-                        dispatch(
-                          'setBlockText',
-                          [layer.do_objectID],
-                          text,
-                          parseBlock(text, BlockDefinition.parser).content,
-                        );
-
-                        if (text !== '') {
+                        if (content.blockText !== '') {
                           dispatch(
                             'setSymbolIdIsFixed',
                             [layer.do_objectID],

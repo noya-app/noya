@@ -9,8 +9,8 @@ import { getEncodedStringAttributes } from './textStyleSelectors';
 interface SymbolProps {
   overrideValues: Sketch.SymbolInstance['overrideValues'];
   symbolMaster: Sketch.SymbolMaster;
-  layerStyles: Sketch.SharedStyleContainer;
-  layerTextStyles: Sketch.SharedTextStyleContainer;
+  layerStyles?: Sketch.SharedStyleContainer;
+  layerTextStyles?: Sketch.SharedTextStyleContainer;
 }
 
 export function applyOverrides({
@@ -63,7 +63,7 @@ export function applyOverrides({
             override.layer.image = override.value;
             break;
           case 'textStyle': {
-            const style = layerTextStyles.objects.find(
+            const style = layerTextStyles?.objects.find(
               (obj) => obj.do_objectID === override.value,
             )?.value;
 
@@ -81,11 +81,18 @@ export function applyOverrides({
             break;
           }
           case 'layerStyle': {
-            override.layer.style = layerStyles.objects.find(
+            const style = layerStyles?.objects.find(
               (obj) => obj.do_objectID === override.value,
             )?.value;
+
+            if (!style) return;
+
+            override.layer.style = style;
             break;
           }
+          case 'blockText':
+            override.layer.blockText = override.value;
+            break;
         }
       }
     });

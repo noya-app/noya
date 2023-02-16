@@ -9,6 +9,7 @@ export * as Overrides from './overrides';
 export * from './primitives';
 export * as Primitives from './primitives';
 export * from './reducers/applicationReducer';
+export * from './reducers/blockReducer';
 export * from './reducers/canvasReducer';
 export * from './reducers/historyReducer';
 export * from './reducers/interactionReducer';

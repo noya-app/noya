@@ -40,6 +40,7 @@ export type SiblingBlockProps = {
 
 export type BlockProps = {
   symbolId: string;
+  layer?: Sketch.SymbolInstance;
   frame?: Rect;
   blockText?: string;
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];

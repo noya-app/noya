@@ -119,18 +119,22 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
     '#flex-col #items-center #justify-center #bg-transparent #p-4 #gap-3',
   layers: [
     SketchModel.symbolInstance({
+      do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
       symbolID: heading2SymbolId,
       blockText: 'Create, iterate, inspire. #text-center',
     }),
     SketchModel.symbolInstance({
+      do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
       symbolID: textSymbolId,
       blockText: 'Turn great ideas into new possibilities. #text-center',
     }),
     SketchModel.symbolInstance({
+      do_objectID: 'aa31ecb4-991d-4bdd-a5ab-18835abbdc35',
       symbolID: spacerSymbolId,
       blockText: '#basis-0',
     }),
     SketchModel.symbolInstance({
+      do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',
       symbolID: buttonSymbolId,
       blockText: 'Get started #primary #md',
     }),

@@ -25,6 +25,7 @@ export type PropertyTypeMap = {
   textStyle: string;
   layerStyle: string;
   image: ImagePropertyValue;
+  blockText: string;
 };
 
 export type PropertyType = keyof PropertyTypeMap;
@@ -37,7 +38,8 @@ export function isValidProperty<T extends PropertyType>(
     case 'stringValue':
     case 'symbolID':
     case 'layerStyle':
-    case 'textStyle': {
+    case 'textStyle':
+    case 'blockText': {
       return typeof value === 'string';
     }
     case 'image': {
@@ -55,6 +57,15 @@ export function getLayerOverride(
   value: PropertyValue,
 ) {
   switch (propertyType) {
+    case 'blockText': {
+      if (
+        !Layers.isSymbolInstance(layer) ||
+        !isValidProperty(propertyType, value)
+      )
+        return;
+
+      return { type: propertyType, value, layer } as const;
+    }
     case 'stringValue': {
       if (!Layers.isTextLayer(layer) || !isValidProperty(propertyType, value))
         return;
@@ -105,12 +116,12 @@ export function canOverrideProperty(
 
 export function getOverrideValue<T extends PropertyType>(
   overrideValues: Sketch.OverrideValue[],
+  pathString: string,
   propertyType: T,
-  key: string,
 ) {
   const value = overrideValues.find(({ overrideName }) => {
     const [idPathString, type] = overrideName.split('_');
-    return idPathString === key && type === propertyType;
+    return idPathString === pathString && type === propertyType;
   })?.value;
 
   return value !== undefined && isValidProperty(propertyType, value)

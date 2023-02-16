@@ -3,14 +3,12 @@ import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   Button,
   Chip,
-  Divider,
   DividerVertical,
   IconButton,
   Popover,
   Small,
   Spacer,
   Stack,
-  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
@@ -22,6 +20,7 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { SketchModel } from 'noya-sketch-model';
 import {
+  BlockContent,
   BlockProps,
   DrawableLayerType,
   getSiblingBlocks,
@@ -235,93 +234,19 @@ function BlockContentOnboardingPopover({
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function TopSuggestions({
-  currentBlockType,
-  blockTypes,
-  blockText,
-  onChangeBlockType,
-  onChangeBlockText,
-}: {
-  currentBlockType: string;
-  blockTypes: InferredBlockTypeResult[];
-  blockText: string;
-  onChangeBlockType: (type: DrawableLayerType) => void;
-  onChangeBlockText: (text: string) => void;
-}) {
-  const theme = useDesignSystemTheme();
-  const [state, dispatch] = useApplicationState();
-
-  return (
-    <ContentElement>
-      <Stack.V padding={'0 6px'}>
-        <Stack.H padding={'4px 0px'} gap={8}>
-          <Small color="textSubtle" flex="1">
-            Top Suggestions
-          </Small>
-          <IconButton
-            iconName="Cross2Icon"
-            color={theme.colors.textDisabled}
-            onPointerDown={(event) => {
-              event.preventDefault();
-
-              dispatch('setSymbolIdIsFixed', undefined, true);
-            }}
-          />
-        </Stack.H>
-
-        <Divider overflow={8} />
-        {blockTypes
-          // Remove the current block type
-          .filter(
-            (blockType) =>
-              typeof blockType.type === 'string' ||
-              blockType.type.symbolId !== currentBlockType,
-          )
-          .slice(0, 3)
-          .map((blockType, index) => {
-            const name =
-              typeof blockType.type === 'string'
-                ? blockType.type
-                : Selectors.getSymbolMaster(state, blockType.type.symbolId)
-                    .name;
-
-            return (
-              <Button
-                key={name}
-                variant="thin"
-                onPointerDown={(event) => {
-                  // Prevent default so the textarea doesn't lose focus
-                  event.preventDefault();
-                  event.stopPropagation();
-
-                  onChangeBlockType(blockType.type);
-                  onChangeBlockText(blockText);
-                }}
-              >
-                {name}
-                <Spacer.Horizontal />
-              </Button>
-            );
-          })}
-      </Stack.V>
-    </ContentElement>
-  );
-}
-
 export const Widget = forwardRef(function Widget(
   {
     layer,
     inferBlockTypes,
     onChangeBlockType,
-    onChangeBlockText,
+    onChangeBlockContent,
     uploadAsset,
     onFocusCanvas,
   }: {
     layer: Sketch.AnyLayer;
     inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
     onChangeBlockType: (type: DrawableLayerType) => void;
-    onChangeBlockText: (text: string) => void;
+    onChangeBlockContent: (content: BlockContent) => void;
     uploadAsset: (file: ArrayBuffer) => Promise<string>;
     onFocusCanvas: () => void;
   },
@@ -392,6 +317,7 @@ export const Widget = forwardRef(function Widget(
     const Block = Blocks[layer.symbolID];
 
     const blockProps: BlockProps = {
+      layer,
       getBlock: (id) => Blocks[id],
       symbolId: layer.symbolID,
       frame: layer.frame,
@@ -530,7 +456,9 @@ export const Widget = forwardRef(function Widget(
 
                           dispatch('interaction', ['reset']);
                           dispatch('selectLayer', []);
-                          onChangeBlockText(url);
+                          onChangeBlockContent({
+                            blockText: url,
+                          });
                         }}
                       />
                     )}
@@ -594,7 +522,7 @@ export const Widget = forwardRef(function Widget(
                   blockText={blockText}
                   blockTypes={blockTypes}
                   onChangeBlockType={onChangeBlockType}
-                  onChangeBlockText={onChangeBlockText}
+                  onChangeBlockContent={onChangeBlockContent}
                   currentBlockType={layer.symbolID}
                 />
               )} */}
@@ -636,7 +564,7 @@ export const Widget = forwardRef(function Widget(
               layer={layer}
               parent={parent}
               onChangeBlockType={onChangeBlockType}
-              onChangeBlockText={onChangeBlockText}
+              onChangeBlockContent={onChangeBlockContent}
               onFocusCanvas={onFocusCanvas}
             />
           </div>

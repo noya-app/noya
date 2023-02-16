@@ -1,7 +1,11 @@
-import { BlockDefinition, BlockProps, Layers } from 'noya-state';
+import {
+  applyOverrides,
+  BlockDefinition,
+  BlockProps,
+  Layers,
+} from 'noya-state';
 import { encodeBlockItem, mergeBlock, parseBlock } from '../parse';
 import { boxSymbol } from './symbols';
-import { zipWithoutSpacers } from './zipWithoutSpacers';
 
 interface BlockRenderOptions {
   props: BlockProps;
@@ -11,19 +15,8 @@ interface BlockRenderOptions {
 export function getContainerBlockProps({
   props,
   block,
-}: {
-  props: BlockProps;
-  block: Pick<BlockDefinition, 'symbol' | 'placeholderText'>;
-}): BlockProps {
-  const { symbol, placeholderText } = block;
-
-  const {
-    parameters: { dark },
-  } = parseBlock(props.blockText, 'newlineSeparated', {
-    placeholder: placeholderText,
-  });
-
-  const fallback = parseBlock(symbol.defaultBlockText, 'regular');
+}: BlockRenderOptions): BlockProps {
+  const fallback = parseBlock(block.symbol.defaultBlockText, 'regular');
 
   return {
     frame: props.frame,
@@ -33,10 +26,8 @@ export function getContainerBlockProps({
     blockText: encodeBlockItem(
       mergeBlock({
         block: {
-          content: '',
-          parameters: {
-            ...(dark && { 'bg-gray-900': true }),
-          },
+          content: props.layer?.blockText ?? '',
+          parameters: {},
         },
         fallback,
       }),
@@ -47,37 +38,22 @@ export function getContainerBlockProps({
 export function getChildrenBlockProps({
   props,
   block,
-}: {
-  props: BlockProps;
-  block: Pick<BlockDefinition, 'symbol' | 'placeholderText'>;
-}): BlockProps[] {
-  const { symbol, placeholderText } = block;
+}: BlockRenderOptions): BlockProps[] {
+  if (!props.layer) return [];
 
-  const {
-    items,
-    parameters: { dark },
-  } = parseBlock(props.blockText, 'newlineSeparated', {
-    placeholder: placeholderText,
+  const master = applyOverrides({
+    overrideValues: props.layer.overrideValues,
+    symbolMaster: block.symbol,
   });
 
-  return zipWithoutSpacers(symbol.layers, items).flatMap(([layer, item]) => {
+  return master.layers.flatMap((layer) => {
     if (!Layers.isSymbolInstance(layer)) return [];
-
-    const Block = props.getBlock(layer.symbolID);
-
-    const fallback = parseBlock(layer.blockText, Block.parser);
-
-    if (dark && Block.hashtags?.includes('text-white')) {
-      fallback.parameters['text-white'] = true;
-    }
-
-    const merged = mergeBlock({ fallback, block: item });
 
     return [
       {
         getBlock: props.getBlock,
         symbolId: layer.symbolID,
-        blockText: encodeBlockItem(merged),
+        blockText: layer.blockText,
         ...(props.dataSet && {
           dataSet: {
             id: layer.do_objectID,

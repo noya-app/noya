@@ -22,6 +22,7 @@ import {
 } from '../selectors';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
+import { BlockAction, blockReducer } from './blockReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
 import { ExportAction, exportReducer } from './exportReducer';
 import {
@@ -103,7 +104,8 @@ export type Action =
   | SymbolsAction
   | ExportAction
   | PointAction
-  | TextEditorAction;
+  | TextEditorAction
+  | BlockAction;
 
 export type ApplicationReducerContext = {
   canvasInsets: Insets;
@@ -496,6 +498,8 @@ export function applicationReducer(
     case 'insertText':
     case 'deleteText':
       return textEditorReducer(state, action, CanvasKit, context);
+    case 'setBlockContent':
+      return blockReducer(state, action, CanvasKit);
     default:
       return themeReducer(state, action);
   }

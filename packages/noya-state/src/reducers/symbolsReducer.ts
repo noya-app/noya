@@ -29,7 +29,11 @@ export type SymbolsAction =
       dimensions: 'resetToMaster' | 'preserveCurrent',
     ]
   | [type: 'goToSymbolSource', overrideName: string]
-  | [type: 'setOverrideValue', overrideName?: string, value?: string];
+  | [
+      type: 'setOverrideValue',
+      overrideName?: string,
+      value?: string | Sketch.FileRef | Sketch.DataRef,
+    ];
 
 export function symbolsReducer(
   state: ApplicationState,

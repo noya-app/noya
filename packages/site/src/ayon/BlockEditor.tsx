@@ -7,8 +7,15 @@ import {
   handleKeyboardEvent,
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
-import { BlockDefinition, DrawableLayerType, ParentLayer } from 'noya-state';
-import { debounce } from 'noya-utils';
+import { SketchModel } from 'noya-sketch-model';
+import {
+  BlockContent,
+  BlockDefinition,
+  DrawableLayerType,
+  Overrides,
+  ParentLayer,
+} from 'noya-state';
+import { debounce, zip } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -152,6 +159,68 @@ function textShortcut(
   return { range, match };
 }
 
+function fromSymbol(
+  symbol: Sketch.SymbolMaster,
+  instance: Sketch.SymbolInstance,
+): Descendant[] {
+  const layers = layersWithoutSpacers(symbol);
+
+  const layerNodes = layers.map((layer): ParagraphElement => {
+    const block = layer ? Blocks[layer.symbolID] : undefined;
+    const name = block ? block.symbol.name : undefined;
+
+    const value = Overrides.getOverrideValue(
+      instance.overrideValues,
+      layer.do_objectID,
+      'blockText',
+    );
+
+    return {
+      type: 'paragraph',
+      children: [{ text: value ?? '' }],
+      label: name,
+    };
+  });
+
+  const rootNode: ParagraphElement = {
+    type: 'paragraph',
+    children: [{ text: instance.blockText ?? '' }],
+  };
+
+  return [...layerNodes, rootNode];
+}
+
+function toString(value: Descendant[]): string {
+  return value.map((n) => Node.string(n)).join('\n');
+}
+
+function toContent(
+  symbol: Sketch.SymbolMaster,
+  value: Descendant[],
+): BlockContent {
+  const last = value[value.length - 1];
+  const rest = value.slice(0, -1);
+
+  const layers = layersWithoutSpacers(symbol);
+
+  const overrides = zip(layers, rest).map(
+    ([layer, node]): Sketch.OverrideValue => {
+      const key = Overrides.encodeName([layer.do_objectID], 'blockText');
+      const value = Node.string(node);
+
+      return SketchModel.overrideValue({
+        overrideName: key,
+        value,
+      });
+    },
+  );
+
+  return {
+    blockText: Node.string(last),
+    overrides: overrides,
+  };
+}
+
 export const BlockEditor = forwardRef(function BlockEditor(
   {
     isEditing,
@@ -161,7 +230,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     blockText,
     blockTypes,
     onChangeBlockType,
-    onChangeBlockText,
+    onChangeBlockContent,
     onFocusCanvas,
   }: {
     isEditing: boolean;
@@ -171,7 +240,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     blockText: string;
     blockTypes: InferredBlockTypeResult[];
     onChangeBlockType: (type: DrawableLayerType) => void;
-    onChangeBlockText: (text: string) => void;
+    onChangeBlockContent: (content: BlockContent) => void;
     onFocusCanvas: () => void;
   },
   forwardedRef: ForwardedRef<IBlockEditor>,
@@ -209,28 +278,35 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const editor = editorRef.current;
 
-  const [internalBlockText, setInternalBlockText] = useState(blockText);
-
-  const setBlockText = useCallback(
-    (text: string) => {
-      setInternalBlockText(text);
-      onChangeBlockText(text);
-    },
-    [onChangeBlockText],
+  const initialNodes = useMemo(
+    () => fromSymbol(blockDefinition.symbol, layer),
+    [blockDefinition.symbol, layer],
   );
 
-  const initialValue = useMemo(() => fromString(blockText), [blockText]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [internalNodes, setInternalNodes] = useState(
+    fromSymbol(blockDefinition.symbol, layer),
+  );
 
-  useEffect(() => {
-    if (internalBlockText === blockText) return;
+  const setBlockNodes = useCallback(
+    (nodes: Descendant[]) => {
+      setInternalNodes(nodes);
+      onChangeBlockContent(toContent(blockDefinition.symbol, nodes));
+    },
+    [blockDefinition.symbol, onChangeBlockContent],
+  );
 
-    editor.children = initialValue;
-  }, [initialValue, editor, internalBlockText, blockText]);
+  // useEffect(() => {
+  //   if (isDeepEqual(internalNodes, initialNodes)) return;
+
+  //   editor.children = initialNodes;
+  // }, [editor, internalNodes, blockText, initialNodes]);
 
   useImperativeHandle(forwardedRef, () => ({
     focus: () => {
       ReactEditor.focus(editor);
-      Transforms.select(editor, Editor.range(editor, []));
+      Transforms.select(editor, Editor.start(editor, []));
+      // Transforms.select(editor, Editor.range(editor, []));
     },
   }));
 
@@ -259,10 +335,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
     possibleItems: symbolItems,
     onSelect: (target, item) => {
       Transforms.delete(editor, { at: target });
-      const newText = toString(editor.children);
 
       onChangeBlockType({ symbolId: item.id });
-      setBlockText(newText);
+      setBlockNodes(editor.children);
     },
   });
 
@@ -303,9 +378,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
       Transforms.delete(editor, { at: target });
       Transforms.insertText(editor, `#${item.id} `, { at: target.anchor });
 
-      const newText = toString(editor.children);
-
-      setBlockText(newText);
+      setBlockNodes(editor.children);
     },
   });
 
@@ -400,7 +473,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
   return (
     <Slate
       editor={editor}
-      value={initialValue}
+      value={initialNodes}
       // This can fire after the selection has changed, so we need to be explicit
       // about which layer we're modifying when dispatching actions
       onChange={(value) => {
@@ -429,10 +502,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
           const { range, match } = mdShortcut;
 
           Transforms.delete(editor, { at: range });
-          const newText = toString(editor.children);
 
           onChangeBlockType({ symbolId: BLOCK_TYPE_SHORTCUTS[match] });
-          setBlockText(newText);
+          setBlockNodes(editor.children);
 
           return;
         }
@@ -457,7 +529,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           hashCompletionMenu.close();
         }
 
-        setBlockText(text);
+        setBlockNodes(editor.children);
 
         // Lock the block type when the user starts editing the text
         if (text) {
@@ -528,17 +600,6 @@ function ElementComponent({
   }
 
   return <DefaultElement {...props} />;
-}
-
-function toString(value: Descendant[]): string {
-  return value.map((n) => Node.string(n)).join('\n');
-}
-
-function fromString(value: string): Descendant[] {
-  return value.split('\n').map((line) => ({
-    type: 'paragraph',
-    children: [{ text: line }],
-  }));
 }
 
 export type ParagraphElement = {
