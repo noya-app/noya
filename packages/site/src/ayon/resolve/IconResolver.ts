@@ -41,7 +41,9 @@ export class IconResolver {
 
     resolved.then((resolvedResponse) => {
       // Validate response
-      responseSchema.parse(resolvedResponse);
+      const parsed = responseSchema.safeParse(resolvedResponse);
+
+      if (!parsed.success) return;
 
       const emitter = this.getEmitter(key, query);
 
