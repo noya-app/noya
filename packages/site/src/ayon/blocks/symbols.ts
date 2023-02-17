@@ -3,6 +3,7 @@ import {
   avatarSymbolId,
   boxSymbolId,
   buttonSymbolId,
+  cardSymbolId,
   checkboxSymbolId,
   headerBarSymbolId,
   heading1SymbolId,
@@ -142,14 +143,14 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
 });
 
 export const cardSymbol = SketchModel.symbolMaster({
-  symbolID: '8bbffbff-efc8-4d9b-9972-73a655adaf47',
+  symbolID: cardSymbolId,
   name: 'Card',
-  defaultBlockText: '#flex-col #bg-white #p-4 #border',
+  defaultBlockText: '#flex-col #bg-white #p-4 #shadow #rounded-md',
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '66a7337d-3e71-48de-b415-7d1551cd7be1',
       symbolID: imageSymbolId,
-      blockText: 'cat #aspect-video',
+      blockText: 'cat #aspect-video #rounded-lg',
     }),
     SketchModel.symbolInstance({
       symbolID: spacerSymbolId,

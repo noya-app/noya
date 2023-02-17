@@ -2,6 +2,7 @@ import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { GroupLayouts } from '../groupLayouts';
 import { Layers } from '../layer';
+import { findPageLayerIndexPaths, getCurrentPage } from '../selectors';
 import { getSelectedLayers } from '../selectors/layerSelectors';
 import {
   getSelectedSymbols,
@@ -31,8 +32,9 @@ export type SymbolsAction =
   | [type: 'goToSymbolSource', overrideName: string]
   | [
       type: 'setOverrideValue',
+      ids: string[] | undefined,
       overrideName?: string,
-      value?: string | Sketch.FileRef | Sketch.DataRef,
+      value?: Sketch.OverrideValue['value'],
     ];
 
 export function symbolsReducer(
@@ -226,31 +228,45 @@ export function symbolsReducer(
       });
     }
     case 'setOverrideValue': {
-      const [, name, value] = action;
+      const [
+        ,
+        ids = Layers.findAll(getCurrentPage(state), (layer) =>
+          state.selectedLayerIds.includes(layer.do_objectID),
+        ).map((layer) => layer.do_objectID),
+        name,
+        value,
+      ] = action;
+
+      const layerIndexPaths = findPageLayerIndexPaths(state, (layer) =>
+        ids.includes(layer.do_objectID),
+      );
 
       return produce(state, (draft) => {
-        const symbols = getSelectedLayers(draft).filter(
-          Layers.isSymbolInstance,
-        );
+        layerIndexPaths.forEach(({ pageIndex, indexPaths }) => {
+          const draftLayer = Layers.access(
+            draft.sketch.pages[pageIndex],
+            indexPaths[0],
+          );
 
-        symbols.forEach((symbol) => {
+          if (!Layers.isSymbolInstance(draftLayer)) return;
+
           if (!name) {
-            symbol.overrideValues = [];
+            draftLayer.overrideValues = [];
             return;
           }
 
-          const overrideValueIndex = symbol.overrideValues.findIndex(
+          const overrideValueIndex = draftLayer.overrideValues.findIndex(
             (property) => property.overrideName === name,
           );
 
           if (overrideValueIndex !== -1) {
             if (value === undefined) {
-              symbol.overrideValues.splice(overrideValueIndex, 1);
+              draftLayer.overrideValues.splice(overrideValueIndex, 1);
             } else {
-              symbol.overrideValues[overrideValueIndex].value = value;
+              draftLayer.overrideValues[overrideValueIndex].value = value;
             }
           } else if (value !== undefined) {
-            symbol.overrideValues.push({
+            draftLayer.overrideValues.push({
               _class: 'overrideValue',
               overrideName: name,
               value: value,

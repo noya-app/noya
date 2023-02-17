@@ -39,7 +39,7 @@ export class RedirectResolver {
 
     const resolved = getRedirectURL(url);
 
-    this.cache[key] = resolved;
+    this.cache[cacheKey] = resolved;
 
     resolved.then((resolvedUrl) => {
       const emitter = this.getEmitter(key, url);
@@ -48,6 +48,16 @@ export class RedirectResolver {
     });
 
     return resolved;
+  }
+
+  clearCache(key: string) {
+    const prefix = `${key}:`;
+
+    this.cache = Object.fromEntries(
+      Object.entries(this.cache).filter(
+        ([cacheKey]) => !cacheKey.startsWith(prefix),
+      ),
+    );
   }
 
   addListener(key: string, url: string, callback: (url: string) => void) {

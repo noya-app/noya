@@ -40,6 +40,7 @@ export function blockReducer(
       state = (overrides ?? []).reduce((result, override) => {
         return symbolsReducer(result, [
           'setOverrideValue',
+          [id],
           override.overrideName,
           override.value,
         ]);

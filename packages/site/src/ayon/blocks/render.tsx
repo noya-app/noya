@@ -27,6 +27,7 @@ export function getContainerBlockProps({
     symbolId: boxSymbol.symbolID,
     dataSet: props.dataSet,
     blockText,
+    resolvedBlockData: props.resolvedBlockData,
   };
 }
 
@@ -59,6 +60,8 @@ export function getChildrenBlockProps({
           getBlock: props.getBlock,
           symbolId: layer.symbolID,
           blockText,
+          resolvedBlockData:
+            layer.resolvedBlockData ?? fallbackLayer.resolvedBlockData,
           ...(props.dataSet && {
             dataSet: {
               id: layer.do_objectID,

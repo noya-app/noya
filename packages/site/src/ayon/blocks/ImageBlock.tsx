@@ -24,7 +24,6 @@ export const ImageBlock: BlockDefinition = {
 
     return (
       <Image
-        background={!src ? 'rgba(0,0,0,0.05)' : undefined}
         src={src}
         fit={contain ? 'contain' : fill ? 'fill' : 'cover'}
         align="middle"

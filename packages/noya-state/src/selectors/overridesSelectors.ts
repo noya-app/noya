@@ -95,6 +95,11 @@ export function applyOverrides({
 
             override.layer.blockText = override.value;
             break;
+          case 'resolvedBlockData':
+            if (!override.value) return;
+
+            override.layer.resolvedBlockData = override.value;
+            break;
         }
       }
     });

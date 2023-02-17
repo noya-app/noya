@@ -1129,6 +1129,14 @@ export enum TextBehaviour {
  * A string representation of a series of 2D points, in the format {{x, y}, {x,y}}.
  */
 export type PointListString = string;
+
+export type ResolvedBlockData = {
+  symbolID: string;
+  originalText: string;
+  resolvedText: string;
+  resolvedAt?: string;
+};
+
 /**
  * Symbol instance layers represent an instance of a symbol source
  */
@@ -1163,12 +1171,7 @@ export type SymbolInstance = {
   verticalSpacing: number;
   horizontalSpacing: number;
   blockText?: string;
-  resolvedBlockData?: {
-    symbolID: string;
-    originalText: string;
-    resolvedText: string;
-    resolvedAt?: string;
-  };
+  resolvedBlockData?: ResolvedBlockData;
   symbolIDIsFixed?: boolean;
 };
 /**
@@ -1178,7 +1181,7 @@ export type OverrideValue = {
   _class: 'overrideValue';
   do_objectID?: Uuid;
   overrideName: OverrideName;
-  value: string | Uuid | FileRef | DataRef;
+  value: string | Uuid | FileRef | DataRef | ResolvedBlockData;
 };
 /**
  * Slice layers allow the content beneath their frame to be exported

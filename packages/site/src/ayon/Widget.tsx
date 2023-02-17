@@ -26,6 +26,7 @@ import {
   getSiblingBlocks,
   InferBlockProps,
   Layers,
+  Overrides,
   Selectors,
 } from 'noya-state';
 import * as React from 'react';
@@ -37,9 +38,15 @@ import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { allInsertableSymbols, Blocks } from './blocks';
 import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
-import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
+import {
+  boxSymbolId,
+  cardSymbolId,
+  heroSymbolV2Id,
+  imageSymbolId,
+} from './blocks/symbolIds';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
 import { BlockEditorV1 } from './editor/BlockEditorV1';
+import { clearResolverCache } from './resolve/resolve';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 import { SearchCompletionMenu } from './useCompletionMenu';
@@ -419,22 +426,40 @@ export const Widget = forwardRef(function Widget(
                       <DividerVertical variant="strong" overflow={4} />
                     }
                   >
-                    {layer.symbolID === imageSymbolId &&
-                      layer.resolvedBlockData && (
-                        <IconButton
-                          key="reload"
-                          iconName="ReloadIcon"
-                          onClick={(event) => {
-                            event.preventDefault();
+                    {(layer.symbolID === imageSymbolId ||
+                      layer.symbolID === cardSymbolId) && (
+                      <IconButton
+                        key="reload"
+                        iconName="ReloadIcon"
+                        onClick={(event) => {
+                          event.preventDefault();
 
-                            dispatch(
-                              'setResolvedBlockData',
-                              layer.do_objectID,
-                              undefined,
-                            );
-                          }}
-                        />
-                      )}
+                          dispatch(
+                            'setResolvedBlockData',
+                            layer.do_objectID,
+                            undefined,
+                          );
+
+                          clearResolverCache(layer.do_objectID);
+
+                          layer.overrideValues.forEach((override) => {
+                            const { layerIdPath, propertyType } =
+                              Overrides.decodeName(override.overrideName);
+
+                            if (propertyType === 'resolvedBlockData') {
+                              clearResolverCache(layerIdPath.join('/'));
+
+                              dispatch(
+                                'setOverrideValue',
+                                [layer.do_objectID],
+                                override.overrideName,
+                                undefined,
+                              );
+                            }
+                          });
+                        }}
+                      />
+                    )}
                     {layer.symbolID === imageSymbolId && (
                       <IconButton
                         iconName="UploadIcon"
