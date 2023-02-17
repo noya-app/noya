@@ -17,6 +17,7 @@ export function getContainerBlockProps({
   block,
 }: BlockRenderOptions): BlockProps {
   const fallback = parseBlock(block.symbol.defaultBlockText, 'regular');
+  const item = parseBlock(props.layer?.blockText, 'regular');
 
   return {
     frame: props.frame,
@@ -25,10 +26,7 @@ export function getContainerBlockProps({
     dataSet: props.dataSet,
     blockText: encodeBlockItem(
       mergeBlock({
-        block: {
-          content: props.layer?.blockText ?? '',
-          parameters: {},
-        },
+        block: item,
         fallback,
       }),
     ),

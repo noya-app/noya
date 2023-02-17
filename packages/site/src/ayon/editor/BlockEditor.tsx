@@ -200,16 +200,32 @@ export const BlockEditor = forwardRef(function BlockEditor(
         Backspace: handleDelete,
         Delete: handleDelete,
         Tab: () => {
-          Transforms.move(editor, { distance: 1, unit: 'line' });
-
-          const block = Editor.above(editor, {
+          const blockPair = Editor.above(editor, {
             match: (node) =>
               SlateElement.isElement(node) && Editor.isBlock(editor, node),
           });
 
-          if (!block) return;
+          if (!blockPair) return;
 
-          Transforms.select(editor, Editor.end(editor, block[1]));
+          const [, path] = blockPair;
+
+          if (path[0] < editor.children.length - 1) {
+            Transforms.select(editor, Editor.end(editor, [path[0] + 1]));
+          }
+        },
+        'Shift-Tab': () => {
+          const blockPair = Editor.above(editor, {
+            match: (node) =>
+              SlateElement.isElement(node) && Editor.isBlock(editor, node),
+          });
+
+          if (!blockPair) return;
+
+          const [, path] = blockPair;
+
+          if (path[0] > 0) {
+            Transforms.select(editor, Editor.end(editor, [path[0] - 1]));
+          }
         },
         // These may override the Escape shortcut
         ...symbolCompletionMenu.keyMap,
