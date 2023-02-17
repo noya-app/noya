@@ -56,6 +56,11 @@ export const Blocks: Record<string, BlockDefinition> = {
   // [CardBlock.symbol.symbolID]: CardBlock,
 };
 
-export const allInsertableSymbols = Object.values(Blocks).map(
+export const allInsertableBlocks = Object.values(Blocks).filter(
+  ({ symbol }) =>
+    symbol.name !== 'Spacer' && /legacy/i.test(symbol.name) === false,
+);
+
+export const allInsertableSymbols = allInsertableBlocks.map(
   (block) => block.symbol,
 );
