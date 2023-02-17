@@ -22,6 +22,7 @@ const placeholderText = heroSymbolV2.layers
   .join('\n');
 
 export const HeroBlockV2: BlockDefinition = {
+  editorVersion: 2,
   symbol: heroSymbolV2,
   parser,
   hashtags: BoxBlock.hashtags,

@@ -65,6 +65,7 @@ export type BlockDefinition = {
   render: (props: BlockProps) => ReactNode;
   hashtags?: string[];
   placeholderText?: string;
+  editorVersion?: number;
 };
 
 export type InteractionMethod = 'mouse' | 'keyboard';

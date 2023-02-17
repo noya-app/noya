@@ -40,6 +40,7 @@ import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
 import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
 import { allAyonSymbols } from './blocks/symbols';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
+import { BlockEditorV1 } from './editor/BlockEditorV1';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 import { SearchCompletionMenu } from './useCompletionMenu';
@@ -555,16 +556,33 @@ export const Widget = forwardRef(function Widget(
             onPointerMoveCapture={(event) => event.stopPropagation()}
             onPointerUpCapture={(event) => event.stopPropagation()}
           >
-            <BlockEditor
-              ref={blockEditorRef}
-              isEditing={isEditing}
-              isSelected={isSelected}
-              blockTypes={blockTypes}
-              layer={layer}
-              parent={parent}
-              onChangeBlockContent={onChangeBlockContent}
-              onFocusCanvas={onFocusCanvas}
-            />
+            {Blocks[layer.symbolID].editorVersion ? (
+              <BlockEditor
+                ref={blockEditorRef}
+                isEditing={isEditing}
+                isSelected={isSelected}
+                blockTypes={blockTypes}
+                layer={layer}
+                parent={parent}
+                onChangeBlockContent={onChangeBlockContent}
+                onFocusCanvas={onFocusCanvas}
+              />
+            ) : (
+              <BlockEditorV1
+                ref={blockEditorRef}
+                isEditing={isEditing}
+                isSelected={isSelected}
+                blockTypes={blockTypes}
+                blockText={blockText}
+                layer={layer}
+                parent={parent}
+                onChangeBlockType={onChangeBlockType}
+                onChangeBlockText={(text) => {
+                  onChangeBlockContent({ blockText: text });
+                }}
+                onFocusCanvas={onFocusCanvas}
+              />
+            )}
           </div>
         }
       />

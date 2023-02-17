@@ -97,4 +97,6 @@ function resetNodes(
   if (point) {
     Transforms.select(editor, point);
   }
+
+  Editor.normalize(editor, { force: true });
 }

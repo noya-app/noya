@@ -1,6 +1,4 @@
-import debounce from 'lodash.debounce';
 import { useDispatch } from 'noya-app-state-context';
-import { useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   FALLTHROUGH,
@@ -9,7 +7,8 @@ import {
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
 import { useLazyValue } from 'noya-react-utils';
-import { BlockContent, ParentLayer } from 'noya-state';
+import { DrawableLayerType, ParentLayer } from 'noya-state';
+import { debounce } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -23,81 +22,170 @@ import {
   createEditor,
   Descendant,
   Editor,
-  Element as SlateElement,
+  Node,
   Range,
   Transforms,
 } from 'slate';
 import { withHistory } from 'slate-history';
-import {
-  Editable,
-  ReactEditor,
-  RenderElementProps,
-  withReact,
-} from 'slate-react';
+import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import { Blocks } from '../blocks';
+import {
+  heading1SymbolId,
+  heading2SymbolId,
+  heading3SymbolId,
+  heading4SymbolId,
+  heading5SymbolId,
+  heading6SymbolId,
+  textSymbolId,
+} from '../blocks/symbolIds';
 import { allAyonSymbols } from '../blocks/symbols';
 import { InferredBlockTypeResult } from '../types';
-import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
-import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
-import { ControlledEditor, IControlledEditor } from './ControlledEditor';
-import { ElementComponent } from './ElementComponent';
-import { fromSymbol, toContent } from './serialization';
-import { CustomEditor, ParagraphElement } from './types';
-import { withLayout } from './withLayout';
+import { useCompletionMenu } from '../useCompletionMenu';
 
 export interface IBlockEditor {
   focus: () => void;
 }
 
-export const BlockEditor = forwardRef(function BlockEditor(
+const BLOCK_TYPE_SHORTCUTS: { [shortcut: string]: string } = {
+  '#': heading1SymbolId,
+  '##': heading2SymbolId,
+  '###': heading3SymbolId,
+  '####': heading4SymbolId,
+  '#####': heading5SymbolId,
+  '######': heading6SymbolId,
+  '"': textSymbolId,
+};
+
+function textCommand(
+  triggerPrefix: string,
+  editor: Editor,
+): { range: Range; match: string } | undefined {
+  const { selection } = editor;
+
+  if (!selection || !Range.isCollapsed(selection)) return;
+
+  const triggerRegex = new RegExp(`\\${triggerPrefix}([A-Za-z0-9\\-]*)$`);
+  const afterRegex = /^(,|\s|$)/;
+
+  const [start] = Range.edges(selection);
+
+  const lineStart = Editor.before(editor, start, { unit: 'line' });
+  const lineEnd = Editor.after(editor, start, { unit: 'line' });
+
+  if (!lineStart) return;
+
+  const beforeText = Editor.string(
+    editor,
+    Editor.range(editor, lineStart, start),
+  );
+  const afterText = Editor.string(editor, Editor.range(editor, start, lineEnd));
+
+  const beforeMatch = beforeText.match(triggerRegex);
+  const afterMatch = afterText.match(afterRegex);
+
+  if (!beforeMatch || !afterMatch) return;
+
+  const match = beforeMatch[1];
+
+  const rangeStart = Editor.before(editor, start, {
+    unit: 'character',
+    distance: match.length + 1,
+  });
+
+  if (!rangeStart) return;
+
+  const range = Editor.range(editor, rangeStart, start);
+
+  return { range, match };
+}
+
+function textShortcut(
+  triggerPrefix: string,
+  editor: Editor,
+): { range: Range; match: string } | undefined {
+  const { selection } = editor;
+
+  if (!selection || !Range.isCollapsed(selection)) return;
+
+  const triggerRegex = new RegExp(`^(${triggerPrefix}) $`);
+
+  const [start] = Range.edges(selection);
+
+  const editorStart = Editor.start(editor, []);
+
+  if (!editorStart) return;
+
+  const beforeText = Editor.string(
+    editor,
+    Editor.range(editor, editorStart, start),
+  );
+
+  const beforeMatch = beforeText.match(triggerRegex);
+
+  if (!beforeMatch) return;
+
+  const match = beforeMatch[1];
+
+  const rangeStart = Editor.before(editor, start, {
+    unit: 'character',
+    distance: match.length + 1,
+  });
+
+  if (!rangeStart) return;
+
+  const range = Editor.range(editor, rangeStart, start);
+
+  return { range, match };
+}
+
+export const BlockEditorV1 = forwardRef(function BlockEditorV1(
   {
     isEditing,
-    isSelected,
     layer,
-    parent,
-    blockTypes,
-    onChangeBlockContent,
+    blockText,
+    onChangeBlockType,
+    onChangeBlockText,
     onFocusCanvas,
   }: {
     isEditing: boolean;
     isSelected: boolean;
     layer: Sketch.SymbolInstance;
     parent: ParentLayer;
+    blockText: string;
     blockTypes: InferredBlockTypeResult[];
-    onChangeBlockContent: (content: BlockContent) => void;
+    onChangeBlockType: (type: DrawableLayerType) => void;
+    onChangeBlockText: (text: string) => void;
     onFocusCanvas: () => void;
   },
   forwardedRef: ForwardedRef<IBlockEditor>,
 ) {
-  const theme = useDesignSystemTheme();
   const dispatch = useDispatch();
 
-  const blockDefinition = Blocks[layer.symbolID];
+  // Creating an editor ref with useLazyValue fixes hot reload
+  const editor = useLazyValue(() => withHistory(withReact(createEditor())));
 
-  const editor = useLazyValue<CustomEditor>(() =>
-    withLayout(layer.symbolID, withHistory(withReact(createEditor()))),
-  );
+  const [internalBlockText, setInternalBlockText] = useState(blockText);
 
-  const initialNodes = fromSymbol(blockDefinition.symbol, layer);
-
-  const setBlockNodes = useCallback(
-    (nodes: Descendant[], symbolId?: string) => {
-      const content = toContent(blockDefinition.symbol, nodes);
-
-      if (symbolId) {
-        content.symbolId = symbolId;
-      }
-
-      controlledEditorRef.current?.updateInternal(nodes, symbolId);
-      onChangeBlockContent(content);
+  const setBlockText = useCallback(
+    (text: string) => {
+      setInternalBlockText(text);
+      onChangeBlockText(text);
     },
-    [blockDefinition.symbol, onChangeBlockContent],
+    [onChangeBlockText],
   );
+
+  const initialValue = useMemo(() => fromString(blockText), [blockText]);
+
+  useEffect(() => {
+    if (internalBlockText === blockText) return;
+
+    editor.children = initialValue;
+  }, [initialValue, editor, internalBlockText, blockText]);
 
   useImperativeHandle(forwardedRef, () => ({
     focus: () => {
       ReactEditor.focus(editor);
-      Transforms.select(editor, Editor.start(editor, []));
+      Transforms.select(editor, Editor.range(editor, []));
     },
   }));
 
@@ -112,6 +200,8 @@ export const BlockEditor = forwardRef(function BlockEditor(
     id: symbol.symbolID,
   }));
 
+  const blockDefinition = Blocks[layer.symbolID];
+
   const getRangeDOMPosition = useCallback(
     (range: Range) => {
       const domRange = ReactEditor.toDOMRange(editor, range);
@@ -121,17 +211,17 @@ export const BlockEditor = forwardRef(function BlockEditor(
     [editor],
   );
 
-  const controlledEditorRef = React.useRef<IControlledEditor>(null);
-
   const symbolCompletionMenu = useCompletionMenu({
     getPosition: getRangeDOMPosition,
     possibleItems: symbolItems,
     onSelect: (target, item) => {
-      Transforms.select(editor, Editor.start(editor, []));
       Transforms.delete(editor, { at: target });
-      setBlockNodes(editor.children, item.id);
+      const newText = toString(editor.children);
 
-      if (!Blocks[item.id].editorVersion) {
+      onChangeBlockType({ symbolId: item.id });
+      setBlockText(newText);
+
+      if (Blocks[item.id].editorVersion === 2) {
         setTimeout(() => {
           const el = document.querySelector(`#editor-${layer.do_objectID}`);
 
@@ -143,12 +233,30 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
   });
 
-  const [hashtagItems, setHashtagItems] = useState<CompletionItem[]>([]);
-
   const hashCompletionMenu = useCompletionMenu({
     getPosition: getRangeDOMPosition,
     showExactMatch: false,
-    possibleItems: hashtagItems,
+    possibleItems: (blockDefinition?.hashtags ?? []).map((item) => ({
+      name: item,
+      id: item,
+      icon: (
+        <div
+          style={{
+            width: 19,
+            height: 19,
+            borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
+            background: /^rounded/.test(item)
+              ? 'rgb(148 163 184)'
+              : /^opacity/.test(item)
+              ? 'black'
+              : undefined,
+          }}
+          className={item}
+        >
+          {/^(text|font)/.test(item) ? 'Tt' : null}
+        </div>
+      ),
+    })),
     onSelect: (target, item) => {
       amplitude.logEvent('Project - Block - Inserted Hashtag', {
         'Block Type': blockDefinition.symbol.symbolID,
@@ -162,7 +270,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
       Transforms.delete(editor, { at: target });
       Transforms.insertText(editor, `#${item.id} `, { at: target.anchor });
 
-      setBlockNodes(editor.children);
+      const newText = toString(editor.children);
+
+      setBlockText(newText);
     },
   });
 
@@ -178,11 +288,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      const isEmpty = Editor.string(editor, []).trim() === '';
-
       const handleDelete = () => {
         // If there's text, don't delete the layer
-        if (!isEmpty) return FALLTHROUGH;
+        if (blockText) return FALLTHROUGH;
 
         dispatch('deleteLayer', layer.do_objectID);
         dispatch('interaction', ['reset']);
@@ -209,44 +317,16 @@ export const BlockEditor = forwardRef(function BlockEditor(
         },
         Backspace: handleDelete,
         Delete: handleDelete,
-        Tab: () => {
-          const blockPair = Editor.above(editor, {
-            match: (node) =>
-              SlateElement.isElement(node) && Editor.isBlock(editor, node),
-          });
-
-          if (!blockPair) return;
-
-          const [, path] = blockPair;
-
-          if (path[0] < editor.children.length - 1) {
-            Transforms.select(editor, Editor.end(editor, [path[0] + 1]));
-          }
-        },
-        'Shift-Tab': () => {
-          const blockPair = Editor.above(editor, {
-            match: (node) =>
-              SlateElement.isElement(node) && Editor.isBlock(editor, node),
-          });
-
-          if (!blockPair) return;
-
-          const [, path] = blockPair;
-
-          if (path[0] > 0) {
-            Transforms.select(editor, Editor.end(editor, [path[0] - 1]));
-          }
-        },
         // These may override the Escape shortcut
         ...symbolCompletionMenu.keyMap,
         ...hashCompletionMenu.keyMap,
       });
     },
     [
-      editor,
       isMouseWithinEditor,
       symbolCompletionMenu.keyMap,
       hashCompletionMenu.keyMap,
+      blockText,
       dispatch,
       layer.do_objectID,
       onFocusCanvas,
@@ -277,17 +357,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
     [],
   );
 
-  const renderElement = useCallback(
-    (props: RenderElementProps) => <ElementComponent {...props} />,
-    [],
-  );
   return (
-    <ControlledEditor
-      ref={controlledEditorRef}
-      key={layer.symbolID}
-      symbolId={layer.symbolID}
+    <Slate
       editor={editor}
-      value={initialNodes}
+      value={initialValue}
       // This can fire after the selection has changed, so we need to be explicit
       // about which layer we're modifying when dispatching actions
       onChange={(value) => {
@@ -305,6 +378,8 @@ export const BlockEditor = forwardRef(function BlockEditor(
           Height: layer.frame.height,
         });
 
+        const text = toString(value);
+
         const mdShortcut = textShortcut(
           Object.keys(BLOCK_TYPE_SHORTCUTS).join('|'),
           editor,
@@ -314,8 +389,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
           const { range, match } = mdShortcut;
 
           Transforms.delete(editor, { at: range });
+          const newText = toString(editor.children);
 
-          setBlockNodes(editor.children, BLOCK_TYPE_SHORTCUTS[match]);
+          onChangeBlockType({ symbolId: BLOCK_TYPE_SHORTCUTS[match] });
+          setBlockText(newText);
 
           return;
         }
@@ -335,30 +412,17 @@ export const BlockEditor = forwardRef(function BlockEditor(
         if (hashCommand) {
           const { range, match } = hashCommand;
 
-          const elementPair = Editor.above<ParagraphElement>(editor, {
-            at: range,
-            match: (n) => SlateElement.isElement(n) && n.type === 'paragraph',
-          });
-
-          if (elementPair) {
-            const [element] = elementPair;
-            const blockDefinition = Blocks[element.symbolId];
-
-            setHashtagItems(
-              (blockDefinition?.hashtags ?? []).map((item) => ({
-                name: item,
-                id: item,
-                icon: <HashtagIcon item={item} />,
-              })),
-            );
-
-            hashCompletionMenu.open(range, match);
-          }
+          hashCompletionMenu.open(range, match);
         } else {
           hashCompletionMenu.close();
         }
 
-        setBlockNodes(editor.children);
+        setBlockText(text);
+
+        // Lock the block type when the user starts editing the text
+        if (text) {
+          dispatch('setSymbolIdIsFixed', layer.do_objectID, true);
+        }
       }}
     >
       <Editable
@@ -367,40 +431,25 @@ export const BlockEditor = forwardRef(function BlockEditor(
         onKeyUp={onKeyUp}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          padding: 4,
-          gap: '2px',
-          display: 'flex',
-          flexDirection: 'column',
-          ...theme.textStyles.small,
-        }}
+        style={{ position: 'absolute', inset: 0, padding: 4 }}
         spellCheck={false}
-        renderElement={renderElement}
+        placeholder={blockDefinition.placeholderText}
       />
       {symbolCompletionMenu.element}
       {hashCompletionMenu.element}
-    </ControlledEditor>
+    </Slate>
   );
 });
 
-function HashtagIcon({ item }: { item: string }) {
-  return (
-    <div
-      style={{
-        width: 19,
-        height: 19,
-        borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
-        background: /^rounded/.test(item)
-          ? 'rgb(148 163 184)'
-          : /^opacity/.test(item)
-          ? 'black'
-          : undefined,
-      }}
-      className={item}
-    >
-      {/^(text|font)/.test(item) ? 'Tt' : null}
-    </div>
-  );
+function toString(value: Descendant[]): string {
+  return value.map((n) => Node.string(n)).join('\n');
+}
+
+function fromString(value: string): Descendant[] {
+  return value.split('\n').map((line) => ({
+    type: 'paragraph',
+    children: [{ text: line }],
+    label: undefined,
+    symbolId: '',
+  }));
 }
