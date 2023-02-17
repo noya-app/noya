@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect).*/,
+        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate).*/,
     },
   ],
   plugins: [
@@ -45,6 +45,14 @@ module.exports = {
         'aspect-auto',
         'aspect-square',
         'aspect-video',
+        'm-{spacing}',
+        'mx-{spacing}',
+        'my-{spacing}',
+        'mt-{spacing}',
+        'mr-{spacing}',
+        'mb-{spacing}',
+        'ml-{spacing}',
+        'truncate',
       ],
     }),
   ],

@@ -29,7 +29,7 @@ export function isSupportedTailwindClass(className: string) {
   return allClassNamesSet.has(className);
 }
 
-const isTextClassRE = /^(text|font)/;
+const isTextClassRE = /^(text|font|truncate)/;
 
 export const [tailwindTextClasses, tailwindBlockClasses] = partition(
   allClassNames,
