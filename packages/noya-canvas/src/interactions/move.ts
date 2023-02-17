@@ -17,6 +17,11 @@ export interface MoveActions {
   setLayerY: (value: number, mode: SetNumberMode) => void;
   moveLayersIntoParentAtPoint: (point: Point) => void;
   reset: () => void;
+  duplicateAndUpdateMoving(
+    ids: string[],
+    point: Point,
+    inferBlockType?: InferBlockType,
+  ): void;
 }
 
 export const createMoveInteraction = (
@@ -31,6 +36,7 @@ export const createMoveInteraction = (
     setLayerY,
     moveLayersIntoParentAtPoint,
     reset,
+    duplicateAndUpdateMoving,
   }: MoveActions) {
     const shortcuts: KeyMap = {
       ArrowLeft: () => setLayerX(-1, 'adjust'),
@@ -79,7 +85,15 @@ export const createMoveInteraction = (
           const { origin } = interactionState;
 
           if (isMoving(canvasPoint, origin, api.zoomValue)) {
-            updateMoving(canvasPoint, options.inferBlockType);
+            if (event.altKey) {
+              duplicateAndUpdateMoving(
+                api.selectedLayerIds,
+                canvasPoint,
+                options.inferBlockType,
+              );
+            } else {
+              updateMoving(canvasPoint, options.inferBlockType);
+            }
           }
 
           api.setPointerCapture?.(event.pointerId);

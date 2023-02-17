@@ -195,6 +195,12 @@ export function useInteractionHandlers({
         dispatch('moveLayersIntoParentAtPoint', point),
       setCursor: (cursor: CSSProperties['cursor'] | undefined) =>
         dispatch('interaction', ['setCursor', cursor]),
+      duplicateAndUpdateMoving: (ids, point, inferBlockType) => {
+        dispatch('duplicateLayer', ids);
+        dispatch('interaction', ['reset']);
+        dispatch('interaction', ['maybeMove', point]);
+        dispatch('interaction', ['updateMoving', point, inferBlockType]);
+      },
     };
   }, [dispatch]);
 
