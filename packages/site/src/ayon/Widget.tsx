@@ -1,5 +1,9 @@
 import { fileOpen } from 'browser-fs-access';
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import {
+  FlatDispatcher,
+  useApplicationState,
+  useWorkspace,
+} from 'noya-app-state-context';
 import {
   Button,
   Chip,
@@ -434,29 +438,7 @@ export const Widget = forwardRef(function Widget(
                         onClick={(event) => {
                           event.preventDefault();
 
-                          dispatch(
-                            'setResolvedBlockData',
-                            layer.do_objectID,
-                            undefined,
-                          );
-
-                          clearResolverCache(layer.do_objectID);
-
-                          layer.overrideValues.forEach((override) => {
-                            const { layerIdPath, propertyType } =
-                              Overrides.decodeName(override.overrideName);
-
-                            if (propertyType === 'resolvedBlockData') {
-                              clearResolverCache(layerIdPath.join('/'));
-
-                              dispatch(
-                                'setOverrideValue',
-                                [layer.do_objectID],
-                                override.overrideName,
-                                undefined,
-                              );
-                            }
-                          });
+                          clearResolvedData({ layer, dispatch });
                         }}
                       />
                     )}
@@ -653,4 +635,85 @@ export function DrawingWidget() {
       }
     />
   );
+}
+
+export function MultipleSelectionWidget() {
+  const [state, dispatch] = useApplicationState();
+  const { canvasInsets } = useWorkspace();
+  const transform = Selectors.getCanvasTransform(state, canvasInsets);
+
+  if (state.interactionState.type !== 'none') return null;
+
+  const page = Selectors.getCurrentPage(state);
+  const boundingRect = Selectors.getBoundingRect(page, state.selectedLayerIds, {
+    groups: 'childrenOnly',
+    includeHiddenLayers: true,
+  });
+
+  if (!boundingRect) return null;
+
+  const rect = transformRect(boundingRect, transform);
+
+  return (
+    <WidgetContainer
+      frame={rect}
+      zIndex={Stacking.level.interactive}
+      footer={
+        <ContentElement>
+          <Stack.H
+            flex="1"
+            padding={'4px 6px'}
+            gap={6}
+            separator={<DividerVertical variant="strong" overflow={4} />}
+          >
+            <IconButton
+              key="reload"
+              iconName="ReloadIcon"
+              onClick={(event) => {
+                event.preventDefault();
+
+                const layers = Selectors.getSelectedLayers(state).filter(
+                  Layers.isSymbolInstance,
+                );
+
+                layers.forEach((layer) =>
+                  clearResolvedData({ layer, dispatch }),
+                );
+              }}
+            />
+            <Button variant="none">Multiple</Button>
+          </Stack.H>
+        </ContentElement>
+      }
+    />
+  );
+}
+
+function clearResolvedData({
+  layer,
+  dispatch,
+}: {
+  layer: Sketch.SymbolInstance;
+  dispatch: FlatDispatcher;
+}) {
+  dispatch('setResolvedBlockData', layer.do_objectID, undefined);
+
+  clearResolverCache(layer.do_objectID);
+
+  layer.overrideValues.forEach((override) => {
+    const { layerIdPath, propertyType } = Overrides.decodeName(
+      override.overrideName,
+    );
+
+    if (propertyType === 'resolvedBlockData') {
+      clearResolverCache(`${layer.do_objectID}@${layerIdPath.join('/')}`);
+
+      dispatch(
+        'setOverrideValue',
+        [layer.do_objectID],
+        override.overrideName,
+        undefined,
+      );
+    }
+  });
 }

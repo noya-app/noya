@@ -25,10 +25,12 @@ export function clearResolverCache(key: string) {
 type Subscription = () => void;
 
 export function resolveLayer({
+  cachePrefix,
   layer,
   onResolve,
   onResolveOverride,
 }: {
+  cachePrefix?: string;
   layer: Sketch.SymbolInstance;
   onResolve: (data: Sketch.ResolvedBlockData | undefined) => void;
   onResolveOverride: (
@@ -62,26 +64,18 @@ export function resolveLayer({
 
   const subscriptions: Subscription[] = [];
 
+  const cacheKey = cachePrefix ? `${cachePrefix}@${layerId}` : layerId;
+
   if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
     const width = frame.width === 0 ? 512 : frame.width;
     const height = frame.height === 0 ? 512 : frame.height;
 
     const unsplashUrl = `https://source.unsplash.com/${width}x${height}?${encodeURIComponent(
       originalText,
-    )}`;
-
-    // console.log('resolve nested', {
-    //   blockText,
-    //   resolvedBlockData,
-    //   frame,
-    //   symbolID,
-    //   layerId,
-    // });
+    )}&buster=${encodeURIComponent(cacheKey)}`;
 
     subscriptions.push(
-      redirectResolver.addListener(layerId, unsplashUrl, (resolvedText) => {
-        // console.log('resolve nested', resolvedText);
-
+      redirectResolver.addListener(cacheKey, unsplashUrl, (resolvedText) => {
         onResolve({
           originalText,
           resolvedText,
@@ -91,12 +85,12 @@ export function resolveLayer({
       }),
     );
 
-    redirectResolver.resolve(layerId, unsplashUrl);
+    redirectResolver.resolve(cacheKey, unsplashUrl);
   } else if (symbolID === writeSymbolId) {
     onResolve(undefined);
 
     subscriptions.push(
-      generateResolver.addListener(layerId, originalText, (resolvedText) => {
+      generateResolver.addListener(cacheKey, originalText, (resolvedText) => {
         onResolve({
           originalText,
           resolvedText,
@@ -106,10 +100,10 @@ export function resolveLayer({
       }),
     );
 
-    generateResolver.resolve(layerId, originalText);
+    generateResolver.resolve(cacheKey, originalText);
   } else if (symbolID === iconSymbolId) {
     subscriptions.push(
-      iconResolver.addListener(layerId, originalText, (resolvedText) => {
+      iconResolver.addListener(cacheKey, originalText, (resolvedText) => {
         onResolve({
           originalText,
           resolvedText,
@@ -119,7 +113,7 @@ export function resolveLayer({
       }),
     );
 
-    iconResolver.resolve(layerId, originalText);
+    iconResolver.resolve(cacheKey, originalText);
   }
 
   const master = applyOverrides({
@@ -130,6 +124,7 @@ export function resolveLayer({
   master.layers.filter(Layers.isSymbolInstance).forEach((child) => {
     subscriptions.push(
       ...resolveLayer({
+        cachePrefix: cachePrefix ? `${cachePrefix}/${layerId}` : layerId,
         layer: child,
         onResolve: (data) => {
           const overrideName = Overrides.encodeName(

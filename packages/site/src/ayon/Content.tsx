@@ -24,7 +24,7 @@ import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
 import { resolveLayer } from './resolve/resolve';
 import { Stacking } from './stacking';
-import { DrawingWidget, Widget } from './Widget';
+import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 
 const Overlay = styled.div({
   position: 'absolute',
@@ -237,6 +237,9 @@ export const Content = memo(function Content({
                   ))}
                   {state.interactionState.type === 'drawing' && (
                     <DrawingWidget />
+                  )}
+                  {state.selectedLayerIds.length >= 2 && (
+                    <MultipleSelectionWidget />
                   )}
                 </>
               )
