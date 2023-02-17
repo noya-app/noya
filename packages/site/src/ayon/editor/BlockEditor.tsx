@@ -34,8 +34,7 @@ import {
   RenderElementProps,
   withReact,
 } from 'slate-react';
-import { Blocks } from '../blocks';
-import { allAyonSymbols } from '../blocks/symbols';
+import { allInsertableSymbols, Blocks } from '../blocks';
 import { InferredBlockTypeResult } from '../types';
 import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
@@ -107,7 +106,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     ReactEditor.deselect(editor);
   }, [editor, isEditing]);
 
-  const symbolItems = allAyonSymbols.map((symbol) => ({
+  const symbolItems = allInsertableSymbols.map((symbol) => ({
     name: symbol.name,
     id: symbol.symbolID,
   }));

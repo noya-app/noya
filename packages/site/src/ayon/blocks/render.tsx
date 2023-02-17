@@ -4,6 +4,7 @@ import {
   BlockProps,
   Layers,
 } from 'noya-state';
+import { zip } from 'noya-utils';
 import { encodeBlockItem, mergeBlock, parseBlock } from '../parse';
 import { boxSymbol } from './symbols';
 
@@ -18,18 +19,14 @@ export function getContainerBlockProps({
 }: BlockRenderOptions): BlockProps {
   const fallback = parseBlock(block.symbol.defaultBlockText, 'regular');
   const item = parseBlock(props.layer?.blockText, 'regular');
+  const blockText = encodeBlockItem(mergeBlock({ block: item, fallback }));
 
   return {
     frame: props.frame,
     getBlock: props.getBlock,
     symbolId: boxSymbol.symbolID,
     dataSet: props.dataSet,
-    blockText: encodeBlockItem(
-      mergeBlock({
-        block: item,
-        fallback,
-      }),
-    ),
+    blockText,
   };
 }
 
@@ -44,23 +41,34 @@ export function getChildrenBlockProps({
     symbolMaster: block.symbol,
   });
 
-  return master.layers.flatMap((layer) => {
-    if (!Layers.isSymbolInstance(layer)) return [];
+  return zip(master.layers, block.symbol.layers).flatMap(
+    ([layer, fallbackLayer]) => {
+      if (
+        !Layers.isSymbolInstance(layer) ||
+        !Layers.isSymbolInstance(fallbackLayer)
+      ) {
+        return [];
+      }
 
-    return [
-      {
-        getBlock: props.getBlock,
-        symbolId: layer.symbolID,
-        blockText: layer.blockText,
-        ...(props.dataSet && {
-          dataSet: {
-            id: layer.do_objectID,
-            parentId: props.dataSet.parentId,
-          },
-        }),
-      },
-    ];
-  });
+      const fallback = parseBlock(fallbackLayer.blockText, 'regular');
+      const item = parseBlock(layer?.blockText, 'regular');
+      const blockText = encodeBlockItem(mergeBlock({ block: item, fallback }));
+
+      return [
+        {
+          getBlock: props.getBlock,
+          symbolId: layer.symbolID,
+          blockText,
+          ...(props.dataSet && {
+            dataSet: {
+              id: layer.do_objectID,
+              parentId: props.dataSet.parentId,
+            },
+          }),
+        },
+      ];
+    },
+  );
 }
 
 export const renderNewlineSeparated = ({

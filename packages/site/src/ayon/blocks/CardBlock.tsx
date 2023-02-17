@@ -4,9 +4,9 @@ import { BoxBlock } from './BoxBlock';
 import { renderNewlineSeparated } from './render';
 import { isWithinRectRange } from './score';
 import { spacerSymbolId } from './symbolIds';
-import { heroSymbolV2 } from './symbols';
+import { cardSymbol } from './symbols';
 
-const placeholderText = heroSymbolV2.layers
+const placeholderText = cardSymbol.layers
   .flatMap((layer) => {
     if (!Layers.isSymbolInstance(layer)) return [];
 
@@ -19,16 +19,14 @@ const placeholderText = heroSymbolV2.layers
   })
   .join('\n');
 
-export const HeroBlockV2: BlockDefinition = {
+export const CardBlock: BlockDefinition = {
   editorVersion: 2,
-  symbol: heroSymbolV2,
+  symbol: cardSymbol,
   parser: 'regular',
   hashtags: BoxBlock.hashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
-    if (
-      siblingBlocks.find((block) => block.symbolId === heroSymbolV2.symbolID)
-    ) {
+    if (siblingBlocks.find((block) => block.symbolId === cardSymbol.symbolID)) {
       return 0;
     }
 
@@ -37,5 +35,5 @@ export const HeroBlockV2: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => renderNewlineSeparated({ props, block: HeroBlockV2 }),
+  render: (props) => renderNewlineSeparated({ props, block: CardBlock }),
 };

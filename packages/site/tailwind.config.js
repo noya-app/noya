@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis).*/,
+        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect).*/,
     },
   ],
   plugins: [
@@ -38,6 +38,13 @@ module.exports = {
         // 'text-justify',
         // 'text-start',
         // 'text-end',
+        'flex-1',
+        'flex-auto',
+        'flex-initial',
+        'flex-none',
+        'aspect-auto',
+        'aspect-square',
+        'aspect-video',
       ],
     }),
   ],

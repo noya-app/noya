@@ -844,3 +844,10 @@ basis-0.5
 basis-1.5
 basis-2.5
 basis-3.5
+flex-1
+flex-auto
+flex-initial
+flex-none
+aspect-auto
+aspect-square
+aspect-video

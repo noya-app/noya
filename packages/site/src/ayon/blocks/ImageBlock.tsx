@@ -24,11 +24,14 @@ export const ImageBlock: BlockDefinition = {
 
     return (
       <Image
+        background={!src ? 'rgba(0,0,0,0.05)' : undefined}
         src={src}
         fit={contain ? 'contain' : fill ? 'fill' : 'cover'}
         align="middle"
-        w="100%"
-        h="100%"
+        {...(props.frame && {
+          w: `${props.frame.width}px`,
+          h: `${props.frame.height}px`,
+        })}
         className={getBlockClassName(hashtags)}
       />
     );

@@ -47,7 +47,11 @@ export const ButtonBlock: BlockDefinition = {
       },
     } = parseBlock(props.blockText, parser, { placeholder: placeholderText });
 
-    const buttonColorKey = light
+    const buttonColorKey = warning
+      ? 'warning'
+      : danger
+      ? 'danger'
+      : light
       ? 'light'
       : dark
       ? 'dark'
@@ -55,10 +59,6 @@ export const ButtonBlock: BlockDefinition = {
       ? 'primary'
       : secondary
       ? 'secondary'
-      : warning
-      ? 'warning'
-      : danger
-      ? 'danger'
       : 'default';
 
     const colors = buttonColors[buttonColorKey];

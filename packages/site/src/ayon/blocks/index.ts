@@ -53,4 +53,9 @@ export const Blocks: Record<string, BlockDefinition> = {
   [RadioBlock.symbol.symbolID]: RadioBlock,
   [TextareaBlock.symbol.symbolID]: TextareaBlock,
   [SpacerBlock.symbol.symbolID]: SpacerBlock,
+  // [CardBlock.symbol.symbolID]: CardBlock,
 };
+
+export const allInsertableSymbols = Object.values(Blocks).map(
+  (block) => block.symbol,
+);

@@ -28,7 +28,7 @@ import {
 } from 'slate';
 import { withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { Blocks } from '../blocks';
+import { allInsertableSymbols, Blocks } from '../blocks';
 import {
   heading1SymbolId,
   heading2SymbolId,
@@ -38,7 +38,6 @@ import {
   heading6SymbolId,
   textSymbolId,
 } from '../blocks/symbolIds';
-import { allAyonSymbols } from '../blocks/symbols';
 import { InferredBlockTypeResult } from '../types';
 import { useCompletionMenu } from '../useCompletionMenu';
 
@@ -195,7 +194,7 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
     ReactEditor.deselect(editor);
   }, [editor, isEditing]);
 
-  const symbolItems = allAyonSymbols.map((symbol) => ({
+  const symbolItems = allInsertableSymbols.map((symbol) => ({
     name: symbol.name,
     id: symbol.symbolID,
   }));

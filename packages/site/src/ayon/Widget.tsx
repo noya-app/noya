@@ -35,10 +35,9 @@ import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { Blocks } from './blocks';
+import { allInsertableSymbols, Blocks } from './blocks';
 import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
 import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
-import { allAyonSymbols } from './blocks/symbols';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
 import { BlockEditorV1 } from './editor/BlockEditorV1';
 import { Stacking } from './stacking';
@@ -285,7 +284,7 @@ export const Widget = forwardRef(function Widget(
     }
   }, [isEditing]);
 
-  const symbolItems = allAyonSymbols.map((symbol) => ({
+  const symbolItems = allInsertableSymbols.map((symbol) => ({
     name: symbol.name,
     id: symbol.symbolID,
   }));

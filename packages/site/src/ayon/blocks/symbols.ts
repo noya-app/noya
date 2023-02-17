@@ -141,6 +141,38 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
   ],
 });
 
+export const cardSymbol = SketchModel.symbolMaster({
+  symbolID: '8bbffbff-efc8-4d9b-9972-73a655adaf47',
+  name: 'Card',
+  defaultBlockText: '#flex-col #bg-white #p-4 #border',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: '66a7337d-3e71-48de-b415-7d1551cd7be1',
+      symbolID: imageSymbolId,
+      blockText: 'cat #aspect-video',
+    }),
+    SketchModel.symbolInstance({
+      symbolID: spacerSymbolId,
+      blockText: '#basis-4',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
+      symbolID: heading5SymbolId,
+      blockText: 'News',
+    }),
+    SketchModel.symbolInstance({
+      symbolID: spacerSymbolId,
+      blockText: '#basis-1',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
+      symbolID: textSymbolId,
+      blockText:
+        'Here you can explore the latest news and information. #flex-1',
+    }),
+  ],
+});
+
 export const iconSymbol = SketchModel.symbolMaster({
   symbolID: iconSymbolId,
   name: 'Icon',
@@ -175,31 +207,3 @@ export const spacerSymbol = SketchModel.symbolMaster({
   symbolID: spacerSymbolId,
   name: 'Spacer',
 });
-
-export const allAyonSymbols = [
-  buttonSymbol,
-  avatarSymbol,
-  boxSymbol,
-  checkboxSymbol,
-  inputSymbol,
-  switchSymbol,
-  textSymbol,
-  imageSymbol,
-  heading1Symbol,
-  heading2Symbol,
-  heading3Symbol,
-  heading4Symbol,
-  heading5Symbol,
-  heading6Symbol,
-  writeSymbol,
-  headerBarSymbol,
-  heroSymbol,
-  heroSymbolV2,
-  iconSymbol,
-  sidebarSymbol,
-  tableSymbol,
-  selectSymbol,
-  radioSymbol,
-  textareaSymbol,
-  // spacerSymbol,
-];

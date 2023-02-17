@@ -8,7 +8,7 @@ import { getBlockClassName, tailwindTextClasses } from './tailwind';
 export const TextBlock: BlockDefinition = {
   symbol: textSymbol,
   parser: 'regular',
-  hashtags: ['left', 'center', 'right', ...tailwindTextClasses],
+  hashtags: ['left', 'center', 'right', ...tailwindTextClasses, 'flex-1'],
   infer: ({ frame, blockText }) =>
     Math.max(
       blockText &&
