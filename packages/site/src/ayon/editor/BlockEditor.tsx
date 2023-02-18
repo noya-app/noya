@@ -34,7 +34,7 @@ import {
   RenderElementProps,
   withReact,
 } from 'slate-react';
-import { allInsertableSymbols, Blocks } from '../blocks';
+import { allInsertableSymbols, Blocks } from '../blocks/blocks';
 import { InferredBlockTypeResult } from '../types';
 import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';

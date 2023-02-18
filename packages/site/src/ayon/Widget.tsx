@@ -40,7 +40,7 @@ import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { allInsertableSymbols, Blocks } from './blocks';
+import { allInsertableSymbols, Blocks } from './blocks/blocks';
 import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
 import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';

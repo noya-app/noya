@@ -10,7 +10,7 @@ import {
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import path from 'path';
-import { Blocks } from '../ayon/blocks';
+import { Blocks } from '../ayon/blocks/blocks';
 import { buttonSymbolId, textSymbolId } from '../ayon/blocks/symbolIds';
 
 // Jest doesn't know how to import a text file, so we mock it

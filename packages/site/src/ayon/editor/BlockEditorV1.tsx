@@ -28,7 +28,7 @@ import {
 } from 'slate';
 import { withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { allInsertableSymbols, Blocks } from '../blocks';
+import { allInsertableSymbols, Blocks } from '../blocks/blocks';
 import {
   heading1SymbolId,
   heading2SymbolId,

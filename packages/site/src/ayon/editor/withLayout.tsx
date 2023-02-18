@@ -1,5 +1,5 @@
 import { Element as SlateElement, Node, Transforms } from 'slate';
-import { Blocks } from '../blocks';
+import { Blocks } from '../blocks/blocks';
 import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
 import { CustomEditor, ParagraphElement } from './types';
 

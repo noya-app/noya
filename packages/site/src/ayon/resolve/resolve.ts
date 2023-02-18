@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { applyOverrides, Layers, Overrides } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import { Blocks } from '../blocks';
+import { Blocks } from '../blocks/blocks';
 import {
   iconSymbolId,
   imageSymbolId,

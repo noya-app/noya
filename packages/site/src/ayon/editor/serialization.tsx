@@ -2,7 +2,7 @@ import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { BlockContent, Overrides } from 'noya-state';
 import { Descendant, Node } from 'slate';
-import { Blocks } from '../blocks';
+import { Blocks } from '../blocks/blocks';
 import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
 import { ParagraphElement } from './types';
 

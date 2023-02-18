@@ -10,7 +10,7 @@ import {
 import { useSize } from 'noya-react-utils';
 import { BlockProps, Layers, Selectors } from 'noya-state';
 import React, { ComponentProps, useRef } from 'react';
-import { Blocks } from './blocks';
+import { Blocks } from './blocks/blocks';
 import { buttonSymbol } from './blocks/symbols';
 
 function SymbolRenderer({
