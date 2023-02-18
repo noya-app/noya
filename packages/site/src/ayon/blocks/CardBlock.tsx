@@ -1,7 +1,7 @@
 import { BlockDefinition, Layers } from 'noya-state';
 import { parseBlock } from '../parse';
 import { BoxBlock } from './BoxBlock';
-import { renderNewlineSeparated } from './render';
+import { renderStack } from './render';
 import { isWithinRectRange } from './score';
 import { spacerSymbolId } from './symbolIds';
 import { cardSymbol } from './symbols';
@@ -35,5 +35,5 @@ export const CardBlock: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => renderNewlineSeparated({ props, block: CardBlock }),
+  render: (props) => renderStack({ props, block: CardBlock }),
 };

@@ -1,4 +1,5 @@
 import { useDispatch } from 'noya-app-state-context';
+import { useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   FALLTHROUGH,
@@ -159,6 +160,7 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
   forwardedRef: ForwardedRef<IBlockEditor>,
 ) {
   const dispatch = useDispatch();
+  const theme = useDesignSystemTheme();
 
   // Creating an editor ref with useLazyValue fixes hot reload
   const editor = useLazyValue(() => withHistory(withReact(createEditor())));
@@ -430,7 +432,12 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
         onKeyUp={onKeyUp}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        style={{ position: 'absolute', inset: 0, padding: 4 }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          padding: 4,
+          ...theme.textStyles.small,
+        }}
         spellCheck={false}
         placeholder={blockDefinition.placeholderText}
       />

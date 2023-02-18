@@ -74,10 +74,7 @@ export function getChildrenBlockProps({
   );
 }
 
-export const renderNewlineSeparated = ({
-  props,
-  block,
-}: BlockRenderOptions) => {
+export const renderStack = ({ props, block }: BlockRenderOptions) => {
   const children = getChildrenBlockProps({ props, block });
 
   const containerBlockProps = getContainerBlockProps({ props, block });
