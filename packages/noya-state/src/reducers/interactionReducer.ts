@@ -66,6 +66,7 @@ export type BlockDefinition = {
   hashtags?: string[];
   placeholderText?: string;
   editorVersion?: number;
+  usesResolver?: boolean;
 };
 
 export type InteractionMethod = 'mouse' | 'keyboard';

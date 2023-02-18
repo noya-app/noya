@@ -11,6 +11,7 @@ export const ImageBlock: BlockDefinition = {
   parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   hashtags: ['contain', 'fill', ...tailwindBlockClasses],
+  usesResolver: true,
   render: (props) => {
     const {
       content,

@@ -42,12 +42,7 @@ import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { allInsertableSymbols, Blocks } from './blocks';
 import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
-import {
-  boxSymbolId,
-  cardSymbolId,
-  heroSymbolV2Id,
-  imageSymbolId,
-} from './blocks/symbolIds';
+import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
 import { BlockEditorV1 } from './editor/BlockEditorV1';
 import { clearResolverCache } from './resolve/resolve';
@@ -430,8 +425,7 @@ export const Widget = forwardRef(function Widget(
                       <DividerVertical variant="strong" overflow={4} />
                     }
                   >
-                    {(layer.symbolID === imageSymbolId ||
-                      layer.symbolID === cardSymbolId) && (
+                    {shouldShowReload(layer) && (
                       <IconButton
                         key="reload"
                         iconName="ReloadIcon"
@@ -654,6 +648,8 @@ export function MultipleSelectionWidget() {
 
   const rect = transformRect(boundingRect, transform);
 
+  const layers = Selectors.getSelectedLayers(state);
+
   return (
     <WidgetContainer
       frame={rect}
@@ -666,27 +662,41 @@ export function MultipleSelectionWidget() {
             gap={6}
             separator={<DividerVertical variant="strong" overflow={4} />}
           >
-            <IconButton
-              key="reload"
-              iconName="ReloadIcon"
-              onClick={(event) => {
-                event.preventDefault();
+            {layers.filter(Layers.isSymbolInstance).some(shouldShowReload) && (
+              <IconButton
+                key="reload"
+                iconName="ReloadIcon"
+                onClick={(event) => {
+                  event.preventDefault();
 
-                const layers = Selectors.getSelectedLayers(state).filter(
-                  Layers.isSymbolInstance,
-                );
+                  const layers = Selectors.getSelectedLayers(state).filter(
+                    Layers.isSymbolInstance,
+                  );
 
-                layers.forEach((layer) =>
-                  clearResolvedData({ layer, dispatch }),
-                );
-              }}
-            />
+                  layers.forEach((layer) =>
+                    clearResolvedData({ layer, dispatch }),
+                  );
+                }}
+              />
+            )}
             <Button variant="none">Multiple</Button>
           </Stack.H>
         </ContentElement>
       }
     />
   );
+}
+
+function shouldShowReload(layer: Sketch.SymbolInstance): boolean {
+  const block = Blocks[layer.symbolID];
+
+  if (!block) return false;
+
+  if (block.usesResolver) return true;
+
+  return block.symbol.layers
+    .filter(Layers.isSymbolInstance)
+    .some(shouldShowReload);
 }
 
 function clearResolvedData({

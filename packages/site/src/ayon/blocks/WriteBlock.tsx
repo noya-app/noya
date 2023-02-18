@@ -9,6 +9,7 @@ export const WriteBlock: BlockDefinition = {
   symbol: writeSymbol,
   parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
+  usesResolver: true,
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
