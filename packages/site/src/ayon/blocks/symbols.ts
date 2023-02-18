@@ -110,7 +110,7 @@ export const headerBarSymbol = SketchModel.symbolMaster({
 
 export const heroSymbol = SketchModel.symbolMaster({
   symbolID: heroSymbolId,
-  name: 'Hero',
+  name: 'Hero V1 (legacy)',
 });
 
 export const heroSymbolV2 = SketchModel.symbolMaster({
@@ -127,12 +127,7 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
       symbolID: textSymbolId,
-      blockText: 'Turn great ideas into new possibilities. #text-center',
-    }),
-    SketchModel.symbolInstance({
-      do_objectID: 'aa31ecb4-991d-4bdd-a5ab-18835abbdc35',
-      symbolID: spacerSymbolId,
-      blockText: '#basis-0',
+      blockText: 'Turn great ideas into new possibilities. #text-center #mb-4',
     }),
     SketchModel.symbolInstance({
       do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',

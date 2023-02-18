@@ -272,7 +272,7 @@ export const Widget = forwardRef(function Widget(
   const parent = Selectors.getParentLayer(page, indexPath) as Sketch.Artboard;
 
   const symbol = Layers.isSymbolInstance(layer)
-    ? Selectors.getSymbolMaster(state, layer.symbolID)
+    ? Blocks[layer.symbolID].symbol
     : undefined;
 
   const isPrimarySelected = state.selectedLayerIds[0] === layer.do_objectID;
@@ -494,7 +494,7 @@ export const Widget = forwardRef(function Widget(
                               setShowBlockPicker(!showBlockPicker);
                             }}
                           >
-                            {symbol?.name ?? layer.name}
+                            {symbol?.name}
                             <Spacer.Horizontal size={4} />
                             <ChevronDownIcon />
                           </Button>
