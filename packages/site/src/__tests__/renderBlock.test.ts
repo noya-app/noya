@@ -79,6 +79,36 @@ describe('hero', () => {
   });
 });
 
+describe('hero left aligned', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: heroSymbolV2Id,
+      frame: SketchModel.rect({
+        width: 400,
+        height: 400,
+      }),
+      blockText: '#left',
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('hero with bg', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: heroSymbolV2Id,
+      frame: SketchModel.rect({
+        width: 400,
+        height: 400,
+      }),
+      blockText: '#bg-blue-500',
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
 describe('generate file', () => {
   test('base', () => {
     const artboard = SketchModel.artboard({

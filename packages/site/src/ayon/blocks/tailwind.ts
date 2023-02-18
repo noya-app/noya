@@ -1,4 +1,4 @@
-import { partition } from 'noya-utils';
+import { groupBy, memoize, partition } from 'noya-utils';
 import { SafelistConfig } from 'tailwindcss/types/config';
 
 const allClassNames = (
@@ -37,14 +37,43 @@ export const [tailwindTextClasses, tailwindBlockClasses] = partition(
 );
 
 export function getBlockClassName(hashtags: string[]) {
-  const className = hashtags.filter(isSupportedTailwindClass).join(' ');
+  const supportedHashtags = hashtags.filter(isSupportedTailwindClass);
+
+  const groups = groupBy(supportedHashtags, getTailwindClassGroup);
+
+  const hashtagsToApply = Object.entries(groups).flatMap(([name, group]) =>
+    name === 'none' ? group : group.slice(-1),
+  );
+
+  const className = hashtagsToApply.join(' ');
+
   return className || undefined;
 }
 
-// export const classGroups = {
-//   background: /^(bg|dark)/,
-// };
+export const classGroups = {
+  background: /^bg/,
+  textColor: /^text/,
+  justify: /^justify/,
+  items: /^items/,
+  gap: /^g-/,
+  none: /.*/,
+  flexDirection: /^(flex-row|flex-col)/,
+  flex: /^(flex-1|flex-auto|flex-none)/,
+  alignSelf: /^self/,
+};
 
-// export function getTailwindClassGroup(className: string) {
-//   return Object.entries(classGroups).find(([, re]) => re.test(className));
-// }
+type ClassGroup = keyof typeof classGroups;
+
+export function hasClassGroup(group: ClassGroup, hashtags: string[]) {
+  return hashtags.some((className) => classGroups[group].test(className));
+}
+
+export const getTailwindClassGroup = memoize(
+  (className: string): ClassGroup => {
+    const entry = Object.entries(classGroups).find(([, re]) =>
+      re.test(className),
+    )!;
+
+    return entry[0] as ClassGroup;
+  },
+);

@@ -139,20 +139,18 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
   }
 }
 
-export function mergeBlock({
-  block,
-  fallback,
-}: {
-  block: ParsedBlockItem;
-  fallback: ParsedBlockItem;
-}) {
-  return {
-    content: block.content || fallback.content,
-    parameters: {
-      ...fallback.parameters,
-      ...block.parameters,
-    },
-  };
+export function mergeBlockItems(items: ParsedBlockItem[]) {
+  const content = items.reduce((result, item) => result || item.content, '');
+
+  const parameters: ParsedBlockItemParameters = {};
+
+  // Assign in reverse order, so new parameters are added last.
+  // The order of parameters matters when they get converted to class names.
+  for (const item of [...items].reverse()) {
+    Object.assign(parameters, item.parameters);
+  }
+
+  return { content, parameters };
 }
 
 export function parseBlock<K extends keyof ParsedBlockTypeMap>(
@@ -171,7 +169,7 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
       if (placeholder) {
         const fallback = parseBlockInner(placeholder, type);
 
-        block = mergeBlock({ block, fallback });
+        block = mergeBlockItems([block, fallback]);
       }
 
       return block as ParsedBlockTypeMap[K];
@@ -286,6 +284,20 @@ export function getTextAlign({
   center,
 }: ParsedBlockItemParameters) {
   return left ? 'left' : right ? 'right' : center ? 'center' : undefined;
+}
+
+export function getSelfAlign({
+  left,
+  right,
+  center,
+}: ParsedBlockItemParameters) {
+  return left
+    ? 'self-start'
+    : right
+    ? 'self-end'
+    : center
+    ? 'self-center'
+    : undefined;
 }
 
 export function encodeBlockItem(blockItem: ParsedBlockItem) {

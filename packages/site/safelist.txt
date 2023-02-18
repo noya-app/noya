@@ -736,6 +736,7 @@ flex-col
 items-start
 items-center
 items-end
+items-stretch
 justify-start
 justify-center
 justify-end
@@ -1111,3 +1112,9 @@ leading-snug
 leading-normal
 leading-relaxed
 leading-loose
+self-auto
+self-start
+self-end
+self-center
+self-stretch
+self-baseline

@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading).*/,
+        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self).*/,
     },
   ],
   plugins: [
@@ -29,6 +29,7 @@ module.exports = {
         'items-start',
         'items-center',
         'items-end',
+        'items-stretch',
         'justify-start',
         'justify-center',
         'justify-end',
@@ -54,6 +55,12 @@ module.exports = {
         'ml-{spacing}',
         'truncate',
         'leading-{lineHeight}',
+        'self-auto',
+        'self-start',
+        'self-end',
+        'self-center',
+        'self-stretch',
+        'self-baseline',
       ],
     }),
   ],

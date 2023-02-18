@@ -1,5 +1,6 @@
 import {
   filterSlashCommands,
+  mergeBlockItems,
   parseBlock,
   ParsedBlockItem,
   ParsedCompositeBlock,
@@ -268,4 +269,19 @@ test('table block with placeholder', () => {
       globalParameter: true,
     },
   });
+});
+
+it('merges block items', () => {
+  const merged = mergeBlockItems([
+    { content: 'Dashboard', parameters: { a: true } },
+    { content: 'Updates', parameters: { b: true } },
+  ]);
+
+  expect(merged).toEqual({
+    content: 'Dashboard',
+    parameters: { a: true, b: true },
+  });
+
+  // Parameter order matters
+  expect(Object.keys(merged.parameters)).toEqual(['b', 'a']);
 });

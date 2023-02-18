@@ -5,7 +5,12 @@ import {
   Layers,
 } from 'noya-state';
 import { zip } from 'noya-utils';
-import { encodeBlockItem, mergeBlock, parseBlock } from '../parse';
+import {
+  encodeBlockItem,
+  mergeBlockItems,
+  parseBlock,
+  ParsedBlockItemParameters,
+} from '../parse';
 import { boxSymbol } from './symbols';
 
 interface BlockRenderOptions {
@@ -19,22 +24,25 @@ export function getContainerBlockProps({
 }: BlockRenderOptions): BlockProps {
   const fallback = parseBlock(block.symbol.defaultBlockText, 'regular');
   const item = parseBlock(props.layer?.blockText, 'regular');
-  const blockText = encodeBlockItem(mergeBlock({ block: item, fallback }));
+  const blockText = encodeBlockItem(mergeBlockItems([item, fallback]));
 
   return {
     frame: props.frame,
     getBlock: props.getBlock,
     symbolId: boxSymbol.symbolID,
     dataSet: props.dataSet,
-    blockText,
     resolvedBlockData: props.resolvedBlockData,
+    blockText,
   };
 }
 
 export function getChildrenBlockProps({
   props,
   block,
-}: BlockRenderOptions): BlockProps[] {
+  extraParameters,
+}: BlockRenderOptions & {
+  extraParameters?: ParsedBlockItemParameters;
+}): BlockProps[] {
   if (!props.layer) return [];
 
   const master = applyOverrides({
@@ -53,7 +61,26 @@ export function getChildrenBlockProps({
 
       const fallback = parseBlock(fallbackLayer.blockText, 'regular');
       const item = parseBlock(layer?.blockText, 'regular');
-      const blockText = encodeBlockItem(mergeBlock({ block: item, fallback }));
+      const merged = mergeBlockItems([
+        item,
+        ...(extraParameters
+          ? [{ content: '', parameters: extraParameters }]
+          : []),
+        fallback,
+      ]);
+
+      for (const [key, value] of Object.entries(extraParameters ?? {})) {
+        if (
+          key in merged.parameters ||
+          !props.getBlock(layer.symbolID).hashtags?.includes(key)
+        ) {
+          continue;
+        }
+
+        merged.parameters[key] = value;
+      }
+
+      const blockText = encodeBlockItem(merged);
 
       return [
         {
@@ -75,9 +102,19 @@ export function getChildrenBlockProps({
 }
 
 export const renderStack = ({ props, block }: BlockRenderOptions) => {
-  const children = getChildrenBlockProps({ props, block });
-
   const containerBlockProps = getContainerBlockProps({ props, block });
+
+  const { parameters } = parseBlock(containerBlockProps.blockText, 'regular');
+
+  const children = getChildrenBlockProps({
+    props,
+    block,
+    extraParameters: {
+      ...(parameters.left && { left: true }),
+      ...(parameters.right && { right: true }),
+      ...(parameters.center && { center: true }),
+    },
+  });
 
   containerBlockProps.children = children.map((childProps) =>
     props.getBlock(childProps.symbolId).render(childProps),
