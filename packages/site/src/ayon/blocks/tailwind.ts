@@ -55,7 +55,7 @@ export const classGroups = {
   textColor: /^text/,
   justify: /^justify/,
   items: /^items/,
-  gap: /^g-/,
+  gap: /^gap-/,
   none: /.*/,
   flexDirection: /^(flex-row|flex-col)/,
   flex: /^(flex-1|flex-auto|flex-none)/,

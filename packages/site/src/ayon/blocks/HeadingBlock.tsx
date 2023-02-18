@@ -2,7 +2,7 @@ import { Flex, Heading, ThemingProps } from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { getTextAlign, parseBlock } from '../parse';
+import { parseBlock } from '../parse';
 import {
   heading1Symbol,
   heading2Symbol,
@@ -37,9 +37,8 @@ const createHeadingBlock = (
         <Heading
           flex="1"
           size={size}
-          className={getBlockClassName(hashtags)}
-          textAlign={getTextAlign(parameters)}
           lineHeight="1.3"
+          className={getBlockClassName(hashtags)}
         >
           {content}
         </Heading>
