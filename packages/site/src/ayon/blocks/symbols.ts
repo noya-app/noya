@@ -110,7 +110,7 @@ export const headerBarSymbol = SketchModel.symbolMaster({
 
 export const heroSymbol = SketchModel.symbolMaster({
   symbolID: heroSymbolId,
-  name: 'HeroLegacyV1',
+  name: 'Hero',
 });
 
 export const heroSymbolV2 = SketchModel.symbolMaster({

@@ -2,7 +2,6 @@ import { BlockDefinition } from 'noya-state';
 import { AvatarBlock } from './AvatarBlock';
 import { BoxBlock } from './BoxBlock';
 import { ButtonBlock } from './ButtonBlock';
-import { CardBlock } from './CardBlock';
 import { CheckboxBlock } from './CheckboxBlock';
 import { HeaderBarBlock } from './HeaderBarBlock';
 import {
@@ -14,14 +13,12 @@ import {
   Heading6Block,
 } from './HeadingBlock';
 import { HeroBlock } from './HeroBlock';
-import { HeroBlockV2 } from './HeroBlockV2';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
 import { RadioBlock } from './RadioBlock';
 import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
-import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TableBlock } from './TableBlock';
 import { TextareaBlock } from './TextareaBlock';
@@ -41,7 +38,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [Heading5Block.symbol.symbolID]: Heading5Block,
   [Heading6Block.symbol.symbolID]: Heading6Block,
   [HeroBlock.symbol.symbolID]: HeroBlock,
-  [HeroBlockV2.symbol.symbolID]: HeroBlockV2,
+  // [HeroBlockV2.symbol.symbolID]: HeroBlockV2,
   [ImageBlock.symbol.symbolID]: ImageBlock,
   [InputBlock.symbol.symbolID]: InputBlock,
   [SwitchBlock.symbol.symbolID]: SwitchBlock,
@@ -53,8 +50,8 @@ export const Blocks: Record<string, BlockDefinition> = {
   [SelectBlock.symbol.symbolID]: SelectBlock,
   [RadioBlock.symbol.symbolID]: RadioBlock,
   [TextareaBlock.symbol.symbolID]: TextareaBlock,
-  [SpacerBlock.symbol.symbolID]: SpacerBlock,
-  [CardBlock.symbol.symbolID]: CardBlock,
+  // [SpacerBlock.symbol.symbolID]: SpacerBlock,
+  // [CardBlock.symbol.symbolID]: CardBlock,
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(
