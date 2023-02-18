@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate).*/,
+        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|p|gap|basis|aspect|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading).*/,
     },
   ],
   plugins: [
@@ -53,6 +53,7 @@ module.exports = {
         'mb-{spacing}',
         'ml-{spacing}',
         'truncate',
+        'leading-{lineHeight}',
       ],
     }),
   ],

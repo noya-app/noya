@@ -39,6 +39,7 @@ const createHeadingBlock = (
           size={size}
           className={getBlockClassName(hashtags)}
           textAlign={getTextAlign(parameters)}
+          lineHeight="1.3"
         >
           {content}
         </Heading>
