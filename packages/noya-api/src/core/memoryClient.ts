@@ -1,6 +1,7 @@
 import { makeCollectionReducer } from './collection';
 import { INoyaNetworkClient } from './networkClient';
 import {
+  NoyaEmailList,
   NoyaFile,
   noyaFileListSchema,
   NoyaShare,
@@ -38,6 +39,19 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
       },
     });
   }
+
+  emailLists = {
+    list: async () => [],
+    update: async (): Promise<NoyaEmailList> => {
+      return {
+        id: '',
+        name: '',
+        description: null,
+        optIn: false,
+        url: '',
+      };
+    },
+  };
 
   auth = {
     session: async () => {

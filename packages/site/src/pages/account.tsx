@@ -1,6 +1,13 @@
 import { format } from 'date-fns';
-import { useNoyaBilling, useNoyaFiles, useNoyaSession } from 'noya-api';
 import {
+  useNoyaBilling,
+  useNoyaClient,
+  useNoyaEmailLists,
+  useNoyaFiles,
+  useNoyaSession,
+} from 'noya-api';
+import {
+  Body,
   Heading2,
   Heading3,
   Small,
@@ -41,6 +48,8 @@ export default function Account() {
     availableProducts,
     0,
   );
+  const { emailLists } = useNoyaEmailLists();
+  const client = useNoyaClient();
 
   const activeSubscriptions = subscriptions.filter(
     (subscription) => subscription.status === 'active',
@@ -148,6 +157,47 @@ export default function Account() {
                 })}
               </Stack.V>
             )}
+          </>
+        )}
+        {emailLists.length > 0 && (
+          <>
+            <Stack.V gap={20}>
+              <Heading3 color="text">Mailing List</Heading3>
+              <Body color="text">
+                Here you can opt in to our mailing list to receive updates about
+                Noya.
+              </Body>
+              <Stack.V
+                border={`1px solid ${theme.colors.dividerSubtle}`}
+                padding={20}
+                background={theme.colors.sidebar.background}
+                gap={10}
+              >
+                {emailLists.map((emailList) => (
+                  <Stack.H key={emailList.id}>
+                    <Stack.V flex="1" gap={4}>
+                      <Small color="text" fontWeight="bold">
+                        {emailList.name}
+                      </Small>
+                      <Small color="textMuted" flex="1">
+                        {emailList.description}
+                      </Small>
+                    </Stack.V>
+                    <Stack.H flex="1">
+                      <Switch
+                        variant="secondary"
+                        value={emailList.optIn}
+                        onChange={(newValue) => {
+                          client.emailLists.update(emailList.id, {
+                            optIn: newValue,
+                          });
+                        }}
+                      />
+                    </Stack.H>
+                  </Stack.H>
+                ))}
+              </Stack.V>
+            </Stack.V>
           </>
         )}
       </Stack.V>

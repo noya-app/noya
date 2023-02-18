@@ -20,3 +20,8 @@ export function useNoyaBilling() {
   const billing = useSelector(useNoyaClient().billing$);
   return billing;
 }
+
+export function useNoyaEmailLists() {
+  const emailLists = useSelector(useNoyaClient().emailLists$);
+  return emailLists;
+}

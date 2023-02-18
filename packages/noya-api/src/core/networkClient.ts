@@ -4,6 +4,7 @@ import { NoyaAPIError } from './error';
 import {
   noyaAssetSchema,
   noyaBillingSchema,
+  noyaEmailListSchema,
   NoyaExportFormat,
   NoyaFileData,
   noyaFileListSchema,
@@ -11,6 +12,7 @@ import {
   noyaSessionSchema,
   noyaSharedFileSchema,
   noyaShareSchema,
+  noyaUserDataSchema,
 } from './schema';
 
 /**
@@ -30,6 +32,7 @@ export interface INoyaNetworkClient {
   files: NoyaNetworkClient['files'];
   assets: NoyaNetworkClient['assets'];
   billing: NoyaNetworkClient['billing'];
+  emailLists: NoyaNetworkClient['emailLists'];
 }
 
 export class NoyaNetworkClient {
@@ -42,6 +45,19 @@ export class NoyaNetworkClient {
   }) {
     this.baseURI = options.baseURI;
     this.onError = options.onError;
+  }
+
+  get userData() {
+    return {
+      read: this.#readUserData,
+    };
+  }
+
+  get emailLists() {
+    return {
+      list: this.#listEmailLists,
+      update: this.#updateEmailList,
+    };
   }
 
   get auth() {
@@ -86,6 +102,47 @@ export class NoyaNetworkClient {
       list: this.#listShares,
     };
   }
+
+  #readUserData = async () => {
+    const response = await fetch(`${this.baseURI}/user`, {
+      credentials: 'include',
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaUserDataSchema.parse(json);
+    return parsed;
+  };
+
+  #listEmailLists = async () => {
+    const response = await fetch(`${this.baseURI}/user/email-lists`, {
+      credentials: 'include',
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = z.array(noyaEmailListSchema).parse(json);
+    return parsed;
+  };
+
+  #updateEmailList = async (id: string, data: { optIn: boolean }) => {
+    const response = await fetch(`${this.baseURI}/user/email-lists/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaEmailListSchema.parse(json);
+    return parsed;
+  };
 
   #listShares = async (fileId: string) => {
     const response = await fetch(`${this.baseURI}/files/${fileId}/shares`, {

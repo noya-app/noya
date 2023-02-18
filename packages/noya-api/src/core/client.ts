@@ -2,7 +2,13 @@ import { observable } from '@legendapp/state';
 import { memoizedGetter } from 'noya-utils';
 import { makeCollectionReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
-import { NoyaBilling, NoyaFile, NoyaFileData, NoyaSession } from './schema';
+import {
+  NoyaBilling,
+  NoyaEmailList,
+  NoyaFile,
+  NoyaFileData,
+  NoyaSession,
+} from './schema';
 
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
@@ -28,6 +34,13 @@ export class NoyaClient {
     subscriptions: [],
     loading: true,
   });
+  emailLists$ = observable<{
+    emailLists: NoyaEmailList[];
+    loading: boolean;
+  }>({
+    emailLists: [],
+    loading: true,
+  });
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -36,12 +49,29 @@ export class NoyaClient {
       this.#fetchSession();
       this.#fetchFiles();
       this.#fetchBilling();
+      this.#fetchEmailLists();
     }
   }
 
   #fetchSession = async () => {
     const session = await this.networkClient.auth.session();
     this.session$.set(session);
+  };
+
+  get emailLists() {
+    return memoizedGetter(this, 'emailLists', {
+      update: this.#updateEmailList,
+    });
+  }
+
+  #fetchEmailLists = async () => {
+    const emailLists = await this.networkClient.emailLists.list();
+    this.emailLists$.set({ emailLists, loading: false });
+  };
+
+  #updateEmailList = async (id: string, data: { optIn: boolean }) => {
+    await this.networkClient.emailLists.update(id, data);
+    this.#fetchEmailLists();
   };
 
   get files() {
