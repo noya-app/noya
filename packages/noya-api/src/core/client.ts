@@ -49,7 +49,7 @@ export class NoyaClient {
       this.#fetchSession();
       this.#fetchFiles();
       this.#fetchBilling();
-      this.#fetchEmailLists();
+      // this.#fetchEmailLists();
     }
   }
 
