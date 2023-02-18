@@ -38,7 +38,7 @@ function splitItems(text: string, type: 'commaSeparated' | 'newlineSeparated') {
   return items.map((item) => item.trim());
 }
 
-export function parseBlockItem(text: string): ParsedBlockItem {
+export function parseBlockItem(text: string = ''): ParsedBlockItem {
   text = text.trim();
 
   const active = text.startsWith('*');

@@ -40,3 +40,11 @@ export function getBlockClassName(hashtags: string[]) {
   const className = hashtags.filter(isSupportedTailwindClass).join(' ');
   return className || undefined;
 }
+
+// export const classGroups = {
+//   background: /^(bg|dark)/,
+// };
+
+// export function getTailwindClassGroup(className: string) {
+//   return Object.entries(classGroups).find(([, re]) => re.test(className));
+// }

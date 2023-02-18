@@ -11,7 +11,11 @@ import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import path from 'path';
 import { Blocks } from '../ayon/blocks/blocks';
-import { buttonSymbolId, textSymbolId } from '../ayon/blocks/symbolIds';
+import {
+  buttonSymbolId,
+  heroSymbolV2Id,
+  textSymbolId,
+} from '../ayon/blocks/symbolIds';
 
 // Jest doesn't know how to import a text file, so we mock it
 jest.mock('../../safelist.txt', () => {
@@ -54,6 +58,20 @@ describe('text', () => {
       frame: SketchModel.rect({
         width: 100,
         height: 40,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('hero', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: heroSymbolV2Id,
+      frame: SketchModel.rect({
+        width: 400,
+        height: 400,
       }),
     });
 
