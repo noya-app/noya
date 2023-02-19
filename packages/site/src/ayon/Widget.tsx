@@ -41,7 +41,7 @@ import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { allInsertableSymbols, Blocks } from './blocks/blocks';
-import { getChildrenBlockProps, getContainerBlockProps } from './blocks/render';
+import { getRenderableBlockProps } from './blocks/render';
 import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
 import { BlockEditorV1 } from './editor/BlockEditorV1';
@@ -335,10 +335,11 @@ export const Widget = forwardRef(function Widget(
       },
     };
 
-    const containerBlockProps = getContainerBlockProps({
-      props: blockProps,
-      block: Block,
-    });
+    const { container: containerBlockProps, children: childrenBlockProps } =
+      getRenderableBlockProps({
+        props: blockProps,
+        block: Block,
+      });
 
     const containerLayer = SketchModel.symbolInstance({
       symbolID: boxSymbolId,
@@ -346,12 +347,7 @@ export const Widget = forwardRef(function Widget(
       frame: layer.frame,
     });
 
-    const children = getChildrenBlockProps({
-      props: blockProps,
-      block: Block,
-    });
-
-    const layers = children.flatMap((child) => {
+    const layers = childrenBlockProps.flatMap((child) => {
       if (!child.dataSet) return [];
 
       const element = document.querySelector<HTMLElement>(

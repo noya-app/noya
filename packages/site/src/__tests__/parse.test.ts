@@ -285,3 +285,13 @@ it('merges block items', () => {
   // Parameter order matters
   expect(Object.keys(merged.parameters)).toEqual(['b', 'a']);
 });
+
+it('merges block items and preserves parameter order', () => {
+  const merged = mergeBlockItems([
+    { content: 'Dashboard', parameters: { a: true } },
+    { content: '', parameters: { b: true } },
+    { content: '', parameters: { a: true } },
+  ]);
+
+  expect(Object.keys(merged.parameters)).toEqual(['b', 'a']);
+});

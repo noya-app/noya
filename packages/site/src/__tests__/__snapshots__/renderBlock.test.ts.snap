@@ -48,20 +48,14 @@ exports[`hero default 1`] = `
   <Flex
     width=\\"400px\\"
     height=\\"400px\\"
-    className=\\"flex-col p-4 gap-3 bg-transparent justify-center items-center\\"
+    className=\\"flex-col p-4 bg-transparent gap-3 items-center justify-center\\"
   >
     <Flex>
-      <Heading
-        flex=\\"1\\"
-        size=\\"xl\\"
-        className=\\"text-center\\"
-        textAlign=\\"center\\"
-        lineHeight=\\"1.3\\"
-      >
+      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" className=\\"text-center\\">
         {'Create, iterate, inspire.'}
       </Heading>
     </Flex>
-    <Text textAlign=\\"center\\" className=\\"text-center mb-4\\">
+    <Text className=\\"text-center mb-4\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
     <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
@@ -77,20 +71,14 @@ exports[`hero left aligned default 1`] = `
   <Flex
     width=\\"400px\\"
     height=\\"400px\\"
-    className=\\"flex-col p-4 gap-3 bg-transparent justify-center items-start\\"
+    className=\\"flex-col p-4 bg-transparent gap-3 items-start justify-center\\"
   >
     <Flex>
-      <Heading
-        flex=\\"1\\"
-        size=\\"xl\\"
-        className=\\"text-center\\"
-        textAlign=\\"left\\"
-        lineHeight=\\"1.3\\"
-      >
+      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" className=\\"text-center\\">
         {'Create, iterate, inspire.'}
       </Heading>
     </Flex>
-    <Text textAlign=\\"left\\" className=\\"text-center mb-4\\">
+    <Text className=\\"text-center mb-4\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
     <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
@@ -106,23 +94,22 @@ exports[`hero with bg default 1`] = `
   <Flex
     width=\\"400px\\"
     height=\\"400px\\"
-    className=\\"flex-col p-4 gap-3 bg-blue-500 justify-center items-center\\"
+    className=\\"flex-col p-4 bg-blue-500 gap-3 items-center justify-center\\"
   >
     <Flex>
       <Heading
         flex=\\"1\\"
         size=\\"xl\\"
-        className=\\"text-center\\"
-        textAlign=\\"center\\"
         lineHeight=\\"1.3\\"
+        className=\\"text-center text-white\\"
       >
         {'Create, iterate, inspire.'}
       </Heading>
     </Flex>
-    <Text textAlign=\\"center\\" className=\\"text-center mb-4\\">
+    <Text className=\\"text-center mb-4 text-white\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
-    <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
+    <Button size=\\"md\\" backgroundColor=\\"#f1f5f9\\" color=\\"#000\\" isDisabled={false}>
       {'Get started'}
     </Button>
   </Flex>
@@ -132,9 +119,7 @@ exports[`hero with bg default 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text textAlign=\\"center\\" className=\\"text-red-500\\">
-    {'Hello world'}
-  </Text>
+  <Text className=\\"text-red-500\\">{'Hello world'}</Text>
 </Frame>;
 "
 `;

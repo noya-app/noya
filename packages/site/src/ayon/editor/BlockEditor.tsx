@@ -397,7 +397,7 @@ function HashtagIcon({ item }: { item: string }) {
           ? 'black'
           : undefined,
       }}
-      className={item}
+      className={/^(p\w?-|m\w?-)/.test(item) ? undefined : item}
     >
       {/^(text|font)/.test(item) ? 'Tt' : null}
     </div>

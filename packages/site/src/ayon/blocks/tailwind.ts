@@ -52,7 +52,9 @@ export function getBlockClassName(hashtags: string[]) {
 
 export const classGroups = {
   background: /^bg/,
-  textColor: /^text/,
+  // From https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
+  textColor:
+    /^text-(inherit|current|transparent|black|white|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)/,
   justify: /^justify/,
   items: /^items/,
   gap: /^gap-/,

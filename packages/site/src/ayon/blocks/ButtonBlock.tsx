@@ -23,6 +23,17 @@ const globalHashtags = [
 
 const parser = 'regular';
 
+type ButtonColorKey = keyof typeof buttonColors;
+
+const colorsKeys = new Set<ButtonColorKey>([
+  'light',
+  'dark',
+  'primary',
+  'secondary',
+  'warning',
+  'danger',
+]);
+
 export const ButtonBlock: BlockDefinition = {
   symbol: buttonSymbol,
   parser,
@@ -33,33 +44,19 @@ export const ButtonBlock: BlockDefinition = {
   render: (props) => {
     const {
       content,
-      parameters: {
-        light,
-        dark,
-        primary,
-        secondary,
-        warning,
-        danger,
-        disabled,
-        xs,
-        lg,
-        md,
-      },
+      parameters: { xs, lg, md, disabled, ...parameters },
     } = parseBlock(props.blockText, parser, { placeholder: placeholderText });
 
-    const buttonColorKey = warning
-      ? 'warning'
-      : danger
-      ? 'danger'
-      : light
-      ? 'light'
-      : dark
-      ? 'dark'
-      : primary
-      ? 'primary'
-      : secondary
-      ? 'secondary'
-      : 'default';
+    const hashtags = Object.keys(parameters);
+
+    const colorKey = hashtags
+      .slice()
+      .reverse()
+      .find((key) => colorsKeys.has(key as ButtonColorKey)) as
+      | ButtonColorKey
+      | undefined;
+
+    const buttonColorKey = colorKey ?? 'default';
 
     const colors = buttonColors[buttonColorKey];
 

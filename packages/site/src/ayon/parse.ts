@@ -146,8 +146,14 @@ export function mergeBlockItems(items: ParsedBlockItem[]) {
 
   // Assign in reverse order, so new parameters are added last.
   // The order of parameters matters when they get converted to class names.
-  for (const item of [...items].reverse()) {
-    Object.assign(parameters, item.parameters);
+  for (const item of items.slice().reverse()) {
+    for (const key of Object.keys(item.parameters)) {
+      if (key in parameters) {
+        delete parameters[key];
+      }
+
+      parameters[key] = item.parameters[key];
+    }
   }
 
   return { content, parameters };

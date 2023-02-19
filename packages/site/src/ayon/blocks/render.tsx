@@ -3,6 +3,7 @@ import {
   BlockDefinition,
   BlockProps,
   Layers,
+  Overrides,
 } from 'noya-state';
 import { zip } from 'noya-utils';
 import {
@@ -59,26 +60,25 @@ export function getChildrenBlockProps({
         return [];
       }
 
+      const override = props.layer?.overrideValues.find(
+        (override) =>
+          override.overrideName ===
+          Overrides.encodeName([layer.do_objectID], 'blockText'),
+      );
+      const hasOverride = !!(override && override.value);
+
       const fallback = parseBlock(fallbackLayer.blockText, 'regular');
       const item = parseBlock(layer?.blockText, 'regular');
       const merged = mergeBlockItems([
+        ...(!hasOverride && extraParameters
+          ? [{ content: '', parameters: extraParameters }]
+          : []),
         item,
-        ...(extraParameters
+        ...(hasOverride && extraParameters
           ? [{ content: '', parameters: extraParameters }]
           : []),
         fallback,
       ]);
-
-      for (const [key, value] of Object.entries(extraParameters ?? {})) {
-        if (
-          key in merged.parameters ||
-          !props.getBlock(layer.symbolID).hashtags?.includes(key)
-        ) {
-          continue;
-        }
-
-        merged.parameters[key] = value;
-      }
 
       const blockText = encodeBlockItem(merged);
 
@@ -101,10 +101,18 @@ export function getChildrenBlockProps({
   );
 }
 
-export const renderStack = ({ props, block }: BlockRenderOptions) => {
-  const containerBlockProps = getContainerBlockProps({ props, block });
+export function getRenderableBlockProps({ props, block }: BlockRenderOptions) {
+  const container = getContainerBlockProps({ props, block });
 
-  const { parameters } = parseBlock(containerBlockProps.blockText, 'regular');
+  const { parameters } = parseBlock(container.blockText, 'regular');
+
+  const background = Object.keys(parameters)
+    .reverse()
+    .find((key) => key.startsWith('bg-'));
+
+  const darkBackground = background
+    ? /-(500|600|700|800|900)$/.test(background)
+    : undefined;
 
   const children = getChildrenBlockProps({
     props,
@@ -113,12 +121,22 @@ export const renderStack = ({ props, block }: BlockRenderOptions) => {
       ...(parameters.left && { left: true }),
       ...(parameters.right && { right: true }),
       ...(parameters.center && { center: true }),
+      ...((parameters.dark || darkBackground) && {
+        'text-white': true,
+        light: true,
+      }),
     },
   });
 
-  containerBlockProps.children = children.map((childProps) =>
+  return { container, children };
+}
+
+export const renderStack = ({ props, block }: BlockRenderOptions) => {
+  const { container, children } = getRenderableBlockProps({ props, block });
+
+  container.children = children.map((childProps) =>
     props.getBlock(childProps.symbolId).render(childProps),
   );
 
-  return props.getBlock(boxSymbol.symbolID).render(containerBlockProps);
+  return props.getBlock(boxSymbol.symbolID).render(container);
 };
