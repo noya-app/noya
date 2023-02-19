@@ -1,4 +1,4 @@
-import { partition } from 'noya-utils';
+import { groupBy, memoize, partition } from 'noya-utils';
 import { SafelistConfig } from 'tailwindcss/types/config';
 
 const allClassNames = (
@@ -29,7 +29,7 @@ export function isSupportedTailwindClass(className: string) {
   return allClassNamesSet.has(className);
 }
 
-const isTextClassRE = /^(text|font)/;
+const isTextClassRE = /^(text|font|truncate|leading)/;
 
 export const [tailwindTextClasses, tailwindBlockClasses] = partition(
   allClassNames,
@@ -37,6 +37,45 @@ export const [tailwindTextClasses, tailwindBlockClasses] = partition(
 );
 
 export function getBlockClassName(hashtags: string[]) {
-  const className = hashtags.filter(isSupportedTailwindClass).join(' ');
+  const supportedHashtags = hashtags.filter(isSupportedTailwindClass);
+
+  const groups = groupBy(supportedHashtags, getTailwindClassGroup);
+
+  const hashtagsToApply = Object.entries(groups).flatMap(([name, group]) =>
+    name === 'none' ? group : group.slice(-1),
+  );
+
+  const className = hashtagsToApply.join(' ');
+
   return className || undefined;
 }
+
+export const classGroups = {
+  background: /^bg/,
+  // From https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
+  textColor:
+    /^text-(inherit|current|transparent|black|white|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)/,
+  justify: /^justify/,
+  items: /^items/,
+  gap: /^gap-/,
+  none: /.*/,
+  flexDirection: /^(flex-row|flex-col)/,
+  flex: /^(flex-1|flex-auto|flex-none)/,
+  alignSelf: /^self/,
+};
+
+type ClassGroup = keyof typeof classGroups;
+
+export function hasClassGroup(group: ClassGroup, hashtags: string[]) {
+  return hashtags.some((className) => classGroups[group].test(className));
+}
+
+export const getTailwindClassGroup = memoize(
+  (className: string): ClassGroup => {
+    const entry = Object.entries(classGroups).find(([, re]) =>
+      re.test(className),
+    )!;
+
+    return entry[0] as ClassGroup;
+  },
+);

@@ -22,6 +22,7 @@ import {
 } from '../selectors';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
+import { BlockAction, blockReducer } from './blockReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
 import { ExportAction, exportReducer } from './exportReducer';
 import {
@@ -87,6 +88,7 @@ export type ApplicationState = {
 };
 
 export type Action =
+  | [type: 'batch', actions: Action[]]
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
@@ -103,7 +105,8 @@ export type Action =
   | SymbolsAction
   | ExportAction
   | PointAction
-  | TextEditorAction;
+  | TextEditorAction
+  | BlockAction;
 
 export type ApplicationReducerContext = {
   canvasInsets: Insets;
@@ -118,6 +121,12 @@ export function applicationReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'batch':
+      return action[1].reduce(
+        (state, action) =>
+          applicationReducer(state, action, CanvasKit, context),
+        state,
+      );
     case 'setKeyModifier':
       const [, name, value] = action;
       return produce(state, (draft) => {
@@ -496,6 +505,8 @@ export function applicationReducer(
     case 'insertText':
     case 'deleteText':
       return textEditorReducer(state, action, CanvasKit, context);
+    case 'setBlockContent':
+      return blockReducer(state, action, CanvasKit);
     default:
       return themeReducer(state, action);
   }

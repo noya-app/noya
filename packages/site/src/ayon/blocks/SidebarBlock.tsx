@@ -4,7 +4,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { sidebarSymbol, sidebarSymbolId } from './symbols';
+import { sidebarSymbol } from './symbols';
 
 const placeholderText = `
 *Dashboard 
@@ -18,7 +18,7 @@ const globalHashtags = ['dark', 'accent', 'title'];
 const parser = 'newlineSeparated';
 
 export const SidebarBlock: BlockDefinition = {
-  id: sidebarSymbolId,
+  symbol: sidebarSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,
@@ -47,7 +47,7 @@ export const SidebarBlock: BlockDefinition = {
     return (
       <VStack
         alignItems="left"
-        height={`${props.frame.height}px`}
+        height={'100%'}
         spacing="5px"
         paddingY="10px"
         paddingX="10px"

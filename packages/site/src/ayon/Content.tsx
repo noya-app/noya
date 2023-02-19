@@ -11,25 +11,26 @@ import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import { DrawableLayerType, Layers, Selectors } from 'noya-state';
+import {
+  Action,
+  BlockContent,
+  DrawableLayerType,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import { debounce, isExternalUrl } from 'noya-utils';
+import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
-import { Blocks } from './blocks';
-import { iconSymbolId, imageSymbolId, writeSymbolId } from './blocks/symbols';
 import { DOMRenderer } from './DOMRenderer';
-import { GenerateResolver } from './GenerateResolver';
-import { IconResolver } from './IconResolver';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
-import { parseBlock } from './parse';
-import { RedirectResolver } from './RedirectResolver';
+import { resolveLayer } from './resolve/resolve';
 import { Stacking } from './stacking';
-import { DrawingWidget, Widget } from './Widget';
+import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 
 const Overlay = styled.div({
   position: 'absolute',
@@ -37,10 +38,6 @@ const Overlay = styled.div({
   pointerEvents: 'none',
   display: 'flex',
 });
-
-const redirectResolver = new RedirectResolver();
-const generateResolver = new GenerateResolver();
-const iconResolver = new IconResolver();
 
 export type ViewType = 'split' | 'combined' | 'previewOnly';
 
@@ -106,92 +103,23 @@ export const Content = memo(function Content({
   };
 
   useEffect(() => {
-    const subscriptions: Array<() => void> = [];
-
-    layers.forEach((layer) => {
-      const {
-        blockText,
-        resolvedBlockData,
-        frame,
-        symbolID,
-        do_objectID: layerId,
-      } = layer;
-
-      if (typeof blockText !== 'string') return;
-
-      const BlockDefinition = Blocks[symbolID];
-
-      if (!BlockDefinition) return;
-
-      const { content: originalText } = parseBlock(
-        blockText,
-        BlockDefinition.parser,
+    const subscriptions = layers
+      .filter(Layers.isSymbolInstance)
+      .flatMap((layer) =>
+        resolveLayer({
+          layer,
+          onResolve: (resolved) =>
+            dispatch('setResolvedBlockData', layer.do_objectID, resolved),
+          onResolveOverride: (overrideName, resolved) => {
+            dispatch(
+              'setOverrideValue',
+              [layer.do_objectID],
+              overrideName,
+              resolved,
+            );
+          },
+        }),
       );
-
-      // Already resolved
-      if (
-        resolvedBlockData &&
-        resolvedBlockData.originalText === originalText
-      ) {
-        return;
-      }
-
-      if (!originalText) {
-        dispatch('setResolvedBlockData', layerId, undefined);
-        return;
-      }
-
-      if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
-        const unsplashUrl = `https://source.unsplash.com/${frame.width}x${
-          frame.height
-        }?${encodeURIComponent(originalText)}`;
-
-        subscriptions.push(
-          redirectResolver.addListener(layerId, unsplashUrl, (resolvedUrl) => {
-            dispatch('setResolvedBlockData', layerId, {
-              originalText,
-              resolvedText: resolvedUrl,
-              symbolID: symbolID,
-              resolvedAt: new Date().toISOString(),
-            });
-          }),
-        );
-
-        redirectResolver.resolve(layerId, unsplashUrl);
-      } else if (symbolID === writeSymbolId) {
-        dispatch('setResolvedBlockData', layerId, undefined);
-
-        subscriptions.push(
-          generateResolver.addListener(
-            layerId,
-            originalText,
-            (resolvedText) => {
-              dispatch('setResolvedBlockData', layerId, {
-                originalText,
-                resolvedText,
-                symbolID: symbolID,
-                resolvedAt: new Date().toISOString(),
-              });
-            },
-          ),
-        );
-
-        generateResolver.resolve(layerId, originalText);
-      } else if (symbolID === iconSymbolId) {
-        subscriptions.push(
-          iconResolver.addListener(layerId, originalText, (resolvedUrl) => {
-            dispatch('setResolvedBlockData', layerId, {
-              originalText,
-              resolvedText: resolvedUrl,
-              symbolID: symbolID,
-              resolvedAt: new Date().toISOString(),
-            });
-          }),
-        );
-
-        iconResolver.resolve(layerId, originalText);
-      }
-    });
 
     return () => {
       subscriptions.forEach((unsubscribe) => unsubscribe());
@@ -299,29 +227,28 @@ export const Content = memo(function Content({
                           'preserveCurrent',
                         );
                       }}
-                      onChangeBlockText={(text: string) => {
-                        const BlockDefinition = Blocks[layer.symbolID];
-
-                        dispatch(
-                          'setBlockText',
-                          [layer.do_objectID],
-                          text,
-                          parseBlock(text, BlockDefinition.parser).content,
-                        );
-
-                        if (text !== '') {
-                          dispatch(
-                            'setSymbolIdIsFixed',
-                            [layer.do_objectID],
-                            true,
-                          );
-                        }
+                      onChangeBlockContent={(content: BlockContent) => {
+                        dispatch('batch', [
+                          ['setBlockContent', layer.do_objectID, content],
+                          ...(content.blockText !== ''
+                            ? [
+                                [
+                                  'setSymbolIdIsFixed',
+                                  layer.do_objectID,
+                                  true,
+                                ] as Action,
+                              ]
+                            : []),
+                        ]);
                       }}
                       uploadAsset={uploadAsset}
                     />
                   ))}
                   {state.interactionState.type === 'drawing' && (
                     <DrawingWidget />
+                  )}
+                  {state.selectedLayerIds.length >= 2 && (
+                    <MultipleSelectionWidget />
                   )}
                 </>
               )

@@ -1,5 +1,5 @@
 import { Emitter } from 'noya-fonts';
-import { NOYA_HOST } from '../utils/noyaClient';
+import { NOYA_HOST } from '../../utils/noyaClient';
 
 export class GenerateResolver {
   cache: Record<string, Promise<string>> = {};

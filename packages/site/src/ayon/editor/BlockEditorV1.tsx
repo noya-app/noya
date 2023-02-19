@@ -1,4 +1,5 @@
 import { useDispatch } from 'noya-app-state-context';
+import { useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   FALLTHROUGH,
@@ -19,7 +20,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  BaseEditor,
   createEditor,
   Descendant,
   Editor,
@@ -27,12 +27,10 @@ import {
   Range,
   Transforms,
 } from 'slate';
-import { HistoryEditor, withHistory } from 'slate-history';
+import { withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { Blocks } from './blocks';
-
+import { allInsertableSymbols, Blocks } from '../blocks/blocks';
 import {
-  allAyonSymbols,
   heading1SymbolId,
   heading2SymbolId,
   heading3SymbolId,
@@ -40,9 +38,9 @@ import {
   heading5SymbolId,
   heading6SymbolId,
   textSymbolId,
-} from './blocks/symbols';
-import { InferredBlockTypeResult } from './types';
-import { useCompletionMenu } from './useCompletionMenu';
+} from '../blocks/symbolIds';
+import { InferredBlockTypeResult } from '../types';
+import { useCompletionMenu } from '../useCompletionMenu';
 
 export interface IBlockEditor {
   focus: () => void;
@@ -140,14 +138,11 @@ function textShortcut(
   return { range, match };
 }
 
-export const BlockEditor = forwardRef(function BlockEditor(
+export const BlockEditorV1 = forwardRef(function BlockEditorV1(
   {
     isEditing,
-    isSelected,
     layer,
-    parent,
     blockText,
-    blockTypes,
     onChangeBlockType,
     onChangeBlockText,
     onFocusCanvas,
@@ -165,6 +160,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
   forwardedRef: ForwardedRef<IBlockEditor>,
 ) {
   const dispatch = useDispatch();
+  const theme = useDesignSystemTheme();
 
   // Creating an editor ref with useLazyValue fixes hot reload
   const editor = useLazyValue(() => withHistory(withReact(createEditor())));
@@ -200,7 +196,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     ReactEditor.deselect(editor);
   }, [editor, isEditing]);
 
-  const symbolItems = allAyonSymbols.map((symbol) => ({
+  const symbolItems = allInsertableSymbols.map((symbol) => ({
     name: symbol.name,
     id: symbol.symbolID,
   }));
@@ -225,6 +221,16 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
       onChangeBlockType({ symbolId: item.id });
       setBlockText(newText);
+
+      if (Blocks[item.id].editorVersion === 2) {
+        setTimeout(() => {
+          const el = document.querySelector(`#editor-${layer.do_objectID}`);
+
+          if (el instanceof HTMLElement) {
+            el.focus();
+          }
+        }, 100);
+      }
     },
   });
 
@@ -254,7 +260,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     })),
     onSelect: (target, item) => {
       amplitude.logEvent('Project - Block - Inserted Hashtag', {
-        'Block Type': blockDefinition.id,
+        'Block Type': blockDefinition.symbol.symbolID,
         X: layer.frame.x,
         Y: layer.frame.y,
         Width: layer.frame.width,
@@ -366,7 +372,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         if (domNode !== document.activeElement) return;
 
         logEditedTextDebounced('Project - Block - Edited Text', {
-          'Block Type': blockDefinition.id,
+          'Block Type': blockDefinition.symbol.symbolID,
           X: layer.frame.x,
           Y: layer.frame.y,
           Width: layer.frame.width,
@@ -421,11 +427,17 @@ export const BlockEditor = forwardRef(function BlockEditor(
       }}
     >
       <Editable
+        id={`editor-${layer.do_objectID}`}
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        style={{ position: 'absolute', inset: 0, padding: 4 }}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          padding: 4,
+          ...theme.textStyles.small,
+        }}
         spellCheck={false}
         placeholder={blockDefinition.placeholderText}
       />
@@ -443,34 +455,7 @@ function fromString(value: string): Descendant[] {
   return value.split('\n').map((line) => ({
     type: 'paragraph',
     children: [{ text: line }],
+    label: undefined,
+    symbolId: '',
   }));
-}
-
-export type ParagraphElement = {
-  type: 'paragraph';
-  align?: string;
-  children: Descendant[];
-};
-
-type CustomElement = ParagraphElement;
-
-export type CustomText = {
-  bold?: boolean;
-  italic?: boolean;
-  code?: boolean;
-  text: string;
-};
-
-export type EmptyText = {
-  text: string;
-};
-
-export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
-
-declare module 'slate' {
-  interface CustomTypes {
-    Editor: CustomEditor;
-    Element: CustomElement;
-    Text: CustomText | EmptyText;
-  }
 }

@@ -23,6 +23,7 @@ export default memo(function SymbolMasterInspector() {
     (overrideName: string, value: string) => {
       dispatch(
         'setOverrideValue',
+        undefined,
         overrideName,
         value === '' ? undefined : value,
       );
@@ -31,7 +32,7 @@ export default memo(function SymbolMasterInspector() {
   );
 
   const onResetOverrideValue = useCallback(() => {
-    dispatch('setOverrideValue');
+    dispatch('setOverrideValue', undefined);
   }, [dispatch]);
 
   const elements = [

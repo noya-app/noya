@@ -2,11 +2,12 @@ import { Image } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { isApproximatelySquare, isWithinRectRange } from './score';
-import { iconSymbolId } from './symbols';
+import { iconSymbol } from './symbols';
 
 export const IconBlock: BlockDefinition = {
-  id: iconSymbolId,
+  symbol: iconSymbol,
   parser: 'regular',
+  usesResolver: true,
   infer: ({ frame, blockText }) =>
     isWithinRectRange(frame, 10, 10, 90, 90) &&
     isApproximatelySquare(frame, 0.2)

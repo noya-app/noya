@@ -38,7 +38,7 @@ function splitItems(text: string, type: 'commaSeparated' | 'newlineSeparated') {
   return items.map((item) => item.trim());
 }
 
-export function parseBlockItem(text: string): ParsedBlockItem {
+export function parseBlockItem(text: string = ''): ParsedBlockItem {
   text = text.trim();
 
   const active = text.startsWith('*');
@@ -139,6 +139,26 @@ function parseBlockInner<K extends keyof ParsedBlockTypeMap>(
   }
 }
 
+export function mergeBlockItems(items: ParsedBlockItem[]) {
+  const content = items.reduce((result, item) => result || item.content, '');
+
+  const parameters: ParsedBlockItemParameters = {};
+
+  // Assign in reverse order, so new parameters are added last.
+  // The order of parameters matters when they get converted to class names.
+  for (const item of items.slice().reverse()) {
+    for (const key of Object.keys(item.parameters)) {
+      if (key in parameters) {
+        delete parameters[key];
+      }
+
+      parameters[key] = item.parameters[key];
+    }
+  }
+
+  return { content, parameters };
+}
+
 export function parseBlock<K extends keyof ParsedBlockTypeMap>(
   text: string = '',
   type: K,
@@ -150,19 +170,15 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 ): ParsedBlockTypeMap[K] {
   switch (type) {
     case 'regular': {
-      const block = parseBlockInner(text, type);
+      let block = parseBlockInner(text, type) as ParsedBlockItem;
 
-      if (placeholder && block.content === '') {
-        const parsedPlaceholder = parseBlockInner(placeholder, type);
+      if (placeholder) {
+        const fallback = parseBlockInner(placeholder, type);
 
-        block.content = parsedPlaceholder.content;
-        block.parameters = mergeObjects([
-          parsedPlaceholder.parameters,
-          block.parameters,
-        ]);
+        block = mergeBlockItems([block, fallback]);
       }
 
-      return block;
+      return block as ParsedBlockTypeMap[K];
     }
     case 'commaSeparated':
     case 'newlineSeparated': {
@@ -274,4 +290,32 @@ export function getTextAlign({
   center,
 }: ParsedBlockItemParameters) {
   return left ? 'left' : right ? 'right' : center ? 'center' : undefined;
+}
+
+export function getSelfAlign({
+  left,
+  right,
+  center,
+}: ParsedBlockItemParameters) {
+  return left
+    ? 'self-start'
+    : right
+    ? 'self-end'
+    : center
+    ? 'self-center'
+    : undefined;
+}
+
+export function encodeBlockItem(blockItem: ParsedBlockItem) {
+  const { content, parameters } = blockItem;
+
+  const encodedParameters = Object.entries(parameters).map(([key, value]) => {
+    if (value === true) {
+      return `#${key}`;
+    } else {
+      return `#${key}=${value}`;
+    }
+  });
+
+  return [content, ...encodedParameters].filter((x) => !!x).join(' ');
 }

@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import { fuzzyFilter, fuzzyTokenize, IScoredItem, IToken } from './fuzzyScorer';
 import { IModalMenu, ModalMenu } from './ModalMenu';
 
-type CompletionItem = { id: string; name: string; icon?: ReactNode };
+export type CompletionItem = { id: string; name: string; icon?: ReactNode };
 
 const Token = styled.span<{ type: IToken['type'] }>(({ type }) => ({
   fontWeight: type === 'match' ? 'bold' : 'normal',

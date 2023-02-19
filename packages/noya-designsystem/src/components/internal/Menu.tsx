@@ -91,6 +91,7 @@ export const styles = {
     boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
     padding: '4px',
     border: `1px solid ${theme.colors.divider}`,
+    zIndex: 1000,
     ...(scrollable && {
       height: '100%',
       maxHeight: 'calc(100vh - 80px)',

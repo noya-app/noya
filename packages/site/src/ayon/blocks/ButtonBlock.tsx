@@ -4,7 +4,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
-import { buttonSymbolId } from './symbols';
+import { buttonSymbol } from './symbols';
 
 const placeholderText = 'Submit';
 
@@ -16,12 +16,26 @@ const globalHashtags = [
   'warning',
   'danger',
   'disabled',
+  'xs',
+  'md',
+  'lg',
 ];
 
 const parser = 'regular';
 
+type ButtonColorKey = keyof typeof buttonColors;
+
+const colorsKeys = new Set<ButtonColorKey>([
+  'light',
+  'dark',
+  'primary',
+  'secondary',
+  'warning',
+  'danger',
+]);
+
 export const ButtonBlock: BlockDefinition = {
-  id: buttonSymbolId,
+  symbol: buttonSymbol,
   parser,
   hashtags: globalHashtags,
   placeholderText,
@@ -30,46 +44,45 @@ export const ButtonBlock: BlockDefinition = {
   render: (props) => {
     const {
       content,
-      parameters: {
-        light,
-        dark,
-        primary,
-        secondary,
-        warning,
-        danger,
-        disabled,
-      },
+      parameters: { xs, lg, md, disabled, ...parameters },
     } = parseBlock(props.blockText, parser, { placeholder: placeholderText });
 
-    const buttonColorKey = light
-      ? 'light'
-      : dark
-      ? 'dark'
-      : primary
-      ? 'primary'
-      : secondary
-      ? 'secondary'
-      : warning
-      ? 'warning'
-      : danger
-      ? 'danger'
-      : 'default';
+    const hashtags = Object.keys(parameters);
+
+    const colorKey = hashtags
+      .slice()
+      .reverse()
+      .find((key) => colorsKeys.has(key as ButtonColorKey)) as
+      | ButtonColorKey
+      | undefined;
+
+    const buttonColorKey = colorKey ?? 'default';
 
     const colors = buttonColors[buttonColorKey];
 
-    let size;
-    if (props.frame.height < 30) {
-      size = 'xs' as const;
-    } else if (props.frame.height > 50) {
-      size = 'lg' as const;
-    } else {
-      size = 'md' as const;
+    let size = xs ? 'xs' : lg ? 'lg' : md ? 'md' : undefined;
+
+    if (props.frame && size === undefined) {
+      if (props.frame.height < 30) {
+        size = 'xs' as const;
+      } else if (props.frame.height > 50) {
+        size = 'lg' as const;
+      } else {
+        size = 'md' as const;
+      }
     }
 
     return (
       <Button
+        {...(props.dataSet && {
+          key: props.dataSet.id,
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
+        {...(props.frame && {
+          width: `${props.frame.width}px`,
+        })}
         size={size}
-        isFullWidth
         backgroundColor={colors.backgroundColor}
         color={colors.color}
         isDisabled={!!disabled}

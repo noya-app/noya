@@ -10,8 +10,12 @@ import {
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import path from 'path';
-import { Blocks } from '../ayon/blocks';
-import { buttonSymbolId, textSymbolId } from '../ayon/blocks/symbols';
+import { Blocks } from '../ayon/blocks/blocks';
+import {
+  buttonSymbolId,
+  heroSymbolV2Id,
+  textSymbolId,
+} from '../ayon/blocks/symbolIds';
 
 // Jest doesn't know how to import a text file, so we mock it
 jest.mock('../../safelist.txt', () => {
@@ -55,6 +59,50 @@ describe('text', () => {
         width: 100,
         height: 40,
       }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('hero', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: heroSymbolV2Id,
+      frame: SketchModel.rect({
+        width: 400,
+        height: 400,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('hero left aligned', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: heroSymbolV2Id,
+      frame: SketchModel.rect({
+        width: 400,
+        height: 400,
+      }),
+      blockText: '#left',
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('hero with bg', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: heroSymbolV2Id,
+      frame: SketchModel.rect({
+        width: 400,
+        height: 400,
+      }),
+      blockText: '#bg-blue-500',
     });
 
     expect(generate(symbol)).toMatchSnapshot();

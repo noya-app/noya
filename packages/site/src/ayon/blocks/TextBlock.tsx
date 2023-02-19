@@ -1,14 +1,14 @@
 import { Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { getTextAlign, parseBlock } from '../parse';
-import { textSymbolId } from './symbols';
+import { parseBlock } from '../parse';
+import { textSymbol } from './symbols';
 import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const TextBlock: BlockDefinition = {
-  id: textSymbolId,
+  symbol: textSymbol,
   parser: 'regular',
-  hashtags: ['left', 'center', 'right', ...tailwindTextClasses],
+  hashtags: ['left', 'center', 'right', ...tailwindTextClasses, 'flex-1'],
   infer: ({ frame, blockText }) =>
     Math.max(
       blockText &&
@@ -24,7 +24,11 @@ export const TextBlock: BlockDefinition = {
 
     return (
       <Text
-        textAlign={getTextAlign(parameters)}
+        {...(props.dataSet && {
+          key: props.dataSet.id,
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
         className={getBlockClassName(hashtags)}
       >
         {content}

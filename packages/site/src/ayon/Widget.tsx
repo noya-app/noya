@@ -1,25 +1,37 @@
 import { fileOpen } from 'browser-fs-access';
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import {
+  FlatDispatcher,
+  useApplicationState,
+  useWorkspace,
+} from 'noya-app-state-context';
 import {
   Button,
   Chip,
-  Divider,
   DividerVertical,
   IconButton,
   Popover,
   Small,
   Spacer,
   Stack,
-  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { AffineTransform, Rect, transformRect } from 'noya-geometry';
-import { ChevronDownIcon } from 'noya-icons';
 import {
+  AffineTransform,
+  createBounds,
+  Rect,
+  transformRect,
+} from 'noya-geometry';
+import { ChevronDownIcon } from 'noya-icons';
+import { SketchModel } from 'noya-sketch-model';
+import {
+  Action,
+  BlockContent,
+  BlockProps,
   DrawableLayerType,
   getSiblingBlocks,
   InferBlockProps,
   Layers,
+  Overrides,
   Selectors,
 } from 'noya-state';
 import * as React from 'react';
@@ -29,11 +41,24 @@ import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { BlockEditor, IBlockEditor } from './BlockEditor';
-import { allAyonSymbols, imageSymbolId } from './blocks/symbols';
+import { allInsertableSymbols, Blocks } from './blocks/blocks';
+import { getRenderableBlockProps } from './blocks/render';
+import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
+import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
+import { BlockEditorV1 } from './editor/BlockEditorV1';
+import { clearResolverCache } from './resolve/resolve';
 import { Stacking } from './stacking';
 import { InferredBlockTypeResult } from './types';
 import { SearchCompletionMenu } from './useCompletionMenu';
+
+function getElementRect(element: HTMLElement) {
+  const style = window.getComputedStyle(element);
+  const width = parseFloat(style.width);
+  const height = parseFloat(style.height);
+  const left = element.offsetLeft;
+  const top = element.offsetTop;
+  return { width, height, x: left, y: top };
+}
 
 const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
@@ -216,93 +241,19 @@ function BlockContentOnboardingPopover({
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function TopSuggestions({
-  currentBlockType,
-  blockTypes,
-  blockText,
-  onChangeBlockType,
-  onChangeBlockText,
-}: {
-  currentBlockType: string;
-  blockTypes: InferredBlockTypeResult[];
-  blockText: string;
-  onChangeBlockType: (type: DrawableLayerType) => void;
-  onChangeBlockText: (text: string) => void;
-}) {
-  const theme = useDesignSystemTheme();
-  const [state, dispatch] = useApplicationState();
-
-  return (
-    <ContentElement>
-      <Stack.V padding={'0 6px'}>
-        <Stack.H padding={'4px 0px'} gap={8}>
-          <Small color="textSubtle" flex="1">
-            Top Suggestions
-          </Small>
-          <IconButton
-            iconName="Cross2Icon"
-            color={theme.colors.textDisabled}
-            onPointerDown={(event) => {
-              event.preventDefault();
-
-              dispatch('setSymbolIdIsFixed', undefined, true);
-            }}
-          />
-        </Stack.H>
-
-        <Divider overflow={8} />
-        {blockTypes
-          // Remove the current block type
-          .filter(
-            (blockType) =>
-              typeof blockType.type === 'string' ||
-              blockType.type.symbolId !== currentBlockType,
-          )
-          .slice(0, 3)
-          .map((blockType, index) => {
-            const name =
-              typeof blockType.type === 'string'
-                ? blockType.type
-                : Selectors.getSymbolMaster(state, blockType.type.symbolId)
-                    .name;
-
-            return (
-              <Button
-                key={name}
-                variant="thin"
-                onPointerDown={(event) => {
-                  // Prevent default so the textarea doesn't lose focus
-                  event.preventDefault();
-                  event.stopPropagation();
-
-                  onChangeBlockType(blockType.type);
-                  onChangeBlockText(blockText);
-                }}
-              >
-                {name}
-                <Spacer.Horizontal />
-              </Button>
-            );
-          })}
-      </Stack.V>
-    </ContentElement>
-  );
-}
-
 export const Widget = forwardRef(function Widget(
   {
     layer,
     inferBlockTypes,
     onChangeBlockType,
-    onChangeBlockText,
+    onChangeBlockContent,
     uploadAsset,
     onFocusCanvas,
   }: {
     layer: Sketch.AnyLayer;
     inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
     onChangeBlockType: (type: DrawableLayerType) => void;
-    onChangeBlockText: (text: string) => void;
+    onChangeBlockContent: (content: BlockContent) => void;
     uploadAsset: (file: ArrayBuffer) => Promise<string>;
     onFocusCanvas: () => void;
   },
@@ -322,7 +273,7 @@ export const Widget = forwardRef(function Widget(
   const parent = Selectors.getParentLayer(page, indexPath) as Sketch.Artboard;
 
   const symbol = Layers.isSymbolInstance(layer)
-    ? Selectors.getSymbolMaster(state, layer.symbolID)
+    ? Blocks[layer.symbolID].symbol
     : undefined;
 
   const isPrimarySelected = state.selectedLayerIds[0] === layer.do_objectID;
@@ -340,7 +291,7 @@ export const Widget = forwardRef(function Widget(
     }
   }, [isEditing]);
 
-  const symbolItems = allAyonSymbols.map((symbol) => ({
+  const symbolItems = allInsertableSymbols.map((symbol) => ({
     name: symbol.name,
     id: symbol.symbolID,
   }));
@@ -366,6 +317,76 @@ export const Widget = forwardRef(function Widget(
       setShowBlockPicker(false);
     }
   }, [showWidgetUI, isEditing]);
+
+  const onDetach = () => {
+    if (!Layers.isSymbolInstance(layer)) return;
+
+    const Block = Blocks[layer.symbolID];
+
+    const blockProps: BlockProps = {
+      layer,
+      getBlock: (id) => Blocks[id],
+      symbolId: layer.symbolID,
+      frame: layer.frame,
+      resolvedBlockData: layer.resolvedBlockData,
+      blockText: layer.blockText,
+      dataSet: {
+        id: layer.do_objectID,
+        parentId: layer.do_objectID,
+      },
+    };
+
+    const { container: containerBlockProps, children: childrenBlockProps } =
+      getRenderableBlockProps({
+        props: blockProps,
+        block: Block,
+      });
+
+    const containerLayer = SketchModel.symbolInstance({
+      symbolID: boxSymbolId,
+      blockText: containerBlockProps.blockText,
+      frame: layer.frame,
+    });
+
+    const actions: Action[] = [];
+
+    const layers = childrenBlockProps.flatMap((child) => {
+      if (!child.dataSet) return [];
+
+      const element = document.querySelector<HTMLElement>(
+        `[data-noya-id="${child.dataSet.id}"][data-noya-parent-id="${child.dataSet.parentId}"]`,
+      );
+
+      if (!element) return [];
+
+      const elementRect = getElementRect(element);
+
+      const clone = SketchModel.symbolInstance({
+        symbolID: child.symbolId,
+        blockText: child.blockText,
+        frame: SketchModel.rect({
+          x: layer.frame.x + Math.round(elementRect.x),
+          y: layer.frame.y + Math.round(elementRect.y),
+          width: Math.ceil(elementRect.width),
+          height: Math.ceil(elementRect.height),
+        }),
+      });
+
+      return [clone];
+    });
+
+    actions.push(['deleteLayer', layer.do_objectID]);
+
+    const layersToInsert = [containerLayer, ...layers];
+
+    layersToInsert.forEach((child) => {
+      const bounds = createBounds(child.frame);
+
+      actions.push(['addLayer', child, { x: bounds.midX, y: bounds.midY }]);
+    });
+
+    dispatch('batch', actions);
+  };
 
   if (!Layers.isSymbolInstance(layer)) return null;
 
@@ -403,22 +424,17 @@ export const Widget = forwardRef(function Widget(
                       <DividerVertical variant="strong" overflow={4} />
                     }
                   >
-                    {layer.symbolID === imageSymbolId &&
-                      layer.resolvedBlockData && (
-                        <IconButton
-                          key="reload"
-                          iconName="ReloadIcon"
-                          onClick={(event) => {
-                            event.preventDefault();
+                    {shouldShowReload(layer) && (
+                      <IconButton
+                        key="reload"
+                        iconName="ReloadIcon"
+                        onClick={(event) => {
+                          event.preventDefault();
 
-                            dispatch(
-                              'setResolvedBlockData',
-                              layer.do_objectID,
-                              undefined,
-                            );
-                          }}
-                        />
-                      )}
+                          clearResolvedData({ layer, dispatch });
+                        }}
+                      />
+                    )}
                     {layer.symbolID === imageSymbolId && (
                       <IconButton
                         iconName="UploadIcon"
@@ -440,7 +456,19 @@ export const Widget = forwardRef(function Widget(
 
                           dispatch('interaction', ['reset']);
                           dispatch('selectLayer', []);
-                          onChangeBlockText(url);
+                          onChangeBlockContent({
+                            blockText: url,
+                          });
+                        }}
+                      />
+                    )}
+                    {layer.symbolID === heroSymbolV2Id && (
+                      <IconButton
+                        iconName="LinkBreak2Icon"
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+
+                          onDetach();
                         }}
                       />
                     )}
@@ -465,7 +493,7 @@ export const Widget = forwardRef(function Widget(
                               setShowBlockPicker(!showBlockPicker);
                             }}
                           >
-                            {symbol?.name ?? layer.name}
+                            {symbol?.name}
                             <Spacer.Horizontal size={4} />
                             <ChevronDownIcon />
                           </Button>
@@ -494,7 +522,7 @@ export const Widget = forwardRef(function Widget(
                   blockText={blockText}
                   blockTypes={blockTypes}
                   onChangeBlockType={onChangeBlockType}
-                  onChangeBlockText={onChangeBlockText}
+                  onChangeBlockContent={onChangeBlockContent}
                   currentBlockType={layer.symbolID}
                 />
               )} */}
@@ -527,18 +555,33 @@ export const Widget = forwardRef(function Widget(
             onPointerMoveCapture={(event) => event.stopPropagation()}
             onPointerUpCapture={(event) => event.stopPropagation()}
           >
-            <BlockEditor
-              ref={blockEditorRef}
-              isEditing={isEditing}
-              isSelected={isSelected}
-              blockTypes={blockTypes}
-              blockText={blockText}
-              layer={layer}
-              parent={parent}
-              onChangeBlockType={onChangeBlockType}
-              onChangeBlockText={onChangeBlockText}
-              onFocusCanvas={onFocusCanvas}
-            />
+            {Blocks[layer.symbolID].editorVersion ? (
+              <BlockEditor
+                ref={blockEditorRef}
+                isEditing={isEditing}
+                isSelected={isSelected}
+                blockTypes={blockTypes}
+                layer={layer}
+                parent={parent}
+                onChangeBlockContent={onChangeBlockContent}
+                onFocusCanvas={onFocusCanvas}
+              />
+            ) : (
+              <BlockEditorV1
+                ref={blockEditorRef}
+                isEditing={isEditing}
+                isSelected={isSelected}
+                blockTypes={blockTypes}
+                blockText={blockText}
+                layer={layer}
+                parent={parent}
+                onChangeBlockType={onChangeBlockType}
+                onChangeBlockText={(text) => {
+                  onChangeBlockContent({ blockText: text });
+                }}
+                onFocusCanvas={onFocusCanvas}
+              />
+            )}
           </div>
         }
       />
@@ -585,4 +628,101 @@ export function DrawingWidget() {
       }
     />
   );
+}
+
+export function MultipleSelectionWidget() {
+  const [state, dispatch] = useApplicationState();
+  const { canvasInsets } = useWorkspace();
+  const transform = Selectors.getCanvasTransform(state, canvasInsets);
+
+  if (state.interactionState.type !== 'none') return null;
+
+  const page = Selectors.getCurrentPage(state);
+  const boundingRect = Selectors.getBoundingRect(page, state.selectedLayerIds, {
+    groups: 'childrenOnly',
+    includeHiddenLayers: true,
+  });
+
+  if (!boundingRect) return null;
+
+  const rect = transformRect(boundingRect, transform);
+
+  const layers = Selectors.getSelectedLayers(state);
+
+  return (
+    <WidgetContainer
+      frame={rect}
+      zIndex={Stacking.level.interactive}
+      footer={
+        <ContentElement>
+          <Stack.H
+            flex="1"
+            padding={'4px 6px'}
+            gap={6}
+            separator={<DividerVertical variant="strong" overflow={4} />}
+          >
+            {layers.filter(Layers.isSymbolInstance).some(shouldShowReload) && (
+              <IconButton
+                key="reload"
+                iconName="ReloadIcon"
+                onClick={(event) => {
+                  event.preventDefault();
+
+                  const layers = Selectors.getSelectedLayers(state).filter(
+                    Layers.isSymbolInstance,
+                  );
+
+                  layers.forEach((layer) =>
+                    clearResolvedData({ layer, dispatch }),
+                  );
+                }}
+              />
+            )}
+            <Button variant="none">Multiple</Button>
+          </Stack.H>
+        </ContentElement>
+      }
+    />
+  );
+}
+
+function shouldShowReload(layer: Sketch.SymbolInstance): boolean {
+  const block = Blocks[layer.symbolID];
+
+  if (!block) return false;
+
+  if (block.usesResolver) return true;
+
+  return block.symbol.layers
+    .filter(Layers.isSymbolInstance)
+    .some(shouldShowReload);
+}
+
+function clearResolvedData({
+  layer,
+  dispatch,
+}: {
+  layer: Sketch.SymbolInstance;
+  dispatch: FlatDispatcher;
+}) {
+  dispatch('setResolvedBlockData', layer.do_objectID, undefined);
+
+  clearResolverCache(layer.do_objectID);
+
+  layer.overrideValues.forEach((override) => {
+    const { layerIdPath, propertyType } = Overrides.decodeName(
+      override.overrideName,
+    );
+
+    if (propertyType === 'resolvedBlockData') {
+      clearResolverCache(`${layer.do_objectID}@${layerIdPath.join('/')}`);
+
+      dispatch(
+        'setOverrideValue',
+        [layer.do_objectID],
+        override.overrideName,
+        undefined,
+      );
+    }
+  });
 }

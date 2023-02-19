@@ -142,7 +142,7 @@ function getOverrideElements(
     switch (layer._class) {
       case 'symbolInstance': {
         const symbolID =
-          Overrides.getOverrideValue(overrideValues, 'symbolID', key) ??
+          Overrides.getOverrideValue(overrideValues, key, 'symbolID') ??
           layer.symbolID;
 
         const symbolMaster = Selectors.getSymbolMaster(state, symbolID);
@@ -194,8 +194,8 @@ function getOverrideElements(
                   value={
                     Overrides.getOverrideValue(
                       overrideValues,
-                      'stringValue',
                       key,
+                      'stringValue',
                     ) ?? ''
                   }
                   placeholder={layer.attributedString.string}
@@ -213,8 +213,9 @@ function getOverrideElements(
                 sharedStyleID={
                   Overrides.getOverrideValue(
                     overrideValues,
-                    'textStyle',
+
                     key,
+                    'textStyle',
                   ) ?? layer.sharedStyleID
                 }
                 onChange={(value) =>
@@ -257,8 +258,8 @@ function getOverrideElements(
                     sharedStyleID={
                       Overrides.getOverrideValue(
                         overrideValues,
-                        'layerStyle',
                         key,
+                        'layerStyle',
                       ) ?? layer.sharedStyleID
                     }
                     onChange={(value) =>

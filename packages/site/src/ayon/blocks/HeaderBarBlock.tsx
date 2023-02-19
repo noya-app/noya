@@ -14,7 +14,7 @@ import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
-import { headerBarSymbol, headerBarSymbolId } from './symbols';
+import { headerBarSymbol } from './symbols';
 import { getBlockClassName } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
@@ -22,7 +22,7 @@ const placeholderText = `*Home, Projects, Team, FAQ`;
 const parser = 'commaSeparated';
 
 export const HeaderBarBlock: BlockDefinition = {
-  id: headerBarSymbolId,
+  symbol: headerBarSymbol,
   hashtags: ['dark', 'accent', 'search', 'title'],
   placeholderText,
   parser,
@@ -61,12 +61,14 @@ export const HeaderBarBlock: BlockDefinition = {
       activeLinkBackgroundColor,
     } = getBlockThemeColors({ dark, accent });
 
+    const height = props.frame?.height ?? 60;
+
     return (
       <Flex
         alignItems="center"
         borderBottomWidth={1}
         borderBottomColor={borderColor}
-        height={`${props.frame.height}px`}
+        height={`${height}px`}
         paddingX="5px"
         backgroundColor={backgroundColor}
         backdropFilter="auto"
@@ -128,7 +130,7 @@ export const HeaderBarBlock: BlockDefinition = {
             <Input placeholder="Search" />
           </InputGroup>
         )}
-        <Avatar size={props.frame.height < 60 ? 'xs' : 'sm'} marginX="10px" />
+        <Avatar size={height < 60 ? 'xs' : 'sm'} marginX="10px" />
       </Flex>
     );
   },

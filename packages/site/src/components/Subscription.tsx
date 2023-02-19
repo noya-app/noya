@@ -17,7 +17,7 @@ import { CheckIcon } from 'noya-icons';
 import { Layers } from 'noya-state';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
-import { writeSymbolId } from '../ayon/blocks/symbols';
+import { writeSymbolId } from '../ayon/blocks/symbolIds';
 
 const CloseButtonContainer = styled.div(({ theme }) => ({
   position: 'absolute',

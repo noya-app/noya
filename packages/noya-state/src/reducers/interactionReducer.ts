@@ -38,8 +38,18 @@ export type SiblingBlockProps = {
   blockText?: string;
 };
 
-export type BlockProps = SiblingBlockProps & {
+export type BlockProps = {
+  symbolId: string;
+  layer?: Sketch.SymbolInstance;
+  frame?: Rect;
+  blockText?: string;
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
+  getBlock: (symbolId: string) => BlockDefinition;
+  children?: ReactNode;
+  dataSet?: {
+    id: string;
+    parentId: string;
+  };
 };
 
 export type InferBlockProps = {
@@ -49,12 +59,14 @@ export type InferBlockProps = {
 };
 
 export type BlockDefinition = {
-  id: string;
+  symbol: Sketch.SymbolMaster;
   parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
   infer: (props: InferBlockProps) => number;
   render: (props: BlockProps) => ReactNode;
   hashtags?: string[];
   placeholderText?: string;
+  editorVersion?: number;
+  usesResolver?: boolean;
 };
 
 export type InteractionMethod = 'mouse' | 'keyboard';

@@ -605,6 +605,16 @@ function symbolInstance(
   };
 }
 
+function overrideValue(
+  options: ModelOptions<Sketch.OverrideValue> &
+    Pick<Sketch.OverrideValue, 'overrideName' | 'value'>,
+): Sketch.OverrideValue {
+  return {
+    ...options,
+    _class: Sketch.ClassValue.OverrideValue,
+  };
+}
+
 function inferredGroupLayout(
   options?: ModelOptions<Sketch.InferredGroupLayout>,
 ): Sketch.InferredGroupLayout {
@@ -799,6 +809,7 @@ export const SketchModel = {
   innerShadow,
   meta,
   oval,
+  overrideValue,
   page,
   paragraphStyle,
   rect,

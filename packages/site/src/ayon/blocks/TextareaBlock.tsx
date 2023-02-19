@@ -3,14 +3,14 @@ import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
-import { textareaSymbolId } from './symbols';
+import { textareaSymbol } from './symbols';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 
 const parser = 'regular';
 
 export const TextareaBlock: BlockDefinition = {
-  id: textareaSymbolId,
+  symbol: textareaSymbol,
   parser,
   hashtags: globalHashtags,
   infer: ({ frame, blockText }) => 0.1,

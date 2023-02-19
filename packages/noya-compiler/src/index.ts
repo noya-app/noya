@@ -99,10 +99,16 @@ export function createElement(
   if (!block) return;
 
   const element = block.render({
+    layer: layer,
     frame: layer.frame,
     symbolId: layer.symbolID,
     blockText: layer.blockText,
     resolvedBlockData: layer.resolvedBlockData,
+    getBlock: (id) => Blocks[id],
+    dataSet: {
+      id: layer.do_objectID,
+      parentId: layer.do_objectID,
+    },
   });
 
   if (!element || !isValidElement(element)) return;
@@ -119,7 +125,10 @@ export function createElement(
       // Filter out children prop and undefined props
       props: Object.fromEntries(
         Object.entries(element.props).filter(
-          ([key, value]) => key !== 'children' && value !== undefined,
+          ([key, value]) =>
+            key !== 'children' &&
+            !key.startsWith('data-noya-') &&
+            value !== undefined,
         ),
       ),
       children: React.Children.toArray(element.props.children).flatMap(
@@ -256,8 +265,6 @@ function Frame(props: React.ComponentProps<typeof Box>) {
       2,
     ),
   };
-
-  console.info(files);
 
   return files;
 }

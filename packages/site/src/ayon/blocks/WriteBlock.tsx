@@ -2,13 +2,14 @@ import { Flex, Spinner, Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { getTextAlign, parseBlock } from '../parse';
-import { writeSymbolId } from './symbols';
+import { writeSymbol } from './symbols';
 import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
-  id: writeSymbolId,
+  symbol: writeSymbol,
   parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
+  usesResolver: true,
   infer: ({ frame, blockText }) => 0.1,
   render: (props) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');

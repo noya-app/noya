@@ -21,6 +21,7 @@ window.TextEncoder = window.TextEncoder ?? util.TextEncoder;
 window.TextDecoder = window.TextDecoder ?? util.TextDecoder;
 File.prototype.arrayBuffer = File.prototype.arrayBuffer || arrayBuffer;
 Blob.prototype.arrayBuffer = Blob.prototype.arrayBuffer || arrayBuffer;
+CSS.supports = CSS.supports ?? (() => false);
 
 function arrayBuffer(this: Blob) {
   return new Promise((resolve) => {
