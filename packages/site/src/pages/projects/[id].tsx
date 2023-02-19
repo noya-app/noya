@@ -110,7 +110,9 @@ function FileEditor({ id }: { id: string }) {
 
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
-      if (!updateDebounced.pending()) return;
+      if (!(updateDebounced.pending() || client.files.hasPendingUpdate(id))) {
+        return;
+      }
 
       updateDebounced.flush();
 
@@ -126,7 +128,7 @@ function FileEditor({ id }: { id: string }) {
     return () => {
       window.removeEventListener('beforeunload', handler, { capture: true });
     };
-  }, [updateDebounced]);
+  }, [client.files, id, updateDebounced]);
 
   const uploadAsset = async (file: ArrayBuffer) => {
     const fileId = await client.assets.create(file, id);

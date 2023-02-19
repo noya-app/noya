@@ -234,6 +234,10 @@ export class NoyaNetworkClient {
     });
 
     this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaFileSchema.parse(json);
+    return parsed;
   };
 
   #listFiles = async () => {

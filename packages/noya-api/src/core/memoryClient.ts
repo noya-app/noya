@@ -110,7 +110,10 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
         type: 'update',
         id,
         data,
+        version: this.data.files.find((file) => file.id === id)!.version + 1,
       });
+
+      return this.data.files.find((file) => file.id === id)!;
     },
     delete: async (id) => {
       this.data.files = fileReducer(this.data.files, { type: 'delete', id });

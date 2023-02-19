@@ -14,6 +14,7 @@ type CollectionAction<Data> =
       type: 'update';
       id: string;
       data: Data;
+      version: number;
     };
 
 type BaseItem<Data> = {
@@ -55,7 +56,7 @@ export const makeCollectionReducer = <Item extends BaseItem<unknown>>({
             return produce<Item, Item>(item, (draft) => {
               draft.data = action.data;
               draft.updatedAt = new Date().toISOString();
-              draft.version += 1;
+              draft.version = action.version;
             });
           }
 

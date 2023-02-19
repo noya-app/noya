@@ -76,6 +76,7 @@ export class NoyaClient {
 
   get files() {
     return memoizedGetter(this, 'files', {
+      hasPendingUpdate: this.#hasPendingUpdate,
       read: this.networkClient.files.read,
       create: this.#createFile,
       update: this.#updateFile,
@@ -133,25 +134,48 @@ export class NoyaClient {
     return result;
   };
 
-  #updateFile = async (id: string, data: NoyaFileData) => {
-    // There might be a race condition here if we try to update a file before
-    // it exists on the backend, but that shouldn't happen yet. In that case
-    // we'll send the update without a version and it will always win.
-    const version = this.files$
-      .get()
-      .files.find((file) => file.id === id)?.version;
+  #getVersion = (id: string) => {
+    return this.files$.get().files.find((file) => file.id === id)?.version ?? 0;
+  };
 
+  inflightUpdate = new Map<string, Pick<NoyaFile, 'id' | 'version'>>();
+  pendingUpdate = new Map<string, Pick<NoyaFile, 'id' | 'version' | 'data'>>();
+
+  #hasPendingUpdate = (id: string) => {
+    return this.pendingUpdate.has(id);
+  };
+
+  #updateFile = async (
+    id: string,
+    data: NoyaFileData,
+    newVersion = this.#getVersion(id) + 1,
+  ): Promise<NoyaFile | undefined> => {
     this.files$.files.set((files) =>
-      fileReducer(files, { type: 'update', id, data }),
+      fileReducer(files, { type: 'update', id, data, version: newVersion }),
     );
 
-    const result = await this.networkClient.files.update(
-      id,
-      data,
-      version !== undefined ? version + 1 : undefined,
-    );
+    if (this.inflightUpdate.has(id)) {
+      this.pendingUpdate.set(id, { id, version: newVersion, data });
+      return;
+    }
 
-    this.#fetchFiles();
+    this.inflightUpdate.set(id, { id, version: newVersion });
+
+    const result = await this.networkClient.files.update(id, data, newVersion);
+
+    this.inflightUpdate.delete(id);
+
+    if (this.pendingUpdate.has(id)) {
+      const pending = this.pendingUpdate.get(id)!;
+      this.pendingUpdate.delete(id);
+
+      if (pending.version > result.version) {
+        return this.#updateFile(id, data, result.version + 1);
+      }
+    }
+
+    // TODO: Put this back?
+    // this.#fetchFiles();
 
     return result;
   };
