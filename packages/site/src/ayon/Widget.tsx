@@ -24,6 +24,7 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { SketchModel } from 'noya-sketch-model';
 import {
+  Action,
   BlockContent,
   BlockProps,
   DrawableLayerType,
@@ -347,6 +348,8 @@ export const Widget = forwardRef(function Widget(
       frame: layer.frame,
     });
 
+    const actions: Action[] = [];
+
     const layers = childrenBlockProps.flatMap((child) => {
       if (!child.dataSet) return [];
 
@@ -372,17 +375,17 @@ export const Widget = forwardRef(function Widget(
       return [clone];
     });
 
-    dispatch('deleteLayer', layer.do_objectID);
+    actions.push(['deleteLayer', layer.do_objectID]);
 
     const layersToInsert = [containerLayer, ...layers];
-
-    // console.log(layersToInsert);
 
     layersToInsert.forEach((child) => {
       const bounds = createBounds(child.frame);
 
-      dispatch('addLayer', child, { x: bounds.midX, y: bounds.midY });
+      actions.push(['addLayer', child, { x: bounds.midX, y: bounds.midY }]);
     });
+
+    dispatch('batch', actions);
   };
 
   if (!Layers.isSymbolInstance(layer)) return null;

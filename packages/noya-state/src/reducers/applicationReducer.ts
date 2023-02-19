@@ -88,6 +88,7 @@ export type ApplicationState = {
 };
 
 export type Action =
+  | [type: 'batch', actions: Action[]]
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
@@ -120,6 +121,12 @@ export function applicationReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'batch':
+      return action[1].reduce(
+        (state, action) =>
+          applicationReducer(state, action, CanvasKit, context),
+        state,
+      );
     case 'setKeyModifier':
       const [, name, value] = action;
       return produce(state, (draft) => {

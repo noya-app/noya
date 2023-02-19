@@ -11,7 +11,13 @@ import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
+import {
+  Action,
+  BlockContent,
+  DrawableLayerType,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -222,15 +228,18 @@ export const Content = memo(function Content({
                         );
                       }}
                       onChangeBlockContent={(content: BlockContent) => {
-                        dispatch('setBlockContent', layer.do_objectID, content);
-
-                        if (content.blockText !== '') {
-                          dispatch(
-                            'setSymbolIdIsFixed',
-                            [layer.do_objectID],
-                            true,
-                          );
-                        }
+                        dispatch('batch', [
+                          ['setBlockContent', layer.do_objectID, content],
+                          ...(content.blockText !== ''
+                            ? [
+                                [
+                                  'setSymbolIdIsFixed',
+                                  layer.do_objectID,
+                                  true,
+                                ] as Action,
+                              ]
+                            : []),
+                        ]);
                       }}
                       uploadAsset={uploadAsset}
                     />
