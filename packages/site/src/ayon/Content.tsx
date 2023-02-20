@@ -25,9 +25,11 @@ import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
+import { Blocks } from './blocks/blocks';
 import { DOMRenderer } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
+import { parseBlock } from './parse';
 import { resolveLayer } from './resolve/resolve';
 import { Stacking } from './stacking';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
@@ -228,9 +230,25 @@ export const Content = memo(function Content({
                         );
                       }}
                       onChangeBlockContent={(content: BlockContent) => {
+                        const nextBlock =
+                          Blocks[content.symbolId ?? layer.symbolID];
+
+                        const contentWithNormalizedText: BlockContent = {
+                          ...content,
+                          normalizedText: parseBlock(
+                            content.blockText,
+                            nextBlock.parser,
+                            { placeholder: nextBlock.placeholderText },
+                          ).content,
+                        };
+
                         dispatch('batch', [
-                          ['setBlockContent', layer.do_objectID, content],
-                          ...(content.blockText !== ''
+                          [
+                            'setBlockContent',
+                            layer.do_objectID,
+                            contentWithNormalizedText,
+                          ],
+                          ...(contentWithNormalizedText.blockText !== ''
                             ? [
                                 [
                                   'setSymbolIdIsFixed',
