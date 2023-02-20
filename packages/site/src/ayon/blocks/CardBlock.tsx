@@ -26,12 +26,16 @@ export const CardBlock: BlockDefinition = {
   hashtags: BoxBlock.hashtags,
   placeholderText,
   infer: ({ frame, blockText, siblingBlocks }) => {
-    if (siblingBlocks.find((block) => block.symbolId === cardSymbol.symbolID)) {
-      return 0;
-    }
-
     return Math.max(
-      isWithinRectRange(frame, 400, 200, 2000, 550) && frame.y < 180 ? 1 : 0,
+      isWithinRectRange({
+        rect: frame,
+        minWidth: 200,
+        minHeight: 250,
+        maxWidth: 300,
+        maxHeight: 400,
+      })
+        ? 1
+        : 0,
       0.1,
     );
   },

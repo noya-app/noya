@@ -144,7 +144,7 @@ export const cardSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: '66a7337d-3e71-48de-b415-7d1551cd7be1',
       symbolID: imageSymbolId,
-      blockText: 'cat #aspect-video #rounded-lg',
+      blockText: 'landscape #rounded-lg #flex-1',
     }),
     SketchModel.symbolInstance({
       do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
@@ -154,8 +154,7 @@ export const cardSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
       symbolID: textSymbolId,
-      blockText:
-        'Here you can explore the latest news and information. #flex-1 #mt-1',
+      blockText: 'Here you can explore the latest news and information. #mt-1',
     }),
   ],
 });

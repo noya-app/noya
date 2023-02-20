@@ -14,8 +14,13 @@ export const AvatarBlock: BlockDefinition = {
   symbol: avatarSymbol,
   parser,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 30, 30, 120, 120) &&
-    isApproximatelySquare(frame, 0.2)
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 30,
+      minHeight: 30,
+      maxWidth: 120,
+      maxHeight: 120,
+    }) && isApproximatelySquare(frame, 0.2)
       ? 0.8
       : 0,
   render: (props) => {

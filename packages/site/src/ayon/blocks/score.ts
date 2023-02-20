@@ -1,12 +1,18 @@
 import { Rect } from 'noya-geometry';
 
-export function isWithinRectRange(
-  rect: Rect,
-  minWidth?: number,
-  minHeight?: number,
-  maxWidth?: number,
-  maxHeight?: number,
-) {
+export function isWithinRectRange({
+  rect,
+  minWidth,
+  minHeight,
+  maxWidth,
+  maxHeight,
+}: {
+  rect: Rect;
+  minWidth?: number;
+  minHeight?: number;
+  maxWidth?: number;
+  maxHeight?: number;
+}) {
   return (
     (!minWidth || rect.width >= minWidth) &&
     (!maxWidth || rect.width <= maxWidth) &&

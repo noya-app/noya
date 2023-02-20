@@ -40,7 +40,15 @@ export const ButtonBlock: BlockDefinition = {
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 60, 30, 300, 80) ? 0.8 : 0,
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 60,
+      minHeight: 30,
+      maxWidth: 300,
+      maxHeight: 80,
+    })
+      ? 0.8
+      : 0,
   render: (props) => {
     const {
       content,

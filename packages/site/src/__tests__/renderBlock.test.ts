@@ -9,11 +9,14 @@ import {
 } from 'noya-compiler';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
+import { Layers, Overrides } from 'noya-state';
 import path from 'path';
 import { Blocks } from '../ayon/blocks/blocks';
 import {
   buttonSymbolId,
+  cardSymbolId,
   heroSymbolV2Id,
+  imageSymbolId,
   textSymbolId,
 } from '../ayon/blocks/symbolIds';
 
@@ -104,6 +107,36 @@ describe('hero with bg', () => {
       }),
       blockText: '#bg-blue-500',
     });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('card with no border radius on image', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: cardSymbolId,
+      frame: SketchModel.rect({
+        width: 300,
+        height: 400,
+      }),
+    });
+
+    Blocks[symbol.symbolID].symbol.layers
+      .filter(Layers.isSymbolInstance)
+      .forEach((layer) => {
+        if (layer.symbolID === imageSymbolId) {
+          symbol.overrideValues.push(
+            SketchModel.overrideValue({
+              overrideName: Overrides.encodeName(
+                [layer.do_objectID],
+                'blockText',
+              ),
+              value: '#rounded-none',
+            }),
+          );
+        }
+      });
 
     expect(generate(symbol)).toMatchSnapshot();
   });

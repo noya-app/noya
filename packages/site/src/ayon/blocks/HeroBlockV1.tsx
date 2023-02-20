@@ -26,7 +26,15 @@ export const HeroBlockV1: BlockDefinition = {
     }
 
     return Math.max(
-      isWithinRectRange(frame, 400, 200, 2000, 550) && frame.y < 180 ? 1 : 0,
+      isWithinRectRange({
+        rect: frame,
+        minWidth: 400,
+        minHeight: 200,
+        maxWidth: 2000,
+        maxHeight: 550,
+      }) && frame.y < 180
+        ? 1
+        : 0,
       0.1,
     );
   },

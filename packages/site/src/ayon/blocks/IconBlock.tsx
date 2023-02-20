@@ -9,8 +9,13 @@ export const IconBlock: BlockDefinition = {
   parser: 'regular',
   usesResolver: true,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 10, 10, 90, 90) &&
-    isApproximatelySquare(frame, 0.2)
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 10,
+      minHeight: 10,
+      maxWidth: 90,
+      maxHeight: 90,
+    }) && isApproximatelySquare(frame, 0.2)
       ? 0.85
       : 0,
   render: (props) => (
