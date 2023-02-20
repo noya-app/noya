@@ -268,10 +268,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
     [dispatch],
   );
 
+  // Closing the completion menu on blur prevents us from clicking the menu with the mouse
   const onBlur = useCallback(() => {
-    hashCompletionMenu.close();
-    symbolCompletionMenu.close();
-  }, [hashCompletionMenu, symbolCompletionMenu]);
+    // hashCompletionMenu.close();
+    // symbolCompletionMenu.close();
+  }, []);
 
   const logEditedTextDebounced = useMemo(
     () =>
