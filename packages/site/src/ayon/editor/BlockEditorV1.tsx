@@ -350,6 +350,11 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
     [dispatch],
   );
 
+  const onBlur = useCallback(() => {
+    hashCompletionMenu.close();
+    symbolCompletionMenu.close();
+  }, [hashCompletionMenu, symbolCompletionMenu]);
+
   const logEditedTextDebounced = useMemo(
     () =>
       debounce((...args: Parameters<ILogEvent>): void => {
@@ -432,6 +437,7 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
         onKeyUp={onKeyUp}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
+        onBlur={onBlur}
         style={{
           position: 'absolute',
           inset: 0,
