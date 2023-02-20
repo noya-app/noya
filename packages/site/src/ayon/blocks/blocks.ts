@@ -25,6 +25,7 @@ import { SwitchBlock } from './SwitchBlock';
 import { TableBlock } from './TableBlock';
 import { TextareaBlock } from './TextareaBlock';
 import { TextBlock } from './TextBlock';
+import { TileCardBlock } from './TileCardBlock';
 import { WriteBlock } from './WriteBlock';
 
 export const Blocks: Record<string, BlockDefinition> = {
@@ -54,6 +55,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [TextareaBlock.symbol.symbolID]: TextareaBlock,
   // [SpacerBlock.symbol.symbolID]: SpacerBlock,
   [CardBlock.symbol.symbolID]: CardBlock,
+  [TileCardBlock.symbol.symbolID]: TileCardBlock,
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(

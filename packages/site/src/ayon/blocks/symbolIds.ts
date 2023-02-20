@@ -26,3 +26,4 @@ export const radioSymbolId = 'e2fbabf8-81f4-4d43-a56d-6067737df0ea';
 export const textareaSymbolId = '7bcb8f7b-7645-429b-89f0-2298fef4ccb6';
 export const spacerSymbolId = '15907162-13f5-4366-81af-19ced2192245';
 export const cardSymbolId = '8bbffbff-efc8-4d9b-9972-73a655adaf47';
+export const tileCardSymbolId = '09dcb31d-5bb2-43f2-a30a-0a9e00d92cde';

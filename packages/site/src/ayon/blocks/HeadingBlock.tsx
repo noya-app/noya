@@ -1,6 +1,7 @@
 import { Flex, Heading, ThemingProps } from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
+import { partition } from 'noya-utils';
 import React from 'react';
 import { parseBlock } from '../parse';
 import {
@@ -11,7 +12,11 @@ import {
   heading5Symbol,
   heading6Symbol,
 } from './symbols';
-import { getBlockClassName, tailwindTextClasses } from './tailwind';
+import {
+  classGroups,
+  getBlockClassName,
+  tailwindTextClasses,
+} from './tailwind';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
@@ -26,6 +31,10 @@ const createHeadingBlock = (
 
     const hashtags = Object.keys(parameters);
 
+    const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {
+      return classGroups.flex.test(hashtag);
+    });
+
     return (
       <Flex
         {...(props.dataSet && {
@@ -33,12 +42,13 @@ const createHeadingBlock = (
           'data-noya-id': props.dataSet.id,
           'data-noya-parent-id': props.dataSet.parentId,
         })}
+        className={getBlockClassName(flexClasses)}
       >
         <Heading
           flex="1"
           size={size}
           lineHeight="1.3"
-          className={getBlockClassName(hashtags)}
+          className={getBlockClassName(otherClasses)}
         >
           {content}
         </Heading>

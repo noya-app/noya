@@ -25,6 +25,7 @@ import {
   tableSymbolId,
   textareaSymbolId,
   textSymbolId,
+  tileCardSymbolId,
   writeSymbolId,
 } from './symbolIds';
 
@@ -155,6 +156,29 @@ export const cardSymbol = SketchModel.symbolMaster({
       do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
       symbolID: textSymbolId,
       blockText: 'Here you can explore the latest news and information. #mt-1',
+    }),
+  ],
+});
+
+export const tileCardSymbol = SketchModel.symbolMaster({
+  symbolID: tileCardSymbolId,
+  name: 'TileCard',
+  defaultBlockText: '#flex-col #bg-blue-50 #p-6 #left',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: '2894cbbb-a257-4372-ad17-50db6faf75a3',
+      symbolID: textSymbolId,
+      blockText: 'Services',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: '91514627-b323-457e-bf05-228c5a96830d',
+      symbolID: heading4SymbolId,
+      blockText: 'How we can help your business. #flex-1 #mt-1',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: '2b211bc6-86e0-4f93-8e14-514ae026afa6',
+      symbolID: buttonSymbolId,
+      blockText: 'Learn more #dark',
     }),
   ],
 });
