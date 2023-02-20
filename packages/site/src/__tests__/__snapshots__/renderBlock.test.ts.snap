@@ -48,7 +48,7 @@ exports[`hero default 1`] = `
   <Flex
     width=\\"400px\\"
     height=\\"400px\\"
-    className=\\"flex-col p-4 bg-transparent gap-3 items-center justify-center\\"
+    className=\\"flex-col bg-transparent p-4 gap-3 items-center justify-center\\"
   >
     <Flex>
       <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" className=\\"text-center\\">
@@ -71,7 +71,7 @@ exports[`hero left aligned default 1`] = `
   <Flex
     width=\\"400px\\"
     height=\\"400px\\"
-    className=\\"flex-col p-4 bg-transparent gap-3 items-start justify-center\\"
+    className=\\"flex-col bg-transparent p-4 gap-3 items-start justify-center\\"
   >
     <Flex>
       <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" className=\\"text-center\\">
@@ -94,7 +94,7 @@ exports[`hero with bg default 1`] = `
   <Flex
     width=\\"400px\\"
     height=\\"400px\\"
-    className=\\"flex-col p-4 bg-blue-500 gap-3 items-center justify-center\\"
+    className=\\"flex-col bg-blue-500 p-4 gap-3 items-center justify-center\\"
   >
     <Flex>
       <Heading
