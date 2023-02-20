@@ -43,7 +43,7 @@ import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { allInsertableSymbols, Blocks } from './blocks/blocks';
 import { getRenderableBlockProps } from './blocks/render';
-import { boxSymbolId, heroSymbolV2Id, imageSymbolId } from './blocks/symbolIds';
+import { boxSymbolId, imageSymbolId } from './blocks/symbolIds';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
 import { BlockEditorV1 } from './editor/BlockEditorV1';
 import { clearResolverCache } from './resolve/resolve';
@@ -55,8 +55,10 @@ function getElementRect(element: HTMLElement) {
   const style = window.getComputedStyle(element);
   const width = parseFloat(style.width);
   const height = parseFloat(style.height);
-  const left = element.offsetLeft;
-  const top = element.offsetTop;
+  const marginLeft = parseFloat(style.marginLeft);
+  const marginTop = parseFloat(style.marginTop);
+  const left = element.offsetLeft - marginLeft;
+  const top = element.offsetTop - marginTop;
   return { width, height, x: left, y: top };
 }
 
@@ -462,7 +464,7 @@ export const Widget = forwardRef(function Widget(
                         }}
                       />
                     )}
-                    {layer.symbolID === heroSymbolV2Id && (
+                    {Blocks[layer.symbolID].editorVersion === 2 && (
                       <IconButton
                         iconName="LinkBreak2Icon"
                         onPointerDown={(event) => {

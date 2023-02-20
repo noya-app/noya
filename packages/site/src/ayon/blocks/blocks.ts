@@ -2,6 +2,7 @@ import { BlockDefinition } from 'noya-state';
 import { AvatarBlock } from './AvatarBlock';
 import { BoxBlock } from './BoxBlock';
 import { ButtonBlock } from './ButtonBlock';
+import { CardBlock } from './CardBlock';
 import { CheckboxBlock } from './CheckboxBlock';
 import { HeaderBarBlock } from './HeaderBarBlock';
 import {
@@ -52,7 +53,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [RadioBlock.symbol.symbolID]: RadioBlock,
   [TextareaBlock.symbol.symbolID]: TextareaBlock,
   // [SpacerBlock.symbol.symbolID]: SpacerBlock,
-  // [CardBlock.symbol.symbolID]: CardBlock,
+  [CardBlock.symbol.symbolID]: CardBlock,
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(

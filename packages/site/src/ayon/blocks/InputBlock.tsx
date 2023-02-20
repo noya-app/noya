@@ -15,7 +15,15 @@ export const InputBlock: BlockDefinition = {
   parser,
   hashtags: globalHashtags,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 60, 25, 600, 80) ? 0.75 : 0,
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 60,
+      minHeight: 25,
+      maxWidth: 600,
+      maxHeight: 80,
+    })
+      ? 0.75
+      : 0,
   render: (props) => {
     const {
       content,

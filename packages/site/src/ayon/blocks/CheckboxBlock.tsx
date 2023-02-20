@@ -17,7 +17,15 @@ export const CheckboxBlock: BlockDefinition = {
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 10, 10, 300, 60) ? 0.8 : 0,
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 10,
+      minHeight: 10,
+      maxWidth: 300,
+      maxHeight: 60,
+    })
+      ? 0.8
+      : 0,
   render: (props) => {
     const {
       content,

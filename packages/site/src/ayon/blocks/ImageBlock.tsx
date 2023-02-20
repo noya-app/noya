@@ -25,13 +25,17 @@ export const ImageBlock: BlockDefinition = {
 
     return (
       <Image
+        {...(props.dataSet && {
+          key: props.dataSet.id,
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
         src={src}
         fit={contain ? 'contain' : fill ? 'fill' : 'cover'}
         align="middle"
-        {...(props.frame && {
-          w: `${props.frame.width}px`,
-          h: `${props.frame.height}px`,
-        })}
+        {...(props.frame
+          ? { w: `${props.frame.width}px`, h: `${props.frame.height}px` }
+          : { minHeight: 0 })}
         className={getBlockClassName(hashtags)}
       />
     );

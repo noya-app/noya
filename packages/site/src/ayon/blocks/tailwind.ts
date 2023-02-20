@@ -72,10 +72,12 @@ export const classGroups = {
   marginRight: /^mr-/,
   marginBottom: /^mb-/,
   marginLeft: /^ml-/,
-  none: /.*/,
   flexDirection: /^(flex-row|flex-col)/,
   flex: /^(flex-1|flex-auto|flex-none)/,
   alignSelf: /^self/,
+  borderRadius: /^rounded/,
+  // Must be last!
+  none: /.*/,
 };
 
 type ClassGroup = keyof typeof classGroups;

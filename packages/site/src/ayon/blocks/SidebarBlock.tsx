@@ -29,7 +29,18 @@ export const SidebarBlock: BlockDefinition = {
       return 0;
     }
 
-    return Math.max(isWithinRectRange(frame, 120, 300, 240, 2000) ? 1 : 0, 0.1);
+    return Math.max(
+      isWithinRectRange({
+        rect: frame,
+        minWidth: 120,
+        minHeight: 300,
+        maxWidth: 240,
+        maxHeight: 2000,
+      })
+        ? 1
+        : 0,
+      0.1,
+    );
   },
   render: (props) => {
     const {

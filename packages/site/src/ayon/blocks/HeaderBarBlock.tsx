@@ -34,7 +34,13 @@ export const HeaderBarBlock: BlockDefinition = {
     }
 
     return Math.max(
-      isWithinRectRange(frame, 400, 30, 2000, 100) &&
+      isWithinRectRange({
+        rect: frame,
+        minWidth: 400,
+        minHeight: 30,
+        maxWidth: 2000,
+        maxHeight: 100,
+      }) &&
         frame.x < 30 &&
         frame.y < 30
         ? 1

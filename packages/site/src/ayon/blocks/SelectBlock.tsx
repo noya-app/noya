@@ -22,7 +22,15 @@ export const SelectBlock: BlockDefinition = {
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
-    isWithinRectRange(frame, 60, 25, 400, 80) ? 0.7 : 0,
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 60,
+      minHeight: 25,
+      maxWidth: 400,
+      maxHeight: 80,
+    })
+      ? 0.7
+      : 0,
   render: (props) => {
     const {
       items,
