@@ -190,12 +190,6 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
     },
   }));
 
-  useEffect(() => {
-    if (isEditing) return;
-
-    ReactEditor.deselect(editor);
-  }, [editor, isEditing]);
-
   const symbolItems = allInsertableSymbols.map((symbol) => ({
     name: symbol.name,
     id: symbol.symbolID,
@@ -350,11 +344,20 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
     [dispatch],
   );
 
-  // Closing the completion menu on blur prevents us from clicking the menu with the mouse
-  const onBlur = useCallback(() => {
-    // hashCompletionMenu.close();
-    // symbolCompletionMenu.close();
-  }, []);
+  useEffect(() => {
+    if (isEditing) return;
+
+    ReactEditor.deselect(editor);
+  }, [editor, isEditing]);
+
+  // Closing the completion menu on blur prevents us from clicking the menu with the mouse,
+  // so we close the menus here instead.
+  useEffect(() => {
+    if (isEditing) return;
+
+    symbolCompletionMenu.close();
+    hashCompletionMenu.close();
+  }, [isEditing, symbolCompletionMenu, hashCompletionMenu]);
 
   const logEditedTextDebounced = useMemo(
     () =>
@@ -438,7 +441,6 @@ export const BlockEditorV1 = forwardRef(function BlockEditorV1(
         onKeyUp={onKeyUp}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
-        onBlur={onBlur}
         style={{
           position: 'absolute',
           inset: 0,
