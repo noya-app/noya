@@ -13,17 +13,12 @@ async function duplicateFile(
   id: string,
   router: NextRouter,
 ) {
-  const newFileId = await client.files.create({ fileId: id });
+  const newFile = await client.files.create({ fileId: id });
 
   amplitude.logEvent('Project - Created (From Duplication)');
 
   // Update the name of the new file
-  const newFile = await client.files.read(newFileId);
-
-  await client.files.update(newFile.id, {
-    ...newFile.data,
-    name: `${newFile.data.name} Copy`,
-  });
+  await client.files.updateFileName(newFile.id, `${newFile.data.name} Copy`);
 
   router.push(`/projects/${newFile.id}`);
 }

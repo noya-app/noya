@@ -6,6 +6,7 @@ import { NoyaNetworkClient } from './core/networkClient';
 import {
   NoyaExportFormat,
   NoyaFile,
+  NoyaFileData,
   NoyaFileList,
   NoyaPrice,
   NoyaProduct,
@@ -37,6 +38,7 @@ export namespace NoyaAPI {
   export type LocalStorageClient = NoyaLocalStorageClient;
 
   export type File = NoyaFile;
+  export type FileData = NoyaFileData;
   export type FileList = NoyaFileList;
   export type User = NoyaUser;
   export type Session = NoyaSession;

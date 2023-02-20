@@ -138,8 +138,11 @@ function Workspace({
   );
 
   const reducer = useCallback(
-    (state: WorkspaceState, action: WorkspaceAction) =>
-      workspaceReducer(state, action, CanvasKit, fontManager),
+    (state: WorkspaceState, action: WorkspaceAction) => {
+      if (window.noyaPageWillReload) return state;
+
+      return workspaceReducer(state, action, CanvasKit, fontManager);
+    },
     [CanvasKit, fontManager],
   );
 

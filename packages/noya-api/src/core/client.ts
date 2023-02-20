@@ -1,6 +1,6 @@
 import { observable } from '@legendapp/state';
 import { memoizedGetter } from 'noya-utils';
-import { makeCollectionReducer } from './collection';
+import { fileReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
 import {
   NoyaBilling,
@@ -9,14 +9,11 @@ import {
   NoyaFileData,
   NoyaSession,
 } from './schema';
+import { throttleAsync } from './throttleAsync';
 
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
-type NoyaFetchPolicy = 'no-cache' | 'cache-and-network';
-
-const fileReducer = makeCollectionReducer<NoyaFile>({
-  createItem: (parameters) => ({ ...parameters, userId: 'unused', version: 0 }),
-});
+type NoyaFetchPolicy = 'no-cache' | 'cache-and-network' | 'network-only';
 
 export class NoyaClient {
   networkClient: INoyaNetworkClient;
@@ -53,6 +50,14 @@ export class NoyaClient {
     }
   }
 
+  reloadFiles() {
+    if (this.files$.get().loading) return;
+
+    this.files$.set({ files: [], loading: true });
+
+    this.#fetchFiles();
+  }
+
   #fetchSession = async () => {
     const session = await this.networkClient.auth.session();
     this.session$.set(session);
@@ -79,6 +84,8 @@ export class NoyaClient {
       read: this.networkClient.files.read,
       create: this.#createFile,
       update: this.#updateFile,
+      updateFileName: this.#updateFileName,
+      updateFileDocument: this.#updateFileDocument,
       delete: this.#deleteFile,
       refetch: this.#fetchFiles,
       download: {
@@ -112,10 +119,11 @@ export class NoyaClient {
 
   #fetchFiles = async () => {
     const files = await this.networkClient.files.list();
-    this.files$.set({
-      files,
+
+    this.files$.set(({ files: currentFiles }) => ({
+      files: fileReducer(currentFiles, { type: 'merge', files }),
       loading: false,
-    });
+    }));
   };
 
   #createFile = async (
@@ -126,30 +134,69 @@ export class NoyaClient {
   ) => {
     const result = await this.networkClient.files.create(fields);
 
-    if (fetchPolicy === 'cache-and-network') {
-      this.#fetchFiles();
+    if (fetchPolicy !== 'no-cache') {
+      this.files$.files.set((files) =>
+        fileReducer(files, { type: 'merge', files: [result] }),
+      );
     }
 
     return result;
   };
 
+  #getLocalFile = (id: string) => {
+    const file = this.files$.get().files.find((file) => file.id === id);
+
+    if (!file) throw new Error(`File not found: ${id}`);
+
+    return file;
+  };
+
+  #updateFileName = async (id: string, name: string) => {
+    const file = this.#getLocalFile(id);
+
+    return this.#updateFile(id, { ...file.data, name });
+  };
+
+  #updateFileDocument = async (
+    id: string,
+    document: NoyaFileData['document'],
+  ) => {
+    const file = this.#getLocalFile(id);
+
+    return this.#updateFile(id, { ...file.data, document });
+  };
+
+  throttledUpdateFileMap = new Map<
+    string,
+    INoyaNetworkClient['files']['update']
+  >();
+
+  // Ensure there's only one active request to update a file at a time.
+  getThrottledUpdateFile(id: string) {
+    let throttledUpdateFile = this.throttledUpdateFileMap.get(id);
+
+    if (!throttledUpdateFile) {
+      throttledUpdateFile = throttleAsync(
+        (...args: Parameters<INoyaNetworkClient['files']['update']>) =>
+          this.networkClient.files.update(...args),
+      );
+
+      this.throttledUpdateFileMap.set(id, throttledUpdateFile);
+    }
+
+    return throttledUpdateFile;
+  }
+
   #updateFile = async (id: string, data: NoyaFileData) => {
-    // There might be a race condition here if we try to update a file before
-    // it exists on the backend, but that shouldn't happen yet. In that case
-    // we'll send the update without a version and it will always win.
-    const version = this.files$
-      .get()
-      .files.find((file) => file.id === id)?.version;
+    const file = this.#getLocalFile(id);
+
+    const version = file.version + 1;
 
     this.files$.files.set((files) =>
-      fileReducer(files, { type: 'update', id, data }),
+      fileReducer(files, { type: 'update', id, data, version }),
     );
 
-    const result = await this.networkClient.files.update(
-      id,
-      data,
-      version !== undefined ? version + 1 : undefined,
-    );
+    const result = await this.getThrottledUpdateFile(id)(id, data, version);
 
     this.#fetchFiles();
 

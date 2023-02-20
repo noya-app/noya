@@ -103,12 +103,46 @@ export class NoyaNetworkClient {
     };
   }
 
+  request = async (
+    ...[input, init]: Parameters<typeof fetch>
+  ): Promise<Response> => {
+    // If the page needs to reload, don't make any more requests
+    if (typeof window !== 'undefined' && window.noyaPageWillReload) {
+      return new Promise(() => {}) as any;
+    }
+
+    const controller = new AbortController();
+
+    const id = setTimeout(() => controller.abort(), 15000);
+
+    let response: Response;
+
+    try {
+      response = await fetch(input, {
+        signal: controller.signal,
+        ...init,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        // There's no way to recover here, so we'll always throw.
+        // But we still allow global error handling to run first.
+        this.handleError(new NoyaAPIError('timeout', 'Request timed out'));
+      }
+
+      throw error;
+    }
+
+    clearTimeout(id);
+
+    return response;
+  };
+
   #readUserData = async () => {
-    const response = await fetch(`${this.baseURI}/user`, {
+    const response = await this.request(`${this.baseURI}/user`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaUserDataSchema.parse(json);
@@ -116,11 +150,11 @@ export class NoyaNetworkClient {
   };
 
   #listEmailLists = async () => {
-    const response = await fetch(`${this.baseURI}/user/email-lists`, {
+    const response = await this.request(`${this.baseURI}/user/email-lists`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = z.array(noyaEmailListSchema).parse(json);
@@ -128,16 +162,19 @@ export class NoyaNetworkClient {
   };
 
   #updateEmailList = async (id: string, data: { optIn: boolean }) => {
-    const response = await fetch(`${this.baseURI}/user/email-lists/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await this.request(
+      `${this.baseURI}/user/email-lists/${id}`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaEmailListSchema.parse(json);
@@ -145,11 +182,14 @@ export class NoyaNetworkClient {
   };
 
   #listShares = async (fileId: string) => {
-    const response = await fetch(`${this.baseURI}/files/${fileId}/shares`, {
-      credentials: 'include',
-    });
+    const response = await this.request(
+      `${this.baseURI}/files/${fileId}/shares`,
+      {
+        credentials: 'include',
+      },
+    );
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = z.array(noyaShareSchema).parse(json);
@@ -157,11 +197,11 @@ export class NoyaNetworkClient {
   };
 
   #readSharedFile = async (shareId: string) => {
-    const response = await fetch(`${this.baseURI}/shares/${shareId}`, {
+    const response = await this.request(`${this.baseURI}/shares/${shareId}`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaSharedFileSchema.parse(json);
@@ -169,11 +209,11 @@ export class NoyaNetworkClient {
   };
 
   #readBilling = async () => {
-    const response = await fetch(`${this.baseURI}/billing`, {
+    const response = await this.request(`${this.baseURI}/billing`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaBillingSchema.parse(json);
@@ -186,13 +226,16 @@ export class NoyaNetworkClient {
   #assetURL = (id: string) => `${this.baseURI}/assets/${id}`;
 
   #createAsset = async (data: ArrayBuffer, fileId: string) => {
-    const response = await fetch(`${this.baseURI}/files/${fileId}/assets`, {
-      method: 'POST',
-      credentials: 'include',
-      body: data,
-    });
+    const response = await this.request(
+      `${this.baseURI}/files/${fileId}/assets`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        body: data,
+      },
+    );
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaAssetSchema.parse(json);
@@ -200,11 +243,11 @@ export class NoyaNetworkClient {
   };
 
   #readSession = async () => {
-    const response = await fetch(`${this.baseURI}/auth/session`, {
+    const response = await this.request(`${this.baseURI}/auth/session`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaSessionSchema.parse(json);
@@ -212,36 +255,33 @@ export class NoyaNetworkClient {
   };
 
   #readFile = async (id: string) => {
-    const response = await fetch(`${this.baseURI}/files/${id}`, {
+    const response = await this.request(`${this.baseURI}/files/${id}`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaFileSchema.parse(json);
     return parsed;
   };
 
-  #updateFile = async (id: string, data: NoyaFileData, version?: number) => {
-    const response = await fetch(`${this.baseURI}/files/${id}`, {
+  #updateFile = async (id: string, data: NoyaFileData, version: number) => {
+    const response = await this.request(`${this.baseURI}/files/${id}`, {
       method: 'PUT',
       credentials: 'include',
-      body: JSON.stringify({
-        data,
-        ...(version !== undefined && { version }),
-      }),
+      body: JSON.stringify({ data, version }),
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
   };
 
   #listFiles = async () => {
-    const response = await fetch(`${this.baseURI}/files`, {
+    const response = await this.request(`${this.baseURI}/files`, {
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaFileListSchema.parse(json);
@@ -251,26 +291,26 @@ export class NoyaNetworkClient {
   #createFile = async (
     fields: { data: NoyaFileData } | { shareId: string } | { fileId: string },
   ) => {
-    const response = await fetch(`${this.baseURI}/files`, {
+    const response = await this.request(`${this.baseURI}/files`, {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify(fields),
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
-    const parsed = z.object({ id: z.string() }).parse(json);
-    return parsed.id;
+    const parsed = noyaFileSchema.parse(json);
+    return parsed;
   };
 
   #deleteFile = async (id: string) => {
-    const response = await fetch(`${this.baseURI}/files/${id}`, {
+    const response = await this.request(`${this.baseURI}/files/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     });
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
   };
 
   #createShare = async (
@@ -282,38 +322,43 @@ export class NoyaNetworkClient {
   ) => {
     const { viewable = true, duplicable = false } = options;
 
-    const response = await fetch(`${this.baseURI}/files/${fileId}/shares`, {
-      method: 'POST',
-      credentials: 'include',
-      body: JSON.stringify({ viewable, duplicable }),
-    });
+    const response = await this.request(
+      `${this.baseURI}/files/${fileId}/shares`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify({ viewable, duplicable }),
+      },
+    );
 
-    this.#ensureAuthorized(response);
+    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaShareSchema.parse(json);
     return parsed;
   };
 
-  #ensureAuthorized = (response: Response) => {
-    const handleError = (error: NoyaAPIError) => {
-      if (this.onError) {
-        const handled = this.onError(error);
+  handleError = (error: NoyaAPIError) => {
+    if (this.onError) {
+      const handled = this.onError(error);
 
-        if (handled) {
-          return;
-        }
+      if (handled) {
+        return;
       }
+    }
 
-      throw error;
-    };
+    throw error;
+  };
 
+  handleHTTPErrors = (response: Response) => {
     if (response.status === 500) {
-      handleError(new NoyaAPIError('internalServerError', response.statusText));
+      this.handleError(
+        new NoyaAPIError('internalServerError', response.statusText),
+      );
     } else if (response.status === 401) {
-      handleError(new NoyaAPIError('unauthorized', response.statusText));
+      this.handleError(new NoyaAPIError('unauthorized', response.statusText));
     } else if (response.status >= 400) {
-      handleError(new NoyaAPIError('unknown', response.statusText));
+      this.handleError(new NoyaAPIError('unknown', response.statusText));
     }
   };
 }

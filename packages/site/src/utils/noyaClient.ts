@@ -13,23 +13,32 @@ export function createNoyaClient() {
     ? new NoyaAPI.NetworkClient({
         baseURI: `${NOYA_HOST}/api`,
         onError: (error) => {
-          if (error instanceof NoyaAPI.Error && error.type === 'unauthorized') {
-            if (NOYA_HOST) {
-              window.location.href = NOYA_HOST;
+          if (error instanceof NoyaAPI.Error) {
+            switch (error.type) {
+              case 'unauthorized':
+                if (NOYA_HOST) {
+                  window.location.href = NOYA_HOST;
+                }
+                return true;
+              case 'internalServerError':
+              case 'timeout':
+                window.noyaPageWillReload = true;
+                window.location.reload();
+                return true;
+              case 'unknown':
+                return false;
             }
-            return true;
-          } else if (
-            error instanceof NoyaAPI.Error &&
-            error.type === 'internalServerError'
-          ) {
-            window.location.reload();
-            return true;
-          } else {
-            return false;
           }
+          return false;
         },
       })
     : new NoyaAPI.LocalStorageClient();
 
   return new NoyaAPI.Client({ networkClient });
+}
+
+declare global {
+  interface Window {
+    noyaPageWillReload?: boolean;
+  }
 }

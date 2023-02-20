@@ -1,10 +1,10 @@
 import produce from 'immer';
-import { uuid } from 'noya-utils';
+import { NoyaFile, NoyaFileData } from './schema';
 
-type CollectionAction<Data> =
+type FilesAction =
   | {
       type: 'create';
-      data: Data;
+      file: NoyaFile;
     }
   | {
       type: 'delete';
@@ -13,55 +13,53 @@ type CollectionAction<Data> =
   | {
       type: 'update';
       id: string;
-      data: Data;
+      data: NoyaFileData;
+      version: number;
+    }
+  | {
+      type: 'merge';
+      files: NoyaFile[];
     };
 
-type BaseItem<Data> = {
-  id: string;
-  data: Data;
-  updatedAt: string;
-  createdAt: string;
-  version: number;
-};
+export const fileReducer = (collection: NoyaFile[], action: FilesAction) => {
+  switch (action.type) {
+    case 'merge': {
+      const { files } = action;
 
-export const makeCollectionReducer = <Item extends BaseItem<unknown>>({
-  createItem,
-}: {
-  createItem: (parameters: BaseItem<Item['data']>) => Item;
-}) => {
-  return (collection: Item[], action: CollectionAction<Item['data']>) => {
-    switch (action.type) {
-      case 'create': {
-        const date = new Date().toISOString();
+      return produce(collection, (draft) => {
+        files.forEach((item) => {
+          const index = draft.findIndex((i) => i.id === item.id);
 
-        const newItem = createItem({
-          id: uuid(),
-          data: action.data,
-          updatedAt: date,
-          createdAt: date,
-          version: 0,
-        });
-
-        return produce<Item[], Item[]>(collection, (draft) => {
-          draft.push(newItem);
-        });
-      }
-      case 'delete': {
-        return collection.filter((item) => item.id !== action.id);
-      }
-      case 'update': {
-        return collection.map((item) => {
-          if (item.id === action.id) {
-            return produce<Item, Item>(item, (draft) => {
-              draft.data = action.data;
-              draft.updatedAt = new Date().toISOString();
-              draft.version += 1;
-            });
+          if (index === -1) {
+            draft.push(item);
+          } else {
+            if (item.version >= draft[index].version) {
+              draft[index] = item;
+            }
           }
-
-          return item;
         });
-      }
+      });
     }
-  };
+    case 'create': {
+      return produce(collection, (draft) => {
+        draft.push(action.file);
+      });
+    }
+    case 'delete': {
+      return collection.filter((item) => item.id !== action.id);
+    }
+    case 'update': {
+      return collection.map((item) => {
+        if (item.id === action.id) {
+          return produce(item, (draft) => {
+            draft.data = action.data;
+            draft.updatedAt = new Date().toISOString();
+            draft.version = action.version;
+          });
+        }
+
+        return item;
+      });
+    }
+  }
 };

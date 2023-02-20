@@ -1,4 +1,4 @@
-import { useNoyaBilling, useNoyaFiles } from 'noya-api';
+import { useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import { amplitude } from 'noya-log';
 import React, { useEffect } from 'react';
 import { AppLayout } from '../components/AppLayout';
@@ -16,8 +16,14 @@ export default function Project() {
     amplitude.logEvent('App - Projects List - Opened');
   }, []);
 
+  const client = useNoyaClient();
   const { files } = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
+
+  useEffect(() => {
+    // Force reload files so we don't show anything stale
+    client.reloadFiles();
+  }, [client]);
 
   const overageItems = getSubscriptionOverage(
     files,
