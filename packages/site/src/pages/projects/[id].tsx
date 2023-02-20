@@ -75,6 +75,8 @@ function FileEditor({ fileId }: { fileId: string }) {
 
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
+      if (window.noyaPageWillReload) return;
+
       if (!updateFileDocumentDebounced.pending()) return;
 
       updateFileDocumentDebounced.flush();

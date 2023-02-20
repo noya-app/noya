@@ -9,6 +9,7 @@ import {
   NoyaFileData,
   NoyaSession,
 } from './schema';
+import { throttleAsync } from './throttleAsync';
 
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
@@ -47,6 +48,14 @@ export class NoyaClient {
       this.#fetchBilling();
       // this.#fetchEmailLists();
     }
+  }
+
+  reloadFiles() {
+    if (this.files$.get().loading) return;
+
+    this.files$.set({ files: [], loading: true });
+
+    this.#fetchFiles();
   }
 
   #fetchSession = async () => {
@@ -155,6 +164,11 @@ export class NoyaClient {
     return this.#updateFile(id, { ...file.data, document });
   };
 
+  #updateFileThrottled = throttleAsync(
+    (...args: Parameters<INoyaNetworkClient['files']['update']>) =>
+      this.networkClient.files.update(...args),
+  );
+
   #updateFile = async (id: string, data: NoyaFileData) => {
     const file = this.#getLocalFile(id);
 
@@ -164,7 +178,7 @@ export class NoyaClient {
       fileReducer(files, { type: 'update', id, data, version }),
     );
 
-    const result = await this.networkClient.files.update(id, data, version);
+    const result = await this.#updateFileThrottled(id, data, version);
 
     this.#fetchFiles();
 
