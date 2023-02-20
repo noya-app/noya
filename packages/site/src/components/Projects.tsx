@@ -30,6 +30,9 @@ export function Projects() {
 
   const [showWelcomeCard, _setShowWelcomeCard] = useState(false);
   const hasFiles = files.length > 0;
+  const [hideWhileNavigating, setHideWhileNavigating] = useState<
+    string | undefined
+  >();
 
   // Show welcome card in a useEffect so it doesn't flash due to SSR
   useEffect(() => {
@@ -60,25 +63,26 @@ export function Projects() {
         const document = createAyonDocument();
 
         client.files
-          // Wait till after navigating to refetch, since it looks bad
-          // if the list updates before transitioning to the new page
-          .create(
-            {
-              data: {
-                name: 'Untitled',
-                type: 'io.noya.ayon',
-                schemaVersion: '0.1.0',
-                document,
-              },
+          .create({
+            data: {
+              name: 'Untitled',
+              type: 'io.noya.ayon',
+              schemaVersion: '0.1.0',
+              document,
             },
-            { fetchPolicy: 'no-cache' },
-          )
-          .then((id) => {
+          })
+          .then((file) => {
+            // Wait till after navigating to show new file, since it looks bad
+            // if the list updates before transitioning to the new page
+            setHideWhileNavigating(file.id);
+
             amplitude.logEvent('Project - Created');
 
-            return push(`/projects/${id}`);
+            return push(`/projects/${file.id}`);
           })
-          .then(() => client.files.refetch());
+          .then(() => {
+            setHideWhileNavigating(undefined);
+          });
       }}
     >
       <PlusIcon />
@@ -127,119 +131,121 @@ export function Projects() {
       )}
       <Stack.V>
         <ListView.Root divider>
-          {sortedFiles.map((file) => {
-            const artboard = Layers.find<Sketch.Artboard>(
-              file.data.document.pages[0],
-              Layers.isArtboard,
-            );
-            const scaledThumbnailSize = artboard
-              ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
-              : thumbnailSize;
-            scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
-            scaledThumbnailSize.height = Math.round(scaledThumbnailSize.height);
+          {sortedFiles
+            .filter((file) => file.id !== hideWhileNavigating)
+            .map((file) => {
+              const artboard = Layers.find<Sketch.Artboard>(
+                file.data.document.pages[0],
+                Layers.isArtboard,
+              );
+              const scaledThumbnailSize = artboard
+                ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
+                : thumbnailSize;
+              scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
+              scaledThumbnailSize.height = Math.round(
+                scaledThumbnailSize.height,
+              );
 
-            return (
-              <ListView.Row
-                key={file.id}
-                hovered={hovered === file.id}
-                selected={selected === file.id}
-                menuItems={createSectionedMenu(
-                  [
-                    { title: 'Rename', value: 'rename' } as const,
-                    { title: 'Duplicate', value: 'duplicate' } as const,
-                  ],
-                  [{ title: 'Delete', value: 'delete' } as const],
-                )}
-                onSelectMenuItem={async (value) => {
-                  switch (value) {
-                    case 'delete':
-                      client.files.delete(file.id);
-                      return;
-                    case 'rename':
-                      setRenaming(file.id);
-                      return;
-                    case 'duplicate': {
-                      const newFileId = await client.files.create({
-                        fileId: file.id,
-                      });
+              return (
+                <ListView.Row
+                  key={file.id}
+                  hovered={hovered === file.id}
+                  selected={selected === file.id}
+                  menuItems={createSectionedMenu(
+                    [
+                      { title: 'Rename', value: 'rename' } as const,
+                      { title: 'Duplicate', value: 'duplicate' } as const,
+                    ],
+                    [{ title: 'Delete', value: 'delete' } as const],
+                  )}
+                  onSelectMenuItem={async (value) => {
+                    switch (value) {
+                      case 'delete':
+                        client.files.delete(file.id);
+                        return;
+                      case 'rename':
+                        setRenaming(file.id);
+                        return;
+                      case 'duplicate': {
+                        const newFile = await client.files.create({
+                          fileId: file.id,
+                        });
 
-                      amplitude.logEvent(
-                        'Project - Created (From Duplication)',
-                      );
+                        amplitude.logEvent(
+                          'Project - Created (From Duplication)',
+                        );
 
-                      // Update the name of the new file
-                      const newFile = await client.files.read(newFileId);
-
-                      await client.files.update(newFile.id, {
-                        ...newFile.data,
-                        name: `${file.data.name} Copy`,
-                      });
-
-                      setRenaming(newFile.id);
+                        await client.files.updateFileName(
+                          newFile.id,
+                          `${file.data.name} Copy`,
+                        );
+                      }
                     }
-                  }
-                }}
-                onHoverChange={(hovered) => {
-                  setHovered(hovered ? file.id : undefined);
-                }}
-                onPress={() => {
-                  push(`/projects/${file.id}`);
-                }}
-                onMenuOpenChange={(open) => {
-                  setSelected(open ? file.id : undefined);
-                }}
-              >
-                <Stack.H
-                  gap={12}
-                  padding={'8px 0'}
-                  margin={'0 -10px'}
-                  alignItems="center"
-                  flex="1"
+                  }}
+                  onHoverChange={(hovered) => {
+                    setHovered(hovered ? file.id : undefined);
+                  }}
+                  onPress={() => {
+                    push(`/projects/${file.id}`);
+                  }}
+                  onMenuOpenChange={(open) => {
+                    setSelected(open ? file.id : undefined);
+                  }}
                 >
-                  <img
-                    src={`${NOYA_HOST}/api/files/${file.id}/thumbnail.png?width=${scaledThumbnailSize.width}&height=${scaledThumbnailSize.height}&deviceScaleFactor=1`}
-                    alt=""
-                    style={{
-                      ...thumbnailSize,
-                      objectFit: 'contain',
-                      background: '#eee',
-                    }}
-                  />
-                  <Stack.V flex="1">
-                    <Stack.H alignItems="center">
-                      <DashboardIcon />
-                      <Spacer.Horizontal size={10} />
-                      {renaming === file.id ? (
-                        <ListView.EditableRowTitle
-                          value={file.data.name}
-                          autoFocus
-                          onSubmitEditing={(value) => {
-                            setRenaming(undefined);
+                  <Stack.H
+                    gap={12}
+                    padding={'8px 0'}
+                    margin={'0 -10px'}
+                    alignItems="center"
+                    flex="1"
+                  >
+                    <img
+                      src={`${NOYA_HOST}/api/files/${file.id}/thumbnail.png?width=${scaledThumbnailSize.width}&height=${scaledThumbnailSize.height}&deviceScaleFactor=1`}
+                      alt=""
+                      style={{
+                        ...thumbnailSize,
+                        objectFit: 'contain',
+                        background: '#eee',
+                      }}
+                    />
+                    <Stack.V flex="1">
+                      <Stack.H alignItems="center">
+                        <DashboardIcon />
+                        <Spacer.Horizontal size={10} />
+                        {renaming === file.id ? (
+                          <ListView.EditableRowTitle
+                            value={file.data.name}
+                            autoFocus
+                            onSubmitEditing={(value) => {
+                              setRenaming(undefined);
 
-                            if (value === file.data.name) return;
+                              if (value === file.data.name) return;
 
-                            client.files.update(file.id, {
-                              ...file.data,
-                              name: value,
-                            });
-                          }}
-                        />
-                      ) : (
-                        <ListView.RowTitle>{file.data.name}</ListView.RowTitle>
-                      )}
-                      <Spacer.Horizontal size={10} />
-                      <Small color="textMuted">
-                        {'Edited '}
-                        {formatDistance(parseISO(file.updatedAt), new Date(), {
-                          addSuffix: true,
-                        }).replace('less than a minute ago', 'just now')}
-                      </Small>
-                    </Stack.H>
-                  </Stack.V>
-                </Stack.H>
-              </ListView.Row>
-            );
-          })}
+                              client.files.updateFileName(file.id, value);
+                            }}
+                          />
+                        ) : (
+                          <ListView.RowTitle>
+                            {file.data.name}
+                          </ListView.RowTitle>
+                        )}
+                        <Spacer.Horizontal size={10} />
+                        <Small color="textMuted">
+                          {'Edited '}
+                          {formatDistance(
+                            parseISO(file.updatedAt),
+                            new Date(),
+                            {
+                              addSuffix: true,
+                            },
+                          ).replace('less than a minute ago', 'just now')}
+                        </Small>
+                      </Stack.H>
+                    </Stack.V>
+                  </Stack.H>
+                </ListView.Row>
+              );
+            })}
         </ListView.Root>
       </Stack.V>
     </Stack.V>

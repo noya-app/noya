@@ -13,7 +13,7 @@ import { throttleAsync } from './throttleAsync';
 
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
-type NoyaFetchPolicy = 'no-cache' | 'cache-and-network';
+type NoyaFetchPolicy = 'no-cache' | 'cache-and-network' | 'network-only';
 
 export class NoyaClient {
   networkClient: INoyaNetworkClient;
@@ -134,8 +134,10 @@ export class NoyaClient {
   ) => {
     const result = await this.networkClient.files.create(fields);
 
-    if (fetchPolicy === 'cache-and-network') {
-      this.#fetchFiles();
+    if (fetchPolicy !== 'no-cache') {
+      this.files$.files.set((files) =>
+        fileReducer(files, { type: 'merge', files: [result] }),
+      );
     }
 
     return result;

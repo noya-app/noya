@@ -104,7 +104,7 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
         },
       });
 
-      return this.data.files[this.data.files.length - 1].id;
+      return this.data.files[this.data.files.length - 1];
     },
     update: async (id, data) => {
       this.data.files = fileReducer(this.data.files, {

@@ -300,8 +300,8 @@ export class NoyaNetworkClient {
     this.handleHTTPErrors(response);
 
     const json = await response.json();
-    const parsed = z.object({ id: z.string() }).parse(json);
-    return parsed.id;
+    const parsed = noyaFileSchema.parse(json);
+    return parsed;
   };
 
   #deleteFile = async (id: string) => {
