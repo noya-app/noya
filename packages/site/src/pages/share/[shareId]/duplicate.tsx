@@ -47,7 +47,7 @@ function Content({
         maxWidth={300}
       >
         <Small color="text" fontWeight="bold">
-          Duplicating {name || 'project'}
+          Cloning {name || 'template'}
         </Small>
         <Spacer.Vertical size={4} />
         <Small color="text">This should only take a few seconds.</Small>

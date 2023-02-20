@@ -188,7 +188,7 @@ function Content({
                 cursor: 'pointer',
               }}
             >
-              DUPLICATE THIS PROJECT
+              CLONE THIS TEMPLATE
               <Spacer.Horizontal size={2} inline />
               <ArrowRightIcon
                 style={{

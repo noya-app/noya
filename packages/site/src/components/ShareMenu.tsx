@@ -157,10 +157,10 @@ export function ShareMenu({ fileId }: { fileId: string }) {
                 <InspectorPrimitives.VerticalSeparator />
                 <InspectorPrimitives.Row>
                   <Stack.V flex="1 1 0%">
-                    <Small color="text">Allow duplication</Small>
+                    <Small color="text">This is a template</Small>
                     <Spacer.Vertical size={4} />
                     <Small color="textSubtle" fontSize="12px">
-                      People who view your project can duplicate it as a
+                      Allow people who view your project to clone it as a
                       starting point for their own work
                     </Small>
                   </Stack.V>
