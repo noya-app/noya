@@ -1,6 +1,6 @@
 import { observable } from '@legendapp/state';
 import { memoizedGetter } from 'noya-utils';
-import { makeCollectionReducer } from './collection';
+import { fileReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
 import {
   NoyaBilling,
@@ -13,10 +13,6 @@ import {
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
 type NoyaFetchPolicy = 'no-cache' | 'cache-and-network';
-
-const fileReducer = makeCollectionReducer<NoyaFile>({
-  createItem: (parameters) => ({ ...parameters, userId: 'unused', version: 0 }),
-});
 
 export class NoyaClient {
   networkClient: INoyaNetworkClient;
@@ -79,6 +75,8 @@ export class NoyaClient {
       read: this.networkClient.files.read,
       create: this.#createFile,
       update: this.#updateFile,
+      updateFileName: this.#updateFileName,
+      updateFileDocument: this.#updateFileDocument,
       delete: this.#deleteFile,
       refetch: this.#fetchFiles,
       download: {
@@ -112,10 +110,11 @@ export class NoyaClient {
 
   #fetchFiles = async () => {
     const files = await this.networkClient.files.list();
-    this.files$.set({
-      files,
+
+    this.files$.set(({ files: currentFiles }) => ({
+      files: fileReducer(currentFiles, { type: 'merge', files }),
       loading: false,
-    });
+    }));
   };
 
   #createFile = async (
@@ -133,23 +132,39 @@ export class NoyaClient {
     return result;
   };
 
+  #getLocalFile = (id: string) => {
+    const file = this.files$.get().files.find((file) => file.id === id);
+
+    if (!file) throw new Error(`File not found: ${id}`);
+
+    return file;
+  };
+
+  #updateFileName = async (id: string, name: string) => {
+    const file = this.#getLocalFile(id);
+
+    return this.#updateFile(id, { ...file.data, name });
+  };
+
+  #updateFileDocument = async (
+    id: string,
+    document: NoyaFileData['document'],
+  ) => {
+    const file = this.#getLocalFile(id);
+
+    return this.#updateFile(id, { ...file.data, document });
+  };
+
   #updateFile = async (id: string, data: NoyaFileData) => {
-    // There might be a race condition here if we try to update a file before
-    // it exists on the backend, but that shouldn't happen yet. In that case
-    // we'll send the update without a version and it will always win.
-    const version = this.files$
-      .get()
-      .files.find((file) => file.id === id)?.version;
+    const file = this.#getLocalFile(id);
+
+    const version = file.version + 1;
 
     this.files$.files.set((files) =>
-      fileReducer(files, { type: 'update', id, data }),
+      fileReducer(files, { type: 'update', id, data, version }),
     );
 
-    const result = await this.networkClient.files.update(
-      id,
-      data,
-      version !== undefined ? version + 1 : undefined,
-    );
+    const result = await this.networkClient.files.update(id, data, version);
 
     this.#fetchFiles();
 

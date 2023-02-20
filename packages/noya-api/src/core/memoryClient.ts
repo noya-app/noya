@@ -1,4 +1,5 @@
-import { makeCollectionReducer } from './collection';
+import { uuid } from 'noya-utils';
+import { fileReducer } from './collection';
 import { INoyaNetworkClient } from './networkClient';
 import {
   NoyaEmailList,
@@ -7,14 +8,6 @@ import {
   NoyaShare,
   NoyaSharedFile,
 } from './schema';
-
-const fileReducer = makeCollectionReducer<NoyaFile>({
-  createItem: (parameters) => ({
-    ...parameters,
-    userId: 'johndoe',
-    version: 0,
-  }),
-});
 
 export type NoyaMemoryClientData = {
   files: NoyaFile[];
@@ -99,10 +92,18 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
           'Cannot create a file with a shareId or fileId using MemoryClient',
         );
       }
+
       this.data.files = fileReducer(this.data.files, {
         type: 'create',
-        data: fields.data,
+        file: {
+          id: uuid(),
+          data: fields.data,
+          version: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
       });
+
       return this.data.files[this.data.files.length - 1].id;
     },
     update: async (id, data) => {
@@ -110,6 +111,8 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
         type: 'update',
         id,
         data,
+        version:
+          (this.data.files.find((file) => file.id === id)?.version || 0) + 1,
       });
     },
     delete: async (id) => {

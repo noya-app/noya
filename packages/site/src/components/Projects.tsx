@@ -45,7 +45,7 @@ export function Projects() {
     _setShowWelcomeCard(value);
   };
 
-  const sortedFiles = files.sort(
+  const sortedFiles = [...files].sort(
     (a, b) => parseISO(b.updatedAt).valueOf() - parseISO(a.updatedAt).valueOf(),
   );
 

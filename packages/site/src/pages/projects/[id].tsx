@@ -11,7 +11,6 @@ import {
 import { Size } from 'noya-geometry';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
-import { SketchFile } from 'noya-sketch-file';
 import { debounce } from 'noya-utils';
 import React, {
   ReactNode,
@@ -46,73 +45,39 @@ function FileTitle({ id }: { id: string }) {
   return <ProjectTitle>{cachedFile.data.name}</ProjectTitle>;
 }
 
-function FileEditor({ id }: { id: string }) {
+function FileEditor({ fileId }: { fileId: string }) {
   const router = useRouter();
   const client = useNoyaClient();
   const { files } = useNoyaFiles();
-  const cachedFile = files.find((file) => file.id === id);
-  const fileProperties = useMemo(() => {
-    if (!cachedFile) return undefined;
-    const { document: design, ...rest } = cachedFile.data;
-    return rest;
-  }, [cachedFile]);
+  const cachedFile = files.find((file) => file.id === fileId);
 
   // The Ayon component is a controlled component that manages its own state
   const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
 
   useEffect(() => {
     // Load the latest version of this file from the server
-    client.files.read(id).then(setInitialFile);
-  }, [client, id]);
+    client.files.read(fileId).then(setInitialFile);
+  }, [client, fileId]);
 
-  const updateDebounced = useMemo(
-    () => debounce(client.files.update, 250, { maxWait: 1000 }),
+  const updateFileDocumentDebounced = useMemo(
+    () => debounce(client.files.updateFileDocument, 250, { maxWait: 1000 }),
     [client],
-  );
-
-  const updateDocument = useCallback(
-    (document: SketchFile) => {
-      if (
-        fileProperties?.name === undefined ||
-        fileProperties.schemaVersion === undefined ||
-        fileProperties.type === undefined
-      )
-        return;
-
-      updateDebounced(id, {
-        name: fileProperties.name,
-        schemaVersion: fileProperties.schemaVersion,
-        type: fileProperties.type,
-        document,
-      });
-    },
-    [
-      id,
-      updateDebounced,
-      fileProperties?.name,
-      fileProperties?.schemaVersion,
-      fileProperties?.type,
-    ],
   );
 
   const updateName = useCallback(
     async (newName: string) => {
-      if (!cachedFile) return;
-
       if (!newName) return;
 
-      const data = { ...cachedFile.data, name: newName };
-
-      client.files.update(cachedFile.id, data);
+      client.files.updateFileName(fileId, newName);
     },
-    [cachedFile, client.files],
+    [client.files, fileId],
   );
 
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
-      if (!updateDebounced.pending()) return;
+      if (!updateFileDocumentDebounced.pending()) return;
 
-      updateDebounced.flush();
+      updateFileDocumentDebounced.flush();
 
       const message = "Your edits haven't finished syncing. Are you sure?";
 
@@ -126,39 +91,45 @@ function FileEditor({ id }: { id: string }) {
     return () => {
       window.removeEventListener('beforeunload', handler, { capture: true });
     };
-  }, [updateDebounced]);
+  }, [updateFileDocumentDebounced]);
 
   const uploadAsset = async (file: ArrayBuffer) => {
-    const fileId = await client.assets.create(file, id);
+    const assetId = await client.assets.create(file, fileId);
 
-    return client.assets.url(fileId);
+    return client.assets.url(assetId);
   };
 
   const downloadFile = useCallback(
     async (format: NoyaAPI.ExportFormat, size: Size, name: string) => {
-      const url = client.files.download.url(id, format, size);
+      const url = client.files.download.url(fileId, format, size);
       downloadUrl(url, name);
     },
-    [id, client.files.download],
+    [fileId, client.files.download],
   );
 
   const duplicateFile = useCallback(() => {
-    updateDebounced.flush();
+    updateFileDocumentDebounced.flush();
 
-    router.push(`/projects/${id}/duplicate`);
-  }, [id, router, updateDebounced]);
+    router.push(`/projects/${fileId}/duplicate`);
+  }, [fileId, router, updateFileDocumentDebounced]);
+
+  const onChangeDocument = useCallback(
+    (document: NoyaAPI.FileData['document']) =>
+      updateFileDocumentDebounced(fileId, document),
+    [fileId, updateFileDocumentDebounced],
+  );
 
   if (!initialFile || !cachedFile) return null;
 
   return (
     <Ayon
-      fileId={id}
+      fileId={fileId}
       canvasRendererType="svg"
       padding={20}
       uploadAsset={uploadAsset}
       name={cachedFile.data.name}
       initialDocument={initialFile.data.document}
-      onChangeDocument={updateDocument}
+      onChangeDocument={onChangeDocument}
       onChangeName={updateName}
       onDuplicate={duplicateFile}
       downloadFile={downloadFile}
@@ -166,8 +137,7 @@ function FileEditor({ id }: { id: string }) {
   );
 }
 
-function Content() {
-  const { query } = useRouter();
+function Content({ fileId }: { fileId: string }) {
   const { files } = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
 
@@ -182,7 +152,6 @@ function Content() {
     (a, b) => b.count / b.limit - a.count / a.limit,
   )[0];
 
-  const id = query.id as string | undefined;
   const theme = useDesignSystemTheme();
   const [leftToolbar, setLeftToolbar] = useState<ReactNode>(null);
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
@@ -192,8 +161,6 @@ function Content() {
     () => ({ setLeftToolbar, setCenterToolbar, setRightToolbar }),
     [],
   );
-
-  if (!id) return null;
 
   return (
     <OnboardingProvider>
@@ -212,10 +179,10 @@ function Content() {
               )
             }
           >
-            {centerToolbar || <FileTitle id={id} />}
+            {centerToolbar || <FileTitle id={fileId} />}
           </Toolbar>
           <Divider variant="strong" />
-          <FileEditor id={id} />
+          <FileEditor fileId={fileId} />
         </Stack.V>
       </ProjectProvider>
     </OnboardingProvider>
@@ -226,13 +193,18 @@ const platform =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
 export default function Project(): JSX.Element {
+  const { query } = useRouter();
+  const id = query.id as string | undefined;
+
   useEffect(() => {
     amplitude.logEvent('Project - Opened');
   }, []);
 
+  if (!id) return <></>;
+
   return (
     <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
-      <Content />
+      <Content fileId={id} />
     </DesignSystemConfigurationProvider>
   );
 }
