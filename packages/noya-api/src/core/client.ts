@@ -164,10 +164,26 @@ export class NoyaClient {
     return this.#updateFile(id, { ...file.data, document });
   };
 
-  #updateFileThrottled = throttleAsync(
-    (...args: Parameters<INoyaNetworkClient['files']['update']>) =>
-      this.networkClient.files.update(...args),
-  );
+  throttledUpdateFileMap = new Map<
+    string,
+    INoyaNetworkClient['files']['update']
+  >();
+
+  // Ensure there's only one active request to update a file at a time.
+  getThrottledUpdateFile(id: string) {
+    let throttledUpdateFile = this.throttledUpdateFileMap.get(id);
+
+    if (!throttledUpdateFile) {
+      throttledUpdateFile = throttleAsync(
+        (...args: Parameters<INoyaNetworkClient['files']['update']>) =>
+          this.networkClient.files.update(...args),
+      );
+
+      this.throttledUpdateFileMap.set(id, throttledUpdateFile);
+    }
+
+    return throttledUpdateFile;
+  }
 
   #updateFile = async (id: string, data: NoyaFileData) => {
     const file = this.#getLocalFile(id);
@@ -178,7 +194,7 @@ export class NoyaClient {
       fileReducer(files, { type: 'update', id, data, version }),
     );
 
-    const result = await this.#updateFileThrottled(id, data, version);
+    const result = await this.getThrottledUpdateFile(id)(id, data, version);
 
     this.#fetchFiles();
 
