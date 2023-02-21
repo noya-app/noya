@@ -36,6 +36,7 @@ import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
+import { useOnboardingUpsellExperiment } from '../../hooks/useOnboardingUpsellExperiment';
 import { downloadUrl } from '../../utils/download';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
@@ -169,6 +170,10 @@ function Content({ fileId }: { fileId: string }) {
   );
 
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+
+  useOnboardingUpsellExperiment({
+    onShow: () => setShowUpgradeDialog(true),
+  });
 
   return (
     <OnboardingProvider>

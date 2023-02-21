@@ -15,6 +15,7 @@ import {
 } from 'noya-designsystem';
 import {
   ChevronDownIcon,
+  CopyIcon,
   DiscordLogoIcon,
   EnvelopeClosedIcon,
   ExitIcon,
@@ -75,6 +76,7 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
 
   const userMenuItems = createSectionedMenu(
     [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
+    [{ title: 'View Templates', value: 'templates', icon: <CopyIcon /> }],
     [
       { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
@@ -141,6 +143,9 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                   switch (value) {
                     case 'account':
                       router.push('/account');
+                      return;
+                    case 'templates':
+                      window.location.href = `${NOYA_HOST}/templates`;
                       return;
                     case 'signOut':
                       window.location.href = `${NOYA_HOST}/api/auth/signout`;
