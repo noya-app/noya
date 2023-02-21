@@ -49,6 +49,7 @@ interface Props {
   children?: ReactNode;
   left?: ReactNode;
   right?: ReactNode;
+  subscribeButton?: ReactNode;
   showOnboarding?: boolean;
   dismissOnboarding?: () => void;
 }
@@ -67,7 +68,7 @@ function openInNewTab(url: string) {
   window?.open(url, '_blank')?.focus();
 }
 
-export function Toolbar({ children, left, right }: Props) {
+export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
   const router = useRouter();
@@ -123,6 +124,7 @@ export function Toolbar({ children, left, right }: Props) {
       <Spacer.Horizontal size={10} />
       <Stack.H gap={theme.sizes.toolbar.itemSeparator}>
         {right}
+        {subscribeButton}
         {session && (
           <SupportOnboardingPopover
             dismiss={dismissOnboarding}

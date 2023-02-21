@@ -57,6 +57,8 @@ const CloseButtonContainer = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.popover.background,
   padding: '4px 6px',
   borderRadius: '2px',
+  boxShadow: '0 0 2px rgba(0, 0, 0, 0.2)',
+  border: `1px solid ${theme.colors.divider}`,
 }));
 
 export interface IDialog {

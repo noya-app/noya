@@ -14,6 +14,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.dividerStrong = 'rgba(0,0,0,1)';
   colors.primary = 'rgb(119, 66, 255)';
   colors.primaryLight = 'rgb(134, 86, 255)';
+  colors.secondaryBright = '#36fe91';
   colors.canvas.background = 'rgb(20,19,23)';
   colors.canvas.sliceOutline = 'rgb(150,150,150)';
   colors.canvas.grid = 'rgba(0,0,0,0.1)';

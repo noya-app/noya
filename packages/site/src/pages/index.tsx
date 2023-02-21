@@ -5,7 +5,6 @@ import {
   useNoyaFiles,
   useNoyaUserData,
 } from 'noya-api';
-import { Dialog } from 'noya-designsystem';
 import { amplitude } from 'noya-log';
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../components/AppLayout';
@@ -13,12 +12,13 @@ import { Projects } from '../components/Projects';
 import {
   findSubscribedProduct,
   getSubscriptionOverage,
+  isProfessionalPlan,
   SubscriptionCard,
   SubscriptionUsageMeter,
   usageMeterThreshold,
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
-import { UpgradeInfo } from '../components/UpgradeInfo';
+import { UpgradeDialog } from '../components/UpgradeDialog';
 
 export default function Project() {
   useEffect(() => {
@@ -30,13 +30,16 @@ export default function Project() {
   const { userData } = useNoyaUserData();
   const { subscriptions, availableProducts } = useNoyaBilling();
 
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(true);
   const didShowOnboardingUpsell =
     useMetadata<boolean>('didShowOnboardingUpsell') === true;
-  const isSubscribed = !!findSubscribedProduct(
+  const subscribedProduct = findSubscribedProduct(
     subscriptions,
     availableProducts,
   );
+  const isSubscribed = subscribedProduct
+    ? isProfessionalPlan(subscribedProduct)
+    : false;
 
   useEffect(() => {
     if (
@@ -68,13 +71,17 @@ export default function Project() {
     <AppLayout
       toolbar={<Toolbar />}
       footer={
-        overageItems.length > 0 && (
+        overageItems.length > 0 &&
+        !showUpgradeDialog && (
           <SubscriptionCard
             name="Current Plan: Starter"
             priceDescription="Free"
             callToActionAccented
             callToActionText="Upgrade"
             callToActionUrl="/app/account"
+            onPressCallToAction={() => {
+              setShowUpgradeDialog(true);
+            }}
           >
             <SubscriptionUsageMeter items={overageItems} />
           </SubscriptionCard>
@@ -83,18 +90,11 @@ export default function Project() {
     >
       <Projects />
       {showUpgradeDialog && (
-        <Dialog
-          style={{
-            maxWidth: '900px',
-            padding: 0,
-          }}
-          open={showUpgradeDialog}
-          onOpenChange={(value) => {
-            setShowUpgradeDialog(value);
-          }}
-        >
-          <UpgradeInfo />
-        </Dialog>
+        <UpgradeDialog
+          showUpgradeDialog={showUpgradeDialog}
+          setShowUpgradeDialog={setShowUpgradeDialog}
+          availableProducts={availableProducts}
+        />
       )}
     </AppLayout>
   );

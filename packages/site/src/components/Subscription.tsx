@@ -1,5 +1,4 @@
 import { isSameMonth, parseISO } from 'date-fns';
-import Link from 'next/link';
 import { NoyaAPI } from 'noya-api';
 import {
   Body,
@@ -88,6 +87,7 @@ export function SubscriptionCard({
   callToActionAccented,
   callToActionText,
   callToActionUrl,
+  onPressCallToAction,
   children,
 }: {
   name: string;
@@ -97,6 +97,7 @@ export function SubscriptionCard({
   callToActionAccented?: boolean;
   callToActionText?: string;
   callToActionUrl?: string | null;
+  onPressCallToAction?: () => void;
   children?: ReactNode;
 }) {
   const theme = useDesignSystemTheme();
@@ -127,7 +128,11 @@ export function SubscriptionCard({
               <Button
                 variant={callToActionAccented ? 'secondary' : 'normal'}
                 onClick={() => {
-                  window.location.href = callToActionUrl;
+                  if (onPressCallToAction) {
+                    onPressCallToAction();
+                  } else {
+                    window.location.href = callToActionUrl;
+                  }
                 }}
               >
                 {callToActionText}
@@ -287,44 +292,49 @@ const SubscriptionUsageMeterScallContainer = styled.a(({ theme }) => ({
 
 export function SubscriptionUsageMeterSmall({
   item,
+  onClick,
 }: {
   item: SubscriptionUsageItem;
+  onClick?: () => void;
 }) {
   const theme = useDesignSystemTheme();
 
   return (
-    <Link href="/account" passHref>
-      <SubscriptionUsageMeterScallContainer>
-        <Spacer.Horizontal size={10} />
-        <Stack.H padding="0 4px" alignItems="center">
-          <Stack.V>
-            <span
-              style={{
-                color: theme.colors.textMuted,
-                letterSpacing: '0.3px',
-                fontSize: '11px',
-                lineHeight: '1',
-              }}
-            >
-              Current Plan
-              <Spacer.Horizontal size={4} inline />
-              <span style={{ opacity: 0.5 }}>⁠–</span>
-              <Spacer.Horizontal size={4} inline />
-              <span style={{ fontWeight: 500 }}>Upgrade</span>
-            </span>
-            <Spacer.Vertical size={6} />
-            <Progress
-              height={4}
-              value={(item.count / item.limit) * 100}
-              variant="warning"
-            />
-            <Spacer.Vertical size={2} />
-          </Stack.V>
-        </Stack.H>
-        <Spacer.Horizontal size={10} />
-        <DividerVertical />
-      </SubscriptionUsageMeterScallContainer>
-    </Link>
+    <SubscriptionUsageMeterScallContainer
+      onClick={onClick}
+      style={{
+        cursor: onClick ? 'pointer' : 'default',
+      }}
+    >
+      <Spacer.Horizontal size={10} />
+      <Stack.H padding="0 4px" alignItems="center">
+        <Stack.V>
+          <span
+            style={{
+              color: theme.colors.textMuted,
+              letterSpacing: '0.3px',
+              fontSize: '11px',
+              lineHeight: '1',
+            }}
+          >
+            Current Plan
+            <Spacer.Horizontal size={4} inline />
+            <span style={{ opacity: 0.5 }}>⁠–</span>
+            <Spacer.Horizontal size={4} inline />
+            <span style={{ fontWeight: 500 }}>Upgrade</span>
+          </span>
+          <Spacer.Vertical size={6} />
+          <Progress
+            height={4}
+            value={(item.count / item.limit) * 100}
+            variant="warning"
+          />
+          <Spacer.Vertical size={2} />
+        </Stack.V>
+      </Stack.H>
+      <Spacer.Horizontal size={10} />
+      <DividerVertical />
+    </SubscriptionUsageMeterScallContainer>
   );
 }
 

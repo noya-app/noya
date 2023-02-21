@@ -2,13 +2,16 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
+  Button,
   DesignSystemConfigurationProvider,
   Divider,
   lightTheme,
+  Spacer,
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
+import { StarFilledIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
@@ -27,6 +30,7 @@ import {
 } from '../../components/Subscription';
 
 import { Toolbar } from '../../components/Toolbar';
+import { UpgradeDialog } from '../../components/UpgradeDialog';
 import { OnboardingProvider } from '../../contexts/OnboardingContext';
 import {
   ProjectContextValue,
@@ -164,6 +168,8 @@ function Content({ fileId }: { fileId: string }) {
     [],
   );
 
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+
   return (
     <OnboardingProvider>
       <ProjectProvider value={project}>
@@ -173,12 +179,28 @@ function Content({ fileId }: { fileId: string }) {
             left={
               overageItem ? (
                 <>
-                  <SubscriptionUsageMeterSmall item={overageItem} />
+                  <SubscriptionUsageMeterSmall
+                    item={overageItem}
+                    onClick={() => {
+                      setShowUpgradeDialog(true);
+                    }}
+                  />
                   {leftToolbar}
                 </>
               ) : (
                 leftToolbar
               )
+            }
+            subscribeButton={
+              <Button
+                onClick={() => {
+                  setShowUpgradeDialog(true);
+                }}
+              >
+                Get Noya Pro
+                <Spacer.Horizontal inline size={4} />
+                <StarFilledIcon color="#fec422" />
+              </Button>
             }
           >
             {centerToolbar || <FileTitle id={fileId} />}
@@ -186,6 +208,13 @@ function Content({ fileId }: { fileId: string }) {
           <Divider variant="strong" />
           <FileEditor fileId={fileId} />
         </Stack.V>
+        {showUpgradeDialog && (
+          <UpgradeDialog
+            showUpgradeDialog={showUpgradeDialog}
+            setShowUpgradeDialog={setShowUpgradeDialog}
+            availableProducts={availableProducts}
+          />
+        )}
       </ProjectProvider>
     </OnboardingProvider>
   );
