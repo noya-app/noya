@@ -198,7 +198,7 @@ function Content({ fileId }: { fileId: string }) {
                 }}
               >
                 Get Noya Pro
-                <Spacer.Horizontal inline size={4} />
+                <Spacer.Horizontal inline size={6} />
                 <StarFilledIcon color="#fec422" />
               </Button>
             }

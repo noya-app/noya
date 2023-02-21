@@ -29,6 +29,7 @@ import {
   ImageIcon,
   PlusIcon,
   SketchLogoIcon,
+  StarFilledIcon,
   TransformIcon,
   ViewVerticalIcon,
 } from 'noya-icons';
@@ -392,7 +393,13 @@ function Workspace({
             SEPARATOR_ITEM,
             {
               value: 'react',
-              title: 'React Code',
+              title: (
+                <>
+                  React Code
+                  <Spacer.Horizontal inline size={6} />
+                  <StarFilledIcon color="#fec422" />
+                </>
+              ),
               icon: <CodeIcon />,
             },
           ]}
