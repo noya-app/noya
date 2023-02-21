@@ -39,6 +39,8 @@ interface StyleProps {
   paddingHorizontal?: string | number;
   margin?: CSSProperties['margin'];
   background?: CSSProperties['background'];
+  backgroundSize?: CSSProperties['backgroundSize'];
+  backgroundPosition?: CSSProperties['backgroundPosition'];
   borderRadius?: CSSProperties['borderRadius'];
   overflowX?: CSSProperties['overflowX'];
   overflowY?: CSSProperties['overflowY'];

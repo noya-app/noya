@@ -48,7 +48,7 @@ function getApplicationMenuItem(
   } else {
     return {
       id: item.value,
-      label: item.title,
+      label: item.title as string,
       enabled: !item.disabled,
       ...(item.shortcut && {
         accelerator: shortcutToAccelerator(item.shortcut),

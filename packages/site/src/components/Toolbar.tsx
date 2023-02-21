@@ -15,6 +15,7 @@ import {
 } from 'noya-designsystem';
 import {
   ChevronDownIcon,
+  CopyIcon,
   DiscordLogoIcon,
   EnvelopeClosedIcon,
   ExitIcon,
@@ -49,6 +50,7 @@ interface Props {
   children?: ReactNode;
   left?: ReactNode;
   right?: ReactNode;
+  subscribeButton?: ReactNode;
   showOnboarding?: boolean;
   dismissOnboarding?: () => void;
 }
@@ -67,13 +69,14 @@ function openInNewTab(url: string) {
   window?.open(url, '_blank')?.focus();
 }
 
-export function Toolbar({ children, left, right }: Props) {
+export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
   const router = useRouter();
 
   const userMenuItems = createSectionedMenu(
     [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
+    [{ title: 'View Templates', value: 'templates', icon: <CopyIcon /> }],
     [
       { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
@@ -123,6 +126,7 @@ export function Toolbar({ children, left, right }: Props) {
       <Spacer.Horizontal size={10} />
       <Stack.H gap={theme.sizes.toolbar.itemSeparator}>
         {right}
+        {subscribeButton}
         {session && (
           <SupportOnboardingPopover
             dismiss={dismissOnboarding}
@@ -139,6 +143,9 @@ export function Toolbar({ children, left, right }: Props) {
                   switch (value) {
                     case 'account':
                       router.push('/account');
+                      return;
+                    case 'templates':
+                      window.location.href = `${NOYA_HOST}/templates`;
                       return;
                     case 'signOut':
                       window.location.href = `${NOYA_HOST}/api/auth/signout`;
