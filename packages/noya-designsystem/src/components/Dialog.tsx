@@ -34,6 +34,7 @@ const StyledContent = styled(DialogPrimitive.Content)(({ theme }) => ({
   overflowY: 'auto',
   color: theme.colors.textMuted,
   '&:focus': { outline: 'none' },
+  pointerEvents: 'all',
 }));
 
 const StyledTitle = styled(DialogPrimitive.Title)(({ theme }) => ({
@@ -52,6 +53,10 @@ const CloseButtonContainer = styled.div(({ theme }) => ({
   position: 'absolute',
   top: theme.sizes.dialog.padding,
   right: theme.sizes.dialog.padding,
+  zIndex: 1,
+  backgroundColor: theme.colors.popover.background,
+  padding: '4px 6px',
+  borderRadius: '2px',
 }));
 
 export interface IDialog {
@@ -62,15 +67,24 @@ interface Props {
   title?: ReactNode;
   description?: ReactNode;
   children?: ReactNode;
+  style?: ComponentProps<typeof StyledContent>['style'];
   open: ComponentProps<typeof DialogPrimitive.Root>['open'];
-  onOpenChange: ComponentProps<typeof DialogPrimitive.Root>['onOpenChange'];
-  onOpenAutoFocus: ComponentProps<
+  onOpenChange?: ComponentProps<typeof DialogPrimitive.Root>['onOpenChange'];
+  onOpenAutoFocus?: ComponentProps<
     typeof DialogPrimitive.Content
   >['onOpenAutoFocus'];
 }
 
 export const Dialog = forwardRef(function Dialog(
-  { children, title, description, open, onOpenChange, onOpenAutoFocus }: Props,
+  {
+    children,
+    title,
+    description,
+    open,
+    style,
+    onOpenChange,
+    onOpenAutoFocus,
+  }: Props,
   forwardedRef: ForwardedRef<IDialog>,
 ) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -86,7 +100,11 @@ export const Dialog = forwardRef(function Dialog(
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <StyledOverlay />
-      <StyledContent ref={contentRef} onOpenAutoFocus={onOpenAutoFocus}>
+      <StyledContent
+        ref={contentRef}
+        onOpenAutoFocus={onOpenAutoFocus}
+        style={style}
+      >
         <CloseButtonContainer>
           <DialogPrimitive.Close asChild>
             <IconButton iconName="Cross1Icon" />

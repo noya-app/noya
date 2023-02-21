@@ -1,6 +1,7 @@
 import { useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
+import { Dialog } from 'noya-designsystem';
 import { amplitude } from 'noya-log';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../components/AppLayout';
 import { Projects } from '../components/Projects';
 import {
@@ -10,6 +11,7 @@ import {
   usageMeterThreshold,
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
+import { UpgradeInfo } from '../components/UpgradeInfo';
 
 export default function Project() {
   useEffect(() => {
@@ -19,6 +21,8 @@ export default function Project() {
   const client = useNoyaClient();
   const { files } = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
+
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   useEffect(() => {
     // Force reload files so we don't show anything stale
@@ -50,6 +54,20 @@ export default function Project() {
       }
     >
       <Projects />
+      {showUpgradeDialog && (
+        <Dialog
+          style={{
+            maxWidth: '900px',
+            padding: 0,
+          }}
+          open={showUpgradeDialog}
+          onOpenChange={(value) => {
+            setShowUpgradeDialog(value);
+          }}
+        >
+          <UpgradeInfo />
+        </Dialog>
+      )}
     </AppLayout>
   );
 }

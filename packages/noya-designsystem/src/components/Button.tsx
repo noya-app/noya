@@ -8,7 +8,13 @@ import React, {
 import styled from 'styled-components';
 import { Tooltip } from './Tooltip';
 
-type ButtonVariant = 'normal' | 'primary' | 'secondary' | 'thin' | 'none';
+type ButtonVariant =
+  | 'normal'
+  | 'primary'
+  | 'secondary'
+  | 'secondaryBrightLarge'
+  | 'thin'
+  | 'none';
 
 /* ----------------------------------------------------------------------------
  * Element
@@ -69,6 +75,18 @@ const ButtonElement = styled.button<{
     },
     '&:active': {
       background: theme.colors.secondary,
+    },
+  }),
+  ...(variant === 'secondaryBrightLarge' && {
+    ...theme.textStyles.heading4,
+    padding: '12px 16px',
+    background: '#0ab557',
+    color: 'white',
+    '&:hover': {
+      opacity: 0.8,
+    },
+    '&:active': {
+      opacity: 0.9,
     },
   }),
   display: 'flex',

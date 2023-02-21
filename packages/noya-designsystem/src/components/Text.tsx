@@ -9,6 +9,8 @@ const elements: Record<keyof Theme['textStyles'], keyof ReactHTML> = {
   heading1: 'h1',
   heading2: 'h2',
   heading3: 'h3',
+  heading4: 'h4',
+  heading5: 'h5',
   body: 'p',
   small: 'span',
   code: 'code',
@@ -34,6 +36,12 @@ type StyleProps = {
   position?: CSSProperties['position'];
   overflow?: CSSProperties['overflow'];
   textOverflow?: CSSProperties['textOverflow'];
+  textDecoration?: CSSProperties['textDecoration'];
+  display?: CSSProperties['display'];
+  top?: CSSProperties['top'];
+  right?: CSSProperties['right'];
+  bottom?: CSSProperties['bottom'];
+  left?: CSSProperties['left'];
 };
 
 export type TextBreakpointList = BreakpointCollection<StyleProps>;
@@ -97,6 +105,18 @@ export const Heading2 = forwardRef(
 export const Heading3 = forwardRef(
   (props: PresetProps, ref: ForwardedRef<HTMLElement>) => (
     <Text ref={ref} {...props} variant="heading3" />
+  ),
+);
+
+export const Heading4 = forwardRef(
+  (props: PresetProps, ref: ForwardedRef<HTMLElement>) => (
+    <Text ref={ref} {...props} variant="heading4" />
+  ),
+);
+
+export const Heading5 = forwardRef(
+  (props: PresetProps, ref: ForwardedRef<HTMLElement>) => (
+    <Text ref={ref} {...props} variant="heading5" />
   ),
 );
 

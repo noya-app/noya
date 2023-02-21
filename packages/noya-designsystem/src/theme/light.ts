@@ -17,6 +17,7 @@ export const colors = {
   primaryLight: 'rgb(147, 86, 255)',
   secondary: 'rgb(0, 151, 117)',
   secondaryLight: 'rgb(0, 160, 129)',
+  secondaryBright: '#36fe91',
   warning: 'rgb(251, 211, 0)',
   neutralBackground: 'rgb(222,223,232)',
   inputBackground: 'rgb(240, 240, 242)',
@@ -105,6 +106,18 @@ export const textStyles = {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[4]}rem`,
     fontWeight: 500,
+    lineHeight: '1.75',
+  } as CSSObject,
+  heading4: {
+    fontFamily: fonts.normal,
+    fontSize: `${typeScale[5]}rem`,
+    fontWeight: 'bold',
+    lineHeight: '1.75',
+  } as CSSObject,
+  heading5: {
+    fontFamily: fonts.normal,
+    fontSize: `${typeScale[6]}rem`,
+    fontWeight: 'bold',
     lineHeight: '1.75',
   } as CSSObject,
   body: {
