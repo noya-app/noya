@@ -1,15 +1,13 @@
 import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
 
-// const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-// type Literal = z.infer<typeof literalSchema>;
-// export type NoyaJson = Literal | { [key: string]: NoyaJson } | NoyaJson[];
-
-// export const noyaJsonSchema: z.ZodType<NoyaJson> = z.lazy(() =>
-//   z.union([literalSchema, z.array(noyaJsonSchema), z.record(noyaJsonSchema)]),
-// );
-
-export type NoyaJson = unknown;
+export type NoyaJson =
+  | string
+  | number
+  | boolean
+  | null
+  | NoyaJson[]
+  | { [key: string]: NoyaJson };
 
 export const noyaJsonSchema = z.unknown();
 
