@@ -9,6 +9,7 @@ import {
   NoyaFileData,
   noyaFileListSchema,
   noyaFileSchema,
+  NoyaJson,
   noyaSessionSchema,
   noyaSharedFileSchema,
   noyaShareSchema,
@@ -33,6 +34,8 @@ export interface INoyaNetworkClient {
   assets: NoyaNetworkClient['assets'];
   billing: NoyaNetworkClient['billing'];
   emailLists: NoyaNetworkClient['emailLists'];
+  userData: NoyaNetworkClient['userData'];
+  metadata: NoyaNetworkClient['metadata'];
 }
 
 export class NoyaNetworkClient {
@@ -81,6 +84,13 @@ export class NoyaNetworkClient {
         create: this.#createShare,
         list: this.#listShares,
       },
+    };
+  }
+
+  get metadata() {
+    return {
+      set: this.#setMetadata,
+      // delete: this.#deleteMetadata,
     };
   }
 
@@ -337,6 +347,26 @@ export class NoyaNetworkClient {
     const parsed = noyaShareSchema.parse(json);
     return parsed;
   };
+
+  /* Metadata */
+
+  #setMetadata = async (id: string, value: NoyaJson) => {
+    const response = await this.request(
+      `${this.baseURI}/user/metadata/${encodeURIComponent(id)}`,
+      {
+        credentials: 'include',
+        method: 'PUT',
+        body: JSON.stringify({ value }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    this.handleHTTPErrors(response);
+  };
+
+  /* Error Handling */
 
   handleError = (error: NoyaAPIError) => {
     if (this.onError) {

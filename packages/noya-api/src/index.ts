@@ -8,6 +8,7 @@ import {
   NoyaFile,
   NoyaFileData,
   NoyaFileList,
+  NoyaJson,
   NoyaPrice,
   NoyaProduct,
   NoyaSession,
@@ -37,6 +38,7 @@ export namespace NoyaAPI {
   export const LocalStorageClient = NoyaLocalStorageClient;
   export type LocalStorageClient = NoyaLocalStorageClient;
 
+  export type Json = NoyaJson;
   export type File = NoyaFile;
   export type FileData = NoyaFileData;
   export type FileList = NoyaFileList;

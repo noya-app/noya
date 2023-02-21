@@ -33,6 +33,24 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     });
   }
 
+  userData = {
+    read: async () => {
+      return {
+        experiments: {
+          showOnboardingUpsell: 'control' as const,
+        },
+        metadata: [],
+        emailLists: [],
+      };
+    },
+  };
+
+  metadata = {
+    set: (id: string, value: unknown) => {
+      return Promise.resolve();
+    },
+  };
+
   emailLists = {
     list: async () => [],
     update: async (): Promise<NoyaEmailList> => {

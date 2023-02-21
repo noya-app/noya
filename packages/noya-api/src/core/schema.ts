@@ -1,6 +1,18 @@
 import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
 
+// const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+// type Literal = z.infer<typeof literalSchema>;
+// export type NoyaJson = Literal | { [key: string]: NoyaJson } | NoyaJson[];
+
+// export const noyaJsonSchema: z.ZodType<NoyaJson> = z.lazy(() =>
+//   z.union([literalSchema, z.array(noyaJsonSchema), z.record(noyaJsonSchema)]),
+// );
+
+export type NoyaJson = unknown;
+
+export const noyaJsonSchema = z.unknown();
+
 export const noyaUserSchema = z.object({
   id: z.string(),
   name: z.nullable(z.string()),
@@ -112,8 +124,20 @@ export const noyaEmailListSchema = z.object({
   url: z.string(),
 });
 
+export const noyaExperimentsSchema = z.object({
+  showOnboardingUpsell: z.enum(['control', 'treatment']).default('control'),
+});
+
+export const noyaMetadataItemSchema = z.object({
+  key: z.string(),
+  value: noyaJsonSchema,
+  url: z.string(),
+});
+
 export const noyaUserDataSchema = z.object({
   emailLists: z.array(noyaEmailListSchema),
+  experiments: noyaExperimentsSchema,
+  metadata: z.array(noyaMetadataItemSchema),
 });
 
 export type NoyaUser = z.infer<typeof noyaUserSchema>;
@@ -130,5 +154,7 @@ export type NoyaShare = z.infer<typeof noyaShareSchema>;
 export type NoyaSharedFile = z.infer<typeof noyaSharedFileSchema>;
 export type NoyaEmailList = z.infer<typeof noyaEmailListSchema>;
 export type NoyaUserData = z.infer<typeof noyaUserDataSchema>;
+export type NoyaExperiments = z.infer<typeof noyaExperimentsSchema>;
+export type NoyaMetadataItem = z.infer<typeof noyaMetadataItemSchema>;
 
 export type NoyaExportFormat = 'png' | 'pdf' | 'svg';

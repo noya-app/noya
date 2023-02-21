@@ -1,4 +1,5 @@
 import { observable } from '@legendapp/state';
+import produce from 'immer';
 import { memoizedGetter } from 'noya-utils';
 import { fileReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
@@ -7,7 +8,10 @@ import {
   NoyaEmailList,
   NoyaFile,
   NoyaFileData,
+  NoyaJson,
+  NoyaMetadataItem,
   NoyaSession,
+  NoyaUserData,
 } from './schema';
 import { throttleAsync } from './throttleAsync';
 
@@ -38,6 +42,13 @@ export class NoyaClient {
     emailLists: [],
     loading: true,
   });
+  userData$ = observable<{
+    userData: NoyaUserData | undefined;
+    loading: boolean;
+  }>({
+    userData: undefined,
+    loading: true,
+  });
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -46,6 +57,7 @@ export class NoyaClient {
       this.#fetchSession();
       this.#fetchFiles();
       this.#fetchBilling();
+      this.#fetchUserData();
       // this.#fetchEmailLists();
     }
   }
@@ -61,6 +73,11 @@ export class NoyaClient {
   #fetchSession = async () => {
     const session = await this.networkClient.auth.session();
     this.session$.set(session);
+  };
+
+  #fetchUserData = async () => {
+    const userData = await this.networkClient.userData.read();
+    this.userData$.set({ userData, loading: false });
   };
 
   get emailLists() {
@@ -106,11 +123,42 @@ export class NoyaClient {
     });
   }
 
+  get metadata() {
+    return memoizedGetter(this, 'metadata', {
+      set: this.#setMetadata,
+    });
+  }
+
   get billing() {
     return memoizedGetter(this, 'billing', {
       read: this.#fetchBilling,
     });
   }
+
+  #setMetadata = async (key: string, value: NoyaJson) => {
+    this.userData$.userData.set((userData) => {
+      if (!userData) return userData;
+
+      return produce(userData, (draft) => {
+        if (!draft) return;
+
+        const index = draft.metadata.findIndex((item) => item.key === key);
+
+        if (index === -1) {
+          const metadataItem: NoyaMetadataItem = {
+            key,
+            value,
+            url: `/api/user/metadata/${key}`,
+          };
+          draft.metadata.push(metadataItem);
+        } else {
+          draft.metadata[index].value = value;
+        }
+      });
+    });
+
+    await this.networkClient.metadata.set(key, value);
+  };
 
   #fetchBilling = async () => {
     const billing = await this.networkClient.billing.read();

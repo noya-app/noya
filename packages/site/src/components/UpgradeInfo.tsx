@@ -77,7 +77,7 @@ export function UpgradeInfo() {
             keyExtractor={(item) => item}
             data={upgradePerks}
             renderItem={(item) => (
-              <ListView.Row>
+              <ListView.Row key={item}>
                 <DotFilledIcon />
                 <Spacer.Horizontal size={10} />
                 <Small color="text">{item}</Small>
