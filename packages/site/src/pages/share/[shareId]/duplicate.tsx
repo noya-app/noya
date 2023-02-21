@@ -26,10 +26,10 @@ function Content({
   const router = useRouter();
 
   useEffect(() => {
-    networkClient.files.create({ shareId }).then((fileId) => {
+    networkClient.files.create({ shareId }).then((file) => {
       amplitude.logEvent('Project - Created (From Share Duplication)');
 
-      router.push(`/projects/${fileId}`);
+      router.push(`/projects/${file.id}`);
     });
   }, [networkClient.files, router, shareId]);
 
