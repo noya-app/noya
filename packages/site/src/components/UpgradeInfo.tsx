@@ -130,7 +130,12 @@ export function UpgradeInfo({
         backgroundSize="cover"
         backgroundPosition="center"
         flex="1"
-      ></Stack.V>
+        breakpoints={{
+          800: {
+            display: 'none',
+          },
+        }}
+      />
     </Stack.H>
   );
 }
