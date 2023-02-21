@@ -22,6 +22,7 @@ export function UpgradeDialog({
       onOpenChange={(value) => {
         setShowUpgradeDialog(value);
       }}
+      closeOnInteractOutside={false}
     >
       <UpgradeInfo
         onClickUpgrade={() => {

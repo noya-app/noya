@@ -58,7 +58,7 @@ const CloseButtonContainer = styled.div(({ theme }) => ({
   padding: '4px 6px',
   borderRadius: '2px',
   boxShadow: '0 0 2px rgba(0, 0, 0, 0.2)',
-  border: `1px solid ${theme.colors.divider}`,
+  border: `1px solid ${theme.colors.textSubtle}`,
 }));
 
 export interface IDialog {
@@ -75,6 +75,7 @@ interface Props {
   onOpenAutoFocus?: ComponentProps<
     typeof DialogPrimitive.Content
   >['onOpenAutoFocus'];
+  closeOnInteractOutside?: boolean;
 }
 
 export const Dialog = forwardRef(function Dialog(
@@ -86,6 +87,7 @@ export const Dialog = forwardRef(function Dialog(
     style,
     onOpenChange,
     onOpenAutoFocus,
+    closeOnInteractOutside = true,
   }: Props,
   forwardedRef: ForwardedRef<IDialog>,
 ) {
@@ -106,6 +108,14 @@ export const Dialog = forwardRef(function Dialog(
         ref={contentRef}
         onOpenAutoFocus={onOpenAutoFocus}
         style={style}
+        {...(closeOnInteractOutside === false && {
+          onPointerDownOutside: (event) => {
+            event.preventDefault();
+          },
+          onInteractOutside: (event) => {
+            event.preventDefault();
+          },
+        })}
       >
         <CloseButtonContainer>
           <DialogPrimitive.Close asChild>

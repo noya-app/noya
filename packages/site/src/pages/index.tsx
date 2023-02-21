@@ -30,7 +30,7 @@ export default function Project() {
   const { userData } = useNoyaUserData();
   const { subscriptions, availableProducts } = useNoyaBilling();
 
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(true);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const didShowOnboardingUpsell =
     useMetadata<boolean>('didShowOnboardingUpsell') === true;
   const subscribedProduct = findSubscribedProduct(
