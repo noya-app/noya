@@ -124,18 +124,30 @@ describe('card with no border radius on image', () => {
 
     Blocks[symbol.symbolID].symbol.layers
       .filter(Layers.isSymbolInstance)
+      .filter((layer) => layer.symbolID === imageSymbolId)
       .forEach((layer) => {
-        if (layer.symbolID === imageSymbolId) {
-          symbol.overrideValues.push(
-            SketchModel.overrideValue({
-              overrideName: Overrides.encodeName(
-                [layer.do_objectID],
-                'blockText',
-              ),
-              value: '#rounded-none',
-            }),
-          );
-        }
+        symbol.overrideValues.push(
+          SketchModel.overrideValue({
+            overrideName: Overrides.encodeName(
+              [layer.do_objectID],
+              'resolvedBlockData',
+            ),
+            value: {
+              symbolID: layer.symbolID,
+              originalText: 'cat',
+              resolvedText: 'https://placekitten.com/300/300',
+            },
+          }),
+        );
+        symbol.overrideValues.push(
+          SketchModel.overrideValue({
+            overrideName: Overrides.encodeName(
+              [layer.do_objectID],
+              'blockText',
+            ),
+            value: 'cat #rounded-none',
+          }),
+        );
       });
 
     expect(generate(symbol)).toMatchSnapshot();
