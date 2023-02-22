@@ -55,6 +55,7 @@ export function resolveLayer({
   const { content: originalText } = parseBlock(
     blockText,
     blockDefinition.parser,
+    { placeholder: blockDefinition.placeholderText },
   );
 
   // Already resolved
@@ -70,8 +71,13 @@ export function resolveLayer({
     const width = frame.width === 0 ? 512 : frame.width;
     const height = frame.height === 0 ? 512 : frame.height;
 
+    const terms = originalText
+      .split(' ')
+      .map((term) => term.trim())
+      .join(',');
+
     const unsplashUrl = `https://source.unsplash.com/${width}x${height}?${encodeURIComponent(
-      originalText,
+      terms,
     )}&buster=${encodeURIComponent(cacheKey)}`;
 
     subscriptions.push(
