@@ -27,6 +27,7 @@ import {
   FileIcon,
   GroupIcon,
   ImageIcon,
+  OpenInNewWindowIcon,
   PlusIcon,
   SketchLogoIcon,
   StarFilledIcon,
@@ -72,6 +73,7 @@ import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
 import { ClientStorage } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
+import { NOYA_HOST } from '../utils/noyaClient';
 import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
@@ -336,7 +338,7 @@ function Workspace({
   useLayoutEffect(() => {
     setRightToolbar(
       <Stack.H gap={8}>
-        <DropdownMenu<ViewType>
+        <DropdownMenu<ViewType | 'livePreview'>
           items={[
             {
               value: 'split',
@@ -350,8 +352,26 @@ function Workspace({
               icon: <BoxIcon />,
               checked: viewType === 'combined',
             },
+            SEPARATOR_ITEM,
+            {
+              value: 'livePreview',
+              title: 'Live Preview',
+              icon: <OpenInNewWindowIcon />,
+            },
           ]}
-          onSelect={setViewType}
+          onSelect={(value) => {
+            switch (value) {
+              case 'combined':
+              case 'split': {
+                setViewType(value);
+                break;
+              }
+              case 'livePreview': {
+                window.open(`${NOYA_HOST}/app/projects/${fileId}/preview`);
+                break;
+              }
+            }
+          }}
           onOpenChange={() => {
             dispatch(['selectLayer', []]);
           }}
