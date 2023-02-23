@@ -10,6 +10,20 @@ import {
   isProfessionalPlan,
 } from '../components/Subscription';
 
+export function useIsSubscribed() {
+  const { subscriptions, availableProducts, loading } = useNoyaBilling();
+
+  // Assume we're subscribed if we're still loading
+  if (loading) return true;
+
+  const subscribedProduct = findSubscribedProduct(
+    subscriptions,
+    availableProducts,
+  );
+
+  return subscribedProduct ? isProfessionalPlan(subscribedProduct) : false;
+}
+
 export function useOnboardingUpsellExperiment({
   onShow,
 }: {
@@ -17,27 +31,13 @@ export function useOnboardingUpsellExperiment({
 }) {
   const client = useNoyaClient();
   const { userData } = useNoyaUserData();
-  const {
-    subscriptions,
-    availableProducts,
-    loading: subscriptionsLoading,
-  } = useNoyaBilling();
+  const isSubscribed = useIsSubscribed();
 
   const didShowOnboardingUpsell =
     useMetadata<boolean>('didShowOnboardingUpsell') === true;
 
-  const subscribedProduct = findSubscribedProduct(
-    subscriptions,
-    availableProducts,
-  );
-
-  const isSubscribed = subscribedProduct
-    ? isProfessionalPlan(subscribedProduct)
-    : false;
-
   useEffect(() => {
     if (
-      subscriptionsLoading ||
       !userData ||
       isSubscribed ||
       didShowOnboardingUpsell ||
@@ -53,7 +53,6 @@ export function useOnboardingUpsellExperiment({
     didShowOnboardingUpsell,
     isSubscribed,
     onShow,
-    subscriptionsLoading,
     userData,
   ]);
 }

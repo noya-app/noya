@@ -36,7 +36,10 @@ import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
-import { useOnboardingUpsellExperiment } from '../../hooks/useOnboardingUpsellExperiment';
+import {
+  useIsSubscribed,
+  useOnboardingUpsellExperiment,
+} from '../../hooks/useOnboardingUpsellExperiment';
 import { downloadUrl } from '../../utils/download';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
@@ -171,6 +174,8 @@ function Content({ fileId }: { fileId: string }) {
 
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
+  const isSubscribed = useIsSubscribed();
+
   useOnboardingUpsellExperiment({
     onShow: () => setShowUpgradeDialog(true),
   });
@@ -197,15 +202,17 @@ function Content({ fileId }: { fileId: string }) {
               )
             }
             subscribeButton={
-              <Button
-                onClick={() => {
-                  setShowUpgradeDialog(true);
-                }}
-              >
-                Get Noya Pro
-                <Spacer.Horizontal inline size={6} />
-                <StarFilledIcon color="#fec422" />
-              </Button>
+              !isSubscribed && (
+                <Button
+                  onClick={() => {
+                    setShowUpgradeDialog(true);
+                  }}
+                >
+                  Get Noya Pro
+                  <Spacer.Horizontal inline size={6} />
+                  <StarFilledIcon color="#fec422" />
+                </Button>
+              )
             }
           >
             {centerToolbar || <FileTitle id={fileId} />}
