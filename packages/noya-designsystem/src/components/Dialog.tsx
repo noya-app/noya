@@ -35,6 +35,7 @@ const StyledContent = styled(DialogPrimitive.Content)(({ theme }) => ({
   color: theme.colors.textMuted,
   '&:focus': { outline: 'none' },
   pointerEvents: 'all',
+  zIndex: 1000,
 }));
 
 const StyledTitle = styled(DialogPrimitive.Title)(({ theme }) => ({
