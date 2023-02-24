@@ -1,9 +1,4 @@
-import {
-  useMetadata,
-  useNoyaBilling,
-  useNoyaClient,
-  useNoyaUserData,
-} from 'noya-api';
+import { useMetadata, useNoyaBilling, useNoyaClient } from 'noya-api';
 import { useEffect } from 'react';
 import {
   findSubscribedProduct,
@@ -24,35 +19,19 @@ export function useIsSubscribed() {
   return subscribedProduct ? isProfessionalPlan(subscribedProduct) : false;
 }
 
-export function useOnboardingUpsellExperiment({
-  onShow,
-}: {
-  onShow: () => void;
-}) {
+export function useOnboardingUpsell({ onShow }: { onShow: () => void }) {
   const client = useNoyaClient();
-  const { userData } = useNoyaUserData();
   const isSubscribed = useIsSubscribed();
 
   const didShowOnboardingUpsell =
     useMetadata<boolean>('didShowOnboardingUpsell') === true;
 
   useEffect(() => {
-    if (
-      !userData ||
-      isSubscribed ||
-      didShowOnboardingUpsell ||
-      userData.experiments.showOnboardingUpsell !== 'treatment'
-    ) {
+    if (isSubscribed || didShowOnboardingUpsell) {
       return;
     }
 
     client.metadata.set('didShowOnboardingUpsell', true);
     onShow();
-  }, [
-    client.metadata,
-    didShowOnboardingUpsell,
-    isSubscribed,
-    onShow,
-    userData,
-  ]);
+  }, [client.metadata, didShowOnboardingUpsell, isSubscribed, onShow]);
 }

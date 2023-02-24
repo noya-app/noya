@@ -122,9 +122,7 @@ export const noyaEmailListSchema = z.object({
   url: z.string(),
 });
 
-export const noyaExperimentsSchema = z.object({
-  showOnboardingUpsell: z.enum(['control', 'treatment']).default('control'),
-});
+export const noyaExperimentsSchema = z.object({});
 
 export const noyaMetadataItemSchema = z.object({
   key: z.string(),

@@ -38,7 +38,7 @@ import {
 } from '../../contexts/ProjectContext';
 import {
   useIsSubscribed,
-  useOnboardingUpsellExperiment,
+  useOnboardingUpsell,
 } from '../../hooks/useOnboardingUpsellExperiment';
 import { downloadUrl } from '../../utils/download';
 
@@ -176,7 +176,7 @@ function Content({ fileId }: { fileId: string }) {
 
   const isSubscribed = useIsSubscribed();
 
-  useOnboardingUpsellExperiment({
+  useOnboardingUpsell({
     onShow: () => setShowUpgradeDialog(true),
   });
 

@@ -11,7 +11,7 @@ import {
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
 import { UpgradeDialog } from '../components/UpgradeDialog';
-import { useOnboardingUpsellExperiment } from '../hooks/useOnboardingUpsellExperiment';
+import { useOnboardingUpsell } from '../hooks/useOnboardingUpsellExperiment';
 
 export default function Project() {
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function Project() {
   const { subscriptions, availableProducts } = useNoyaBilling();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
-  useOnboardingUpsellExperiment({
+  useOnboardingUpsell({
     onShow: () => setShowUpgradeDialog(true),
   });
 
