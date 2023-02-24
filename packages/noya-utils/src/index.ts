@@ -1,5 +1,6 @@
 export * from './isShallowEqual';
 export * from './isDeepEqual';
+export * from './isEqualIgnoringUndefinedKeys';
 export * from './isNumberEqual';
 export * from './zip';
 export * from './clamp';

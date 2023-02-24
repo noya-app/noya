@@ -1,10 +1,17 @@
-export function isEqualArray<T>(a: T[], b: T[], deep: boolean) {
+export function isEqualArray<T>(
+  a: T[],
+  b: T[],
+  deep: boolean,
+  ignoreUndefinedKeys: boolean,
+) {
   if (a === b) return true;
 
   if (a.length !== b.length) return false;
 
   for (let i = 0; i < a.length; i++) {
-    if (!(deep ? isEqual(a[i], b[i], deep) : a[i] === b[i])) {
+    if (
+      !(deep ? isEqual(a[i], b[i], deep, ignoreUndefinedKeys) : a[i] === b[i])
+    ) {
       return false;
     }
   }
@@ -16,13 +23,19 @@ function isEqualObject<T extends Record<PropertyKey, any>>(
   a: T,
   b: T,
   deep: boolean,
+  ignoreUndefinedKeys: boolean,
 ) {
   if (a === b) return true;
 
   if (!a || !b) return false;
 
-  const aKeys = Object.keys(a);
-  const bKeys = Object.keys(b);
+  let aKeys = Object.keys(a);
+  let bKeys = Object.keys(b);
+
+  if (ignoreUndefinedKeys) {
+    aKeys = aKeys.filter((key) => a[key] !== undefined);
+    bKeys = bKeys.filter((key) => b[key] !== undefined);
+  }
 
   if (aKeys.length !== bKeys.length) return false;
 
@@ -30,7 +43,9 @@ function isEqualObject<T extends Record<PropertyKey, any>>(
     const key = aKeys[i];
 
     if (
-      !(deep ? isEqual(a[key], b[key], deep) : a[key] === b[key]) ||
+      !(deep
+        ? isEqual(a[key], b[key], deep, ignoreUndefinedKeys)
+        : a[key] === b[key]) ||
       !Object.prototype.hasOwnProperty.call(b, key)
     ) {
       return false;
@@ -40,7 +55,12 @@ function isEqualObject<T extends Record<PropertyKey, any>>(
   return true;
 }
 
-export function isEqual<T>(a: T, b: T, deep: boolean) {
+export function isEqual<T>(
+  a: T,
+  b: T,
+  deep: boolean,
+  ignoreUndefinedKeys: boolean,
+) {
   const aType = typeof a;
   const bType = typeof b;
 
@@ -50,8 +70,8 @@ export function isEqual<T>(a: T, b: T, deep: boolean) {
   if (aType !== 'object' || !a || !b) return a === b;
 
   if (a instanceof Array && b instanceof Array) {
-    return isEqualArray(a, b, deep);
+    return isEqualArray(a, b, deep, ignoreUndefinedKeys);
   }
 
-  return isEqualObject(a, b, deep);
+  return isEqualObject(a, b, deep, ignoreUndefinedKeys);
 }

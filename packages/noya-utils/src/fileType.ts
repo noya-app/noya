@@ -35,6 +35,7 @@ function startsWith(arrayBuffer: ArrayBuffer, prefix: number[], offset = 0) {
     [...new Uint8Array(arrayBuffer).slice(offset, offset + prefix.length)],
     prefix,
     false,
+    false,
   );
 }
 
