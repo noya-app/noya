@@ -54,6 +54,7 @@ export function fromSymbol(
       children: [{ text: value ?? '' }],
       label: name,
       symbolId: layer.symbolID,
+      placeholder: layer.blockText,
     };
   });
 
@@ -61,6 +62,7 @@ export function fromSymbol(
     type: 'paragraph',
     children: [{ text: instance.blockText ?? '' }],
     symbolId: instance.symbolID,
+    placeholder: undefined,
   };
 
   return [...layerNodes, rootNode];

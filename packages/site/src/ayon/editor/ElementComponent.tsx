@@ -1,4 +1,5 @@
 import React from 'react';
+import { Node } from 'slate';
 import {
   DefaultElement,
   RenderElementProps,
@@ -19,10 +20,30 @@ export function ElementComponent(props: RenderElementProps) {
           padding: '4px 8px',
           display: 'flex',
           alignItems: 'end',
+          position: 'relative',
         }}
       >
-        <div style={{ flex: '1' }}>
+        <div style={{ flex: '1', position: 'relative' }}>
           <DefaultElement {...props} />
+          {props.element.placeholder && Node.string(props.element) === '' && (
+            <span
+              contentEditable={false}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                right: '20px',
+                color: 'rgba(0,0,0,0.4)',
+                userSelect: 'none',
+                pointerEvents: 'none',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {props.element.placeholder}
+            </span>
+          )}
         </div>
         <span
           contentEditable={false}

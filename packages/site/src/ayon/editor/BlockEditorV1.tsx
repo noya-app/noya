@@ -465,6 +465,7 @@ function fromString(value: string): Descendant[] {
     type: 'paragraph',
     children: [{ text: line }],
     label: undefined,
+    placeholder: undefined,
     symbolId: '',
   }));
 }

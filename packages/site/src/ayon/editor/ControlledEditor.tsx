@@ -1,4 +1,4 @@
-import { isDeepEqual } from 'noya-utils';
+import { isEqualIgnoringUndefinedKeys } from 'noya-utils';
 import React, {
   ComponentProps,
   ForwardedRef,
@@ -7,8 +7,9 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
-import { Descendant, Editor, Node, Point, Transforms } from 'slate';
+import { Descendant, Node } from 'slate';
 import { Slate } from 'slate-react';
+import { resetNodes } from './resetNodes';
 import { CustomEditor } from './types';
 
 export interface IControlledEditor {
@@ -32,7 +33,7 @@ export const ControlledEditor = forwardRef(function ControlledEditor(
 
   useEffect(() => {
     if (
-      isDeepEqual(initialValue, internalNodes) &&
+      isEqualIgnoringUndefinedKeys(initialValue, internalNodes) &&
       symbolId === editor.symbolId
     ) {
       return;
@@ -65,38 +66,3 @@ export const ControlledEditor = forwardRef(function ControlledEditor(
     </Slate>
   );
 });
-
-function resetNodes(
-  editor: CustomEditor,
-  options: {
-    nodes?: Node[];
-    at?: Location;
-  } = {},
-): void {
-  const children = [...editor.children];
-
-  children.forEach((node) =>
-    editor.apply({ type: 'remove_node', path: [0], node }),
-  );
-
-  const nodes = options.nodes;
-
-  if (nodes) {
-    Editor.withoutNormalizing(editor, () => {
-      nodes.forEach((node, i) =>
-        editor.apply({ type: 'insert_node', path: [i], node: node }),
-      );
-    });
-  }
-
-  const point =
-    options.at && Point.isPoint(options.at)
-      ? options.at
-      : Editor.end(editor, []);
-
-  if (point) {
-    Transforms.select(editor, point);
-  }
-
-  Editor.normalize(editor, { force: true });
-}

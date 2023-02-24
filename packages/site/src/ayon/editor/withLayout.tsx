@@ -28,6 +28,7 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
           children: [{ text: '' }],
           label: block.symbol.name,
           symbolId: block.symbol.symbolID,
+          placeholder: block && layer ? layer.blockText : undefined,
         };
 
         Transforms.insertNodes(editor, paragraph, {
@@ -52,12 +53,16 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
           const block = Blocks[layer.symbolID];
 
           const label = block.symbol.name;
+          const placeholder = layer ? layer.blockText : undefined;
 
-          if (child.label === label) continue;
+          if (child.label === label && child.placeholder === placeholder) {
+            continue;
+          }
 
           const newProperties: Partial<SlateElement> = {
             label,
             symbolId: layer.symbolID,
+            placeholder,
           };
 
           Transforms.setNodes<SlateElement>(editor, newProperties, {
@@ -69,6 +74,7 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
           const newProperties: Partial<SlateElement> = {
             label: undefined,
             symbolId: symbol.symbolID,
+            placeholder: undefined,
           };
 
           Transforms.setNodes<SlateElement>(editor, newProperties, {
