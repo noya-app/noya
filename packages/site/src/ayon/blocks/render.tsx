@@ -55,7 +55,8 @@ export function getChildrenBlockProps({
     ([layer, fallbackLayer]) => {
       if (
         !Layers.isSymbolInstance(layer) ||
-        !Layers.isSymbolInstance(fallbackLayer)
+        !Layers.isSymbolInstance(fallbackLayer) ||
+        layer.isVisible === false
       ) {
         return [];
       }

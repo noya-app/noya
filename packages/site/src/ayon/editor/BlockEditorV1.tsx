@@ -41,6 +41,7 @@ import {
 } from '../blocks/symbolIds';
 import { InferredBlockTypeResult } from '../types';
 import { useCompletionMenu } from '../useCompletionMenu';
+import { CustomElement } from './types';
 
 export interface IBlockEditor {
   focus: () => void;
@@ -460,7 +461,7 @@ function toString(value: Descendant[]): string {
   return value.map((n) => Node.string(n)).join('\n');
 }
 
-function fromString(value: string): Descendant[] {
+function fromString(value: string): CustomElement[] {
   return value.split('\n').map((line) => ({
     type: 'paragraph',
     children: [{ text: line }],

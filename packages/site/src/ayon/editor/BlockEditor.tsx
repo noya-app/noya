@@ -9,7 +9,7 @@ import {
 } from 'noya-keymap';
 import { amplitude, ILogEvent } from 'noya-log';
 import { useLazyValue } from 'noya-react-utils';
-import { BlockContent, ParentLayer } from 'noya-state';
+import { BlockContent, Overrides, ParentLayer } from 'noya-state';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -35,6 +35,7 @@ import {
   withReact,
 } from 'slate-react';
 import { allInsertableSymbols, Blocks } from '../blocks/blocks';
+import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
 import { InferredBlockTypeResult } from '../types';
 import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
@@ -285,10 +286,51 @@ export const BlockEditor = forwardRef(function BlockEditor(
     [],
   );
 
-  const renderElement = useCallback(
-    (props: RenderElementProps) => <ElementComponent {...props} />,
-    [],
+  const onSetVisible = useCallback(
+    (layerId: string, isVisible: boolean) => {
+      dispatch(
+        'setOverrideValue',
+        [layer.do_objectID],
+        Overrides.encodeName([layerId], 'isVisible'),
+        isVisible,
+      );
+    },
+    [dispatch, layer.do_objectID],
   );
+
+  const layerVisibility = useMemo(() => {
+    const visibility: Record<string, boolean> = {};
+    const children = layersWithoutSpacers(blockDefinition.symbol);
+
+    for (const child of children) {
+      const isVisible = Overrides.getOverrideValue(
+        layer.overrideValues,
+        child.do_objectID,
+        'isVisible',
+      );
+
+      visibility[child.do_objectID] = isVisible ?? true;
+    }
+
+    return visibility;
+  }, [blockDefinition.symbol, layer.overrideValues]);
+
+  const renderElement = useCallback(
+    (props: RenderElementProps) => {
+      const layerId = props.element.layerId;
+      const isVisible = layerId ? layerVisibility[layerId] : true;
+
+      return (
+        <ElementComponent
+          isVisible={isVisible}
+          onSetVisible={onSetVisible}
+          {...props}
+        />
+      );
+    },
+    [layerVisibility, onSetVisible],
+  );
+
   return (
     <ControlledEditor
       ref={controlledEditorRef}

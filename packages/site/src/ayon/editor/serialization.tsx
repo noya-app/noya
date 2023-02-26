@@ -15,13 +15,11 @@ export function toContent(
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
-    const key = Overrides.encodeName([layer.do_objectID], 'blockText');
-    const value = nodes[i] ? Node.string(nodes[i]) : '';
 
     overrides.push(
       SketchModel.overrideValue({
-        overrideName: key,
-        value,
+        overrideName: Overrides.encodeName([layer.do_objectID], 'blockText'),
+        value: nodes[i] ? Node.string(nodes[i]) : '',
       }),
     );
   }
@@ -55,6 +53,7 @@ export function fromSymbol(
       label: name,
       symbolId: layer.symbolID,
       placeholder: layer.blockText,
+      layerId: layer.do_objectID,
     };
   });
 
@@ -63,6 +62,7 @@ export function fromSymbol(
     children: [{ text: instance.blockText ?? '' }],
     symbolId: instance.symbolID,
     placeholder: undefined,
+    layerId: undefined,
   };
 
   return [...layerNodes, rootNode];
