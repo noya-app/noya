@@ -27,6 +27,7 @@ export type PropertyTypeMap = {
   image: ImagePropertyValue;
   blockText: string;
   resolvedBlockData: Sketch.ResolvedBlockData;
+  isVisible: boolean;
 };
 
 export type PropertyType = keyof PropertyTypeMap;
@@ -49,6 +50,9 @@ export function isValidProperty<T extends PropertyType>(
     case 'resolvedBlockData': {
       return true;
     }
+    case 'isVisible': {
+      return typeof value === 'boolean';
+    }
     default:
       // This should never happen
       return false;
@@ -61,6 +65,11 @@ export function getLayerOverride(
   value: PropertyValue,
 ) {
   switch (propertyType) {
+    case 'isVisible': {
+      if (!isValidProperty(propertyType, value)) return;
+
+      return { type: propertyType, value, layer } as const;
+    }
     case 'resolvedBlockData':
       if (
         !Layers.isSymbolInstance(layer) ||

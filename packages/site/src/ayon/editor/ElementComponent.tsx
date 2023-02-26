@@ -1,3 +1,4 @@
+import { EyeNoneIcon, EyeOpenIcon } from 'noya-icons';
 import React from 'react';
 import { Node } from 'slate';
 import {
@@ -6,23 +7,58 @@ import {
   useFocused,
   useSelected,
 } from 'slate-react';
+import styled from 'styled-components';
 
-export function ElementComponent(props: RenderElementProps) {
+const Container = styled.div<{ selected: boolean }>(({ selected }) => ({
+  background: selected ? 'white' : 'rgba(0,0,0,0.05)',
+  border: `1px solid ${selected ? 'black' : 'transparent'}`,
+  padding: '4px 8px',
+  display: 'flex',
+  alignItems: 'end',
+  position: 'relative',
+
+  '&:hover .hide-on-hover': {
+    visibility: 'hidden',
+  },
+  '& .show-on-hover': {
+    visibility: 'hidden',
+  },
+  '&:hover .show-on-hover': {
+    visibility: 'visible',
+  },
+}));
+
+const ComponentMenu = styled.span({
+  color: 'rgba(0,0,0,0.4)',
+  userSelect: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+});
+
+const HoverMenu = styled.div({
+  position: 'absolute',
+  right: 8,
+  top: 0,
+  bottom: 0,
+  display: 'flex',
+  alignItems: 'center',
+});
+
+interface Props extends RenderElementProps {
+  onSetVisible?: (layerId: string, visible: boolean) => void;
+  isVisible: boolean;
+}
+
+export function ElementComponent(props: Props) {
   const selected = useSelected();
   const focused = useFocused();
 
   if (focused && props.element.label) {
+    const EyeComponent = props.isVisible ? EyeOpenIcon : EyeNoneIcon;
+
     return (
-      <div
-        style={{
-          background: selected ? 'white' : 'rgba(0,0,0,0.05)',
-          border: `1px solid ${selected ? 'black' : 'transparent'}`,
-          padding: '4px 8px',
-          display: 'flex',
-          alignItems: 'end',
-          position: 'relative',
-        }}
-      >
+      <Container selected={selected}>
         <div style={{ flex: '1', position: 'relative' }}>
           <DefaultElement {...props} />
           {props.element.placeholder && Node.string(props.element) === '' && (
@@ -45,18 +81,33 @@ export function ElementComponent(props: RenderElementProps) {
             </span>
           )}
         </div>
-        <span
-          contentEditable={false}
-          style={{
-            color: 'rgba(0,0,0,0.4)',
-            userSelect: 'none',
-            // TODO: Click should focus the end of the line
-            pointerEvents: 'none',
-          }}
-        >
-          {props.element.label}
-        </span>
-      </div>
+        <ComponentMenu contentEditable={false}>
+          <span
+            className="hide-on-hover"
+            style={{
+              textDecoration: props.isVisible ? undefined : 'line-through',
+            }}
+          >
+            {props.element.label}
+          </span>
+          <HoverMenu className="show-on-hover">
+            <EyeComponent
+              style={{
+                color: !props.isVisible ? 'black' : undefined,
+                cursor: 'pointer',
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (!props.element.layerId) return;
+
+                props.onSetVisible?.(props.element.layerId, !props.isVisible);
+              }}
+            />
+          </HoverMenu>
+        </ComponentMenu>
+      </Container>
     );
   }
 

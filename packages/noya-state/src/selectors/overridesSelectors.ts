@@ -48,6 +48,9 @@ export function applyOverrides({
         if (!override) return;
 
         switch (override.type) {
+          case 'isVisible':
+            override.layer.isVisible = override.value;
+            break;
           case 'stringValue':
             override.layer.attributedString = replaceTextInRange(
               override.layer.attributedString,
