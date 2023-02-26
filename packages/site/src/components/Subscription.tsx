@@ -338,13 +338,20 @@ export function SubscriptionUsageMeterSmall({
   );
 }
 
+export function filterActiveSubscriptions(
+  subscriptions: NoyaAPI.Subscription[],
+) {
+  return subscriptions.filter(
+    (subscription) =>
+      subscription.status === 'active' || subscription.status === 'past_due',
+  );
+}
+
 export function findSubscribedProduct(
   subscriptions: NoyaAPI.Subscription[],
   products: NoyaAPI.Product[],
 ) {
-  const activeSubscriptions = subscriptions.filter(
-    (subscription) => subscription.status === 'active',
-  );
+  const activeSubscriptions = filterActiveSubscriptions(subscriptions);
 
   const priceIds = activeSubscriptions.flatMap((subscription) =>
     subscription.items.map((item) => item.price.id),

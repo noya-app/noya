@@ -20,7 +20,11 @@ export default function Project() {
 
   const client = useNoyaClient();
   const { files } = useNoyaFiles();
-  const { subscriptions, availableProducts } = useNoyaBilling();
+  const {
+    subscriptions,
+    availableProducts,
+    loading: loadingBilling,
+  } = useNoyaBilling();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   useOnboardingUpsell({
@@ -32,12 +36,14 @@ export default function Project() {
     client.reloadFiles();
   }, [client]);
 
-  const overageItems = getSubscriptionOverage(
-    files,
-    subscriptions,
-    availableProducts,
-    usageMeterThreshold,
-  );
+  const overageItems = loadingBilling
+    ? []
+    : getSubscriptionOverage(
+        files,
+        subscriptions,
+        availableProducts,
+        usageMeterThreshold,
+      );
 
   return (
     <AppLayout

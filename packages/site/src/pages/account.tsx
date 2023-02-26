@@ -22,6 +22,7 @@ import { AppLayout } from '../components/AppLayout';
 import {
   AccountDetailRow,
   describePrice,
+  filterActiveSubscriptions,
   findSubscribedProduct,
   getSubscriptionOverage,
   isProfessionalPlan,
@@ -51,9 +52,7 @@ export default function Account() {
   const { emailLists } = useNoyaEmailLists();
   const client = useNoyaClient();
 
-  const activeSubscriptions = subscriptions.filter(
-    (subscription) => subscription.status === 'active',
-  );
+  const activeSubscriptions = filterActiveSubscriptions(subscriptions);
 
   const [isAnnualBilling, setIsAnnualBilling] = useState(true);
 
