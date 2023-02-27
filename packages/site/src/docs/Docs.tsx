@@ -1,4 +1,3 @@
-// import { MDXProvider } from '@mdx-js/react';
 import produce from 'immer';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -23,6 +22,7 @@ import guidebook from '../../guidebook';
 import { Toolbar } from '../components/Toolbar';
 import { getHeadTags } from './getHeadTags';
 import { socialConfig } from './socialConfig';
+const { MDXProvider } = require('@mdx-js/react');
 
 const theme = darkTheme;
 
@@ -34,10 +34,8 @@ export const docsTheme = produce(defaultTheme, (draft) => {
   draft.colors.textMuted = theme.colors.textMuted;
   draft.colors.divider = theme.colors.divider;
   draft.colors.neutralBackground = theme.colors.neutralBackground;
-  draft.colors.textDecorativeLight = theme.colors.secondaryLight;
-  draft.colors.selectedBackground = theme.colors.selectedBackground;
-  // draft.colors.textDecorativeLight = '#ffe8fa';
-  // draft.colors.selectedBackground = '#ff08d526';
+  draft.colors.textDecorativeLight = '#bba1ff';
+  draft.colors.selectedBackground = '#7218ff4a';
   draft.colors.textLink = theme.colors.primary;
   draft.colors.textLinkFocused = theme.colors.primaryLight;
   draft.colors.inlineCode.text = '#23ff86';
@@ -73,9 +71,9 @@ export const docsTheme = produce(defaultTheme, (draft) => {
 
   draft.textStyles.sidebar.title.color = draft.colors.text;
   draft.textStyles.sidebar.title.fontWeight = 500;
-  draft.textStyles.sidebar.row.color = draft.colors.textMuted;
+  draft.textStyles.sidebar.row.color = draft.colors.text;
   draft.textStyles.sidebar.row.fontWeight = 500;
-  draft.textStyles.sidebar.rowSmall.color = draft.colors.textMuted;
+  draft.textStyles.sidebar.rowSmall.color = draft.colors.text;
   draft.textStyles.sidebar.rowSmall.fontWeight = 500;
 });
 
@@ -94,7 +92,6 @@ const StyledTable = guidebookStyled(PageComponents.table)({
   marginBottom: 0,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MDXComponents = {
   ...PageComponents,
   a: StyledAnchor,
@@ -130,20 +127,22 @@ export function Docs({
   );
 
   const LinkComponent = useMemo(() => {
-    return ({ href, children, style }: LinkProps) => (
-      <Link
-        href={
-          isExternalUrl(href)
-            ? href
-            : href.startsWith('#')
-            ? href
-            : `${urlPrefix}${href}`
-        }
-        passHref
-      >
-        <Anchor style={style}>{children}</Anchor>
-      </Link>
-    );
+    return ({ href, children, style }: LinkProps) => {
+      return (
+        <Link
+          href={
+            isExternalUrl(href)
+              ? href
+              : href.startsWith('#')
+              ? href
+              : `${urlPrefix}${href}`
+          }
+          passHref
+        >
+          <Anchor style={style}>{children}</Anchor>
+        </Link>
+      );
+    };
   }, [urlPrefix]);
 
   const node = findNodeBySlug(guidebook, pathname.slice(1));
@@ -168,9 +167,9 @@ export function Docs({
           <Divider variant="strong" />
           <GuidebookThemeProvider theme={docsTheme}>
             {/* A single child is required here for React.Children.only */}
-            {/* <MDXProvider components={MDXComponents}> */}
-            <Page rootNode={guidebook}>{children}</Page>
-            {/* </MDXProvider> */}
+            <MDXProvider components={MDXComponents}>
+              <Page rootNode={guidebook}>{children}</Page>
+            </MDXProvider>
           </GuidebookThemeProvider>
         </LinkProvider>
       </RouterProvider>

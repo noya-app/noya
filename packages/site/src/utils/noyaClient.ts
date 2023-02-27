@@ -8,7 +8,7 @@ if (NOYA_HOST) {
   console.info('INFO: Using local storage');
 }
 
-export function createNoyaClient() {
+export function createNoyaNetworkClient() {
   const networkClient = NOYA_HOST
     ? new NoyaAPI.NetworkClient({
         baseURI: `${NOYA_HOST}/api`,
@@ -32,9 +32,18 @@ export function createNoyaClient() {
           return false;
         },
       })
-    : new NoyaAPI.LocalStorageClient();
+    : undefined;
 
-  return new NoyaAPI.Client({ networkClient });
+  return networkClient;
+}
+
+export function createNoyaClient(networkClient?: NoyaAPI.NetworkClient) {
+  return new NoyaAPI.Client({
+    networkClient:
+      networkClient ??
+      createNoyaNetworkClient() ??
+      new NoyaAPI.LocalStorageClient(),
+  });
 }
 
 declare global {

@@ -10,9 +10,10 @@ import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import React, { useMemo } from 'react';
 import { Analytics, installAnalytics } from '../components/Analytics';
+import { OptionalNoyaAPIProvider } from '../components/OptionalNoyaAPIProvider';
 import { Docs } from '../docs/Docs';
 import '../styles/index.css';
-import { createNoyaClient } from '../utils/noyaClient';
+import { createNoyaClient, createNoyaNetworkClient } from '../utils/noyaClient';
 
 const platform =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
@@ -23,6 +24,8 @@ amplitude.logEvent('App - Opened');
 const docsUrlPrefix = '/docs';
 const shareUrlPrefix = '/share';
 
+const networkClient = createNoyaNetworkClient();
+
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
@@ -31,7 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const isSessionRequired = !(isSharePage || isDocsPage);
 
   const noyaClient = useMemo(() => {
-    return isSessionRequired ? createNoyaClient() : undefined;
+    return isSessionRequired ? createNoyaClient(networkClient) : undefined;
   }, [isSessionRequired]);
 
   // console.log(Component, pageProps, router);
@@ -49,15 +52,17 @@ export default function App({ Component, pageProps }: AppProps) {
   } else if (isDocsPage) {
     return (
       <DesignSystemConfigurationProvider theme={darkTheme} platform={platform}>
-        <Stack.V
-          id="docs-container"
-          flex="1"
-          background={darkTheme.colors.canvas.background}
-        >
-          <Docs urlPrefix={docsUrlPrefix}>
-            <Component {...pageProps} />
-          </Docs>
-        </Stack.V>
+        <OptionalNoyaAPIProvider networkClient={networkClient}>
+          <Stack.V
+            id="docs-container"
+            flex="1"
+            background={darkTheme.colors.canvas.background}
+          >
+            <Docs urlPrefix={docsUrlPrefix}>
+              <Component {...pageProps} />
+            </Docs>
+          </Stack.V>
+        </OptionalNoyaAPIProvider>
       </DesignSystemConfigurationProvider>
     );
   } else {

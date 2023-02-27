@@ -1,7 +1,7 @@
 import { GuidebookConfig } from 'react-guidebook';
 
 export const socialConfig: GuidebookConfig = {
-  title: 'Noya Docs',
+  title: 'Noya Documentation',
   location: {
     host: 'www.noya.io/app/docs',
   },
@@ -18,7 +18,7 @@ export const socialConfig: GuidebookConfig = {
     type: 'image/png',
     width: '1200',
     height: '630',
-    alt: 'Noya Docs',
+    alt: 'Noya Documentation',
     path: '/studio-721-preview-card.png',
   },
 };
