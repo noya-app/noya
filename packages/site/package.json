@@ -23,6 +23,7 @@
     "logrocket": "^3.0.1",
     "logrocket-react": "^5.0.1",
     "next": "^12",
+    "react-guidebook": "^0.12.0",
     "react-resizable-panels": "^0.0.33",
     "slate": "^0.90.0",
     "slate-history": "^0.86.0",
@@ -34,8 +35,11 @@
     "@types/lodash.debounce": "^4.0.7",
     "@types/logrocket-react": "^3.0.0",
     "autoprefixer": "^10.4.13",
+    "generate-guidebook": "^1.4.0",
+    "next-mdx-frontmatter": "^0.0.4",
     "postcss": "^8.4.21",
     "raw-loader": "^4.0.2",
+    "rehype-slug": "^5.1.0",
     "tailwind-safelist-generator": "^1.0.0",
     "tailwindcss": "^3.2.4"
   }
