@@ -19,6 +19,6 @@ export const socialConfig: GuidebookConfig = {
     width: '1200',
     height: '630',
     alt: 'Noya Documentation',
-    path: '/studio-721-preview-card.png',
+    path: '/noya-preview-card.png',
   },
 };

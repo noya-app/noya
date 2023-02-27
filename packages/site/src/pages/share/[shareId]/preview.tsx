@@ -78,7 +78,7 @@ export default function Preview() {
   addShareCookie(shareId);
 
   return (
-    <OptionalNoyaAPIProvider networkClient={networkClient}>
+    <OptionalNoyaAPIProvider>
       <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
         <Content shareId={shareId} />
       </DesignSystemConfigurationProvider>

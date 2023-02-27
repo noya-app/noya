@@ -150,12 +150,10 @@ export function Docs({
   return (
     <>
       <Head>
-        <title>Studio 721 Docs</title>
+        <title>Noya Docs</title>
         {getHeadTags({
-          pageTitle: node?.title ?? 'Studio 721 Guide',
-          pageDescription:
-            node?.subtitle ??
-            'Learn how NFTs work, and how to create your own collection.',
+          pageTitle: node?.title ?? 'Noya Docs',
+          pageDescription: node?.subtitle ?? 'Noya Docs',
           config: socialConfig,
         })}
         <link rel="icon" href="/favicon.ico" />
