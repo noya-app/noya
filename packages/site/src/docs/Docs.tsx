@@ -19,6 +19,7 @@ import {
 } from 'react-guidebook';
 import styled from 'styled-components';
 import guidebook from '../../guidebook';
+import { NavigationLinks } from '../components/NavigationLinks';
 import { Toolbar } from '../components/Toolbar';
 import { getHeadTags } from './getHeadTags';
 import { socialConfig } from './socialConfig';
@@ -161,7 +162,9 @@ export function Docs({
       <RouterProvider value={routerWithPrefix}>
         <LinkProvider value={LinkComponent}>
           {/* <Styles.Main /> */}
-          <Toolbar />
+          <Toolbar>
+            <NavigationLinks />
+          </Toolbar>
           <Divider variant="strong" />
           <GuidebookThemeProvider theme={docsTheme}>
             {/* A single child is required here for React.Children.only */}
