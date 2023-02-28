@@ -90,11 +90,13 @@ function Loader({
   width,
   height,
   viewType,
+  blockText,
 }: {
   blockId: string;
   width: number;
   height: number;
   viewType?: ViewType;
+  blockText?: string;
 }) {
   const [blocks, setBlocks] = useState<
     Record<string, BlockDefinition> | undefined
@@ -111,13 +113,19 @@ function Loader({
 
       const client = new NoyaAPI.Client({
         networkClient: new NoyaAPI.MemoryClient({
-          files: [createLocalFile(blocks[blockId], { width, height })],
+          files: [
+            createLocalFile({
+              block: blocks[blockId],
+              size: { width, height },
+              blockText,
+            }),
+          ],
         }),
       });
 
       setClient(client);
     });
-  }, [blockId, height, width]);
+  }, [blockId, blockText, height, width]);
 
   if (!blocks || !blockId || !client) return null;
 
@@ -132,7 +140,10 @@ interface Props {
   blockId: string;
   width?: CSSProperties['width'];
   height?: CSSProperties['height'];
+  blockHeight?: number;
+  blockWidth?: number;
   viewType?: ViewType;
+  blockText?: string;
 }
 
 // We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
@@ -140,11 +151,17 @@ interface Props {
 export function InteractiveBlockPreview(props: Props) {
   const config = useDesignSystemConfiguration();
 
-  const blockWidth = blockMetadata[props.blockId]?.preferredSize.width ?? 600;
-  const blockHeight = blockMetadata[props.blockId]?.preferredSize.height ?? 400;
+  const blockWidth =
+    props.blockWidth ??
+    blockMetadata[props.blockId]?.preferredSize.width ??
+    600;
+  const blockHeight =
+    props.blockHeight ??
+    blockMetadata[props.blockId]?.preferredSize.height ??
+    400;
 
   const width = props.width ?? '100%';
-  const height = props.height ?? blockHeight + 40 ?? 400;
+  const height = props.height ? props.height : blockHeight + 40;
 
   return (
     <DesignSystemConfigurationProvider
@@ -162,13 +179,22 @@ export function InteractiveBlockPreview(props: Props) {
   );
 }
 
-function createLocalFile(block: BlockDefinition, size: Size) {
+function createLocalFile({
+  block,
+  size,
+  blockText,
+}: {
+  block: BlockDefinition;
+  size: Size;
+  blockText?: string;
+}) {
   const instance = SketchModel.symbolInstance({
     symbolID: block.symbol.symbolID,
     frame: SketchModel.rect({
       width: size.width,
       height: size.height,
     }),
+    blockText,
   });
 
   const artboard = SketchModel.artboard({
