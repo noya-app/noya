@@ -20,6 +20,7 @@
     "@types/styled-components": "^5.1.14",
     "cookie": "^0.5.0",
     "date-fns": "^2.29.3",
+    "flexsearch": "^0.6.32",
     "framer-motion": "^6",
     "lodash.debounce": "^4.0.8",
     "logrocket": "^3.0.1",

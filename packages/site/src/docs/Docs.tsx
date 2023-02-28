@@ -24,6 +24,7 @@ import { NavigationLinks } from '../components/NavigationLinks';
 import { Toolbar } from '../components/Toolbar';
 import { getHeadTags } from './getHeadTags';
 import { InteractiveBlockPreview } from './InteractiveBlockPreview';
+import { searchPages, searchTextMatch } from './search';
 import { socialConfig } from './socialConfig';
 import { StaticBlockPreview } from './StaticBlockPreview';
 const { MDXProvider } = require('@mdx-js/react');
@@ -176,7 +177,13 @@ export function Docs({
             {/* A single child is required here for React.Children.only */}
             <MDXProvider components={MDXComponents}>
               <Stack.V overflowY="auto">
-                <Page rootNode={guidebook}>{children}</Page>
+                <Page
+                  rootNode={guidebook}
+                  searchPages={searchPages}
+                  searchTextMatch={searchTextMatch}
+                >
+                  {children}
+                </Page>
               </Stack.V>
             </MDXProvider>
           </GuidebookThemeProvider>
