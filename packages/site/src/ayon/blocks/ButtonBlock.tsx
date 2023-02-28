@@ -5,6 +5,7 @@ import { parseBlock } from '../parse';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
 import { buttonSymbol } from './symbols';
+import { getBlockClassName } from './tailwind';
 
 const placeholderText = 'Submit';
 
@@ -94,6 +95,7 @@ export const ButtonBlock: BlockDefinition = {
         backgroundColor={colors.backgroundColor}
         color={colors.color}
         isDisabled={!!disabled}
+        className={getBlockClassName(hashtags)}
       >
         {content}
       </Button>

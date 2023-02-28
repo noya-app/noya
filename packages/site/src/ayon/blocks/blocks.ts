@@ -21,6 +21,8 @@ import { InputBlock } from './InputBlock';
 import { RadioBlock } from './RadioBlock';
 import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
+import { SignInBlock } from './SignInBlock';
+import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TableBlock } from './TableBlock';
 import { TextareaBlock } from './TextareaBlock';
@@ -53,9 +55,10 @@ export const Blocks: Record<string, BlockDefinition> = {
   [SelectBlock.symbol.symbolID]: SelectBlock,
   [RadioBlock.symbol.symbolID]: RadioBlock,
   [TextareaBlock.symbol.symbolID]: TextareaBlock,
-  // [SpacerBlock.symbol.symbolID]: SpacerBlock,
+  [SpacerBlock.symbol.symbolID]: SpacerBlock,
   [CardBlock.symbol.symbolID]: CardBlock,
   [TileCardBlock.symbol.symbolID]: TileCardBlock,
+  [SignInBlock.symbol.symbolID]: SignInBlock,
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(
