@@ -26,13 +26,15 @@ amplitude.logEvent('App - Opened');
 
 const docsUrlPrefix = '/docs';
 const shareUrlPrefix = '/share';
+const playgroundUrlPrefix = '/playground';
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   const isDocsPage = router.asPath.startsWith(docsUrlPrefix);
   const isSharePage = router.asPath.startsWith(shareUrlPrefix);
-  const isSessionRequired = !(isSharePage || isDocsPage);
+  const isPlaygroundPage = router.asPath.startsWith(playgroundUrlPrefix);
+  const isSessionRequired = !(isSharePage || isDocsPage || isPlaygroundPage);
 
   const noyaClient = useMemo(() => {
     return isSessionRequired

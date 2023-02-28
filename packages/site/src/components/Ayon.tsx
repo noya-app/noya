@@ -102,6 +102,7 @@ function Workspace({
   padding,
   canvasRendererType,
   downloadFile,
+  isPlayground,
 }: {
   fileId: string;
   initialDocument: SketchFile;
@@ -113,7 +114,7 @@ function Workspace({
   downloadFile?: (type: NoyaAPI.ExportFormat, size: Size, name: string) => void;
 } & Pick<
   ComponentProps<typeof Content>,
-  'uploadAsset' | 'padding' | 'canvasRendererType'
+  'uploadAsset' | 'padding' | 'canvasRendererType' | 'isPlayground'
 >): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
@@ -540,6 +541,7 @@ function Workspace({
         uploadAsset={uploadAsset}
         viewType={viewType}
         padding={padding}
+        isPlayground={isPlayground}
       />
     </StateProvider>
   );

@@ -23,7 +23,9 @@ import guidebook from '../../guidebook';
 import { NavigationLinks } from '../components/NavigationLinks';
 import { Toolbar } from '../components/Toolbar';
 import { getHeadTags } from './getHeadTags';
+import { InteractiveBlockPreview } from './InteractiveBlockPreview';
 import { socialConfig } from './socialConfig';
+import { StaticBlockPreview } from './StaticBlockPreview';
 const { MDXProvider } = require('@mdx-js/react');
 
 const theme = darkTheme;
@@ -98,6 +100,8 @@ const MDXComponents = {
   ...PageComponents,
   a: StyledAnchor,
   kbd: InlineCode,
+  StaticBlockPreview,
+  InteractiveBlockPreview,
   table: (props: React.ComponentProps<typeof PageComponents['table']>) => (
     <ScrollableTableContainer>
       <StyledTable {...props} />
