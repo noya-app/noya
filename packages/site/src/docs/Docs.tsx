@@ -22,6 +22,7 @@ import styled from 'styled-components';
 import guidebook from '../../guidebook';
 import { NavigationLinks } from '../components/NavigationLinks';
 import { Toolbar } from '../components/Toolbar';
+import { BlockGrid } from './BlockGrid';
 import { getHeadTags } from './getHeadTags';
 import { InteractiveBlockPreview } from './InteractiveBlockPreview';
 import { searchPages, searchTextMatch } from './search';
@@ -103,6 +104,7 @@ const MDXComponents = {
   kbd: InlineCode,
   StaticBlockPreview,
   InteractiveBlockPreview,
+  BlockGrid,
   table: (props: React.ComponentProps<typeof PageComponents['table']>) => (
     <ScrollableTableContainer>
       <StyledTable {...props} />

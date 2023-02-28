@@ -44,8 +44,6 @@ export default function App({ Component, pageProps }: AppProps) {
       : undefined;
   }, [isSessionRequired]);
 
-  // console.log(Component, pageProps, router);
-
   if (noyaClient) {
     return (
       <DesignSystemConfigurationProvider theme={darkTheme} platform={platform}>

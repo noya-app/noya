@@ -10,7 +10,9 @@ import {
 import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { BlockDefinition, createSketchFile } from 'noya-state';
-import React, { useEffect, useState } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
+import { blockMetadata } from '../ayon/blocks/blockMetadata';
+import { ViewType } from '../ayon/Content';
 
 const Blocks = import('../ayon/blocks/blocks');
 const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
@@ -52,9 +54,11 @@ export function BlockPreview({
 function Content({
   blocks,
   blockId,
+  viewType = 'combined',
 }: {
   blocks: Record<string, BlockDefinition>;
   blockId: string;
+  viewType?: ViewType;
 }) {
   const block = blocks[blockId];
 
@@ -75,13 +79,23 @@ function Content({
       initialDocument={initialFile.data.document}
       name={initialFile.data.name}
       uploadAsset={async () => ''}
-      viewType="combined"
+      viewType={viewType}
       isPlayground
     />
   );
 }
 
-function Loader({ blockId, width, height }: Props) {
+function Loader({
+  blockId,
+  width,
+  height,
+  viewType,
+}: {
+  blockId: string;
+  width: number;
+  height: number;
+  viewType?: ViewType;
+}) {
   const [blocks, setBlocks] = useState<
     Record<string, BlockDefinition> | undefined
   >();
@@ -109,15 +123,16 @@ function Loader({ blockId, width, height }: Props) {
 
   return (
     <NoyaAPIProvider value={client}>
-      <Content blocks={blocks} blockId={blockId} />
+      <Content blocks={blocks} blockId={blockId} viewType={viewType} />
     </NoyaAPIProvider>
   );
 }
 
 interface Props {
   blockId: string;
-  width: number;
-  height: number;
+  width?: CSSProperties['width'];
+  height?: CSSProperties['height'];
+  viewType?: ViewType;
 }
 
 // We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
@@ -125,17 +140,23 @@ interface Props {
 export function InteractiveBlockPreview(props: Props) {
   const config = useDesignSystemConfiguration();
 
+  const blockWidth = blockMetadata[props.blockId]?.preferredSize.width ?? 600;
+  const blockHeight = blockMetadata[props.blockId]?.preferredSize.height ?? 400;
+
+  const width = props.width ?? '100%';
+  const height = props.height ?? blockHeight + 40 ?? 400;
+
   return (
     <DesignSystemConfigurationProvider
       platform={config.platform}
       theme={lightTheme}
     >
       <Stack.V
-        height={props.height + 40}
-        maxWidth="100%"
+        height={height}
+        width={width}
         background={lightTheme.colors.canvas.background}
       >
-        <Loader {...props} />
+        <Loader {...props} width={blockWidth} height={blockHeight} />
       </Stack.V>
     </DesignSystemConfigurationProvider>
   );
