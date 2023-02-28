@@ -5,6 +5,7 @@ import {
   DesignSystemConfigurationProvider,
   lightTheme,
   Stack,
+  useDesignSystemConfiguration,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
@@ -122,8 +123,13 @@ interface Props {
 // We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
 // We load Ayon/Blocks async to work around a react-jsx transform issue when loading Chakra.
 export function InteractiveBlockPreview(props: Props) {
+  const config = useDesignSystemConfiguration();
+
   return (
-    <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
+    <DesignSystemConfigurationProvider
+      platform={config.platform}
+      theme={lightTheme}
+    >
       <Stack.V
         height={props.height + 40}
         maxWidth="100%"

@@ -181,6 +181,7 @@ export const Content = memo(function Content({
               isPlayground
                 ? [
                     Interactions.escape,
+                    Interactions.clipboard,
                     Interactions.createEditBlock({ inferBlockType }),
                     Interactions.selection,
                     Interactions.marquee,
