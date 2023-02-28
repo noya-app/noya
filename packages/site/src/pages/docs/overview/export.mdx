@@ -1,3 +1,71 @@
 ---
 title: Export
 ---
+
+## Exporting to design files or code
+
+Noya offers the ability to export the high-fidelity output to design files or
+code. When you are ready to hand off or implement your design, exporting is the
+next step. To export, click the Export button in the top right corner of the
+screen and select the desired file format. In a few seconds, a file will start
+downloading.
+
+The file formats available to export are:
+
+- PNG, a raster graphics format
+- PDF or SVG, vector graphics formats
+- React code
+
+Each file format is suited for specific purposes. The following sections
+describe common cases for exporting along with a recommendation for which file
+format to choose in each case.
+
+> Exporting is a beta feature and we recommend testing it early and throughout
+> your design process to make sure you can get the output you need. Please
+> [reach out](https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd)
+> if you run into any issues with export.
+
+## Sharing a screenshot or mockup of the design
+
+Exporting a PNG file creates an image file is suitable for sharing. For example,
+you can email it or upload it on any platform that supports image attachments
+(such as Slack, Discord, or Linear). The file contains pixel data, meaning that
+if it were to be opened in a design tool, it would appear as one big image,
+similar to a screenshot. This means that the file would appear the same no
+matter where it's viewed, but it's not very editable.
+
+> If you want a quick way to let someone view your design while you are working
+> on it, we recommend using the [Sharing](sharing) option, which creates a link
+> to preview your Noya project. This is easier to share than uploading an image
+> file and it allows the viewer to refresh the file as you make edits.
+
+## Handing off the design to work on it in Figma or Sketch
+
+If you need to fine tune the design or slice it into multiple asset files, you
+can export to Figma or Sketch and then work with the design in those apps. Noya
+provides specific export file formats for Figma (based on SVG) and Sketch (based
+on PDF). Files exported with these options can be dragged and dropped directly
+into your canvas in Figma or Sketch. These exports contain layer data, so you
+will be able to manipulate and edit each layer.
+
+## Handing off the design to implement with React code
+
+If you are building a React app, the React code exported from Noya can be used
+as a reference for how to configure the components from the selected design
+system's component library to look exactly like your design, or in some cases,
+the code can be inserted directly into your app.
+
+Exporting to React code provides you with a ZIP file containing two files:
+
+- App.tsx: This file contains the view, which will be your design built using
+  the component library for your selected design system.
+- package.json: This file describes the dependencies required for the code to
+  run. Typically, this is the component library for your selected design system
+  and supporting packages related to styling and additional assets such as
+  icons.
+
+> Noya currently does not handle advanced layout features, such as responsive
+> layouts. So while your generated React code should look identical to the
+> high-fidelity design you see in Noya, keep in mind that many of the components
+> will be positioned with absolute coordinates, so you will likely need to make
+> changes to use the code in a production layout.
