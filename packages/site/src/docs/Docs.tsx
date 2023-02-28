@@ -2,7 +2,7 @@ import produce from 'immer';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { darkTheme, Divider } from 'noya-designsystem';
+import { darkTheme, Divider, Stack } from 'noya-designsystem';
 import React, { ReactNode, useMemo } from 'react';
 import {
   Anchor,
@@ -36,9 +36,9 @@ export const docsTheme = produce(defaultTheme, (draft) => {
   draft.colors.divider = theme.colors.divider;
   draft.colors.neutralBackground = theme.colors.neutralBackground;
   draft.colors.textDecorativeLight = '#bba1ff';
-  draft.colors.selectedBackground = '#7218ff4a';
-  draft.colors.textLink = theme.colors.primary;
-  draft.colors.textLinkFocused = theme.colors.primaryLight;
+  draft.colors.selectedBackground = 'rgba(140, 125, 253, 0.25)';
+  draft.colors.textLink = '#00a4ff';
+  // draft.colors.textLinkFocused = theme.colors.primaryLight;
   draft.colors.inlineCode.text = '#23ff86';
 
   draft.colors.primary = theme.colors.primary;
@@ -169,7 +169,9 @@ export function Docs({
           <GuidebookThemeProvider theme={docsTheme}>
             {/* A single child is required here for React.Children.only */}
             <MDXProvider components={MDXComponents}>
-              <Page rootNode={guidebook}>{children}</Page>
+              <Stack.V overflowY="auto">
+                <Page rootNode={guidebook}>{children}</Page>
+              </Stack.V>
             </MDXProvider>
           </GuidebookThemeProvider>
         </LinkProvider>
