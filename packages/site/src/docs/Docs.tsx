@@ -10,6 +10,7 @@ import {
   findNodeBySlug,
   guidebookStyled,
   GuidebookThemeProvider,
+  InlineCode,
   isExternalUrl,
   LinkProps,
   LinkProvider,
@@ -80,7 +81,7 @@ export const docsTheme = produce(defaultTheme, (draft) => {
 
 const StyledAnchor = styled(PageComponents.a)({
   // Prevent long lines from overflowing and resizing the page on mobile
-  lineBreak: 'anywhere',
+  // lineBreak: 'anywhere',
 });
 
 const ScrollableTableContainer = guidebookStyled.div({
@@ -96,6 +97,7 @@ const StyledTable = guidebookStyled(PageComponents.table)({
 const MDXComponents = {
   ...PageComponents,
   a: StyledAnchor,
+  kbd: InlineCode,
   table: (props: React.ComponentProps<typeof PageComponents['table']>) => (
     <ScrollableTableContainer>
       <StyledTable {...props} />

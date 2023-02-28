@@ -2,8 +2,40 @@
 title: Styling Blocks
 ---
 
-Steps you can follow:
+import { LinkBreak2Icon } from 'noya-icons';
 
-- First, check for hashtag commands
-- Next, you may need to detach the block
-- Last, you can contact us
+## Hashtag `#` Commands
+
+Most blocks accept `#` commands. These commands allow you to style the block.
+
+In general there are two categories of commands:
+
+- **Universal commands** - Some blocks support one-word commands like `#dark` or
+  `#left`, which influence the style or behavior of many aspects of the block.
+- **Tailwind commands** - Other blocks support
+  [Tailwind CSS](https://tailwindcss.com/) classes like `#text-gray-500` or
+  `#bg-gray-100`, which influence the style of very specific aspects of the
+  block.
+
+You can find the list of supported commands for each block by typing `#` and
+browsing the list, or by checking the [Block Reference](/app/docs/blocks) page
+for that block.
+
+> In the future, we hope to support more configurability at the design system
+> level. For now, however, tailwind commands are often the only way to acheive
+> the custom styles you're aiming for.
+
+## Troubleshooting
+
+If you're not sure how to style a block, there are a few steps you can try:
+
+- First, check the available `#` commands. Type `#` and search or scroll through
+  the list to see if you can find what you're looking for.
+- Next, you may be able to detach the block. This allows you to style the nested
+  blocks independently. To detach a block, click it and then click the Detach
+  icon <LinkBreak2Icon
+  style={{ display: 'inline', verticalAlign: 'text-top' }}/>.
+- Last, you can
+  [contact](https://noyasoftware.notion.site/Noya-Contact-9a95e0895eba4f578517dfdc4d94ccdd)
+  the Noya team. It may not be possible to style the block the way you want, but
+  we can either add this feature or help you find a workaround.

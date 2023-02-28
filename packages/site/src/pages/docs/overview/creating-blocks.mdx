@@ -1,3 +1,54 @@
 ---
 title: Creating Blocks
 ---
+
+import InsertBlock from '../../../assets/InsertBlock.webp';
+import ConfigureBlockType from '../../../assets/ConfigureBlockType.webp';
+import ConfigureBlockText from '../../../assets/ConfigureBlockText.webp';
+import InsertTool from '../../../assets/docs/InsertTool.png';
+import { PlusIcon } from 'noya-icons';
+
+## Using the Insert Tool
+
+To create a block, first activate the Insert tool <PlusIcon
+style={{ display: 'inline', verticalAlign: 'text-top' }} />. You can do this by
+clicking the Insert tool button at the top left of the toolbar, or by holding
+the `Command ⌘` key (on Mac) or `Control` key (on Windows).
+
+<img src={InsertTool.src} alt="Insert tool" />
+
+Once the Insert tool is active, you can click and drag to create a block. The
+block will be created at the size of the rectangle you drew.
+
+<img src={InsertBlock.src} alt="Drag to insert block" />
+
+## Block inference
+
+When you create a block, Noya will try to infer an appropriate block type based
+on a variety of factors, including its size and position. If the block Noya
+chooses is not the one you want, there are two ways to change it:
+
+- You can change block type via the dropdown menu next to the block's name.
+- You can double click to edit the block's contents, and then type `/` followed
+  by the name of the block type you want.
+
+<img src={ConfigureBlockType.src} alt="Configure block type" />
+
+## Configuring block content
+
+To edit the contents of a block, double click it or press `Enter`. In general,
+you can type text and it will influence how the block is rendered.
+
+<img src={ConfigureBlockText.src} alt="Configure block text" />
+
+Some blocks have multiple nested blocks within that can be edited individually.
+Some blocks (e.g. [Image](/docs/blocks/elements/image),
+[Icon](/docs/blocks/elements/icon), [Write](/docs/blocks/elements/write))
+require special text. To understand how to edit a particular block, check the
+documentation page for that block in the [Block Reference](/app/docs/blocks)
+section.
+
+You can click anywhere outside of the block or press `Escape` to exit edit mode.
+
+> We're actively working on making block editing clearer and more consistent
+> between blocks!
