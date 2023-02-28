@@ -80,15 +80,7 @@ function Content({
   );
 }
 
-export function InteractiveBlockPreview({
-  blockId,
-  width,
-  height,
-}: {
-  blockId: string;
-  width: number;
-  height: number;
-}) {
+function Loader({ blockId, width, height }: Props) {
   const [blocks, setBlocks] = useState<
     Record<string, BlockDefinition> | undefined
   >();
@@ -116,12 +108,30 @@ export function InteractiveBlockPreview({
 
   return (
     <NoyaAPIProvider value={client}>
-      <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-        <Stack.V height={height + 40} maxWidth="100%">
-          <Content blocks={blocks} blockId={blockId} />
-        </Stack.V>
-      </DesignSystemConfigurationProvider>
+      <Content blocks={blocks} blockId={blockId} />
     </NoyaAPIProvider>
+  );
+}
+
+interface Props {
+  blockId: string;
+  width: number;
+  height: number;
+}
+
+// We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
+// We load Ayon/Blocks async to work around a react-jsx transform issue when loading Chakra.
+export function InteractiveBlockPreview(props: Props) {
+  return (
+    <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
+      <Stack.V
+        height={props.height + 40}
+        maxWidth="100%"
+        background={lightTheme.colors.canvas.background}
+      >
+        <Loader {...props} />
+      </Stack.V>
+    </DesignSystemConfigurationProvider>
   );
 }
 
