@@ -5,7 +5,7 @@ import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
 import { radioSymbol } from './symbols';
 
-const placeholderText = '#on Daily';
+const placeholderText = '#off Daily';
 
 const globalHashtags = ['on', 'off', 'disabled'];
 
