@@ -3,12 +3,19 @@ import {
   avatarSymbolId,
   boxSymbolId,
   buttonSymbolId,
+  checkboxSymbolId,
+  headerBarSymbolId,
   heroSymbolV2Id,
   iconSymbolId,
   imageSymbolId,
+  inputSymbolId,
+  radioSymbolId,
+  selectSymbolId,
   sidebarSymbolId,
   signInSymbolId,
+  switchSymbolId,
   tableSymbolId,
+  textareaSymbolId,
   writeSymbolId,
 } from './symbolIds';
 
@@ -80,5 +87,40 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     name: 'Sidebar',
     category: 'application',
     preferredSize: { width: 250, height: 600 },
+  },
+  [headerBarSymbolId]: {
+    name: 'Header Bar',
+    category: 'application',
+    preferredSize: { width: 1280, height: 80 },
+  },
+  [checkboxSymbolId]: {
+    name: 'Checkbox',
+    category: 'element',
+    preferredSize: { width: 300, height: 30 },
+  },
+  [radioSymbolId]: {
+    name: 'Radio',
+    category: 'element',
+    preferredSize: { width: 300, height: 30 },
+  },
+  [selectSymbolId]: {
+    name: 'Select',
+    category: 'element',
+    preferredSize: { width: 300, height: 40 },
+  },
+  [textareaSymbolId]: {
+    name: 'Textarea',
+    category: 'element',
+    preferredSize: { width: 240, height: 120 },
+  },
+  [inputSymbolId]: {
+    name: 'Input',
+    category: 'element',
+    preferredSize: { width: 240, height: 40 },
+  },
+  [switchSymbolId]: {
+    name: 'Switch',
+    category: 'element',
+    preferredSize: { width: 50, height: 35 },
   },
 };

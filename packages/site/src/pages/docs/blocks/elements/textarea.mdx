@@ -1,0 +1,25 @@
+import { textareaSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={textareaSymbolId} />
+
+## Configuration
+
+The textarea can be prefilled with text.
+
+You can further configure the textarea's style by adding:
+
+- `#dark` - to use the dark theme
+- `#accent` - to use the accent color variant of the theme
+- `#disabled` - to disable the select
+
+Here's an example configuration that uses these options (double click to edit):
+
+<InteractiveBlockPreview
+  blockId={textareaSymbolId}
+  blockText={`Leave a message for the guestbook after you sign in.
+#dark #accent #disabled`}
+/>

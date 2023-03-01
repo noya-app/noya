@@ -1,0 +1,28 @@
+import { selectSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={selectSymbolId} />
+
+## Configuration
+
+Each item in the select should be on a separate line.
+
+You can further configure the select's style by adding:
+
+- `#dark` - to use the dark theme
+- `#accent` - to use the accent color variant of the theme
+- `#disabled` - to disable the select
+
+Here's an example configuration that uses these options (double click to edit):
+
+<InteractiveBlockPreview
+  blockId={selectSymbolId}
+  blockText={`Category
+Apartment
+Condo
+House
+#dark #accent #disabled`}
+/>

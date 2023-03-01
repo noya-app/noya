@@ -1,0 +1,19 @@
+import { switchSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={switchSymbolId} />
+
+## Configuration
+
+The switch has a few different states that can be configured by adding:
+
+- `#off` - to switch to the off position (default)
+- `#on` - to switch to the on position
+- `#disabled` - to disable the switch
+
+Here's an example with `#on` and `#disabled`:
+
+<InteractiveBlockPreview blockId={switchSymbolId} blockText="#on #disabled" />

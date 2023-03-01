@@ -1,0 +1,30 @@
+---
+title: Header Bar
+---
+
+import { headerBarSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={headerBarSymbolId} />
+
+## Configuration
+
+Items in the header bar should be comma separated. To show a specific item as
+active, type `*` before the item name.
+
+You can further configure the header bar's style by adding:
+
+- `#title` - to use the first item as a title
+- `#dark` - to use the dark theme
+- `#accent` - to use the accent color variant of the theme
+- `#search` - to include a search bar
+
+Here's an example configuration that uses these options (double click to edit):
+
+<InteractiveBlockPreview
+  blockId={headerBarSymbolId}
+  blockText={`Wayfinder, Locations, *Points of Interest, Map #title #dark #accent #search`}
+/>

@@ -1,0 +1,25 @@
+import { checkboxSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={checkboxSymbolId} />
+
+## Configuration
+
+You can configure the checkbox with text, which will appear as a label to the
+right. If you do not want a label, resize the block to a square that fits only
+the checkbox. The checkbox has a few different states that can be configured by
+adding:
+
+- `#off` - to uncheck the checkbox (default)
+- `#on` - to check the checkbox
+- `#disabled` - to disable the checkbox
+
+Here's an example with a text label, `#on` and `#disabled`:
+
+<InteractiveBlockPreview
+  blockId={checkboxSymbolId}
+  blockText="Enable daily notifications #on #disabled"
+/>
