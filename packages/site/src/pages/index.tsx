@@ -2,6 +2,7 @@ import { useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import { amplitude } from 'noya-log';
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../components/AppLayout';
+import { NavigationLinks } from '../components/NavigationLinks';
 import { Projects } from '../components/Projects';
 import {
   getSubscriptionOverage,
@@ -47,7 +48,11 @@ export default function Project() {
 
   return (
     <AppLayout
-      toolbar={<Toolbar />}
+      toolbar={
+        <Toolbar>
+          <NavigationLinks />
+        </Toolbar>
+      }
       footer={
         overageItems.length > 0 &&
         !showUpgradeDialog && (

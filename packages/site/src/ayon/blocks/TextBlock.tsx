@@ -1,7 +1,7 @@
 import { Text } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
-import { parseBlock } from '../parse';
+import { getTextAlign, parseBlock } from '../parse';
 import { textSymbol } from './symbols';
 import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
@@ -30,6 +30,7 @@ export const TextBlock: BlockDefinition = {
           'data-noya-parent-id': props.dataSet.parentId,
         })}
         className={getBlockClassName(hashtags)}
+        textAlign={getTextAlign(hashtags)}
       >
         {content}
       </Text>

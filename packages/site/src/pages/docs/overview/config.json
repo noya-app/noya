@@ -1,0 +1,13 @@
+{
+  "order": [
+    "projects",
+    "design-systems",
+    "creating-blocks",
+    "styling-blocks",
+    "region-tool",
+    "ai-generation",
+    "export",
+    "sharing",
+    "views"
+  ]
+}

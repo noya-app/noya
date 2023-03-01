@@ -19,6 +19,7 @@ import {
   DiscordLogoIcon,
   EnvelopeClosedIcon,
   ExitIcon,
+  FileTextIcon,
   InfoCircledIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
@@ -76,7 +77,10 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
 
   const userMenuItems = createSectionedMenu(
     [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
-    [{ title: 'View Templates', value: 'templates', icon: <CopyIcon /> }],
+    [
+      { title: 'Docs', value: 'docs', icon: <FileTextIcon /> },
+      { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
+    ],
     [
       { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
@@ -94,6 +98,8 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const { onboardingStep, setOnboardingStep } = useOnboarding();
   const showOnboarding = onboardingStep === 'configuredBlockText';
   const dismissOnboarding = () => setOnboardingStep('dismissedSupportInfo');
+
+  const isProjectsPath = router.pathname.startsWith('/projects');
 
   return (
     <Stack.H
@@ -142,7 +148,18 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                 onSelect={(value) => {
                   switch (value) {
                     case 'account':
-                      router.push('/account');
+                      if (isProjectsPath) {
+                        openInNewTab(`${NOYA_HOST}/app/account`);
+                      } else {
+                        router.push('/account');
+                      }
+                      return;
+                    case 'docs':
+                      if (isProjectsPath) {
+                        openInNewTab(`${NOYA_HOST}/app/docs`);
+                      } else {
+                        router.push('/docs');
+                      }
                       return;
                     case 'templates':
                       window.location.href = `${NOYA_HOST}/templates`;

@@ -50,11 +50,13 @@ export const Content = memo(function Content({
   viewType,
   padding,
   canvasRendererType = 'canvas',
+  isPlayground,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
   padding?: number;
   canvasRendererType?: CanvasRendererType;
+  isPlayground?: boolean;
 }) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -173,31 +175,42 @@ export const Content = memo(function Content({
           <SimpleCanvas
             ref={canvasRef}
             padding={padding}
+            position={isPlayground ? undefined : 'top'}
             logEvent={amplitude.logEvent}
-            interactions={[
-              Interactions.selectionMode,
-              Interactions.duplicate,
-              Interactions.reorder,
-              Interactions.zoom,
-              Interactions.escape,
-              Interactions.history,
-              Interactions.clipboard,
-              Interactions.editText,
-              Interactions.createEditBlock({ inferBlockType }),
-              Interactions.focus,
-              Interactions.pan,
-              Interactions.scale,
-              Interactions.createInsertMode({ inferBlockType }),
-              Interactions.selection,
-              Interactions.move,
-              Interactions.marquee,
-              Interactions.createDrawing({
-                allowDrawingFromNoneState: false,
-                hasMovementThreshold: true,
-                inferBlockType,
-              }),
-              Interactions.defaultCursor,
-            ]}
+            interactions={
+              isPlayground
+                ? [
+                    Interactions.escape,
+                    Interactions.clipboard,
+                    Interactions.createEditBlock({ inferBlockType }),
+                    Interactions.selection,
+                    Interactions.marquee,
+                  ]
+                : [
+                    Interactions.selectionMode,
+                    Interactions.duplicate,
+                    Interactions.reorder,
+                    Interactions.zoom,
+                    Interactions.escape,
+                    Interactions.history,
+                    Interactions.clipboard,
+                    Interactions.editText,
+                    Interactions.createEditBlock({ inferBlockType }),
+                    Interactions.focus,
+                    Interactions.pan,
+                    Interactions.scale,
+                    Interactions.createInsertMode({ inferBlockType }),
+                    Interactions.selection,
+                    Interactions.move,
+                    Interactions.marquee,
+                    Interactions.createDrawing({
+                      allowDrawingFromNoneState: false,
+                      hasMovementThreshold: true,
+                      inferBlockType,
+                    }),
+                    Interactions.defaultCursor,
+                  ]
+            }
             widgets={
               viewType !== 'previewOnly' && (
                 <>
@@ -207,6 +220,7 @@ export const Content = memo(function Content({
                       layer={layer}
                       inferBlockTypes={inferBlockTypes}
                       onFocusCanvas={onFocusCanvas}
+                      showToolbar={!isPlayground}
                       onChangeBlockType={(type: DrawableLayerType) => {
                         if (typeof type === 'string') return;
 
@@ -325,8 +339,8 @@ export const Content = memo(function Content({
                     <Design.DrawLayer />
                     <Design.SnapGuides showLabels={false} />
                     <Design.MeasurementGuides showLabels={false} />
-                    <Design.DragHandles />
-                    <Design.Marquee />
+                    {!isPlayground && <Design.DragHandles />}
+                    {!isPlayground && <Design.Marquee />}
                   </Design.Root>
                 </RenderingModeProvider>
               </SVGRenderer>

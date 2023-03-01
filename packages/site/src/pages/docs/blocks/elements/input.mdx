@@ -1,0 +1,24 @@
+import { inputSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={inputSymbolId} />
+
+## Configuration
+
+The input can be prefilled with text.
+
+You can further configure the input's style by adding:
+
+- `#dark` - to use the dark theme
+- `#accent` - to use the accent color variant of the theme
+- `#disabled` - to disable the select
+
+Here's an example configuration that uses these options (double click to edit):
+
+<InteractiveBlockPreview
+  blockId={inputSymbolId}
+  blockText={`Live chat offline #dark #accent #disabled`}
+/>

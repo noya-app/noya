@@ -1,0 +1,28 @@
+import { tableSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={tableSymbolId} />
+
+## Customization
+
+You can type or paste any comma-separated or tab-separated data into the table
+block to customize its contents. For example:
+
+```
+Name, Age, Height
+John, 30, 6'0"
+Jane, 25, 5'8"
+```
+
+Results in the following table:
+
+<InteractiveBlockPreview
+  blockId={tableSymbolId}
+  blockText={`Name, Age, Height
+John, 30, 6'0"
+Jane, 25, 5'8"`}
+  blockHeight={300}
+/>

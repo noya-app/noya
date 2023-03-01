@@ -1,4 +1,5 @@
 import {
+  Divider,
   ScrollArea,
   Spacer,
   Stack,
@@ -20,6 +21,7 @@ export function AppLayout({
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
       {toolbar}
+      {toolbar && <Divider variant="strong" />}
       <ScrollArea>
         <Stack.V flex="1">
           <Spacer.Vertical size={100} />

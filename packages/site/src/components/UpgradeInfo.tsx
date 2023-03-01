@@ -20,7 +20,7 @@ import PremiumTemplateMosaic from '../assets/PremiumTemplateMosaic.png';
 
 const upgradePerks = [
   'Unlimited projects & blocks',
-  '3,000 AI-generated content per month',
+  '3,000 AI-generations per month',
   'Access to premium template library',
   'React code export',
   'Early access to new features',

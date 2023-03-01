@@ -284,12 +284,19 @@ export function filterSlashCommands(text: string) {
   return text;
 }
 
-export function getTextAlign({
-  left,
-  right,
-  center,
-}: ParsedBlockItemParameters) {
-  return left ? 'left' : right ? 'right' : center ? 'center' : undefined;
+const textAlignKeys = new Set(['left', 'right', 'center']);
+
+export function getTextAlign(hashtags: string[]) {
+  const textAlignKey = hashtags
+    .slice()
+    .reverse()
+    .find((key) => textAlignKeys.has(key)) as
+    | 'left'
+    | 'right'
+    | 'center'
+    | undefined;
+
+  return textAlignKey;
 }
 
 export function getSelfAlign({

@@ -1,0 +1,21 @@
+import { textSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={textSymbolId} />
+
+## Configuration
+
+The text block accepts many `#` commands for styling text, such as
+`#text-red-600 #font-bold`:
+
+<InteractiveBlockPreview
+  blockId={textSymbolId}
+  blockText="Cats are great pets. They make loyal and loving companions who can provide years of fun and joy. #text-red-600 #font-bold"
+/>
+
+## Limitations
+
+There is currently no way to change the font size or font family.

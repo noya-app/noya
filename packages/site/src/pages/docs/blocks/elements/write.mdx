@@ -1,0 +1,25 @@
+import { writeSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview
+  blockId={writeSymbolId}
+  blockText="Cats are great pets"
+  resolvedBlockText="Cats are incredibly intelligent creatures with personalities all of their own. They make loyal and loving companions who can provide years of fun and joy. Cats come in all shapes, sizes, and colors and offer a variety of health benefits to their human owners. From their natural mouse-catching abilities to their playful antics, cats make terrific pet choices for a wide variety of households."
+/>
+
+## Configuration
+
+For more information about generating content, see the
+[AI Generation](/app/docs/overview/ai-generation) page of the docs.
+
+The write block accepts many `#` commands for styling text, such as
+`#text-red-600 #font-bold`:
+
+<InteractiveBlockPreview
+  blockId={writeSymbolId}
+  blockText="Cats are great pets #text-red-600 #font-bold"
+  resolvedBlockText="Cats are incredibly intelligent creatures with personalities all of their own. They make loyal and loving companions who can provide years of fun and joy. Cats come in all shapes, sizes, and colors and offer a variety of health benefits to their human owners. From their natural mouse-catching abilities to their playful antics, cats make terrific pet choices for a wide variety of households."
+/>

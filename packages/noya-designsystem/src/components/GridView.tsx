@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  CSSProperties,
   ForwardedRef,
   forwardRef,
   memo,
@@ -16,7 +17,10 @@ import { Spacer } from './Spacer';
 
 export type GridViewVariant = 'small' | 'large';
 
-const Grid = styled.div<{ variant: GridViewVariant }>(({ theme, variant }) => {
+const Grid = styled.div<{
+  variant: GridViewVariant;
+  padding: CSSProperties['padding'];
+}>(({ theme, variant, padding }) => {
   return {
     color: theme.colors.text,
     display: 'grid',
@@ -25,15 +29,17 @@ const Grid = styled.div<{ variant: GridViewVariant }>(({ theme, variant }) => {
     }px, 1fr))`,
     gridAutoRows: variant === 'large' ? '280px' : '170px',
     gap: `20px`,
-    padding: `20px`,
+    padding,
   };
 });
 
-const Container = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'column',
-}));
+const Container = styled.div<{ scrollable: boolean }>(
+  ({ theme, scrollable }) => ({
+    flex: scrollable ? '1' : '0 0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+);
 
 const ItemContainer = styled.div<{ selected?: boolean }>(
   ({ theme, selected }) => ({
@@ -45,6 +51,14 @@ const ItemContainer = styled.div<{ selected?: boolean }>(
     borderRadius: '2px',
     border: `1px solid ${selected ? theme.colors.primary : 'transparent'}`,
     overflow: 'hidden',
+
+    cursor: 'pointer',
+    '&:hover': {
+      opacity: 0.9,
+    },
+    '&:active': {
+      opacity: 0.95,
+    },
   }),
 );
 
@@ -162,9 +176,15 @@ interface GridViewRootProps {
   variant?: GridViewVariant;
   children: ReactNode;
   onClick: () => void;
+  scrollable?: boolean;
 }
 
-function GridViewRoot({ variant, children, onClick }: GridViewRootProps) {
+function GridViewRoot({
+  variant,
+  children,
+  scrollable = true,
+  onClick,
+}: GridViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -177,17 +197,27 @@ function GridViewRoot({ variant, children, onClick }: GridViewRootProps) {
 
   return (
     <GridViewContext.Provider value={variant ?? 'small'}>
-      <Container onClick={handleClick}>
-        <ScrollArea>{children}</ScrollArea>
+      <Container onClick={handleClick} scrollable={scrollable}>
+        {scrollable ? <ScrollArea>{children}</ScrollArea> : children}
       </Container>
     </GridViewContext.Provider>
   );
 }
 
-function GridViewSection({ children }: { children?: ReactNode }) {
+function GridViewSection({
+  children,
+  padding = '20px',
+}: {
+  children?: ReactNode;
+  padding?: CSSProperties['padding'];
+}) {
   const variant = useContext(GridViewContext);
 
-  return <Grid variant={variant}>{children}</Grid>;
+  return (
+    <Grid variant={variant} padding={padding}>
+      {children}
+    </Grid>
+  );
 }
 
 function GridViewSectionHeader({ title }: { title: string }) {

@@ -1,5 +1,6 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
+import { ResizePosition } from 'noya-geometry';
 import { ILogEvent } from 'noya-log';
 import { Selectors } from 'noya-state';
 import React, {
@@ -31,6 +32,7 @@ interface Props {
   interactions?: Interaction[];
   padding?: number;
   logEvent?: ILogEvent;
+  position?: ResizePosition;
 }
 
 export interface ISimpleCanvas {
@@ -45,6 +47,7 @@ export const SimpleCanvas = memo(
       widgets,
       rendererZIndex = 0,
       padding = 0,
+      position,
       logEvent,
     }: Props,
     forwardedRef: ForwardedRef<ISimpleCanvas>,
@@ -91,9 +94,9 @@ export const SimpleCanvas = memo(
       dispatch(
         'zoomToFit*',
         { type: 'layer', value: state.isolatedLayerId },
-        { padding, max: 1, position: 'top' },
+        { padding, max: 1, position },
       );
-    }, [canvasSize, state.isolatedLayerId, dispatch, padding]);
+    }, [canvasSize, state.isolatedLayerId, dispatch, padding, position]);
 
     return (
       <ContextMenu

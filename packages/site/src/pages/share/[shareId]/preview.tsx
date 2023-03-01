@@ -7,20 +7,10 @@ import {
 } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
 import { Interstitial } from '../../../components/Interstitial';
-import { OptionalNoyaAPIProvider } from '../../../components/OptionalNoyaAPIProvider';
 import { addShareCookie } from '../../../utils/cookies';
-import { NOYA_HOST } from '../../../utils/noyaClient';
+import { networkClientThatThrows } from '../../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../../components/Ayon'), { ssr: false });
-
-/**
- * This client throws errors if the user isn't logged in
- */
-const networkClient = NOYA_HOST
-  ? new NoyaAPI.NetworkClient({
-      baseURI: `${NOYA_HOST}/api`,
-    })
-  : undefined;
 
 function Content({ shareId }: { shareId: string }) {
   const [initialFile, setInitialFile] = useState<
@@ -30,10 +20,12 @@ function Content({ shareId }: { shareId: string }) {
 
   useEffect(() => {
     async function main() {
-      if (!networkClient) return;
+      if (!networkClientThatThrows) return;
 
       try {
-        const file = await networkClient.files.shares.readSharedFile(shareId);
+        const file = await networkClientThatThrows.files.shares.readSharedFile(
+          shareId,
+        );
         setInitialFile(file);
       } catch (error) {
         if (error instanceof Error) {
@@ -78,10 +70,8 @@ export default function Preview() {
   addShareCookie(shareId);
 
   return (
-    <OptionalNoyaAPIProvider networkClient={networkClient}>
-      <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-        <Content shareId={shareId} />
-      </DesignSystemConfigurationProvider>
-    </OptionalNoyaAPIProvider>
+    <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
+      <Content shareId={shareId} />
+    </DesignSystemConfigurationProvider>
   );
 }

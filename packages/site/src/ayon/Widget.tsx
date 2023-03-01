@@ -251,6 +251,7 @@ export const Widget = forwardRef(function Widget(
     onChangeBlockContent,
     uploadAsset,
     onFocusCanvas,
+    showToolbar = true,
   }: {
     layer: Sketch.AnyLayer;
     inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
@@ -258,6 +259,7 @@ export const Widget = forwardRef(function Widget(
     onChangeBlockContent: (content: BlockContent) => void;
     uploadAsset: (file: ArrayBuffer) => Promise<string>;
     onFocusCanvas: () => void;
+    showToolbar?: boolean;
   },
   forwardedRef: React.Ref<HTMLDivElement>,
 ) {
@@ -411,6 +413,7 @@ export const Widget = forwardRef(function Widget(
         )
       }
       footer={
+        showToolbar &&
         showWidgetUI && (
           <Stack.V gap={6} alignItems="flex-end">
             <BlockTypeOnboardingPopover

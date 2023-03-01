@@ -1,0 +1,26 @@
+import { iconSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={iconSymbolId} />
+
+## Configuration
+
+Type within the icon block to search
+[iconify](https://icon-sets.iconify.design/?query=twitter) for an icon.
+
+The icon block will use the top recommended search result automatically, e.g.
+for `twitter`:
+
+<InteractiveBlockPreview blockId={iconSymbolId} blockText="twitter" />
+
+You can also search [iconify](https://icon-sets.iconify.design/?query=twitter)
+yourself in another browser tab and use a specific icon name directly, e.g.
+`iconoir:twitter-verified-badge`:
+
+<InteractiveBlockPreview
+  blockId={iconSymbolId}
+  blockText="iconoir:twitter-verified-badge"
+/>

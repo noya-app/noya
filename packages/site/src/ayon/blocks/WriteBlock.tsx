@@ -18,7 +18,7 @@ export const WriteBlock: BlockDefinition = {
 
     return (
       <Text
-        textAlign={getTextAlign(parameters)}
+        textAlign={getTextAlign(hashtags)}
         className={getBlockClassName(hashtags)}
       >
         {props.resolvedBlockData?.resolvedText ?? (

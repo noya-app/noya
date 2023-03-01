@@ -18,24 +18,14 @@ import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { Interstitial } from '../../components/Interstitial';
-import { OptionalNoyaAPIProvider } from '../../components/OptionalNoyaAPIProvider';
 import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
-import { NOYA_HOST } from '../../utils/noyaClient';
+import { networkClientThatThrows, NOYA_HOST } from '../../utils/noyaClient';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 
-/**
- * This client throws errors if the user isn't logged in
- */
-export const networkClient = NOYA_HOST
-  ? new NoyaAPI.NetworkClient({
-      baseURI: `${NOYA_HOST}/api`,
-    })
-  : undefined;
-
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  if (!networkClient) return;
+  if (!networkClientThatThrows) return;
 
   let shareId: string | null = null,
     initialFile: NoyaAPI.SharedFile | null = null,
@@ -43,7 +33,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   try {
     shareId = context.params!.shareId as string;
-    const file = await networkClient.files.shares.readSharedFile(shareId);
+    const file = await networkClientThatThrows.files.shares.readSharedFile(
+      shareId,
+    );
     initialFile = file;
   } catch (readFileError) {
     if (readFileError instanceof Error) {
@@ -76,10 +68,12 @@ function Content({
 
   useEffect(() => {
     async function main() {
-      if (!networkClient) return;
+      if (!networkClientThatThrows) return;
 
       try {
-        const file = await networkClient.files.shares.readSharedFile(shareId);
+        const file = await networkClientThatThrows.files.shares.readSharedFile(
+          shareId,
+        );
         setFileId(file.fileId);
       } catch (error) {}
     }
@@ -104,7 +98,7 @@ function Content({
     Layers.isArtboard,
   );
 
-  const screenshotUrl = `${networkClient?.baseURI}/shares/${initialFile.id}.png?width=${artboard?.frame.width}&height=${artboard?.frame.height}`;
+  const screenshotUrl = `${networkClientThatThrows?.baseURI}/shares/${initialFile.id}.png?width=${artboard?.frame.width}&height=${artboard?.frame.height}`;
 
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
@@ -231,10 +225,8 @@ export default function Preview({
   addShareCookie(shareId);
 
   return (
-    <OptionalNoyaAPIProvider networkClient={networkClient}>
-      <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-        <Content shareId={shareId} initialFile={initialFile} error={error} />
-      </DesignSystemConfigurationProvider>
-    </OptionalNoyaAPIProvider>
+    <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
+      <Content shareId={shareId} initialFile={initialFile} error={error} />
+    </DesignSystemConfigurationProvider>
   );
 }

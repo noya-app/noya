@@ -41,6 +41,11 @@ export const InputBlock: BlockDefinition = {
 
     return (
       <Input
+        {...(props.dataSet && {
+          key: props.dataSet.id,
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        })}
         value={content}
         size={size}
         backgroundColor={backgroundColor}
