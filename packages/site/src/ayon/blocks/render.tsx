@@ -8,6 +8,7 @@ import {
 import { zip } from 'noya-utils';
 import {
   encodeBlockItem,
+  getTextAlign,
   mergeBlockItems,
   parseBlock,
   ParsedBlockItemParameters,
@@ -106,6 +107,7 @@ export function getRenderableBlockProps({ props, block }: BlockRenderOptions) {
   const container = getContainerBlockProps({ props, block });
 
   const { parameters } = parseBlock(container.blockText, 'regular');
+  const hashtags = Object.keys(parameters);
 
   const background = Object.keys(parameters)
     .reverse()
@@ -115,13 +117,13 @@ export function getRenderableBlockProps({ props, block }: BlockRenderOptions) {
     ? /-(500|600|700|800|900)$/.test(background)
     : undefined;
 
+  const textAlign = getTextAlign(hashtags);
+
   const children = getChildrenBlockProps({
     props,
     block,
     extraParameters: {
-      ...(parameters.left && { left: true }),
-      ...(parameters.right && { right: true }),
-      ...(parameters.center && { center: true }),
+      ...(textAlign && { [textAlign]: true }),
       ...((parameters.dark || darkBackground) && {
         'text-white': true,
         light: true,

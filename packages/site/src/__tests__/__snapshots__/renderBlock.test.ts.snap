@@ -101,11 +101,11 @@ exports[`hero left aligned default 1`] = `
     className=\\"flex-col bg-transparent p-4 gap-3 items-start justify-center\\"
   >
     <Flex>
-      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" className=\\"text-center\\">
+      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" textAlign=\\"left\\">
         {'Create, iterate, inspire.'}
       </Heading>
     </Flex>
-    <Text className=\\"text-center mb-4\\">
+    <Text className=\\"mb-4\\" textAlign=\\"left\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
     <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
