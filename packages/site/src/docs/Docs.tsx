@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { darkTheme, Divider, Stack } from 'noya-designsystem';
 import * as Icons from 'noya-icons';
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef } from 'react';
 import {
   Anchor,
   defaultTheme,
@@ -46,7 +46,8 @@ export const docsTheme = produce(defaultTheme, (draft) => {
   draft.colors.selectedBackground = 'rgba(140, 125, 253, 0.25)';
   draft.colors.textLink = '#00a4ff';
   // draft.colors.textLinkFocused = theme.colors.primaryLight;
-  draft.colors.inlineCode.text = '#23ff86';
+  draft.colors.inlineCode.text = theme.colors.secondaryBright;
+  draft.colors.inlineCode.background = '#00968842';
 
   draft.colors.primary = theme.colors.primary;
   draft.colors.title.left = 'white';
@@ -129,6 +130,15 @@ export function Docs({
   urlPrefix: string;
 }) {
   const router = useRouter();
+  const scrollElement = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      scrollElement.current?.scrollTo(0, 0);
+    };
+
+    return router.events.on('routeChangeComplete', handleRouteChange);
+  }, [router.events]);
 
   // Use `asPath`, since `pathname` will be "_error" if the page isn't found
   const pathname = router.pathname.slice(urlPrefix.length);
@@ -187,7 +197,7 @@ export function Docs({
           <GuidebookThemeProvider theme={docsTheme}>
             {/* A single child is required here for React.Children.only */}
             <MDXProvider components={MDXComponents}>
-              <Stack.V overflowY="auto">
+              <Stack.V overflowY="auto" ref={scrollElement}>
                 <Page
                   rootNode={guidebook}
                   searchPages={searchPages}
