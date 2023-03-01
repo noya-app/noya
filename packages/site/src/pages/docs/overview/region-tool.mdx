@@ -1,0 +1,32 @@
+---
+title: Region Tool
+---
+
+import { GroupIcon } from 'noya-icons';
+import RegionTool from '../../../assets/docs/RegionTool.png';
+import RegionToolExample from '../../../assets/docs/RegionToolExample.webp';
+
+## How it Works
+
+The region tool lets you select multiple blocks, even when there may be another
+block directly under the cursor.
+
+You can activate the region tool by clicking the <GroupIcon
+style={{ display: 'inline', verticalAlign: 'text-top' }} /> icon in the toolbar,
+or by holding the `Shift` key.
+
+<img src={RegionTool.src} alt="Region Tool" />
+
+## Selection Behavior
+
+Insipired by CAD software, the region tool has two different selection behaviors
+based on the direction you drag after clicking:
+
+- **Left to right** - Select any block that the region tool touches (this is the
+  selection behavior of Figma & Sketch)
+- **Right to left** - Select only fully enclosed blocks
+
+Selecting enclosed blocks is useful when you want to select blocks that have
+another block in the background behind them.
+
+<img src={RegionToolExample.src} alt="Region Tool Example" />
