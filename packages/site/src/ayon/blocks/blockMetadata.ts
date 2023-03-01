@@ -9,6 +9,7 @@ import {
   sidebarSymbolId,
   signInSymbolId,
   tableSymbolId,
+  writeSymbolId,
 } from './symbolIds';
 
 export type BlockCategory = 'application' | 'marketing' | 'element';
@@ -56,6 +57,14 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     preferredBlockText: 'landscape',
     preferredResolvedBlockText:
       'https://images.unsplash.com/photo-1514917860136-ee8b88e8c9c9?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8bGFuZHNjYXBlLGJ1c3Rlcnx8fHx8fDE2Nzc2NDIxNDM&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=300',
+  },
+  [writeSymbolId]: {
+    name: 'Write',
+    category: 'element',
+    preferredSize: { width: 300, height: 300 },
+    preferredBlockText: 'Cats are great pets',
+    preferredResolvedBlockText:
+      'Cats are incredibly intelligent creatures with personalities all of their own. They make loyal and loving companions who can provide years of fun and joy. Cats come in all shapes, sizes, and colors and offer a variety of health benefits to their human owners. From their natural mouse-catching abilities to their playful antics, cats make terrific pet choices for a wide variety of households.',
   },
   [signInSymbolId]: {
     name: 'Sign In',
