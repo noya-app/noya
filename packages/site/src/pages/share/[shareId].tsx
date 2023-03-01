@@ -18,7 +18,6 @@ import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { Interstitial } from '../../components/Interstitial';
-import { OptionalNoyaAPIProvider } from '../../components/OptionalNoyaAPIProvider';
 import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
 import { networkClientThatThrows, NOYA_HOST } from '../../utils/noyaClient';
@@ -226,10 +225,8 @@ export default function Preview({
   addShareCookie(shareId);
 
   return (
-    <OptionalNoyaAPIProvider>
-      <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
-        <Content shareId={shareId} initialFile={initialFile} error={error} />
-      </DesignSystemConfigurationProvider>
-    </OptionalNoyaAPIProvider>
+    <DesignSystemConfigurationProvider platform="key" theme={lightTheme}>
+      <Content shareId={shareId} initialFile={initialFile} error={error} />
+    </DesignSystemConfigurationProvider>
   );
 }

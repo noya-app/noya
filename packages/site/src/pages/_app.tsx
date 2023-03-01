@@ -71,6 +71,10 @@ export default function App({ Component, pageProps }: AppProps) {
       </DesignSystemConfigurationProvider>
     );
   } else {
-    return <Component {...pageProps} />;
+    return (
+      <OptionalNoyaAPIProvider>
+        <Component {...pageProps} />
+      </OptionalNoyaAPIProvider>
+    );
   }
 }

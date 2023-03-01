@@ -191,7 +191,7 @@ export function ProfessionalPlanFeatures() {
     <Stack.V gap={8} padding={'0 20px'}>
       <FeatureItem>Unlimited projects</FeatureItem>
       <FeatureItem>Unlimited blocks</FeatureItem>
-      <FeatureItem>3,000 AI-generated content/mo</FeatureItem>
+      <FeatureItem>3,000 AI-generations per month</FeatureItem>
       <FeatureItem>Export to Figma or Sketch</FeatureItem>
       <FeatureItem>Export React code</FeatureItem>
       <FeatureItem>Priority support</FeatureItem>
@@ -204,7 +204,7 @@ export function StarterPlanFeatures() {
     <Stack.V gap={8} padding={'0 20px'}>
       <FeatureItem>10 projects</FeatureItem>
       <FeatureItem>200 blocks</FeatureItem>
-      <FeatureItem>30 AI-generated content/mo</FeatureItem>
+      <FeatureItem>30 AI-generations per month</FeatureItem>
       <FeatureItem>Export to Figma or Sketch</FeatureItem>
     </Stack.V>
   );

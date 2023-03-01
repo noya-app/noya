@@ -28,7 +28,6 @@ import { getHeadTags } from './getHeadTags';
 import { InteractiveBlockPreview } from './InteractiveBlockPreview';
 import { searchPages, searchTextMatch } from './search';
 import { socialConfig } from './socialConfig';
-import { StaticBlockPreview } from './StaticBlockPreview';
 
 const { MDXProvider } = require('@mdx-js/react');
 
@@ -105,7 +104,6 @@ const MDXComponents = {
   ...PageComponents,
   a: StyledAnchor,
   kbd: InlineCode,
-  StaticBlockPreview,
   InteractiveBlockPreview,
   BlockGrid,
   InlineIcon: ({ name }: { name: keyof typeof Icons }) => {
