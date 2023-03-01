@@ -78,11 +78,11 @@ exports[`hero default 1`] = `
     className=\\"flex-col bg-transparent p-4 gap-3 items-center justify-center\\"
   >
     <Flex>
-      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" className=\\"text-center\\">
+      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" textAlign=\\"center\\">
         {'Create, iterate, inspire.'}
       </Heading>
     </Flex>
-    <Text className=\\"text-center mb-4\\">
+    <Text className=\\"mb-4\\" textAlign=\\"center\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
     <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
@@ -128,15 +128,22 @@ exports[`hero with bg default 1`] = `
         flex=\\"1\\"
         size=\\"xl\\"
         lineHeight=\\"1.3\\"
-        className=\\"text-center text-white\\"
+        className=\\"text-white\\"
+        textAlign=\\"center\\"
       >
         {'Create, iterate, inspire.'}
       </Heading>
     </Flex>
-    <Text className=\\"text-center mb-4 text-white\\">
+    <Text className=\\"mb-4 text-white\\" textAlign=\\"center\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
-    <Button size=\\"md\\" backgroundColor=\\"#f1f5f9\\" color=\\"#000\\" isDisabled={false}>
+    <Button
+      size=\\"md\\"
+      backgroundColor=\\"#f1f5f9\\"
+      color=\\"#000\\"
+      isDisabled={false}
+      className=\\"text-white\\"
+    >
       {'Get started'}
     </Button>
   </Flex>
@@ -146,7 +153,9 @@ exports[`hero with bg default 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text className=\\"text-red-500\\">{'Hello world'}</Text>
+  <Text className=\\"text-red-500\\" textAlign=\\"center\\">
+    {'Hello world'}
+  </Text>
 </Frame>;
 "
 `;
