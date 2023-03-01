@@ -6,6 +6,12 @@ import {
   cardSymbolId,
   checkboxSymbolId,
   headerBarSymbolId,
+  heading1SymbolId,
+  heading2SymbolId,
+  heading3SymbolId,
+  heading4SymbolId,
+  heading5SymbolId,
+  heading6SymbolId,
   heroSymbolV2Id,
   iconSymbolId,
   imageSymbolId,
@@ -17,6 +23,7 @@ import {
   switchSymbolId,
   tableSymbolId,
   textareaSymbolId,
+  textSymbolId,
   tileCardSymbolId,
   writeSymbolId,
 } from './symbolIds';
@@ -29,6 +36,19 @@ export type BlockMetadata = {
   preferredSize: Size;
   preferredBlockText?: string;
   preferredResolvedBlockText?: string;
+  hideInDocs?: boolean;
+};
+
+const headingMetadata: BlockMetadata = {
+  name: 'Heading',
+  category: 'element',
+  preferredSize: { width: 500, height: 60 },
+  preferredBlockText: 'All About Cats',
+};
+
+const headingNMetadata: BlockMetadata = {
+  ...headingMetadata,
+  hideInDocs: true,
 };
 
 // This is in a separate file so docs don't have to import Chakra components directly.
@@ -85,6 +105,19 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     preferredResolvedBlockText:
       'Cats are incredibly intelligent creatures with personalities all of their own. They make loyal and loving companions who can provide years of fun and joy. Cats come in all shapes, sizes, and colors and offer a variety of health benefits to their human owners. From their natural mouse-catching abilities to their playful antics, cats make terrific pet choices for a wide variety of households.',
   },
+  [textSymbolId]: {
+    name: 'Text',
+    category: 'element',
+    preferredSize: { width: 300, height: 150 },
+    preferredBlockText:
+      'Cats are great pets. They make loyal and loving companions who can provide years of fun and joy.',
+  },
+  [heading1SymbolId]: headingMetadata,
+  [heading2SymbolId]: headingNMetadata,
+  [heading3SymbolId]: headingNMetadata,
+  [heading4SymbolId]: headingNMetadata,
+  [heading5SymbolId]: headingNMetadata,
+  [heading6SymbolId]: headingNMetadata,
   [signInSymbolId]: {
     name: 'Sign In',
     category: 'application',

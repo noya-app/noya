@@ -48,7 +48,8 @@ export const HeroBlockV1: BlockDefinition = {
 
     const { backgroundColor, color } = getBlockThemeColors({ dark, accent });
 
-    const textAlign = getTextAlign(parameters) ?? 'center';
+    const hashtags = Object.keys(parameters);
+    const textAlign = getTextAlign(hashtags) ?? 'center';
 
     const [headline, subheadline, button, button2] = items.map(
       (item) => item.content,

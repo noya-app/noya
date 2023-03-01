@@ -21,6 +21,7 @@ export function BlockGrid({ category }: { category: BlockCategory }) {
         <GridView.Section padding={0}>
           {Object.entries(blockMetadata)
             .filter(([, metadata]) => metadata.category === category)
+            .filter(([, metadata]) => !metadata.hideInDocs)
             .map(([blockId, metadata]) => (
               <GridView.Item
                 key={blockId}

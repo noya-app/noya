@@ -3,7 +3,7 @@ import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
 import React from 'react';
-import { parseBlock } from '../parse';
+import { getTextAlign, parseBlock } from '../parse';
 import {
   heading1Symbol,
   heading2Symbol,
@@ -49,6 +49,7 @@ const createHeadingBlock = (
           size={size}
           lineHeight="1.3"
           className={getBlockClassName(otherClasses)}
+          textAlign={getTextAlign(hashtags)}
         >
           {content}
         </Heading>

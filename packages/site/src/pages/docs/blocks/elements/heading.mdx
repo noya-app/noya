@@ -1,0 +1,34 @@
+import {
+  heading1SymbolId,
+  heading3SymbolId,
+} from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={heading1SymbolId} />
+
+## Configuration
+
+There are 6 different pre-defined heading styles, each represented by a
+different block type. The block types are:
+
+- `Heading 1`
+- `Heading 2`
+- `Heading 3`
+- `Heading 4`
+- `Heading 5`
+- `Heading 6`
+
+The heading block accepts many `#` commands for styling text. For example,
+here's a `Heading 3` block with the styles `#text-red-600 #center`:
+
+<InteractiveBlockPreview
+  blockId={heading3SymbolId}
+  blockText="All About Cats #text-red-600 #center"
+/>
+
+## Limitations
+
+There is currently no way to change the font size or font family.
