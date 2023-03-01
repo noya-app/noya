@@ -3,6 +3,7 @@ import {
   avatarSymbolId,
   boxSymbolId,
   buttonSymbolId,
+  cardSymbolId,
   checkboxSymbolId,
   headerBarSymbolId,
   heroSymbolV2Id,
@@ -16,6 +17,7 @@ import {
   switchSymbolId,
   tableSymbolId,
   textareaSymbolId,
+  tileCardSymbolId,
   writeSymbolId,
 } from './symbolIds';
 
@@ -51,6 +53,16 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     name: 'Hero',
     category: 'marketing',
     preferredSize: { width: 600, height: 400 },
+  },
+  [cardSymbolId]: {
+    name: 'Card',
+    category: 'marketing',
+    preferredSize: { width: 250, height: 300 },
+  },
+  [tileCardSymbolId]: {
+    name: 'Tile Card',
+    category: 'marketing',
+    preferredSize: { width: 250, height: 250 },
   },
   [iconSymbolId]: {
     name: 'Icon',

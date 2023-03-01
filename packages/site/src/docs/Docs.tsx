@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { darkTheme, Divider, Stack } from 'noya-designsystem';
+import * as Icons from 'noya-icons';
 import React, { ReactNode, useMemo } from 'react';
 import {
   Anchor,
@@ -28,6 +29,7 @@ import { InteractiveBlockPreview } from './InteractiveBlockPreview';
 import { searchPages, searchTextMatch } from './search';
 import { socialConfig } from './socialConfig';
 import { StaticBlockPreview } from './StaticBlockPreview';
+
 const { MDXProvider } = require('@mdx-js/react');
 
 const theme = darkTheme;
@@ -105,6 +107,13 @@ const MDXComponents = {
   StaticBlockPreview,
   InteractiveBlockPreview,
   BlockGrid,
+  InlineIcon: ({ name }: { name: keyof typeof Icons }) => {
+    const Component = Icons[name];
+
+    return (
+      <Component style={{ display: 'inline', verticalAlign: 'text-top' }} />
+    );
+  },
   table: (props: React.ComponentProps<typeof PageComponents['table']>) => (
     <ScrollableTableContainer>
       <StyledTable {...props} />

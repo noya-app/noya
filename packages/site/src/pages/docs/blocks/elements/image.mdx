@@ -5,3 +5,24 @@ import { imageSymbolId } from '../../../../ayon/blocks/symbolIds';
 You can double click the block to edit its contents.
 
 <InteractiveBlockPreview blockId={imageSymbolId} />
+
+## Configuration
+
+By default, the image block searches https://unsplash.com for images based on
+the text within the block. For example, the default text is `landscape`, so the
+block picks a nice landscape image.
+
+You can click the <InlineIcon name="ReloadIcon" /> icon in the block's toolbar
+to search for a different image using the same search text, e.g. `landscape`.
+
+> Images on unsplash are royalty-free and can be used in commercial projects:
+> [Unsplash License](https://unsplash.com/license)
+
+## Custom Images
+
+To use a custom image, you can:
+
+- drag an image file from your computer onto the Noya canvas
+- select the block and click the upload icon <InlineIcon name="UploadIcon" />
+  that appears in the block's toolbar
+- edit the block and type/paste any url from the web
