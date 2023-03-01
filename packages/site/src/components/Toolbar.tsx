@@ -99,6 +99,8 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const showOnboarding = onboardingStep === 'configuredBlockText';
   const dismissOnboarding = () => setOnboardingStep('dismissedSupportInfo');
 
+  const isProjectsPath = router.pathname.startsWith('/projects');
+
   return (
     <Stack.H
       background={theme.colors.sidebar.background}
@@ -146,10 +148,18 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                 onSelect={(value) => {
                   switch (value) {
                     case 'account':
-                      router.push('/account');
+                      if (isProjectsPath) {
+                        openInNewTab(`${NOYA_HOST}/app/account`);
+                      } else {
+                        router.push('/account');
+                      }
                       return;
                     case 'docs':
-                      router.push('/docs');
+                      if (isProjectsPath) {
+                        openInNewTab(`${NOYA_HOST}/app/docs`);
+                      } else {
+                        router.push('/docs');
+                      }
                       return;
                     case 'templates':
                       window.location.href = `${NOYA_HOST}/templates`;

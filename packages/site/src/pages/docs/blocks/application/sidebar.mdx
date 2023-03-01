@@ -8,10 +8,21 @@ You can double click the block to edit its contents.
 
 ## Configuration
 
+Each item in the sidebar should be on a separate line. To show a specific item
+as active, type `*` before the item name.
+
+You can further configure the sidebar's style by adding:
+
+- `#title` - to use the first item as a title
+- `#dark` - to use the dark theme
+
+Here's an example configuration that uses these options (double click to edit):
+
 <InteractiveBlockPreview
   blockId={sidebarSymbolId}
-  blockText={`Dashboard,
-*Updates,
-Billing #dark`}
+  blockText={`Dashboard
+*Updates
+Billing
+#dark #title`}
   blockHeight={200}
 />
