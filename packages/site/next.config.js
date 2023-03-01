@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const generateGuidebook = require('generate-guidebook/next');
+const slug = require('rehype-slug');
 
 const workspacePath = path.join(__dirname, '..');
 
@@ -9,13 +10,12 @@ const withGuidebook = generateGuidebook({
   guidebookModulePath: `./guidebook.js`,
 });
 
-const withMDX = (...args) =>
-  require('next-mdx-frontmatter')({
-    extension: /\.mdx?$/,
-    MDXOptions: {
-      rehypePlugins: [],
-    },
-  })(...args);
+const withMDX = require('next-mdx-frontmatter')({
+  extension: /\.mdx?$/,
+  MDXOptions: {
+    rehypePlugins: [slug],
+  },
+});
 
 const withConfig = (nextConfig) => ({
   ...nextConfig,
