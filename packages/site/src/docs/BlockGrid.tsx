@@ -28,7 +28,9 @@ export function BlockGrid({ category }: { category: BlockCategory }) {
                 title={metadata.name}
                 onClick={() => {
                   router.push(
-                    `/docs/blocks/${category}/${metadata.name
+                    `/docs/blocks/${
+                      category === 'element' ? 'elements' : category
+                    }/${metadata.name
                       .toLocaleLowerCase()
                       .replaceAll(' ', '-')}`,
                   );

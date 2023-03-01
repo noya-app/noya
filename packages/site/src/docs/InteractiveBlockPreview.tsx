@@ -7,12 +7,14 @@ import {
   Stack,
   useDesignSystemConfiguration,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { BlockDefinition, createSketchFile } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { blockMetadata } from '../ayon/blocks/blockMetadata';
 import { ViewType } from '../ayon/Content';
+import { parseBlock } from '../ayon/parse';
 
 const Blocks = import('../ayon/blocks/blocks');
 const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
@@ -91,12 +93,14 @@ function Loader({
   height,
   viewType,
   blockText,
+  resolvedBlockText,
 }: {
   blockId: string;
   width: number;
   height: number;
   viewType?: ViewType;
   blockText?: string;
+  resolvedBlockText?: string;
 }) {
   const [blocks, setBlocks] = useState<
     Record<string, BlockDefinition> | undefined
@@ -111,6 +115,22 @@ function Loader({
 
       setBlocks(blocks);
 
+      const { content: originalText } = parseBlock(
+        blockText,
+        blocks[blockId].parser,
+        { placeholder: blocks[blockId].placeholderText },
+      );
+
+      const resolvedBlockData: Sketch.ResolvedBlockData | undefined =
+        resolvedBlockText
+          ? {
+              originalText,
+              resolvedText: resolvedBlockText,
+              symbolID: blockId,
+              resolvedAt: new Date().toISOString(),
+            }
+          : undefined;
+
       const client = new NoyaAPI.Client({
         networkClient: new NoyaAPI.MemoryClient({
           files: [
@@ -118,6 +138,7 @@ function Loader({
               block: blocks[blockId],
               size: { width, height },
               blockText,
+              resolvedBlockData,
             }),
           ],
         }),
@@ -125,7 +146,7 @@ function Loader({
 
       setClient(client);
     });
-  }, [blockId, blockText, height, width]);
+  }, [blockId, blockText, height, resolvedBlockText, width]);
 
   if (!blocks || !blockId || !client) return null;
 
@@ -144,6 +165,7 @@ interface Props {
   blockWidth?: number;
   viewType?: ViewType;
   blockText?: string;
+  resolvedBlockText?: string;
 }
 
 // We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
@@ -159,9 +181,13 @@ export function InteractiveBlockPreview(props: Props) {
     props.blockHeight ??
     blockMetadata[props.blockId]?.preferredSize.height ??
     400;
-
   const width = props.width ?? '100%';
   const height = props.height ? props.height : blockHeight + 40;
+  const blockText =
+    props.blockText ?? blockMetadata[props.blockId]?.preferredBlockText;
+  const resolvedBlockText =
+    props.resolvedBlockText ??
+    blockMetadata[props.blockId]?.preferredResolvedBlockText;
 
   return (
     <DesignSystemConfigurationProvider
@@ -173,7 +199,13 @@ export function InteractiveBlockPreview(props: Props) {
         width={width}
         background={lightTheme.colors.canvas.background}
       >
-        <Loader {...props} width={blockWidth} height={blockHeight} />
+        <Loader
+          {...props}
+          width={blockWidth}
+          height={blockHeight}
+          blockText={blockText}
+          resolvedBlockText={resolvedBlockText}
+        />
       </Stack.V>
     </DesignSystemConfigurationProvider>
   );
@@ -183,10 +215,12 @@ function createLocalFile({
   block,
   size,
   blockText,
+  resolvedBlockData,
 }: {
   block: BlockDefinition;
   size: Size;
   blockText?: string;
+  resolvedBlockData?: Sketch.ResolvedBlockData;
 }) {
   const instance = SketchModel.symbolInstance({
     symbolID: block.symbol.symbolID,
@@ -195,6 +229,7 @@ function createLocalFile({
       height: size.height,
     }),
     blockText,
+    resolvedBlockData,
   });
 
   const artboard = SketchModel.artboard({
