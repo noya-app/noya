@@ -10,9 +10,14 @@ import {
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
-import { BlockDefinition, createSketchFile } from 'noya-state';
+import {
+  BlockDefinition,
+  createSketchFile,
+  Layers,
+  Overrides,
+} from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
-import { blockMetadata } from '../ayon/blocks/blockMetadata';
+import { blockMetadata, PreferredOverride } from '../ayon/blocks/blockMetadata';
 import { ViewType } from '../ayon/Content';
 import { parseBlock } from '../ayon/parse';
 
@@ -94,6 +99,7 @@ function Loader({
   viewType,
   blockText,
   resolvedBlockText,
+  overrides,
 }: {
   blockId: string;
   width: number;
@@ -101,6 +107,7 @@ function Loader({
   viewType?: ViewType;
   blockText?: string;
   resolvedBlockText?: string;
+  overrides?: PreferredOverride[];
 }) {
   const [blocks, setBlocks] = useState<
     Record<string, BlockDefinition> | undefined
@@ -131,6 +138,51 @@ function Loader({
             }
           : undefined;
 
+      const layers = blocks[blockId].symbol.layers;
+
+      const overrideValues: Sketch.OverrideValue[] = (overrides ?? []).flatMap(
+        (override) => {
+          const { content } = parseBlock(
+            override.blockText,
+            blocks[override.symbolId].parser,
+            { placeholder: blocks[override.symbolId].placeholderText },
+          );
+
+          const layer = layers.find(
+            (layer): layer is Sketch.SymbolInstance =>
+              Layers.isSymbolInstance(layer) &&
+              layer.symbolID === override.symbolId,
+          );
+
+          if (!layer) return [];
+
+          return [
+            SketchModel.overrideValue({
+              overrideName: Overrides.encodeName(
+                [layer.do_objectID],
+                'blockText',
+              ),
+              value: override.blockText,
+            }),
+            ...(override.resolvedBlockText
+              ? [
+                  SketchModel.overrideValue({
+                    overrideName: Overrides.encodeName(
+                      [layer.do_objectID],
+                      'resolvedBlockData',
+                    ),
+                    value: {
+                      symbolID: layer.symbolID,
+                      originalText: content,
+                      resolvedText: override.resolvedBlockText,
+                    },
+                  }),
+                ]
+              : []),
+          ];
+        },
+      );
+
       const client = new NoyaAPI.Client({
         networkClient: new NoyaAPI.MemoryClient({
           files: [
@@ -139,6 +191,7 @@ function Loader({
               size: { width, height },
               blockText,
               resolvedBlockData,
+              overrideValues,
             }),
           ],
         }),
@@ -146,7 +199,7 @@ function Loader({
 
       setClient(client);
     });
-  }, [blockId, blockText, height, resolvedBlockText, width]);
+  }, [blockId, blockText, height, overrides, resolvedBlockText, width]);
 
   if (!blocks || !blockId || !client) return null;
 
@@ -166,6 +219,7 @@ interface Props {
   viewType?: ViewType;
   blockText?: string;
   resolvedBlockText?: string;
+  overrides?: PreferredOverride[];
 }
 
 // We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
@@ -188,6 +242,8 @@ export function InteractiveBlockPreview(props: Props) {
   const resolvedBlockText =
     props.resolvedBlockText ??
     blockMetadata[props.blockId]?.preferredResolvedBlockText;
+  const overrides =
+    props.overrides ?? blockMetadata[props.blockId]?.preferredOverrides;
 
   return (
     <DesignSystemConfigurationProvider
@@ -205,6 +261,7 @@ export function InteractiveBlockPreview(props: Props) {
           height={blockHeight}
           blockText={blockText}
           resolvedBlockText={resolvedBlockText}
+          overrides={overrides}
         />
       </Stack.V>
     </DesignSystemConfigurationProvider>
@@ -216,11 +273,13 @@ function createLocalFile({
   size,
   blockText,
   resolvedBlockData,
+  overrideValues,
 }: {
   block: BlockDefinition;
   size: Size;
   blockText?: string;
   resolvedBlockData?: Sketch.ResolvedBlockData;
+  overrideValues?: Sketch.OverrideValue[];
 }) {
   const instance = SketchModel.symbolInstance({
     symbolID: block.symbol.symbolID,
@@ -230,6 +289,7 @@ function createLocalFile({
     }),
     blockText,
     resolvedBlockData,
+    overrideValues,
   });
 
   const artboard = SketchModel.artboard({
