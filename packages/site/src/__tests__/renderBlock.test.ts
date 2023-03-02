@@ -16,6 +16,7 @@ import {
   buttonSymbolId,
   cardSymbolId,
   heroSymbolV2Id,
+  iconSymbolId,
   imageSymbolId,
   textSymbolId,
 } from '../ayon/blocks/symbolIds';
@@ -61,6 +62,33 @@ describe('text', () => {
       frame: SketchModel.rect({
         width: 100,
         height: 40,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('icon', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: iconSymbolId,
+      frame: SketchModel.rect({
+        width: 48,
+        height: 48,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+
+  test('with color', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: iconSymbolId,
+      blockText: '#fill-blue-400',
+      frame: SketchModel.rect({
+        width: 48,
+        height: 48,
       }),
     });
 

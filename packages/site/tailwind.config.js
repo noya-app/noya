@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(shadow|border|rounded|opacity|bg|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self).*/,
+        /^(shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self).*/,
     },
   ],
   plugins: [
@@ -17,6 +17,7 @@ module.exports = {
         'rounded-{borderRadius}',
         'opacity-{opacity}',
         'bg-{colors}',
+        'fill-{colors}',
         'blur-{blur}',
         'text-{colors}',
         'font-{fontWeight}',
