@@ -17338,10 +17338,10 @@ react-focus-lock@2.5.2:
     use-callback-ref "^1.2.5"
     use-sidecar "^1.0.5"
 
-react-guidebook@^0.12.1:
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/react-guidebook/-/react-guidebook-0.12.1.tgz#c83e2d1c729743c22054f6a9721a233da3204dea"
-  integrity sha512-T33ToNNulhB/MUonHfs3YKubm3in5ywQjYO18NJ57DkxjNPjMDvmgLZLb/JbU6/Bl8lexW2L6Ga0df87AOwdug==
+react-guidebook@^0.13.0:
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/react-guidebook/-/react-guidebook-0.13.0.tgz#8d68db084bdd23e089c96ac5f2368ef5a3f33e62"
+  integrity sha512-cqGU64YCeZODmWX+WUU4IG596W3LSCpQQRI4xbbxO3vfZXvyIlL9UA9sH1ADmlNMEaGsKJX8IY41evmYcB1UXg==
   dependencies:
     downshift "^6.0.5"
     javascript-playgrounds "^1.1.4"

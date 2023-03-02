@@ -43,7 +43,7 @@ export function getHeadTags({
       <meta
         key="og:url"
         property="og:url"
-        content={`https://${config.location.host}`}
+        content={`https://${config.location.host}${config.location.path}`}
       />
     ),
 

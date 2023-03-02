@@ -3,10 +3,13 @@ import { GuidebookConfig } from 'react-guidebook';
 export const socialConfig: GuidebookConfig = {
   title: 'Noya Documentation',
   location: {
-    host: 'www.noya.io/app/docs',
+    host: (
+      process.env.NEXT_PUBLIC_NOYA_WEB_URL ?? 'https://www.noya.io'
+    ).replace(/https?:\/\//, ''),
+    path: '/app/docs',
   },
   author: {
-    twitter: 'dvnabbott',
+    twitter: 'noyasoftware',
   },
   favicons: [
     {
@@ -19,6 +22,6 @@ export const socialConfig: GuidebookConfig = {
     width: '1200',
     height: '630',
     alt: 'Noya Documentation',
-    path: '/noya-preview-card.png',
+    path: '/app/SocialCard.png',
   },
 };
