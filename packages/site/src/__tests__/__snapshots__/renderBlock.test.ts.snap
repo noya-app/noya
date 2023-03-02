@@ -151,6 +151,36 @@ exports[`hero with bg default 1`] = `
 "
 `;
 
+exports[`icon default 1`] = `
+"<Frame width={48} height={48}>
+  <Image
+    src=\\"https://api.iconify.design/material-symbols/menu.svg\\"
+    fit=\\"contain\\"
+    align=\\"middle\\"
+    w=\\"100%\\"
+    h=\\"100%\\"
+  />
+</Frame>;
+"
+`;
+
+exports[`icon with color 1`] = `
+"<Frame width={48} height={48}>
+  <Box
+    w=\\"100%\\"
+    h=\\"100%\\"
+    backgroundColor=\\"#60a5fa\\"
+    style={{
+      maskImage:
+        'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
+      WebkitMask:
+        'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
+    }}
+  />
+</Frame>;
+"
+`;
+
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
   <Text className=\\"text-red-500\\" textAlign=\\"center\\">

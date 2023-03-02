@@ -1,4 +1,4 @@
-import { Image } from '@chakra-ui/react';
+import { Box, Image } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import React from 'react';
 import { parseBlock } from '../parse';
@@ -36,11 +36,11 @@ export const IconBlock: BlockDefinition = {
 
     if (fill) {
       return (
-        <div
+        <Box
+          w="100%"
+          h="100%"
+          backgroundColor={fill}
           style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: fill,
             maskImage: `url(${src}) center / contain no-repeat`,
             WebkitMask: `url(${src}) center / contain no-repeat`,
           }}

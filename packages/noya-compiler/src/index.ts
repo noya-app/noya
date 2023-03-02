@@ -7,7 +7,7 @@ import React, { isValidElement } from 'react';
 import { flat } from 'tree-visit';
 import ts from 'typescript';
 
-function createExpressionCode(value: unknown) {
+function createExpressionCode(value: unknown): ts.Expression {
   switch (typeof value) {
     case 'string':
       return ts.factory.createStringLiteral(value);
@@ -15,6 +15,27 @@ function createExpressionCode(value: unknown) {
       return ts.factory.createNumericLiteral(value);
     case 'boolean':
       return value ? ts.factory.createTrue() : ts.factory.createFalse();
+    case 'object':
+      if (value === null) return ts.factory.createNull();
+
+      if (Array.isArray(value)) {
+        return ts.factory.createArrayLiteralExpression(
+          value.map((item) => createExpressionCode(item)),
+        );
+      }
+
+      return ts.factory.createObjectLiteralExpression(
+        Object.entries(value).flatMap(([key, value]) => {
+          const expression = createExpressionCode(value);
+
+          return [
+            ts.factory.createPropertyAssignment(
+              ts.factory.createIdentifier(key),
+              expression,
+            ),
+          ];
+        }),
+      );
     default:
       return ts.factory.createNull();
   }
@@ -66,7 +87,7 @@ export function createElementCode({
               expression.kind === ts.SyntaxKind.TrueKeyword
                 ? undefined
                 : expression.kind === ts.SyntaxKind.StringLiteral
-                ? expression
+                ? (expression as ts.StringLiteral)
                 : ts.factory.createJsxExpression(undefined, expression),
             ),
           ];
