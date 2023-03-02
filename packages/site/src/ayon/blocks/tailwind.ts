@@ -1,5 +1,4 @@
-import { groupBy, memoize, partition } from 'noya-utils';
-import { SafelistConfig } from 'tailwindcss/types/config';
+import { groupBy, memoize } from 'noya-utils';
 
 const allClassNames = (
   require('../../../safelist.txt').default as string
@@ -7,33 +6,18 @@ const allClassNames = (
 
 const allClassNamesSet = new Set(allClassNames);
 
-type SafelistPattern = SafelistConfig[0];
-
-function isSafe(className: string, item?: SafelistPattern) {
-  return !item
-    ? false
-    : typeof item === 'string'
-    ? className === item
-    : item.pattern.test(className);
-}
-
-export function getTailwindClasses(filters?: SafelistConfig[0][]) {
-  if (!filters) return allClassNames;
-
-  return allClassNames.filter((className) =>
-    filters.some((filter) => isSafe(className, filter)),
-  );
-}
-
 export function isSupportedTailwindClass(className: string) {
   return allClassNamesSet.has(className);
 }
 
 const isTextClassRE = /^(text|font|truncate|leading)/;
+const isFillClassRE = /^fill-/;
 
-export const [tailwindTextClasses, tailwindBlockClasses] = partition(
-  allClassNames,
-  (item) => isTextClassRE.test(item),
+export const tailwindTextClasses = allClassNames.filter((item) =>
+  isTextClassRE.test(item),
+);
+export const tailwindBlockClasses = allClassNames.filter(
+  (item) => !isTextClassRE.test(item) && !isFillClassRE.test(item),
 );
 
 export function getBlockClassName(hashtags: string[]) {
@@ -55,6 +39,7 @@ export const classGroups = {
   // From https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
   textColor:
     /^text-(inherit|current|transparent|black|white|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)/,
+  fill: /^fill-/,
   justify: /^justify/,
   items: /^items/,
   gap: /^gap-/,
@@ -80,18 +65,30 @@ export const classGroups = {
   none: /.*/,
 };
 
-type ClassGroup = keyof typeof classGroups;
+type ClassGroupKey = keyof typeof classGroups;
 
-export function hasClassGroup(group: ClassGroup, hashtags: string[]) {
+export function hasClassGroup(group: ClassGroupKey, hashtags: string[]) {
   return hashtags.some((className) => classGroups[group].test(className));
 }
 
 export const getTailwindClassGroup = memoize(
-  (className: string): ClassGroup => {
+  (className: string): ClassGroupKey => {
     const entry = Object.entries(classGroups).find(([, re]) =>
       re.test(className),
     )!;
 
-    return entry[0] as ClassGroup;
+    return entry[0] as ClassGroupKey;
   },
 );
+
+export const isTailwindClassGroup = memoize(
+  (className: string, group: ClassGroupKey): boolean => {
+    return classGroups[group].test(className);
+  },
+);
+
+export const getTailwindClassesByGroup = memoize((group: ClassGroupKey) => {
+  return allClassNames.filter((className) =>
+    classGroups[group].test(className),
+  );
+});
