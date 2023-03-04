@@ -115,6 +115,24 @@ export const heroSymbol = SketchModel.symbolMaster({
   name: 'Hero V1 (update available)',
 });
 
+export const heroButtonRowSymbol = SketchModel.symbolMaster({
+  symbolID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
+  name: 'Hero Button Row',
+  defaultBlockText: '#bg-transparent #flex-row #gap-4',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',
+      symbolID: buttonSymbolId,
+      blockText: 'Get started #primary #md',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
+      symbolID: buttonSymbolId,
+      blockText: 'Learn more #md',
+    }),
+  ],
+});
+
 export const heroSymbolV2 = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
@@ -131,9 +149,9 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
       blockText: 'Turn great ideas into new possibilities. #mb-4',
     }),
     SketchModel.symbolInstance({
-      do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',
-      symbolID: buttonSymbolId,
-      blockText: 'Get started #primary #md',
+      do_objectID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
+      symbolID: heroButtonRowSymbol.symbolID,
+      blockText: '',
     }),
   ],
 });

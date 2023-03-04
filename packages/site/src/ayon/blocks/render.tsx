@@ -45,10 +45,8 @@ export function getChildrenBlockProps({
 }: BlockRenderOptions & {
   extraParameters?: ParsedBlockItemParameters;
 }): BlockProps[] {
-  if (!props.layer) return [];
-
   const master = applyOverrides({
-    overrideValues: props.layer.overrideValues,
+    overrideValues: props.layer?.overrideValues ?? [],
     symbolMaster: block.symbol,
   });
 
@@ -137,9 +135,15 @@ export function getRenderableBlockProps({ props, block }: BlockRenderOptions) {
 export const renderStack = ({ props, block }: BlockRenderOptions) => {
   const { container, children } = getRenderableBlockProps({ props, block });
 
-  container.children = children.map((childProps) =>
-    props.getBlock(childProps.symbolId).render(childProps),
-  );
+  container.children = children.map((childProps) => {
+    const block = props.getBlock(childProps.symbolId);
+
+    if (block.isPassthrough) {
+      return renderStack({ props: childProps, block });
+    }
+
+    return block.render(childProps);
+  });
 
   return props.getBlock(boxSymbol.symbolID).render(container);
 };

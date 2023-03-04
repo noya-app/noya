@@ -19,11 +19,13 @@ import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
 import { RadioBlock } from './RadioBlock';
+import { renderStack } from './render';
 import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
 import { SignInBlock } from './SignInBlock';
 import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
+import { heroButtonRowSymbol } from './symbols';
 import { TableBlock } from './TableBlock';
 import { TextareaBlock } from './TextareaBlock';
 import { TextBlock } from './TextBlock';
@@ -59,6 +61,21 @@ export const Blocks: Record<string, BlockDefinition> = {
   [CardBlock.symbol.symbolID]: CardBlock,
   [TileCardBlock.symbol.symbolID]: TileCardBlock,
   [SignInBlock.symbol.symbolID]: SignInBlock,
+  [heroButtonRowSymbol.symbolID]: {
+    symbol: heroButtonRowSymbol,
+    infer: () => 0,
+    parser: 'regular',
+    isPassthrough: true,
+    editorVersion: 2,
+    render: (props) =>
+      renderStack({
+        props,
+        block: {
+          placeholderText: '',
+          symbol: heroButtonRowSymbol,
+        },
+      }),
+  },
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(

@@ -28,6 +28,7 @@ export type PropertyTypeMap = {
   blockText: string;
   resolvedBlockData: Sketch.ResolvedBlockData;
   isVisible: boolean;
+  layers: Sketch.LayersOverrideValue;
 };
 
 export type PropertyType = keyof PropertyTypeMap;
@@ -65,6 +66,8 @@ export function getLayerOverride(
   value: PropertyValue,
 ) {
   switch (propertyType) {
+    case 'layers':
+      return { type: propertyType, value, layer } as const;
     case 'isVisible': {
       if (!isValidProperty(propertyType, value)) return;
 

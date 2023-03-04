@@ -1181,8 +1181,23 @@ export type OverrideValue = {
   _class: 'overrideValue';
   do_objectID?: Uuid;
   overrideName: OverrideName;
-  value: boolean | string | Uuid | FileRef | DataRef | ResolvedBlockData;
+  value:
+    | boolean
+    | string
+    | Uuid
+    | FileRef
+    | DataRef
+    | ResolvedBlockData
+    | LayersOverrideValue;
 };
+
+export type LayersOverrideValue = {
+  layers: Pick<
+    SymbolInstance,
+    'do_objectID' | 'symbolID' | 'blockText' | 'resolvedBlockData'
+  >[];
+};
+
 /**
  * Slice layers allow the content beneath their frame to be exported
  */
