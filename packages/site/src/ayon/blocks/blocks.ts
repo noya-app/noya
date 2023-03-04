@@ -79,8 +79,10 @@ export const Blocks: Record<string, BlockDefinition> = {
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(
-  ({ symbol }) =>
-    symbol.name !== 'Spacer' && /update/i.test(symbol.name) === false,
+  ({ isPassthrough, symbol }) =>
+    !isPassthrough &&
+    symbol.name !== 'Spacer' &&
+    /update/i.test(symbol.name) === false,
 );
 
 export const allInsertableSymbols = allInsertableBlocks.map(

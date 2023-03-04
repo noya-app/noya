@@ -340,11 +340,31 @@ export const Widget = forwardRef(function Widget(
       },
     };
 
-    const { container: containerBlockProps, children: childrenBlockProps } =
-      getRenderableBlockProps({
-        props: blockProps,
-        block: Block,
-      });
+    const {
+      container: containerBlockProps,
+      children: childrenBlockProps,
+      extraParameters,
+    } = getRenderableBlockProps({
+      props: blockProps,
+      block: Block,
+    });
+
+    const flattenedChildrenBlockProps = childrenBlockProps.flatMap(
+      (childProps) => {
+        const block = blockProps.getBlock(childProps.symbolId);
+
+        if (block.isPassthrough) {
+          return getRenderableBlockProps({
+            props: childProps,
+            block: block,
+            extraParameters,
+            overrideValues: blockProps.layer?.overrideValues,
+          }).children;
+        }
+
+        return [childProps];
+      },
+    );
 
     const containerLayer = SketchModel.symbolInstance({
       symbolID: boxSymbolId,
@@ -354,7 +374,7 @@ export const Widget = forwardRef(function Widget(
 
     const actions: Action[] = [];
 
-    const layers = childrenBlockProps.flatMap((child) => {
+    const layers = flattenedChildrenBlockProps.flatMap((child) => {
       if (!child.dataSet) return [];
 
       const element = document.querySelector<HTMLElement>(
