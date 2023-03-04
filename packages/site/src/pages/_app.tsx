@@ -4,7 +4,6 @@ import { NoyaAPI, NoyaAPIProvider } from 'noya-api';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
-  Stack,
 } from 'noya-designsystem';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
@@ -26,15 +25,13 @@ amplitude.logEvent('App - Opened');
 
 const docsUrlPrefix = '/docs';
 const shareUrlPrefix = '/share';
-const playgroundUrlPrefix = '/playground';
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   const isDocsPage = router.asPath.startsWith(docsUrlPrefix);
   const isSharePage = router.asPath.startsWith(shareUrlPrefix);
-  const isPlaygroundPage = router.asPath.startsWith(playgroundUrlPrefix);
-  const isSessionRequired = !(isSharePage || isDocsPage || isPlaygroundPage);
+  const isSessionRequired = !(isSharePage || isDocsPage);
 
   const noyaClient = useMemo(() => {
     return isSessionRequired
@@ -46,34 +43,38 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if (noyaClient) {
     return (
-      <DesignSystemConfigurationProvider theme={darkTheme} platform={platform}>
-        <NoyaAPIProvider value={noyaClient}>
-          <Analytics>
+      <NoyaAPIProvider value={noyaClient}>
+        <Analytics>
+          <DesignSystemConfigurationProvider
+            theme={darkTheme}
+            platform={platform}
+          >
             <Component {...pageProps} />
-          </Analytics>
-        </NoyaAPIProvider>
-      </DesignSystemConfigurationProvider>
+          </DesignSystemConfigurationProvider>
+        </Analytics>
+      </NoyaAPIProvider>
     );
   } else if (isDocsPage) {
     return (
-      <DesignSystemConfigurationProvider theme={darkTheme} platform={platform}>
-        <OptionalNoyaAPIProvider>
-          <Stack.V
-            id="docs-container"
-            flex="1"
-            background={darkTheme.colors.canvas.background}
+      <OptionalNoyaAPIProvider>
+        <Analytics>
+          <DesignSystemConfigurationProvider
+            theme={darkTheme}
+            platform={platform}
           >
             <Docs urlPrefix={docsUrlPrefix}>
               <Component {...pageProps} />
             </Docs>
-          </Stack.V>
-        </OptionalNoyaAPIProvider>
-      </DesignSystemConfigurationProvider>
+          </DesignSystemConfigurationProvider>
+        </Analytics>
+      </OptionalNoyaAPIProvider>
     );
   } else {
     return (
       <OptionalNoyaAPIProvider>
-        <Component {...pageProps} />
+        <Analytics>
+          <Component {...pageProps} />
+        </Analytics>
       </OptionalNoyaAPIProvider>
     );
   }

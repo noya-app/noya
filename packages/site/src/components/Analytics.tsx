@@ -1,7 +1,7 @@
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import Script from 'next/script';
-import { NoyaAPI, useNoyaSession } from 'noya-api';
+import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
 import { amplitude } from 'noya-log';
 import React, { useEffect } from 'react';
 
@@ -108,7 +108,7 @@ export function useAnalytics(session?: NoyaAPI.Session | null) {
 }
 
 export function Analytics({ children }: { children: React.ReactNode }) {
-  const session = useNoyaSession();
+  const session = useOptionalNoyaSession();
   useAnalytics(session);
   return (
     <>

@@ -1,7 +1,6 @@
 import { NoyaAPI, NoyaAPIProvider } from 'noya-api';
 import React, { useEffect, useState } from 'react';
 import { networkClientThatThrows } from '../utils/noyaClient';
-import { Analytics } from './Analytics';
 
 export function OptionalNoyaAPIProvider({
   children,
@@ -26,13 +25,5 @@ export function OptionalNoyaAPIProvider({
     main();
   }, []);
 
-  if (client) {
-    return (
-      <NoyaAPIProvider value={client}>
-        <Analytics>{children}</Analytics>
-      </NoyaAPIProvider>
-    );
-  } else {
-    return <>{children}</>;
-  }
+  return <NoyaAPIProvider value={client}>{children}</NoyaAPIProvider>;
 }

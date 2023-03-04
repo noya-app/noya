@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { darkTheme, Divider, Stack } from 'noya-designsystem';
 import * as Icons from 'noya-icons';
+import { amplitude } from 'noya-log';
 import React, { ReactNode, useEffect, useMemo, useRef } from 'react';
 import {
   Anchor,
@@ -120,6 +121,11 @@ const MDXComponents = {
   ),
 };
 
+function cleanPath(prefix: string, path: string) {
+  const cleaned = path.replace(prefix, '');
+  return cleaned === '' ? '/' : cleaned;
+}
+
 export function Docs({
   children,
   urlPrefix,
@@ -129,14 +135,44 @@ export function Docs({
 }) {
   const router = useRouter();
   const scrollElement = useRef<HTMLDivElement>(null);
+  const basePath = router.basePath;
+
+  const loggedOpen = useRef(false);
+  const loggedOpenPath = useRef<string | undefined>();
+
+  // `asPath` has /docs prefix (but no basePath)
+  const openedPath = cleanPath(urlPrefix, router.asPath);
 
   useEffect(() => {
-    const handleRouteChange = () => {
+    if (loggedOpen.current) return;
+
+    loggedOpen.current = true;
+    loggedOpenPath.current = openedPath;
+
+    amplitude.logEvent(`Docs - Opened - ${openedPath}`);
+  }, [openedPath, loggedOpen]);
+
+  useEffect(() => {
+    const handleRouteChange = (url: string) => {
       scrollElement.current?.scrollTo(0, 0);
+
+      // `url` has /app/docs prefix
+      const changedPath = cleanPath(`${basePath}${urlPrefix}`, url);
+
+      // Don't log Changed if we just logged Opened
+      if (changedPath === loggedOpenPath.current) {
+        loggedOpenPath.current = undefined;
+      } else {
+        amplitude.logEvent(`Docs - Changed - ${changedPath}`);
+      }
     };
 
-    return router.events.on('routeChangeComplete', handleRouteChange);
-  }, [router.events]);
+    router.events.on('routeChangeComplete', handleRouteChange);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [basePath, router.events, urlPrefix]);
 
   // Use `asPath`, since `pathname` will be "_error" if the page isn't found
   const pathname = router.pathname.slice(urlPrefix.length);
@@ -175,7 +211,7 @@ export function Docs({
   const node = findNodeBySlug(guidebook, pathname.slice(1));
 
   return (
-    <>
+    <Stack.V flex="1" background={darkTheme.colors.canvas.background}>
       <Head>
         <title>Noya Docs</title>
         {getHeadTags({
@@ -208,6 +244,6 @@ export function Docs({
           </GuidebookThemeProvider>
         </LinkProvider>
       </RouterProvider>
-    </>
+    </Stack.V>
   );
 }
