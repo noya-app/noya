@@ -1,6 +1,6 @@
 import { Element as SlateElement, Node, Transforms } from 'slate';
 import { Blocks } from '../blocks/blocks';
-import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
+import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { CustomEditor, ParagraphElement } from './types';
 
 export function withLayout(initialSymbolId: string, editor: CustomEditor) {
@@ -11,7 +11,7 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
   editor.normalizeNode = ([node, path]) => {
     const symbol = Blocks[editor.symbolId].symbol;
 
-    const layers = layersWithoutSpacers(symbol);
+    const layers = flattenPassthroughLayers(symbol);
 
     // If this is the editor
     if (path.length === 0) {

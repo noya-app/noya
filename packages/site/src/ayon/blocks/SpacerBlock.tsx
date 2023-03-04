@@ -10,6 +10,7 @@ export const SpacerBlock: BlockDefinition = {
   parser: 'regular',
   hashtags: tailwindBlockClasses,
   infer: ({ frame, blockText }) => 0,
+  isPassthrough: true,
   render: (props) => {
     const { parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
