@@ -1,3 +1,4 @@
+import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { AvatarBlock } from './AvatarBlock';
 import { BoxBlock } from './BoxBlock';
@@ -32,6 +33,24 @@ import { TextBlock } from './TextBlock';
 import { TileCardBlock } from './TileCardBlock';
 import { WriteBlock } from './WriteBlock';
 
+function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
+  return {
+    symbol,
+    infer: () => 0,
+    parser: 'regular',
+    isPassthrough: true,
+    editorVersion: 2,
+    render: (props) =>
+      renderStack({
+        props,
+        block: {
+          placeholderText: '',
+          symbol,
+        },
+      }),
+  };
+}
+
 export const Blocks: Record<string, BlockDefinition> = {
   [AvatarBlock.symbol.symbolID]: AvatarBlock,
   [ButtonBlock.symbol.symbolID]: ButtonBlock,
@@ -61,21 +80,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [CardBlock.symbol.symbolID]: CardBlock,
   [TileCardBlock.symbol.symbolID]: TileCardBlock,
   [SignInBlock.symbol.symbolID]: SignInBlock,
-  [heroButtonRowSymbol.symbolID]: {
-    symbol: heroButtonRowSymbol,
-    infer: () => 0,
-    parser: 'regular',
-    isPassthrough: true,
-    editorVersion: 2,
-    render: (props) =>
-      renderStack({
-        props,
-        block: {
-          placeholderText: '',
-          symbol: heroButtonRowSymbol,
-        },
-      }),
-  },
+  [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(
