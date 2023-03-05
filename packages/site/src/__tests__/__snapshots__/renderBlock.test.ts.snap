@@ -100,6 +100,36 @@ exports[`hero default 1`] = `
 "
 `;
 
+exports[`hero left aligned 1`] = `
+"<Frame width={400} height={400}>
+  <Flex
+    width=\\"400px\\"
+    height=\\"400px\\"
+    className=\\"flex-col bg-transparent p-4 gap-3 items-start justify-center\\"
+  >
+    <Flex>
+      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" textAlign=\\"left\\">
+        {'Create, iterate, inspire.'}
+      </Heading>
+    </Flex>
+    <Text className=\\"mb-4\\" textAlign=\\"left\\">
+      {'Turn great ideas into new possibilities.'}
+    </Text>
+    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button
+        size=\\"md\\"
+        backgroundColor=\\"#15803d\\"
+        color=\\"#fff\\"
+        isDisabled={false}
+      >
+        {'Get started'}
+      </Button>
+    </Flex>
+  </Flex>
+</Frame>;
+"
+`;
+
 exports[`hero left aligned default 1`] = `
 "<Frame width={400} height={400}>
   <Flex
@@ -121,6 +151,43 @@ exports[`hero left aligned default 1`] = `
         backgroundColor=\\"#15803d\\"
         color=\\"#fff\\"
         isDisabled={false}
+      >
+        {'Get started'}
+      </Button>
+    </Flex>
+  </Flex>
+</Frame>;
+"
+`;
+
+exports[`hero with bg 1`] = `
+"<Frame width={400} height={400}>
+  <Flex
+    width=\\"400px\\"
+    height=\\"400px\\"
+    className=\\"flex-col bg-blue-500 p-4 gap-3 items-center justify-center\\"
+  >
+    <Flex>
+      <Heading
+        flex=\\"1\\"
+        size=\\"xl\\"
+        lineHeight=\\"1.3\\"
+        className=\\"text-white\\"
+        textAlign=\\"center\\"
+      >
+        {'Create, iterate, inspire.'}
+      </Heading>
+    </Flex>
+    <Text className=\\"mb-4 text-white\\" textAlign=\\"center\\">
+      {'Turn great ideas into new possibilities.'}
+    </Text>
+    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button
+        size=\\"md\\"
+        backgroundColor=\\"#f1f5f9\\"
+        color=\\"#000\\"
+        isDisabled={false}
+        className=\\"text-white\\"
       >
         {'Get started'}
       </Button>
