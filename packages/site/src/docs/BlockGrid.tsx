@@ -22,6 +22,7 @@ export function BlockGrid({ category }: { category: BlockCategory }) {
           {Object.entries(blockMetadata)
             .filter(([, metadata]) => metadata.category === category)
             .filter(([, metadata]) => !metadata.hideInDocs)
+            .sort(([, a], [, b]) => a.name.localeCompare(b.name))
             .map(([blockId, metadata]) => (
               <GridView.Item
                 key={blockId}

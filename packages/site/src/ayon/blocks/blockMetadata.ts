@@ -16,6 +16,7 @@ import {
   iconSymbolId,
   imageSymbolId,
   inputSymbolId,
+  linkSymbolId,
   radioSymbolId,
   selectSymbolId,
   sidebarSymbolId,
@@ -68,6 +69,11 @@ export const blockMetadata: Record<string, BlockMetadata> = {
   },
   [buttonSymbolId]: {
     name: 'Button',
+    category: 'element',
+    preferredSize: { width: 200, height: 40 },
+  },
+  [linkSymbolId]: {
+    name: 'Link',
     category: 'element',
     preferredSize: { width: 200, height: 40 },
   },

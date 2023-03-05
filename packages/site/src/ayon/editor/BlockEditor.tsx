@@ -35,7 +35,7 @@ import {
   withReact,
 } from 'slate-react';
 import { allInsertableSymbols, Blocks } from '../blocks/blocks';
-import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
+import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { InferredBlockTypeResult } from '../types';
 import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
@@ -300,7 +300,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const layerVisibility = useMemo(() => {
     const visibility: Record<string, boolean> = {};
-    const children = layersWithoutSpacers(blockDefinition.symbol);
+    const children = flattenPassthroughLayers(blockDefinition.symbol);
 
     for (const child of children) {
       const isVisible = Overrides.getOverrideValue(
@@ -309,7 +309,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         'isVisible',
       );
 
-      visibility[child.do_objectID] = isVisible ?? true;
+      visibility[child.do_objectID] = isVisible ?? child.isVisible;
     }
 
     return visibility;

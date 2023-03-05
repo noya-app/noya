@@ -18,6 +18,7 @@ import {
   heroSymbolV2Id,
   iconSymbolId,
   imageSymbolId,
+  linkSymbolId,
   textSymbolId,
 } from '../ayon/blocks/symbolIds';
 
@@ -69,6 +70,22 @@ describe('text', () => {
   });
 });
 
+describe('link', () => {
+  // TODO: Icon doesn't get added to exported code
+  test('with icon', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: linkSymbolId,
+      blockText: 'Test #icon-arrow-right',
+      frame: SketchModel.rect({
+        width: 100,
+        height: 40,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
 describe('icon', () => {
   test('default', () => {
     const symbol = SketchModel.symbolInstance({
@@ -108,10 +125,8 @@ describe('hero', () => {
 
     expect(generate(symbol)).toMatchSnapshot();
   });
-});
 
-describe('hero left aligned', () => {
-  test('default', () => {
+  test('left aligned', () => {
     const symbol = SketchModel.symbolInstance({
       symbolID: heroSymbolV2Id,
       frame: SketchModel.rect({
@@ -123,10 +138,8 @@ describe('hero left aligned', () => {
 
     expect(generate(symbol)).toMatchSnapshot();
   });
-});
 
-describe('hero with bg', () => {
-  test('default', () => {
+  test('with bg', () => {
     const symbol = SketchModel.symbolInstance({
       symbolID: heroSymbolV2Id,
       frame: SketchModel.rect({

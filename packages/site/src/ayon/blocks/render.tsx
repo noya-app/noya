@@ -1,3 +1,4 @@
+import Sketch from 'noya-file-format';
 import {
   applyOverrides,
   BlockDefinition,
@@ -17,7 +18,9 @@ import { boxSymbol } from './symbols';
 
 interface BlockRenderOptions {
   props: BlockProps;
-  block: Pick<BlockDefinition, 'symbol' | 'placeholderText'>;
+  block: Pick<BlockDefinition, 'symbol' | 'placeholderText' | 'isPassthrough'>;
+  overrideValues?: Sketch.OverrideValue[];
+  extraParameters?: ParsedBlockItemParameters;
 }
 
 export function getContainerBlockProps({
@@ -42,13 +45,10 @@ export function getChildrenBlockProps({
   props,
   block,
   extraParameters,
-}: BlockRenderOptions & {
-  extraParameters?: ParsedBlockItemParameters;
-}): BlockProps[] {
-  if (!props.layer) return [];
-
+  overrideValues = [],
+}: BlockRenderOptions): BlockProps[] {
   const master = applyOverrides({
-    overrideValues: props.layer.overrideValues,
+    overrideValues,
     symbolMaster: block.symbol,
   });
 
@@ -62,7 +62,7 @@ export function getChildrenBlockProps({
         return [];
       }
 
-      const override = props.layer?.overrideValues.find(
+      const override = overrideValues.find(
         (override) =>
           override.overrideName ===
           Overrides.encodeName([layer.do_objectID], 'blockText'),
@@ -103,7 +103,12 @@ export function getChildrenBlockProps({
   );
 }
 
-export function getRenderableBlockProps({ props, block }: BlockRenderOptions) {
+export function getRenderableBlockProps({
+  props,
+  block,
+  overrideValues,
+  extraParameters: inputExtraParameters,
+}: BlockRenderOptions) {
   const container = getContainerBlockProps({ props, block });
 
   const { parameters } = parseBlock(container.blockText, 'regular');
@@ -119,27 +124,64 @@ export function getRenderableBlockProps({ props, block }: BlockRenderOptions) {
 
   const textAlign = getTextAlign(hashtags);
 
+  const extraParameters = inputExtraParameters ?? {
+    ...(textAlign && { [textAlign]: true }),
+    ...((parameters.dark || darkBackground) && {
+      'text-white': true,
+      light: true,
+    }),
+  };
+
   const children = getChildrenBlockProps({
     props,
     block,
-    extraParameters: {
-      ...(textAlign && { [textAlign]: true }),
-      ...((parameters.dark || darkBackground) && {
-        'text-white': true,
-        light: true,
-      }),
-    },
+    overrideValues: props.layer?.overrideValues ?? overrideValues,
+    extraParameters,
   });
 
-  return { container, children };
+  return { container, children, extraParameters };
 }
 
-export const renderStack = ({ props, block }: BlockRenderOptions) => {
-  const { container, children } = getRenderableBlockProps({ props, block });
+export const renderStack = ({
+  props,
+  block,
+  overrideValues,
+  extraParameters: inputExtraParameters,
+}: BlockRenderOptions) => {
+  const {
+    container,
+    children,
+    extraParameters: outputExtraParameters,
+  } = getRenderableBlockProps({
+    props,
+    block,
+    overrideValues,
+    extraParameters: inputExtraParameters,
+  });
 
-  container.children = children.map((childProps) =>
-    props.getBlock(childProps.symbolId).render(childProps),
-  );
+  container.children = children.map((childProps) => {
+    const block = props.getBlock(childProps.symbolId);
+
+    if (block.isPassthrough) {
+      return renderStack({
+        props: childProps,
+        block,
+        overrideValues: props.layer?.overrideValues,
+        extraParameters: outputExtraParameters,
+      });
+    }
+
+    return block.render(childProps);
+  });
+
+  // We don't render empty passthrough blocks
+  if (
+    block.isPassthrough &&
+    Array.isArray(container.children) &&
+    container.children.length === 0
+  ) {
+    return null;
+  }
 
   return props.getBlock(boxSymbol.symbolID).render(container);
 };

@@ -44,6 +44,18 @@ Array [
         "text": "",
       },
     ],
+    "label": "Link",
+    "layerId": "eee85c94-7361-4bcf-8afb-f59c6e8661f7",
+    "placeholder": "Learn more #text-slate-800 #icon-arrow-forward",
+    "symbolId": "5be80b87-7bd6-4090-8947-316d54064544",
+    "type": "paragraph",
+  },
+  Object {
+    "children": Array [
+      Object {
+        "text": "",
+      },
+    ],
     "layerId": undefined,
     "placeholder": undefined,
     "symbolId": "61eb943b-7ee7-4b33-9315-aac7cb2d2764",

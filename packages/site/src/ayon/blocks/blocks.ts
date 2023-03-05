@@ -1,3 +1,4 @@
+import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { AvatarBlock } from './AvatarBlock';
 import { BoxBlock } from './BoxBlock';
@@ -18,17 +19,38 @@ import { HeroBlockV1 } from './HeroBlockV1';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
+import { LinkBlock } from './LinkBlock';
 import { RadioBlock } from './RadioBlock';
+import { renderStack } from './render';
 import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
 import { SignInBlock } from './SignInBlock';
 import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
+import { heroButtonRowSymbol } from './symbols';
 import { TableBlock } from './TableBlock';
 import { TextareaBlock } from './TextareaBlock';
 import { TextBlock } from './TextBlock';
 import { TileCardBlock } from './TileCardBlock';
 import { WriteBlock } from './WriteBlock';
+
+function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
+  return {
+    symbol,
+    infer: () => 0,
+    parser: 'regular',
+    isPassthrough: true,
+    editorVersion: 2,
+    render: (props) =>
+      renderStack({
+        props,
+        block: {
+          placeholderText: '',
+          symbol,
+        },
+      }),
+  };
+}
 
 export const Blocks: Record<string, BlockDefinition> = {
   [AvatarBlock.symbol.symbolID]: AvatarBlock,
@@ -59,11 +81,13 @@ export const Blocks: Record<string, BlockDefinition> = {
   [CardBlock.symbol.symbolID]: CardBlock,
   [TileCardBlock.symbol.symbolID]: TileCardBlock,
   [SignInBlock.symbol.symbolID]: SignInBlock,
+  [LinkBlock.symbol.symbolID]: LinkBlock,
+  [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
 };
 
 export const allInsertableBlocks = Object.values(Blocks).filter(
-  ({ symbol }) =>
-    symbol.name !== 'Spacer' && /update/i.test(symbol.name) === false,
+  ({ isPassthrough, symbol }) =>
+    !isPassthrough && /update/i.test(symbol.name) === false,
 );
 
 export const allInsertableSymbols = allInsertableBlocks.map(

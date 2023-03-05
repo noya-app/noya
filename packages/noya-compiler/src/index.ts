@@ -276,7 +276,7 @@ function Frame(props: React.ComponentProps<typeof Box>) {
         name: 'app',
         dependencies: {
           react: '^18',
-          '@chakra-ui/icons': '^2',
+          '@chakra-ui/icons': '^1',
           '@chakra-ui/react': '^1',
           '@emotion/react': '^11',
           '@emotion/styled': '^11',

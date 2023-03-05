@@ -1183,6 +1183,7 @@ export type OverrideValue = {
   overrideName: OverrideName;
   value: boolean | string | Uuid | FileRef | DataRef | ResolvedBlockData;
 };
+
 /**
  * Slice layers allow the content beneath their frame to be exported
  */

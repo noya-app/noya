@@ -67,6 +67,7 @@ export type BlockDefinition = {
   placeholderText?: string;
   editorVersion?: number;
   usesResolver?: boolean;
+  isPassthrough?: boolean;
 };
 
 export type InteractionMethod = 'mouse' | 'keyboard';

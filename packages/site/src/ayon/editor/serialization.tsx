@@ -3,14 +3,14 @@ import { SketchModel } from 'noya-sketch-model';
 import { BlockContent, Overrides } from 'noya-state';
 import { Descendant, Node } from 'slate';
 import { Blocks } from '../blocks/blocks';
-import { layersWithoutSpacers } from '../blocks/zipWithoutSpacers';
+import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { ParagraphElement } from './types';
 
 export function toContent(
   symbol: Sketch.SymbolMaster,
   nodes: Descendant[],
 ): BlockContent {
-  const layers = layersWithoutSpacers(symbol);
+  const layers = flattenPassthroughLayers(symbol);
   const overrides: Sketch.OverrideValue[] = [];
 
   for (let i = 0; i < layers.length; i++) {
@@ -35,7 +35,7 @@ export function fromSymbol(
   symbol: Sketch.SymbolMaster,
   instance: Sketch.SymbolInstance,
 ): Descendant[] {
-  const layers = layersWithoutSpacers(symbol);
+  const layers = flattenPassthroughLayers(symbol);
 
   const layerNodes = layers.map((layer): ParagraphElement => {
     const block = layer ? Blocks[layer.symbolID] : undefined;

@@ -1,0 +1,18 @@
+import { linkSymbolId } from '../../../../ayon/blocks/symbolIds';
+
+## Live Preview
+
+You can double click the block to edit its contents.
+
+<InteractiveBlockPreview blockId={linkSymbolId} />
+
+## Configuration
+
+The text block accepts many `#` commands for styling text, such as
+`#text-red-600 #font-bold`. You can also use the `#icon-arrow-forward` command
+to add an arrow icon:
+
+<InteractiveBlockPreview
+  blockId={linkSymbolId}
+  blockText="View all cats #text-red-600 #font-bold #icon-arrow-forward"
+/>
