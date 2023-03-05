@@ -129,6 +129,7 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
       do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
       symbolID: buttonSymbolId,
       blockText: 'Learn more #md',
+      isVisible: false,
     }),
   ],
 });

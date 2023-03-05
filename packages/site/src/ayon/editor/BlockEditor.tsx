@@ -309,7 +309,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         'isVisible',
       );
 
-      visibility[child.do_objectID] = isVisible ?? true;
+      visibility[child.do_objectID] = isVisible ?? child.isVisible;
     }
 
     return visibility;
