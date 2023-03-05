@@ -17,6 +17,7 @@ import {
   iconSymbolId,
   imageSymbolId,
   inputSymbolId,
+  linkSymbolId,
   radioSymbolId,
   selectSymbolId,
   sidebarSymbolId,
@@ -33,6 +34,11 @@ import {
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
   name: 'Button',
+});
+
+export const linkSymbol = SketchModel.symbolMaster({
+  symbolID: linkSymbolId,
+  name: 'Link',
 });
 
 export const avatarSymbol = SketchModel.symbolMaster({
@@ -118,7 +124,7 @@ export const heroSymbol = SketchModel.symbolMaster({
 export const heroButtonRowSymbol = SketchModel.symbolMaster({
   symbolID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
   name: 'Hero Button Row',
-  defaultBlockText: '#bg-transparent #flex-row #gap-4',
+  defaultBlockText: '#bg-transparent #flex-row #items-center #gap-6',
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',
@@ -127,8 +133,8 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
-      symbolID: buttonSymbolId,
-      blockText: 'Learn more #md',
+      symbolID: linkSymbolId,
+      blockText: 'Learn more #text-slate-800 #icon-arrow-forward',
       isVisible: false,
     }),
   ],

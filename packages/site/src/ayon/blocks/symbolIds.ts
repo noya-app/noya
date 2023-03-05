@@ -28,3 +28,4 @@ export const spacerSymbolId = '15907162-13f5-4366-81af-19ced2192245';
 export const cardSymbolId = '8bbffbff-efc8-4d9b-9972-73a655adaf47';
 export const tileCardSymbolId = '09dcb31d-5bb2-43f2-a30a-0a9e00d92cde';
 export const signInSymbolId = '78481f59-0db6-4de6-b38c-f4e4d9354fa9';
+export const linkSymbolId = '5be80b87-7bd6-4090-8947-316d54064544';

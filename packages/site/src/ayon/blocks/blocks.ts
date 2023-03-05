@@ -19,6 +19,7 @@ import { HeroBlockV1 } from './HeroBlockV1';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
+import { LinkBlock } from './LinkBlock';
 import { RadioBlock } from './RadioBlock';
 import { renderStack } from './render';
 import { SelectBlock } from './SelectBlock';
@@ -80,6 +81,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [CardBlock.symbol.symbolID]: CardBlock,
   [TileCardBlock.symbol.symbolID]: TileCardBlock,
   [SignInBlock.symbol.symbolID]: SignInBlock,
+  [LinkBlock.symbol.symbolID]: LinkBlock,
   [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
 };
 

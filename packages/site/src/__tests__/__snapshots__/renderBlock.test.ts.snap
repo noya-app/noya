@@ -85,9 +85,16 @@ exports[`hero default 1`] = `
     <Text className=\\"mb-4\\" textAlign=\\"center\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
-    <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
-      {'Get started'}
-    </Button>
+    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button
+        size=\\"md\\"
+        backgroundColor=\\"#15803d\\"
+        color=\\"#fff\\"
+        isDisabled={false}
+      >
+        {'Get started'}
+      </Button>
+    </Flex>
   </Flex>
 </Frame>;
 "
@@ -108,9 +115,16 @@ exports[`hero left aligned default 1`] = `
     <Text className=\\"mb-4\\" textAlign=\\"left\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
-    <Button size=\\"md\\" backgroundColor=\\"#15803d\\" color=\\"#fff\\" isDisabled={false}>
-      {'Get started'}
-    </Button>
+    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button
+        size=\\"md\\"
+        backgroundColor=\\"#15803d\\"
+        color=\\"#fff\\"
+        isDisabled={false}
+      >
+        {'Get started'}
+      </Button>
+    </Flex>
   </Flex>
 </Frame>;
 "
@@ -137,15 +151,17 @@ exports[`hero with bg default 1`] = `
     <Text className=\\"mb-4 text-white\\" textAlign=\\"center\\">
       {'Turn great ideas into new possibilities.'}
     </Text>
-    <Button
-      size=\\"md\\"
-      backgroundColor=\\"#f1f5f9\\"
-      color=\\"#000\\"
-      isDisabled={false}
-      className=\\"text-white\\"
-    >
-      {'Get started'}
-    </Button>
+    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button
+        size=\\"md\\"
+        backgroundColor=\\"#f1f5f9\\"
+        color=\\"#000\\"
+        isDisabled={false}
+        className=\\"text-white\\"
+      >
+        {'Get started'}
+      </Button>
+    </Flex>
   </Flex>
 </Frame>;
 "
