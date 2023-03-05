@@ -18,7 +18,7 @@ import { boxSymbol } from './symbols';
 
 interface BlockRenderOptions {
   props: BlockProps;
-  block: Pick<BlockDefinition, 'symbol' | 'placeholderText'>;
+  block: Pick<BlockDefinition, 'symbol' | 'placeholderText' | 'isPassthrough'>;
   overrideValues?: Sketch.OverrideValue[];
   extraParameters?: ParsedBlockItemParameters;
 }
@@ -173,6 +173,15 @@ export const renderStack = ({
 
     return block.render(childProps);
   });
+
+  // We don't render empty passthrough blocks
+  if (
+    block.isPassthrough &&
+    Array.isArray(container.children) &&
+    container.children.length === 0
+  ) {
+    return null;
+  }
 
   return props.getBlock(boxSymbol.symbolID).render(container);
 };
