@@ -18,6 +18,7 @@ import {
   heroSymbolV2Id,
   iconSymbolId,
   imageSymbolId,
+  linkSymbolId,
   textSymbolId,
 } from '../ayon/blocks/symbolIds';
 
@@ -59,6 +60,22 @@ describe('text', () => {
     const symbol = SketchModel.symbolInstance({
       symbolID: textSymbolId,
       blockText: 'Hello world #center #text-red-500',
+      frame: SketchModel.rect({
+        width: 100,
+        height: 40,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
+});
+
+describe('link', () => {
+  // TODO: Icon doesn't get added to exported code
+  test('with icon', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: linkSymbolId,
+      blockText: 'Test #icon-arrow-right',
       frame: SketchModel.rect({
         width: 100,
         height: 40,

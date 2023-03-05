@@ -61,7 +61,7 @@ export { App };
   \\"name\\": \\"app\\",
   \\"dependencies\\": {
     \\"react\\": \\"^18\\",
-    \\"@chakra-ui/icons\\": \\"^2\\",
+    \\"@chakra-ui/icons\\": \\"^1\\",
     \\"@chakra-ui/react\\": \\"^1\\",
     \\"@emotion/react\\": \\"^11\\",
     \\"@emotion/styled\\": \\"^11\\"
@@ -193,6 +193,15 @@ exports[`icon with color 1`] = `
         'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
     }}
   />
+</Frame>;
+"
+`;
+
+exports[`link with icon 1`] = `
+"<Frame width={100} height={40}>
+  <Link fontWeight=\\"semibold\\" color=\\"dodgerblue\\">
+    {'Test'}
+  </Link>
 </Frame>;
 "
 `;
