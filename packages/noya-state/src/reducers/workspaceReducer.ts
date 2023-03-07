@@ -65,6 +65,7 @@ export type WorkspaceAction =
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setIsContextMenuOpen', value: boolean]
+  | [type: 'setDesignSystemId', value: string]
   | HistoryAction;
 
 export function workspaceReducer(
@@ -74,6 +75,13 @@ export function workspaceReducer(
   fontManager: IFontManager,
 ): WorkspaceState {
   switch (action[0]) {
+    case 'setDesignSystemId': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.history.present.sketch.document.designSystemID = value;
+      });
+    }
     case 'newFile': {
       return produce(state, (draft) => {
         draft.fileHandle = undefined;

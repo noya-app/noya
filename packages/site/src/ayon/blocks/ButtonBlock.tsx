@@ -1,9 +1,8 @@
-import { Button } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
+import { buttonSymbolId } from './symbolIds';
 import { buttonSymbol } from './symbols';
 import { getBlockClassName } from './tailwind';
 
@@ -50,7 +49,7 @@ export const ButtonBlock: BlockDefinition = {
     })
       ? 0.8
       : 0,
-  render: (props) => {
+  render: ({ h, Components: { [buttonSymbolId]: Button } }, props) => {
     const {
       content,
       parameters: { xs, lg, md, disabled, ...parameters },
@@ -81,24 +80,26 @@ export const ButtonBlock: BlockDefinition = {
       }
     }
 
-    return (
-      <Button
-        {...(props.dataSet && {
+    return h(
+      Button,
+      {
+        ...(props.dataSet && {
           key: props.dataSet.id,
           'data-noya-id': props.dataSet.id,
           'data-noya-parent-id': props.dataSet.parentId,
-        })}
-        {...(props.frame && {
-          width: `${props.frame.width}px`,
-        })}
-        size={size}
-        backgroundColor={colors.backgroundColor}
-        color={colors.color}
-        isDisabled={!!disabled}
-        className={getBlockClassName(hashtags)}
-      >
-        {content}
-      </Button>
+        }),
+        size,
+        backgroundColor: colors.backgroundColor,
+        color: colors.color,
+        isDisabled: !!disabled,
+        className: getBlockClassName(hashtags),
+        style: {
+          ...(props.frame && {
+            width: `${props.frame.width}px`,
+          }),
+        },
+      },
+      content,
     );
   },
 };

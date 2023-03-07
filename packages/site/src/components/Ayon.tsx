@@ -513,6 +513,9 @@ function Workspace({
     fileId,
   ]);
 
+  const designSystem =
+    state.history.present.sketch.document.designSystemID ?? 'default';
+
   useLayoutEffect(() => {
     setCenterToolbar(
       <StateProvider state={state} dispatch={dispatch}>
@@ -525,6 +528,10 @@ function Workspace({
           <Stack.V width={240}>
             <ProjectMenu
               name={name}
+              designSystem={designSystem}
+              onChangeDesignSystem={(value) => {
+                dispatch(['setDesignSystemId', value]);
+              }}
               onChangeName={onChangeName || (() => {})}
               onDuplicate={onDuplicate || (() => {})}
             />
@@ -532,7 +539,7 @@ function Workspace({
         </Popover>
       </StateProvider>,
     );
-  }, [name, onChangeName, onDuplicate, setCenterToolbar, state]);
+  }, [designSystem, name, onChangeName, onDuplicate, setCenterToolbar, state]);
 
   return (
     <StateProvider state={state} dispatch={dispatch}>
@@ -542,6 +549,7 @@ function Workspace({
         viewType={viewType}
         padding={padding}
         isPlayground={isPlayground}
+        designSystem={designSystem}
       />
     </StateProvider>
   );

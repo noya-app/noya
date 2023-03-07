@@ -3629,6 +3629,13 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@noya-design-system/protocol@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.2.tgz#925c3f379aaaa9f4212b1a7a68e04c9f50c23f7d"
+  integrity sha512-3J5EIxMxRjHGGwYKdhHBCTwqAWWNt/SuzrRoaxL4YyszRjjmagPeeWjCbq6SjNDlIqhBJNf+fy5jYGbNuA0dIw==
+  dependencies:
+    react "^18.2.0"
+
 "@npm/types@*":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@npm/types/-/types-1.0.2.tgz#b9443e6064f35e18f27f4d2c08fff564334c9fa5"
@@ -17464,6 +17471,13 @@ react@^17.0.1:
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
+
+react@^18.2.0:
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
+  integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
+  dependencies:
+    loose-envify "^1.1.0"
 
 read-cache@^1.0.0:
   version "1.0.0"

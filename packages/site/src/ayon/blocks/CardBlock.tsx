@@ -9,6 +9,7 @@ export const CardBlock: BlockDefinition = {
   symbol: cardSymbol,
   parser: 'regular',
   hashtags: BoxBlock.hashtags,
+  isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     return Math.max(
       isWithinRectRange({
@@ -23,5 +24,5 @@ export const CardBlock: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => renderStack({ props, block: CardBlock }),
+  render: (env, props) => renderStack(env, { props, block: CardBlock }),
 };

@@ -1,4 +1,8 @@
-import { ChakraProvider } from '@chakra-ui/react';
+import {
+  component,
+  DesignSystemDefinition,
+  RenderableRoot,
+} from '@noya-design-system/protocol';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import {
@@ -8,31 +12,105 @@ import {
   transformRect,
 } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
-import { BlockProps, Layers, Selectors } from 'noya-state';
-import React, { ComponentProps, useRef } from 'react';
+import {
+  BlockProps,
+  BlockRenderingEnvironment,
+  InteractionState,
+  Layers,
+  Selectors,
+} from 'noya-state';
+import React, {
+  ComponentProps,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from 'react';
 import { Blocks } from './blocks/blocks';
-import { buttonSymbol } from './blocks/symbols';
 
-function SymbolRenderer({
-  layer,
-  dataSet,
-  frame,
-  symbolId,
-  blockText,
-  resolvedBlockData,
-  getBlock,
-}: BlockProps & { frame: Rect; symbolId: string }) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: frame.x,
-        top: frame.y,
-        width: frame.width,
-        height: frame.height,
-      }}
-    >
-      {getBlock(symbolId).render({
+class ErrorBoundary extends React.Component<any> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true };
+  }
+
+  componentDidCatch() {}
+
+  render() {
+    return this.props.children;
+  }
+}
+
+function requireModule(content: string) {
+  const exports = {};
+  const module = { exports };
+
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+  new Function('exports', 'module', `{\n${content};\n}`)(exports, module);
+
+  if (!(module.exports as any).DesignSystem) {
+    throw new Error('No DesignSystem exported');
+  }
+
+  return (module.exports as any).DesignSystem as DesignSystemDefinition;
+}
+
+function createRenderingEnvironment(
+  system: DesignSystemDefinition,
+): BlockRenderingEnvironment {
+  const { createElement: h, components } = system;
+
+  return {
+    h,
+    Components: Object.fromEntries(
+      Object.entries(components).map(([key, value]) => [key, value.Component]),
+    ),
+  };
+}
+
+function renderDynamicContent(
+  system: DesignSystemDefinition,
+  layers: Sketch.Artboard['layers'],
+  drawing: Extract<InteractionState, { type: 'drawing' }> | undefined,
+) {
+  const { createElement: h, Provider } = system;
+  const env = createRenderingEnvironment(system);
+
+  const getBlock = (symbolId: string) => Blocks[symbolId];
+
+  function SymbolRenderer({
+    key,
+    layer,
+    dataSet,
+    frame,
+    symbolId,
+    blockText,
+    resolvedBlockData,
+    getBlock,
+  }: BlockProps & { frame: Rect; symbolId: string; key: string }) {
+    const block = getBlock(symbolId);
+
+    if (!env.Components[symbolId] && !block.isComposedBlock) {
+      return null;
+    }
+
+    return h(
+      'div',
+      {
+        key,
+        style: {
+          position: 'absolute',
+          left: frame.x,
+          top: frame.y,
+          width: frame.width,
+          height: frame.height,
+        },
+      },
+      getBlock(symbolId).render(env, {
         layer,
         dataSet,
         symbolId,
@@ -40,8 +118,106 @@ function SymbolRenderer({
         blockText,
         resolvedBlockData,
         getBlock,
-      })}
-    </div>
+      }),
+    );
+  }
+
+  const content = [
+    layers.filter(Layers.isSymbolInstance).map((layer) => {
+      return SymbolRenderer({
+        key: layer.do_objectID,
+        layer,
+        dataSet: {
+          id: layer.do_objectID,
+          parentId: layer.do_objectID,
+        },
+        frame: layer.frame,
+        symbolId: layer.symbolID,
+        blockText: layer.blockText,
+        resolvedBlockData: layer.resolvedBlockData,
+        getBlock,
+      });
+    }),
+    ...(drawing
+      ? [
+          SymbolRenderer({
+            key: 'drawing',
+            frame: Selectors.getDrawnLayerRect(
+              drawing.origin,
+              drawing.current,
+              drawing.options,
+            ),
+            symbolId:
+              typeof drawing.shapeType === 'string'
+                ? component.id.button
+                : drawing.shapeType.symbolId,
+            getBlock,
+          }),
+        ]
+      : []),
+  ];
+
+  return (h as unknown as any)(
+    'div',
+    {},
+    Provider ? (h as unknown as any)(Provider, {}, content) : content,
+  );
+}
+
+function DynamicRenderer({
+  artboard,
+  designSystem,
+  drawing,
+}: {
+  artboard: Sketch.Artboard;
+  designSystem: string;
+  drawing: Extract<InteractionState, { type: 'drawing' }> | undefined;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [system, setSystem] = React.useState<
+    DesignSystemDefinition | undefined
+  >();
+  const [root, setRoot] = React.useState<RenderableRoot | undefined>();
+
+  useEffect(() => {
+    async function fetchLibrary() {
+      const url = `https://www.unpkg.com/@noya-design-system/${designSystem}`;
+      const response = await fetch(url);
+      const text = await response.text();
+      const system = requireModule(text);
+      setSystem(system);
+    }
+
+    setSystem(undefined);
+
+    fetchLibrary();
+  }, [designSystem]);
+
+  useEffect(() => {
+    if (system && !root) {
+      setRoot(system.createRoot(ref.current!));
+    } else if (!system && root) {
+      root.unmount();
+      setRoot(undefined);
+    }
+  }, [root, system]);
+
+  useLayoutEffect(() => {
+    if (!root || !system) return;
+
+    root.render(renderDynamicContent(system, artboard.layers, drawing));
+  }, [artboard.layers, designSystem, drawing, root, system]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+      }}
+    />
   );
 }
 
@@ -49,10 +225,12 @@ function DOMRendererContent({
   size,
   resizeBehavior,
   padding = 0,
+  designSystem,
 }: {
   size: Size;
   resizeBehavior: ResizeBehavior;
   padding?: number;
+  designSystem: string;
 }): JSX.Element {
   const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
@@ -71,10 +249,8 @@ function DOMRendererContent({
 
   const paddedRect = transformRect(rect, transform);
 
-  const getBlock = (symbolId: string) => Blocks[symbolId];
-
   return (
-    <ChakraProvider>
+    <>
       <div
         style={{
           position: 'absolute',
@@ -96,39 +272,19 @@ function DOMRendererContent({
           overflow: 'hidden',
         }}
       >
-        {artboard.layers.filter(Layers.isSymbolInstance).map((layer) => (
-          <SymbolRenderer
-            layer={layer}
-            dataSet={{
-              id: layer.do_objectID,
-              parentId: layer.do_objectID,
-            }}
-            key={layer.do_objectID}
-            frame={layer.frame}
-            symbolId={layer.symbolID}
-            blockText={layer.blockText}
-            resolvedBlockData={layer.resolvedBlockData}
-            getBlock={getBlock}
-          />
-        ))}
-        {state.interactionState.type === 'drawing' && (
-          <SymbolRenderer
-            key="drawing"
-            frame={Selectors.getDrawnLayerRect(
-              state.interactionState.origin,
-              state.interactionState.current,
-              state.interactionState.options,
-            )}
-            symbolId={
-              typeof state.interactionState.shapeType === 'string'
-                ? buttonSymbol.symbolID
-                : state.interactionState.shapeType.symbolId
+        <ErrorBoundary>
+          <DynamicRenderer
+            artboard={artboard}
+            designSystem={designSystem}
+            drawing={
+              state.interactionState.type === 'drawing'
+                ? state.interactionState
+                : undefined
             }
-            getBlock={getBlock}
           />
-        )}
+        </ErrorBoundary>
       </div>
-    </ChakraProvider>
+    </>
   );
 }
 

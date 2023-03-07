@@ -7,6 +7,7 @@ import {
   TextSelectionRange,
   UUID,
 } from 'noya-state';
+import type React from 'react';
 import { CSSProperties, ReactNode } from 'react';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
@@ -58,16 +59,22 @@ export type InferBlockProps = {
   siblingBlocks: SiblingBlockProps[];
 };
 
+export type BlockRenderingEnvironment = {
+  Components: Record<string, React.FC<any>>;
+  h: (...args: any[]) => JSX.Element;
+};
+
 export type BlockDefinition = {
   symbol: Sketch.SymbolMaster;
   parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
   infer: (props: InferBlockProps) => number;
-  render: (props: BlockProps) => ReactNode;
+  render: (env: BlockRenderingEnvironment, props: BlockProps) => JSX.Element;
   hashtags?: string[];
   placeholderText?: string;
   editorVersion?: number;
   usesResolver?: boolean;
   isPassthrough?: boolean;
+  isComposedBlock?: boolean;
 };
 
 export type InteractionMethod = 'mouse' | 'keyboard';

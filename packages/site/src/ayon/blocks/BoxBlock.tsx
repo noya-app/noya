@@ -1,9 +1,8 @@
-import { Flex } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { accentColor } from './blockTheme';
 import { getBlockThemeColors } from './colors';
+import { boxSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
 import {
   getBlockClassName,
@@ -16,7 +15,7 @@ export const BoxBlock: BlockDefinition = {
   parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   hashtags: ['left', 'center', 'right', 'dark', ...tailwindBlockClasses],
-  render: (props) => {
+  render: ({ h, Components: { [boxSymbolId]: Box } }, props) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
 
@@ -74,26 +73,28 @@ export const BoxBlock: BlockDefinition = {
       }
     }
 
-    return (
-      <Flex
-        {...(props.dataSet && {
+    return h(
+      Box,
+      {
+        ...(props.dataSet && {
           key: props.dataSet.id,
           'data-noya-id': props.dataSet.id,
           'data-noya-parent-id': props.dataSet.parentId,
-        })}
-        {...(props.frame && {
-          width: `${props.frame.width}px`,
-          height: `${props.frame.height}px`,
-        })}
-        bg={backgroundColor}
-        className={getBlockClassName([
+        }),
+        style: {
+          backgroundColor,
+          ...(props.frame && {
+            width: `${props.frame.width}px`,
+            height: `${props.frame.height}px`,
+          }),
+        },
+        className: getBlockClassName([
           ...hashtags,
           ...(items ? [items] : []),
           ...(justify ? [justify] : []),
-        ])}
-      >
-        {props.children}
-      </Flex>
+        ]),
+      },
+      props.children,
     );
   },
 };

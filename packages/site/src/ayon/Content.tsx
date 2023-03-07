@@ -51,12 +51,14 @@ export const Content = memo(function Content({
   padding,
   canvasRendererType = 'canvas',
   isPlayground,
+  designSystem,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
   padding?: number;
   canvasRendererType?: CanvasRendererType;
   isPlayground?: boolean;
+  designSystem: string;
 }) {
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
@@ -313,7 +315,10 @@ export const Content = memo(function Content({
               viewType === 'previewOnly' ? { pointerEvents: 'all' } : undefined
             }
           >
-            <DOMRenderer resizeBehavior="match-canvas" />
+            <DOMRenderer
+              resizeBehavior="match-canvas"
+              designSystem={designSystem}
+            />
           </Overlay>
         )}
         {viewType !== 'previewOnly' && (
@@ -352,7 +357,11 @@ export const Content = memo(function Content({
         <>
           <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
           <Panel.Item collapsible>
-            <DOMRenderer padding={padding} resizeBehavior="fit-container" />
+            <DOMRenderer
+              padding={padding}
+              resizeBehavior="fit-container"
+              designSystem={designSystem}
+            />
           </Panel.Item>
         </>
       )}

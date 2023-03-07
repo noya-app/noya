@@ -13,11 +13,15 @@ import React from 'react';
 
 export function ProjectMenu({
   name,
+  designSystem,
   onChangeName,
+  onChangeDesignSystem,
   onDuplicate,
 }: {
   name: string;
+  designSystem: string;
   onChangeName: (name: string) => void;
+  onChangeDesignSystem: (name: string) => void;
   onDuplicate: () => void;
 }) {
   const [state, dispatch] = useApplicationState();
@@ -86,12 +90,14 @@ export function ProjectMenu({
           <DropdownMenu
             items={[
               { value: 'chakra', title: 'Chakra UI' },
-              { value: 'more', title: 'More coming soon!' },
+              { value: 'mui', title: 'Material Design' },
             ]}
-            onSelect={() => {}}
+            onSelect={(value) => {
+              onChangeDesignSystem(value);
+            }}
           >
             <Button flex="1">
-              Chakra UI
+              {designSystem}
               <Spacer.Horizontal />
               <ChevronDownIcon />
             </Button>

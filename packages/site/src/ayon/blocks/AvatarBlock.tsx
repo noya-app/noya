@@ -1,9 +1,8 @@
-import { Avatar } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { isApproximatelySquare, isWithinRectRange } from './score';
+import { avatarSymbolId } from './symbolIds';
 import { avatarSymbol } from './symbols';
 
 const AVATAR_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'];
@@ -23,7 +22,7 @@ export const AvatarBlock: BlockDefinition = {
     }) && isApproximatelySquare(frame, 0.2)
       ? 0.8
       : 0,
-  render: (props) => {
+  render: ({ h, Components: { [avatarSymbolId]: Avatar } }, props) => {
     const { content } = parseBlock(props.blockText, parser);
     const src = isExternalUrl(content) ? content : undefined;
     const name = !src ? content : undefined;
@@ -38,6 +37,21 @@ export const AvatarBlock: BlockDefinition = {
         ]
       : 'md';
 
-    return <Avatar size={size} name={name} src={src} />;
+    const sizePx = props.frame
+      ? Math.min(props.frame.width, props.frame.height)
+      : undefined;
+
+    return h(Avatar, {
+      size,
+      name,
+      src,
+      style: {
+        aspectRatio: '1',
+        ...(sizePx && {
+          width: `${sizePx}px`,
+          height: `${sizePx}px`,
+        }),
+      },
+    });
   },
 };

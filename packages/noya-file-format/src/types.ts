@@ -1620,6 +1620,7 @@ export type Document = {
   documentState?: DocumentState;
   patchInfo?: PatchInfo;
   pages: FileRef[];
+  designSystemID?: Uuid;
 };
 /**
  * Union of all layers

@@ -3,6 +3,7 @@ import {
   applyOverrides,
   BlockDefinition,
   BlockProps,
+  BlockRenderingEnvironment,
   Layers,
   Overrides,
 } from 'noya-state';
@@ -142,12 +143,15 @@ export function getRenderableBlockProps({
   return { container, children, extraParameters };
 }
 
-export const renderStack = ({
-  props,
-  block,
-  overrideValues,
-  extraParameters: inputExtraParameters,
-}: BlockRenderOptions) => {
+export const renderStack = (
+  env: BlockRenderingEnvironment,
+  {
+    props,
+    block,
+    overrideValues,
+    extraParameters: inputExtraParameters,
+  }: BlockRenderOptions,
+) => {
   const {
     container,
     children,
@@ -163,7 +167,7 @@ export const renderStack = ({
     const block = props.getBlock(childProps.symbolId);
 
     if (block.isPassthrough) {
-      return renderStack({
+      return renderStack(env, {
         props: childProps,
         block,
         overrideValues: props.layer?.overrideValues,
@@ -171,7 +175,7 @@ export const renderStack = ({
       });
     }
 
-    return block.render(childProps);
+    return block.render(env, childProps);
   });
 
   // We don't render empty passthrough blocks
@@ -180,8 +184,8 @@ export const renderStack = ({
     Array.isArray(container.children) &&
     container.children.length === 0
   ) {
-    return null;
+    return null as unknown as JSX.Element;
   }
 
-  return props.getBlock(boxSymbol.symbolID).render(container);
+  return props.getBlock(boxSymbol.symbolID).render(env, container);
 };
