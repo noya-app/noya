@@ -1,7 +1,6 @@
-import { Switch } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
+import { switchSymbolId } from './symbolIds';
 import { switchSymbol } from './symbols';
 
 const placeholderText = '#off';
@@ -16,14 +15,21 @@ export const SwitchBlock: BlockDefinition = {
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) => 0.1,
-  render: (props) => {
+  render: ({ h, Components: { [switchSymbolId]: Switch } }, props) => {
     const {
       parameters: { on, disabled },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
-    const height = props.frame?.height ?? 25;
-    const size = height >= 35 ? 'lg' : height >= 25 ? 'md' : 'sm';
-    return <Switch size={size} isChecked={!!on} isDisabled={!!disabled} />;
+
+    return h(Switch, {
+      ...(props.dataSet && {
+        key: props.dataSet.id,
+        'data-noya-id': props.dataSet.id,
+        'data-noya-parent-id': props.dataSet.parentId,
+      }),
+      checked: !!on,
+      disabled: !!disabled,
+    });
   },
 };

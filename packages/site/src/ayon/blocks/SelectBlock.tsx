@@ -1,9 +1,8 @@
-import { Select } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
+import { selectSymbolId } from './symbolIds';
 import { selectSymbol } from './symbols';
 
 const placeholderText = `
@@ -31,7 +30,7 @@ export const SelectBlock: BlockDefinition = {
     })
       ? 0.7
       : 0,
-  render: (props) => {
+  render: ({ h, Components: { [selectSymbolId]: Select } }, props) => {
     const {
       items,
       parameters: { dark, accent, disabled },
@@ -39,28 +38,25 @@ export const SelectBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const height = props.frame?.height ?? 30;
-
-    const size = height >= 45 ? 'lg' : height >= 30 ? 'md' : 'sm';
-
     const { backgroundColor, color, borderColor } = getBlockThemeColors({
       dark,
       accent,
     });
 
-    return (
-      <Select
-        size={size}
-        backgroundColor={backgroundColor}
-        color={color}
-        borderColor={borderColor}
-        isDisabled={!!disabled}
-        placeholder={items[0].content}
-      >
-        {items.slice(1).map((item, index) => (
-          <option key={item.content}>{item.content}</option>
-        ))}
-      </Select>
-    );
+    return h(Select, {
+      ...(props.dataSet && {
+        key: props.dataSet.id,
+        'data-noya-id': props.dataSet.id,
+        'data-noya-parent-id': props.dataSet.parentId,
+      }),
+      style: {
+        backgroundColor,
+        color,
+        borderColor,
+      },
+      disabled: !!disabled,
+      value: items[0].content,
+      options: items.map((item) => item.content),
+    });
   },
 };

@@ -1,8 +1,7 @@
-import { Radio } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
+import { radioSymbolId } from './symbolIds';
 import { radioSymbol } from './symbols';
 
 const placeholderText = '#off Daily';
@@ -26,7 +25,7 @@ export const RadioBlock: BlockDefinition = {
     })
       ? 0.8
       : 0,
-  render: (props) => {
+  render: ({ h, Components: { [radioSymbolId]: Radio } }, props) => {
     const {
       content,
       parameters: { on, disabled },
@@ -34,15 +33,15 @@ export const RadioBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const height = props.frame ? props.frame.height : 20;
     const width = props.frame ? props.frame.width : 40;
 
-    const size = height >= 30 ? 'lg' : height >= 20 ? 'md' : 'sm';
-
-    return (
-      <Radio size={size} isChecked={!!on} isDisabled={!!disabled}>
-        {width >= 40 && content}
-      </Radio>
+    return h(
+      Radio,
+      {
+        checked: !!on,
+        disabled: !!disabled,
+      },
+      width >= 40 && content,
     );
   },
 };

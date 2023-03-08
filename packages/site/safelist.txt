@@ -1553,3 +1553,7 @@ self-end
 self-center
 self-stretch
 self-baseline
+underline
+line-through
+overline
+no-underline

@@ -15,7 +15,6 @@ import {
   Heading6Block,
 } from './HeadingBlock';
 import { HeroBlockV2 } from './HeroBlock';
-import { HeroBlockV1 } from './HeroBlockV1';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
@@ -27,6 +26,7 @@ import { SidebarBlock } from './SidebarBlock';
 import { SignInBlock } from './SignInBlock';
 import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
+import { heroSymbolId } from './symbolIds';
 import { heroButtonRowSymbol } from './symbols';
 import { TableBlock } from './TableBlock';
 import { TextareaBlock } from './TextareaBlock';
@@ -64,7 +64,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [Heading4Block.symbol.symbolID]: Heading4Block,
   [Heading5Block.symbol.symbolID]: Heading5Block,
   [Heading6Block.symbol.symbolID]: Heading6Block,
-  [HeroBlockV1.symbol.symbolID]: HeroBlockV1,
+  [heroSymbolId]: HeroBlockV2,
   [HeroBlockV2.symbol.symbolID]: HeroBlockV2,
   [ImageBlock.symbol.symbolID]: ImageBlock,
   [InputBlock.symbol.symbolID]: InputBlock,

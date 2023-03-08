@@ -35,7 +35,11 @@ const createHeadingBlock = (
     const hashtags = Object.keys(parameters);
 
     const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {
-      return classGroups.flex.test(hashtag) || /m[xytrbl]?-/.test(hashtag);
+      return (
+        classGroups.flex.test(hashtag) ||
+        classGroups.alignSelf.test(hashtag) ||
+        /m[xytrbl]?-/.test(hashtag)
+      );
     });
 
     return h(

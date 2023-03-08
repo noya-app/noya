@@ -34,6 +34,7 @@ export const LinkBlock: BlockDefinition = {
     const hashtags = Object.keys(parameters);
     const colorKey = getLastClassInGroup('textColor', hashtags);
     const color = colorKey ? resolveColor(colorKey) : 'dodgerblue';
+    const textDecoration = getLastClassInGroup('textDecoration', hashtags);
 
     return h(
       Link,
@@ -47,6 +48,14 @@ export const LinkBlock: BlockDefinition = {
           fontWeight: 'semibold',
           color,
           textDecorationColor: color,
+          textDecoration:
+            textDecoration === 'no-underline'
+              ? 'none'
+              : textDecoration === 'line-through'
+              ? 'line-through'
+              : textDecoration === 'overline'
+              ? 'overline'
+              : undefined,
         },
         className: getBlockClassName(hashtags),
       },

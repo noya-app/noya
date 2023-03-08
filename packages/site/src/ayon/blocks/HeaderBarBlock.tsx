@@ -1,21 +1,16 @@
-import { SearchIcon } from '@chakra-ui/icons';
-import {
-  Avatar,
-  Flex,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Link,
-  Spacer,
-} from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
-import { getBlockThemeColors } from './colors';
+import { getBlockThemeColorClasses } from './colors';
 import { isWithinRectRange } from './score';
+import {
+  avatarSymbolId,
+  boxSymbolId,
+  heading6SymbolId,
+  inputSymbolId,
+  linkSymbolId,
+  spacerSymbolId,
+} from './symbolIds';
 import { headerBarSymbol } from './symbols';
-import { getBlockClassName } from './tailwind';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
@@ -26,6 +21,7 @@ export const HeaderBarBlock: BlockDefinition = {
   hashtags: ['dark', 'accent', 'search', 'title'],
   placeholderText,
   parser,
+  isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === headerBarSymbol.symbolID)
@@ -48,7 +44,7 @@ export const HeaderBarBlock: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => {
+  render: (env, props) => {
     const {
       items,
       parameters: { dark, title, accent, search, ...globalParameters },
@@ -56,88 +52,74 @@ export const HeaderBarBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const hashtags = Object.keys(globalParameters);
     const hasActiveItem = items.some((item) => item.parameters.active);
 
-    const {
-      backgroundColor,
-      borderColor,
-      searchBackgroundColor,
-      color,
-      activeLinkBackgroundColor,
-    } = getBlockThemeColors({ dark, accent });
+    const { text, bg, activeLinkBg } = getBlockThemeColorClasses({
+      dark,
+      accent,
+    });
 
-    const height = props.frame?.height ?? 60;
-
-    return (
-      <Flex
-        alignItems="center"
-        borderBottomWidth={1}
-        borderBottomColor={borderColor}
-        height={`${height}px`}
-        paddingX="5px"
-        backgroundColor={backgroundColor}
-        backdropFilter="auto"
-        backdropBlur="10px"
-        overflow="hidden"
-        className={getBlockClassName(hashtags)}
-      >
-        {items.map(({ content, parameters: { active, ...rest } }, index) => {
-          const className = getBlockClassName(Object.keys(rest));
-
-          let backgroundColor = 'transparent';
-
-          if (active || (!hasActiveItem && index === 0)) {
-            backgroundColor = activeLinkBackgroundColor;
-          }
+    return props.getBlock(boxSymbolId).render(env, {
+      symbolId: boxSymbolId,
+      blockText: ['#flex-row #items-center #px-4 #gap-6', bg].join(' '),
+      frame: props.frame,
+      getBlock: props.getBlock,
+      children: [
+        ...items.map(({ content, parameters: { active, ...rest } }, index) => {
+          const activeOrDefault =
+            active || (!hasActiveItem && index === (title ? 1 : 0));
 
           if (title && index === 0) {
-            return (
-              <Heading
-                color={color}
-                fontWeight="semibold"
-                size="sm"
-                margin="0 18px 0 15px"
-                className={className}
-              >
-                {content}
-              </Heading>
-            );
+            return props.getBlock(heading6SymbolId).render(env, {
+              blockText: [content, text, '#p-2'].join(' '),
+              symbolId: heading6SymbolId,
+              getBlock: props.getBlock,
+            });
           }
 
-          return (
-            <Link
-              marginX="5px"
-              padding="8px 14px"
-              borderRadius="3px"
-              fontSize="12px"
-              fontWeight="medium"
-              backgroundColor={backgroundColor}
-              color={color}
-              className={className}
-            >
-              {content}
-            </Link>
-          );
-        })}
-        <Spacer />
-        {search && (
-          <InputGroup
-            flex="0.35"
-            marginX="10px"
-            size="sm"
-            borderColor="rgba(0,0,0,0.1)"
-            backgroundColor={searchBackgroundColor}
-          >
-            <InputLeftElement
-              pointerEvents="none"
-              children={<SearchIcon color={color} opacity={0.8} />}
-            />
-            <Input placeholder="Search" />
-          </InputGroup>
-        )}
-        <Avatar size={height < 60 ? 'xs' : 'sm'} marginX="10px" />
-      </Flex>
-    );
+          return props.getBlock(boxSymbolId).render(env, {
+            getBlock: props.getBlock,
+            symbolId: boxSymbolId,
+            blockText: [
+              activeOrDefault ? activeLinkBg : '#bg-transparent',
+              '#rounded #p-2',
+            ]
+              .filter(Boolean)
+              .join(' '),
+            children: [
+              props.getBlock(linkSymbolId).render(env, {
+                blockText: [
+                  content,
+                  text,
+                  '#no-underline',
+                  activeOrDefault ? '#font-semibold' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' '),
+                symbolId: linkSymbolId,
+                getBlock: props.getBlock,
+              }),
+            ],
+          });
+        }),
+        props.getBlock(spacerSymbolId).render(env, {
+          symbolId: spacerSymbolId,
+          blockText: '#flex-1',
+          getBlock: props.getBlock,
+        }),
+        search &&
+          props.getBlock(inputSymbolId).render(env, {
+            symbolId: inputSymbolId,
+            blockText: ['Search', dark && '#dark', accent && '#accent']
+              .filter(Boolean)
+              .join(' '),
+            getBlock: props.getBlock,
+          }),
+        props.getBlock(avatarSymbolId).render(env, {
+          symbolId: avatarSymbolId,
+          getBlock: props.getBlock,
+        }),
+      ],
+    });
   },
 };

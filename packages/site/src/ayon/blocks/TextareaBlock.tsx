@@ -1,8 +1,7 @@
-import { Textarea } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
+import { textareaSymbolId } from './symbolIds';
 import { textareaSymbol } from './symbols';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
@@ -14,7 +13,7 @@ export const TextareaBlock: BlockDefinition = {
   parser,
   hashtags: globalHashtags,
   infer: ({ frame, blockText }) => 0.1,
-  render: (props) => {
+  render: ({ h, Components: { [textareaSymbolId]: Textarea } }, props) => {
     const {
       content,
       parameters: { dark, accent, disabled },
@@ -25,15 +24,23 @@ export const TextareaBlock: BlockDefinition = {
       accent,
     });
 
-    return (
-      <Textarea
-        value={content}
-        height={'100%'}
-        backgroundColor={backgroundColor}
-        color={color}
-        borderColor={borderColor}
-        isDisabled={!!disabled}
-      />
-    );
+    return h(Textarea, {
+      ...(props.dataSet && {
+        key: props.dataSet.id,
+        'data-noya-id': props.dataSet.id,
+        'data-noya-parent-id': props.dataSet.parentId,
+      }),
+      value: content,
+      disabled: !!disabled,
+      style: {
+        backgroundColor,
+        color,
+        borderColor,
+        ...(props.frame && {
+          width: `${props.frame.width}px`,
+          height: `${props.frame.height}px`,
+        }),
+      },
+    });
   },
 };

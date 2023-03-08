@@ -10,7 +10,8 @@ export function isSupportedTailwindClass(className: string) {
   return allClassNamesSet.has(className);
 }
 
-const isTextClassRE = /^(text|font|truncate|leading)/;
+const isTextClassRE =
+  /^(text|font|truncate|leading|underline|overline|no-underline|line-through)/;
 const isFillClassRE = /^fill-/;
 
 export const tailwindTextClasses = allClassNames.filter((item) =>
@@ -61,6 +62,7 @@ export const classGroups = {
   flex: /^(flex-1|flex-auto|flex-none)/,
   alignSelf: /^self/,
   borderRadius: /^rounded/,
+  textDecoration: /^(underline|overline|no-underline|line-through)/,
   // Must be last!
   none: /.*/,
 };

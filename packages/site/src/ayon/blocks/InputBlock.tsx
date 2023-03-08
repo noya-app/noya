@@ -49,6 +49,9 @@ export const InputBlock: BlockDefinition = {
         backgroundColor,
         color,
         borderColor,
+        ...(props.frame && {
+          width: `${props.frame.width}px`,
+        }),
       },
     });
   },

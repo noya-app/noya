@@ -1,9 +1,8 @@
-import { Heading, Link, VStack } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
-import { getBlockThemeColors } from './colors';
+import { getBlockThemeColorClasses } from './colors';
 import { isWithinRectRange } from './score';
+import { boxSymbolId, heading5SymbolId, linkSymbolId } from './symbolIds';
 import { sidebarSymbol } from './symbols';
 
 const placeholderText = `
@@ -22,6 +21,7 @@ export const SidebarBlock: BlockDefinition = {
   parser,
   hashtags: globalHashtags,
   placeholderText,
+  isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === sidebarSymbol.symbolID)
@@ -42,7 +42,7 @@ export const SidebarBlock: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => {
+  render: (env, props) => {
     const {
       items,
       parameters: { dark, accent, title },
@@ -52,56 +52,53 @@ export const SidebarBlock: BlockDefinition = {
 
     const hasActiveItem = items.some((item) => item.parameters.active);
 
-    const { backgroundColor, color, activeLinkBackgroundColor } =
-      getBlockThemeColors({ dark, accent });
+    const { text, bg, activeLinkBg } = getBlockThemeColorClasses({
+      dark,
+      accent,
+    });
 
-    return (
-      <VStack
-        alignItems="left"
-        height={'100%'}
-        spacing="5px"
-        paddingY="10px"
-        paddingX="10px"
-        backgroundColor={backgroundColor}
-        backdropFilter="auto"
-        backdropBlur="10px"
-      >
-        {items.map(({ content, parameters: { active } }, index) => {
-          let backgroundColor = 'transparent';
-          let fontWeight = 'normal';
+    return props.getBlock(boxSymbolId).render(env, {
+      symbolId: boxSymbolId,
+      blockText: ['#flex-col #p-4', bg].join(' '),
+      frame: props.frame,
+      getBlock: props.getBlock,
+      children: items.map(({ content, parameters: { active } }, index) => {
+        const activeOrDefault =
+          active || (!hasActiveItem && index === (title ? 1 : 0));
 
-          if (active || (!hasActiveItem && index === 0)) {
-            backgroundColor = activeLinkBackgroundColor;
-            fontWeight = 'medium';
-          }
+        if (title && index === 0) {
+          return props.getBlock(heading5SymbolId).render(env, {
+            blockText: [content, text, '#mb-4'].join(' '),
+            symbolId: heading5SymbolId,
+            getBlock: props.getBlock,
+          });
+        }
 
-          if (title && index === 0) {
-            return (
-              <Heading
-                color={color}
-                fontWeight="semibold"
-                size="md"
-                padding="12px 10px"
-              >
-                {content}
-              </Heading>
-            );
-          }
-
-          return (
-            <Link
-              padding="8px 10px"
-              borderRadius="3px"
-              fontSize="12px"
-              fontWeight={fontWeight}
-              backgroundColor={backgroundColor}
-              color={color}
-            >
-              {content}
-            </Link>
-          );
-        })}
-      </VStack>
-    );
+        return props.getBlock(boxSymbolId).render(env, {
+          getBlock: props.getBlock,
+          symbolId: boxSymbolId,
+          blockText: [
+            activeOrDefault ? activeLinkBg : '#bg-transparent',
+            '#rounded #p-2',
+          ]
+            .filter(Boolean)
+            .join(' '),
+          children: [
+            props.getBlock(linkSymbolId).render(env, {
+              blockText: [
+                content,
+                text,
+                '#no-underline',
+                activeOrDefault ? '#font-semibold' : '',
+              ]
+                .filter(Boolean)
+                .join(' '),
+              symbolId: linkSymbolId,
+              getBlock: props.getBlock,
+            }),
+          ],
+        });
+      }),
+    });
   },
 };
