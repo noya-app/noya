@@ -1,9 +1,7 @@
-import { Flex, Image, Spinner } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import React from 'react';
 import { parseBlock } from '../parse';
-import { imageSymbolId } from './symbolIds';
+import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { imageSymbol } from './symbols';
 import { getBlockClassName, tailwindBlockClasses } from './tailwind';
 
@@ -16,9 +14,10 @@ export const ImageBlock: BlockDefinition = {
   hashtags: ['contain', 'fill', ...tailwindBlockClasses],
   usesResolver: true,
   placeholderText,
-  render: ({h, Components: {
-    [imageSymbolId]: Image
-  }}, props) => {
+  render: (
+    { h, Components: { [imageSymbolId]: Image, [boxSymbolId]: Box } },
+    props,
+  ) => {
     const {
       content,
       parameters: { contain, fill, ...parameters },
@@ -32,44 +31,50 @@ export const ImageBlock: BlockDefinition = {
       : props.resolvedBlockData?.resolvedText;
 
     // Loading
-    // if (!src && content) {
-    //   const terms = content
-    //     .split(' ')
-    //     .map((term) => `'${term.trim()}'`)
-    //     .join(', ');
+    if (!src && content) {
+      const terms = content
+        .split(' ')
+        .map((term) => `'${term.trim()}'`)
+        .join(', ');
 
-    //   return (
-    //     <Flex
-    //       {...(props.frame
-    //         ? { w: `${props.frame.width}px`, h: `${props.frame.height}px` }
-    //         : { minHeight: 0 })}
-    //       justifyContent="center"
-    //       alignItems="center"
-    //       className={getBlockClassName(hashtags)}
-    //       background="rgba(0,0,0,0.05)"
-    //     >
-    //       <Spinner thickness="3px" color="gray" speed="1.5s" />
-    //       <span style={{ marginLeft: 10 }}>Finding image of {terms}...</span>
-    //     </Flex>
-    //   );
-    // }
+      return h(
+        Box,
+        {
+          className: getBlockClassName(hashtags),
+          style: {
+            display: 'flex',
+            ...(props.frame
+              ? {
+                  width: `${props.frame.width}px`,
+                  height: `${props.frame.height}px`,
+                }
+              : { minHeight: 0 }),
+            justifyContent: 'center',
+            alignItems: 'center',
+            background: 'rgba(0,0,0,0.05)',
+          },
+        },
+        [h('span', {}, [`Finding image of ${terms}...`])],
+      );
+    }
 
-    return h(
-      Image,
-      {
-        ...(props.dataSet && {
-          key: props.dataSet.id,
-          'data-noya-id': props.dataSet.id,
-          'data-noya-parent-id': props.dataSet.parentId,
-        }),
-        src,
-        fit: contain ? 'contain' : fill ? 'fill' : 'cover',
-        align: 'middle',
+    return h(Image, {
+      ...(props.dataSet && {
+        key: props.dataSet.id,
+        'data-noya-id': props.dataSet.id,
+        'data-noya-parent-id': props.dataSet.parentId,
+      }),
+      src,
+      style: {
         ...(props.frame
-          ? { w: `${props.frame.width}px`, h: `${props.frame.height}px` }
+          ? {
+              width: `${props.frame.width}px`,
+              height: `${props.frame.height}px`,
+            }
           : { minHeight: 0 }),
-        className: getBlockClassName(hashtags),
+        objectFit: contain ? 'contain' : fill ? 'fill' : 'cover',
       },
-    )
+      className: getBlockClassName(hashtags),
+    });
   },
 };

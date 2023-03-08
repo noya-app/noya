@@ -1,7 +1,6 @@
-import { Spacer } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
+import { boxSymbolId } from './symbolIds';
 import { spacerSymbol } from './symbols';
 import { getBlockClassName, tailwindBlockClasses } from './tailwind';
 
@@ -11,17 +10,19 @@ export const SpacerBlock: BlockDefinition = {
   hashtags: tailwindBlockClasses,
   infer: ({ frame, blockText }) => 0,
   isPassthrough: true,
-  render: (props) => {
+  isComposedBlock: true,
+  render: ({ h, Components: { [boxSymbolId]: Box } }, props) => {
     const { parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
 
-    return (
-      <Spacer
-        {...(props.dataSet && {
-          key: props.dataSet.id,
-        })}
-        className={getBlockClassName(hashtags)}
-      />
-    );
+    return h(Box, {
+      ...(props.dataSet && {
+        key: props.dataSet.id,
+      }),
+      style: {
+        backgroundColor: 'transparent',
+      },
+      className: getBlockClassName(hashtags),
+    });
   },
 };

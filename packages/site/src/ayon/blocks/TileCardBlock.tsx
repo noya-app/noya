@@ -9,6 +9,7 @@ export const TileCardBlock: BlockDefinition = {
   symbol: tileCardSymbol,
   parser: 'regular',
   hashtags: BoxBlock.hashtags,
+  isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     return Math.max(
       isWithinRectRange({
@@ -23,5 +24,5 @@ export const TileCardBlock: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => renderStack({ props, block: TileCardBlock }),
+  render: (env, props) => renderStack(env, { props, block: TileCardBlock }),
 };

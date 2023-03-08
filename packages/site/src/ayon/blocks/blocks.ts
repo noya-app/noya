@@ -41,8 +41,8 @@ function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
     parser: 'regular',
     isPassthrough: true,
     editorVersion: 2,
-    render: (props) =>
-      renderStack({
+    render: (env, props) =>
+      renderStack(env, {
         props,
         block: {
           placeholderText: '',

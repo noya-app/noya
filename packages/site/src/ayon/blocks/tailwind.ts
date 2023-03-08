@@ -71,6 +71,13 @@ export function hasClassGroup(group: ClassGroupKey, hashtags: string[]) {
   return hashtags.some((className) => classGroups[group].test(className));
 }
 
+export function getLastClassInGroup(group: ClassGroupKey, hashtags: string[]) {
+  return hashtags
+    .slice()
+    .reverse()
+    .find((className) => classGroups[group].test(className));
+}
+
 export const getTailwindClassGroup = memoize(
   (className: string): ClassGroupKey => {
     const entry = Object.entries(classGroups).find(([, re]) =>

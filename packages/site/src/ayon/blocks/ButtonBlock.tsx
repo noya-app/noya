@@ -89,15 +89,15 @@ export const ButtonBlock: BlockDefinition = {
           'data-noya-parent-id': props.dataSet.parentId,
         }),
         size,
-        backgroundColor: colors.backgroundColor,
-        color: colors.color,
         isDisabled: !!disabled,
-        className: getBlockClassName(hashtags),
         style: {
+          color: colors.color,
+          backgroundColor: colors.backgroundColor,
           ...(props.frame && {
             width: `${props.frame.width}px`,
           }),
         },
+        className: getBlockClassName(hashtags),
       },
       content,
     );

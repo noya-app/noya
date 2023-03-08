@@ -15,6 +15,7 @@ import {
   parseBlock,
   ParsedBlockItemParameters,
 } from '../parse';
+import { spacerSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
 
 interface BlockRenderOptions {
@@ -166,7 +167,7 @@ export const renderStack = (
   container.children = children.map((childProps) => {
     const block = props.getBlock(childProps.symbolId);
 
-    if (block.isPassthrough) {
+    if (block.isPassthrough && block.symbol.symbolID !== spacerSymbolId) {
       return renderStack(env, {
         props: childProps,
         block,
@@ -177,6 +178,10 @@ export const renderStack = (
 
     return block.render(env, childProps);
   });
+
+  if (block.symbol.symbolID === spacerSymbolId) {
+    return props.getBlock(spacerSymbolId).render(env, container);
+  }
 
   // We don't render empty passthrough blocks
   if (

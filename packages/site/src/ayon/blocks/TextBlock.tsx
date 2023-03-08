@@ -29,8 +29,10 @@ export const TextBlock: BlockDefinition = {
           'data-noya-id': props.dataSet.id,
           'data-noya-parent-id': props.dataSet.parentId,
         }),
+        style: {
+          textAlign: getTextAlign(hashtags),
+        },
         className: getBlockClassName(hashtags),
-        textAlign: getTextAlign(hashtags),
       },
       content,
     );

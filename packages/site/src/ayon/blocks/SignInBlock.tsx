@@ -8,6 +8,7 @@ export const SignInBlock: BlockDefinition = {
   symbol: signInSymbol,
   parser: 'regular',
   hashtags: BoxBlock.hashtags,
+  isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === signInSymbol.symbolID)
@@ -17,5 +18,5 @@ export const SignInBlock: BlockDefinition = {
 
     return 0.1;
   },
-  render: (props) => renderStack({ props, block: SignInBlock }),
+  render: (env, props) => renderStack(env, { props, block: SignInBlock }),
 };

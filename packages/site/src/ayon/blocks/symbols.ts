@@ -152,7 +152,7 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
-      symbolID: textSymbolId,
+      symbolID: heading5SymbolId,
       blockText: 'Turn great ideas into new possibilities. #mb-4',
     }),
     SketchModel.symbolInstance({
@@ -211,11 +211,11 @@ export const cardSymbol = SketchModel.symbolMaster({
       symbolID: imageSymbolId,
       blockText: 'landscape #rounded-lg #flex-1',
     }),
-    // SketchModel.symbolInstance({
-    //   do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
-    //   symbolID: heading5SymbolId,
-    //   blockText: 'News #mt-4',
-    // }),
+    SketchModel.symbolInstance({
+      do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
+      symbolID: heading5SymbolId,
+      blockText: 'News #mt-4',
+    }),
     SketchModel.symbolInstance({
       do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
       symbolID: textSymbolId,

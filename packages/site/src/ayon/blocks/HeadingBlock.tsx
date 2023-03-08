@@ -1,9 +1,8 @@
-import { Flex, Heading, ThemingProps } from '@chakra-ui/react';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
-import React from 'react';
 import { getTextAlign, parseBlock } from '../parse';
+import { boxSymbolId, textSymbolId } from './symbolIds';
 import {
   heading1Symbol,
   heading2Symbol,
@@ -20,47 +19,57 @@ import {
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
-  size: ThemingProps['size'],
+  variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
 ): BlockDefinition => ({
   symbol,
   parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
+  isComposedBlock: true,
   infer: ({ frame, blockText }) => 0.1,
-  render: (props) => {
+  render: (
+    { h, Components: { [textSymbolId]: Text, [boxSymbolId]: Box } },
+    props,
+  ) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
 
     const hashtags = Object.keys(parameters);
 
     const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {
-      return classGroups.flex.test(hashtag);
+      return classGroups.flex.test(hashtag) || /m[xytrbl]?-/.test(hashtag);
     });
 
-    return (
-      <Flex
-        {...(props.dataSet && {
+    return h(
+      Box,
+      {
+        ...(props.dataSet && {
           key: props.dataSet.id,
           'data-noya-id': props.dataSet.id,
           'data-noya-parent-id': props.dataSet.parentId,
-        })}
-        className={getBlockClassName(flexClasses)}
-      >
-        <Heading
-          flex="1"
-          size={size}
-          lineHeight="1.3"
-          className={getBlockClassName(otherClasses)}
-          textAlign={getTextAlign(hashtags)}
-        >
-          {content}
-        </Heading>
-      </Flex>
+        }),
+        style: {
+          display: 'flex',
+        },
+        className: getBlockClassName(flexClasses),
+      },
+      h(
+        Text,
+        {
+          style: {
+            flex: '1',
+            textAlign: getTextAlign(hashtags),
+          },
+          className: getBlockClassName(otherClasses),
+          variant,
+        },
+        content,
+      ),
     );
   },
 });
 
-export const Heading1Block = createHeadingBlock(heading1Symbol, '2xl');
-export const Heading2Block = createHeadingBlock(heading2Symbol, 'xl');
-export const Heading3Block = createHeadingBlock(heading3Symbol, 'lg');
-export const Heading4Block = createHeadingBlock(heading4Symbol, 'md');
-export const Heading5Block = createHeadingBlock(heading5Symbol, 'sm');
-export const Heading6Block = createHeadingBlock(heading6Symbol, 'xs');
+export const Heading1Block = createHeadingBlock(heading1Symbol, 'h1');
+export const Heading2Block = createHeadingBlock(heading2Symbol, 'h2');
+export const Heading3Block = createHeadingBlock(heading3Symbol, 'h3');
+export const Heading4Block = createHeadingBlock(heading4Symbol, 'h4');
+export const Heading5Block = createHeadingBlock(heading5Symbol, 'h5');
+export const Heading6Block = createHeadingBlock(heading6Symbol, 'h6');

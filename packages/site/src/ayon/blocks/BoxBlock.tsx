@@ -82,6 +82,7 @@ export const BoxBlock: BlockDefinition = {
           'data-noya-parent-id': props.dataSet.parentId,
         }),
         style: {
+          display: 'flex',
           backgroundColor,
           ...(props.frame && {
             width: `${props.frame.width}px`,

@@ -9,6 +9,7 @@ export const HeroBlockV2: BlockDefinition = {
   symbol: heroSymbolV2,
   parser: 'regular',
   hashtags: BoxBlock.hashtags,
+  isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
       siblingBlocks.find((block) => block.symbolId === heroSymbolV2.symbolID)
@@ -29,5 +30,5 @@ export const HeroBlockV2: BlockDefinition = {
       0.1,
     );
   },
-  render: (props) => renderStack({ props, block: HeroBlockV2 }),
+  render: (env, props) => renderStack(env, { props, block: HeroBlockV2 }),
 };

@@ -1,8 +1,7 @@
-import { Box, Image } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { isApproximatelySquare, isWithinRectRange } from './score';
+import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { iconSymbol } from './symbols';
 import { getTailwindClassesByGroup, isTailwindClassGroup } from './tailwind';
 import { resolveColor } from './tailwindColors';
@@ -12,6 +11,7 @@ export const IconBlock: BlockDefinition = {
   parser: 'regular',
   usesResolver: true,
   hashtags: getTailwindClassesByGroup('fill'),
+  isComposedBlock: true,
   infer: ({ frame, blockText }) =>
     isWithinRectRange({
       rect: frame,
@@ -22,7 +22,10 @@ export const IconBlock: BlockDefinition = {
     }) && isApproximatelySquare(frame, 0.2)
       ? 0.85
       : 0,
-  render: (props) => {
+  render: (
+    { h, Components: { [boxSymbolId]: Box, [imageSymbolId]: Image } },
+    props,
+  ) => {
     const src =
       props.resolvedBlockData?.resolvedText ??
       'https://api.iconify.design/material-symbols/menu.svg';
@@ -35,19 +38,24 @@ export const IconBlock: BlockDefinition = {
     const fill = fillClassName ? resolveColor(fillClassName) : undefined;
 
     if (fill) {
-      return (
-        <Box
-          w="100%"
-          h="100%"
-          backgroundColor={fill}
-          style={{
-            maskImage: `url(${src}) center / contain no-repeat`,
-            WebkitMask: `url(${src}) center / contain no-repeat`,
-          }}
-        />
-      );
+      return h(Box, {
+        style: {
+          width: '100%',
+          height: '100%',
+          backgroundColor: fill,
+          maskImage: `url(${src}) center / contain no-repeat`,
+          WebkitMask: `url(${src}) center / contain no-repeat`,
+        },
+      });
     } else {
-      return <Image src={src} fit="contain" align="middle" w="100%" h="100%" />;
+      return h(Image, {
+        src: src,
+        style: {
+          objectFit: 'contain',
+          width: '100%',
+          height: '100%',
+        },
+      });
     }
   },
 };

@@ -1,8 +1,7 @@
-import { Checkbox } from '@chakra-ui/react';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { isWithinRectRange } from './score';
+import { checkboxSymbolId } from './symbolIds';
 import { checkboxSymbol } from './symbols';
 
 const placeholderText = '#off Remember me';
@@ -26,24 +25,21 @@ export const CheckboxBlock: BlockDefinition = {
     })
       ? 0.8
       : 0,
-  render: (props) => {
+  render: ({ h, Components: { [checkboxSymbolId]: Checkbox } }, props) => {
     const {
       content,
       parameters: { on, disabled },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
-    const size = !props.frame
-      ? 'md'
-      : props.frame.height >= 30
-      ? 'lg'
-      : props.frame.height >= 20
-      ? 'md'
-      : 'sm';
-    return (
-      <Checkbox size={size} isChecked={!!on} isDisabled={!!disabled}>
-        {props.frame ? props.frame.width > 40 && content : content}
-      </Checkbox>
+
+    return h(
+      Checkbox,
+      {
+        checked: !!on,
+        disabled: !!disabled,
+      },
+      props.frame ? props.frame.width > 40 && content : content,
     );
   },
 };
