@@ -4,6 +4,7 @@ import {
   RenderableRoot,
 } from '@noya-design-system/protocol';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { createRenderingEnvironment } from 'noya-compiler';
 import Sketch from 'noya-file-format';
 import {
   createResizeTransform,
@@ -11,14 +12,9 @@ import {
   Size,
   transformRect,
 } from 'noya-geometry';
+import { loadDesignSystem } from 'noya-module-loader';
 import { useSize } from 'noya-react-utils';
-import {
-  BlockProps,
-  BlockRenderingEnvironment,
-  InteractionState,
-  Layers,
-  Selectors,
-} from 'noya-state';
+import { BlockProps, InteractionState, Layers, Selectors } from 'noya-state';
 import React, {
   ComponentProps,
   useEffect,
@@ -43,33 +39,6 @@ class ErrorBoundary extends React.Component<any> {
   render() {
     return this.props.children;
   }
-}
-
-function requireModule(content: string) {
-  const exports = {};
-  const module = { exports };
-
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-  new Function('exports', 'module', `{\n${content};\n}`)(exports, module);
-
-  if (!(module.exports as any).DesignSystem) {
-    throw new Error('No DesignSystem exported');
-  }
-
-  return (module.exports as any).DesignSystem as DesignSystemDefinition;
-}
-
-function createRenderingEnvironment(
-  system: DesignSystemDefinition,
-): BlockRenderingEnvironment {
-  const { createElement: h, components } = system;
-
-  return {
-    h,
-    Components: Object.fromEntries(
-      Object.entries(components).map(([key, value]) => [key, value.Component]),
-    ),
-  };
 }
 
 function renderDynamicContent(
@@ -182,10 +151,7 @@ function DynamicRenderer({
 
   useEffect(() => {
     async function fetchLibrary() {
-      const url = `https://www.unpkg.com/@noya-design-system/${designSystem}`;
-      const response = await fetch(url);
-      const text = await response.text();
-      const system = requireModule(text);
+      const system = await loadDesignSystem(designSystem);
       setSystem(system);
     }
 

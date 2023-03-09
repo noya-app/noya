@@ -1,4 +1,3 @@
-import { ChakraProvider } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
@@ -23,40 +22,6 @@ import { parseBlock } from '../ayon/parse';
 
 const Blocks = import('../ayon/blocks/blocks');
 const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
-
-export function BlockPreview({
-  symbolId,
-  blockText,
-  width,
-  height,
-  getBlock,
-}: {
-  symbolId: string;
-  blockText: string;
-  width: number;
-  height: number;
-  getBlock: (symbolId: string) => BlockDefinition;
-}) {
-  const layer = SketchModel.symbolInstance({
-    symbolID: symbolId,
-    blockText,
-    frame: SketchModel.rect({
-      width,
-      height,
-    }),
-  });
-
-  const rendered = getBlock(symbolId).render({
-    layer,
-    symbolId,
-    frame: layer.frame,
-    blockText: layer.blockText,
-    resolvedBlockData: layer.resolvedBlockData,
-    getBlock,
-  });
-
-  return <ChakraProvider>{rendered}</ChakraProvider>;
-}
 
 function Content({
   blocks,

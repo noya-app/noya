@@ -1,5 +1,7 @@
+import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
-import { BlockDefinition, Layers } from 'noya-state';
+import { loadDesignSystem } from 'noya-module-loader';
+import { BlockDefinition, BlockRenderingEnvironment, Layers } from 'noya-state';
 import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
@@ -109,17 +111,39 @@ export interface CompilerConfiguration {
   artboard: Sketch.Artboard;
   Blocks: Record<string, BlockDefinition>;
   Components: Map<unknown, string>;
+  DesignSystem: string | DesignSystemDefinition;
+}
+
+export function createRenderingEnvironment(
+  system: DesignSystemDefinition,
+): BlockRenderingEnvironment {
+  const { createElement: h, components } = system;
+
+  return {
+    h,
+    Components: Object.fromEntries(
+      Object.entries(components).map(([key, value]) => [key, value.Component]),
+    ),
+  };
 }
 
 export function createElement(
-  { Blocks, Components }: Pick<CompilerConfiguration, 'Blocks' | 'Components'>,
+  {
+    Blocks,
+    Components,
+    DesignSystem,
+  }: {
+    Blocks: CompilerConfiguration['Blocks'];
+    Components: CompilerConfiguration['Components'];
+    DesignSystem: DesignSystemDefinition;
+  },
   layer: Sketch.SymbolInstance,
 ): SimpleElement | undefined {
   const block = Blocks[layer.symbolID];
 
   if (!block) return;
 
-  const element = block.render({
+  const element = block.render(createRenderingEnvironment(DesignSystem), {
     layer: layer,
     frame: layer.frame,
     symbolId: layer.symbolID,
@@ -180,13 +204,26 @@ export function createElement(
   };
 }
 
-export function compile(configuration: CompilerConfiguration) {
+export async function compile(configuration: CompilerConfiguration) {
   const { artboard } = configuration;
+
+  const DesignSystem =
+    typeof configuration.DesignSystem === 'string'
+      ? await loadDesignSystem(configuration.DesignSystem)
+      : configuration.DesignSystem;
 
   const components = artboard.layers
     .filter(Layers.isSymbolInstance)
     .flatMap((layer) => {
-      const element = createElement(configuration, layer);
+      const element = createElement(
+        {
+          Blocks: configuration.Blocks,
+          Components: configuration.Components,
+          DesignSystem,
+        },
+        layer,
+      );
+
       return element ? [element] : [];
     });
 

@@ -336,6 +336,9 @@ function Workspace({
     theme.colors.dividerStrong,
   ]);
 
+  const designSystem =
+    state.history.present.sketch.document.designSystemID ?? 'mui';
+
   useLayoutEffect(() => {
     setRightToolbar(
       <Stack.H gap={8}>
@@ -456,10 +459,11 @@ function Workspace({
               case 'react': {
                 amplitude.logEvent('Project - Export - Exported React Code');
                 const { compile } = await import('noya-compiler');
-                const result = compile({
+                const result = await compile({
                   artboard,
                   Blocks,
                   Components,
+                  DesignSystem: designSystem,
                 });
                 const zipFile = await toZipFile(
                   {
@@ -511,10 +515,8 @@ function Workspace({
     name,
     onChangeName,
     fileId,
+    designSystem,
   ]);
-
-  const designSystem =
-    state.history.present.sketch.document.designSystemID ?? 'mui';
 
   useLayoutEffect(() => {
     setCenterToolbar(

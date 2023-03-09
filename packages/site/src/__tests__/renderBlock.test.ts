@@ -1,4 +1,5 @@
 import * as ChakraUI from '@chakra-ui/react';
+import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { readFileSync } from 'fs';
 import {
   compile,
@@ -8,6 +9,7 @@ import {
   print,
 } from 'noya-compiler';
 import Sketch from 'noya-file-format';
+import { loadDesignSystem } from 'noya-module-loader';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides } from 'noya-state';
 import path from 'path';
@@ -35,9 +37,19 @@ Object.entries(ChakraUI).forEach(([key, value]) => {
   Components.set(value, key);
 });
 
+let DesignSystem: DesignSystemDefinition;
+
+beforeAll(async () => {
+  DesignSystem = await loadDesignSystem('mui');
+});
+
 function generate(symbol: Sketch.SymbolInstance) {
   return format(
-    print(createElementCode(createElement({ Blocks, Components }, symbol)!)),
+    print(
+      createElementCode(
+        createElement({ Blocks, Components, DesignSystem }, symbol)!,
+      ),
+    ),
   );
 }
 
@@ -209,6 +221,7 @@ describe('generate file', () => {
         artboard,
         Blocks,
         Components,
+        DesignSystem,
       }),
     ).toMatchSnapshot();
   });
