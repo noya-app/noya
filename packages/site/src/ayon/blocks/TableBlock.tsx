@@ -1,6 +1,5 @@
-import { Table, Td, Th, Thead, Tr, VStack } from '@chakra-ui/react';
+import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import React from 'react';
 import { parseBlock } from '../parse';
 import { getBlockThemeColors } from './colors';
 import { tableSymbol } from './symbols';
@@ -27,13 +26,24 @@ export const TableBlock: BlockDefinition = {
   parser,
   hashtags: globalHashtags,
   placeholderText,
-  infer: ({ frame, blockText, siblingBlocks }) => {
-    return 0;
-  },
-  render: (props) => {
+  infer: () => 0,
+  render: (
+    {
+      h,
+      Components: {
+        [component.id.table]: Table,
+        [component.id.tableHead]: TableHead,
+        [component.id.tableBody]: TableBody,
+        [component.id.tableRow]: TableRow,
+        [component.id.tableHeadCell]: TableHeadCell,
+        [component.id.tableCell]: TableCell,
+      },
+    },
+    props,
+  ) => {
     const {
       rows,
-      parameters: { dark, accent, sm, md, lg },
+      parameters: { dark, accent },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
@@ -43,38 +53,52 @@ export const TableBlock: BlockDefinition = {
       accent,
     });
 
-    const size = sm ? 'sm' : md ? 'md' : lg ? 'lg' : 'md';
-
-    return (
-      <VStack
-        alignItems="left"
-        height={`100%`}
-        backgroundColor={backgroundColor}
-        backdropFilter="auto"
-        backdropBlur="10px"
-        overflowY="auto"
-        border={`1px solid ${borderColor}`}
-        color={color}
-      >
-        <Table size={size}>
-          {rows.length > 0 && (
-            <Thead>
-              <Tr>
-                {rows[0].items.map((cell, i) => (
-                  <Th key={i}>{cell.content}</Th>
-                ))}
-              </Tr>
-            </Thead>
-          )}
-          {rows.slice(1).map((row, i) => (
-            <Tr key={i}>
-              {row.items.map((cell, j) => (
-                <Td key={`${i}-${j}`}>{cell.content}</Td>
-              ))}
-            </Tr>
-          ))}
-        </Table>
-      </VStack>
+    return h(
+      Table,
+      {
+        ...(props.dataSet && {
+          key: props.dataSet.id,
+          'data-noya-id': props.dataSet.id,
+          'data-noya-parent-id': props.dataSet.parentId,
+        }),
+        style: {
+          ...(props.frame && {
+            width: `${props.frame.width}px`,
+            height: `${props.frame.height}px`,
+          }),
+          backgroundColor,
+          backdropFilter: 'auto',
+          backdropBlur: '10px',
+          overflowY: 'auto',
+          border: `1px solid ${borderColor}`,
+          color: color,
+        },
+      },
+      [
+        rows.length > 0 &&
+          h(TableHead, {}, [
+            h(
+              TableRow,
+              {},
+              rows[0].items.map((cell, i) =>
+                h(TableHeadCell, { key: i }, [cell.content]),
+              ),
+            ),
+          ]),
+        h(
+          TableBody,
+          {},
+          rows.slice(1).map((row, i) =>
+            h(
+              TableRow,
+              { key: i },
+              row.items.map((cell, j) =>
+                h(TableCell, { key: `${i}-${j}` }, [cell.content]),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   },
 };

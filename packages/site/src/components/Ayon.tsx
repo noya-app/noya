@@ -514,7 +514,7 @@ function Workspace({
   ]);
 
   const designSystem =
-    state.history.present.sketch.document.designSystemID ?? 'default';
+    state.history.present.sketch.document.designSystemID ?? 'mui';
 
   useLayoutEffect(() => {
     setCenterToolbar(

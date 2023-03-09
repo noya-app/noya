@@ -47,7 +47,7 @@ export const HeaderBarBlock: BlockDefinition = {
   render: (env, props) => {
     const {
       items,
-      parameters: { dark, title, accent, search, ...globalParameters },
+      parameters: { dark, title, accent, search },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
