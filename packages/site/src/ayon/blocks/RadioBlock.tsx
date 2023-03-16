@@ -27,13 +27,13 @@ export const RadioBlock: BlockDefinition = {
       : 0,
   render: ({ h, Components: { [radioSymbolId]: Radio } }, props) => {
     const {
-      content,
+      // content,
       parameters: { on, disabled },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
 
-    const width = props.frame ? props.frame.width : 40;
+    // const width = props.frame ? props.frame.width : 40;
 
     return h(
       Radio,
@@ -41,7 +41,7 @@ export const RadioBlock: BlockDefinition = {
         checked: !!on,
         disabled: !!disabled,
       },
-      width >= 40 && content,
+      // width >= 40 && content,
     );
   },
 };

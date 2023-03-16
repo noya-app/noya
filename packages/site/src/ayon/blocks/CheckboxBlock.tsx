@@ -27,7 +27,7 @@ export const CheckboxBlock: BlockDefinition = {
       : 0,
   render: ({ h, Components: { [checkboxSymbolId]: Checkbox } }, props) => {
     const {
-      content,
+      // content,
       parameters: { on, disabled },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
@@ -39,7 +39,7 @@ export const CheckboxBlock: BlockDefinition = {
         checked: !!on,
         disabled: !!disabled,
       },
-      props.frame ? props.frame.width > 40 && content : content,
+      // props.frame ? props.frame.width > 40 && content : content,
     );
   },
 };

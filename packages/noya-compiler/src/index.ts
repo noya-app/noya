@@ -117,13 +117,9 @@ export interface CompilerConfiguration {
 export function createRenderingEnvironment(
   system: DesignSystemDefinition,
 ): BlockRenderingEnvironment {
-  const { createElement: h, components } = system;
-
   return {
-    h,
-    Components: Object.fromEntries(
-      Object.entries(components).map(([key, value]) => [key, value.Component]),
-    ),
+    h: system.createElement,
+    Components: system.components,
   };
 }
 

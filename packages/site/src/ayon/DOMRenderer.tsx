@@ -46,7 +46,10 @@ function renderDynamicContent(
   layers: Sketch.Artboard['layers'],
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined,
 ) {
-  const { createElement: h, Provider } = system;
+  const {
+    createElement: h,
+    components: { [component.id.provider]: Provider },
+  } = system;
   const env = createRenderingEnvironment(system);
 
   const getBlock = (symbolId: string) => Blocks[symbolId];
