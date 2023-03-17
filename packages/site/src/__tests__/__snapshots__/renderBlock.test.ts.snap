@@ -295,10 +295,9 @@ exports[`link with icon 1`] = `
   <Link
     href=\\"#\\"
     style={{
-      fontWeight: 'semibold',
+      fontWeight: 500,
       color: 'dodgerblue',
       textDecorationColor: 'dodgerblue',
-      textDecoration: undefined,
     }}
   >
     Test

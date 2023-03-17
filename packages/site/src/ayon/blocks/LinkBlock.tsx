@@ -1,4 +1,5 @@
 import { BlockDefinition } from 'noya-state';
+import { CSSProperties } from 'react';
 import { parseBlock } from '../parse';
 import { linkSymbolId } from './symbolIds';
 import { linkSymbol } from './symbols';
@@ -35,6 +36,14 @@ export const LinkBlock: BlockDefinition = {
     const colorKey = getLastClassInGroup('textColor', hashtags);
     const color = colorKey ? resolveColor(colorKey) : 'dodgerblue';
     const textDecoration = getLastClassInGroup('textDecoration', hashtags);
+    const textDecorationValue =
+      textDecoration === 'no-underline'
+        ? 'none'
+        : textDecoration === 'line-through'
+        ? 'line-through'
+        : textDecoration === 'overline'
+        ? 'overline'
+        : undefined;
 
     return h(
       Link,
@@ -45,18 +54,13 @@ export const LinkBlock: BlockDefinition = {
           'data-noya-parent-id': props.dataSet.parentId,
         }),
         style: {
-          fontWeight: 'semibold',
+          fontWeight: 500,
           color,
           textDecorationColor: color,
-          textDecoration:
-            textDecoration === 'no-underline'
-              ? 'none'
-              : textDecoration === 'line-through'
-              ? 'line-through'
-              : textDecoration === 'overline'
-              ? 'overline'
-              : undefined,
-        },
+          ...(textDecorationValue && {
+            textDecorationLine: textDecorationValue,
+          }),
+        } as CSSProperties,
         className: getBlockClassName(hashtags),
       },
       content,
