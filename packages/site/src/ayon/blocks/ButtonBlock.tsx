@@ -88,8 +88,7 @@ export const ButtonBlock: BlockDefinition = {
           'data-noya-id': props.dataSet.id,
           'data-noya-parent-id': props.dataSet.parentId,
         }),
-        size,
-        isDisabled: !!disabled,
+        disabled: !!disabled,
         style: {
           color: colors.color,
           backgroundColor: colors.backgroundColor,

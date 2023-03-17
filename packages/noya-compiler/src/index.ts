@@ -38,6 +38,8 @@ function createExpressionCode(value: unknown): ts.Expression {
           ];
         }),
       );
+    case 'undefined':
+      return ts.factory.createIdentifier('undefined');
     default:
       return ts.factory.createNull();
   }
@@ -110,7 +112,6 @@ export function createElementCode({
 export interface CompilerConfiguration {
   artboard: Sketch.Artboard;
   Blocks: Record<string, BlockDefinition>;
-  Components: Map<unknown, string>;
   DesignSystem: string | DesignSystemDefinition;
 }
 
@@ -126,11 +127,9 @@ export function createRenderingEnvironment(
 export function createElement(
   {
     Blocks,
-    Components,
     DesignSystem,
   }: {
     Blocks: CompilerConfiguration['Blocks'];
-    Components: CompilerConfiguration['Components'];
     DesignSystem: DesignSystemDefinition;
   },
   layer: Sketch.SymbolInstance,
@@ -154,10 +153,27 @@ export function createElement(
 
   if (!element || !isValidElement(element)) return;
 
+  const Components = buildComponentMap(DesignSystem.imports);
+
   function createSimpleElement(
     element: React.ReactElement,
   ): SimpleElement | undefined {
-    const name = Components.get(element.type);
+    const protocolComponent = Object.values(DesignSystem.components).find(
+      (value) => value === element.type,
+    );
+
+    if (!protocolComponent) return;
+
+    const libraryElement = protocolComponent?.(element.props);
+
+    if (isValidElement(libraryElement)) {
+      element = libraryElement;
+    }
+
+    const name =
+      typeof element.type === 'string'
+        ? element.type
+        : Components.get(element.type);
 
     if (!name) return;
 
@@ -200,6 +216,18 @@ export function createElement(
   };
 }
 
+export function buildComponentMap(imports: DesignSystemDefinition['imports']) {
+  const Components = new Map<any, string>();
+
+  for (const declaration of imports ?? []) {
+    for (let [name, value] of Object.entries(declaration.namespace)) {
+      Components.set(value, name);
+    }
+  }
+
+  return Components;
+}
+
 export async function compile(configuration: CompilerConfiguration) {
   const { artboard } = configuration;
 
@@ -214,7 +242,6 @@ export async function compile(configuration: CompilerConfiguration) {
       const element = createElement(
         {
           Blocks: configuration.Blocks,
-          Components: configuration.Components,
           DesignSystem,
         },
         layer,
@@ -295,6 +322,14 @@ function Frame(props: React.ComponentProps<typeof Box>) {
     ]),
   );
 
+  const allDependencies = (DesignSystem.imports ?? []).reduce(
+    (result, importDeclaration) => ({
+      ...result,
+      ...importDeclaration.dependencies,
+    }),
+    DesignSystem.dependencies ?? {},
+  );
+
   const files = {
     'App.tsx': format(
       [
@@ -307,13 +342,7 @@ function Frame(props: React.ComponentProps<typeof Box>) {
     'package.json': JSON.stringify(
       {
         name: 'app',
-        dependencies: {
-          react: '^18',
-          '@chakra-ui/icons': '^1',
-          '@chakra-ui/react': '^1',
-          '@emotion/react': '^11',
-          '@emotion/styled': '^11',
-        },
+        dependencies: allDependencies,
       },
       null,
       2,

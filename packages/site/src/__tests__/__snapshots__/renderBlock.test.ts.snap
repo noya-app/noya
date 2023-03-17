@@ -3,10 +3,7 @@
 exports[`button default 1`] = `
 "<Frame width={100} height={40}>
   <Button
-    width=\\"100px\\"
-    size=\\"md\\"
-    backgroundColor=\\"#f1f5f9\\"
-    color=\\"#000\\"
+    style={{ color: '#000', backgroundColor: '#f1f5f9', width: '100px' }}
     isDisabled={false}
   >
     {'Submit'}
@@ -17,27 +14,29 @@ exports[`button default 1`] = `
 
 exports[`card with no border radius on image default 1`] = `
 "<Frame width={300} height={400}>
-  <Flex
-    width=\\"300px\\"
-    height=\\"400px\\"
+  <Box
+    style={{
+      display: 'flex',
+      backgroundColor: undefined,
+      width: '300px',
+      height: '400px',
+    }}
     className=\\"flex-col bg-white p-4 shadow rounded-md\\"
   >
     <Image
-      src=\\"https://placekitten.com/300/300\\"
-      fit=\\"cover\\"
-      align=\\"middle\\"
-      minHeight={0}
+      style={{ minHeight: 0, objectFit: 'cover' }}
       className=\\"rounded-none flex-1\\"
+      src=\\"https://placekitten.com/300/300\\"
     />
-    <Flex>
-      <Heading flex=\\"1\\" size=\\"sm\\" lineHeight=\\"1.3\\" className=\\"mt-4\\">
+    <Box style={{ display: 'flex' }} className=\\"mt-4\\">
+      <Text style={{ flex: '1', textAlign: undefined }} fontSize=\\"2xl\\">
         {'News'}
-      </Heading>
-    </Flex>
-    <Text className=\\"mt-1\\">
+      </Text>
+    </Box>
+    <Text style={{ textAlign: undefined }} className=\\"mt-1\\">
       {'Here you can explore the latest news and information.'}
     </Text>
-  </Flex>
+  </Box>
 </Frame>;
 "
 `;
@@ -61,10 +60,12 @@ export { App };
   \\"name\\": \\"app\\",
   \\"dependencies\\": {
     \\"react\\": \\"^18\\",
-    \\"@chakra-ui/icons\\": \\"^1\\",
-    \\"@chakra-ui/react\\": \\"^1\\",
-    \\"@emotion/react\\": \\"^11\\",
-    \\"@emotion/styled\\": \\"^11\\"
+    \\"@chakra-ui/icons\\": \\"^2.0.17\\",
+    \\"@chakra-ui/react\\": \\"^2.5.1\\",
+    \\"@chakra-ui/system\\": \\"^2.5.1\\",
+    \\"@emotion/react\\": \\"^11.10.6\\",
+    \\"@emotion/styled\\": \\"^11.10.6\\",
+    \\"framer-motion\\": \\"^10.2.3\\"
   }
 }",
 }
@@ -72,97 +73,120 @@ export { App };
 
 exports[`hero default 1`] = `
 "<Frame width={400} height={400}>
-  <Flex
-    width=\\"400px\\"
-    height=\\"400px\\"
+  <Box
+    style={{
+      display: 'flex',
+      backgroundColor: undefined,
+      width: '400px',
+      height: '400px',
+    }}
     className=\\"flex-col bg-transparent p-4 gap-3 items-center justify-center\\"
   >
-    <Flex>
-      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" textAlign=\\"center\\">
+    <Box style={{ display: 'flex' }}>
+      <Text style={{ flex: '1', textAlign: 'center' }} fontSize=\\"6xl\\">
         {'Create, iterate, inspire.'}
-      </Heading>
-    </Flex>
-    <Text className=\\"mb-4\\" textAlign=\\"center\\">
-      {'Turn great ideas into new possibilities.'}
-    </Text>
-    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      </Text>
+    </Box>
+    <Box style={{ display: 'flex' }} className=\\"mb-4\\">
+      <Text style={{ flex: '1', textAlign: 'center' }} fontSize=\\"2xl\\">
+        {'Turn great ideas into new possibilities.'}
+      </Text>
+    </Box>
+    <Box
+      style={{ display: 'flex', backgroundColor: undefined }}
+      className=\\"bg-transparent flex-row items-center gap-6\\"
+    >
       <Button
-        size=\\"md\\"
-        backgroundColor=\\"#15803d\\"
-        color=\\"#fff\\"
+        style={{ color: '#fff', backgroundColor: '#15803d' }}
         isDisabled={false}
       >
         {'Get started'}
       </Button>
-    </Flex>
-  </Flex>
+    </Box>
+  </Box>
 </Frame>;
 "
 `;
 
 exports[`hero left aligned 1`] = `
 "<Frame width={400} height={400}>
-  <Flex
-    width=\\"400px\\"
-    height=\\"400px\\"
+  <Box
+    style={{
+      display: 'flex',
+      backgroundColor: undefined,
+      width: '400px',
+      height: '400px',
+    }}
     className=\\"flex-col bg-transparent p-4 gap-3 items-start justify-center\\"
   >
-    <Flex>
-      <Heading flex=\\"1\\" size=\\"xl\\" lineHeight=\\"1.3\\" textAlign=\\"left\\">
+    <Box style={{ display: 'flex' }}>
+      <Text style={{ flex: '1', textAlign: 'left' }} fontSize=\\"6xl\\">
         {'Create, iterate, inspire.'}
-      </Heading>
-    </Flex>
-    <Text className=\\"mb-4\\" textAlign=\\"left\\">
-      {'Turn great ideas into new possibilities.'}
-    </Text>
-    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
+      </Text>
+    </Box>
+    <Box style={{ display: 'flex' }} className=\\"mb-4\\">
+      <Text style={{ flex: '1', textAlign: 'left' }} fontSize=\\"2xl\\">
+        {'Turn great ideas into new possibilities.'}
+      </Text>
+    </Box>
+    <Box
+      style={{ display: 'flex', backgroundColor: undefined }}
+      className=\\"bg-transparent flex-row items-center gap-6\\"
+    >
       <Button
-        size=\\"md\\"
-        backgroundColor=\\"#15803d\\"
-        color=\\"#fff\\"
+        style={{ color: '#fff', backgroundColor: '#15803d' }}
         isDisabled={false}
       >
         {'Get started'}
       </Button>
-    </Flex>
-  </Flex>
+    </Box>
+  </Box>
 </Frame>;
 "
 `;
 
 exports[`hero with bg 1`] = `
 "<Frame width={400} height={400}>
-  <Flex
-    width=\\"400px\\"
-    height=\\"400px\\"
+  <Box
+    style={{
+      display: 'flex',
+      backgroundColor: undefined,
+      width: '400px',
+      height: '400px',
+    }}
     className=\\"flex-col bg-blue-500 p-4 gap-3 items-center justify-center\\"
   >
-    <Flex>
-      <Heading
-        flex=\\"1\\"
-        size=\\"xl\\"
-        lineHeight=\\"1.3\\"
+    <Box style={{ display: 'flex' }}>
+      <Text
+        style={{ flex: '1', textAlign: 'center' }}
         className=\\"text-white\\"
-        textAlign=\\"center\\"
+        fontSize=\\"6xl\\"
       >
         {'Create, iterate, inspire.'}
-      </Heading>
-    </Flex>
-    <Text className=\\"mb-4 text-white\\" textAlign=\\"center\\">
-      {'Turn great ideas into new possibilities.'}
-    </Text>
-    <Flex className=\\"bg-transparent flex-row items-center gap-6\\">
-      <Button
-        size=\\"md\\"
-        backgroundColor=\\"#f1f5f9\\"
-        color=\\"#000\\"
-        isDisabled={false}
+      </Text>
+    </Box>
+    <Box style={{ display: 'flex' }} className=\\"mb-4\\">
+      <Text
+        style={{ flex: '1', textAlign: 'center' }}
         className=\\"text-white\\"
+        fontSize=\\"2xl\\"
+      >
+        {'Turn great ideas into new possibilities.'}
+      </Text>
+    </Box>
+    <Box
+      style={{ display: 'flex', backgroundColor: undefined }}
+      className=\\"bg-transparent flex-row items-center gap-6\\"
+    >
+      <Button
+        style={{ color: '#000', backgroundColor: '#f1f5f9' }}
+        className=\\"text-white\\"
+        isDisabled={false}
       >
         {'Get started'}
       </Button>
-    </Flex>
-  </Flex>
+    </Box>
+  </Box>
 </Frame>;
 "
 `;
@@ -170,11 +194,8 @@ exports[`hero with bg 1`] = `
 exports[`icon default 1`] = `
 "<Frame width={48} height={48}>
   <Image
+    style={{ objectFit: 'contain', width: '100%', height: '100%' }}
     src=\\"https://api.iconify.design/material-symbols/menu.svg\\"
-    fit=\\"contain\\"
-    align=\\"middle\\"
-    w=\\"100%\\"
-    h=\\"100%\\"
   />
 </Frame>;
 "
@@ -183,10 +204,10 @@ exports[`icon default 1`] = `
 exports[`icon with color 1`] = `
 "<Frame width={48} height={48}>
   <Box
-    w=\\"100%\\"
-    h=\\"100%\\"
-    backgroundColor=\\"#60a5fa\\"
     style={{
+      width: '100%',
+      height: '100%',
+      backgroundColor: '#60a5fa',
       maskImage:
         'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
       WebkitMask:
@@ -199,7 +220,15 @@ exports[`icon with color 1`] = `
 
 exports[`link with icon 1`] = `
 "<Frame width={100} height={40}>
-  <Link fontWeight=\\"semibold\\" color=\\"dodgerblue\\">
+  <Link
+    href=\\"#\\"
+    style={{
+      fontWeight: 'semibold',
+      color: 'dodgerblue',
+      textDecorationColor: 'dodgerblue',
+      textDecoration: undefined,
+    }}
+  >
     {'Test'}
   </Link>
 </Frame>;
@@ -208,7 +237,7 @@ exports[`link with icon 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text className=\\"text-red-500\\" textAlign=\\"center\\">
+  <Text style={{ textAlign: 'center' }} className=\\"text-red-500\\">
     {'Hello world'}
   </Text>
 </Frame>;

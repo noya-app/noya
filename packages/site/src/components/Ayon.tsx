@@ -462,7 +462,6 @@ function Workspace({
                 const result = await compile({
                   artboard,
                   Blocks,
-                  Components,
                   DesignSystem: designSystem,
                 });
                 const zipFile = await toZipFile(

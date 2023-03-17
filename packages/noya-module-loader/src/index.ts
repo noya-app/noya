@@ -1,3 +1,5 @@
+import fetch from 'cross-fetch';
+
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 
 function evaluateModule(content: string) {

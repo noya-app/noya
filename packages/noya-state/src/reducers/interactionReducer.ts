@@ -68,7 +68,10 @@ export type BlockDefinition = {
   symbol: Sketch.SymbolMaster;
   parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
   infer: (props: InferBlockProps) => number;
-  render: (env: BlockRenderingEnvironment, props: BlockProps) => JSX.Element;
+  render: (
+    env: BlockRenderingEnvironment,
+    props: BlockProps,
+  ) => JSX.Element | null;
   hashtags?: string[];
   placeholderText?: string;
   editorVersion?: number;

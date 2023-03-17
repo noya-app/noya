@@ -1,4 +1,3 @@
-import * as ChakraUI from '@chakra-ui/react';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { readFileSync } from 'fs';
 import {
@@ -31,25 +30,15 @@ jest.mock('../../safelist.txt', () => {
   };
 });
 
-const Components = new Map<unknown, string>();
-
-Object.entries(ChakraUI).forEach(([key, value]) => {
-  Components.set(value, key);
-});
-
 let DesignSystem: DesignSystemDefinition;
 
 beforeAll(async () => {
-  DesignSystem = await loadDesignSystem('mui');
+  DesignSystem = await loadDesignSystem('chakra');
 });
 
 function generate(symbol: Sketch.SymbolInstance) {
   return format(
-    print(
-      createElementCode(
-        createElement({ Blocks, Components, DesignSystem }, symbol)!,
-      ),
-    ),
+    print(createElementCode(createElement({ Blocks, DesignSystem }, symbol)!)),
   );
 }
 
@@ -208,7 +197,7 @@ describe('card with no border radius on image', () => {
 });
 
 describe('generate file', () => {
-  test('base', () => {
+  test('base', async () => {
     const artboard = SketchModel.artboard({
       frame: SketchModel.rect({
         width: 100,
@@ -217,10 +206,9 @@ describe('generate file', () => {
     });
 
     expect(
-      compile({
+      await compile({
         artboard,
         Blocks,
-        Components,
         DesignSystem,
       }),
     ).toMatchSnapshot();

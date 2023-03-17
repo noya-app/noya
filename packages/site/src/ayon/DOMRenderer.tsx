@@ -4,7 +4,6 @@ import {
   RenderableRoot,
 } from '@noya-design-system/protocol';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { createRenderingEnvironment } from 'noya-compiler';
 import Sketch from 'noya-file-format';
 import {
   createResizeTransform,
@@ -50,7 +49,10 @@ function renderDynamicContent(
     createElement: h,
     components: { [component.id.provider]: Provider },
   } = system;
-  const env = createRenderingEnvironment(system);
+  const env = {
+    h: system.createElement,
+    Components: system.components,
+  };
 
   const getBlock = (symbolId: string) => Blocks[symbolId];
 
