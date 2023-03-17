@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { isWithinRectRange } from './score';
 import { radioSymbolId } from './symbolIds';
 import { radioSymbol } from './symbols';
@@ -38,6 +39,7 @@ export const RadioBlock: BlockDefinition = {
     return h(
       Radio,
       {
+        ...applyCommonProps(props),
         checked: !!on,
         disabled: !!disabled,
       },

@@ -1,6 +1,7 @@
 import { BlockDefinition } from 'noya-state';
 import { CSSProperties } from 'react';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { linkSymbolId } from './symbolIds';
 import { linkSymbol } from './symbols';
 import {
@@ -48,11 +49,7 @@ export const LinkBlock: BlockDefinition = {
     return h(
       Link,
       {
-        ...(props.dataSet && {
-          key: props.dataSet.id,
-          'data-noya-id': props.dataSet.id,
-          'data-noya-parent-id': props.dataSet.parentId,
-        }),
+        ...applyCommonProps(props),
         style: {
           fontWeight: 500,
           color,

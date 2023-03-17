@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { switchSymbolId } from './symbolIds';
 import { switchSymbol } from './symbols';
 
@@ -23,11 +24,7 @@ export const SwitchBlock: BlockDefinition = {
     });
 
     return h(Switch, {
-      ...(props.dataSet && {
-        key: props.dataSet.id,
-        'data-noya-id': props.dataSet.id,
-        'data-noya-parent-id': props.dataSet.parentId,
-      }),
+      ...applyCommonProps(props),
       checked: !!on,
       disabled: !!disabled,
     });

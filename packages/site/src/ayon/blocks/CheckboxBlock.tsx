@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { isWithinRectRange } from './score';
 import { checkboxSymbolId } from './symbolIds';
 import { checkboxSymbol } from './symbols';
@@ -36,6 +37,7 @@ export const CheckboxBlock: BlockDefinition = {
     return h(
       Checkbox,
       {
+        ...applyCommonProps(props),
         checked: !!on,
         disabled: !!disabled,
       },

@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { textareaSymbolId } from './symbolIds';
 import { textareaSymbol } from './symbols';
@@ -25,11 +26,7 @@ export const TextareaBlock: BlockDefinition = {
     });
 
     return h(Textarea, {
-      ...(props.dataSet && {
-        key: props.dataSet.id,
-        'data-noya-id': props.dataSet.id,
-        'data-noya-parent-id': props.dataSet.parentId,
-      }),
+      ...applyCommonProps(props),
       value: content,
       disabled: !!disabled,
       style: {

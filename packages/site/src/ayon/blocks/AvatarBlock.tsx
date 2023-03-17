@@ -1,3 +1,4 @@
+import { applyCommonProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import { parseBlock } from '../parse';
@@ -42,6 +43,7 @@ export const AvatarBlock: BlockDefinition = {
       : undefined;
 
     return h(Avatar, {
+      ...applyCommonProps(props),
       size,
       name,
       src,

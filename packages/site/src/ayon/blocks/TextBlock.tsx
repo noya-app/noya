@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { getTextAlign, parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { textSymbolId } from './symbolIds';
 import { textSymbol } from './symbols';
 import { getBlockClassName, tailwindTextClasses } from './tailwind';
@@ -24,11 +25,7 @@ export const TextBlock: BlockDefinition = {
     return h(
       Text,
       {
-        ...(props.dataSet && {
-          key: props.dataSet.id,
-          'data-noya-id': props.dataSet.id,
-          'data-noya-parent-id': props.dataSet.parentId,
-        }),
+        ...applyCommonProps(props),
         style: {
           textAlign: getTextAlign(hashtags),
         },

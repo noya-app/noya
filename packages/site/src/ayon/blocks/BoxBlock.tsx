@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { accentColor } from './blockTheme';
 import { getBlockThemeColors } from './colors';
 import { boxSymbolId } from './symbolIds';
@@ -76,11 +77,7 @@ export const BoxBlock: BlockDefinition = {
     return h(
       Box,
       {
-        ...(props.dataSet && {
-          key: props.dataSet.id,
-          'data-noya-id': props.dataSet.id,
-          'data-noya-parent-id': props.dataSet.parentId,
-        }),
+        ...applyCommonProps(props),
         style: {
           display: 'flex',
           backgroundColor,

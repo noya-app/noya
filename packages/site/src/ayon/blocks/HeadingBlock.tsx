@@ -2,6 +2,7 @@ import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
 import { getTextAlign, parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { boxSymbolId, textSymbolId } from './symbolIds';
 import {
   heading1Symbol,
@@ -45,11 +46,7 @@ const createHeadingBlock = (
     return h(
       Box,
       {
-        ...(props.dataSet && {
-          key: props.dataSet.id,
-          'data-noya-id': props.dataSet.id,
-          'data-noya-parent-id': props.dataSet.parentId,
-        }),
+        ...applyCommonProps(props),
         style: {
           display: 'flex',
         },

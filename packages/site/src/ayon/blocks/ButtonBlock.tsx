@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
 import { buttonSymbolId } from './symbolIds';
@@ -83,11 +84,7 @@ export const ButtonBlock: BlockDefinition = {
     return h(
       Button,
       {
-        ...(props.dataSet && {
-          key: props.dataSet.id,
-          'data-noya-id': props.dataSet.id,
-          'data-noya-parent-id': props.dataSet.parentId,
-        }),
+        ...applyCommonProps(props),
         disabled: !!disabled,
         style: {
           color: colors.color,

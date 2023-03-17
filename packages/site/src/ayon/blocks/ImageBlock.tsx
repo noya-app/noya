@@ -1,6 +1,7 @@
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { imageSymbol } from './symbols';
 import { getBlockClassName, tailwindBlockClasses } from './tailwind';
@@ -59,11 +60,7 @@ export const ImageBlock: BlockDefinition = {
     }
 
     return h(Image, {
-      ...(props.dataSet && {
-        key: props.dataSet.id,
-        'data-noya-id': props.dataSet.id,
-        'data-noya-parent-id': props.dataSet.parentId,
-      }),
+      ...applyCommonProps(props),
       src,
       style: {
         ...(props.frame

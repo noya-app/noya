@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
+import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { inputSymbolId } from './symbolIds';
@@ -38,11 +39,7 @@ export const InputBlock: BlockDefinition = {
     });
 
     return h(Input, {
-      ...(props.dataSet && {
-        key: props.dataSet.id,
-        'data-noya-id': props.dataSet.id,
-        'data-noya-parent-id': props.dataSet.parentId,
-      }),
+      ...applyCommonProps(props),
       placeholder: content,
       disabled: !!disabled,
       style: {
