@@ -2,10 +2,8 @@ import { getParameters } from 'codesandbox/lib/api/define';
 
 function getCodesandboxParameters({
   files,
-  main,
 }: {
   files: Record<string, string>;
-  main: string;
 }) {
   return getParameters({
     files: {
@@ -28,20 +26,3 @@ export function openInCodesandbox(
 
   window.open(url, '_blank');
 }
-
-// 'package.json': {
-//   isBinary: false,
-//   content: {
-//     name: 'App',
-//     version: '1.0.0',
-//     main,
-//     scripts: {
-//       start: `parcel ${main} --open`,
-//       build: `parcel build ${main}`,
-//     },
-//     dependencies: {},
-//     devDependencies: {
-//       'parcel-bundler': '*',
-//     },
-//   } as any,
-// },

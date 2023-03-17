@@ -500,7 +500,7 @@ function Workspace({
                   Blocks,
                   DesignSystem: designSystem,
                 });
-                openInCodesandbox({ files: result, main: 'App.tsx' });
+                openInCodesandbox({ files: result });
                 // amplitude.logEvent('Project - Export - Exported CodeSandbox');
               }
             }

@@ -1,4 +1,7 @@
-import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import {
+  component,
+  DesignSystemDefinition,
+} from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
 import { loadDesignSystem } from 'noya-module-loader';
 import { BlockDefinition, BlockRenderingEnvironment, Layers } from 'noya-state';
@@ -296,6 +299,28 @@ function Frame(
   )
 }`;
 
+  const Provider = DesignSystem.components[component.id.provider] as
+    | React.FC<any>
+    | undefined;
+  let providerSource: { source: string; name: string } | undefined;
+
+  if (Provider) {
+    const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
+      Object.values(namespace).includes(Provider),
+    );
+    if (importDeclaration) {
+      const name = Object.entries(importDeclaration.namespace).find(
+        ([_, value]) => value === Provider,
+      )?.[0];
+      if (name) {
+        providerSource = {
+          source: importDeclaration.source,
+          name,
+        };
+      }
+    }
+  }
+
   const imports = (DesignSystem.imports ?? []).map(({ source }) => {
     return ts.factory.createImportDeclaration(
       undefined,
@@ -310,6 +335,7 @@ function Frame(
                 ? [element.name]
                 : [],
             ),
+            ...(providerSource?.source === source ? [providerSource.name] : []),
           ]).map((name) =>
             ts.factory.createImportSpecifier(
               false,
@@ -324,7 +350,7 @@ function Frame(
   });
 
   const func = ts.factory.createFunctionDeclaration(
-    undefined,
+    [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
     undefined,
     'App',
     undefined,
@@ -332,23 +358,23 @@ function Frame(
     undefined,
     ts.factory.createBlock([
       ts.factory.createReturnStatement(
-        ts.factory.createJsxFragment(
-          ts.factory.createJsxOpeningFragment(),
-          componentCode,
-          ts.factory.createJsxJsxClosingFragment(),
-        ),
-      ),
-    ]),
-  );
-
-  const exports = ts.factory.createExportDeclaration(
-    undefined,
-    false,
-    ts.factory.createNamedExports([
-      ts.factory.createExportSpecifier(
-        false,
-        undefined,
-        ts.factory.createIdentifier('App'),
+        providerSource
+          ? ts.factory.createJsxElement(
+              ts.factory.createJsxOpeningElement(
+                ts.factory.createIdentifier(providerSource.name),
+                undefined,
+                ts.factory.createJsxAttributes([]),
+              ),
+              componentCode,
+              ts.factory.createJsxClosingElement(
+                ts.factory.createIdentifier(providerSource.name),
+              ),
+            )
+          : ts.factory.createJsxFragment(
+              ts.factory.createJsxOpeningFragment(),
+              componentCode,
+              ts.factory.createJsxJsxClosingFragment(),
+            ),
       ),
     ]),
   );
@@ -377,7 +403,7 @@ function Frame(
         print(imports),
         `import * as React from "react";`,
         frameComponent,
-        print([func, exports]),
+        print(func),
       ].join('\n\n'),
     ),
     'index.html': `<!DOCTYPE html>

@@ -97,7 +97,7 @@ export function ProjectMenu({
             }}
           >
             <Button flex="1">
-              {designSystem}
+              {designSystem === 'mui' ? 'Material Design' : 'Chakra UI'}
               <Spacer.Horizontal />
               <ChevronDownIcon />
             </Button>
