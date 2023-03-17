@@ -47,8 +47,24 @@ Object {
 
 import * as React from 'react';
 
+/**
+ * To make this layout responsive, replace any instance of this component
+ * with your own layout components that use e.g. flexbox.
+ */
 function Frame(props: React.ComponentProps<typeof Box>) {
-  return <Box pos=\\"absolute\\" {...props} />;
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        left: props.left,
+        top: props.top,
+        width: props.width,
+        height: props.height,
+      }}
+    >
+      {props.children}
+    </Box>
+  );
 }
 
 function App() {

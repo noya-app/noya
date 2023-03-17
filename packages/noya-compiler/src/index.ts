@@ -66,6 +66,7 @@ function createJsxElement(
 
 type SimpleElement = {
   name: string;
+  source?: string;
   props: Record<string, unknown>;
   children: (SimpleElement | string)[];
 };
@@ -170,15 +171,24 @@ export function createElement(
       element = libraryElement;
     }
 
+    const componentName = Components.get(element.type);
+
     const name =
-      typeof element.type === 'string'
-        ? element.type
-        : Components.get(element.type);
+      typeof element.type === 'string' ? element.type : componentName;
 
     if (!name) return;
 
+    let source: string | undefined;
+
+    if (componentName) {
+      source = DesignSystem.imports?.find(({ namespace }) =>
+        Object.values(namespace).includes(element.type),
+      )?.source;
+    }
+
     return {
       name,
+      source,
       // Filter out children prop and undefined props
       props: Object.fromEntries(
         Object.entries(element.props).filter(
@@ -262,35 +272,52 @@ export async function compile(configuration: CompilerConfiguration) {
 
   const componentCode = components.map(createElementCode);
 
-  const frameComponent = `
+  const frameComponent = `/**
+ * To make this layout responsive, replace any instance of this component
+ * with your own layout components that use e.g. flexbox.
+ */
 function Frame(props: React.ComponentProps<typeof Box>) {
-  return <Box pos="absolute" {...props} />
+  return (
+    <Box 
+      style={{
+        position: 'absolute',
+        left: props.left,
+        top: props.top,
+        width: props.width,
+        height: props.height,
+      }}
+    >
+      {props.children}
+    </Box>
+  )
 }`;
 
-  const imports = ts.factory.createImportDeclaration(
-    undefined,
-    ts.factory.createImportClause(
-      false,
+  const imports = (DesignSystem.imports ?? []).map(({ source }) => {
+    return ts.factory.createImportDeclaration(
       undefined,
-      ts.factory.createNamedImports(
-        unique([
-          'Box',
-          ...flat(fakeRoot, { getChildren })
-            .map((element) =>
-              typeof element === 'string' ? 'Frame' : element.name,
-            )
-            .filter((name) => name !== 'Frame'),
-        ]).map((name) =>
-          ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier(name),
+      ts.factory.createImportClause(
+        false,
+        undefined,
+        ts.factory.createNamedImports(
+          unique([
+            'Box',
+            ...flat(fakeRoot, { getChildren }).flatMap((element) =>
+              typeof element !== 'string' && element.source === source
+                ? [element.name]
+                : [],
+            ),
+          ]).map((name) =>
+            ts.factory.createImportSpecifier(
+              false,
+              undefined,
+              ts.factory.createIdentifier(name),
+            ),
           ),
         ),
       ),
-    ),
-    ts.factory.createStringLiteral('@chakra-ui/react'),
-  );
+      ts.factory.createStringLiteral(source),
+    );
+  });
 
   const func = ts.factory.createFunctionDeclaration(
     undefined,
@@ -333,7 +360,7 @@ function Frame(props: React.ComponentProps<typeof Box>) {
   const files = {
     'App.tsx': format(
       [
-        print([imports]),
+        print(imports),
         `import * as React from "react";`,
         frameComponent,
         print([func, exports]),
