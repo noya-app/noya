@@ -276,7 +276,11 @@ export async function compile(configuration: CompilerConfiguration) {
  * To make your layout responsive, delete this Frame component and replace any
  * instance of it with your own layout components that use e.g. flexbox.
  */
-function Frame(props: React.ComponentProps<typeof Box>) {
+function Frame(
+  props: React.PropsWithChildren<
+    Pick<React.CSSProperties, "left" | "top" | "width" | "height">
+  >
+) {
   return (
     <Box 
       style={{
@@ -357,6 +361,16 @@ function Frame(props: React.ComponentProps<typeof Box>) {
     DesignSystem.dependencies ?? {},
   );
 
+  const allDevDependencies = (DesignSystem.imports ?? []).reduce(
+    (result, importDeclaration) => ({
+      ...result,
+      ...importDeclaration.devDependencies,
+    }),
+    DesignSystem.devDependencies ?? {},
+  );
+
+  const main = 'index.tsx';
+
   const files = {
     'App.tsx': format(
       [
@@ -366,10 +380,40 @@ function Frame(props: React.ComponentProps<typeof Box>) {
         print([func, exports]),
       ].join('\n\n'),
     ),
+    'index.html': `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>`,
+    'index.tsx': `import { createRoot } from "react-dom/client";
+import * as React from 'react';
+
+import { App } from "./App";
+
+const rootElement = document.getElementById("root");
+const root = createRoot(rootElement!);
+
+root.render(<App />);`,
     'package.json': JSON.stringify(
       {
-        name: 'app',
+        name: 'App',
+        version: '0.0.1',
+        main,
+        scripts: {
+          start: `parcel ${main} --open`,
+          build: `parcel build ${main}`,
+        },
         dependencies: allDependencies,
+        devDependencies: {
+          'parcel-bundler': '*',
+          ...allDevDependencies,
+        },
       },
       null,
       2,
@@ -411,3 +455,5 @@ export function format(text: string) {
     plugins: [prettierTypeScript],
   });
 }
+
+export * from './codesandbox';

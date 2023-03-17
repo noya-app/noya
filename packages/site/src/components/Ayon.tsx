@@ -22,6 +22,7 @@ import {
   BoxIcon,
   ChevronDownIcon,
   CodeIcon,
+  CodeSandboxLogoIcon,
   CursorArrowIcon,
   FigmaLogoIcon,
   FileIcon,
@@ -85,7 +86,12 @@ Object.entries(ChakraUI).forEach(([key, value]) => {
   Components.set(value, key);
 });
 
-export type ExportType = NoyaAPI.ExportFormat | 'figma' | 'sketch' | 'react';
+export type ExportType =
+  | NoyaAPI.ExportFormat
+  | 'figma'
+  | 'sketch'
+  | 'react'
+  | 'codesandbox';
 
 const persistedViewType =
   (ClientStorage.getItem('preferredViewType') as ViewType) || 'split';
@@ -426,6 +432,17 @@ function Workspace({
               ),
               icon: <CodeIcon />,
             },
+            {
+              value: 'codesandbox',
+              title: (
+                <>
+                  CodeSandbox
+                  <Spacer.Horizontal inline size={6} />
+                  <StarFilledIcon color="#fec422" />
+                </>
+              ),
+              icon: <CodeSandboxLogoIcon />,
+            },
           ]}
           onSelect={async (value) => {
             if (!artboard) return;
@@ -473,6 +490,18 @@ function Workspace({
                 );
                 downloadBlob(zipFile);
                 return;
+              }
+              case 'codesandbox': {
+                const { compile, openInCodesandbox } = await import(
+                  'noya-compiler'
+                );
+                const result = await compile({
+                  artboard,
+                  Blocks,
+                  DesignSystem: designSystem,
+                });
+                openInCodesandbox({ files: result, main: 'App.tsx' });
+                // amplitude.logEvent('Project - Export - Exported CodeSandbox');
               }
             }
           }}
