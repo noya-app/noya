@@ -181,14 +181,31 @@ function DynamicRenderer({
   }, [artboard.layers, designSystem, drawing, root, system]);
 
   return (
-    <div
-      ref={ref}
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-      }}
-    />
+    <>
+      <div
+        ref={ref}
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+        }}
+      />
+      {!system && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            padding: '4px 8px',
+            color: '#aaa',
+            pointerEvents: 'none',
+          }}
+        >
+          Loading design system...
+        </div>
+      )}
+    </>
   );
 }
 
