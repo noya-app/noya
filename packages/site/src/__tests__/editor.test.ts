@@ -6,7 +6,7 @@ import { createEditor, Editor } from 'slate';
 import { withHistory } from 'slate-history';
 import { withReact } from 'slate-react';
 import { Blocks } from '../ayon/blocks/blocks';
-import { heroSymbolV2Id, textSymbolId } from '../ayon/blocks/symbolIds';
+import { heading5SymbolId, heroSymbolV2Id } from '../ayon/blocks/symbolIds';
 import { fromSymbol } from '../ayon/editor/serialization';
 import { withLayout } from '../ayon/editor/withLayout';
 
@@ -49,7 +49,7 @@ test('serializes block with layer text', () => {
 
   Blocks[instance.symbolID].symbol.layers
     .filter(Layers.isSymbolInstance)
-    .filter((layer) => layer.symbolID === textSymbolId)
+    .filter((layer) => layer.symbolID === heading5SymbolId)
     .forEach((layer) => {
       instance.overrideValues.push(
         SketchModel.overrideValue({

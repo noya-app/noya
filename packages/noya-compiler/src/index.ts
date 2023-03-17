@@ -273,8 +273,8 @@ export async function compile(configuration: CompilerConfiguration) {
   const componentCode = components.map(createElementCode);
 
   const frameComponent = `/**
- * To make this layout responsive, replace any instance of this component
- * with your own layout components that use e.g. flexbox.
+ * To make your layout responsive, delete this Frame component and replace any
+ * instance of it with your own layout components that use e.g. flexbox.
  */
 function Frame(props: React.ComponentProps<typeof Box>) {
   return (
