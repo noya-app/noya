@@ -223,6 +223,7 @@ describe('generate file', () => {
         artboard,
         Blocks,
         DesignSystem,
+        target: 'standalone',
       }),
     ).toMatchSnapshot();
   });

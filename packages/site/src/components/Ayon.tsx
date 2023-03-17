@@ -480,12 +480,15 @@ function Workspace({
                   artboard,
                   Blocks,
                   DesignSystem: designSystem,
+                  target: 'standalone',
                 });
                 const zipFile = await toZipFile(
-                  {
-                    'App.tsx': UTF16.toUTF8(result['App.tsx']),
-                    'package.json': UTF16.toUTF8(result['package.json']),
-                  },
+                  Object.fromEntries(
+                    Object.entries(result).map(
+                      ([name, content]) =>
+                        [name, UTF16.toUTF8(content)] as const,
+                    ),
+                  ),
                   'App.zip',
                 );
                 downloadBlob(zipFile);
@@ -499,6 +502,7 @@ function Workspace({
                   artboard,
                   Blocks,
                   DesignSystem: designSystem,
+                  target: 'codesandbox',
                 });
                 openInCodesandbox({ files: result });
                 // amplitude.logEvent('Project - Export - Exported CodeSandbox');

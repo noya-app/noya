@@ -123,6 +123,7 @@ export interface CompilerConfiguration {
   artboard: Sketch.Artboard;
   Blocks: Record<string, BlockDefinition>;
   DesignSystem: string | DesignSystemDefinition;
+  target: 'standalone' | 'codesandbox';
 }
 
 export function createRenderingEnvironment(
@@ -401,8 +402,6 @@ function Frame(
     DesignSystem.devDependencies ?? {},
   );
 
-  const main = 'index.tsx';
-
   const files = {
     'App.tsx': format(
       [
@@ -412,6 +411,22 @@ function Frame(
         print(func),
       ].join('\n\n'),
     ),
+    '.postcssrc': `{
+  "plugins": {
+    "tailwindcss": {}
+  }
+}`,
+    'tailwind.config.js': `module.exports = {
+  content: ["./*.{html,js,jsx,ts,tsx}"],
+  theme: {
+    extend: {},
+  },
+  variants: {},
+  plugins: [],
+};`,
+    'index.css': `@tailwind base;
+@tailwind components;
+@tailwind utilities;`,
     'index.html': `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -420,7 +435,13 @@ function Frame(
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="index.js"></script>
+    <link href="./index.css" rel="stylesheet" />
+    ${
+      configuration.target === 'codesandbox'
+        ? '<script src="https://cdn.tailwindcss.com"></script>'
+        : ''
+    }
+    <script type="module" src="index.tsx"></script>
   </body>
 </html>`,
     'index.tsx': `import { createRoot } from "react-dom/client";
@@ -436,14 +457,17 @@ root.render(<App />);`,
       {
         name: 'App',
         version: '0.0.1',
-        main,
         scripts: {
-          start: `parcel ${main} --open`,
-          build: `parcel build ${main}`,
+          start: 'parcel index.html --open',
+          build: 'parcel build index.html',
         },
         dependencies: allDependencies,
         devDependencies: {
-          'parcel-bundler': '*',
+          autoprefixer: '10.4.14',
+          parcel: '^2.8.3',
+          postcss: '8.4.21',
+          tailwindcss: '3.2.7',
+          process: '^0.11.10',
           ...allDevDependencies,
         },
       },
