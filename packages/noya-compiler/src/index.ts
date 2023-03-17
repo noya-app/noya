@@ -104,13 +104,19 @@ export function createElementCode({
     ),
     children.map((child) =>
       typeof child === 'string'
-        ? ts.factory.createJsxExpression(
-            undefined,
-            ts.factory.createStringLiteral(child),
-          )
+        ? isSafeForJsxText(child)
+          ? ts.factory.createJsxText(child, false)
+          : ts.factory.createJsxExpression(
+              undefined,
+              ts.factory.createStringLiteral(child),
+            )
         : createElementCode(child),
     ),
   );
+}
+
+function isSafeForJsxText(text: string) {
+  return !/[{}<>]/.test(text);
 }
 
 export interface CompilerConfiguration {

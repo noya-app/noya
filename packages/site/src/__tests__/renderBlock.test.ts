@@ -69,6 +69,19 @@ describe('text', () => {
 
     expect(generate(symbol)).toMatchSnapshot();
   });
+
+  test('escape jsx', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: textSymbolId,
+      blockText: 'Hello "\'<{test}>\'" world',
+      frame: SketchModel.rect({
+        width: 100,
+        height: 40,
+      }),
+    });
+
+    expect(generate(symbol)).toMatchSnapshot();
+  });
 });
 
 describe('link', () => {
