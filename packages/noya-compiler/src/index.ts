@@ -248,6 +248,51 @@ export function buildComponentMap(imports: DesignSystemDefinition['imports']) {
   return Components;
 }
 
+function findSource(
+  DesignSystem: DesignSystemDefinition,
+  componentId: string,
+): { source: string; name: string } | undefined {
+  const Component = DesignSystem.components[componentId] as
+    | React.FC<any>
+    | undefined;
+
+  if (!Component) return;
+
+  const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
+    Object.values(namespace).includes(Component),
+  );
+
+  if (!importDeclaration) return;
+
+  const name = Object.entries(importDeclaration.namespace).find(
+    ([_, value]) => value === Component,
+  )?.[0];
+
+  if (!name) return;
+
+  return {
+    source: importDeclaration.source,
+    name,
+  };
+}
+
+// We should look this up more dynamically the same way we do for blocks
+function findSourceByName(
+  DesignSystem: DesignSystemDefinition,
+  name: string,
+): { source: string; name: string } | undefined {
+  const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
+    Object.keys(namespace).includes(name),
+  );
+
+  if (!importDeclaration) return;
+
+  return {
+    source: importDeclaration.source,
+    name,
+  };
+}
+
 export async function compile(configuration: CompilerConfiguration) {
   const { artboard } = configuration;
 
@@ -282,78 +327,41 @@ export async function compile(configuration: CompilerConfiguration) {
 
   const componentCode = components.map(createElementCode);
 
-  const frameComponent = `/**
- * To make your layout responsive, delete this Frame component and replace any
- * instance of it with your own layout components that use e.g. flexbox.
- */
-function Frame(
-  props: React.PropsWithChildren<
-    Pick<React.CSSProperties, "left" | "top" | "width" | "height">
-  >
-) {
-  return (
-    <Box 
-      style={{
-        position: 'absolute',
-        left: props.left,
-        top: props.top,
-        width: props.width,
-        height: props.height,
-      }}
-    >
-      {props.children}
-    </Box>
-  )
-}`;
+  const providerSource = findSource(DesignSystem, component.id.provider);
+  const boxSource = findSourceByName(DesignSystem, 'Box');
 
-  const Provider = DesignSystem.components[component.id.provider] as
-    | React.FC<any>
-    | undefined;
-  let providerSource: { source: string; name: string } | undefined;
+  const imports = (DesignSystem.imports ?? []).flatMap(({ source }) => {
+    const names = unique([
+      ...flat(fakeRoot, { getChildren }).flatMap((element) =>
+        typeof element !== 'string' && element.source === source
+          ? [element.name]
+          : [],
+      ),
+      ...(providerSource?.source === source ? [providerSource.name] : []),
+      ...(boxSource?.source === source ? [boxSource.name] : []),
+    ]);
 
-  if (Provider) {
-    const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
-      Object.values(namespace).includes(Provider),
-    );
-    if (importDeclaration) {
-      const name = Object.entries(importDeclaration.namespace).find(
-        ([_, value]) => value === Provider,
-      )?.[0];
-      if (name) {
-        providerSource = {
-          source: importDeclaration.source,
-          name,
-        };
-      }
-    }
-  }
+    if (names.length === 0) return [];
 
-  const imports = (DesignSystem.imports ?? []).map(({ source }) => {
-    return ts.factory.createImportDeclaration(
-      undefined,
-      ts.factory.createImportClause(
-        false,
+    return [
+      ts.factory.createImportDeclaration(
         undefined,
-        ts.factory.createNamedImports(
-          unique([
-            'Box',
-            ...flat(fakeRoot, { getChildren }).flatMap((element) =>
-              typeof element !== 'string' && element.source === source
-                ? [element.name]
-                : [],
-            ),
-            ...(providerSource?.source === source ? [providerSource.name] : []),
-          ]).map((name) =>
-            ts.factory.createImportSpecifier(
-              false,
-              undefined,
-              ts.factory.createIdentifier(name),
+        ts.factory.createImportClause(
+          false,
+          undefined,
+          ts.factory.createNamedImports(
+            names.map((name) =>
+              ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier(name),
+              ),
             ),
           ),
         ),
+        ts.factory.createStringLiteral(source),
       ),
-      ts.factory.createStringLiteral(source),
-    );
+    ];
   });
 
   const func = ts.factory.createFunctionDeclaration(
@@ -401,6 +409,30 @@ function Frame(
     }),
     DesignSystem.devDependencies ?? {},
   );
+
+  const frameComponent = `/**
+ * To make your layout responsive, delete this Frame component and replace any
+ * instance of it with your own layout components that use e.g. flexbox.
+ */
+function Frame(
+  props: React.PropsWithChildren<
+    Pick<React.CSSProperties, "left" | "top" | "width" | "height">
+  >
+) {
+  return (
+    <${boxSource?.name} 
+      style={{
+        position: 'absolute',
+        left: props.left,
+        top: props.top,
+        width: props.width,
+        height: props.height,
+      }}
+    >
+      {props.children}
+    </${boxSource?.name}>
+  )
+}`;
 
   const files = {
     'App.tsx': format(

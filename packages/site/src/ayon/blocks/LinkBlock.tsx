@@ -1,3 +1,4 @@
+import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { CSSProperties } from 'react';
 import { parseBlock } from '../parse';
@@ -28,7 +29,16 @@ export const LinkBlock: BlockDefinition = {
   ],
   placeholderText,
   infer: ({ frame, blockText }) => 0,
-  render: ({ h, Components: { [linkSymbolId]: Link } }, props) => {
+  render: (
+    {
+      h,
+      Components: {
+        [linkSymbolId]: Link,
+        [component.id.iconArrowForward]: IconArrowForward,
+      },
+    },
+    props,
+  ) => {
     const { content, parameters } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
@@ -60,18 +70,25 @@ export const LinkBlock: BlockDefinition = {
         } as CSSProperties,
         className: getBlockClassName(hashtags),
       },
-      content,
+      [
+        content,
+        ...(parameters['icon-arrow-forward']
+          ? [
+              ' ',
+              h(IconArrowForward, {
+                style: {
+                  verticalAlign: 'text-bottom',
+                  width: 16,
+                  height: 16,
+                  textDecorationColor: color,
+                  ...(textDecorationValue && {
+                    textDecorationLine: textDecorationValue,
+                  }),
+                },
+              }),
+            ]
+          : []),
+      ],
     );
   },
 };
-
-/* {parameters['icon-arrow-forward'] && (
-  <>
-    {' '}
-    <ArrowForwardIcon
-      style={{
-        verticalAlign: 'text-bottom',
-      }}
-    />
-  </>
-)} */

@@ -3,8 +3,8 @@
 exports[`button default 1`] = `
 "<Frame width={100} height={40}>
   <Button
-    style={{ color: '#000', backgroundColor: '#f1f5f9', width: '100px' }}
     isDisabled={false}
+    style={{ color: '#000', backgroundColor: '#f1f5f9', width: '100px' }}
   >
     Submit
   </Button>
@@ -24,12 +24,12 @@ exports[`card with no border radius on image default 1`] = `
     className=\\"flex-col bg-white p-4 shadow rounded-md\\"
   >
     <Image
+      src=\\"https://placekitten.com/300/300\\"
       style={{ minHeight: 0, objectFit: 'cover' }}
       className=\\"rounded-none flex-1\\"
-      src=\\"https://placekitten.com/300/300\\"
     />
     <Box style={{ display: 'flex' }} className=\\"mt-4\\">
-      <Text style={{ flex: '1', textAlign: undefined }} fontSize=\\"2xl\\">
+      <Text fontSize=\\"2xl\\" style={{ flex: '1', textAlign: undefined }}>
         News
       </Text>
     </Box>
@@ -48,7 +48,7 @@ Object {
     \\"tailwindcss\\": {}
   }
 }",
-  "App.tsx": "import { Box, ChakraProvider } from '@chakra-ui/react';
+  "App.tsx": "import { ChakraProvider, Box } from '@chakra-ui/react';
 
 import * as React from 'react';
 
@@ -115,12 +115,12 @@ root.render(<App />);",
   \\"dependencies\\": {
     \\"react\\": \\"^18\\",
     \\"react-dom\\": \\"^18\\",
-    \\"@chakra-ui/icons\\": \\"^2.0.17\\",
-    \\"@chakra-ui/react\\": \\"^2.5.1\\",
-    \\"@chakra-ui/system\\": \\"^2.5.1\\",
-    \\"@emotion/react\\": \\"^11.10.6\\",
-    \\"@emotion/styled\\": \\"^11.10.6\\",
-    \\"framer-motion\\": \\"^10.2.3\\"
+    \\"@chakra-ui/react\\": \\"^2\\",
+    \\"@chakra-ui/system\\": \\"^2\\",
+    \\"@emotion/react\\": \\"^11\\",
+    \\"@emotion/styled\\": \\"^11\\",
+    \\"framer-motion\\": \\"^10\\",
+    \\"@chakra-ui/icons\\": \\"^2\\"
   },
   \\"devDependencies\\": {
     \\"autoprefixer\\": \\"10.4.14\\",
@@ -155,12 +155,12 @@ exports[`hero default 1`] = `
     className=\\"flex-col bg-transparent p-4 gap-3 items-center justify-center\\"
   >
     <Box style={{ display: 'flex' }}>
-      <Text style={{ flex: '1', textAlign: 'center' }} fontSize=\\"6xl\\">
+      <Text fontSize=\\"6xl\\" style={{ flex: '1', textAlign: 'center' }}>
         Create, iterate, inspire.
       </Text>
     </Box>
     <Box style={{ display: 'flex' }} className=\\"mb-4\\">
-      <Text style={{ flex: '1', textAlign: 'center' }} fontSize=\\"2xl\\">
+      <Text fontSize=\\"2xl\\" style={{ flex: '1', textAlign: 'center' }}>
         Turn great ideas into new possibilities.
       </Text>
     </Box>
@@ -169,8 +169,8 @@ exports[`hero default 1`] = `
       className=\\"bg-transparent flex-row items-center gap-6\\"
     >
       <Button
-        style={{ color: '#fff', backgroundColor: '#15803d' }}
         isDisabled={false}
+        style={{ color: '#fff', backgroundColor: '#15803d' }}
       >
         Get started
       </Button>
@@ -192,12 +192,12 @@ exports[`hero left aligned 1`] = `
     className=\\"flex-col bg-transparent p-4 gap-3 items-start justify-center\\"
   >
     <Box style={{ display: 'flex' }}>
-      <Text style={{ flex: '1', textAlign: 'left' }} fontSize=\\"6xl\\">
+      <Text fontSize=\\"6xl\\" style={{ flex: '1', textAlign: 'left' }}>
         Create, iterate, inspire.
       </Text>
     </Box>
     <Box style={{ display: 'flex' }} className=\\"mb-4\\">
-      <Text style={{ flex: '1', textAlign: 'left' }} fontSize=\\"2xl\\">
+      <Text fontSize=\\"2xl\\" style={{ flex: '1', textAlign: 'left' }}>
         Turn great ideas into new possibilities.
       </Text>
     </Box>
@@ -206,8 +206,8 @@ exports[`hero left aligned 1`] = `
       className=\\"bg-transparent flex-row items-center gap-6\\"
     >
       <Button
-        style={{ color: '#fff', backgroundColor: '#15803d' }}
         isDisabled={false}
+        style={{ color: '#fff', backgroundColor: '#15803d' }}
       >
         Get started
       </Button>
@@ -230,18 +230,18 @@ exports[`hero with bg 1`] = `
   >
     <Box style={{ display: 'flex' }}>
       <Text
+        fontSize=\\"6xl\\"
         style={{ flex: '1', textAlign: 'center' }}
         className=\\"text-white\\"
-        fontSize=\\"6xl\\"
       >
         Create, iterate, inspire.
       </Text>
     </Box>
     <Box style={{ display: 'flex' }} className=\\"mb-4\\">
       <Text
+        fontSize=\\"2xl\\"
         style={{ flex: '1', textAlign: 'center' }}
         className=\\"text-white\\"
-        fontSize=\\"2xl\\"
       >
         Turn great ideas into new possibilities.
       </Text>
@@ -251,9 +251,9 @@ exports[`hero with bg 1`] = `
       className=\\"bg-transparent flex-row items-center gap-6\\"
     >
       <Button
+        isDisabled={false}
         style={{ color: '#000', backgroundColor: '#f1f5f9' }}
         className=\\"text-white\\"
-        isDisabled={false}
       >
         Get started
       </Button>
@@ -266,8 +266,8 @@ exports[`hero with bg 1`] = `
 exports[`icon default 1`] = `
 "<Frame width={48} height={48}>
   <Image
-    style={{ objectFit: 'contain', width: '100%', height: '100%' }}
     src=\\"https://api.iconify.design/material-symbols/menu.svg\\"
+    style={{ objectFit: 'contain', width: '100%', height: '100%' }}
   />
 </Frame>;
 "
