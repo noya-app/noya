@@ -79,7 +79,9 @@ export function workspaceReducer(
       const [, value] = action;
 
       return produce(state, (draft) => {
-        draft.history.present.sketch.document.designSystemID = value;
+        draft.history.present.sketch.document.designSystem = {
+          id: value,
+        };
       });
     }
     case 'newFile': {

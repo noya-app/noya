@@ -343,7 +343,7 @@ function Workspace({
   ]);
 
   const designSystem =
-    state.history.present.sketch.document.designSystemID ?? 'mui';
+    state.history.present.sketch.document.designSystem?.id ?? 'mui';
 
   useLayoutEffect(() => {
     setRightToolbar(
