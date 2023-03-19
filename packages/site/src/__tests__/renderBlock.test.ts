@@ -2,9 +2,9 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { readFileSync } from 'fs';
 import {
   compile,
-  createElement,
   createElementCode,
   format,
+  mapBlockToElement,
   print,
 } from 'noya-compiler';
 import Sketch from 'noya-file-format';
@@ -46,7 +46,9 @@ function generate(
   DesignSystem = ChakraDesignSystem,
 ) {
   return format(
-    print(createElementCode(createElement({ Blocks, DesignSystem }, symbol)!)),
+    print(
+      createElementCode(mapBlockToElement({ Blocks, DesignSystem }, symbol)!),
+    ),
   );
 }
 

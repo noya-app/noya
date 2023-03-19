@@ -4,7 +4,7 @@ import {
 } from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
 import { loadDesignSystem } from 'noya-module-loader';
-import { BlockDefinition, BlockRenderingEnvironment, Layers } from 'noya-state';
+import { BlockDefinition, Layers } from 'noya-state';
 import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
@@ -139,15 +139,6 @@ export interface CompilerConfiguration {
   target: 'standalone' | 'codesandbox';
 }
 
-export function createRenderingEnvironment(
-  system: DesignSystemDefinition,
-): BlockRenderingEnvironment {
-  return {
-    h: system.createElement,
-    Components: system.components,
-  };
-}
-
 function findElementNameAndSource(
   element: React.ReactElement,
   DesignSystem: DesignSystemDefinition,
@@ -183,7 +174,55 @@ function findElementNameAndSource(
   return findElementNameAndSource(libraryElement, DesignSystem, Components);
 }
 
-export function createElement(
+function createSimpleElement(
+  originalElement: React.ReactElement,
+  DesignSystem: DesignSystemDefinition,
+): SimpleElement | undefined {
+  const Components = buildComponentMap(DesignSystem.imports);
+
+  const elementType = findElementNameAndSource(
+    originalElement,
+    DesignSystem,
+    Components,
+  );
+
+  if (!elementType) return;
+
+  const { element, name, source } = elementType;
+
+  return {
+    [simpleElementSymbol]: true,
+    name,
+    source,
+    // Filter out children prop and undefined props
+    props: Object.fromEntries(
+      Object.entries(element.props)
+        .filter(
+          ([key, value]) =>
+            key !== 'children' &&
+            !key.startsWith('data-noya-') &&
+            value !== undefined,
+        )
+        .map(([key, value]) => {
+          if (React.isValidElement(value)) {
+            return [key, createSimpleElement(value, DesignSystem)];
+          }
+          return [key, value];
+        }),
+    ),
+    children: React.Children.toArray(element.props.children).flatMap(
+      (element): (SimpleElement | string)[] => {
+        if (typeof element === 'string' && element !== '') return [element];
+        const validElement = React.isValidElement(element);
+        if (!validElement) return [];
+        const mapped = createSimpleElement(element, DesignSystem);
+        return mapped ? [mapped] : [];
+      },
+    ),
+  };
+}
+
+export function mapBlockToElement(
   {
     Blocks,
     DesignSystem,
@@ -197,69 +236,28 @@ export function createElement(
 
   if (!block) return;
 
-  const element = block.render(createRenderingEnvironment(DesignSystem), {
-    layer: layer,
-    frame: layer.frame,
-    symbolId: layer.symbolID,
-    blockText: layer.blockText,
-    resolvedBlockData: layer.resolvedBlockData,
-    getBlock: (id) => Blocks[id],
-    dataSet: {
-      id: layer.do_objectID,
-      parentId: layer.do_objectID,
+  const element = block.render(
+    {
+      h: DesignSystem.createElement,
+      Components: DesignSystem.components,
     },
-  });
+    {
+      layer: layer,
+      frame: layer.frame,
+      symbolId: layer.symbolID,
+      blockText: layer.blockText,
+      resolvedBlockData: layer.resolvedBlockData,
+      getBlock: (id) => Blocks[id],
+      dataSet: {
+        id: layer.do_objectID,
+        parentId: layer.do_objectID,
+      },
+    },
+  );
 
   if (!element || !isValidElement(element)) return;
 
-  const Components = buildComponentMap(DesignSystem.imports);
-
-  function createSimpleElement(
-    originalElement: React.ReactElement,
-  ): SimpleElement | undefined {
-    const elementType = findElementNameAndSource(
-      originalElement,
-      DesignSystem,
-      Components,
-    );
-
-    if (!elementType) return;
-
-    const { element, name, source } = elementType;
-
-    return {
-      [simpleElementSymbol]: true,
-      name,
-      source,
-      // Filter out children prop and undefined props
-      props: Object.fromEntries(
-        Object.entries(element.props)
-          .filter(
-            ([key, value]) =>
-              key !== 'children' &&
-              !key.startsWith('data-noya-') &&
-              value !== undefined,
-          )
-          .map(([key, value]) => {
-            if (React.isValidElement(value)) {
-              return [key, createSimpleElement(value)];
-            }
-            return [key, value];
-          }),
-      ),
-      children: React.Children.toArray(element.props.children).flatMap(
-        (element): (SimpleElement | string)[] => {
-          if (typeof element === 'string' && element !== '') return [element];
-          const validElement = React.isValidElement(element);
-          if (!validElement) return [];
-          const mapped = createSimpleElement(element);
-          return mapped ? [mapped] : [];
-        },
-      ),
-    };
-  }
-
-  const root = createSimpleElement(element);
+  const root = createSimpleElement(element, DesignSystem);
 
   if (!root) return;
 
@@ -286,34 +284,6 @@ function buildComponentMap(imports: DesignSystemDefinition['imports']) {
   }
 
   return Components;
-}
-
-function findSource(
-  DesignSystem: DesignSystemDefinition,
-  componentId: string,
-): { source: string; name: string } | undefined {
-  const Component = DesignSystem.components[componentId] as
-    | React.FC<any>
-    | undefined;
-
-  if (!Component) return;
-
-  const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
-    Object.values(namespace).includes(Component),
-  );
-
-  if (!importDeclaration) return;
-
-  const name = Object.entries(importDeclaration.namespace).find(
-    ([_, value]) => value === Component,
-  )?.[0];
-
-  if (!name) return;
-
-  return {
-    source: importDeclaration.source,
-    name,
-  };
 }
 
 // We should look this up more dynamically the same way we do for blocks
@@ -344,7 +314,7 @@ export async function compile(configuration: CompilerConfiguration) {
   const components = artboard.layers
     .filter(Layers.isSymbolInstance)
     .flatMap((layer) => {
-      const element = createElement(
+      const element = mapBlockToElement(
         {
           Blocks: configuration.Blocks,
           DesignSystem,
@@ -366,16 +336,24 @@ export async function compile(configuration: CompilerConfiguration) {
     ];
   };
 
-  const fakeRoot: SimpleElement = {
+  const providerElement = createSimpleElement(
+    DesignSystem.createElement(DesignSystem.components[component.id.provider], {
+      children: components,
+    }),
+    DesignSystem,
+  );
+
+  if (providerElement) {
+    providerElement.children = components;
+  }
+
+  const fakeRoot: SimpleElement = providerElement ?? {
     [simpleElementSymbol]: true,
     name: 'Frame',
     children: components,
     props: {},
   };
 
-  const componentCode = components.map(createElementCode);
-
-  const providerSource = findSource(DesignSystem, component.id.provider);
   const boxSource = findSourceByName(DesignSystem, 'Box');
 
   const imports = (DesignSystem.imports ?? []).flatMap(({ source }) => {
@@ -385,7 +363,6 @@ export async function compile(configuration: CompilerConfiguration) {
           ? [element.name]
           : [],
       ),
-      ...(providerSource?.source === source ? [providerSource.name] : []),
       ...(boxSource?.source === source ? [boxSource.name] : []),
     ]);
 
@@ -421,21 +398,11 @@ export async function compile(configuration: CompilerConfiguration) {
     undefined,
     ts.factory.createBlock([
       ts.factory.createReturnStatement(
-        providerSource
-          ? ts.factory.createJsxElement(
-              ts.factory.createJsxOpeningElement(
-                ts.factory.createIdentifier(providerSource.name),
-                undefined,
-                ts.factory.createJsxAttributes([]),
-              ),
-              componentCode,
-              ts.factory.createJsxClosingElement(
-                ts.factory.createIdentifier(providerSource.name),
-              ),
-            )
+        providerElement
+          ? createElementCode(providerElement)
           : ts.factory.createJsxFragment(
               ts.factory.createJsxOpeningFragment(),
-              componentCode,
+              components.map(createElementCode),
               ts.factory.createJsxJsxClosingFragment(),
             ),
       ),

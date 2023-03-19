@@ -91,7 +91,7 @@ function Frame(
 }
 
 export function App() {
-  return <ChakraProvider></ChakraProvider>;
+  return <ChakraProvider />;
 }
 ",
   "index.css": "@tailwind base;

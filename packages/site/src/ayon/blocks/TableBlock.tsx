@@ -32,6 +32,7 @@ export const TableBlock: BlockDefinition = {
     {
       h,
       Components: {
+        [component.id.tableContainer]: TableContainer,
         [component.id.table]: Table,
         [component.id.tableHead]: TableHead,
         [component.id.tableBody]: TableBody,
@@ -49,13 +50,13 @@ export const TableBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const { backgroundColor, color, borderColor } = getBlockThemeColors({
+    const { backgroundColor, color } = getBlockThemeColors({
       dark,
       accent,
     });
 
     return h(
-      Table,
+      TableContainer,
       {
         ...applyCommonProps(props),
         style: {
@@ -63,22 +64,20 @@ export const TableBlock: BlockDefinition = {
             width: `${props.frame.width}px`,
             height: `${props.frame.height}px`,
           }),
+          overflowY: 'auto',
           backgroundColor,
           backdropFilter: 'auto',
           backdropBlur: '10px',
-          overflowY: 'auto',
-          border: `1px solid ${borderColor}`,
-          color: color,
         },
       },
-      [
+      h(Table, {}, [
         rows.length > 0 &&
           h(TableHead, {}, [
             h(
               TableRow,
               {},
               rows[0].items.map((cell, i) =>
-                h(TableHeadCell, { key: i }, [cell.content]),
+                h(TableHeadCell, { key: i, style: { color } }, [cell.content]),
               ),
             ),
           ]),
@@ -90,12 +89,14 @@ export const TableBlock: BlockDefinition = {
               TableRow,
               { key: i },
               row.items.map((cell, j) =>
-                h(TableCell, { key: `${i}-${j}` }, [cell.content]),
+                h(TableCell, { key: `${i}-${j}`, style: { color } }, [
+                  cell.content,
+                ]),
               ),
             ),
           ),
         ),
-      ],
+      ]),
     );
   },
 };
