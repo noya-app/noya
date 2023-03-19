@@ -41,7 +41,21 @@ exports[`card with no border radius on image default 1`] = `
 "
 `;
 
-exports[`generate file base 1`] = `
+exports[`element as prop default 1`] = `
+"<Frame width={100} height={40}>
+  <Box
+    style={{ display: 'flex', alignItems: 'center', width: 100, height: 40 }}
+  >
+    <FormControlLabel
+      control={<Checkbox checked={false} disabled={false} />}
+      label=\\"Hello world\\"
+    />
+  </Box>
+</Frame>;
+"
+`;
+
+exports[`generate file chakra 1`] = `
 Object {
   ".postcssrc": "{
   \\"plugins\\": {
@@ -121,6 +135,124 @@ root.render(<App />);",
     \\"@emotion/styled\\": \\"^11\\",
     \\"framer-motion\\": \\"^10\\",
     \\"@chakra-ui/icons\\": \\"^2\\"
+  },
+  \\"devDependencies\\": {
+    \\"autoprefixer\\": \\"10.4.14\\",
+    \\"parcel\\": \\"^2.8.3\\",
+    \\"postcss\\": \\"8.4.21\\",
+    \\"tailwindcss\\": \\"3.2.7\\",
+    \\"process\\": \\"^0.11.10\\",
+    \\"@types/react\\": \\"^18\\",
+    \\"@types/react-dom\\": \\"^18\\"
+  }
+}",
+  "tailwind.config.js": "module.exports = {
+  content: [\\"./*.{html,js,jsx,ts,tsx}\\"],
+  theme: {
+    extend: {},
+  },
+  variants: {},
+  plugins: [],
+};",
+}
+`;
+
+exports[`generate file mui 1`] = `
+Object {
+  ".postcssrc": "{
+  \\"plugins\\": {
+    \\"tailwindcss\\": {}
+  }
+}",
+  "App.tsx": "import { Box, FormControlLabel, Checkbox } from '@mui/material';
+
+import * as React from 'react';
+
+/**
+ * To make your layout responsive, delete this Frame component and replace any
+ * instance of it with your own layout components that use e.g. flexbox.
+ */
+function Frame(
+  props: React.PropsWithChildren<
+    Pick<React.CSSProperties, 'left' | 'top' | 'width' | 'height'>
+  >
+) {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        left: props.left,
+        top: props.top,
+        width: props.width,
+        height: props.height,
+      }}
+    >
+      {props.children}
+    </Box>
+  );
+}
+
+export function App() {
+  return (
+    <>
+      <Frame width={100} height={40}>
+        <Box
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: 100,
+            height: 40,
+          }}
+        >
+          <FormControlLabel
+            control={<Checkbox checked={false} disabled={false} />}
+            label=\\"Hello world\\"
+          />
+        </Box>
+      </Frame>
+    </>
+  );
+}
+",
+  "index.css": "@tailwind base;
+@tailwind components;
+@tailwind utilities;",
+  "index.html": "<!DOCTYPE html>
+<html lang=\\"en\\">
+  <head>
+    <meta charset=\\"utf-8\\" />
+    <title>App</title>
+  </head>
+  <body>
+    <div id=\\"root\\"></div>
+    <link href=\\"./index.css\\" rel=\\"stylesheet\\" />
+    
+    <script type=\\"module\\" src=\\"index.tsx\\"></script>
+  </body>
+</html>",
+  "index.tsx": "import { createRoot } from \\"react-dom/client\\";
+import * as React from 'react';
+
+import { App } from \\"./App\\";
+
+const rootElement = document.getElementById(\\"root\\");
+const root = createRoot(rootElement!);
+
+root.render(<App />);",
+  "package.json": "{
+  \\"name\\": \\"App\\",
+  \\"version\\": \\"0.0.1\\",
+  \\"scripts\\": {
+    \\"start\\": \\"parcel index.html --open\\",
+    \\"build\\": \\"parcel build index.html\\"
+  },
+  \\"dependencies\\": {
+    \\"react\\": \\"^18\\",
+    \\"react-dom\\": \\"^18\\",
+    \\"@mui/material\\": \\"^5\\",
+    \\"@emotion/react\\": \\"^11\\",
+    \\"@emotion/styled\\": \\"^11\\",
+    \\"@mui/icons-material\\": \\"^5\\"
   },
   \\"devDependencies\\": {
     \\"autoprefixer\\": \\"10.4.14\\",

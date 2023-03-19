@@ -1,3 +1,4 @@
+import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
@@ -7,7 +8,7 @@ import { checkboxSymbol } from './symbols';
 
 const placeholderText = '#off Remember me';
 
-const globalHashtags = ['on', 'off', 'disabled'];
+const globalHashtags = ['on', 'off', 'disabled', 'no-label'];
 
 const parser = 'regular';
 
@@ -26,22 +27,41 @@ export const CheckboxBlock: BlockDefinition = {
     })
       ? 0.8
       : 0,
-  render: ({ h, Components: { [checkboxSymbolId]: Checkbox } }, props) => {
+  render: (
+    {
+      h,
+      Components: { [checkboxSymbolId]: Checkbox, [component.id.box]: Box },
+    },
+    props,
+  ) => {
     const {
-      // content,
-      parameters: { on, disabled },
+      content,
+      parameters: { on, disabled, 'no-label': noLabel },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
 
-    return h(
-      Checkbox,
-      {
-        ...applyCommonProps(props),
-        checked: !!on,
-        disabled: !!disabled,
-      },
-      // props.frame ? props.frame.width > 40 && content : content,
-    );
+    const inner = h(Checkbox, {
+      ...applyCommonProps(props),
+      checked: !!on,
+      disabled: !!disabled,
+      ...(!noLabel && { label: content }),
+    });
+
+    // Center within frame
+    return props.frame
+      ? h(
+          Box,
+          {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              width: props.frame.width,
+              height: props.frame.height,
+            },
+          },
+          inner,
+        )
+      : inner;
   },
 };

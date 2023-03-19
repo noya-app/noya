@@ -50,7 +50,7 @@ export type BlockMetadata = {
 const headingMetadata: BlockMetadata = {
   name: 'Heading',
   category: 'element',
-  preferredSize: { width: 500, height: 60 },
+  preferredSize: { width: 700, height: 100 },
   preferredBlockText: 'All About Cats',
 };
 
@@ -157,7 +157,7 @@ export const blockMetadata: Record<string, BlockMetadata> = {
   [headerBarSymbolId]: {
     name: 'Header Bar',
     category: 'application',
-    preferredSize: { width: 1280, height: 80 },
+    preferredSize: { width: 800, height: 80 },
   },
   [checkboxSymbolId]: {
     name: 'Checkbox',

@@ -13,6 +13,10 @@ import { flat } from 'tree-visit';
 import ts from 'typescript';
 
 function createExpressionCode(value: unknown): ts.Expression {
+  if (isSimpleElement(value)) {
+    return createElementCode(value);
+  }
+
   switch (typeof value) {
     case 'string':
       return ts.factory.createStringLiteral(value);
@@ -67,7 +71,16 @@ function createJsxElement(
   );
 }
 
+const simpleElementSymbol = Symbol('simpleElement');
+
+function isSimpleElement(value: unknown): value is SimpleElement {
+  return (
+    typeof value === 'object' && value !== null && simpleElementSymbol in value
+  );
+}
+
 type SimpleElement = {
+  [simpleElementSymbol]: true;
   name: string;
   source?: string;
   props: Record<string, unknown>;
@@ -135,6 +148,41 @@ export function createRenderingEnvironment(
   };
 }
 
+function findElementNameAndSource(
+  element: React.ReactElement,
+  DesignSystem: DesignSystemDefinition,
+  Components: Map<React.ComponentType, { name: string; source?: string }>,
+):
+  | {
+      name: string;
+      element: React.ReactElement;
+      source?: string;
+    }
+  | undefined {
+  // This is a DOM element
+  if (typeof element.type === 'string') {
+    return { name: element.type, element };
+  }
+
+  // This is a component exported directly from the design system
+  const component = Components.get(element.type);
+
+  if (component) {
+    return { ...component, element };
+  }
+
+  const protocolComponent = Object.values(DesignSystem.components).find(
+    (value) => value === element.type,
+  );
+
+  // This is an adapter function that returns a DOM or design system component
+  const libraryElement = protocolComponent?.(element.props);
+
+  if (!isValidElement(libraryElement)) return;
+
+  return findElementNameAndSource(libraryElement, DesignSystem, Components);
+}
+
 export function createElement(
   {
     Blocks,
@@ -167,46 +215,37 @@ export function createElement(
   const Components = buildComponentMap(DesignSystem.imports);
 
   function createSimpleElement(
-    element: React.ReactElement,
+    originalElement: React.ReactElement,
   ): SimpleElement | undefined {
-    const protocolComponent = Object.values(DesignSystem.components).find(
-      (value) => value === element.type,
+    const elementType = findElementNameAndSource(
+      originalElement,
+      DesignSystem,
+      Components,
     );
 
-    if (!protocolComponent) return;
+    if (!elementType) return;
 
-    const libraryElement = protocolComponent?.(element.props);
-
-    if (isValidElement(libraryElement)) {
-      element = libraryElement;
-    }
-
-    const componentName = Components.get(element.type);
-
-    const name =
-      typeof element.type === 'string' ? element.type : componentName;
-
-    if (!name) return;
-
-    let source: string | undefined;
-
-    if (componentName) {
-      source = DesignSystem.imports?.find(({ namespace }) =>
-        Object.values(namespace).includes(element.type),
-      )?.source;
-    }
+    const { element, name, source } = elementType;
 
     return {
+      [simpleElementSymbol]: true,
       name,
       source,
       // Filter out children prop and undefined props
       props: Object.fromEntries(
-        Object.entries(element.props).filter(
-          ([key, value]) =>
-            key !== 'children' &&
-            !key.startsWith('data-noya-') &&
-            value !== undefined,
-        ),
+        Object.entries(element.props)
+          .filter(
+            ([key, value]) =>
+              key !== 'children' &&
+              !key.startsWith('data-noya-') &&
+              value !== undefined,
+          )
+          .map(([key, value]) => {
+            if (React.isValidElement(value)) {
+              return [key, createSimpleElement(value)];
+            }
+            return [key, value];
+          }),
       ),
       children: React.Children.toArray(element.props.children).flatMap(
         (element): (SimpleElement | string)[] => {
@@ -225,6 +264,7 @@ export function createElement(
   if (!root) return;
 
   return {
+    [simpleElementSymbol]: true,
     name: 'Frame',
     props: {
       ...(layer.frame.x !== 0 && { left: layer.frame.x }),
@@ -236,12 +276,12 @@ export function createElement(
   };
 }
 
-export function buildComponentMap(imports: DesignSystemDefinition['imports']) {
-  const Components = new Map<any, string>();
+function buildComponentMap(imports: DesignSystemDefinition['imports']) {
+  const Components = new Map<any, { name: string; source: string }>();
 
   for (const declaration of imports ?? []) {
     for (let [name, value] of Object.entries(declaration.namespace)) {
-      Components.set(value, name);
+      Components.set(value, { name, source: declaration.source });
     }
   }
 
@@ -315,11 +355,19 @@ export async function compile(configuration: CompilerConfiguration) {
       return element ? [element] : [];
     });
 
-  const getChildren = (element: SimpleElement | string) => {
-    return typeof element === 'string' ? [] : element.children;
+  const getChildren = (
+    element: SimpleElement | string,
+  ): (string | SimpleElement)[] => {
+    if (typeof element === 'string') return [];
+
+    return [
+      ...element.children,
+      ...Object.values(element.props).filter(isSimpleElement),
+    ];
   };
 
   const fakeRoot: SimpleElement = {
+    [simpleElementSymbol]: true,
     name: 'Frame',
     children: components,
     props: {},

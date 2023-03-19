@@ -16,12 +16,15 @@ import { Blocks } from '../ayon/blocks/blocks';
 import {
   buttonSymbolId,
   cardSymbolId,
+  checkboxSymbolId,
   heroSymbolV2Id,
   iconSymbolId,
   imageSymbolId,
   linkSymbolId,
   textSymbolId,
 } from '../ayon/blocks/symbolIds';
+
+jest.setTimeout(20000);
 
 // Jest doesn't know how to import a text file, so we mock it
 jest.mock('../../safelist.txt', () => {
@@ -30,13 +33,18 @@ jest.mock('../../safelist.txt', () => {
   };
 });
 
-let DesignSystem: DesignSystemDefinition;
+let ChakraDesignSystem: DesignSystemDefinition;
+let MaterialDesignSystem: DesignSystemDefinition;
 
 beforeAll(async () => {
-  DesignSystem = await loadDesignSystem('chakra');
+  ChakraDesignSystem = await loadDesignSystem('chakra');
+  MaterialDesignSystem = await loadDesignSystem('mui');
 });
 
-function generate(symbol: Sketch.SymbolInstance) {
+function generate(
+  symbol: Sketch.SymbolInstance,
+  DesignSystem = ChakraDesignSystem,
+) {
   return format(
     print(createElementCode(createElement({ Blocks, DesignSystem }, symbol)!)),
   );
@@ -209,8 +217,23 @@ describe('card with no border radius on image', () => {
   });
 });
 
+describe('element as prop', () => {
+  test('default', () => {
+    const symbol = SketchModel.symbolInstance({
+      symbolID: checkboxSymbolId,
+      frame: SketchModel.rect({
+        width: 100,
+        height: 40,
+      }),
+      blockText: 'Hello world',
+    });
+
+    expect(generate(symbol, MaterialDesignSystem)).toMatchSnapshot();
+  });
+});
+
 describe('generate file', () => {
-  test('base', async () => {
+  test('chakra', async () => {
     const artboard = SketchModel.artboard({
       frame: SketchModel.rect({
         width: 100,
@@ -222,7 +245,35 @@ describe('generate file', () => {
       await compile({
         artboard,
         Blocks,
-        DesignSystem,
+        DesignSystem: ChakraDesignSystem,
+        target: 'standalone',
+      }),
+    ).toMatchSnapshot();
+  });
+
+  test('mui', async () => {
+    const checkbox = SketchModel.symbolInstance({
+      symbolID: checkboxSymbolId,
+      frame: SketchModel.rect({
+        width: 100,
+        height: 40,
+      }),
+      blockText: 'Hello world',
+    });
+
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        width: 100,
+        height: 100,
+      }),
+      layers: [checkbox],
+    });
+
+    expect(
+      await compile({
+        artboard,
+        Blocks,
+        DesignSystem: MaterialDesignSystem,
         target: 'standalone',
       }),
     ).toMatchSnapshot();

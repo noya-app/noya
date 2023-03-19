@@ -1,3 +1,4 @@
+import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
@@ -7,7 +8,7 @@ import { radioSymbol } from './symbols';
 
 const placeholderText = '#off Daily';
 
-const globalHashtags = ['on', 'off', 'disabled'];
+const globalHashtags = ['on', 'off', 'disabled', 'no-label'];
 
 const parser = 'regular';
 
@@ -26,24 +27,38 @@ export const RadioBlock: BlockDefinition = {
     })
       ? 0.8
       : 0,
-  render: ({ h, Components: { [radioSymbolId]: Radio } }, props) => {
+  render: (
+    { h, Components: { [radioSymbolId]: Radio, [component.id.box]: Box } },
+    props,
+  ) => {
     const {
-      // content,
-      parameters: { on, disabled },
+      content,
+      parameters: { on, disabled, 'no-label': noLabel },
     } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
     });
 
-    // const width = props.frame ? props.frame.width : 40;
+    const inner = h(Radio, {
+      ...applyCommonProps(props),
+      checked: !!on,
+      disabled: !!disabled,
+      ...(!noLabel && { label: content }),
+    });
 
-    return h(
-      Radio,
-      {
-        ...applyCommonProps(props),
-        checked: !!on,
-        disabled: !!disabled,
-      },
-      // width >= 40 && content,
-    );
+    // Center within frame
+    return props.frame
+      ? h(
+          Box,
+          {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              width: props.frame.width,
+              height: props.frame.height,
+            },
+          },
+          inner,
+        )
+      : inner;
   },
 };
