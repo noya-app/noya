@@ -237,7 +237,7 @@ export const tileCardSymbol = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       do_objectID: '91514627-b323-457e-bf05-228c5a96830d',
-      symbolID: heading6SymbolId,
+      symbolID: heading5SymbolId,
       blockText: 'How we can help your business. #flex-1 #mt-1',
     }),
     SketchModel.symbolInstance({
