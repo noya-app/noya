@@ -61,7 +61,7 @@ export const HeaderBarBlock: BlockDefinition = {
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-row #items-center #px-3 #gap-6', bg].join(' '),
+      blockText: ['#flex-row #items-center #px-3 #gap-3', bg].join(' '),
       frame: props.frame,
       getBlock: props.getBlock,
       children: [
@@ -71,7 +71,7 @@ export const HeaderBarBlock: BlockDefinition = {
 
           if (title && index === 0) {
             return props.getBlock(heading6SymbolId).render(env, {
-              blockText: [content, text, '#p-2'].join(' '),
+              blockText: [content, text, '#p-2', '#mr-6'].join(' '),
               symbolId: heading6SymbolId,
               getBlock: props.getBlock,
             });
@@ -91,7 +91,7 @@ export const HeaderBarBlock: BlockDefinition = {
                 blockText: [
                   content,
                   text,
-                  '#no-underline',
+                  '#text-xs #no-underline',
                   activeOrDefault ? '#font-semibold' : '',
                 ]
                   .filter(Boolean)

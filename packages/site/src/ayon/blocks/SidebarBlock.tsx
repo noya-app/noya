@@ -88,7 +88,7 @@ export const SidebarBlock: BlockDefinition = {
               blockText: [
                 content,
                 text,
-                '#no-underline',
+                '#text-xs #no-underline',
                 activeOrDefault ? '#font-semibold' : '',
               ]
                 .filter(Boolean)

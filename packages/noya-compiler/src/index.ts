@@ -336,10 +336,10 @@ export async function compile(configuration: CompilerConfiguration) {
     ];
   };
 
+  const ProviderComponent = DesignSystem.components[component.id.provider];
+
   const providerElement = createSimpleElement(
-    DesignSystem.createElement(DesignSystem.components[component.id.provider], {
-      children: components,
-    }),
+    DesignSystem.createElement(ProviderComponent),
     DesignSystem,
   );
 

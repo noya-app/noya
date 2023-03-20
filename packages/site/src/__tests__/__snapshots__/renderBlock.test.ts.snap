@@ -284,7 +284,7 @@ exports[`hero default 1`] = `
       width: '400px',
       height: '400px',
     }}
-    className=\\"flex-col bg-transparent p-4 gap-3 items-center justify-center\\"
+    className=\\"flex-col bg-transparent p-4 gap-3 backdrop-blur items-center justify-center\\"
   >
     <Box style={{ display: 'flex' }}>
       <Text fontSize=\\"6xl\\" style={{ flex: '1', textAlign: 'center' }}>
@@ -321,7 +321,7 @@ exports[`hero left aligned 1`] = `
       width: '400px',
       height: '400px',
     }}
-    className=\\"flex-col bg-transparent p-4 gap-3 items-start justify-center\\"
+    className=\\"flex-col bg-transparent p-4 gap-3 backdrop-blur items-start justify-center\\"
   >
     <Box style={{ display: 'flex' }}>
       <Text fontSize=\\"6xl\\" style={{ flex: '1', textAlign: 'left' }}>
@@ -358,7 +358,7 @@ exports[`hero with bg 1`] = `
       width: '400px',
       height: '400px',
     }}
-    className=\\"flex-col bg-blue-500 p-4 gap-3 items-center justify-center\\"
+    className=\\"flex-col bg-blue-500 p-4 gap-3 backdrop-blur items-center justify-center\\"
   >
     <Box style={{ display: 'flex' }}>
       <Text
