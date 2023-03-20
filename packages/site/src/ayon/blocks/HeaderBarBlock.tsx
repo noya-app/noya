@@ -61,7 +61,7 @@ export const HeaderBarBlock: BlockDefinition = {
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-row #items-center #px-4 #gap-6', bg].join(' '),
+      blockText: ['#flex-row #items-center #px-3 #gap-6', bg].join(' '),
       frame: props.frame,
       getBlock: props.getBlock,
       children: [
@@ -82,7 +82,7 @@ export const HeaderBarBlock: BlockDefinition = {
             symbolId: boxSymbolId,
             blockText: [
               activeOrDefault ? activeLinkBg : '#bg-transparent',
-              '#rounded #p-2',
+              '#rounded #px-3 #py-2',
             ]
               .filter(Boolean)
               .join(' '),
@@ -110,7 +110,11 @@ export const HeaderBarBlock: BlockDefinition = {
         search &&
           props.getBlock(inputSymbolId).render(env, {
             symbolId: inputSymbolId,
-            blockText: ['Search', dark && '#dark', accent && '#accent']
+            blockText: [
+              'Search #basis-60',
+              dark && '#dark',
+              accent && '#accent',
+            ]
               .filter(Boolean)
               .join(' '),
             getBlock: props.getBlock,

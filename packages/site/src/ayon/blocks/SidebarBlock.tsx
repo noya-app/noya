@@ -59,7 +59,7 @@ export const SidebarBlock: BlockDefinition = {
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-col #p-4', bg].join(' '),
+      blockText: ['#flex-col #p-3 #gap-1', bg].join(' '),
       frame: props.frame,
       getBlock: props.getBlock,
       children: items.map(({ content, parameters: { active } }, index) => {
@@ -68,7 +68,7 @@ export const SidebarBlock: BlockDefinition = {
 
         if (title && index === 0) {
           return props.getBlock(heading5SymbolId).render(env, {
-            blockText: [content, text, '#mb-4'].join(' '),
+            blockText: [content, text, '#mb-4 #px-3 #py-2'].join(' '),
             symbolId: heading5SymbolId,
             getBlock: props.getBlock,
           });
@@ -79,7 +79,7 @@ export const SidebarBlock: BlockDefinition = {
           symbolId: boxSymbolId,
           blockText: [
             activeOrDefault ? activeLinkBg : '#bg-transparent',
-            '#rounded #p-2',
+            '#rounded #px-3 #py-2',
           ]
             .filter(Boolean)
             .join(' '),

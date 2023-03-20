@@ -66,8 +66,7 @@ export const TableBlock: BlockDefinition = {
           }),
           overflowY: 'auto',
           backgroundColor,
-          backdropFilter: 'auto',
-          backdropBlur: '10px',
+          backdropFilter: 'blur(10px)',
         },
       },
       h(Table, {}, [

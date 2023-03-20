@@ -3,6 +3,7 @@ import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
 import { getTextAlign, parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
+import { isWithinRectRange } from './score';
 import { boxSymbolId, textSymbolId } from './symbolIds';
 import {
   heading1Symbol,
@@ -26,7 +27,17 @@ const createHeadingBlock = (
   parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   isComposedBlock: true,
-  infer: ({ frame, blockText }) => 0.1,
+  infer: ({ frame, blockText }) =>
+    variant === 'h3' &&
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 400,
+      minHeight: 30,
+      maxWidth: 2000,
+      maxHeight: 80,
+    })
+      ? 0.5
+      : 0,
   render: (
     { h, Components: { [textSymbolId]: Text, [boxSymbolId]: Box } },
     props,

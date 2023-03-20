@@ -60,6 +60,7 @@ export const classGroups = {
   marginLeft: /^ml-/,
   flexDirection: /^(flex-row|flex-col)/,
   flex: /^(flex-1|flex-auto|flex-none)/,
+  flexBasis: /^basis-/,
   alignSelf: /^self/,
   borderRadius: /^rounded/,
   textDecoration: /^(underline|overline|no-underline|line-through)/,

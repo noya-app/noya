@@ -62,14 +62,14 @@ export function getBlockThemeColorClasses({
     case 'dark':
       return {
         text: '#text-white',
-        bg: '#bg-slate-900',
-        activeLinkBg: '#bg-slate-800',
+        bg: '#bg-zinc-900',
+        activeLinkBg: '#bg-zinc-700',
       };
     case 'light':
       return {
         text: '#text-black',
-        bg: '#bg-slate-100',
-        activeLinkBg: '#bg-slate-200',
+        bg: '#bg-white',
+        activeLinkBg: '#bg-zinc-100',
       };
     case 'dark-accent':
       return {
