@@ -122,6 +122,7 @@ export const HeaderBarBlock: BlockDefinition = {
         props.getBlock(avatarSymbolId).render(env, {
           symbolId: avatarSymbolId,
           getBlock: props.getBlock,
+          blockText: '#w-10',
         }),
       ],
     });

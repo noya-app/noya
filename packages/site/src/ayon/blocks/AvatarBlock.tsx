@@ -5,6 +5,7 @@ import { parseBlock } from '../parse';
 import { isApproximatelySquare, isWithinRectRange } from './score';
 import { avatarSymbolId } from './symbolIds';
 import { avatarSymbol } from './symbols';
+import { getBlockClassName } from './tailwind';
 
 const AVATAR_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'];
 
@@ -24,9 +25,10 @@ export const AvatarBlock: BlockDefinition = {
       ? 0.8
       : 0,
   render: ({ h, Components: { [avatarSymbolId]: Avatar } }, props) => {
-    const { content } = parseBlock(props.blockText, parser);
+    const { content, parameters } = parseBlock(props.blockText, parser);
     const src = isExternalUrl(content) ? content : undefined;
     const name = !src ? content : undefined;
+    const hashtags = Object.keys(parameters);
 
     // Size up in 14px increments
     const size = props.frame
@@ -42,6 +44,11 @@ export const AvatarBlock: BlockDefinition = {
       ? Math.min(props.frame.width, props.frame.height)
       : undefined;
 
+    const widthHashtag = hashtags.find((hashtag) => hashtag.startsWith('w-'));
+    const widthMatch = widthHashtag ? widthHashtag.match(/w-(\d+)/) : undefined;
+    const width = widthMatch ? Number(widthMatch[1]) : undefined;
+    const tailwindSize = width ? `${width * 0.25}rem` : undefined;
+
     return h(Avatar, {
       ...applyCommonProps(props),
       size,
@@ -53,7 +60,12 @@ export const AvatarBlock: BlockDefinition = {
           width: `${sizePx}px`,
           height: `${sizePx}px`,
         }),
+        ...(tailwindSize && {
+          width: tailwindSize,
+          height: tailwindSize,
+        }),
       },
+      className: getBlockClassName(hashtags),
     });
   },
 };
