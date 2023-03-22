@@ -230,18 +230,16 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 export function extractHashtagParameters(text: string) {
   const parameters: ParsedBlockItemParameters = {};
 
-  text = text.replaceAll(
-    /#([A-Za-z0-9-]*)(=[A-Za-z0-9-]*)?/g,
-    (match, arg1, arg2) => {
-      if (arg2) {
-        parameters[arg1] = arg2.slice(1);
-      } else {
-        parameters[arg1] = true;
-      }
+  text = text.replaceAll(/#[A-Za-z0-9-]*(?:\[(.*)\])?/g, (match, value) => {
+    const key = match.slice(1);
+    if (value) {
+      parameters[key] = value;
+    } else {
+      parameters[key] = true;
+    }
 
-      return '';
-    },
-  );
+    return '';
+  });
 
   return {
     content: text.trim(),

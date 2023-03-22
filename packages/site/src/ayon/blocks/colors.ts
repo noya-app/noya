@@ -1,5 +1,5 @@
 import { ParsedBlockParameter } from '../parse';
-import { accentColor } from './blockTheme';
+import { accentColor, neutralColor } from './blockTheme';
 
 export function getBlockThemeColors({
   dark,
@@ -62,25 +62,25 @@ export function getBlockThemeColorClasses({
     case 'dark':
       return {
         text: '#text-white',
-        bg: '#bg-zinc-900',
+        bg: `#bg-[${neutralColor[900]}e5] #backdrop-blur`,
         activeLinkBg: '#bg-zinc-700',
       };
     case 'light':
       return {
         text: '#text-black',
-        bg: '#bg-white',
+        bg: '#bg-[#ffffffe5] #backdrop-blur',
         activeLinkBg: '#bg-zinc-100',
       };
     case 'dark-accent':
       return {
         text: '#text-white',
-        bg: '#bg-blue-800',
+        bg: `#bg-[${accentColor[800]}e5] #backdrop-blur`,
         activeLinkBg: '#bg-blue-600',
       };
     case 'light-accent':
       return {
         text: '#text-blue-900',
-        bg: '#bg-blue-50',
+        bg: `#bg-[${accentColor[50]}e5] #backdrop-blur`,
         activeLinkBg: '#bg-blue-100',
       };
   }

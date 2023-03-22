@@ -14,7 +14,7 @@ test('remove slash commands', () => {
 });
 
 const sidebarText = `
-*Dashboard #booleanParameter #keywordParameter=value
+*Dashboard #booleanParameter #keywordParameter-[value]
 Updates
 
 Projects
@@ -46,7 +46,7 @@ const sidebarBlock: ParsedCompositeBlock = {
   ],
   parameters: {
     booleanParameter: true,
-    keywordParameter: 'value',
+    'keywordParameter-[value]': 'value',
     globalParameter: true,
     globalParameter2: true,
     globalParameter3: true,
@@ -161,7 +161,7 @@ test('comma separated parameters-only with placeholder', () => {
   });
 });
 
-const buttonText = `Hello #keywordParameter=value
+const buttonText = `Hello #keywordParameter-[value]
 #booleanParameter`;
 
 test('regular block', () => {
@@ -169,7 +169,7 @@ test('regular block', () => {
     content: 'Hello',
     parameters: {
       booleanParameter: true,
-      keywordParameter: 'value',
+      'keywordParameter-[value]': 'value',
     },
   });
 });

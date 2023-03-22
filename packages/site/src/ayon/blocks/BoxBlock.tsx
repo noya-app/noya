@@ -7,7 +7,7 @@ import { boxSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
 import {
   getBlockClassName,
-  hasClassGroup,
+  getLastClassInGroup,
   tailwindBlockClasses,
 } from './tailwind';
 
@@ -20,10 +20,17 @@ export const BoxBlock: BlockDefinition = {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
 
+    const bgClass = getLastClassInGroup('background', hashtags);
+    const dynamicClass = bgClass
+      ? typeof parameters[bgClass] === 'string'
+      : undefined;
+
     const backgroundColor = parameters.dark
       ? getBlockThemeColors({ dark: true, accent: false }).backgroundColor
-      : hasClassGroup('background', hashtags)
-      ? undefined
+      : bgClass
+      ? dynamicClass
+        ? parameters[bgClass]
+        : undefined
       : [content]
           .concat(hashtags)
           .find((value) => CSS.supports('color', `${value}`)) ??
