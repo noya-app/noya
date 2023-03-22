@@ -85,10 +85,9 @@ export const Blocks: Record<string, BlockDefinition> = {
   [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
 };
 
-export const allInsertableBlocks = Object.values(Blocks).filter(
-  ({ isPassthrough, symbol }) =>
-    !isPassthrough && /update/i.test(symbol.name) === false,
-);
+export const allInsertableBlocks = Object.entries(Blocks)
+  .filter(([id, { isPassthrough }]) => id !== heroSymbolId && !isPassthrough)
+  .map(([, block]) => block);
 
 export const allInsertableSymbols = allInsertableBlocks.map(
   (block) => block.symbol,
