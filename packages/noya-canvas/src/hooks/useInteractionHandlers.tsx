@@ -107,6 +107,8 @@ export function useInteractionHandlers({
       zoomIn: () => dispatch('setZoom*', 2, 'multiply'),
       zoomOut: () => dispatch('setZoom*', 0.5, 'multiply'),
       zoomActualSize: () => dispatch('setZoom*', 1),
+      zoomToFitCanvas: () => dispatch('zoomToFit*', 'canvas', { padding: 0 }),
+      zoomToFitSelection: () => dispatch('zoomToFit*', 'selection'),
       undo: () => dispatch('undo'),
       redo: () => dispatch('redo'),
       maybeMarquee: (point, method) =>

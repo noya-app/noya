@@ -6,14 +6,23 @@ export interface ZoomActions {
   zoomIn: () => void;
   zoomOut: () => void;
   zoomActualSize: () => void;
+  zoomToFitCanvas: () => void;
+  zoomToFitSelection: () => void;
 }
 
-type MenuItemType = 'zoomIn' | 'zoomOut' | 'zoomActualSize';
+type MenuItemType =
+  | 'zoomIn'
+  | 'zoomOut'
+  | 'zoomActualSize'
+  | 'zoomToFitCanvas'
+  | 'zoomToFitSelection';
 
 export function zoomInteraction({
   zoomIn,
   zoomOut,
   zoomActualSize,
+  zoomToFitCanvas,
+  zoomToFitSelection,
 }: ZoomActions) {
   const handlers = handleActionType<
     InteractionState,
@@ -86,6 +95,12 @@ export function zoomInteraction({
             'Old Zoom Level': api.zoomValue,
           });
           zoomActualSize();
+        },
+        'Mod-1': () => {
+          zoomToFitCanvas();
+        },
+        'Mod-2': () => {
+          zoomToFitSelection();
         },
       }),
     };

@@ -17,10 +17,10 @@ import {
 } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { blockMetadata, PreferredOverride } from '../ayon/blocks/blockMetadata';
+import { Blocks } from '../ayon/blocks/blocks';
 import { ViewType } from '../ayon/Content';
 import { parseBlock } from '../ayon/parse';
 
-const Blocks = import('../ayon/blocks/blocks');
 const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
 
 function Content({
@@ -57,6 +57,96 @@ function Content({
   );
 }
 
+export type BlockExample = {
+  block: BlockDefinition;
+  size: Size;
+  blockText?: string;
+  resolvedBlockData?: Sketch.ResolvedBlockData;
+  overrideValues?: Sketch.OverrideValue[];
+};
+
+export function createBlockExample({
+  blockId,
+  width,
+  height,
+  blockText,
+  resolvedBlockText,
+  overrides,
+}: {
+  blockId: string;
+  width: number;
+  height: number;
+  blockText?: string;
+  resolvedBlockText?: string;
+  overrides?: PreferredOverride[];
+}) {
+  const { content: originalText } = parseBlock(
+    blockText,
+    Blocks[blockId].parser,
+    { placeholder: Blocks[blockId].placeholderText },
+  );
+
+  const resolvedBlockData: Sketch.ResolvedBlockData | undefined =
+    resolvedBlockText
+      ? {
+          originalText,
+          resolvedText: resolvedBlockText,
+          symbolID: blockId,
+          resolvedAt: new Date().toISOString(),
+        }
+      : undefined;
+
+  const layers = Blocks[blockId].symbol.layers;
+
+  const overrideValues: Sketch.OverrideValue[] = (overrides ?? []).flatMap(
+    (override) => {
+      const { content } = parseBlock(
+        override.blockText,
+        Blocks[override.symbolId].parser,
+        { placeholder: Blocks[override.symbolId].placeholderText },
+      );
+
+      const layer = layers.find(
+        (layer): layer is Sketch.SymbolInstance =>
+          Layers.isSymbolInstance(layer) &&
+          layer.symbolID === override.symbolId,
+      );
+
+      if (!layer) return [];
+
+      return [
+        SketchModel.overrideValue({
+          overrideName: Overrides.encodeName([layer.do_objectID], 'blockText'),
+          value: override.blockText,
+        }),
+        ...(override.resolvedBlockText
+          ? [
+              SketchModel.overrideValue({
+                overrideName: Overrides.encodeName(
+                  [layer.do_objectID],
+                  'resolvedBlockData',
+                ),
+                value: {
+                  symbolID: layer.symbolID,
+                  originalText: content,
+                  resolvedText: override.resolvedBlockText,
+                },
+              }),
+            ]
+          : []),
+      ];
+    },
+  );
+
+  return {
+    block: Blocks[blockId],
+    size: { width, height },
+    blockText,
+    resolvedBlockData,
+    overrideValues,
+  };
+}
+
 function Loader({
   blockId,
   width,
@@ -74,103 +164,34 @@ function Loader({
   resolvedBlockText?: string;
   overrides?: PreferredOverride[];
 }) {
-  const [blocks, setBlocks] = useState<
-    Record<string, BlockDefinition> | undefined
-  >();
   const [client, setClient] = useState<NoyaAPI.Client | undefined>();
 
   useEffect(() => {
-    if (!blockId) return;
-
-    Blocks.then((m) => {
-      const blocks = m.Blocks;
-
-      setBlocks(blocks);
-
-      const { content: originalText } = parseBlock(
-        blockText,
-        blocks[blockId].parser,
-        { placeholder: blocks[blockId].placeholderText },
-      );
-
-      const resolvedBlockData: Sketch.ResolvedBlockData | undefined =
-        resolvedBlockText
-          ? {
-              originalText,
-              resolvedText: resolvedBlockText,
-              symbolID: blockId,
-              resolvedAt: new Date().toISOString(),
-            }
-          : undefined;
-
-      const layers = blocks[blockId].symbol.layers;
-
-      const overrideValues: Sketch.OverrideValue[] = (overrides ?? []).flatMap(
-        (override) => {
-          const { content } = parseBlock(
-            override.blockText,
-            blocks[override.symbolId].parser,
-            { placeholder: blocks[override.symbolId].placeholderText },
-          );
-
-          const layer = layers.find(
-            (layer): layer is Sketch.SymbolInstance =>
-              Layers.isSymbolInstance(layer) &&
-              layer.symbolID === override.symbolId,
-          );
-
-          if (!layer) return [];
-
-          return [
-            SketchModel.overrideValue({
-              overrideName: Overrides.encodeName(
-                [layer.do_objectID],
-                'blockText',
-              ),
-              value: override.blockText,
-            }),
-            ...(override.resolvedBlockText
-              ? [
-                  SketchModel.overrideValue({
-                    overrideName: Overrides.encodeName(
-                      [layer.do_objectID],
-                      'resolvedBlockData',
-                    ),
-                    value: {
-                      symbolID: layer.symbolID,
-                      originalText: content,
-                      resolvedText: override.resolvedBlockText,
-                    },
-                  }),
-                ]
-              : []),
-          ];
-        },
-      );
-
-      const client = new NoyaAPI.Client({
-        networkClient: new NoyaAPI.MemoryClient({
-          files: [
-            createLocalFile({
-              block: blocks[blockId],
-              size: { width, height },
+    const client = new NoyaAPI.Client({
+      networkClient: new NoyaAPI.MemoryClient({
+        files: [
+          createLocalFile(
+            createBlockExample({
+              blockId,
+              width,
+              height,
               blockText,
-              resolvedBlockData,
-              overrideValues,
+              resolvedBlockText,
+              overrides,
             }),
-          ],
-        }),
-      });
-
-      setClient(client);
+          ),
+        ],
+      }),
     });
+
+    setClient(client);
   }, [blockId, blockText, height, overrides, resolvedBlockText, width]);
 
-  if (!blocks || !blockId || !client) return null;
+  if (!blockId || !client) return null;
 
   return (
     <NoyaAPIProvider value={client}>
-      <Content blocks={blocks} blockId={blockId} viewType={viewType} />
+      <Content blocks={Blocks} blockId={blockId} viewType={viewType} />
     </NoyaAPIProvider>
   );
 }
@@ -239,13 +260,7 @@ function createLocalFile({
   blockText,
   resolvedBlockData,
   overrideValues,
-}: {
-  block: BlockDefinition;
-  size: Size;
-  blockText?: string;
-  resolvedBlockData?: Sketch.ResolvedBlockData;
-  overrideValues?: Sketch.OverrideValue[];
-}) {
+}: BlockExample) {
   const instance = SketchModel.symbolInstance({
     symbolID: block.symbol.symbolID,
     frame: SketchModel.rect({
