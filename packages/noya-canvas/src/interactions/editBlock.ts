@@ -47,6 +47,7 @@ export const createEditBlockInteraction = ({
               groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
+              includeLayersOutsideArtboardBounds: true,
             },
           );
 
