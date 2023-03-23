@@ -181,7 +181,7 @@ export function useInteractionHandlers({
       setLayerY: (value: number, mode: SetNumberMode) =>
         dispatch('setLayerY', value, mode),
       selectAllLayers: () => dispatch('selectAllLayers'),
-      addLayer: (layer) => dispatch('addLayer', layer),
+      addLayer: (layer, options) => dispatch('addLayer', layer, options),
       highlightLayer: (layerHighlight) =>
         dispatch('highlightLayer', layerHighlight),
       enterInsertMode: (layerType, method) =>

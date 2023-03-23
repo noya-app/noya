@@ -406,7 +406,11 @@ export const Widget = forwardRef(function Widget(
     layersToInsert.forEach((child) => {
       const bounds = createBounds(child.frame);
 
-      actions.push(['addLayer', child, { x: bounds.midX, y: bounds.midY }]);
+      actions.push([
+        'addLayer',
+        child,
+        { point: { x: bounds.midX, y: bounds.midY } },
+      ]);
     });
 
     dispatch('batch', actions);

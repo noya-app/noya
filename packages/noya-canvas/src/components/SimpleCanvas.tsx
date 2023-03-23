@@ -80,7 +80,10 @@ export const SimpleCanvas = memo(
     useCopyHandler();
 
     usePasteHandler<SupportedImageUploadType>({
-      onPasteLayers: actions.addLayer,
+      onPasteLayers: (layers) =>
+        actions.addLayer(layers, {
+          useOriginalDimensions: true,
+        }),
     });
 
     // When canvasSize changes, zoom to fit the isolated layer
