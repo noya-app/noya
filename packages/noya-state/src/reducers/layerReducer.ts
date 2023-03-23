@@ -5,7 +5,9 @@ import {
   AffineTransform,
   createBounds,
   Point,
+  rectContainsRect,
   transformRect,
+  unionRects,
 } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
@@ -504,6 +506,10 @@ export function layerReducer(
           )
         : undefined;
 
+      const newLayersBoundingRect = unionRects(
+        ...layers.map((layer) => layer.frame),
+      );
+
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[currentPageIndex];
         draft.selectedLayerIds = [];
@@ -567,8 +573,26 @@ export function layerReducer(
               });
 
               newLayer = produce(newLayer, (draftLayer) => {
-                if (useOriginalDimensions) return;
+                // TODO: We may not need this flag. But need to test this behavior on noya.design.
+                if (useOriginalDimensions) {
+                  const newLayersFitWithinParent = rectContainsRect(
+                    selectedLayer.frame,
+                    newLayersBoundingRect,
+                  );
 
+                  if (newLayersFitWithinParent) return;
+
+                  // Center all layers within parent
+                  draftLayer.frame.x +=
+                    parentBounds.midX -
+                    createBounds(newLayersBoundingRect).midX;
+                  draftLayer.frame.y +=
+                    parentBounds.midY -
+                    createBounds(newLayersBoundingRect).midY;
+                  return;
+                }
+
+                // Center layers individually at target point or within parent
                 const targetPoint = point
                   ? point
                   : { x: parentBounds.midX, y: parentBounds.midY };
