@@ -66,6 +66,7 @@ export function marqueeInteraction(actions: MarqueeActions) {
           artboards: 'childrenOnly',
           includeLockedLayers: false,
           includePartiallyContainedLayers: origin.x < current.x,
+          includeLayersOutsideArtboardBounds: true,
         });
 
         selectLayer(layerIds);
@@ -82,6 +83,7 @@ export function marqueeInteraction(actions: MarqueeActions) {
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'childrenOnly',
             includeLockedLayers: false,
+            includeLayersOutsideArtboardBounds: true,
           });
 
           const layerIds = layerId ? [layerId] : [];
@@ -96,6 +98,7 @@ export function marqueeInteraction(actions: MarqueeActions) {
             artboards: 'childrenOnly',
             includeLockedLayers: false,
             includePartiallyContainedLayers: origin.x < current.x,
+            includeLayersOutsideArtboardBounds: true,
           });
 
           reset();

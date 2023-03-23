@@ -60,6 +60,11 @@ export type LayerTraversalOptions = {
   includePartiallyContainedLayers?: boolean;
 
   /**
+   * The default is false
+   */
+  includeLayersOutsideArtboardBounds?: boolean;
+
+  /**
    * The default is `groupOnly`
    */
   groups?: 'groupOnly' | 'childrenOnly' | 'groupAndChildren';
@@ -82,6 +87,7 @@ const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
   includeHiddenLayers: false,
   includeLockedLayers: true,
   includePartiallyContainedLayers: true,
+  includeLayersOutsideArtboardBounds: false,
   groups: 'groupOnly',
   artboards: 'childrenOnly',
 };
@@ -170,7 +176,12 @@ export function getLayersInRect(
     // TODO: Handle rotated rectangle collision
     const hasIntersect = rectsIntersect(screenRect, transformedFrame);
 
-    if (!hasIntersect) return SKIP;
+    const visitChildrenEvenWhenNotIntersecting =
+      Layers.isArtboard(layer) && options.includeLayersOutsideArtboardBounds;
+
+    if (!hasIntersect && !visitChildrenEvenWhenNotIntersecting) {
+      return SKIP;
+    }
 
     const includeSelf =
       (Layers.isGroup(layer) && options.groups === 'groupAndChildren') ||
@@ -251,7 +262,10 @@ export function getLayerAtPoint(
       screenPoint,
     );
 
-    if (!frameContainsPoint) {
+    const visitChildrenEvenWhenNotIntersecting =
+      Layers.isArtboard(layer) && options.includeLayersOutsideArtboardBounds;
+
+    if (!frameContainsPoint && !visitChildrenEvenWhenNotIntersecting) {
       if (
         Layers.isSymbolMasterOrArtboard(layer) &&
         options.artboards === 'emptyOrContainedArtboardOrChildren' &&
