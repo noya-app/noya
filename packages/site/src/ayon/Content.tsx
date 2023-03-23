@@ -103,7 +103,7 @@ export const Content = memo(function Content({
       'canvas',
     );
 
-    dispatch('addLayer', layers, point);
+    dispatch('addLayer', layers, { point });
   };
 
   useEffect(() => {

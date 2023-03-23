@@ -1,12 +1,16 @@
 import { ReactEventHandlers } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { handleActionType, InteractionState } from 'noya-state';
+import {
+  AddLayerOptions,
+  handleActionType,
+  InteractionState,
+} from 'noya-state';
 import { ClipboardUtils } from 'noya-utils';
 import { NoyaClipboardData } from '../hooks/useCopyHandler';
 import { InteractionAPI } from './types';
 
 export interface ClipboardActions {
-  addLayer: (layers: Sketch.AnyLayer[]) => void;
+  addLayer: (layers: Sketch.AnyLayer[], options?: AddLayerOptions) => void;
 }
 
 type MenuItemType = 'copy' | 'paste';

@@ -13,6 +13,7 @@ export * from './reducers/blockReducer';
 export * from './reducers/canvasReducer';
 export * from './reducers/historyReducer';
 export * from './reducers/interactionReducer';
+export type { AddLayerOptions } from './reducers/layerReducer';
 export type { SelectedPoint } from './reducers/pointReducer';
 export * from './reducers/styleReducer';
 export * from './reducers/workspaceReducer';

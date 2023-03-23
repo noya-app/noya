@@ -11,7 +11,7 @@ export type NoyaClipboardData = {
 };
 
 export function useCopyHandler() {
-  const [state] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
   const selectedLayers = getSelectedLayers(state);
 
   useEffect(() => {
@@ -31,10 +31,21 @@ export function useCopyHandler() {
         'text/html',
         ClipboardUtils.toEncodedHTML(data),
       );
+
+      if (event.type === 'cut') {
+        dispatch(
+          'deleteLayer',
+          selectedLayers.map((layer) => layer.do_objectID),
+        );
+      }
     };
 
     document.addEventListener('copy', handler);
+    document.addEventListener('cut', handler);
 
-    return () => document.removeEventListener('copy', handler);
-  }, [selectedLayers]);
+    return () => {
+      document.removeEventListener('copy', handler);
+      document.removeEventListener('cut', handler);
+    };
+  }, [dispatch, selectedLayers]);
 }

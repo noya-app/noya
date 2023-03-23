@@ -46,6 +46,11 @@ import { createPage } from '../selectors/pageSelectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import type { ApplicationState } from './applicationReducer';
 
+export type AddLayerOptions = {
+  point?: Point;
+  useOriginalDimensions?: boolean;
+};
+
 export type LayerAction =
   | [
       type: 'moveLayer',
@@ -62,7 +67,11 @@ export type LayerAction =
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
   | [type: 'duplicateLayer', ids: string[]]
-  | [type: 'addLayer', data: Sketch.AnyLayer | Sketch.AnyLayer[], point?: Point]
+  | [
+      type: 'addLayer',
+      data: Sketch.AnyLayer | Sketch.AnyLayer[],
+      options?: AddLayerOptions,
+    ]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -469,7 +478,9 @@ export function layerReducer(
       });
     }
     case 'addLayer': {
-      const [, layer, point] = action;
+      const [, layer, options = {}] = action;
+      const { useOriginalDimensions = false, point } = options;
+
       const layers = Array.isArray(layer) ? layer : [layer];
       const currentPageIndex = getCurrentPageIndex(state);
       const selectedLayerIndexPath =
@@ -556,6 +567,8 @@ export function layerReducer(
               });
 
               newLayer = produce(newLayer, (draftLayer) => {
+                if (useOriginalDimensions) return;
+
                 const targetPoint = point
                   ? point
                   : { x: parentBounds.midX, y: parentBounds.midY };
