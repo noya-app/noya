@@ -2,10 +2,7 @@
 
 exports[`button default 1`] = `
 "<Frame width={100} height={40}>
-  <Button
-    isDisabled={false}
-    style={{ color: '#000', backgroundColor: '#f1f5f9', width: '100px' }}
-  >
+  <Button isDisabled={false} textColor=\\"#000\\" bgColor=\\"#f1f5f9\\" w=\\"100px\\">
     Submit
   </Button>
 </Frame>;
@@ -15,16 +12,19 @@ exports[`button default 1`] = `
 exports[`card with no border radius on image default 1`] = `
 "<Frame width={300} height={400}>
   <Box
-    style={{ display: 'flex', width: '300px', height: '400px' }}
+    display=\\"flex\\"
+    w=\\"300px\\"
+    h=\\"400px\\"
     className=\\"flex-col bg-white p-4 shadow rounded-md\\"
   >
     <Image
       src=\\"https://placekitten.com/300/300\\"
-      style={{ minHeight: 0, objectFit: 'cover' }}
+      minH={0}
+      objectFit=\\"cover\\"
       className=\\"rounded-none flex-1\\"
     />
-    <Box style={{ display: 'flex' }} className=\\"mt-4\\">
-      <Text fontSize=\\"2xl\\" style={{ flex: '1' }}>
+    <Box display=\\"flex\\" className=\\"mt-4\\">
+      <Text fontSize=\\"2xl\\" flex=\\"1\\">
         News
       </Text>
     </Box>
@@ -267,27 +267,23 @@ root.render(<App />);",
 exports[`hero default 1`] = `
 "<Frame width={400} height={400}>
   <Box
-    style={{ display: 'flex', width: '400px', height: '400px' }}
+    display=\\"flex\\"
+    w=\\"400px\\"
+    h=\\"400px\\"
     className=\\"flex-col bg-transparent p-4 gap-3 backdrop-blur items-center justify-center\\"
   >
-    <Box style={{ display: 'flex' }}>
-      <Text fontSize=\\"6xl\\" style={{ flex: '1', textAlign: 'center' }}>
+    <Box display=\\"flex\\">
+      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"center\\">
         Create, iterate, inspire.
       </Text>
     </Box>
-    <Box style={{ display: 'flex' }} className=\\"mb-4\\">
-      <Text fontSize=\\"2xl\\" style={{ flex: '1', textAlign: 'center' }}>
+    <Box display=\\"flex\\" className=\\"mb-4\\">
+      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\">
         Turn great ideas into new possibilities.
       </Text>
     </Box>
-    <Box
-      style={{ display: 'flex' }}
-      className=\\"bg-transparent flex-row items-center gap-6\\"
-    >
-      <Button
-        isDisabled={false}
-        style={{ color: '#fff', backgroundColor: '#15803d' }}
-      >
+    <Box display=\\"flex\\" className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button isDisabled={false} textColor=\\"#fff\\" bgColor=\\"#15803d\\">
         Get started
       </Button>
     </Box>
@@ -299,27 +295,23 @@ exports[`hero default 1`] = `
 exports[`hero left aligned 1`] = `
 "<Frame width={400} height={400}>
   <Box
-    style={{ display: 'flex', width: '400px', height: '400px' }}
+    display=\\"flex\\"
+    w=\\"400px\\"
+    h=\\"400px\\"
     className=\\"flex-col bg-transparent p-4 gap-3 backdrop-blur items-start justify-center\\"
   >
-    <Box style={{ display: 'flex' }}>
-      <Text fontSize=\\"6xl\\" style={{ flex: '1', textAlign: 'left' }}>
+    <Box display=\\"flex\\">
+      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"left\\">
         Create, iterate, inspire.
       </Text>
     </Box>
-    <Box style={{ display: 'flex' }} className=\\"mb-4\\">
-      <Text fontSize=\\"2xl\\" style={{ flex: '1', textAlign: 'left' }}>
+    <Box display=\\"flex\\" className=\\"mb-4\\">
+      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"left\\">
         Turn great ideas into new possibilities.
       </Text>
     </Box>
-    <Box
-      style={{ display: 'flex' }}
-      className=\\"bg-transparent flex-row items-center gap-6\\"
-    >
-      <Button
-        isDisabled={false}
-        style={{ color: '#fff', backgroundColor: '#15803d' }}
-      >
+    <Box display=\\"flex\\" className=\\"bg-transparent flex-row items-center gap-6\\">
+      <Button isDisabled={false} textColor=\\"#fff\\" bgColor=\\"#15803d\\">
         Get started
       </Button>
     </Box>
@@ -331,34 +323,26 @@ exports[`hero left aligned 1`] = `
 exports[`hero with bg 1`] = `
 "<Frame width={400} height={400}>
   <Box
-    style={{ display: 'flex', width: '400px', height: '400px' }}
+    display=\\"flex\\"
+    w=\\"400px\\"
+    h=\\"400px\\"
     className=\\"flex-col bg-blue-500 p-4 gap-3 backdrop-blur items-center justify-center\\"
   >
-    <Box style={{ display: 'flex' }}>
-      <Text
-        fontSize=\\"6xl\\"
-        style={{ flex: '1', textAlign: 'center' }}
-        className=\\"text-white\\"
-      >
+    <Box display=\\"flex\\">
+      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"center\\" className=\\"text-white\\">
         Create, iterate, inspire.
       </Text>
     </Box>
-    <Box style={{ display: 'flex' }} className=\\"mb-4\\">
-      <Text
-        fontSize=\\"2xl\\"
-        style={{ flex: '1', textAlign: 'center' }}
-        className=\\"text-white\\"
-      >
+    <Box display=\\"flex\\" className=\\"mb-4\\">
+      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\" className=\\"text-white\\">
         Turn great ideas into new possibilities.
       </Text>
     </Box>
-    <Box
-      style={{ display: 'flex' }}
-      className=\\"bg-transparent flex-row items-center gap-6\\"
-    >
+    <Box display=\\"flex\\" className=\\"bg-transparent flex-row items-center gap-6\\">
       <Button
         isDisabled={false}
-        style={{ color: '#000', backgroundColor: '#f1f5f9' }}
+        textColor=\\"#000\\"
+        bgColor=\\"#f1f5f9\\"
         className=\\"text-white\\"
       >
         Get started
@@ -373,7 +357,9 @@ exports[`icon default 1`] = `
 "<Frame width={48} height={48}>
   <Image
     src=\\"https://api.iconify.design/material-symbols/menu.svg\\"
-    style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+    objectFit=\\"contain\\"
+    w=\\"100%\\"
+    h=\\"100%\\"
   />
 </Frame>;
 "
@@ -382,10 +368,10 @@ exports[`icon default 1`] = `
 exports[`icon with color 1`] = `
 "<Frame width={48} height={48}>
   <Box
+    w=\\"100%\\"
+    h=\\"100%\\"
+    bgColor=\\"#60a5fa\\"
     style={{
-      width: '100%',
-      height: '100%',
-      backgroundColor: '#60a5fa',
       maskImage:
         'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
       WebkitMask:
@@ -400,11 +386,9 @@ exports[`link with icon 1`] = `
 "<Frame width={100} height={40}>
   <Link
     href=\\"#\\"
-    style={{
-      fontWeight: 500,
-      color: 'dodgerblue',
-      textDecorationColor: 'dodgerblue',
-    }}
+    fontWeight={500}
+    textColor=\\"dodgerblue\\"
+    textDecorationColor=\\"dodgerblue\\"
   >
     Test
   </Link>
@@ -414,7 +398,7 @@ exports[`link with icon 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text style={{ textAlign: 'center' }} className=\\"text-red-500\\">
+  <Text textAlign=\\"center\\" className=\\"text-red-500\\">
     Hello world
   </Text>
 </Frame>;
