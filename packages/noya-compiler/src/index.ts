@@ -11,6 +11,8 @@ import prettierTypeScript from 'prettier/parser-typescript';
 import React, { isValidElement } from 'react';
 import { flat } from 'tree-visit';
 import ts from 'typescript';
+import { removeEmptyStyles } from './removeEmptyStyles';
+import { removeUndefinedStyles } from './removeUndefinedStyles';
 
 function createExpressionCode(value: unknown): ts.Expression {
   if (isSimpleElement(value)) {
@@ -450,7 +452,7 @@ function Frame(
 }`;
 
   const files = {
-    'App.tsx': format(
+    'App.tsx': clean(
       [
         print(imports),
         `import * as React from "react";`,
@@ -557,6 +559,20 @@ export function format(text: string) {
     parser: 'typescript',
     plugins: [prettierTypeScript],
   });
+}
+
+export function clean(text: string) {
+  const sourceFile = ts.createSourceFile(
+    'temp.tsx',
+    text,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TSX,
+  );
+
+  const updated = removeEmptyStyles(removeUndefinedStyles(sourceFile));
+
+  return format(print(updated));
 }
 
 export * from './codesandbox';
