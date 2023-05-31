@@ -78,8 +78,8 @@ export const LinkBlock: BlockDefinition = {
               h(IconArrowForward, {
                 style: {
                   verticalAlign: 'text-bottom',
-                  width: 16,
-                  height: 16,
+                  width: '16px',
+                  height: '16px',
                   textDecorationColor: color,
                   ...(textDecorationValue && {
                     textDecorationLine: textDecorationValue,
