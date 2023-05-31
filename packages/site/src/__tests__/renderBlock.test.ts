@@ -245,6 +245,7 @@ describe('generate file', () => {
 
     expect(
       await compile({
+        name: 'My App',
         artboard,
         Blocks,
         DesignSystem: ChakraDesignSystem,
@@ -273,6 +274,7 @@ describe('generate file', () => {
 
     expect(
       await compile({
+        name: 'My App',
         artboard,
         Blocks,
         DesignSystem: MaterialDesignSystem,

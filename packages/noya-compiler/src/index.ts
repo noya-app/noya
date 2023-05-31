@@ -13,6 +13,7 @@ import { flat } from 'tree-visit';
 import ts from 'typescript';
 import { removeEmptyStyles } from './removeEmptyStyles';
 import { removeUndefinedStyles } from './removeUndefinedStyles';
+import { escapeHtml, sanitizePackageName } from './validate';
 
 function createExpressionCode(value: unknown): ts.Expression {
   if (isSimpleElement(value)) {
@@ -135,6 +136,7 @@ function isSafeForJsxText(text: string) {
 }
 
 export interface CompilerConfiguration {
+  name: string;
   artboard: Sketch.Artboard;
   Blocks: Record<string, BlockDefinition>;
   DesignSystem: string | DesignSystemDefinition;
@@ -492,7 +494,7 @@ function Frame(
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>App</title>
+    <title>${escapeHtml(configuration.name)}</title>
   </head>
   <body>
     <div id="root"></div>
@@ -516,10 +518,10 @@ const root = createRoot(rootElement!);
 root.render(<App />);`,
     'package.json': JSON.stringify(
       {
-        name: 'App',
+        name: sanitizePackageName(configuration.name),
         version: '0.0.1',
         scripts: {
-          start: 'parcel index.html --open',
+          dev: 'parcel index.html --open',
           build: 'parcel build index.html',
         },
         dependencies: allDependencies,
@@ -535,6 +537,21 @@ root.render(<App />);`,
       null,
       2,
     ),
+    'README.md': `# ${configuration.name}
+
+## Local Development
+
+\`\`\`
+npm install
+npm run dev
+\`\`\`
+
+## Production Build
+
+\`\`\`
+npm run build
+\`\`\`
+`,
   };
 
   return files;

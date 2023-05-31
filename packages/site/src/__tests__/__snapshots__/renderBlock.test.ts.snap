@@ -86,6 +86,21 @@ export function App() {
   return <ChakraProvider />;
 }
 ",
+  "README.md": "# My App
+
+## Local Development
+
+\`\`\`
+npm install
+npm run dev
+\`\`\`
+
+## Production Build
+
+\`\`\`
+npm run build
+\`\`\`
+",
   "index.css": "@tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,7 +116,7 @@ export function App() {
 <html lang=\\"en\\">
   <head>
     <meta charset=\\"utf-8\\" />
-    <title>App</title>
+    <title>My App</title>
   </head>
   <body>
     <div id=\\"root\\"></div>
@@ -120,10 +135,10 @@ const root = createRoot(rootElement!);
 
 root.render(<App />);",
   "package.json": "{
-  \\"name\\": \\"App\\",
+  \\"name\\": \\"my-app\\",
   \\"version\\": \\"0.0.1\\",
   \\"scripts\\": {
-    \\"start\\": \\"parcel index.html --open\\",
+    \\"dev\\": \\"parcel index.html --open\\",
     \\"build\\": \\"parcel build index.html\\"
   },
   \\"dependencies\\": {
@@ -212,6 +227,21 @@ export function App() {
   );
 }
 ",
+  "README.md": "# My App
+
+## Local Development
+
+\`\`\`
+npm install
+npm run dev
+\`\`\`
+
+## Production Build
+
+\`\`\`
+npm run build
+\`\`\`
+",
   "index.css": "@tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -227,7 +257,7 @@ export function App() {
 <html lang=\\"en\\">
   <head>
     <meta charset=\\"utf-8\\" />
-    <title>App</title>
+    <title>My App</title>
   </head>
   <body>
     <div id=\\"root\\"></div>
@@ -246,10 +276,10 @@ const root = createRoot(rootElement!);
 
 root.render(<App />);",
   "package.json": "{
-  \\"name\\": \\"App\\",
+  \\"name\\": \\"my-app\\",
   \\"version\\": \\"0.0.1\\",
   \\"scripts\\": {
-    \\"start\\": \\"parcel index.html --open\\",
+    \\"dev\\": \\"parcel index.html --open\\",
     \\"build\\": \\"parcel build index.html\\"
   },
   \\"dependencies\\": {
