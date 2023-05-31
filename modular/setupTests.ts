@@ -48,3 +48,11 @@ nock('http://localhost')
     return fs.createReadStream(path.join(pathToPublic, match[1]));
   })
   .persist();
+
+// Ignore JSDOM error
+// https://stackoverflow.com/a/75757070
+const originalConsoleError = console.error;
+console.error = function (msg) {
+  if (msg.startsWith('Error: Could not parse CSS stylesheet')) return;
+  originalConsoleError(msg);
+};

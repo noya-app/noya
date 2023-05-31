@@ -358,38 +358,42 @@ export async function compile(configuration: CompilerConfiguration) {
 
   const boxSource = findSourceByName(DesignSystem, 'Box');
 
-  const imports = (DesignSystem.imports ?? []).flatMap(({ source }) => {
-    const names = unique([
-      ...flat(fakeRoot, { getChildren }).flatMap((element) =>
-        typeof element !== 'string' && element.source === source
-          ? [element.name]
-          : [],
-      ),
-      ...(boxSource?.source === source ? [boxSource.name] : []),
-    ]);
+  const imports = (DesignSystem.imports ?? []).flatMap(
+    ({ source, alwaysInclude }) => {
+      const names = unique([
+        ...flat(fakeRoot, { getChildren }).flatMap((element) =>
+          typeof element !== 'string' && element.source === source
+            ? [element.name]
+            : [],
+        ),
+        ...(boxSource?.source === source ? [boxSource.name] : []),
+      ]);
 
-    if (names.length === 0) return [];
+      if (names.length === 0 && !alwaysInclude) return [];
 
-    return [
-      ts.factory.createImportDeclaration(
-        undefined,
-        ts.factory.createImportClause(
-          false,
+      return [
+        ts.factory.createImportDeclaration(
           undefined,
-          ts.factory.createNamedImports(
-            names.map((name) =>
-              ts.factory.createImportSpecifier(
+          names.length === 0
+            ? undefined
+            : ts.factory.createImportClause(
                 false,
                 undefined,
-                ts.factory.createIdentifier(name),
+                ts.factory.createNamedImports(
+                  names.map((name) =>
+                    ts.factory.createImportSpecifier(
+                      false,
+                      undefined,
+                      ts.factory.createIdentifier(name),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
+          ts.factory.createStringLiteral(source),
         ),
-        ts.factory.createStringLiteral(source),
-      ),
-    ];
-  });
+      ];
+    },
+  );
 
   const func = ts.factory.createFunctionDeclaration(
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -475,7 +479,15 @@ function Frame(
 };`,
     'index.css': `@tailwind base;
 @tailwind components;
-@tailwind utilities;`,
+@tailwind utilities;
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+`,
     'index.html': `<!DOCTYPE html>
 <html lang="en">
   <head>

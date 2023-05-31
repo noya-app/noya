@@ -88,7 +88,15 @@ export function App() {
 ",
   "index.css": "@tailwind base;
 @tailwind components;
-@tailwind utilities;",
+@tailwind utilities;
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+",
   "index.html": "<!DOCTYPE html>
 <html lang=\\"en\\">
   <head>
@@ -157,6 +165,7 @@ Object {
   }
 }",
   "App.tsx": "import { Box, FormControlLabel, Checkbox } from '@mui/material';
+import '@fontsource/roboto/latin.css';
 import * as React from 'react';
 /**
  * To make your layout responsive, delete this Frame component and replace any
@@ -205,7 +214,15 @@ export function App() {
 ",
   "index.css": "@tailwind base;
 @tailwind components;
-@tailwind utilities;",
+@tailwind utilities;
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+",
   "index.html": "<!DOCTYPE html>
 <html lang=\\"en\\">
   <head>
@@ -241,7 +258,8 @@ root.render(<App />);",
     \\"@mui/material\\": \\"^5\\",
     \\"@emotion/react\\": \\"^11\\",
     \\"@emotion/styled\\": \\"^11\\",
-    \\"@mui/icons-material\\": \\"^5\\"
+    \\"@mui/icons-material\\": \\"^5\\",
+    \\"@fontsource/roboto\\": \\"^5\\"
   },
   \\"devDependencies\\": {
     \\"autoprefixer\\": \\"10.4.14\\",
