@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import {
   getBlockClassName,
+  parametersToTailwindStyle,
   resolveTailwindClass,
 } from '../ayon/blocks/tailwind';
 
@@ -82,6 +83,41 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('px-4')).toEqual({
       paddingLeft: '1rem',
       paddingRight: '1rem',
+    });
+  });
+});
+
+describe('parameters', () => {
+  it('basic', () => {
+    expect(
+      parametersToTailwindStyle({
+        'text-red-500': true,
+      }),
+    ).toEqual({
+      color: '#ef4444',
+    });
+  });
+
+  it('last in group wins', () => {
+    expect(
+      parametersToTailwindStyle({
+        'text-red-500': true,
+        'text-blue-500': true,
+      }),
+    ).toEqual({
+      color: '#3b82f6',
+    });
+  });
+
+  it('merge', () => {
+    expect(
+      parametersToTailwindStyle({
+        'items-center': true,
+        'justify-center': true,
+      }),
+    ).toEqual({
+      alignItems: 'center',
+      justifyContent: 'center',
     });
   });
 });

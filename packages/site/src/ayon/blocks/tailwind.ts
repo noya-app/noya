@@ -1,5 +1,6 @@
 import { groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
+import { ParsedBlockItemParameters } from '../parse';
 import { ThemeValue, config } from './tailwind.config';
 import { resolveColor } from './tailwindColors';
 
@@ -271,6 +272,21 @@ export function resolveTailwindClass(className: string): CSSProperties {
   }
 
   return assertNever(classGroup);
+}
+
+export function parametersToTailwindStyle(
+  parameters: ParsedBlockItemParameters,
+): CSSProperties {
+  const hashtags = Object.keys(parameters);
+
+  return hashtags.reduce((result, className) => {
+    const style = resolveTailwindClass(className);
+
+    return {
+      ...result,
+      ...style,
+    };
+  }, {});
 }
 
 // assertNever
