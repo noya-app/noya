@@ -3,7 +3,12 @@ import { getTextAlign, parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
 import { textSymbolId } from './symbolIds';
 import { textSymbol } from './symbols';
-import { getBlockClassName, tailwindTextClasses } from './tailwind';
+import {
+  getBlockClassName,
+  getLastClassInGroup,
+  tailwindTextClasses,
+} from './tailwind';
+import { resolveColor } from './tailwindColors';
 
 export const TextBlock: BlockDefinition = {
   symbol: textSymbol,
@@ -20,7 +25,10 @@ export const TextBlock: BlockDefinition = {
   render: ({ h, Components: { [textSymbolId]: Text } }, props) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
 
-    const hashtags = Object.keys(parameters);
+    let hashtags = Object.keys(parameters);
+    const colorKey = getLastClassInGroup('textColor', hashtags);
+    const color = colorKey ? resolveColor(colorKey) : undefined;
+    hashtags = hashtags.filter((hashtag) => hashtag !== colorKey);
 
     return h(
       Text,
@@ -28,6 +36,7 @@ export const TextBlock: BlockDefinition = {
         ...applyCommonProps(props),
         style: {
           textAlign: getTextAlign(hashtags),
+          color,
         },
         className: getBlockClassName(hashtags),
       },

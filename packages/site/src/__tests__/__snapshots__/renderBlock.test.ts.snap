@@ -377,12 +377,12 @@ exports[`hero with bg 1`] = `
     className=\\"flex-col bg-blue-500 p-4 gap-3 backdrop-blur items-center justify-center\\"
   >
     <Box display=\\"flex\\">
-      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"center\\" className=\\"text-white\\">
+      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
         Create, iterate, inspire.
       </Text>
     </Box>
     <Box display=\\"flex\\" className=\\"mb-4\\">
-      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\" className=\\"text-white\\">
+      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
         Turn great ideas into new possibilities.
       </Text>
     </Box>
@@ -445,7 +445,7 @@ exports[`link with icon 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text textAlign=\\"center\\" className=\\"text-red-500\\">
+  <Text textAlign=\\"center\\" textColor=\\"#ef4444\\">
     Hello world
   </Text>
 </Frame>;

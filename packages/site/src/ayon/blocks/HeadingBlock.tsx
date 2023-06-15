@@ -16,8 +16,10 @@ import {
 import {
   classGroups,
   getBlockClassName,
+  getLastClassInGroup,
   tailwindTextClasses,
 } from './tailwind';
+import { resolveColor } from './tailwindColors';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
@@ -44,7 +46,10 @@ const createHeadingBlock = (
   ) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
 
-    const hashtags = Object.keys(parameters);
+    let hashtags = Object.keys(parameters);
+    const colorKey = getLastClassInGroup('textColor', hashtags);
+    const color = colorKey ? resolveColor(colorKey) : undefined;
+    hashtags = hashtags.filter((hashtag) => hashtag !== colorKey);
 
     const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {
       return (
@@ -69,6 +74,7 @@ const createHeadingBlock = (
           style: {
             flex: '1',
             textAlign: getTextAlign(hashtags),
+            color,
           },
           className: getBlockClassName(otherClasses),
           variant,
