@@ -340,7 +340,7 @@ export async function compile(configuration: CompilerConfiguration) {
     ];
   };
 
-  const ProviderComponent = DesignSystem.components[component.id.provider];
+  const ProviderComponent = DesignSystem.components[component.id.Provider];
 
   const providerElement = createSimpleElement(
     DesignSystem.createElement(ProviderComponent),

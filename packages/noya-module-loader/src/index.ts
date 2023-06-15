@@ -2,12 +2,18 @@ import fetch from 'cross-fetch';
 
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 
+const requireModule = () => {};
+
 function evaluateModule(content: string) {
   const exports = {};
   const module = { exports };
 
   // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-  new Function('exports', 'module', `{\n${content};\n}`)(exports, module);
+  new Function('exports', 'module', 'require', `{\n${content};\n}`)(
+    exports,
+    module,
+    requireModule,
+  );
 
   return module.exports;
 }
@@ -20,7 +26,7 @@ export async function loadModule(url: string) {
 
 export async function loadDesignSystem(name: string) {
   const exports = await loadModule(
-    `https://www.unpkg.com/@noya-design-system/${name}`,
+    `https://www.unpkg.com/@noya-design-system/${name}/dist/standalone.js`,
   );
 
   if (!(exports as any).DesignSystem) {

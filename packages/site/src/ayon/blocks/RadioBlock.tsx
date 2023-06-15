@@ -28,7 +28,7 @@ export const RadioBlock: BlockDefinition = {
       ? 0.8
       : 0,
   render: (
-    { h, Components: { [radioSymbolId]: Radio, [component.id.box]: Box } },
+    { h, Components: { [radioSymbolId]: Radio, [component.id.Box]: Box } },
     props,
   ) => {
     const {

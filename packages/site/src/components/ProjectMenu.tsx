@@ -11,6 +11,12 @@ import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import React from 'react';
 
+const designSystems = {
+  mui: 'Material Design',
+  antd: 'Ant Design',
+  chakra: 'Chakra UI',
+};
+
 export function ProjectMenu({
   name,
   designSystem,
@@ -88,16 +94,16 @@ export function ProjectMenu({
         <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row>
           <DropdownMenu
-            items={[
-              { value: 'chakra', title: 'Chakra UI' },
-              { value: 'mui', title: 'Material Design' },
-            ]}
+            items={Object.entries(designSystems).map(([key, value]) => ({
+              value: key as keyof typeof designSystems,
+              title: value,
+            }))}
             onSelect={(value) => {
               onChangeDesignSystem(value);
             }}
           >
             <Button flex="1">
-              {designSystem === 'mui' ? 'Material Design' : 'Chakra UI'}
+              {designSystems[designSystem as keyof typeof designSystems]}
               <Spacer.Horizontal />
               <ChevronDownIcon />
             </Button>

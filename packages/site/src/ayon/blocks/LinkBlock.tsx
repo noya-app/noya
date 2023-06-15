@@ -34,7 +34,7 @@ export const LinkBlock: BlockDefinition = {
       h,
       Components: {
         [linkSymbolId]: Link,
-        [component.id.iconArrowForward]: IconArrowForward,
+        [component.id.IconArrowForward]: IconArrowForward,
       },
     },
     props,

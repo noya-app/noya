@@ -1,4 +1,4 @@
-import { component } from '@noya-design-system/protocol';
+import { TableProps, component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
@@ -28,21 +28,7 @@ export const TableBlock: BlockDefinition = {
   hashtags: globalHashtags,
   placeholderText,
   infer: () => 0,
-  render: (
-    {
-      h,
-      Components: {
-        [component.id.tableContainer]: TableContainer,
-        [component.id.table]: Table,
-        [component.id.tableHead]: TableHead,
-        [component.id.tableBody]: TableBody,
-        [component.id.tableRow]: TableRow,
-        [component.id.tableHeadCell]: TableHeadCell,
-        [component.id.tableCell]: TableCell,
-      },
-    },
-    props,
-  ) => {
+  render: ({ h, Components: { [component.id.Table]: Table } }, props) => {
     const {
       rows,
       parameters: { dark, accent },
@@ -55,47 +41,33 @@ export const TableBlock: BlockDefinition = {
       accent,
     });
 
-    return h(
-      TableContainer,
-      {
-        ...applyCommonProps(props),
-        style: {
-          ...(props.frame && {
-            width: `${props.frame.width}px`,
-            height: `${props.frame.height}px`,
-          }),
-          overflowY: 'auto',
-          backgroundColor,
-          backdropFilter: 'blur(10px)',
-        },
-      },
-      h(Table, {}, [
-        rows.length > 0 &&
-          h(TableHead, {}, [
-            h(
-              TableRow,
-              {},
-              rows[0].items.map((cell, i) =>
-                h(TableHeadCell, { key: i, style: { color } }, [cell.content]),
-              ),
-            ),
-          ]),
-        h(
-          TableBody,
-          {},
-          rows.slice(1).map((row, i) =>
-            h(
-              TableRow,
-              { key: i },
-              row.items.map((cell, j) =>
-                h(TableCell, { key: `${i}-${j}`, style: { color } }, [
-                  cell.content,
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ]),
+    const columns: TableProps<Record<string, any>>['columns'] =
+      rows[0].items.map((cell, index) => ({
+        title: cell.content,
+        dataKey: index.toString(),
+      }));
+
+    const data = rows.slice(1).map((row) =>
+      row.items.reduce<Record<string, any>>((result, cell, index) => {
+        result[index.toString()] = cell.content;
+        return result;
+      }, {}),
     );
+
+    return h(Table, {
+      ...applyCommonProps(props),
+      data,
+      columns,
+      style: {
+        ...(props.frame && {
+          width: `${props.frame.width}px`,
+          height: `${props.frame.height}px`,
+        }),
+        overflowY: 'auto',
+        backgroundColor,
+        backdropFilter: 'blur(10px)',
+        color,
+      },
+    });
   },
 };

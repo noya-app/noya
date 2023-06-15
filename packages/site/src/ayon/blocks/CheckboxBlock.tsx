@@ -30,7 +30,7 @@ export const CheckboxBlock: BlockDefinition = {
   render: (
     {
       h,
-      Components: { [checkboxSymbolId]: Checkbox, [component.id.box]: Box },
+      Components: { [checkboxSymbolId]: Checkbox, [component.id.Box]: Box },
     },
     props,
   ) => {

@@ -47,7 +47,7 @@ function renderDynamicContent(
 ) {
   const {
     createElement: h,
-    components: { [component.id.provider]: Provider },
+    components: { [component.id.Provider]: Provider },
   } = system;
   const env = {
     h: system.createElement,
@@ -123,7 +123,7 @@ function renderDynamicContent(
             ),
             symbolId:
               typeof drawing.shapeType === 'string'
-                ? component.id.button
+                ? component.id.Button
                 : drawing.shapeType.symbolId,
             getBlock,
           }),
