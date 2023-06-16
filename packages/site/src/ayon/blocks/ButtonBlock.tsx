@@ -1,6 +1,5 @@
 import { ButtonProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { findLast } from 'noya-utils';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
 import { buttonColors } from './blockTheme';
@@ -10,10 +9,10 @@ import { buttonSymbol } from './symbols';
 import { parametersToTailwindStyle } from './tailwind';
 
 const placeholderText = 'Submit';
+const colorSchemeKeys = ['dark', 'light'];
+const sizeKeys = ['small', 'medium', 'large'];
 
-const sizeKeys = new Set(['small', 'medium', 'large']);
-
-const globalHashtags = ['dark', 'light', 'disabled', ...Array.from(sizeKeys)];
+const globalHashtags = [...sizeKeys, ...colorSchemeKeys, 'disabled'];
 
 const parser = 'regular';
 
@@ -35,21 +34,20 @@ export const ButtonBlock: BlockDefinition = {
   render: ({ h, Components: { [buttonSymbolId]: Button } }, props) => {
     const { content, parameters } = parseBlock(props.blockText, parser, {
       placeholder: placeholderText,
+      mutuallyExclusiveParameters: {
+        colorScheme: colorSchemeKeys,
+        size: sizeKeys,
+      },
     });
-
-    const hashtags = Object.keys(parameters);
-    const size = findLast(hashtags, (key) => sizeKeys.has(key)) as
-      | ButtonProps['size']
-      | undefined;
 
     const style = parametersToTailwindStyle(parameters);
 
-    if (parameters.dark) {
+    if (parameters.colorScheme === 'dark') {
       Object.assign(
         style,
         parameters.disabled ? buttonColors.darkDisabled : buttonColors.dark,
       );
-    } else if (parameters.light) {
+    } else if (parameters.colorScheme === 'light') {
       Object.assign(
         style,
         parameters.disabled ? buttonColors.lightDisabled : buttonColors.light,
@@ -71,7 +69,9 @@ export const ButtonBlock: BlockDefinition = {
       {
         ...applyCommonProps(props),
         ...(parameters.disabled && { disabled: true }),
-        size,
+        ...(parameters.size && {
+          size: parameters.size as ButtonProps['size'],
+        }),
         style: {
           ...style,
           ...(props.frame && {

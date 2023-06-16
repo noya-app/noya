@@ -183,6 +183,25 @@ test('regular block with url', () => {
   });
 });
 
+const mutuallyExclusiveText = `Hello #red #small #large #blue`;
+
+test('mutually exclusive hashtags', () => {
+  expect(
+    parseBlock(mutuallyExclusiveText, 'regular', {
+      mutuallyExclusiveParameters: {
+        color: ['red', 'blue'],
+        size: ['small', 'large'],
+      },
+    }),
+  ).toEqual<ParsedBlockItem>({
+    content: 'Hello',
+    parameters: {
+      color: 'blue',
+      size: 'large',
+    },
+  });
+});
+
 const tableText = `
 #globalParameter2 Name,Age,Twitter
 John,28,@john

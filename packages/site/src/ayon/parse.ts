@@ -1,3 +1,5 @@
+import { findLast } from 'noya-utils';
+
 export type ParsedBlockParameter = string | boolean;
 
 export type ParsedBlockItemParameters = Record<string, ParsedBlockParameter>;
@@ -159,14 +161,38 @@ export function mergeBlockItems(items: ParsedBlockItem[]) {
   return { content, parameters };
 }
 
+function pickLastMutuallyExclusiveParameter(
+  parameters: ParsedBlockItemParameters,
+  mutuallyExclusiveParameters?: Record<string, string[]>,
+) {
+  if (!mutuallyExclusiveParameters) return;
+
+  Object.entries(mutuallyExclusiveParameters).forEach(([key, values]) => {
+    const lastParameter = findLast(
+      values,
+      (parameter) => parameter in parameters,
+    );
+
+    // If there's a mutually exclusive parameter, remove all others
+    if (lastParameter) {
+      for (const item of values) {
+        delete parameters[item];
+      }
+
+      parameters[key] = lastParameter;
+    }
+  });
+}
+
+type ParseBlockOptions = {
+  placeholder?: string;
+  mutuallyExclusiveParameters?: Record<string, string[]>;
+};
+
 export function parseBlock<K extends keyof ParsedBlockTypeMap>(
   text: string = '',
   type: K,
-  {
-    placeholder,
-  }: {
-    placeholder?: string;
-  } = {},
+  { placeholder, mutuallyExclusiveParameters }: ParseBlockOptions = {},
 ): ParsedBlockTypeMap[K] {
   switch (type) {
     case 'regular': {
@@ -177,6 +203,11 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
 
         block = mergeBlockItems([block, fallback]);
       }
+
+      pickLastMutuallyExclusiveParameter(
+        block.parameters,
+        mutuallyExclusiveParameters,
+      );
 
       return block as ParsedBlockTypeMap[K];
     }
@@ -198,6 +229,18 @@ export function parseBlock<K extends keyof ParsedBlockTypeMap>(
           block.parameters,
         ]);
       }
+
+      pickLastMutuallyExclusiveParameter(
+        block.parameters,
+        mutuallyExclusiveParameters,
+      );
+
+      block.items.forEach((item) => {
+        pickLastMutuallyExclusiveParameter(
+          item.parameters,
+          mutuallyExclusiveParameters,
+        );
+      });
 
       return block as ParsedBlockTypeMap[K];
     }
