@@ -1,3 +1,4 @@
+import { BoxProps, TextProps } from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
@@ -15,11 +16,9 @@ import {
 } from './symbols';
 import {
   classGroups,
-  getBlockClassName,
-  getLastClassInGroup,
+  parametersToTailwindStyle,
   tailwindTextClasses,
 } from './tailwind';
-import { resolveColor } from './tailwindColors';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,
@@ -45,11 +44,7 @@ const createHeadingBlock = (
     props,
   ) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
-
-    let hashtags = Object.keys(parameters);
-    const colorKey = getLastClassInGroup('textColor', hashtags);
-    const color = colorKey ? resolveColor(colorKey) : undefined;
-    hashtags = hashtags.filter((hashtag) => hashtag !== colorKey);
+    const hashtags = Object.keys(parameters);
 
     const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {
       return (
@@ -59,25 +54,28 @@ const createHeadingBlock = (
       );
     });
 
-    return h(
+    const boxStyle = parametersToTailwindStyle(flexClasses);
+
+    const textStyle = parametersToTailwindStyle(otherClasses);
+
+    return h<BoxProps>(
       Box,
       {
         ...applyCommonProps(props),
         style: {
           display: 'flex',
+          ...boxStyle,
         },
-        className: getBlockClassName(flexClasses),
       },
-      h(
+      h<TextProps>(
         Text,
         {
+          variant,
           style: {
             flex: '1',
             textAlign: getTextAlign(hashtags),
-            color,
+            ...textStyle,
           },
-          className: getBlockClassName(otherClasses),
-          variant,
         },
         content,
       ),

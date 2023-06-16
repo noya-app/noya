@@ -1,6 +1,6 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 * {
   box-sizing: border-box;
@@ -43,7 +43,9 @@ html {
   min-height: 100vh;
 }
 
-body, #root, #__next {
+body,
+#root,
+#__next {
   flex: 1;
   width: 100%;
   min-height: 100vh;

@@ -70,6 +70,7 @@ export const classGroups = {
   alignSelf: /^self/,
   borderRadius: /^rounded/,
   textDecoration: /^(underline|overline|no-underline|line-through)/,
+  boxShadow: /^shadow/,
   // Must be last!
   none: /.*/,
 };
@@ -269,6 +270,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         default:
           return {};
       }
+    case 'boxShadow': {
+      const value = getValue(className);
+      return {
+        boxShadow: (config.theme as any).boxShadow[value || 'DEFAULT'],
+      };
+    }
     case 'none':
       return {};
   }
@@ -277,9 +284,11 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
 });
 
 export function parametersToTailwindStyle(
-  parameters: ParsedBlockItemParameters,
+  parameters: ParsedBlockItemParameters | string[],
 ): CSSProperties {
-  const hashtags = Object.keys(parameters);
+  const hashtags = Array.isArray(parameters)
+    ? parameters
+    : Object.keys(parameters);
 
   return hashtags.reduce((result, className) => {
     const style = resolveTailwindClass(className);

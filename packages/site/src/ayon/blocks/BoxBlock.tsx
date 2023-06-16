@@ -1,4 +1,5 @@
 import { BlockDefinition } from 'noya-state';
+import { findLast } from 'noya-utils';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
 import { accentColor } from './blockTheme';
@@ -6,8 +7,8 @@ import { getBlockThemeColors } from './colors';
 import { boxSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
 import {
-  getBlockClassName,
   getLastClassInGroup,
+  parametersToTailwindStyle,
   tailwindBlockClasses,
 } from './tailwind';
 
@@ -36,50 +37,13 @@ export const BoxBlock: BlockDefinition = {
           .find((value) => CSS.supports('color', `${value}`)) ??
         accentColor[50];
 
-    const hashtagsReversed = hashtags.slice().reverse();
-    const flexKey = hashtagsReversed.find((value) =>
-      /^(flex-row|flex-col)$/.test(value),
-    );
-    const alignmentKey = hashtagsReversed.find((value) =>
-      /^(left|center|right)$/.test(value),
-    );
+    const { justify, items } = simpleFlex(hashtags);
 
-    let justify: string | undefined;
-    let items: string | undefined;
-
-    if (flexKey === 'flex-row') {
-      switch (alignmentKey) {
-        case 'left':
-          justify = 'justify-start';
-          break;
-        case 'center':
-          justify = 'justify-center';
-          break;
-        case 'right':
-          justify = 'justify-end';
-          break;
-      }
-
-      if (hashtags.includes('center')) {
-        items = 'items-center';
-      }
-    } else if (flexKey === 'flex-col') {
-      switch (alignmentKey) {
-        case 'left':
-          items = 'items-start';
-          break;
-        case 'center':
-          items = 'items-center';
-          break;
-        case 'right':
-          items = 'items-end';
-          break;
-      }
-
-      if (hashtags.includes('center')) {
-        justify = 'justify-center';
-      }
-    }
+    const style = parametersToTailwindStyle({
+      ...parameters,
+      ...(justify && { [justify]: true }),
+      ...(items && { [items]: true }),
+    });
 
     return h(
       Box,
@@ -87,19 +51,64 @@ export const BoxBlock: BlockDefinition = {
         ...applyCommonProps(props),
         style: {
           display: 'flex',
+          ...style,
           backgroundColor,
           ...(props.frame && {
             width: `${props.frame.width}px`,
             height: `${props.frame.height}px`,
           }),
         },
-        className: getBlockClassName([
-          ...hashtags,
-          ...(items ? [items] : []),
-          ...(justify ? [justify] : []),
-        ]),
       },
       props.children,
     );
   },
 };
+
+// Simplify flexbox alignment by handling row vs. column automatically
+function simpleFlex(hashtags: string[]) {
+  const flexKey = findLast(hashtags, (value) =>
+    /^(flex-row|flex-col)$/.test(value),
+  );
+  const alignmentKey = findLast(hashtags, (value) =>
+    /^(left|center|right)$/.test(value),
+  );
+
+  let justify: string | undefined;
+  let items: string | undefined;
+
+  if (flexKey === 'flex-row') {
+    switch (alignmentKey) {
+      case 'left':
+        justify = 'justify-start';
+        break;
+      case 'center':
+        justify = 'justify-center';
+        break;
+      case 'right':
+        justify = 'justify-end';
+        break;
+    }
+
+    if (hashtags.includes('center')) {
+      items = 'items-center';
+    }
+  } else if (flexKey === 'flex-col') {
+    switch (alignmentKey) {
+      case 'left':
+        items = 'items-start';
+        break;
+      case 'center':
+        items = 'items-center';
+        break;
+      case 'right':
+        items = 'items-end';
+        break;
+    }
+
+    if (hashtags.includes('center')) {
+      justify = 'justify-center';
+    }
+  }
+
+  return { justify, items };
+}

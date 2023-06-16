@@ -27,32 +27,20 @@ export const neutralColor = {
 };
 
 export const buttonColors = {
-  default: {
+  light: {
     backgroundColor: '#f1f5f9',
     color: '#000',
   },
-  light: {
-    backgroundColor: '#f1f5f9',
+  lightDisabled: {
+    backgroundColor: '#e2e8f0',
     color: '#000',
   },
   dark: {
     backgroundColor: '#475569',
     color: '#fff',
   },
-  primary: {
-    backgroundColor: '#15803d',
-    color: '#fff',
-  },
-  secondary: {
-    backgroundColor: '#94a3b8',
-    color: '#fff',
-  },
-  warning: {
-    backgroundColor: '#fde047',
-    color: '#000',
-  },
-  danger: {
-    backgroundColor: '#dc2626',
+  darkDisabled: {
+    backgroundColor: '#8799b2',
     color: '#fff',
   },
 };

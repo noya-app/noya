@@ -1,39 +1,21 @@
+import { ButtonProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
+import { findLast } from 'noya-utils';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
 import { buttonSymbolId } from './symbolIds';
 import { buttonSymbol } from './symbols';
-import { getBlockClassName } from './tailwind';
+import { parametersToTailwindStyle } from './tailwind';
 
 const placeholderText = 'Submit';
 
-const globalHashtags = [
-  'light',
-  'dark',
-  'primary',
-  'secondary',
-  'warning',
-  'danger',
-  'disabled',
-  'xs',
-  'md',
-  'lg',
-];
+const globalHashtags = ['dark', 'disabled', 'small', 'medium', 'large'];
 
 const parser = 'regular';
 
-type ButtonColorKey = keyof typeof buttonColors;
-
-const colorsKeys = new Set<ButtonColorKey>([
-  'light',
-  'dark',
-  'primary',
-  'secondary',
-  'warning',
-  'danger',
-]);
+const sizeKeys = new Set(['small', 'medium', 'large']);
 
 export const ButtonBlock: BlockDefinition = {
   symbol: buttonSymbol,
@@ -51,49 +33,51 @@ export const ButtonBlock: BlockDefinition = {
       ? 0.8
       : 0,
   render: ({ h, Components: { [buttonSymbolId]: Button } }, props) => {
-    const {
-      content,
-      parameters: { xs, lg, md, disabled, ...parameters },
-    } = parseBlock(props.blockText, parser, { placeholder: placeholderText });
+    const { content, parameters } = parseBlock(props.blockText, parser, {
+      placeholder: placeholderText,
+    });
 
     const hashtags = Object.keys(parameters);
-
-    const colorKey = hashtags
-      .slice()
-      .reverse()
-      .find((key) => colorsKeys.has(key as ButtonColorKey)) as
-      | ButtonColorKey
+    const size = findLast(hashtags, (key) => sizeKeys.has(key)) as
+      | ButtonProps['size']
       | undefined;
 
-    const buttonColorKey = colorKey ?? 'default';
+    const style = parametersToTailwindStyle(parameters);
 
-    const colors = buttonColors[buttonColorKey];
-
-    let size = xs ? 'xs' : lg ? 'lg' : md ? 'md' : undefined;
-
-    if (props.frame && size === undefined) {
-      if (props.frame.height < 30) {
-        size = 'xs' as const;
-      } else if (props.frame.height > 50) {
-        size = 'lg' as const;
-      } else {
-        size = 'md' as const;
-      }
+    if (parameters.dark) {
+      Object.assign(
+        style,
+        parameters.disabled ? buttonColors.darkDisabled : buttonColors.dark,
+      );
+    } else if (parameters.light) {
+      Object.assign(
+        style,
+        parameters.disabled ? buttonColors.lightDisabled : buttonColors.light,
+      );
     }
 
-    return h(
+    // if (props.frame && size === undefined) {
+    //   if (props.frame.height < 30) {
+    //     size = 'xs' as const;
+    //   } else if (props.frame.height > 50) {
+    //     size = 'lg' as const;
+    //   } else {
+    //     size = 'md' as const;
+    //   }
+    // }
+
+    return h<ButtonProps>(
       Button,
       {
         ...applyCommonProps(props),
-        disabled: !!disabled,
+        ...(parameters.disabled && { disabled: true }),
+        size,
         style: {
-          color: colors.color,
-          backgroundColor: colors.backgroundColor,
+          ...style,
           ...(props.frame && {
             width: `${props.frame.width}px`,
           }),
         },
-        className: getBlockClassName(hashtags),
       },
       content,
     );

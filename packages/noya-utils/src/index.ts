@@ -12,6 +12,7 @@ export * from './clipboard';
 export * from './cartesianProduct';
 export * from './windowsOf';
 export * from './sortBy';
+export * from './findLast';
 export * from './chunkBy';
 export * from './groupBy';
 export * from './getIncrementedName';
