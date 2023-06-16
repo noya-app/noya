@@ -11,11 +11,11 @@ import { parametersToTailwindStyle } from './tailwind';
 
 const placeholderText = 'Submit';
 
-const globalHashtags = ['dark', 'disabled', 'small', 'medium', 'large'];
+const sizeKeys = new Set(['small', 'medium', 'large']);
+
+const globalHashtags = ['dark', 'light', 'disabled', ...Array.from(sizeKeys)];
 
 const parser = 'regular';
-
-const sizeKeys = new Set(['small', 'medium', 'large']);
 
 export const ButtonBlock: BlockDefinition = {
   symbol: buttonSymbol,
