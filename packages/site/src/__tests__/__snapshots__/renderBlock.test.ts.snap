@@ -22,7 +22,8 @@ exports[`card with no border radius on image default 1`] = `
       src=\\"https://placekitten.com/300/300\\"
       minH={0}
       objectFit=\\"cover\\"
-      className=\\"rounded-none flex-1\\"
+      rounded=\\"0px\\"
+      flex=\\"1\\"
     />
     <Box display=\\"flex\\" mt=\\"1rem\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\">

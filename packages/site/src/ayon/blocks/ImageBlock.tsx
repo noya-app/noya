@@ -1,10 +1,15 @@
+import { ImageProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
 import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { imageSymbol } from './symbols';
-import { getBlockClassName, tailwindBlockClasses } from './tailwind';
+import {
+  getBlockClassName,
+  parametersToTailwindStyle,
+  tailwindBlockClasses,
+} from './tailwind';
 
 const placeholderText = 'landscape';
 
@@ -59,7 +64,9 @@ export const ImageBlock: BlockDefinition = {
       );
     }
 
-    return h(Image, {
+    const style = parametersToTailwindStyle(parameters);
+
+    return h<ImageProps>(Image, {
       ...applyCommonProps(props),
       src,
       style: {
@@ -70,8 +77,8 @@ export const ImageBlock: BlockDefinition = {
             }
           : { minHeight: 0 }),
         objectFit: contain ? 'contain' : fill ? 'fill' : 'cover',
+        ...style,
       },
-      className: getBlockClassName(hashtags),
     });
   },
 };
