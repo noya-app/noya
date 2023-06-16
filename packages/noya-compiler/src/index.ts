@@ -242,7 +242,7 @@ export function mapBlockToElement(
 
   const element = block.render(
     {
-      h: DesignSystem.createElement,
+      h: DesignSystem.createElement as any,
       Components: DesignSystem.components,
     },
     {

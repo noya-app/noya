@@ -53,11 +53,11 @@ export const LinkBlock: BlockDefinition = {
       },
     };
 
+    const hasIcon = parameters['icon-arrow-forward'];
+
     return h(Link, linkProps, [
       content,
-      ...(parameters['icon-arrow-forward']
-        ? [h(IconArrowForward, iconProps)]
-        : []),
+      ...(hasIcon ? [h(IconArrowForward, iconProps)] : []),
     ]);
   },
 };

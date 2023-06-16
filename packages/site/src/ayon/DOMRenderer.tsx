@@ -13,7 +13,13 @@ import {
 } from 'noya-geometry';
 import { loadDesignSystem } from 'noya-module-loader';
 import { useSize } from 'noya-react-utils';
-import { BlockProps, InteractionState, Layers, Selectors } from 'noya-state';
+import {
+  BlockProps,
+  BlockRenderingEnvironment,
+  InteractionState,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import React, {
   ComponentProps,
   useEffect,
@@ -49,8 +55,8 @@ function renderDynamicContent(
     createElement: h,
     components: { [component.id.Provider]: Provider },
   } = system;
-  const env = {
-    h: system.createElement,
+  const env: BlockRenderingEnvironment = {
+    h: system.createElement as any,
     Components: system.components,
   };
 

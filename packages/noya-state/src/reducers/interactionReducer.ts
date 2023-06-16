@@ -2,13 +2,13 @@ import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { Point, Rect } from 'noya-geometry';
 import {
-  getCursorForCompassDirection,
   ScalingOptions,
   TextSelectionRange,
   UUID,
+  getCursorForCompassDirection,
 } from 'noya-state';
 import type React from 'react';
-import { CSSProperties, ReactNode } from 'react';
+import { CSSProperties, ReactNode, createElement } from 'react';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -61,7 +61,7 @@ export type InferBlockProps = {
 
 export type BlockRenderingEnvironment = {
   Components: Record<string, React.FC<any>>;
-  h: (...args: any[]) => JSX.Element;
+  h: typeof createElement;
 };
 
 export type BlockDefinition = {
