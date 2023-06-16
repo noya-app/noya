@@ -1,16 +1,10 @@
-import { component } from '@noya-design-system/protocol';
+import { IconProps, LinkProps, component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { CSSProperties } from 'react';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
 import { linkSymbolId } from './symbolIds';
 import { linkSymbol } from './symbols';
-import {
-  getBlockClassName,
-  getLastClassInGroup,
-  tailwindTextClasses,
-} from './tailwind';
-import { resolveColor } from './tailwindColors';
+import { parametersToTailwindStyle, tailwindTextClasses } from './tailwind';
 
 const placeholderText = 'Read More';
 
@@ -43,52 +37,27 @@ export const LinkBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const hashtags = Object.keys(parameters);
-    const colorKey = getLastClassInGroup('textColor', hashtags);
-    const color = colorKey ? resolveColor(colorKey) : 'dodgerblue';
-    const textDecoration = getLastClassInGroup('textDecoration', hashtags);
-    const textDecorationValue =
-      textDecoration === 'no-underline'
-        ? 'none'
-        : textDecoration === 'line-through'
-        ? 'line-through'
-        : textDecoration === 'overline'
-        ? 'overline'
-        : undefined;
+    const style = parametersToTailwindStyle(parameters);
 
-    return h(
-      Link,
-      {
-        ...applyCommonProps(props),
-        style: {
-          fontWeight: 500,
-          color,
-          textDecorationColor: color,
-          ...(textDecorationValue && {
-            textDecorationLine: textDecorationValue,
-          }),
-        } as CSSProperties,
-        className: getBlockClassName(hashtags),
+    const linkProps: LinkProps = {
+      ...applyCommonProps(props),
+      style,
+      href: '#',
+    };
+
+    const iconProps: IconProps = {
+      size: '16px',
+      style: {
+        verticalAlign: 'text-bottom',
+        marginLeft: '4px',
       },
-      [
-        content,
-        ...(parameters['icon-arrow-forward']
-          ? [
-              ' ',
-              h(IconArrowForward, {
-                style: {
-                  verticalAlign: 'text-bottom',
-                  width: '16px',
-                  height: '16px',
-                  textDecorationColor: color,
-                  ...(textDecorationValue && {
-                    textDecorationLine: textDecorationValue,
-                  }),
-                },
-              }),
-            ]
-          : []),
-      ],
-    );
+    };
+
+    return h(Link, linkProps, [
+      content,
+      ...(parameters['icon-arrow-forward']
+        ? [h(IconArrowForward, iconProps)]
+        : []),
+    ]);
   },
 };

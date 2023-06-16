@@ -3066,22 +3066,12 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-design-system/protocol@0.0.42", "@noya-design-system/protocol@^0.0.42":
+"@noya-design-system/protocol@^0.0.42":
   version "0.0.42"
   resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.42.tgz#2e80039b356acc2334681e40c3a5ec99ef589811"
   integrity sha512-hXYjPt+ciMxBTcTo55YDtYf0UwsvD55hjMWHtO2WNVBk32JmSAtizpt+kfc2yA9KtVvWeDSK0bOumeHCpI2ElA==
   dependencies:
     react "^18.2.0"
-
-"@noya-design-system/provider@^0.0.43":
-  version "0.0.43"
-  resolved "https://registry.yarnpkg.com/@noya-design-system/provider/-/provider-0.0.43.tgz#5020bb15d368128b01f48466946f94440a42b571"
-  integrity sha512-ovbMP/srHXcGsNY8lCwqH15h7ZFOH31Ely0tASqXeTS0K2s0gmHVtuee2rlz55xtvoPnj1s9t4d8FNxcPWHSaA==
-  dependencies:
-    "@noya-design-system/protocol" "0.0.42"
-    cross-fetch "^3.1.6"
-    react "^18.2.0"
-    react-dom "^18.2.0"
 
 "@npm/types@*":
   version "1.0.2"
@@ -8013,13 +8003,6 @@ cross-fetch@^3.1.5:
   integrity sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==
   dependencies:
     node-fetch "2.6.7"
-
-cross-fetch@^3.1.6:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.6.tgz#bae05aa31a4da760969756318feeee6e70f15d6c"
-  integrity sha512-riRvo06crlE8HiqOwIpQhxwdOk4fOeR7FVM/wXoxchFEqMNUjvbs3bfo4OTgMEMHzppd4DxFBDbyySj8Cv781g==
-  dependencies:
-    node-fetch "^2.6.11"
 
 cross-spawn-windows-exe@^1.1.0, cross-spawn-windows-exe@^1.2.0:
   version "1.2.0"
@@ -15299,13 +15282,6 @@ node-fetch@^1.0.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
-node-fetch@^2.6.11:
-  version "2.6.11"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.11.tgz#cde7fc71deef3131ef80a738919f999e6edfff25"
-  integrity sha512-4I6pdBY1EthSqDmJkiNk3JIT8cswwR9nfeW/cPdUagJYEQG7R95WRH74wpz7ma8Gh/9dI9FP+OU+0E4FvtA55w==
-  dependencies:
-    whatwg-url "^5.0.0"
-
 node-forge@^1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
@@ -17652,14 +17628,6 @@ react-dom@^17.0.1:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-dom@^18.2.0:
-  version "18.2.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
-  integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
-  dependencies:
-    loose-envify "^1.1.0"
-    scheduler "^0.23.0"
-
 react-error-boundary@^3.1.0:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-3.1.3.tgz#276bfa05de8ac17b863587c9e0647522c25e2a0b"
@@ -18665,13 +18633,6 @@ scheduler@^0.20.2:
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-
-scheduler@^0.23.0:
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.23.0.tgz#ba8041afc3d30eb206a487b6b384002e4e61fdfe"
-  integrity sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==
-  dependencies:
-    loose-envify "^1.1.0"
 
 schema-utils@^2.6.5:
   version "2.7.1"

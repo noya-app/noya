@@ -129,7 +129,9 @@ function getSpacingValue(className: string): string | undefined {
   return value as string;
 }
 
-export function resolveTailwindClass(className: string): CSSProperties {
+export const resolveTailwindClass = memoize(function resolveTailwindClass(
+  className: string,
+): CSSProperties {
   const classGroup = getTailwindClassGroup(className);
 
   switch (classGroup) {
@@ -272,7 +274,7 @@ export function resolveTailwindClass(className: string): CSSProperties {
   }
 
   return assertNever(classGroup);
-}
+});
 
 export function parametersToTailwindStyle(
   parameters: ParsedBlockItemParameters,

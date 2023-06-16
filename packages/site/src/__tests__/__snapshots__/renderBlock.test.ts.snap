@@ -432,13 +432,7 @@ exports[`icon with color 1`] = `
 
 exports[`link with icon 1`] = `
 "<Frame width={100} height={40}>
-  <Link
-    fontWeight={500}
-    textColor=\\"dodgerblue\\"
-    textDecorationColor=\\"dodgerblue\\"
-  >
-    Test
-  </Link>
+  <Link href=\\"#\\">Test</Link>
 </Frame>;
 "
 `;
