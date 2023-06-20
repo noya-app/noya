@@ -2,15 +2,10 @@ import { BlockDefinition } from 'noya-state';
 import { findLast } from 'noya-utils';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
-import { accentColor } from './blockTheme';
 import { getBlockThemeColors } from './colors';
 import { boxSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
-import {
-  getLastClassInGroup,
-  parametersToTailwindStyle,
-  tailwindBlockClasses,
-} from './tailwind';
+import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   symbol: boxSymbol,
@@ -18,24 +13,15 @@ export const BoxBlock: BlockDefinition = {
   infer: ({ frame, blockText }) => 0.1,
   hashtags: ['left', 'center', 'right', 'dark', ...tailwindBlockClasses],
   render: ({ h, Components: { [boxSymbolId]: Box } }, props) => {
-    const { content, parameters } = parseBlock(props.blockText, 'regular');
+    const { parameters } = parseBlock(props.blockText, 'regular');
     const hashtags = Object.keys(parameters);
 
-    const bgClass = getLastClassInGroup('background', hashtags);
-    const dynamicClass = bgClass
-      ? typeof parameters[bgClass] === 'string'
-      : undefined;
-
-    const backgroundColor = parameters.dark
-      ? getBlockThemeColors({ dark: true, accent: false }).backgroundColor
-      : bgClass
-      ? dynamicClass
-        ? parameters[bgClass]
-        : undefined
-      : [content]
-          .concat(hashtags)
-          .find((value) => CSS.supports('color', `${value}`)) ??
-        accentColor[50];
+    const themeStyle = parameters.dark
+      ? {
+          backgroundColor: getBlockThemeColors({ dark: true, accent: false })
+            .backgroundColor,
+        }
+      : {};
 
     const { justify, items } = simpleFlex(hashtags);
 
@@ -51,8 +37,8 @@ export const BoxBlock: BlockDefinition = {
         ...applyCommonProps(props),
         style: {
           display: 'flex',
+          ...themeStyle,
           ...style,
-          backgroundColor,
           ...(props.frame && {
             width: `${props.frame.width}px`,
             height: `${props.frame.height}px`,

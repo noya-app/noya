@@ -30,6 +30,9 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('bg-red-500')).toEqual({
       backgroundColor: '#ef4444',
     });
+    expect(resolveTailwindClass('bg-[#000000e5]')).toEqual({
+      backgroundColor: '#000000e5',
+    });
   });
 
   it('backdrop-blur', () => {
@@ -72,6 +75,18 @@ describe('resolves styles', () => {
   it('gap', () => {
     expect(resolveTailwindClass('gap-4')).toEqual({
       gap: '1rem',
+    });
+  });
+
+  it('flex', () => {
+    expect(resolveTailwindClass('flex-1')).toEqual({
+      flex: '1',
+    });
+  });
+
+  it('flexBasis', () => {
+    expect(resolveTailwindClass('basis-20')).toEqual({
+      flexBasis: '5rem',
     });
   });
 

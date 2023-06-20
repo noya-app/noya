@@ -130,9 +130,11 @@ function getSpacingValue(className: string): string | undefined {
   return value as string;
 }
 
+const customValueRE = /[A-Za-z0-9-]*(?:\[(.*)\])?/;
+
 export const resolveTailwindClass = memoize(function resolveTailwindClass(
   className: string,
-): CSSProperties {
+): CSSProperties | null {
   const classGroup = getTailwindClassGroup(className);
 
   switch (classGroup) {
@@ -140,8 +142,10 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       // Not used?
       return {};
     case 'background':
+      const custom = customValueRE.exec(className)?.[1];
+
       return {
-        backgroundColor: resolveColor(className),
+        backgroundColor: custom || resolveColor(className),
       };
     case 'backdropFilter': {
       const key = /backdrop-blur-(.+)/.exec(className)?.[1];
@@ -236,9 +240,8 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         flex: className.replace('flex-', ''),
       };
     case 'flexBasis':
-      return {
-        flexBasis: className.replace('basis-', ''),
-      };
+      const value = getSpacingValue(className);
+      return value ? { flexBasis: value } : {};
     case 'alignSelf':
       return {
         alignSelf: className.replace('self-', ''),
@@ -277,7 +280,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       };
     }
     case 'none':
-      return {};
+      return null;
   }
 
   return assertNever(classGroup);

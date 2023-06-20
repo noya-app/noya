@@ -1,4 +1,4 @@
-import { ButtonProps } from '@noya-design-system/protocol';
+import { ButtonProps, ButtonVariant } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
@@ -11,8 +11,14 @@ import { parametersToTailwindStyle } from './tailwind';
 const placeholderText = 'Submit';
 const colorSchemeKeys = ['dark', 'light'];
 const sizeKeys = ['small', 'medium', 'large'];
+const variantKeys: ButtonVariant[] = ['outline', 'solid', 'text'];
 
-const globalHashtags = [...sizeKeys, ...colorSchemeKeys, 'disabled'];
+const globalHashtags = [
+  ...variantKeys,
+  ...sizeKeys,
+  ...colorSchemeKeys,
+  'disabled',
+];
 
 const parser = 'regular';
 
@@ -37,6 +43,7 @@ export const ButtonBlock: BlockDefinition = {
       mutuallyExclusiveParameters: {
         colorScheme: colorSchemeKeys,
         size: sizeKeys,
+        variant: variantKeys,
       },
     });
 
@@ -69,6 +76,9 @@ export const ButtonBlock: BlockDefinition = {
       {
         ...applyCommonProps(props),
         ...(parameters.disabled && { disabled: true }),
+        ...(parameters.variant && {
+          variant: parameters.variant as ButtonProps['variant'],
+        }),
         ...(parameters.size && {
           size: parameters.size as ButtonProps['size'],
         }),

@@ -143,8 +143,7 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
 export const heroSymbolV2 = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
-  defaultBlockText:
-    '#flex-col #center #bg-transparent #p-4 #gap-3 #backdrop-blur',
+  defaultBlockText: '#flex-col #center #p-4 #gap-3',
   layers: [
     SketchModel.symbolInstance({
       do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',

@@ -5,7 +5,10 @@ import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { inputSymbolId } from './symbolIds';
 import { inputSymbol } from './symbols';
-import { getBlockClassName, getTailwindClassesByGroup } from './tailwind';
+import {
+  getTailwindClassesByGroup,
+  parametersToTailwindStyle,
+} from './tailwind';
 
 const globalHashtags = [
   'dark',
@@ -36,8 +39,6 @@ export const InputBlock: BlockDefinition = {
       parameters: { dark, accent, disabled, ...parameters },
     } = parseBlock(props.blockText, parser);
 
-    const hashtags = Object.keys(parameters);
-
     // const height = props.frame?.height ?? 30;
     // const size = height >= 45 ? 'lg' : height >= 30 ? 'md' : 'sm';
 
@@ -45,6 +46,8 @@ export const InputBlock: BlockDefinition = {
       dark,
       accent,
     });
+
+    const style = parametersToTailwindStyle(parameters);
 
     return h(Input, {
       ...applyCommonProps(props),
@@ -57,8 +60,8 @@ export const InputBlock: BlockDefinition = {
         ...(props.frame && {
           width: `${props.frame.width}px`,
         }),
+        ...style,
       },
-      className: getBlockClassName(hashtags),
     });
   },
 };

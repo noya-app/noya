@@ -2,7 +2,7 @@ import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { boxSymbolId } from './symbolIds';
 import { spacerSymbol } from './symbols';
-import { getBlockClassName, tailwindBlockClasses } from './tailwind';
+import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
 
 export const SpacerBlock: BlockDefinition = {
   symbol: spacerSymbol,
@@ -13,7 +13,7 @@ export const SpacerBlock: BlockDefinition = {
   isComposedBlock: true,
   render: ({ h, Components: { [boxSymbolId]: Box } }, props) => {
     const { parameters } = parseBlock(props.blockText, 'regular');
-    const hashtags = Object.keys(parameters);
+    const style = parametersToTailwindStyle(parameters);
 
     return h(Box, {
       ...(props.dataSet && {
@@ -21,8 +21,8 @@ export const SpacerBlock: BlockDefinition = {
       }),
       style: {
         backgroundColor: 'transparent',
+        ...style,
       },
-      className: getBlockClassName(hashtags),
     });
   },
 };

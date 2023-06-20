@@ -5,9 +5,9 @@ import { isWithinRectRange } from './score';
 import {
   avatarSymbolId,
   boxSymbolId,
+  buttonSymbolId,
   heading6SymbolId,
   inputSymbolId,
-  linkSymbolId,
   spacerSymbolId,
 } from './symbolIds';
 import { headerBarSymbol } from './symbols';
@@ -61,7 +61,7 @@ export const HeaderBarBlock: BlockDefinition = {
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-row #items-center #px-3 #gap-3', bg].join(' '),
+      blockText: ['#flex-row #items-center #px-4 #gap-4', bg].join(' '),
       frame: props.frame,
       getBlock: props.getBlock,
       children: [
@@ -77,29 +77,19 @@ export const HeaderBarBlock: BlockDefinition = {
             });
           }
 
-          return props.getBlock(boxSymbolId).render(env, {
-            getBlock: props.getBlock,
-            symbolId: boxSymbolId,
+          return props.getBlock(buttonSymbolId).render(env, {
             blockText: [
-              activeOrDefault ? activeLinkBg : '#bg-transparent',
-              '#rounded #px-3 #py-2',
+              content,
+              ...(dark || accent
+                ? [text, activeOrDefault ? activeLinkBg : '']
+                : []),
+              activeOrDefault ? '#solid' : '#text',
+              '#small #shadow-none',
             ]
               .filter(Boolean)
               .join(' '),
-            children: [
-              props.getBlock(linkSymbolId).render(env, {
-                blockText: [
-                  content,
-                  text,
-                  '#text-xs #no-underline',
-                  activeOrDefault ? '#font-semibold' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' '),
-                symbolId: linkSymbolId,
-                getBlock: props.getBlock,
-              }),
-            ],
+            symbolId: buttonSymbolId,
+            getBlock: props.getBlock,
           });
         }),
         props.getBlock(spacerSymbolId).render(env, {
