@@ -11,12 +11,14 @@ import { parametersToTailwindStyle } from './tailwind';
 const placeholderText = 'Submit';
 const colorSchemeKeys = ['dark', 'light'];
 const sizeKeys = ['small', 'medium', 'large'];
+const positionKeys = ['left', 'center', 'right'];
 const variantKeys: ButtonVariant[] = ['outline', 'solid', 'text'];
 
 const globalHashtags = [
   ...variantKeys,
   ...sizeKeys,
   ...colorSchemeKeys,
+  ...positionKeys,
   'disabled',
 ];
 
@@ -44,6 +46,7 @@ export const ButtonBlock: BlockDefinition = {
         colorScheme: colorSchemeKeys,
         size: sizeKeys,
         variant: variantKeys,
+        position: positionKeys,
       },
     });
 
@@ -84,6 +87,10 @@ export const ButtonBlock: BlockDefinition = {
         }),
         style: {
           ...style,
+          ...(parameters.position && {
+            textAlign: parameters.position as 'left' | 'center' | 'right',
+            justifyContent: parameters.position as 'left' | 'center' | 'right',
+          }),
           ...(props.frame && {
             width: `${props.frame.width}px`,
           }),

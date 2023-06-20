@@ -2,7 +2,7 @@ import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { getBlockThemeColorClasses } from './colors';
 import { isWithinRectRange } from './score';
-import { boxSymbolId, heading5SymbolId, linkSymbolId } from './symbolIds';
+import { boxSymbolId, buttonSymbolId, heading5SymbolId } from './symbolIds';
 import { sidebarSymbol } from './symbols';
 
 const placeholderText = `
@@ -59,7 +59,7 @@ export const SidebarBlock: BlockDefinition = {
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-col #p-3 #gap-1', bg].join(' '),
+      blockText: ['#flex-col #p-4 #gap-3', bg].join(' '),
       frame: props.frame,
       getBlock: props.getBlock,
       children: items.map(({ content, parameters: { active } }, index) => {
@@ -68,35 +68,25 @@ export const SidebarBlock: BlockDefinition = {
 
         if (title && index === 0) {
           return props.getBlock(heading5SymbolId).render(env, {
-            blockText: [content, text, '#mb-4 #px-3 #py-2'].join(' '),
+            blockText: [content, text, '#mb-4'].join(' '),
             symbolId: heading5SymbolId,
             getBlock: props.getBlock,
           });
         }
 
-        return props.getBlock(boxSymbolId).render(env, {
-          getBlock: props.getBlock,
-          symbolId: boxSymbolId,
+        return props.getBlock(buttonSymbolId).render(env, {
           blockText: [
-            activeOrDefault ? activeLinkBg : '#bg-transparent',
-            '#rounded #px-3 #py-2',
+            content,
+            ...(dark || accent
+              ? [text, activeOrDefault ? activeLinkBg : '']
+              : []),
+            activeOrDefault ? '#solid' : '#text',
+            '#shadow-none #left',
           ]
             .filter(Boolean)
             .join(' '),
-          children: [
-            props.getBlock(linkSymbolId).render(env, {
-              blockText: [
-                content,
-                text,
-                '#text-xs #no-underline',
-                activeOrDefault ? '#font-semibold' : '',
-              ]
-                .filter(Boolean)
-                .join(' '),
-              symbolId: linkSymbolId,
-              getBlock: props.getBlock,
-            }),
-          ],
+          symbolId: buttonSymbolId,
+          getBlock: props.getBlock,
         });
       }),
     });
