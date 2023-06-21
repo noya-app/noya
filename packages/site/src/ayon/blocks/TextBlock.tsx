@@ -1,14 +1,15 @@
+import { BoxProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
+import { partition } from 'noya-utils';
 import { getTextAlign, parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
-import { textSymbolId } from './symbolIds';
+import { boxSymbolId, textSymbolId } from './symbolIds';
 import { textSymbol } from './symbols';
 import {
-  getBlockClassName,
-  getLastClassInGroup,
+  classGroups,
+  parametersToTailwindStyle,
   tailwindTextClasses,
 } from './tailwind';
-import { resolveColor } from './tailwindColors';
 
 export const TextBlock: BlockDefinition = {
   symbol: textSymbol,
@@ -22,25 +23,48 @@ export const TextBlock: BlockDefinition = {
         : 0,
       0.1,
     ),
-  render: ({ h, Components: { [textSymbolId]: Text } }, props) => {
+  render: (
+    { h, Components: { [textSymbolId]: Text, [boxSymbolId]: Box } },
+    props,
+  ) => {
     const { content, parameters } = parseBlock(props.blockText, 'regular');
+    const hashtags = Object.keys(parameters);
 
-    let hashtags = Object.keys(parameters);
-    const colorKey = getLastClassInGroup('textColor', hashtags);
-    const color = colorKey ? resolveColor(colorKey) : undefined;
-    hashtags = hashtags.filter((hashtag) => hashtag !== colorKey);
+    const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {
+      return (
+        classGroups.flex.test(hashtag) ||
+        classGroups.alignSelf.test(hashtag) ||
+        /m[xytrbl]?-/.test(hashtag)
+      );
+    });
 
-    return h(
+    const boxStyle = parametersToTailwindStyle(flexClasses);
+    const textStyle = parametersToTailwindStyle(otherClasses);
+
+    const contentElement = h(
       Text,
+      {
+        style: {
+          flex: '1',
+          textAlign: getTextAlign(hashtags),
+          ...textStyle,
+        },
+      },
+      content,
+    );
+
+    if (Object.keys(boxStyle).length === 0) return contentElement;
+
+    return h<BoxProps>(
+      Box,
       {
         ...applyCommonProps(props),
         style: {
-          textAlign: getTextAlign(hashtags),
-          color,
+          display: 'flex',
+          ...boxStyle,
         },
-        className: getBlockClassName(hashtags),
       },
-      content,
+      contentElement,
     );
   },
 };

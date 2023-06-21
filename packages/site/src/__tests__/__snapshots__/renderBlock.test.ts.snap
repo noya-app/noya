@@ -27,13 +27,15 @@ exports[`card with no border radius on image default 1`] = `
       flex=\\"1\\"
     />
     <Box display=\\"flex\\" mt=\\"1rem\\">
-      <Text fontSize=\\"2xl\\" flex=\\"1\\">
+      <Text fontSize=\\"xl\\" flex=\\"1\\">
         News
       </Text>
     </Box>
-    <Text className=\\"mt-1\\">
-      Here you can explore the latest news and information.
-    </Text>
+    <Box display=\\"flex\\" mt=\\"0.25rem\\">
+      <Text flex=\\"1\\">
+        Here you can explore the latest news and information.
+      </Text>
+    </Box>
   </Box>
 </Frame>;
 "
@@ -327,10 +329,15 @@ exports[`hero default 1`] = `
     w=\\"400px\\"
     h=\\"400px\\"
   >
-    <Box display=\\"flex\\">
-      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"center\\">
-        Create, iterate, inspire.
+    <Box display=\\"flex\\" bgColor=\\"transparent\\" flexDirection=\\"column\\">
+      <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#3b82f6\\" fontWeight=\\"700\\">
+        The future is here
       </Text>
+      <Box display=\\"flex\\">
+        <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\">
+          Create, iterate, inspire.
+        </Text>
+      </Box>
     </Box>
     <Box display=\\"flex\\" mb=\\"1rem\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\">
@@ -363,10 +370,15 @@ exports[`hero left aligned 1`] = `
     w=\\"400px\\"
     h=\\"400px\\"
   >
-    <Box display=\\"flex\\">
-      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"left\\">
-        Create, iterate, inspire.
+    <Box display=\\"flex\\" bgColor=\\"transparent\\" flexDirection=\\"column\\">
+      <Text flex=\\"1\\" textAlign=\\"left\\" textColor=\\"#3b82f6\\" fontWeight=\\"700\\">
+        The future is here
       </Text>
+      <Box display=\\"flex\\">
+        <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"left\\">
+          Create, iterate, inspire.
+        </Text>
+      </Box>
     </Box>
     <Box display=\\"flex\\" mb=\\"1rem\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"left\\">
@@ -402,10 +414,15 @@ exports[`hero with bg 1`] = `
     w=\\"400px\\"
     h=\\"400px\\"
   >
-    <Box display=\\"flex\\">
-      <Text fontSize=\\"6xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
-        Create, iterate, inspire.
+    <Box display=\\"flex\\" bgColor=\\"transparent\\" flexDirection=\\"column\\">
+      <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\" fontWeight=\\"700\\">
+        The future is here
       </Text>
+      <Box display=\\"flex\\">
+        <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
+          Create, iterate, inspire.
+        </Text>
+      </Box>
     </Box>
     <Box display=\\"flex\\" mb=\\"1rem\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
@@ -466,7 +483,7 @@ exports[`link with icon 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text textAlign=\\"center\\" textColor=\\"#ef4444\\">
+  <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#ef4444\\">
     Hello world
   </Text>
 </Frame>;
@@ -475,7 +492,7 @@ exports[`text default 1`] = `
 
 exports[`text escape jsx 1`] = `
 "<Frame width={100} height={40}>
-  <Text>{'Hello \\"\\\\'<{test}>\\\\'\\" world'}</Text>
+  <Text flex=\\"1\\">{'Hello \\"\\\\'<{test}>\\\\'\\" world'}</Text>
 </Frame>;
 "
 `;

@@ -8,22 +8,34 @@ Array [
         "text": "",
       },
     ],
-    "label": "Heading2",
-    "layerId": "ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb",
-    "placeholder": "Create, iterate, inspire.",
-    "symbolId": "b3884865-3fbe-4ed0-b577-c3f5864c4a21",
+    "label": "Text",
+    "layerId": "1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2",
+    "placeholder": "The future is here #text-blue-500 #font-bold",
+    "symbolId": "a1f7266f-50cc-416f-9ed2-4af4bca30257",
     "type": "paragraph",
   },
   Object {
     "children": Array [
       Object {
-        "text": "hello",
+        "text": "",
       },
     ],
-    "label": "Heading5",
+    "label": "Heading1",
+    "layerId": "ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb",
+    "placeholder": "Create, iterate, inspire.",
+    "symbolId": "955f4cb1-7879-4331-a359-a21a031147cb",
+    "type": "paragraph",
+  },
+  Object {
+    "children": Array [
+      Object {
+        "text": "",
+      },
+    ],
+    "label": "Heading4",
     "layerId": "aa722c35-9ba4-4bf3-a5d0-f7d17f02c361",
     "placeholder": "Turn great ideas into new possibilities. #mb-4",
-    "symbolId": "a6f2653e-1595-4dcc-b979-4e0b1340fda3",
+    "symbolId": "b8441949-12ba-42be-8f87-5cf222af70d0",
     "type": "paragraph",
   },
   Object {

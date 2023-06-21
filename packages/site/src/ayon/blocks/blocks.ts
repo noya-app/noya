@@ -20,19 +20,19 @@ import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
 import { LinkBlock } from './LinkBlock';
 import { RadioBlock } from './RadioBlock';
-import { renderStack } from './render';
 import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
 import { SignInBlock } from './SignInBlock';
 import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
-import { heroSymbolId } from './symbolIds';
-import { heroButtonRowSymbol } from './symbols';
 import { TableBlock } from './TableBlock';
-import { TextareaBlock } from './TextareaBlock';
 import { TextBlock } from './TextBlock';
+import { TextareaBlock } from './TextareaBlock';
 import { TileCardBlock } from './TileCardBlock';
 import { WriteBlock } from './WriteBlock';
+import { renderStack } from './render';
+import { heroSymbolId } from './symbolIds';
+import { heroButtonRowSymbol, heroHeadlineStackSymbol } from './symbols';
 
 function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
   return {
@@ -83,6 +83,9 @@ export const Blocks: Record<string, BlockDefinition> = {
   [SignInBlock.symbol.symbolID]: SignInBlock,
   [LinkBlock.symbol.symbolID]: LinkBlock,
   [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
+  [heroHeadlineStackSymbol.symbolID]: createPassthroughBlock(
+    heroHeadlineStackSymbol,
+  ),
 };
 
 export const allInsertableBlocks = Object.entries(Blocks)

@@ -140,19 +140,37 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
   ],
 });
 
+export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
+  symbolID: '511cf6e2-b92b-45a3-a239-b13e9dbbfe9f',
+  name: 'Hero Headline Stack',
+  defaultBlockText: '#bg-transparent #flex-col',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
+      symbolID: textSymbolId,
+      blockText: 'The future is here #text-blue-500 #font-bold',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
+      symbolID: heading1SymbolId,
+      blockText: 'Create, iterate, inspire.',
+    }),
+  ],
+});
+
 export const heroSymbolV2 = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
   defaultBlockText: '#flex-col #center #p-4 #gap-3',
   layers: [
     SketchModel.symbolInstance({
-      do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
-      symbolID: heading2SymbolId,
-      blockText: 'Create, iterate, inspire.',
+      do_objectID: 'd6593501-b089-4390-bbe2-fb10afb5df5a',
+      symbolID: heroHeadlineStackSymbol.symbolID,
+      blockText: '',
     }),
     SketchModel.symbolInstance({
       do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
-      symbolID: heading5SymbolId,
+      symbolID: heading4SymbolId,
       blockText: 'Turn great ideas into new possibilities. #mb-4',
     }),
     SketchModel.symbolInstance({
