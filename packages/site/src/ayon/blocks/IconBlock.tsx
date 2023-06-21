@@ -3,14 +3,20 @@ import { parseBlock } from '../parse';
 import { isApproximatelySquare, isWithinRectRange } from './score';
 import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { iconSymbol } from './symbols';
-import { getTailwindClassesByGroup, isTailwindClassGroup } from './tailwind';
-import { resolveColor } from './tailwindColors';
+import {
+  getTailwindClassesByGroup,
+  parametersToTailwindStyle,
+} from './tailwind';
 
 export const IconBlock: BlockDefinition = {
   symbol: iconSymbol,
   parser: 'regular',
   usesResolver: true,
-  hashtags: getTailwindClassesByGroup('fill'),
+  hashtags: [
+    ...getTailwindClassesByGroup('borderRadius'),
+    ...getTailwindClassesByGroup('fill'),
+    ...getTailwindClassesByGroup('background'),
+  ],
   isComposedBlock: true,
   infer: ({ frame, blockText }) =>
     isWithinRectRange({
@@ -30,32 +36,50 @@ export const IconBlock: BlockDefinition = {
       props.resolvedBlockData?.resolvedText ??
       'https://api.iconify.design/material-symbols/menu.svg';
     const { parameters } = parseBlock(props.blockText, 'regular');
-    const hashtags = Object.keys(parameters);
-    const fillClassName = hashtags
-      .slice()
-      .reverse()
-      .find((hashtag) => isTailwindClassGroup(hashtag, 'fill'));
-    const fill = fillClassName ? resolveColor(fillClassName) : undefined;
+    const style = parametersToTailwindStyle(parameters);
 
-    if (fill) {
-      return h(Box, {
-        style: {
-          width: '100%',
-          height: '100%',
-          backgroundColor: fill,
-          maskImage: `url(${src}) center / contain no-repeat`,
-          WebkitMask: `url(${src}) center / contain no-repeat`,
-        },
-      });
-    } else {
-      return h(Image, {
-        src: src,
-        style: {
-          objectFit: 'contain',
-          width: '100%',
-          height: '100%',
-        },
-      });
+    const { fill, ...remainingStyles } = style;
+
+    const inner = fill
+      ? h(Box, {
+          style: {
+            width: '100%',
+            height: '100%',
+            backgroundColor: fill,
+            maskImage: `url(${src}) center / contain no-repeat`,
+            WebkitMask: `url(${src}) center / contain no-repeat`,
+          },
+        })
+      : h(Image, {
+          src: src,
+          style: {
+            objectFit: 'contain',
+            width: '100%',
+            height: '100%',
+          },
+        });
+
+    if (Object.keys(remainingStyles).length === 0) {
+      return inner;
     }
+
+    return h(
+      Box,
+      {
+        ...(props.dataSet && {
+          key: props.dataSet.id,
+        }),
+        style: {
+          ...style,
+          ...(props.frame
+            ? {
+                width: `${props.frame.width}px`,
+                height: `${props.frame.height}px`,
+              }
+            : {}),
+        },
+      },
+      inner,
+    );
   },
 };
