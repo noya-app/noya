@@ -87,10 +87,14 @@ export const ButtonBlock: BlockDefinition = {
         }),
         style: {
           ...style,
-          ...(parameters.position && {
-            textAlign: parameters.position as 'left' | 'center' | 'right',
-            justifyContent: parameters.position as 'left' | 'center' | 'right',
-          }),
+          ...(parameters.position &&
+            parameters.position !== 'center' && {
+              textAlign: parameters.position as 'left' | 'center' | 'right',
+              justifyContent: parameters.position as
+                | 'left'
+                | 'center'
+                | 'right',
+            }),
           ...(props.frame && {
             width: `${props.frame.width}px`,
           }),
