@@ -41,6 +41,8 @@ export function getBlockClassName(hashtags: string[]) {
 
 export const classGroups = {
   fontSize: /^(text-base|text-sm|text-xs)/,
+  fontWeight:
+    /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
   background: /^bg/,
   backdropFilter: /^backdrop-blur/,
   // From https://github.com/tailwindlabs/tailwindcss/blob/86f9c6f09270a9da6fee77909863444b52e2f9b6/stubs/config.full.js
@@ -332,6 +334,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'borderColor': {
       return {
         borderColor: resolveColor(className),
+      };
+    }
+    case 'fontWeight': {
+      const value = className.replace('font-', '');
+      return {
+        fontWeight: (config.theme as any).fontWeight[value],
       };
     }
     case 'none':
