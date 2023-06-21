@@ -273,7 +273,7 @@ export const tailwindColors = {
   },
 };
 
-const colorPrefixes = ['text', 'bg', 'fill'] as const;
+const colorPrefixes = ['text', 'bg', 'fill', 'border'] as const;
 
 export const resolveColor = memoize(function resolveColor(color: string) {
   const [prefix, name, shade] = color.split('-');

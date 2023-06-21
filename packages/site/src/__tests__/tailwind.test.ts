@@ -100,6 +100,43 @@ describe('resolves styles', () => {
       paddingRight: '1rem',
     });
   });
+
+  it('shadow', () => {
+    expect(resolveTailwindClass('shadow')).toEqual({
+      boxShadow:
+        '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+    });
+
+    expect(resolveTailwindClass('shadow-none')).toEqual({
+      boxShadow: 'none',
+    });
+  });
+
+  it('border', () => {
+    expect(resolveTailwindClass('border-black')).toEqual({
+      borderColor: '#000',
+    });
+  });
+
+  it('borderWidth', () => {
+    expect(resolveTailwindClass('border')).toEqual({
+      borderWidth: '1px',
+    });
+
+    expect(resolveTailwindClass('border-2')).toEqual({
+      borderWidth: '2px',
+    });
+
+    expect(resolveTailwindClass('border-x')).toEqual({
+      borderLeftWidth: '1px',
+      borderRightWidth: '1px',
+    });
+
+    expect(resolveTailwindClass('border-x-2')).toEqual({
+      borderLeftWidth: '2px',
+      borderRightWidth: '2px',
+    });
+  });
 });
 
 describe('parameters', () => {

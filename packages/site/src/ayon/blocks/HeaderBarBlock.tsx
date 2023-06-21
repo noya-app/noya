@@ -61,7 +61,9 @@ export const HeaderBarBlock: BlockDefinition = {
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-row #items-center #px-4 #gap-4', bg].join(' '),
+      blockText: ['#flex-row #items-center #px-4 #gap-4 #border-b', bg].join(
+        ' ',
+      ),
       frame: props.frame,
       getBlock: props.getBlock,
       children: [

@@ -6,6 +6,9 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+
+  border-width: 0px;
+  border-style: solid;
 }
 
 body {

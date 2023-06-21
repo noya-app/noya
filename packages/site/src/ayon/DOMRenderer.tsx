@@ -1,14 +1,16 @@
 import {
-  component,
   DesignSystemDefinition,
   RenderableRoot,
+  component,
+  defaultTheme,
+  transform,
 } from '@noya-design-system/protocol';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import {
-  createResizeTransform,
   Rect,
   Size,
+  createResizeTransform,
   transformRect,
 } from 'noya-geometry';
 import { loadDesignSystem } from 'noya-module-loader';
@@ -24,6 +26,7 @@ import React, {
   ComponentProps,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
 } from 'react';
 import { Blocks } from './blocks/blocks';
@@ -50,6 +53,7 @@ function renderDynamicContent(
   system: DesignSystemDefinition,
   layers: Sketch.Artboard['layers'],
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined,
+  theme: unknown,
 ) {
   const {
     createElement: h,
@@ -140,7 +144,7 @@ function renderDynamicContent(
   return (h as unknown as any)(
     'div',
     {},
-    Provider ? (h as unknown as any)(Provider, {}, content) : content,
+    Provider ? (h as unknown as any)(Provider, { theme }, content) : content,
   );
 }
 
@@ -180,11 +184,22 @@ function DynamicRenderer({
     }
   }, [root, system]);
 
+  const theme = useMemo(() => {
+    if (!system || !system.themeTransformer) return undefined;
+
+    const themeValue = transform(
+      { theme: defaultTheme },
+      system.themeTransformer,
+    );
+
+    return themeValue;
+  }, [system]);
+
   useLayoutEffect(() => {
     if (!root || !system) return;
 
-    root.render(renderDynamicContent(system, artboard.layers, drawing));
-  }, [artboard.layers, designSystem, drawing, root, system]);
+    root.render(renderDynamicContent(system, artboard.layers, drawing, theme));
+  }, [artboard.layers, designSystem, drawing, root, system, theme]);
 
   return (
     <>

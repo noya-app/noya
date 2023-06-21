@@ -13,6 +13,12 @@ module.exports = {
       patterns: [
         'shadow-{boxShadow}',
         'border-{borderWidth}',
+        'border-x-{borderWidth}',
+        'border-y-{borderWidth}',
+        'border-t-{borderWidth}',
+        'border-r-{borderWidth}',
+        'border-b-{borderWidth}',
+        'border-l-{borderWidth}',
         'border-{colors}',
         'rounded-{borderRadius}',
         'opacity-{opacity}',

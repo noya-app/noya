@@ -69,6 +69,14 @@ export const classGroups = {
   flexBasis: /^basis-/,
   alignSelf: /^self/,
   borderRadius: /^rounded/,
+  borderWidth: /^border(-\d+)?$/,
+  borderXWidth: /^border-x(-\d+)?$/,
+  borderYWidth: /^border-y(-\d+)?$/,
+  borderTopWidth: /^border-t(-\d+)?$/,
+  borderRightWidth: /^border-r(-\d+)?$/,
+  borderBottomWidth: /^border-b(-\d+)?$/,
+  borderLeftWidth: /^border-l(-\d+)?$/,
+  borderColor: /^border-[-a-z]+/,
   textDecoration: /^(underline|overline|no-underline|line-through)/,
   boxShadow: /^shadow/,
   // Must be last!
@@ -111,13 +119,7 @@ export const getTailwindClassesByGroup = memoize((group: ClassGroupKey) => {
 });
 
 function getValue(className: string): string | undefined {
-  const lastIndex = className.lastIndexOf('-');
-
-  if (lastIndex === -1) return undefined;
-
-  const key = className.slice(lastIndex + 1);
-
-  return key;
+  return /-((\d+)|(none))$/.exec(className)?.[1];
 }
 
 function getSpacingValue(className: string): string | undefined {
@@ -277,6 +279,59 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = getValue(className);
       return {
         boxShadow: (config.theme as any).boxShadow[value || 'DEFAULT'],
+      };
+    }
+    case 'borderWidth': {
+      const value = getValue(className);
+      return {
+        borderWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+      };
+    }
+    case 'borderXWidth': {
+      const value = getValue(className);
+      return {
+        borderLeftWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+        borderRightWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+      };
+    }
+    case 'borderYWidth': {
+      const value = getValue(className);
+      return {
+        borderTopWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+        borderBottomWidth: (config.theme as any).borderWidth[
+          value || 'DEFAULT'
+        ],
+      };
+    }
+    case 'borderTopWidth': {
+      const value = getValue(className);
+      return {
+        borderTopWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+      };
+    }
+    case 'borderRightWidth': {
+      const value = getValue(className);
+      return {
+        borderRightWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+      };
+    }
+    case 'borderBottomWidth': {
+      const value = getValue(className);
+      return {
+        borderBottomWidth: (config.theme as any).borderWidth[
+          value || 'DEFAULT'
+        ],
+      };
+    }
+    case 'borderLeftWidth': {
+      const value = getValue(className);
+      return {
+        borderLeftWidth: (config.theme as any).borderWidth[value || 'DEFAULT'],
+      };
+    }
+    case 'borderColor': {
+      return {
+        borderColor: resolveColor(className),
       };
     }
     case 'none':
