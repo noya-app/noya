@@ -52,18 +52,22 @@ export const HeaderBarBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const hasActiveItem = items.some((item) => item.parameters.active);
+    const hasActiveItem = items
+      .slice(title ? 1 : 0)
+      .some((item) => item.parameters.active);
 
-    const { text, bg, activeLinkBg } = getBlockThemeColorClasses({
+    const { text, bg, activeLinkBg, borderColor } = getBlockThemeColorClasses({
       dark,
       accent,
     });
 
     return props.getBlock(boxSymbolId).render(env, {
       symbolId: boxSymbolId,
-      blockText: ['#flex-row #items-center #px-4 #gap-4 #border-b', bg].join(
-        ' ',
-      ),
+      blockText: [
+        '#flex-row #items-center #px-4 #gap-4 #border-b',
+        bg,
+        borderColor,
+      ].join(' '),
       frame: props.frame,
       getBlock: props.getBlock,
       children: [

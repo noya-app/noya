@@ -36,6 +36,8 @@ export const ImageBlock: BlockDefinition = {
       ? content
       : props.resolvedBlockData?.resolvedText;
 
+    const style = parametersToTailwindStyle(parameters);
+
     // Loading
     if (!src && content) {
       const terms = content
@@ -48,6 +50,7 @@ export const ImageBlock: BlockDefinition = {
         {
           className: getBlockClassName(hashtags),
           style: {
+            ...style,
             display: 'flex',
             ...(props.frame
               ? {
@@ -63,8 +66,6 @@ export const ImageBlock: BlockDefinition = {
         [h('span', {}, [`Finding image of ${terms}...`])],
       );
     }
-
-    const style = parametersToTailwindStyle(parameters);
 
     return h<ImageProps>(Image, {
       ...applyCommonProps(props),

@@ -50,7 +50,9 @@ export const SidebarBlock: BlockDefinition = {
       placeholder: placeholderText,
     });
 
-    const hasActiveItem = items.some((item) => item.parameters.active);
+    const hasActiveItem = items
+      .slice(title ? 1 : 0)
+      .some((item) => item.parameters.active);
 
     const { text, bg, activeLinkBg } = getBlockThemeColorClasses({
       dark,

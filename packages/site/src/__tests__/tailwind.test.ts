@@ -112,7 +112,17 @@ describe('resolves styles', () => {
     });
   });
 
-  it('border', () => {
+  it('borderRadius', () => {
+    expect(resolveTailwindClass('rounded')).toEqual({
+      borderRadius: '0.25rem',
+    });
+
+    expect(resolveTailwindClass('rounded-2xl')).toEqual({
+      borderRadius: '1rem',
+    });
+  });
+
+  it('borderColor', () => {
     expect(resolveTailwindClass('border-black')).toEqual({
       borderColor: '#000',
     });

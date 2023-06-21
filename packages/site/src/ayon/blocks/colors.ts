@@ -64,24 +64,28 @@ export function getBlockThemeColorClasses({
         text: '#text-white',
         bg: `#bg-[${neutralColor[900]}e5] #backdrop-blur`,
         activeLinkBg: '#bg-slate-700',
+        borderColor: '#border-transparent',
       };
     case 'light':
       return {
         text: '#text-black',
         bg: '#bg-[#ffffffe5] #backdrop-blur',
         activeLinkBg: '#bg-slate-100',
+        borderColor: '#border-gray-200',
       };
     case 'dark-accent':
       return {
         text: '#text-white',
         bg: `#bg-[${accentColor[800]}e5] #backdrop-blur`,
         activeLinkBg: '#bg-blue-600',
+        borderColor: '#border-transparent',
       };
     case 'light-accent':
       return {
         text: '#text-blue-900',
         bg: `#bg-[${accentColor[50]}e5] #backdrop-blur`,
         activeLinkBg: '#bg-blue-100',
+        borderColor: '#border-gray-200',
       };
   }
 }
