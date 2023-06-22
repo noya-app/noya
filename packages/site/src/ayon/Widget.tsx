@@ -471,7 +471,7 @@ export const Widget = forwardRef(function Widget(
                     {shouldShowReload(layer) && (
                       <IconButton
                         key="reload"
-                        iconName="ReloadIcon"
+                        iconName="ShuffleIcon"
                         onClick={(event) => {
                           event.preventDefault();
 
@@ -732,7 +732,7 @@ export function MultipleSelectionWidget() {
             {layers.filter(Layers.isSymbolInstance).some(shouldShowReload) && (
               <IconButton
                 key="reload"
-                iconName="ReloadIcon"
+                iconName="ShuffleIcon"
                 onClick={(event) => {
                   event.preventDefault();
 
