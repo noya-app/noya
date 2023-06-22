@@ -5,6 +5,7 @@ import {
   defaultTheme,
   transform,
 } from '@noya-design-system/protocol';
+import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import {
@@ -20,6 +21,7 @@ import {
   BlockRenderingEnvironment,
   InteractionState,
   Layers,
+  OverriddenBlockContent,
   Selectors,
 } from 'noya-state';
 import React, {
@@ -230,16 +232,39 @@ function DynamicRenderer({
   );
 }
 
+function overrideBlockContent<T extends Sketch.AnyLayer>(
+  layer: T,
+  overriddenBlock: OverriddenBlockContent,
+) {
+  return produce(layer, (draft) => {
+    const indexPath = Layers.findIndexPath(
+      draft,
+      (layer) => layer.do_objectID === overriddenBlock.layerId,
+    );
+
+    if (indexPath) {
+      const layer = Layers.access(draft, indexPath);
+
+      if (Layers.isSymbolInstance(layer)) {
+        layer.symbolID =
+          overriddenBlock.blockContent.symbolId ?? layer.symbolID;
+      }
+    }
+  });
+}
+
 function DOMRendererContent({
   size,
   resizeBehavior,
   padding = 0,
   designSystem,
+  overriddenBlock,
 }: {
   size: Size;
   resizeBehavior: ResizeBehavior;
   padding?: number;
   designSystem: string;
+  overriddenBlock?: OverriddenBlockContent;
 }): JSX.Element {
   const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
@@ -257,6 +282,10 @@ function DOMRendererContent({
     resizeBehavior === 'match-canvas' ? canvasTransform : containerTransform;
 
   const paddedRect = transformRect(rect, transform);
+
+  const overriddenArtboard = overriddenBlock
+    ? overrideBlockContent(artboard, overriddenBlock)
+    : artboard;
 
   return (
     <>
@@ -283,7 +312,7 @@ function DOMRendererContent({
       >
         <ErrorBoundary>
           <DynamicRenderer
-            artboard={artboard}
+            artboard={overriddenArtboard}
             designSystem={designSystem}
             drawing={
               state.interactionState.type === 'drawing'

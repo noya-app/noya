@@ -2,8 +2,8 @@ import dynamic from 'next/dynamic';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
-  lightTheme,
   Stack,
+  lightTheme,
   useDesignSystemConfiguration,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -11,15 +11,15 @@ import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   BlockDefinition,
-  createSketchFile,
   Layers,
   Overrides,
+  createSketchFile,
 } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
-import { blockMetadata, PreferredOverride } from '../ayon/blocks/blockMetadata';
+import { PreferredOverride, blockMetadata } from '../ayon/blocks/blockMetadata';
 import { Blocks } from '../ayon/blocks/blocks';
-import { ViewType } from '../ayon/Content';
 import { parseBlock } from '../ayon/parse';
+import { ViewType } from '../ayon/types';
 
 const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
 

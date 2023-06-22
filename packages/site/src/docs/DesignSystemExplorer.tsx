@@ -5,8 +5,8 @@ import {
   Button,
   DesignSystemConfigurationProvider,
   Divider,
-  lightTheme,
   Stack,
+  lightTheme,
   useDesignSystemConfiguration,
 } from 'noya-designsystem';
 import { SketchModel } from 'noya-sketch-model';
@@ -14,7 +14,7 @@ import { createSketchFile } from 'noya-state';
 import { groupBy, uuid } from 'noya-utils';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BlockMetadata } from '../ayon/blocks/blockMetadata';
-import { ViewType } from '../ayon/Content';
+import { ViewType } from '../ayon/types';
 import { Toolbar } from '../components/Toolbar';
 import { BlockExample, createBlockExample } from './InteractiveBlockPreview';
 

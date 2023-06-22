@@ -8,20 +8,21 @@ import {
   Stack,
 } from 'noya-designsystem';
 import { Point, Size } from 'noya-geometry';
-import { getCurrentPlatform, handleKeyboardEvent, KeyMap } from 'noya-keymap';
+import { KeyMap, getCurrentPlatform, handleKeyboardEvent } from 'noya-keymap';
 import React, {
   ForwardedRef,
-  forwardRef,
   ReactNode,
+  forwardRef,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { Range } from 'slate';
 import styled from 'styled-components';
-import { fuzzyFilter, fuzzyTokenize, IScoredItem, IToken } from './fuzzyScorer';
 import { IModalMenu, ModalMenu } from './ModalMenu';
+import { IScoredItem, IToken, fuzzyFilter, fuzzyTokenize } from './fuzzyScorer';
 
 export type CompletionItem = { id: string; name: string; icon?: ReactNode };
 
@@ -91,30 +92,48 @@ const CompletionMenu = forwardRef(function CompletionMenu(
 
 export function SearchCompletionMenu({
   onSelect,
+  onHover,
   onClose,
   items,
 }: {
   onSelect: (item: CompletionListItem) => void;
+  onHover: (item: CompletionListItem) => void;
   onClose: () => void;
   items: CompletionItem[];
 }) {
-  const [index, setIndex] = useState(0);
-  const [search, setSearch] = useState('');
-  const listRef = React.useRef<ListView.VirtualizedList>(null);
+  const [state, setState] = useState({
+    search: '',
+    index: 0,
+  });
 
-  // When search changes, reset the index
-  useEffect(() => {
-    setIndex(0);
-  }, [search]);
+  const { index, search } = state;
+
+  const listRef = React.useRef<ListView.VirtualizedList>(null);
 
   useEffect(() => {
     listRef.current?.scrollToIndex(index);
   }, [index]);
 
-  const results = fuzzyFilter({
-    items: items.map((item) => item.name),
-    query: search,
-  }).map((item) => ({ ...item, ...items[item.index] }));
+  const results = useMemo(
+    () =>
+      fuzzyFilter({
+        items: items.map((item) => item.name),
+        query: search,
+      }).map((item) => ({ ...item, ...items[item.index] })),
+    [items, search],
+  );
+
+  const setSearch = useCallback((search: string) => {
+    setState((state) => ({ ...state, search, index: 0 }));
+  }, []);
+
+  const setIndex = useCallback((index: number) => {
+    setState((state) => ({ ...state, index }));
+  }, []);
+
+  useEffect(() => {
+    onHover(results[index]);
+  }, [index, onHover, results]);
 
   const searchHeight = 31;
 
@@ -150,7 +169,7 @@ export function SearchCompletionMenu({
         Escape: () => onClose(),
       });
     },
-    [index, onClose, onSelect, results],
+    [index, onClose, onSelect, results, setIndex],
   );
 
   const inputRef = useRef<HTMLInputElement>(null);

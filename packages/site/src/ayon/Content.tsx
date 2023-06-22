@@ -1,10 +1,10 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   CanvasKitRenderer,
-  convertPoint,
-  Interactions,
   ISimpleCanvas,
+  Interactions,
   SimpleCanvas,
+  convertPoint,
 } from 'noya-canvas';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
@@ -16,6 +16,7 @@ import {
   BlockContent,
   DrawableLayerType,
   Layers,
+  OverriddenBlockContent,
   Selectors,
 } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
@@ -25,14 +26,15 @@ import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
-import { Blocks } from './blocks/blocks';
 import { DOMRenderer } from './DOMRenderer';
-import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { Panel } from './Panel';
+import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
+import { Blocks } from './blocks/blocks';
+import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { parseBlock } from './parse';
 import { resolveLayer } from './resolve/resolve';
 import { Stacking } from './stacking';
-import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
+import { ViewType } from './types';
 
 const Overlay = styled.div({
   position: 'absolute',
@@ -40,8 +42,6 @@ const Overlay = styled.div({
   pointerEvents: 'none',
   display: 'flex',
 });
-
-export type ViewType = 'split' | 'combined' | 'previewOnly';
 
 type CanvasRendererType = 'canvas' | 'svg';
 
@@ -70,6 +70,25 @@ export const Content = memo(function Content({
   const CanvasKit = useCanvasKit();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
+
+  const [overriddenBlock, _setOverriddenBlock] = React.useState<
+    OverriddenBlockContent | undefined
+  >();
+
+  // Prevent infinite loop by only updating the overridden block when the value actually changes
+  const setOverriddenBlock = useCallback(
+    (value: OverriddenBlockContent | undefined) => {
+      if (
+        value?.layerId === overriddenBlock?.layerId &&
+        value?.blockContent.symbolId === overriddenBlock?.blockContent.symbolId
+      ) {
+        return;
+      }
+
+      _setOverriddenBlock(value);
+    },
+    [overriddenBlock?.blockContent.symbolId, overriddenBlock?.layerId],
+  );
 
   const addImageFiles = async (files: File[], offsetPoint: OffsetPoint) => {
     const images = await Promise.all(
@@ -223,6 +242,17 @@ export const Content = memo(function Content({
                       inferBlockTypes={inferBlockTypes}
                       onFocusCanvas={onFocusCanvas}
                       showToolbar={!isPlayground}
+                      viewType={viewType}
+                      setOverriddenBlock={(blockContent) => {
+                        if (blockContent) {
+                          setOverriddenBlock({
+                            layerId: layer.do_objectID,
+                            blockContent,
+                          });
+                        } else {
+                          setOverriddenBlock(undefined);
+                        }
+                      }}
                       onChangeBlockType={(type: DrawableLayerType) => {
                         if (typeof type === 'string') return;
 
@@ -316,6 +346,7 @@ export const Content = memo(function Content({
             }
           >
             <DOMRenderer
+              overriddenBlock={overriddenBlock}
               resizeBehavior="match-canvas"
               designSystem={designSystem}
             />
@@ -358,6 +389,7 @@ export const Content = memo(function Content({
           <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
           <Panel.Item collapsible>
             <DOMRenderer
+              overriddenBlock={overriddenBlock}
               padding={padding}
               resizeBehavior="fit-container"
               designSystem={designSystem}

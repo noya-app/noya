@@ -11,6 +11,11 @@ export type BlockContent = {
   symbolId?: string;
 };
 
+export type OverriddenBlockContent = {
+  layerId: string;
+  blockContent: BlockContent;
+};
+
 export type BlockAction =
   | [type: 'setBlockContent', layerId: string, content: BlockContent];
 

@@ -17,8 +17,8 @@ import {
 import Sketch from 'noya-file-format';
 import {
   AffineTransform,
-  createBounds,
   Rect,
+  createBounds,
   transformRect,
 } from 'noya-geometry';
 import { ChevronDownIcon } from 'noya-icons';
@@ -28,27 +28,34 @@ import {
   BlockContent,
   BlockProps,
   DrawableLayerType,
-  getSiblingBlocks,
   InferBlockProps,
   Layers,
   Overrides,
   Selectors,
+  getSiblingBlocks,
 } from 'noya-state';
 import * as React from 'react';
-import { forwardRef, ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  ReactNode,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { allInsertableSymbols, Blocks } from './blocks/blocks';
+import { Blocks, allInsertableSymbols } from './blocks/blocks';
 import { getRenderableBlockProps } from './blocks/render';
 import { boxSymbolId, imageSymbolId } from './blocks/symbolIds';
 import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
 import { BlockEditorV1 } from './editor/BlockEditorV1';
 import { clearResolverCache } from './resolve/resolve';
 import { Stacking } from './stacking';
-import { InferredBlockTypeResult } from './types';
+import { InferredBlockTypeResult, ViewType } from './types';
 import { SearchCompletionMenu } from './useCompletionMenu';
 
 function getElementRect(element: HTMLElement) {
@@ -249,17 +256,21 @@ export const Widget = forwardRef(function Widget(
     inferBlockTypes,
     onChangeBlockType,
     onChangeBlockContent,
+    setOverriddenBlock,
     uploadAsset,
     onFocusCanvas,
     showToolbar = true,
+    viewType,
   }: {
     layer: Sketch.AnyLayer;
     inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
     onChangeBlockType: (type: DrawableLayerType) => void;
     onChangeBlockContent: (content: BlockContent) => void;
+    setOverriddenBlock: (preview: BlockContent | undefined) => void;
     uploadAsset: (file: ArrayBuffer) => Promise<string>;
     onFocusCanvas: () => void;
     showToolbar?: boolean;
+    viewType: ViewType;
   },
   forwardedRef: React.Ref<HTMLDivElement>,
 ) {
@@ -295,10 +306,14 @@ export const Widget = forwardRef(function Widget(
     }
   }, [isEditing]);
 
-  const symbolItems = allInsertableSymbols.map((symbol) => ({
-    name: symbol.name,
-    id: symbol.symbolID,
-  }));
+  const symbolItems = useMemo(
+    () =>
+      allInsertableSymbols.map((symbol) => ({
+        name: symbol.name,
+        id: symbol.symbolID,
+      })),
+    [],
+  );
 
   const [showBlockPicker, setShowBlockPicker] = useState(false);
 
@@ -313,7 +328,7 @@ export const Widget = forwardRef(function Widget(
   const showTextOnboarding =
     showWidgetUI && onboardingStep === 'configuredBlockType';
 
-  // Hide the block picker if whenever the widget UI is hidden
+  // Hide the block picker whenever the widget UI is hidden
   useEffect(() => {
     const shouldHide = !showWidgetUI;
 
@@ -508,12 +523,17 @@ export const Widget = forwardRef(function Widget(
                           if (open) {
                             setShowBlockPicker(true);
                           }
+                          if (!open) {
+                            setOverriddenBlock(undefined);
+                          }
                         }}
                         onInteractOutside={(event) => {
                           event.preventDefault();
+                          setOverriddenBlock(undefined);
                         }}
                         onPointerDownOutside={(event) => {
                           setShowBlockPicker(false);
+                          setOverriddenBlock(undefined);
                         }}
                         trigger={
                           <Button
@@ -531,9 +551,19 @@ export const Widget = forwardRef(function Widget(
                         <SearchCompletionMenu
                           items={symbolItems}
                           onClose={() => {
+                            setOverriddenBlock(undefined);
                             setShowBlockPicker(false);
                           }}
+                          onHover={(item) => {
+                            if (!showBlockPicker) return;
+
+                            setOverriddenBlock({
+                              symbolId: item.id,
+                              blockText,
+                            });
+                          }}
                           onSelect={(item) => {
+                            setOverriddenBlock(undefined);
                             setShowBlockPicker(false);
                             onChangeBlockType({ symbolId: item.id });
                           }}
@@ -575,7 +605,16 @@ export const Widget = forwardRef(function Widget(
               pointerEvents: isEditing ? 'all' : 'none',
               // Children of the page don't appear in the rendered output,
               // so we make them partially transparent
-              opacity: Layers.isPageLayer(parent) ? 0.3 : isEditing ? 0.9 : 0.7,
+              opacity:
+                // In combined view, we show the block preview behind the widget,
+                // so we make the widget transparent
+                showBlockPicker && viewType === 'combined'
+                  ? 0
+                  : Layers.isPageLayer(parent)
+                  ? 0.3
+                  : isEditing
+                  ? 0.9
+                  : 0.7,
               overflow: 'hidden',
               cursor: isEditing ? 'text' : 'pointer',
             }}
