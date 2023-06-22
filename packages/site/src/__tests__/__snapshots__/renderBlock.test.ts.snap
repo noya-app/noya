@@ -339,7 +339,7 @@ exports[`hero default 1`] = `
         </Text>
       </Box>
     </Box>
-    <Box display=\\"flex\\" mb=\\"1rem\\">
+    <Box display=\\"flex\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\">
         Turn great ideas into new possibilities.
       </Text>
@@ -350,6 +350,7 @@ exports[`hero default 1`] = `
       flexDirection=\\"row\\"
       alignItems=\\"center\\"
       gap=\\"1.5rem\\"
+      mt=\\"1rem\\"
     >
       <Button>Get started</Button>
     </Box>
@@ -380,7 +381,7 @@ exports[`hero left aligned 1`] = `
         </Text>
       </Box>
     </Box>
-    <Box display=\\"flex\\" mb=\\"1rem\\">
+    <Box display=\\"flex\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"left\\">
         Turn great ideas into new possibilities.
       </Text>
@@ -391,6 +392,7 @@ exports[`hero left aligned 1`] = `
       flexDirection=\\"row\\"
       alignItems=\\"center\\"
       gap=\\"1.5rem\\"
+      mt=\\"1rem\\"
     >
       <Button textAlign=\\"left\\" justifyContent=\\"left\\">
         Get started
@@ -424,7 +426,7 @@ exports[`hero with bg 1`] = `
         </Text>
       </Box>
     </Box>
-    <Box display=\\"flex\\" mb=\\"1rem\\">
+    <Box display=\\"flex\\">
       <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
         Turn great ideas into new possibilities.
       </Text>
@@ -435,6 +437,7 @@ exports[`hero with bg 1`] = `
       flexDirection=\\"row\\"
       alignItems=\\"center\\"
       gap=\\"1.5rem\\"
+      mt=\\"1rem\\"
     >
       <Button textColor=\\"#000\\" bgColor=\\"#f1f5f9\\">
         Get started
