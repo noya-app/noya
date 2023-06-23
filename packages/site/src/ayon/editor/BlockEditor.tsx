@@ -43,7 +43,7 @@ import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
-import { fromSymbol, toContent } from './serialization';
+import { extractBlockContent, fromSymbol, toContent } from './serialization';
 import { CustomEditor, ParagraphElement } from './types';
 import { withLayout } from './withLayout';
 
@@ -80,7 +80,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
     withLayout(layer.symbolID, withHistory(withReact(createEditor()))),
   );
 
-  const initialNodes = fromSymbol(blockDefinition.symbol, layer);
+  const initialNodes = fromSymbol(
+    blockDefinition.symbol,
+    extractBlockContent(layer),
+  );
 
   const setBlockNodes = useCallback(
     (
