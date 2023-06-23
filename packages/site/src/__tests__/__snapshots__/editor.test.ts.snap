@@ -58,7 +58,7 @@ Array [
     ],
     "label": "Link",
     "layerId": "eee85c94-7361-4bcf-8afb-f59c6e8661f7",
-    "placeholder": "Learn more #text-slate-800 #no-underline #icon-arrow-forward",
+    "placeholder": "Learn more #no-underline #icon-arrow-forward",
     "symbolId": "5be80b87-7bd6-4090-8947-316d54064544",
     "type": "paragraph",
   },

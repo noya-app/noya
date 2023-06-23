@@ -134,7 +134,7 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
       symbolID: linkSymbolId,
-      blockText: 'Learn more #text-slate-800 #no-underline #icon-arrow-forward',
+      blockText: 'Learn more #no-underline #icon-arrow-forward',
       isVisible: false,
     }),
   ],

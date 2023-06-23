@@ -7,8 +7,9 @@ import {
   getCurrentPlatform,
   handleKeyboardEvent,
 } from 'noya-keymap';
-import { amplitude, ILogEvent } from 'noya-log';
+import { ILogEvent, amplitude } from 'noya-log';
 import { useLazyValue } from 'noya-react-utils';
+import { SketchModel } from 'noya-sketch-model';
 import { BlockContent, Overrides, ParentLayer } from 'noya-state';
 import React, {
   ForwardedRef,
@@ -17,15 +18,16 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import {
-  createEditor,
   Descendant,
   Editor,
-  Element as SlateElement,
   Range,
+  Element as SlateElement,
   Transforms,
+  createEditor,
 } from 'slate';
 import { withHistory } from 'slate-history';
 import {
@@ -34,13 +36,13 @@ import {
   RenderElementProps,
   withReact,
 } from 'slate-react';
-import { allInsertableSymbols, Blocks } from '../blocks/blocks';
+import { Blocks, allInsertableSymbols } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { InferredBlockTypeResult } from '../types';
 import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
-import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
 import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
+import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
 import { fromSymbol, toContent } from './serialization';
 import { CustomEditor, ParagraphElement } from './types';
 import { withLayout } from './withLayout';
@@ -81,14 +83,32 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const initialNodes = fromSymbol(blockDefinition.symbol, layer);
 
   const setBlockNodes = useCallback(
-    (nodes: Descendant[], symbolId?: string) => {
-      const content = toContent(blockDefinition.symbol, nodes);
+    (
+      nodes: Descendant[],
+      // If there's a layerId that means this is a nested block
+      symbolInfo?: { layerId?: string; symbolId: string },
+    ) => {
+      let content = toContent(blockDefinition.symbol, nodes);
 
-      if (symbolId) {
-        content.symbolId = symbolId;
+      if (symbolInfo && symbolInfo.layerId) {
+        const override = SketchModel.overrideValue({
+          overrideName: Overrides.encodeName([symbolInfo.layerId], 'symbolID'),
+          value: symbolInfo.symbolId,
+        });
+
+        content = {
+          ...content,
+          overrides: [...(content.overrides ?? []), override],
+        };
       }
 
-      controlledEditorRef.current?.updateInternal(nodes, symbolId);
+      if (symbolInfo && !symbolInfo.layerId) {
+        content.symbolId = symbolInfo.symbolId;
+        controlledEditorRef.current?.updateInternal(nodes, symbolInfo.symbolId);
+      } else {
+        controlledEditorRef.current?.updateInternal(nodes);
+      }
+
       onChangeBlockContent(content);
     },
     [blockDefinition.symbol, onChangeBlockContent],
@@ -121,9 +141,22 @@ export const BlockEditor = forwardRef(function BlockEditor(
     getPosition: getRangeDOMPosition,
     possibleItems: symbolItems,
     onSelect: (target, item) => {
+      const elementPair = Editor.above<ParagraphElement>(editor, {
+        at: target,
+        match: (n) => SlateElement.isElement(n) && n.type === 'paragraph',
+      });
+
+      if (!elementPair) return;
+
+      const [element] = elementPair;
+
       Transforms.select(editor, Editor.start(editor, []));
       Transforms.delete(editor, { at: target });
-      setBlockNodes(editor.children, item.id);
+
+      setBlockNodes(editor.children, {
+        layerId: element.layerId,
+        symbolId: item.id,
+      });
 
       if (!Blocks[item.id].editorVersion) {
         setTimeout(() => {
@@ -315,6 +348,30 @@ export const BlockEditor = forwardRef(function BlockEditor(
     return visibility;
   }, [blockDefinition.symbol, layer.overrideValues]);
 
+  const layerBlockTypes = useMemo(() => {
+    const blockTypes: Record<string, string> = {};
+    const children = flattenPassthroughLayers(blockDefinition.symbol);
+
+    for (const child of children) {
+      const blockType = Overrides.getOverrideValue(
+        layer.overrideValues,
+        child.do_objectID,
+        'symbolID',
+      );
+
+      blockTypes[child.do_objectID] = blockType ?? child.symbolID;
+    }
+
+    return blockTypes;
+  }, [blockDefinition.symbol, layer.overrideValues]);
+
+  const layerBlockTypesRef = useRef(layerBlockTypes);
+
+  // layerBlockTypes is stale in the Editor onChange callback if we don't use a ref
+  useEffect(() => {
+    layerBlockTypesRef.current = layerBlockTypes;
+  }, [layerBlockTypes]);
+
   const renderElement = useCallback(
     (props: RenderElementProps) => {
       const layerId = props.element.layerId;
@@ -324,11 +381,12 @@ export const BlockEditor = forwardRef(function BlockEditor(
         <ElementComponent
           isVisible={isVisible}
           onSetVisible={onSetVisible}
+          layerBlockTypes={layerBlockTypes}
           {...props}
         />
       );
     },
-    [layerVisibility, onSetVisible],
+    [layerBlockTypes, layerVisibility, onSetVisible],
   );
 
   return (
@@ -365,7 +423,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
           Transforms.delete(editor, { at: range });
 
-          setBlockNodes(editor.children, BLOCK_TYPE_SHORTCUTS[match]);
+          setBlockNodes(editor.children, {
+            symbolId: BLOCK_TYPE_SHORTCUTS[match],
+          });
 
           return;
         }
@@ -392,7 +452,10 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
           if (elementPair) {
             const [element] = elementPair;
-            const blockDefinition = Blocks[element.symbolId];
+            const targetSymbolId = element.layerId
+              ? layerBlockTypesRef.current[element.layerId]
+              : element.symbolId;
+            const blockDefinition = Blocks[targetSymbolId];
 
             setHashtagItems(
               (blockDefinition?.hashtags ?? []).map((item) => ({

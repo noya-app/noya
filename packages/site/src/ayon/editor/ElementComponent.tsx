@@ -8,6 +8,7 @@ import {
   useSelected,
 } from 'slate-react';
 import styled from 'styled-components';
+import { Blocks } from '../blocks/blocks';
 
 const Container = styled.div<{ selected: boolean }>(({ selected }) => ({
   background: selected ? 'white' : 'rgba(0,0,0,0.05)',
@@ -48,6 +49,7 @@ const HoverMenu = styled.div({
 interface Props extends RenderElementProps {
   onSetVisible?: (layerId: string, visible: boolean) => void;
   isVisible: boolean;
+  layerBlockTypes: Record<string, string>;
 }
 
 export function ElementComponent(props: Props) {
@@ -88,7 +90,9 @@ export function ElementComponent(props: Props) {
               textDecoration: props.isVisible ? undefined : 'line-through',
             }}
           >
-            {props.element.label}
+            {props.element.layerId
+              ? Blocks[props.layerBlockTypes[props.element.layerId]].symbol.name
+              : props.element.label}
           </span>
           <HoverMenu className="show-on-hover">
             <EyeComponent
