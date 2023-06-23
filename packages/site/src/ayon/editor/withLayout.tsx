@@ -91,7 +91,13 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
     if (path.length === 0) {
       // Ensure there's a node for each layer and the container
       while (editor.children.length < layers.length + 1) {
-        insertBlock(editor, layers[editor.children.length - 1] ?? symbol, path);
+        insertBlock(
+          editor,
+          editor.children.length === 0
+            ? symbol
+            : layers[editor.children.length - 1],
+          path,
+        );
       }
 
       while (editor.children.length > layers.length + 1) {
@@ -103,12 +109,12 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
       for (const [child, childPath] of Node.children(editor, path)) {
         if (!SlateElement.isElement(child)) continue;
 
-        const layer = layers[childPath[0]];
+        const index = childPath[0];
 
-        if (layer) {
-          setNestedNodeProperties(editor, layer, childPath, child);
-        } else {
+        if (index === 0) {
           setRootNodeProperties(editor, symbol, childPath, child);
+        } else {
+          setNestedNodeProperties(editor, layers[index - 1], childPath, child);
         }
       }
     }

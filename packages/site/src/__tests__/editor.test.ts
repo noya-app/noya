@@ -52,13 +52,22 @@ test('serializes empty block', () => {
     extractBlockContent(layer),
   );
 
-  expect(editor.children.map(toBlockName)).toEqual([
+  expect(nodes.map(toBlockName)).toEqual([
+    'Hero',
     'Text',
     'Heading1',
     'Heading4',
     'Button',
     'Link',
+  ]);
+
+  expect(editor.children.map(toBlockName)).toEqual([
     'Hero',
+    'Text',
+    'Heading1',
+    'Heading4',
+    'Button',
+    'Link',
   ]);
 
   expect(editor.children).toEqual(nodes);

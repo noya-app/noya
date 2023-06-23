@@ -20,7 +20,8 @@ export function toContent(
 
   for (let i = 0; i < layers.length; i++) {
     const layer = layers[i];
-    const value = nodes[i] ? Node.string(nodes[i]) : '';
+    const node = nodes[i + 1];
+    const value = node ? Node.string(node) : '';
 
     overrides.push(
       SketchModel.overrideValue({
@@ -32,8 +33,7 @@ export function toContent(
 
   return {
     symbolId: symbol.symbolID,
-    blockText:
-      nodes.length > layers.length ? Node.string(nodes[layers.length]) : '',
+    blockText: nodes.length > layers.length ? Node.string(nodes[0]) : '',
     overrides: overrides,
   };
 }
@@ -82,7 +82,7 @@ export function fromSymbol(
     layerId: undefined,
   };
 
-  return [...layerNodes, rootNode];
+  return [rootNode, ...layerNodes];
 }
 
 export function toString(value: Descendant[]): string {

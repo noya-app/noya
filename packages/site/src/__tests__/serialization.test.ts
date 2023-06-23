@@ -70,8 +70,16 @@ test('serializes block with layer text', () => {
   );
 
   const originalContent = extractBlockContent(instance);
+
+  expect(originalContent).toMatchSnapshot('originalContent');
+
   const nodes = fromSymbol(symbol, originalContent);
+
+  expect(nodes).toMatchSnapshot('nodes');
+
   const content = toContent(symbol, nodes);
+
+  expect(content).toMatchSnapshot('content');
 
   expect(filterEmptyOverrides(content)).toEqual(originalContent);
   expect(nodes).toMatchSnapshot();
