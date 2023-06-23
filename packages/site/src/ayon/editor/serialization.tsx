@@ -6,7 +6,10 @@ import { Blocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { ParagraphElement } from './types';
 
-type SerializedBlockContent = Omit<Required<BlockContent>, 'normalizedText'>;
+export type SerializedBlockContent = Omit<
+  Required<BlockContent>,
+  'normalizedText'
+>;
 
 export function toContent(
   symbol: Sketch.SymbolMaster,
@@ -19,14 +22,12 @@ export function toContent(
     const layer = layers[i];
     const value = nodes[i] ? Node.string(nodes[i]) : '';
 
-    if (value) {
-      overrides.push(
-        SketchModel.overrideValue({
-          overrideName: Overrides.encodeName([layer.do_objectID], 'blockText'),
-          value,
-        }),
-      );
-    }
+    overrides.push(
+      SketchModel.overrideValue({
+        overrideName: Overrides.encodeName([layer.do_objectID], 'blockText'),
+        value,
+      }),
+    );
   }
 
   return {

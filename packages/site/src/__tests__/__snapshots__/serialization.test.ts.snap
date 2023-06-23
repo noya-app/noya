@@ -29,7 +29,7 @@ Array [
   Object {
     "children": Array [
       Object {
-        "text": "",
+        "text": "hello",
       },
     ],
     "label": "Heading4",

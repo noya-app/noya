@@ -3,8 +3,9 @@ import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides } from 'noya-state';
 import path from 'path';
 import { Blocks } from '../ayon/blocks/blocks';
-import { heading5SymbolId, heroSymbolV2Id } from '../ayon/blocks/symbolIds';
+import { heading4SymbolId, heroSymbolV2Id } from '../ayon/blocks/symbolIds';
 import {
+  SerializedBlockContent,
   extractBlockContent,
   fromSymbol,
   toContent,
@@ -16,6 +17,13 @@ jest.mock('../../safelist.txt', () => {
     default: readFileSync(path.join(__dirname, '../../safelist.txt'), 'utf8'),
   };
 });
+
+function filterEmptyOverrides(blockContent: SerializedBlockContent) {
+  return {
+    ...blockContent,
+    overrides: blockContent.overrides.filter((o) => o.value !== ''),
+  };
+}
 
 test('serializes block', () => {
   const instance = SketchModel.symbolInstance({
@@ -33,7 +41,7 @@ test('serializes block', () => {
   const nodes = fromSymbol(symbol, originalContent);
   const content = toContent(symbol, nodes);
 
-  expect(content).toEqual(originalContent);
+  expect(filterEmptyOverrides(content)).toEqual(originalContent);
 });
 
 test('serializes block with layer text', () => {
@@ -47,22 +55,24 @@ test('serializes block with layer text', () => {
 
   const symbol = Blocks[instance.symbolID].symbol;
 
-  symbol.layers
+  const targetLayer = symbol.layers
     .filter(Layers.isSymbolInstance)
-    .filter((layer) => layer.symbolID === heading5SymbolId)
-    .forEach((layer) => {
-      instance.overrideValues.push(
-        SketchModel.overrideValue({
-          overrideName: Overrides.encodeName([layer.do_objectID], 'blockText'),
-          value: 'hello',
-        }),
-      );
-    });
+    .find((layer) => layer.symbolID === heading4SymbolId);
+
+  instance.overrideValues.push(
+    SketchModel.overrideValue({
+      overrideName: Overrides.encodeName(
+        [targetLayer!.do_objectID],
+        'blockText',
+      ),
+      value: 'hello',
+    }),
+  );
 
   const originalContent = extractBlockContent(instance);
   const nodes = fromSymbol(symbol, originalContent);
   const content = toContent(symbol, nodes);
 
-  expect(content).toEqual(originalContent);
+  expect(filterEmptyOverrides(content)).toEqual(originalContent);
   expect(nodes).toMatchSnapshot();
 });

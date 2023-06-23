@@ -1,7 +1,12 @@
 import { readFileSync } from 'fs';
 import { SketchModel } from 'noya-sketch-model';
 import path from 'path';
-import { Editor, createEditor } from 'slate';
+import {
+  Descendant,
+  Editor,
+  Element as SlateElement,
+  createEditor,
+} from 'slate';
 import { withHistory } from 'slate-history';
 import { withReact } from 'slate-react';
 import { Blocks } from '../ayon/blocks/blocks';
@@ -15,6 +20,16 @@ jest.mock('../../safelist.txt', () => {
     default: readFileSync(path.join(__dirname, '../../safelist.txt'), 'utf8'),
   };
 });
+
+function toBlockName(node: Descendant) {
+  if (!SlateElement.isElement(node)) {
+    throw new Error('Expected node (expected an element)');
+  }
+
+  const block = Blocks[node.symbolId];
+
+  return block.symbol.name;
+}
 
 test('serializes empty block', () => {
   const layer = SketchModel.symbolInstance({
@@ -36,6 +51,15 @@ test('serializes empty block', () => {
     Blocks[layer.symbolID].symbol,
     extractBlockContent(layer),
   );
+
+  expect(editor.children.map(toBlockName)).toEqual([
+    'Text',
+    'Heading1',
+    'Heading4',
+    'Button',
+    'Link',
+    'Hero',
+  ]);
 
   expect(editor.children).toEqual(nodes);
 });
