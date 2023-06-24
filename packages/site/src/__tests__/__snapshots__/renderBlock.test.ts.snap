@@ -329,7 +329,12 @@ exports[`hero default 1`] = `
     w=\\"400px\\"
     h=\\"400px\\"
   >
-    <Box display=\\"flex\\" bgColor=\\"transparent\\" flexDirection=\\"column\\">
+    <Box
+      display=\\"flex\\"
+      bgColor=\\"transparent\\"
+      flexDirection=\\"column\\"
+      alignItems=\\"inherit\\"
+    >
       <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#3b82f6\\" fontWeight=\\"700\\">
         The future is here
       </Text>
@@ -371,7 +376,12 @@ exports[`hero left aligned 1`] = `
     w=\\"400px\\"
     h=\\"400px\\"
   >
-    <Box display=\\"flex\\" bgColor=\\"transparent\\" flexDirection=\\"column\\">
+    <Box
+      display=\\"flex\\"
+      bgColor=\\"transparent\\"
+      flexDirection=\\"column\\"
+      alignItems=\\"inherit\\"
+    >
       <Text flex=\\"1\\" textAlign=\\"left\\" textColor=\\"#3b82f6\\" fontWeight=\\"700\\">
         The future is here
       </Text>
@@ -416,7 +426,12 @@ exports[`hero with bg 1`] = `
     w=\\"400px\\"
     h=\\"400px\\"
   >
-    <Box display=\\"flex\\" bgColor=\\"transparent\\" flexDirection=\\"column\\">
+    <Box
+      display=\\"flex\\"
+      bgColor=\\"transparent\\"
+      flexDirection=\\"column\\"
+      alignItems=\\"inherit\\"
+    >
       <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\" fontWeight=\\"700\\">
         The future is here
       </Text>

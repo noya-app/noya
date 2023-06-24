@@ -143,7 +143,7 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
 export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
   symbolID: '511cf6e2-b92b-45a3-a239-b13e9dbbfe9f',
   name: 'Hero Headline Stack',
-  defaultBlockText: '#bg-transparent #flex-col',
+  defaultBlockText: '#bg-transparent #flex-col #items-inherit',
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
