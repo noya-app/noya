@@ -4,6 +4,7 @@ import {
   getBlockClassName,
   parametersToTailwindStyle,
   resolveTailwindClass,
+  simpleAlignmentResolver,
 } from '../ayon/blocks/tailwind';
 
 // Jest doesn't know how to import a text file, so we mock it
@@ -180,6 +181,14 @@ describe('parameters', () => {
     ).toEqual({
       alignItems: 'center',
       justifyContent: 'center',
+    });
+  });
+
+  it('customer resolver', () => {
+    expect(
+      parametersToTailwindStyle({ center: true }, simpleAlignmentResolver),
+    ).toEqual({
+      textAlign: 'center',
     });
   });
 });

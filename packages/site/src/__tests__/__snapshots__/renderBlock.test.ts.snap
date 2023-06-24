@@ -31,11 +31,9 @@ exports[`card with no border radius on image default 1`] = `
         News
       </Text>
     </Box>
-    <Box display=\\"flex\\" mt=\\"0.25rem\\">
-      <Text flex=\\"1\\">
-        Here you can explore the latest news and information.
-      </Text>
-    </Box>
+    <Text mt=\\"0.25rem\\">
+      Here you can explore the latest news and information.
+    </Text>
   </Box>
 </Frame>;
 "
@@ -335,7 +333,7 @@ exports[`hero default 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#3b82f6\\" fontWeight=\\"700\\">
+      <Text textColor=\\"#3b82f6\\" fontWeight=\\"700\\" textAlign=\\"center\\">
         The future is here
       </Text>
       <Box display=\\"flex\\">
@@ -382,7 +380,7 @@ exports[`hero left aligned 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Text flex=\\"1\\" textAlign=\\"left\\" textColor=\\"#3b82f6\\" fontWeight=\\"700\\">
+      <Text textColor=\\"#3b82f6\\" fontWeight=\\"700\\" textAlign=\\"left\\">
         The future is here
       </Text>
       <Box display=\\"flex\\">
@@ -432,7 +430,7 @@ exports[`hero with bg 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\" fontWeight=\\"700\\">
+      <Text textColor=\\"#fff\\" fontWeight=\\"700\\" textAlign=\\"center\\">
         The future is here
       </Text>
       <Box display=\\"flex\\">
@@ -501,7 +499,7 @@ exports[`link with icon 1`] = `
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#ef4444\\">
+  <Text textAlign=\\"center\\" textColor=\\"#ef4444\\">
     Hello world
   </Text>
 </Frame>;
@@ -510,7 +508,7 @@ exports[`text default 1`] = `
 
 exports[`text escape jsx 1`] = `
 "<Frame width={100} height={40}>
-  <Text flex=\\"1\\">{'Hello \\"\\\\'<{test}>\\\\'\\" world'}</Text>
+  <Text>{'Hello \\"\\\\'<{test}>\\\\'\\" world'}</Text>
 </Frame>;
 "
 `;

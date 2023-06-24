@@ -349,15 +349,35 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
   return assertNever(classGroup);
 });
 
+export function simpleAlignmentResolver(
+  className: string,
+): CSSProperties | null {
+  switch (className) {
+    case 'center':
+      return { textAlign: 'center' };
+    case 'left':
+      return { textAlign: 'left' };
+    case 'right':
+      return { textAlign: 'right' };
+    default:
+      return null;
+  }
+}
+
 export function parametersToTailwindStyle(
   parameters: ParsedBlockItemParameters | string[],
+  resolve?: (className: string) => CSSProperties | null,
 ): CSSProperties {
   const hashtags = Array.isArray(parameters)
     ? parameters
     : Object.keys(parameters);
 
   return hashtags.reduce((result, className) => {
-    const style = resolveTailwindClass(className);
+    let style = resolve?.(className);
+
+    if (!style) {
+      style = resolveTailwindClass(className);
+    }
 
     return {
       ...result,
