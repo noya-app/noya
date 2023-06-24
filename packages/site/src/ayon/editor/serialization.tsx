@@ -69,7 +69,6 @@ export function fromSymbol(
       children: [{ text: value ?? '' }],
       label: name,
       symbolId: layer.symbolID,
-      placeholder: layer.blockText,
       layerId: layer.do_objectID,
     };
   });
@@ -78,7 +77,6 @@ export function fromSymbol(
     type: 'paragraph',
     children: [{ text: instance.blockText ?? '' }],
     symbolId: instance.symbolId,
-    placeholder: undefined,
     layerId: undefined,
   };
 

@@ -351,6 +351,19 @@ export const BlockEditor = forwardRef(function BlockEditor(
     return visibility;
   }, [blockDefinition.symbol, layer.overrideValues]);
 
+  const layerPlaceholderText = useMemo(() => {
+    const placeholderText: Record<string, string> = {};
+    const children = flattenPassthroughLayers(blockDefinition.symbol);
+
+    for (const child of children) {
+      if (!child.blockText) continue;
+
+      placeholderText[child.do_objectID] = child.blockText;
+    }
+
+    return placeholderText;
+  }, [blockDefinition.symbol]);
+
   const layerBlockTypes = useMemo(() => {
     const blockTypes: Record<string, string> = {};
     const children = flattenPassthroughLayers(blockDefinition.symbol);
@@ -379,17 +392,19 @@ export const BlockEditor = forwardRef(function BlockEditor(
     (props: RenderElementProps) => {
       const layerId = props.element.layerId;
       const isVisible = layerId ? layerVisibility[layerId] : true;
+      const placeholder = layerId ? layerPlaceholderText[layerId] : undefined;
 
       return (
         <ElementComponent
           isVisible={isVisible}
           onSetVisible={onSetVisible}
           layerBlockTypes={layerBlockTypes}
+          placeholder={placeholder}
           {...props}
         />
       );
     },
-    [layerBlockTypes, layerVisibility, onSetVisible],
+    [layerBlockTypes, layerPlaceholderText, layerVisibility, onSetVisible],
   );
 
   return (

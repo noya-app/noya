@@ -49,6 +49,7 @@ const HoverMenu = styled.div({
 interface Props extends RenderElementProps {
   onSetVisible?: (layerId: string, visible: boolean) => void;
   isVisible: boolean;
+  placeholder?: string;
   layerBlockTypes: Record<string, string>;
 }
 
@@ -63,7 +64,7 @@ export function ElementComponent(props: Props) {
       <Container selected={selected}>
         <div style={{ flex: '1', position: 'relative' }}>
           <DefaultElement {...props} />
-          {props.element.placeholder && Node.string(props.element) === '' && (
+          {props.placeholder && Node.string(props.element) === '' && (
             <span
               contentEditable={false}
               style={{
@@ -79,7 +80,7 @@ export function ElementComponent(props: Props) {
                 whiteSpace: 'nowrap',
               }}
             >
-              {props.element.placeholder}
+              {props.placeholder}
             </span>
           )}
         </div>

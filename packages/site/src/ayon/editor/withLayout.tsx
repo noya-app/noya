@@ -1,5 +1,4 @@
 import Sketch from 'noya-file-format';
-import { Layers } from 'noya-state';
 import { Node, Element as SlateElement, Transforms } from 'slate';
 import { Blocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
@@ -17,7 +16,6 @@ export function insertBlock(
     children: [{ text: '' }],
     label: block.symbol.name,
     symbolId: block.symbol.symbolID,
-    placeholder: Layers.isSymbolInstance(layer) ? layer.blockText : undefined,
     layerId: layer ? layer.do_objectID : undefined,
   };
 
@@ -35,20 +33,14 @@ export function setNestedNodeProperties(
   const block = Blocks[layer.symbolID];
 
   const label = block.symbol.name;
-  const placeholder = layer ? layer.blockText : undefined;
 
-  if (
-    node.label === label &&
-    node.placeholder === placeholder &&
-    node.layerId === layer.do_objectID
-  ) {
+  if (node.label === label && node.layerId === layer.do_objectID) {
     return;
   }
 
   const newProperties: Partial<SlateElement> = {
     label,
     symbolId: layer.symbolID,
-    placeholder,
     layerId: layer.do_objectID,
   };
 
@@ -68,7 +60,6 @@ export function setRootNodeProperties(
   const newProperties: Partial<SlateElement> = {
     label: undefined,
     symbolId: layer.symbolID,
-    placeholder: undefined,
     layerId: undefined,
   };
 
