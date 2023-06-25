@@ -43,9 +43,9 @@ import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
+import { createSchema, withSchema } from './schema';
 import { extractBlockContent, fromContent, toContent } from './serialization';
 import { CustomEditor, EditorSchema, ParagraphElement } from './types';
-import { createSchema, withLayout } from './withLayout';
 
 export interface IBlockEditor {
   focus: () => void;
@@ -87,7 +87,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
   );
 
   const editor = useLazyValue<CustomEditor>(() =>
-    withLayout(schema, withHistory(withReact(createEditor()))),
+    withSchema(schema, withHistory(withReact(createEditor()))),
   );
 
   const initialNodes = fromContent(

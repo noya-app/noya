@@ -8,7 +8,7 @@ import {
   ParagraphElement,
 } from './types';
 
-export function withLayout(schema: EditorSchema, editor: CustomEditor) {
+export function withSchema(schema: EditorSchema, editor: CustomEditor) {
   const { normalizeNode } = editor;
 
   editor.schema = schema;

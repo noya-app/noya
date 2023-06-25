@@ -14,8 +14,8 @@ import { withReact } from 'slate-react';
 import { withOptions } from 'tree-visit';
 import { Blocks } from '../ayon/blocks/blocks';
 import { heroSymbolV2Id } from '../ayon/blocks/symbolIds';
+import { createSchema, withSchema } from '../ayon/editor/schema';
 import { extractBlockContent, fromContent } from '../ayon/editor/serialization';
-import { createSchema, withLayout } from '../ayon/editor/withLayout';
 
 const traverse = withOptions({
   getChildren: (node: SlateNode): SlateNode[] => {
@@ -69,7 +69,7 @@ test('serializes empty block', () => {
     frame: SketchModel.rect({ width: 400, height: 400 }),
   });
 
-  const editor = withLayout(
+  const editor = withSchema(
     createSchema({
       symbolId: layer.symbolID,
       layerId: layer.do_objectID,
@@ -112,7 +112,7 @@ test('insert and delete text', () => {
     frame: SketchModel.rect({ width: 400, height: 400 }),
   });
 
-  const editor = withLayout(
+  const editor = withSchema(
     createSchema({
       symbolId: layer.symbolID,
       layerId: layer.do_objectID,
