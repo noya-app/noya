@@ -252,6 +252,7 @@ export function mapBlockToElement(
       blockText: layer.blockText,
       resolvedBlockData: layer.resolvedBlockData,
       getBlock: (id) => Blocks[id],
+      overrideValues: layer.overrideValues,
       dataSet: {
         id: layer.do_objectID,
         parentId: layer.do_objectID,

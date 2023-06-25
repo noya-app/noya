@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import {
   applyOverrides,
   BlockDefinition,
@@ -21,7 +20,6 @@ import { boxSymbol } from './symbols';
 interface BlockRenderOptions {
   props: BlockProps;
   block: Pick<BlockDefinition, 'symbol' | 'placeholderText' | 'isPassthrough'>;
-  overrideValues?: Sketch.OverrideValue[];
   extraParameters?: ParsedBlockItemParameters;
 }
 
@@ -40,22 +38,25 @@ export function getContainerBlockProps({
     dataSet: props.dataSet,
     resolvedBlockData: props.resolvedBlockData,
     blockText,
+    layer: props.layer,
+    overrideValues: props.overrideValues,
   };
 }
 
-export function getChildrenBlockProps({
+function getChildrenBlockProps({
   props,
   block,
   extraParameters,
-  overrideValues = [],
 }: BlockRenderOptions): BlockProps[] {
+  const overrideValues = props.overrideValues ?? [];
+
   const master = applyOverrides({
     overrideValues,
     symbolMaster: block.symbol,
   });
 
   return zip(master.layers, block.symbol.layers).flatMap(
-    ([layer, fallbackLayer]) => {
+    ([layer, fallbackLayer]): BlockProps[] => {
       if (
         !Layers.isSymbolInstance(layer) ||
         !Layers.isSymbolInstance(fallbackLayer) ||
@@ -64,11 +65,12 @@ export function getChildrenBlockProps({
         return [];
       }
 
-      const override = overrideValues.find(
-        (override) =>
+      const override = overrideValues.find((override) => {
+        return (
           override.overrideName ===
-          Overrides.encodeName([layer.do_objectID], 'blockText'),
-      );
+          Overrides.encodeName([layer.do_objectID], 'blockText')
+        );
+      });
       const hasOverride = !!(override && override.value);
 
       const fallback = parseBlock(fallbackLayer.blockText, 'regular');
@@ -93,6 +95,11 @@ export function getChildrenBlockProps({
           blockText,
           resolvedBlockData:
             layer.resolvedBlockData ?? fallbackLayer.resolvedBlockData,
+          overrideValues: Overrides.removePrefix(
+            overrideValues,
+            layer.do_objectID,
+          ),
+          layer,
           ...(props.dataSet && {
             dataSet: {
               id: layer.do_objectID,
@@ -108,7 +115,6 @@ export function getChildrenBlockProps({
 export function getRenderableBlockProps({
   props,
   block,
-  overrideValues,
   extraParameters: inputExtraParameters,
 }: BlockRenderOptions) {
   const container = getContainerBlockProps({ props, block });
@@ -137,7 +143,6 @@ export function getRenderableBlockProps({
   const children = getChildrenBlockProps({
     props,
     block,
-    overrideValues: props.layer?.overrideValues ?? overrideValues,
     extraParameters,
   });
 
@@ -146,12 +151,7 @@ export function getRenderableBlockProps({
 
 export const renderStack = (
   env: BlockRenderingEnvironment,
-  {
-    props,
-    block,
-    overrideValues,
-    extraParameters: inputExtraParameters,
-  }: BlockRenderOptions,
+  { props, block, extraParameters: inputExtraParameters }: BlockRenderOptions,
 ) => {
   const {
     container,
@@ -160,7 +160,6 @@ export const renderStack = (
   } = getRenderableBlockProps({
     props,
     block,
-    overrideValues,
     extraParameters: inputExtraParameters,
   });
 
@@ -171,7 +170,6 @@ export const renderStack = (
       return renderStack(env, {
         props: childProps,
         block,
-        overrideValues: props.layer?.overrideValues,
         extraParameters: outputExtraParameters,
       });
     }

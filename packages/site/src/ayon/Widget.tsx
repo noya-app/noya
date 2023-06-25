@@ -353,6 +353,7 @@ export const Widget = forwardRef(function Widget(
         id: layer.do_objectID,
         parentId: layer.do_objectID,
       },
+      overrideValues: layer.overrideValues,
     };
 
     const {
@@ -373,7 +374,6 @@ export const Widget = forwardRef(function Widget(
             props: childProps,
             block: block,
             extraParameters,
-            overrideValues: blockProps.layer?.overrideValues,
           }).children;
         }
 

@@ -81,6 +81,11 @@ export const classGroups = {
   borderColor: /^border-[-a-z]+/,
   textDecoration: /^(underline|overline|no-underline|line-through)/,
   boxShadow: /^shadow/,
+  autoCols: /^auto-cols/,
+  autoRows: /^auto-rows/,
+  gridFlow: /^grid-flow/,
+  display:
+    /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
   // Must be last!
   none: /.*/,
 };
@@ -344,6 +349,40 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     }
     case 'none':
       return null;
+    case 'autoCols': {
+      const value = className.replace('auto-cols-', '');
+      return {
+        gridAutoColumns: (config.theme as any).gridAutoColumns[
+          value || 'DEFAULT'
+        ],
+      };
+    }
+    case 'autoRows': {
+      const value = className.replace('auto-rows-', '');
+      return {
+        gridAutoRows: (config.theme as any).gridAutoRows[value || 'DEFAULT'],
+      };
+    }
+    case 'gridFlow': {
+      const value = className.replace('grid-flow-', '');
+      switch (value) {
+        case 'row':
+          return {
+            gridAutoFlow: 'row',
+          };
+        case 'col':
+          return {
+            gridAutoFlow: 'column',
+          };
+        default:
+          return null;
+      }
+    }
+    case 'display': {
+      return {
+        display: className,
+      };
+    }
   }
 
   return assertNever(classGroup);

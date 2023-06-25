@@ -104,6 +104,7 @@ function renderDynamicContent(
         blockText,
         resolvedBlockData,
         getBlock,
+        overrideValues: layer?.overrideValues,
       }),
     );
   }
@@ -122,6 +123,7 @@ function renderDynamicContent(
         blockText: layer.blockText,
         resolvedBlockData: layer.resolvedBlockData,
         getBlock,
+        overrideValues: layer.overrideValues,
       });
     }),
     ...(drawing

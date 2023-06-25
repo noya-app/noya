@@ -149,3 +149,28 @@ export function getOverrideValue<T extends PropertyType>(
     ? value
     : undefined;
 }
+
+export function removePrefix(
+  overrideValues: Sketch.OverrideValue[],
+  prefixLayerId: string,
+) {
+  const overrides = overrideValues.flatMap(
+    (override): Sketch.OverrideValue[] => {
+      const {
+        layerIdPath: [layerId, ...remainingPath],
+        propertyType,
+      } = decodeName(override.overrideName);
+
+      if (layerId !== prefixLayerId) return [];
+
+      return [
+        {
+          ...override,
+          overrideName: encodeName(remainingPath, propertyType),
+        },
+      ];
+    },
+  );
+
+  return overrides;
+}

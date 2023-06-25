@@ -47,6 +47,7 @@ export type BlockProps = {
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
   getBlock: (symbolId: string) => BlockDefinition;
   children?: ReactNode;
+  overrideValues?: Sketch.OverrideValue[];
   dataSet?: {
     id: string;
     parentId: string;

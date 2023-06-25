@@ -148,6 +148,20 @@ describe('resolves styles', () => {
       borderRightWidth: '2px',
     });
   });
+
+  it('grid', () => {
+    expect(resolveTailwindClass('grid')).toEqual({
+      display: 'grid',
+    });
+
+    expect(resolveTailwindClass('grid-flow-col')).toEqual({
+      gridAutoFlow: 'column',
+    });
+
+    expect(resolveTailwindClass('auto-cols-max')).toEqual({
+      gridAutoColumns: 'max-content',
+    });
+  });
 });
 
 describe('parameters', () => {

@@ -76,7 +76,7 @@ export const ImageBlock: BlockDefinition = {
               width: `${props.frame.width}px`,
               height: `${props.frame.height}px`,
             }
-          : { minHeight: 0 }),
+          : { minHeight: 0, minWidth: 0 }),
         objectFit: contain ? 'contain' : fill ? 'fill' : 'cover',
         ...style,
       },

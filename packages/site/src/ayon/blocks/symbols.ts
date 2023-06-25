@@ -185,17 +185,17 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
 export const heroWithImageSymbol = SketchModel.symbolMaster({
   symbolID: heroWithImageSymbolId,
   name: 'Hero with Image',
-  defaultBlockText: '#flex-row',
+  defaultBlockText: '#grid #grid-flow-col #auto-cols-fr	',
   layers: [
     SketchModel.symbolInstance({
       do_objectID: 'bc20968b-328a-4831-b242-ed0572e6459d',
       symbolID: heroSymbolV2Id,
-      blockText: '#left',
+      blockText: '#left #px-20',
     }),
     SketchModel.symbolInstance({
       do_objectID: 'e65f7c76-ef83-4924-9545-3e50ac18b32a',
       symbolID: imageSymbolId,
-      blockText: 'landscape',
+      blockText: 'landscape #w-full #h-full',
     }),
   ],
 });
