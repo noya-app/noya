@@ -65,9 +65,9 @@ export function createSchema(rootElement: EditorSchemaElement): EditorSchema {
   const layers = flattenPassthroughLayers(block.symbol);
 
   const children = layers.map(
-    (layer): EditorSchemaElement => ({
-      symbolId: layer.symbolID,
-      layerPath: [layer.do_objectID],
+    (child): EditorSchemaElement => ({
+      symbolId: child.layer.symbolID,
+      layerPath: child.layerPath,
       isRoot: false,
     }),
   );

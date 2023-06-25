@@ -16,17 +16,17 @@ export function toContent(
   symbol: Sketch.SymbolMaster,
   nodes: Descendant[],
 ): EditorBlockContent {
-  const layers = flattenPassthroughLayers(symbol);
+  const children = flattenPassthroughLayers(symbol);
   const overrides: Sketch.OverrideValue[] = [];
 
-  for (let i = 0; i < layers.length; i++) {
-    const layer = layers[i];
+  for (let i = 0; i < children.length; i++) {
+    const { layerPath } = children[i];
     const node = nodes[i + 1];
     const value = node ? Node.string(node) : '';
 
     overrides.push(
       SketchModel.overrideValue({
-        overrideName: Overrides.encodeName([layer.do_objectID], 'blockText'),
+        overrideName: Overrides.encodeName(layerPath, 'blockText'),
         value,
       }),
     );
@@ -36,7 +36,7 @@ export function toContent(
 
   return {
     symbolId: symbol.symbolID,
-    blockText: nodes.length > layers.length ? Node.string(rootNode) : '',
+    blockText: nodes.length > children.length ? Node.string(rootNode) : '',
     overrides: overrides,
     layerPath: [],
   };
@@ -57,12 +57,12 @@ export function fromContent(
   symbol: Sketch.SymbolMaster,
   content: EditorBlockContent,
 ): Descendant[] {
-  const layers = flattenPassthroughLayers(symbol);
+  const children = flattenPassthroughLayers(symbol);
 
-  const layerNodes = layers.map((layer): ParagraphElement => {
+  const layerNodes = children.map(({ layer, layerPath }): ParagraphElement => {
     const value = Overrides.getOverrideValue(
       content.overrides ?? [],
-      layer.do_objectID,
+      layerPath.join('/'),
       'blockText',
     );
 
@@ -70,7 +70,7 @@ export function fromContent(
       type: 'paragraph',
       children: [{ text: value ?? '' }],
       symbolId: layer.symbolID,
-      layerPath: [layer.do_objectID],
+      layerPath: layerPath,
       isRoot: false,
     };
   });

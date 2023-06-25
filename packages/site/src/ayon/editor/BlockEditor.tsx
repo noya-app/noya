@@ -353,13 +353,15 @@ export const BlockEditor = forwardRef(function BlockEditor(
     const children = flattenPassthroughLayers(blockDefinition.symbol);
 
     for (const child of children) {
+      const layerPathString = child.layerPath.join('/');
+
       const isVisible = Overrides.getOverrideValue(
         layer.overrideValues,
-        child.do_objectID,
+        layerPathString,
         'isVisible',
       );
 
-      visibility[child.do_objectID] = isVisible ?? child.isVisible;
+      visibility[layerPathString] = isVisible ?? child.layer.isVisible;
     }
 
     return visibility;
@@ -370,9 +372,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
     const children = flattenPassthroughLayers(blockDefinition.symbol);
 
     for (const child of children) {
-      if (!child.blockText) continue;
+      if (!child.layer.blockText) continue;
 
-      placeholderText[child.do_objectID] = child.blockText;
+      const layerPathString = child.layerPath.join('/');
+
+      placeholderText[layerPathString] = child.layer.blockText;
     }
 
     return placeholderText;
@@ -383,13 +387,15 @@ export const BlockEditor = forwardRef(function BlockEditor(
     const children = flattenPassthroughLayers(blockDefinition.symbol);
 
     for (const child of children) {
+      const layerPathString = child.layerPath.join('/');
+
       const blockType = Overrides.getOverrideValue(
         layer.overrideValues,
-        child.do_objectID,
+        layerPathString,
         'symbolID',
       );
 
-      blockTypes[child.do_objectID] = blockType ?? child.symbolID;
+      blockTypes[layerPathString] = blockType ?? child.layer.symbolID;
     }
 
     return blockTypes;
@@ -400,15 +406,17 @@ export const BlockEditor = forwardRef(function BlockEditor(
     const children = flattenPassthroughLayers(blockDefinition.symbol);
 
     for (const child of children) {
+      const layerPathString = child.layerPath.join('/');
+
       const symbolId = Overrides.getOverrideValue(
         layer.overrideValues,
-        child.do_objectID,
+        layerPathString,
         'symbolID',
       );
 
-      const label = Blocks[symbolId ?? child.symbolID].symbol.name;
+      const label = Blocks[symbolId ?? child.layer.symbolID].symbol.name;
 
-      labels[child.do_objectID] = label ?? child.name;
+      labels[layerPathString] = label ?? child.layer.name;
     }
 
     return labels;

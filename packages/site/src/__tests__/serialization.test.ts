@@ -3,7 +3,11 @@ import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides } from 'noya-state';
 import path from 'path';
 import { Blocks } from '../ayon/blocks/blocks';
-import { heading4SymbolId, heroSymbolV2Id } from '../ayon/blocks/symbolIds';
+import {
+  heading4SymbolId,
+  heroSymbolV2Id,
+  heroWithImageSymbolId,
+} from '../ayon/blocks/symbolIds';
 import {
   EditorBlockContent,
   extractBlockContent,
@@ -85,4 +89,58 @@ test('serializes block with layer text', () => {
 
   expect(filterEmptyOverrides(content)).toEqual(originalContent);
   expect(nodes).toMatchSnapshot();
+});
+
+test('serializes nested block', () => {
+  const instance = SketchModel.symbolInstance({
+    do_objectID: 'a',
+    symbolID: heroWithImageSymbolId,
+    frame: SketchModel.rect({
+      width: 400,
+      height: 400,
+    }),
+  });
+
+  const symbol = Blocks[instance.symbolID].symbol;
+
+  const heroLayer = symbol.layers
+    .filter(Layers.isSymbolInstance)
+    .find((layer) => layer.symbolID === heroSymbolV2Id);
+
+  const nestedSymbol = Blocks[heroLayer!.symbolID].symbol;
+
+  const targetLayer = nestedSymbol.layers
+    .filter(Layers.isSymbolInstance)
+    .find((layer) => layer.symbolID === heading4SymbolId);
+
+  instance.overrideValues.push(
+    SketchModel.overrideValue({
+      overrideName: Overrides.encodeName(
+        [heroLayer!.do_objectID, targetLayer!.do_objectID],
+        'blockText',
+      ),
+      value: 'hello',
+    }),
+  );
+
+  const originalContent = extractBlockContent(instance);
+
+  expect(originalContent).toEqual({
+    blockText: '',
+    overrides: [
+      SketchModel.overrideValue({
+        overrideName: Overrides.encodeName(
+          [heroLayer!.do_objectID, targetLayer!.do_objectID],
+          'blockText',
+        ),
+        value: 'hello',
+      }),
+    ],
+    symbolId: symbol.symbolID,
+    layerPath: [],
+  });
+
+  const nodes = fromContent(symbol, originalContent);
+  const content = toContent(symbol, nodes);
+  expect(filterEmptyOverrides(content)).toEqual(originalContent);
 });

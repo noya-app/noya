@@ -4,20 +4,24 @@ import { Blocks } from './blocks';
 
 export function flattenPassthroughLayers(
   symbolMaster: Sketch.SymbolMaster,
-): Sketch.SymbolInstance[] {
+  prefixPath: string[] = [],
+): { layer: Sketch.SymbolInstance; layerPath: string[] }[] {
   return symbolMaster.layers
     .filter(Layers.isSymbolInstance)
     .flatMap((layer) => {
       const block = Blocks[layer.symbolID];
 
       if (block.isPassthrough) {
-        return flattenPassthroughLayers(block.symbol);
+        return flattenPassthroughLayers(block.symbol, prefixPath);
       }
+
+      const layerPath = [...prefixPath, layer.do_objectID];
+      const self = { layer, layerPath };
 
       if (block.isComposedBlock) {
-        return [layer, ...flattenPassthroughLayers(block.symbol)];
+        return [self, ...flattenPassthroughLayers(block.symbol, layerPath)];
       }
 
-      return layer;
+      return [self];
     });
 }
