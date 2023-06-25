@@ -243,35 +243,37 @@ export function symbolsReducer(
 
       return produce(state, (draft) => {
         layerIndexPaths.forEach(({ pageIndex, indexPaths }) => {
-          const draftLayer = Layers.access(
-            draft.sketch.pages[pageIndex],
-            indexPaths[0],
-          );
+          indexPaths.forEach((indexPath) => {
+            const draftLayer = Layers.access(
+              draft.sketch.pages[pageIndex],
+              indexPath,
+            );
 
-          if (!Layers.isSymbolInstance(draftLayer)) return;
+            if (!Layers.isSymbolInstance(draftLayer)) return;
 
-          if (!name) {
-            draftLayer.overrideValues = [];
-            return;
-          }
-
-          const overrideValueIndex = draftLayer.overrideValues.findIndex(
-            (property) => property.overrideName === name,
-          );
-
-          if (overrideValueIndex !== -1) {
-            if (value === undefined) {
-              draftLayer.overrideValues.splice(overrideValueIndex, 1);
-            } else {
-              draftLayer.overrideValues[overrideValueIndex].value = value;
+            if (!name) {
+              draftLayer.overrideValues = [];
+              return;
             }
-          } else if (value !== undefined) {
-            draftLayer.overrideValues.push({
-              _class: 'overrideValue',
-              overrideName: name,
-              value: value,
-            });
-          }
+
+            const overrideValueIndex = draftLayer.overrideValues.findIndex(
+              (property) => property.overrideName === name,
+            );
+
+            if (overrideValueIndex !== -1) {
+              if (value === undefined) {
+                draftLayer.overrideValues.splice(overrideValueIndex, 1);
+              } else {
+                draftLayer.overrideValues[overrideValueIndex].value = value;
+              }
+            } else if (value !== undefined) {
+              draftLayer.overrideValues.push({
+                _class: 'overrideValue',
+                overrideName: name,
+                value: value,
+              });
+            }
+          });
         });
       });
     }
