@@ -1,41 +1,12 @@
 import { Node, Element as SlateElement, Transforms } from 'slate';
 import { Blocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
-import { CustomEditor, EditorSchema, ParagraphElement } from './types';
-
-export function setNodeProperties({
-  editor,
-  symbolId,
-  layerId,
-  isRoot,
-  path,
-  node,
-}: {
-  editor: CustomEditor;
-  symbolId: string;
-  layerId: string;
-  isRoot: boolean;
-  path: number[];
-  node: ParagraphElement;
-}) {
-  // if (
-  //   node.layerId === layerId &&
-  //   node.symbolId === symbolId &&
-  //   node.isRoot === isRoot
-  // ) {
-  //   return;
-  // }
-
-  const newProperties: Partial<SlateElement> = {
-    symbolId,
-    layerId,
-    isRoot,
-  };
-
-  Transforms.setNodes<SlateElement>(editor, newProperties, {
-    at: path,
-  });
-}
+import {
+  CustomEditor,
+  EditorSchema,
+  EditorSchemaElement,
+  ParagraphElement,
+} from './types';
 
 export function withLayout(schema: EditorSchema, editor: CustomEditor) {
   const { normalizeNode } = editor;
@@ -43,24 +14,19 @@ export function withLayout(schema: EditorSchema, editor: CustomEditor) {
   editor.schema = schema;
 
   editor.normalizeNode = ([node, path]) => {
-    const symbol = Blocks[editor.schema.symbolId].symbol;
-
+    const symbol = Blocks[editor.schema[0].symbolId].symbol;
     const layers = flattenPassthroughLayers(symbol);
 
     // If this is the editor
     if (path.length === 0) {
       // Ensure there's a node for each layer and the container
-      while (editor.children.length < layers.length + 1) {
-        const isRoot = editor.children.length === 0;
-
-        const layer = layers[editor.children.length - 1];
+      while (editor.children.length < editor.schema.length) {
+        const schemaElement = editor.schema[editor.children.length];
 
         const paragraph: ParagraphElement = {
           type: 'paragraph',
           children: [{ text: '' }],
-          symbolId: isRoot ? schema.symbolId : layer.symbolID,
-          layerId: isRoot ? schema.layerId : layer.do_objectID,
-          isRoot,
+          ...schemaElement,
         };
 
         Transforms.insertNodes(editor, paragraph, {
@@ -79,27 +45,11 @@ export function withLayout(schema: EditorSchema, editor: CustomEditor) {
 
         const index = childPath[0];
 
-        if (index === 0) {
-          setNodeProperties({
-            editor,
-            node: child,
-            path: childPath,
-            layerId: schema.layerId,
-            symbolId: schema.symbolId,
-            isRoot: true,
-          });
-        } else {
-          const layer = layers[index - 1];
+        const schemaElement = editor.schema[index];
 
-          setNodeProperties({
-            editor,
-            node: child,
-            path: childPath,
-            layerId: layer.do_objectID,
-            symbolId: layer.symbolID,
-            isRoot: false,
-          });
-        }
+        Transforms.setNodes<SlateElement>(editor, schemaElement, {
+          at: childPath,
+        });
       }
     }
 
@@ -107,4 +57,18 @@ export function withLayout(schema: EditorSchema, editor: CustomEditor) {
   };
 
   return editor;
+}
+
+export function createSchema(rootElement: EditorSchemaElement): EditorSchema {
+  const block = Blocks[rootElement.symbolId];
+
+  const layers = flattenPassthroughLayers(block.symbol);
+
+  const children = layers.map((layer) => ({
+    symbolId: layer.symbolID,
+    layerId: layer.do_objectID,
+    isRoot: false,
+  }));
+
+  return [rootElement, ...children];
 }

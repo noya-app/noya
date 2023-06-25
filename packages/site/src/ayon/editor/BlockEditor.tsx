@@ -45,7 +45,7 @@ import { ElementComponent } from './ElementComponent';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
 import { extractBlockContent, fromContent, toContent } from './serialization';
 import { CustomEditor, EditorSchema, ParagraphElement } from './types';
-import { withLayout } from './withLayout';
+import { createSchema, withLayout } from './withLayout';
 
 export interface IBlockEditor {
   focus: () => void;
@@ -77,10 +77,12 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const blockDefinition = Blocks[layer.symbolID];
 
   const schema = useMemo(
-    (): EditorSchema => ({
-      layerId: layer.do_objectID,
-      symbolId: layer.symbolID,
-    }),
+    (): EditorSchema =>
+      createSchema({
+        layerId: layer.do_objectID,
+        symbolId: layer.symbolID,
+        isRoot: true,
+      }),
     [layer.do_objectID, layer.symbolID],
   );
 

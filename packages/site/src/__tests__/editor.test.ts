@@ -15,7 +15,7 @@ import { withOptions } from 'tree-visit';
 import { Blocks } from '../ayon/blocks/blocks';
 import { heroSymbolV2Id } from '../ayon/blocks/symbolIds';
 import { extractBlockContent, fromContent } from '../ayon/editor/serialization';
-import { withLayout } from '../ayon/editor/withLayout';
+import { createSchema, withLayout } from '../ayon/editor/withLayout';
 
 const traverse = withOptions({
   getChildren: (node: SlateNode): SlateNode[] => {
@@ -70,7 +70,11 @@ test('serializes empty block', () => {
   });
 
   const editor = withLayout(
-    { symbolId: layer.symbolID, layerId: layer.do_objectID },
+    createSchema({
+      symbolId: layer.symbolID,
+      layerId: layer.do_objectID,
+      isRoot: true,
+    }),
     withHistory(withReact(createEditor())),
   );
 
@@ -109,10 +113,11 @@ test('insert and delete text', () => {
   });
 
   const editor = withLayout(
-    {
+    createSchema({
       symbolId: layer.symbolID,
       layerId: layer.do_objectID,
-    },
+      isRoot: true,
+    }),
     withHistory(withReact(createEditor())),
   );
 

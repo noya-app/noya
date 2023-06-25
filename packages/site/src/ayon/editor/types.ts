@@ -16,7 +16,12 @@ export type ParagraphElement = {
 
 export type CustomElement = ParagraphElement;
 
-export type EditorSchema = Pick<ParagraphElement, 'symbolId' | 'layerId'>;
+export type EditorSchemaElement = Pick<
+  ParagraphElement,
+  'symbolId' | 'layerId' | 'isRoot'
+>;
+
+export type EditorSchema = EditorSchemaElement[];
 
 export type CustomEditor = BaseEditor &
   ReactEditor &
