@@ -103,9 +103,12 @@ export function ElementComponent(props: Props) {
                 event.preventDefault();
                 event.stopPropagation();
 
-                if (!props.element.layerId) return;
+                if (!props.element.layerPath) return;
 
-                props.onSetVisible?.(props.element.layerId, !props.isVisible);
+                props.onSetVisible?.(
+                  props.element.layerPath.join('/'),
+                  !props.isVisible,
+                );
               }}
             />
           </HoverMenu>

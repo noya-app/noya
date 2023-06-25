@@ -9,7 +9,7 @@ Array [
       },
     ],
     "isRoot": true,
-    "layerId": "a",
+    "layerPath": Array [],
     "symbolId": "61eb943b-7ee7-4b33-9315-aac7cb2d2764",
     "type": "paragraph",
   },
@@ -20,7 +20,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2",
+    "layerPath": Array [
+      "1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2",
+    ],
     "symbolId": "a1f7266f-50cc-416f-9ed2-4af4bca30257",
     "type": "paragraph",
   },
@@ -31,7 +33,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb",
+    "layerPath": Array [
+      "ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb",
+    ],
     "symbolId": "955f4cb1-7879-4331-a359-a21a031147cb",
     "type": "paragraph",
   },
@@ -42,7 +46,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "aa722c35-9ba4-4bf3-a5d0-f7d17f02c361",
+    "layerPath": Array [
+      "aa722c35-9ba4-4bf3-a5d0-f7d17f02c361",
+    ],
     "symbolId": "b8441949-12ba-42be-8f87-5cf222af70d0",
     "type": "paragraph",
   },
@@ -53,7 +59,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "6b386c69-d6cf-4c2f-ae06-c92af43268d5",
+    "layerPath": Array [
+      "6b386c69-d6cf-4c2f-ae06-c92af43268d5",
+    ],
     "symbolId": "cdf2346b-cb21-4f23-8d93-7c4fb2e3a5a0",
     "type": "paragraph",
   },
@@ -64,7 +72,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "eee85c94-7361-4bcf-8afb-f59c6e8661f7",
+    "layerPath": Array [
+      "eee85c94-7361-4bcf-8afb-f59c6e8661f7",
+    ],
     "symbolId": "5be80b87-7bd6-4090-8947-316d54064544",
     "type": "paragraph",
   },
@@ -74,7 +84,7 @@ Array [
 exports[`serializes block with layer text: content 1`] = `
 Object {
   "blockText": "",
-  "layerId": "a",
+  "layerPath": Array [],
   "overrides": Array [
     Object {
       "_class": "overrideValue",
@@ -115,7 +125,7 @@ Array [
       },
     ],
     "isRoot": true,
-    "layerId": "a",
+    "layerPath": Array [],
     "symbolId": "61eb943b-7ee7-4b33-9315-aac7cb2d2764",
     "type": "paragraph",
   },
@@ -126,7 +136,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2",
+    "layerPath": Array [
+      "1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2",
+    ],
     "symbolId": "a1f7266f-50cc-416f-9ed2-4af4bca30257",
     "type": "paragraph",
   },
@@ -137,7 +149,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb",
+    "layerPath": Array [
+      "ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb",
+    ],
     "symbolId": "955f4cb1-7879-4331-a359-a21a031147cb",
     "type": "paragraph",
   },
@@ -148,7 +162,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "aa722c35-9ba4-4bf3-a5d0-f7d17f02c361",
+    "layerPath": Array [
+      "aa722c35-9ba4-4bf3-a5d0-f7d17f02c361",
+    ],
     "symbolId": "b8441949-12ba-42be-8f87-5cf222af70d0",
     "type": "paragraph",
   },
@@ -159,7 +175,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "6b386c69-d6cf-4c2f-ae06-c92af43268d5",
+    "layerPath": Array [
+      "6b386c69-d6cf-4c2f-ae06-c92af43268d5",
+    ],
     "symbolId": "cdf2346b-cb21-4f23-8d93-7c4fb2e3a5a0",
     "type": "paragraph",
   },
@@ -170,7 +188,9 @@ Array [
       },
     ],
     "isRoot": false,
-    "layerId": "eee85c94-7361-4bcf-8afb-f59c6e8661f7",
+    "layerPath": Array [
+      "eee85c94-7361-4bcf-8afb-f59c6e8661f7",
+    ],
     "symbolId": "5be80b87-7bd6-4090-8947-316d54064544",
     "type": "paragraph",
   },
@@ -180,7 +200,7 @@ Array [
 exports[`serializes block with layer text: originalContent 1`] = `
 Object {
   "blockText": "",
-  "layerId": "a",
+  "layerPath": Array [],
   "overrides": Array [
     Object {
       "_class": "overrideValue",

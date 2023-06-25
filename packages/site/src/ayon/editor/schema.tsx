@@ -64,11 +64,13 @@ export function createSchema(rootElement: EditorSchemaElement): EditorSchema {
 
   const layers = flattenPassthroughLayers(block.symbol);
 
-  const children = layers.map((layer) => ({
-    symbolId: layer.symbolID,
-    layerId: layer.do_objectID,
-    isRoot: false,
-  }));
+  const children = layers.map(
+    (layer): EditorSchemaElement => ({
+      symbolId: layer.symbolID,
+      layerPath: [layer.do_objectID],
+      isRoot: false,
+    }),
+  );
 
   return [rootElement, ...children];
 }

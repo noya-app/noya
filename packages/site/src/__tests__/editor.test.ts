@@ -72,7 +72,7 @@ test('serializes empty block', () => {
   const editor = withSchema(
     createSchema({
       symbolId: layer.symbolID,
-      layerId: layer.do_objectID,
+      layerPath: [],
       isRoot: true,
     }),
     withHistory(withReact(createEditor())),
@@ -115,7 +115,7 @@ test('insert and delete text', () => {
   const editor = withSchema(
     createSchema({
       symbolId: layer.symbolID,
-      layerId: layer.do_objectID,
+      layerPath: [],
       isRoot: true,
     }),
     withHistory(withReact(createEditor())),

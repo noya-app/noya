@@ -466,7 +466,7 @@ function fromString(value: string): CustomElement[] {
     type: 'paragraph',
     children: [{ text: line }],
     symbolId: '',
-    layerId: '',
+    layerPath: [],
     isRoot: true,
   }));
 }

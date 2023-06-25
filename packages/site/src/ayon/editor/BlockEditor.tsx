@@ -79,11 +79,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const schema = useMemo(
     (): EditorSchema =>
       createSchema({
-        layerId: layer.do_objectID,
+        layerPath: [],
         symbolId: layer.symbolID,
         isRoot: true,
       }),
-    [layer.do_objectID, layer.symbolID],
+    [layer.symbolID],
   );
 
   const editor = useLazyValue<CustomEditor>(() =>
@@ -98,13 +98,13 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const setBlockNodes = useCallback(
     (
       nodes: Descendant[],
-      symbolInfo?: { isRoot: boolean; layerId: string; symbolId: string },
+      symbolInfo?: { isRoot: boolean; layerPath: string[]; symbolId: string },
     ) => {
       let content = toContent(blockDefinition.symbol, nodes);
 
       if (symbolInfo && !symbolInfo.isRoot) {
         const override = SketchModel.overrideValue({
-          overrideName: Overrides.encodeName([symbolInfo.layerId], 'symbolID'),
+          overrideName: Overrides.encodeName(symbolInfo.layerPath, 'symbolID'),
           value: symbolInfo.symbolId,
         });
 
@@ -171,7 +171,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
       setBlockNodes(editor.children, {
         symbolId: item.id,
-        layerId: element.layerId,
+        layerPath: element.layerPath,
         isRoot: element.isRoot,
       });
 
@@ -423,7 +423,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const renderElement = useCallback(
     (props: RenderElementProps) => {
-      const layerId = props.element.layerId;
+      const layerId = props.element.layerPath.join('/');
 
       return (
         <ElementComponent
@@ -481,7 +481,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
           setBlockNodes(editor.children, {
             symbolId: BLOCK_TYPE_SHORTCUTS[match],
-            layerId: layer.do_objectID,
+            layerPath: [],
             isRoot: true,
           });
 
@@ -512,7 +512,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
             const [element] = elementPair;
             const targetSymbolId = element.isRoot
               ? element.symbolId
-              : layerBlockTypesRef.current[element.layerId];
+              : layerBlockTypesRef.current[element.layerPath.join('/')];
             const blockDefinition = Blocks[targetSymbolId];
 
             setHashtagItems(

@@ -9,7 +9,7 @@ export type EditorBlockContent = Omit<
   Required<BlockContent>,
   'normalizedText'
 > & {
-  layerId: string;
+  layerPath: string[];
 };
 
 export function toContent(
@@ -38,7 +38,7 @@ export function toContent(
     symbolId: symbol.symbolID,
     blockText: nodes.length > layers.length ? Node.string(rootNode) : '',
     overrides: overrides,
-    layerId: rootNode.layerId,
+    layerPath: [],
   };
 }
 
@@ -49,7 +49,7 @@ export function extractBlockContent(
     blockText: instance.blockText ?? '',
     overrides: instance.overrideValues,
     symbolId: instance.symbolID,
-    layerId: instance.do_objectID,
+    layerPath: [],
   };
 }
 
@@ -70,7 +70,7 @@ export function fromContent(
       type: 'paragraph',
       children: [{ text: value ?? '' }],
       symbolId: layer.symbolID,
-      layerId: layer.do_objectID,
+      layerPath: [layer.do_objectID],
       isRoot: false,
     };
   });
@@ -79,7 +79,7 @@ export function fromContent(
     type: 'paragraph',
     children: [{ text: content.blockText ?? '' }],
     symbolId: content.symbolId,
-    layerId: content.layerId,
+    layerPath: [],
     isRoot: true,
   };
 

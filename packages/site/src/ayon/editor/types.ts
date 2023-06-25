@@ -10,7 +10,7 @@ export type ParagraphElement = {
   type: 'paragraph';
   symbolId: string;
   children: Descendant[];
-  layerId: string;
+  layerPath: string[];
   isRoot: boolean;
 };
 
@@ -18,7 +18,7 @@ export type CustomElement = ParagraphElement;
 
 export type EditorSchemaElement = Pick<
   ParagraphElement,
-  'symbolId' | 'layerId' | 'isRoot'
+  'symbolId' | 'layerPath' | 'isRoot'
 >;
 
 export type EditorSchema = EditorSchemaElement[];
