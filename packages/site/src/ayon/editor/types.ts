@@ -16,10 +16,12 @@ export type ParagraphElement = {
 
 export type CustomElement = ParagraphElement;
 
+export type EditorSchema = Pick<ParagraphElement, 'symbolId' | 'layerId'>;
+
 export type CustomEditor = BaseEditor &
   ReactEditor &
   HistoryEditor & {
-    symbolId: string;
+    schema: EditorSchema;
   };
 
 declare module 'slate' {

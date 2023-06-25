@@ -44,7 +44,7 @@ import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
 import { extractBlockContent, fromContent, toContent } from './serialization';
-import { CustomEditor, ParagraphElement } from './types';
+import { CustomEditor, EditorSchema, ParagraphElement } from './types';
 import { withLayout } from './withLayout';
 
 export interface IBlockEditor {
@@ -76,14 +76,16 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
   const blockDefinition = Blocks[layer.symbolID];
 
+  const schema = useMemo(
+    (): EditorSchema => ({
+      layerId: layer.do_objectID,
+      symbolId: layer.symbolID,
+    }),
+    [layer.do_objectID, layer.symbolID],
+  );
+
   const editor = useLazyValue<CustomEditor>(() =>
-    withLayout(
-      {
-        rootLayerId: layer.do_objectID,
-        initialSymbolId: layer.symbolID,
-      },
-      withHistory(withReact(createEditor())),
-    ),
+    withLayout(schema, withHistory(withReact(createEditor()))),
   );
 
   const initialNodes = fromContent(
@@ -112,14 +114,18 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
       if (symbolInfo && symbolInfo.isRoot) {
         content.symbolId = symbolInfo.symbolId;
-        controlledEditorRef.current?.updateInternal(nodes, symbolInfo.symbolId);
+        const updatedSchema = {
+          ...schema,
+          initialSymbolId: symbolInfo.symbolId,
+        };
+        controlledEditorRef.current?.updateInternal(nodes, updatedSchema);
       } else {
         controlledEditorRef.current?.updateInternal(nodes);
       }
 
       onChangeBlockContent(content);
     },
-    [blockDefinition.symbol, onChangeBlockContent],
+    [blockDefinition.symbol, onChangeBlockContent, schema],
   );
 
   useImperativeHandle(forwardedRef, () => ({
@@ -441,7 +447,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     <ControlledEditor
       ref={controlledEditorRef}
       key={layer.symbolID}
-      symbolId={layer.symbolID}
+      schema={schema}
       editor={editor}
       value={initialNodes}
       // This can fire after the selection has changed, so we need to be explicit

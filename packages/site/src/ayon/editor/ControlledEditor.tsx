@@ -10,22 +10,22 @@ import React, {
 import { Descendant, Node } from 'slate';
 import { Slate } from 'slate-react';
 import { resetNodes } from './resetNodes';
-import { CustomEditor } from './types';
+import { CustomEditor, EditorSchema } from './types';
 
 export interface IControlledEditor {
-  updateInternal(value: Node[], symbolId?: string): void;
+  updateInternal(value: Node[], schema?: EditorSchema): void;
 }
 
 export const ControlledEditor = forwardRef(function ControlledEditor(
   {
     value: initialValue,
     onChange,
-    symbolId,
+    schema,
     editor,
     children,
   }: Omit<ComponentProps<typeof Slate>, 'editor'> & {
     editor: CustomEditor;
-    symbolId: string;
+    schema: EditorSchema;
   },
   forwardedRef: ForwardedRef<IControlledEditor>,
 ) {
@@ -34,20 +34,20 @@ export const ControlledEditor = forwardRef(function ControlledEditor(
   useEffect(() => {
     if (
       isEqualIgnoringUndefinedKeys(initialValue, internalNodes) &&
-      symbolId === editor.symbolId
+      isEqualIgnoringUndefinedKeys(editor.schema, schema)
     ) {
       return;
     }
 
-    editor.symbolId = symbolId;
+    editor.schema = schema;
     setInternalNodes(initialValue);
     resetNodes(editor, { nodes: initialValue });
-  }, [initialValue, internalNodes, editor, symbolId]);
+  }, [initialValue, internalNodes, editor, schema]);
 
   useImperativeHandle(forwardedRef, () => ({
-    updateInternal(value: Descendant[], symbolId?: string) {
-      if (symbolId) {
-        editor.symbolId = symbolId;
+    updateInternal(value: Descendant[], schema?: EditorSchema) {
+      if (schema) {
+        editor.schema = schema;
       }
       setInternalNodes(value);
     },

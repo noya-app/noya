@@ -1,7 +1,7 @@
 import { Node, Element as SlateElement, Transforms } from 'slate';
 import { Blocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
-import { CustomEditor, ParagraphElement } from './types';
+import { CustomEditor, EditorSchema, ParagraphElement } from './types';
 
 export function setNodeProperties({
   editor,
@@ -37,19 +37,13 @@ export function setNodeProperties({
   });
 }
 
-export function withLayout(
-  options: {
-    initialSymbolId: string;
-    rootLayerId: string;
-  },
-  editor: CustomEditor,
-) {
+export function withLayout(schema: EditorSchema, editor: CustomEditor) {
   const { normalizeNode } = editor;
 
-  editor.symbolId = options.initialSymbolId;
+  editor.schema = schema;
 
   editor.normalizeNode = ([node, path]) => {
-    const symbol = Blocks[editor.symbolId].symbol;
+    const symbol = Blocks[editor.schema.symbolId].symbol;
 
     const layers = flattenPassthroughLayers(symbol);
 
@@ -64,8 +58,8 @@ export function withLayout(
         const paragraph: ParagraphElement = {
           type: 'paragraph',
           children: [{ text: '' }],
-          symbolId: isRoot ? options.initialSymbolId : layer.symbolID,
-          layerId: isRoot ? options.rootLayerId : layer.do_objectID,
+          symbolId: isRoot ? schema.symbolId : layer.symbolID,
+          layerId: isRoot ? schema.layerId : layer.do_objectID,
           isRoot,
         };
 
@@ -90,8 +84,8 @@ export function withLayout(
             editor,
             node: child,
             path: childPath,
-            layerId: options.rootLayerId,
-            symbolId: options.initialSymbolId,
+            layerId: schema.layerId,
+            symbolId: schema.symbolId,
             isRoot: true,
           });
         } else {

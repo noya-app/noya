@@ -70,7 +70,7 @@ test('serializes empty block', () => {
   });
 
   const editor = withLayout(
-    { initialSymbolId: layer.symbolID, rootLayerId: layer.do_objectID },
+    { symbolId: layer.symbolID, layerId: layer.do_objectID },
     withHistory(withReact(createEditor())),
   );
 
@@ -110,8 +110,8 @@ test('insert and delete text', () => {
 
   const editor = withLayout(
     {
-      initialSymbolId: layer.symbolID,
-      rootLayerId: layer.do_objectID,
+      symbolId: layer.symbolID,
+      layerId: layer.do_objectID,
     },
     withHistory(withReact(createEditor())),
   );
