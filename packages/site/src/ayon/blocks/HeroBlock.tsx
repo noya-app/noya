@@ -2,7 +2,7 @@ import { BlockDefinition } from 'noya-state';
 import { BoxBlock } from './BoxBlock';
 import { renderStack } from './render';
 import { isWithinRectRange } from './score';
-import { heroSymbolV2 } from './symbols';
+import { heroSymbolV2, heroWithImageSymbol } from './symbols';
 
 export const HeroBlockV2: BlockDefinition = {
   editorVersion: 2,
@@ -31,4 +31,15 @@ export const HeroBlockV2: BlockDefinition = {
     );
   },
   render: (env, props) => renderStack(env, { props, block: HeroBlockV2 }),
+};
+
+export const HeroWithImageBlock: BlockDefinition = {
+  editorVersion: 2,
+  symbol: heroWithImageSymbol,
+  parser: 'regular',
+  hashtags: BoxBlock.hashtags,
+  isComposedBlock: true,
+  infer: ({ frame, blockText, siblingBlocks }) => 0,
+  render: (env, props) =>
+    renderStack(env, { props, block: HeroWithImageBlock }),
 };

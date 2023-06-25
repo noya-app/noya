@@ -14,6 +14,7 @@ import {
   heading6SymbolId,
   heroSymbolId,
   heroSymbolV2Id,
+  heroWithImageSymbolId,
   iconSymbolId,
   imageSymbolId,
   inputSymbolId,
@@ -177,6 +178,24 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
       do_objectID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
       symbolID: heroButtonRowSymbol.symbolID,
       blockText: '',
+    }),
+  ],
+});
+
+export const heroWithImageSymbol = SketchModel.symbolMaster({
+  symbolID: heroWithImageSymbolId,
+  name: 'Hero with Image',
+  defaultBlockText: '#flex-row',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: 'bc20968b-328a-4831-b242-ed0572e6459d',
+      symbolID: heroSymbolV2Id,
+      blockText: '#left',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: 'e65f7c76-ef83-4924-9545-3e50ac18b32a',
+      symbolID: imageSymbolId,
+      blockText: 'landscape',
     }),
   ],
 });

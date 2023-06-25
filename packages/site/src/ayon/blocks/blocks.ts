@@ -14,7 +14,7 @@ import {
   Heading5Block,
   Heading6Block,
 } from './HeadingBlock';
-import { HeroBlockV2 } from './HeroBlock';
+import { HeroBlockV2, HeroWithImageBlock } from './HeroBlock';
 import { IconBlock } from './IconBlock';
 import { ImageBlock } from './ImageBlock';
 import { InputBlock } from './InputBlock';
@@ -66,6 +66,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [Heading6Block.symbol.symbolID]: Heading6Block,
   [heroSymbolId]: HeroBlockV2,
   [HeroBlockV2.symbol.symbolID]: HeroBlockV2,
+  [HeroWithImageBlock.symbol.symbolID]: HeroWithImageBlock,
   [ImageBlock.symbol.symbolID]: ImageBlock,
   [InputBlock.symbol.symbolID]: InputBlock,
   [SwitchBlock.symbol.symbolID]: SwitchBlock,

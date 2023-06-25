@@ -10,8 +10,12 @@ export function flattenPassthroughLayers(
     .flatMap((layer) => {
       const block = Blocks[layer.symbolID];
 
-      if (block && block.isPassthrough) {
+      if (block.isPassthrough) {
         return flattenPassthroughLayers(block.symbol);
+      }
+
+      if (block.isComposedBlock) {
+        return [layer, ...flattenPassthroughLayers(block.symbol)];
       }
 
       return layer;
