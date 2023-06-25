@@ -8,7 +8,6 @@ import {
   useSelected,
 } from 'slate-react';
 import styled from 'styled-components';
-import { Blocks } from '../blocks/blocks';
 
 const Container = styled.div<{ selected: boolean }>(({ selected }) => ({
   background: selected ? 'white' : 'rgba(0,0,0,0.05)',
@@ -49,6 +48,7 @@ const HoverMenu = styled.div({
 interface Props extends RenderElementProps {
   onSetVisible?: (layerId: string, visible: boolean) => void;
   isVisible: boolean;
+  label: string;
   placeholder?: string;
   layerBlockTypes: Record<string, string>;
 }
@@ -57,7 +57,7 @@ export function ElementComponent(props: Props) {
   const selected = useSelected();
   const focused = useFocused();
 
-  if (focused && props.element.label) {
+  if (focused && !props.element.isRoot) {
     const EyeComponent = props.isVisible ? EyeOpenIcon : EyeNoneIcon;
 
     return (
@@ -91,9 +91,7 @@ export function ElementComponent(props: Props) {
               textDecoration: props.isVisible ? undefined : 'line-through',
             }}
           >
-            {props.element.layerId
-              ? Blocks[props.layerBlockTypes[props.element.layerId]].symbol.name
-              : props.element.label}
+            {props.label}
           </span>
           <HoverMenu className="show-on-hover">
             <EyeComponent

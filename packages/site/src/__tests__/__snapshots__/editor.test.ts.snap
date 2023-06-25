@@ -2,7 +2,7 @@
 
 exports[`insert and delete text: delete 1`] = `
 "Editor (1.0:0 -> 1.0:0)
-├── ?
+├── Hero
 │   └── (empty)
 ├── Text
 │   └── (empty)
@@ -18,7 +18,7 @@ exports[`insert and delete text: delete 1`] = `
 
 exports[`insert and delete text: final 1`] = `
 "Editor (0.0:0 -> 0.0:0)
-├── ?
+├── Hero
 │   └── (empty)
 ├── Text
 │   └── (empty)
@@ -34,7 +34,7 @@ exports[`insert and delete text: final 1`] = `
 
 exports[`insert and delete text: initial 1`] = `
 "Editor (1.0:0 -> 1.0:0)
-├── ?
+├── Hero
 │   └── (empty)
 ├── Text
 │   └── (empty)
@@ -50,7 +50,7 @@ exports[`insert and delete text: initial 1`] = `
 
 exports[`insert and delete text: with hi 1`] = `
 "Editor (1.0:2 -> 1.0:2)
-├── ?
+├── Hero
 │   └── (empty)
 ├── Text
 │   └── hi

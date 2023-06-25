@@ -6,7 +6,7 @@ import {
   getCurrentPlatform,
   handleKeyboardEvent,
 } from 'noya-keymap';
-import { amplitude, ILogEvent } from 'noya-log';
+import { ILogEvent, amplitude } from 'noya-log';
 import { useLazyValue } from 'noya-react-utils';
 import { DrawableLayerType, ParentLayer } from 'noya-state';
 import { debounce } from 'noya-utils';
@@ -20,16 +20,16 @@ import React, {
   useState,
 } from 'react';
 import {
-  createEditor,
   Descendant,
   Editor,
   Node,
   Range,
   Transforms,
+  createEditor,
 } from 'slate';
 import { withHistory } from 'slate-history';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { allInsertableSymbols, Blocks } from '../blocks/blocks';
+import { Blocks, allInsertableSymbols } from '../blocks/blocks';
 import {
   heading1SymbolId,
   heading2SymbolId,
@@ -465,8 +465,8 @@ function fromString(value: string): CustomElement[] {
   return value.split('\n').map((line) => ({
     type: 'paragraph',
     children: [{ text: line }],
-    label: undefined,
-    placeholder: undefined,
     symbolId: '',
+    layerId: '',
+    isRoot: true,
   }));
 }

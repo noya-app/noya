@@ -5,9 +5,9 @@ import path from 'path';
 import { Blocks } from '../ayon/blocks/blocks';
 import { heading4SymbolId, heroSymbolV2Id } from '../ayon/blocks/symbolIds';
 import {
-  SerializedBlockContent,
+  EditorBlockContent,
   extractBlockContent,
-  fromSymbol,
+  fromContent,
   toContent,
 } from '../ayon/editor/serialization';
 
@@ -18,7 +18,7 @@ jest.mock('../../safelist.txt', () => {
   };
 });
 
-function filterEmptyOverrides(blockContent: SerializedBlockContent) {
+function filterEmptyOverrides(blockContent: EditorBlockContent) {
   return {
     ...blockContent,
     overrides: blockContent.overrides.filter((o) => o.value !== ''),
@@ -27,6 +27,7 @@ function filterEmptyOverrides(blockContent: SerializedBlockContent) {
 
 test('serializes block', () => {
   const instance = SketchModel.symbolInstance({
+    do_objectID: 'b',
     blockText: '',
     symbolID: heroSymbolV2Id,
     frame: SketchModel.rect({
@@ -38,7 +39,7 @@ test('serializes block', () => {
   const symbol = Blocks[instance.symbolID].symbol;
 
   const originalContent = extractBlockContent(instance);
-  const nodes = fromSymbol(symbol, originalContent);
+  const nodes = fromContent(symbol, originalContent);
   const content = toContent(symbol, nodes);
 
   expect(filterEmptyOverrides(content)).toEqual(originalContent);
@@ -46,6 +47,7 @@ test('serializes block', () => {
 
 test('serializes block with layer text', () => {
   const instance = SketchModel.symbolInstance({
+    do_objectID: 'a',
     symbolID: heroSymbolV2Id,
     frame: SketchModel.rect({
       width: 400,
@@ -73,7 +75,7 @@ test('serializes block with layer text', () => {
 
   expect(originalContent).toMatchSnapshot('originalContent');
 
-  const nodes = fromSymbol(symbol, originalContent);
+  const nodes = fromContent(symbol, originalContent);
 
   expect(nodes).toMatchSnapshot('nodes');
 

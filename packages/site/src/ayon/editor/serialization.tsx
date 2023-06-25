@@ -2,19 +2,20 @@ import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { BlockContent, Overrides } from 'noya-state';
 import { Descendant, Node } from 'slate';
-import { Blocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { ParagraphElement } from './types';
 
-export type SerializedBlockContent = Omit<
+export type EditorBlockContent = Omit<
   Required<BlockContent>,
   'normalizedText'
->;
+> & {
+  layerId: string;
+};
 
 export function toContent(
   symbol: Sketch.SymbolMaster,
   nodes: Descendant[],
-): SerializedBlockContent {
+): EditorBlockContent {
   const layers = flattenPassthroughLayers(symbol);
   const overrides: Sketch.OverrideValue[] = [];
 
@@ -31,35 +32,36 @@ export function toContent(
     );
   }
 
+  const rootNode = nodes[0] as ParagraphElement;
+
   return {
     symbolId: symbol.symbolID,
-    blockText: nodes.length > layers.length ? Node.string(nodes[0]) : '',
+    blockText: nodes.length > layers.length ? Node.string(rootNode) : '',
     overrides: overrides,
+    layerId: rootNode.layerId,
   };
 }
 
 export function extractBlockContent(
   instance: Sketch.SymbolInstance,
-): SerializedBlockContent {
+): EditorBlockContent {
   return {
     blockText: instance.blockText ?? '',
     overrides: instance.overrideValues,
     symbolId: instance.symbolID,
+    layerId: instance.do_objectID,
   };
 }
 
-export function fromSymbol(
+export function fromContent(
   symbol: Sketch.SymbolMaster,
-  instance: SerializedBlockContent,
+  content: EditorBlockContent,
 ): Descendant[] {
   const layers = flattenPassthroughLayers(symbol);
 
   const layerNodes = layers.map((layer): ParagraphElement => {
-    const block = layer ? Blocks[layer.symbolID] : undefined;
-    const name = block ? block.symbol.name : undefined;
-
     const value = Overrides.getOverrideValue(
-      instance.overrides ?? [],
+      content.overrides ?? [],
       layer.do_objectID,
       'blockText',
     );
@@ -67,17 +69,18 @@ export function fromSymbol(
     return {
       type: 'paragraph',
       children: [{ text: value ?? '' }],
-      label: name,
       symbolId: layer.symbolID,
       layerId: layer.do_objectID,
+      isRoot: false,
     };
   });
 
   const rootNode: ParagraphElement = {
     type: 'paragraph',
-    children: [{ text: instance.blockText ?? '' }],
-    symbolId: instance.symbolId,
-    layerId: undefined,
+    children: [{ text: content.blockText ?? '' }],
+    symbolId: content.symbolId,
+    layerId: content.layerId,
+    isRoot: true,
   };
 
   return [rootNode, ...layerNodes];

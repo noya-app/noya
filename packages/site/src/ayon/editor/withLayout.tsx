@@ -1,47 +1,35 @@
-import Sketch from 'noya-file-format';
 import { Node, Element as SlateElement, Transforms } from 'slate';
 import { Blocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { CustomEditor, ParagraphElement } from './types';
 
-export function insertBlock(
-  editor: CustomEditor,
-  layer: Sketch.SymbolInstance | Sketch.SymbolMaster,
-  path: number[],
-) {
-  const block = Blocks[layer.symbolID];
-
-  const paragraph: ParagraphElement = {
-    type: 'paragraph',
-    children: [{ text: '' }],
-    label: block.symbol.name,
-    symbolId: block.symbol.symbolID,
-    layerId: layer ? layer.do_objectID : undefined,
-  };
-
-  Transforms.insertNodes(editor, paragraph, {
-    at: path.concat(editor.children.length),
-  });
-}
-
-export function setNestedNodeProperties(
-  editor: CustomEditor,
-  layer: Sketch.SymbolInstance,
-  path: number[],
-  node: ParagraphElement,
-) {
-  const block = Blocks[layer.symbolID];
-
-  const label = block.symbol.name;
-
-  if (node.label === label && node.layerId === layer.do_objectID) {
-    return;
-  }
+export function setNodeProperties({
+  editor,
+  symbolId,
+  layerId,
+  isRoot,
+  path,
+  node,
+}: {
+  editor: CustomEditor;
+  symbolId: string;
+  layerId: string;
+  isRoot: boolean;
+  path: number[];
+  node: ParagraphElement;
+}) {
+  // if (
+  //   node.layerId === layerId &&
+  //   node.symbolId === symbolId &&
+  //   node.isRoot === isRoot
+  // ) {
+  //   return;
+  // }
 
   const newProperties: Partial<SlateElement> = {
-    label,
-    symbolId: layer.symbolID,
-    layerId: layer.do_objectID,
+    symbolId,
+    layerId,
+    isRoot,
   };
 
   Transforms.setNodes<SlateElement>(editor, newProperties, {
@@ -49,29 +37,16 @@ export function setNestedNodeProperties(
   });
 }
 
-export function setRootNodeProperties(
+export function withLayout(
+  options: {
+    initialSymbolId: string;
+    rootLayerId: string;
+  },
   editor: CustomEditor,
-  layer: Sketch.SymbolMaster,
-  path: number[],
-  node: ParagraphElement,
 ) {
-  if (!node.label) return;
-
-  const newProperties: Partial<SlateElement> = {
-    label: undefined,
-    symbolId: layer.symbolID,
-    layerId: undefined,
-  };
-
-  Transforms.setNodes<SlateElement>(editor, newProperties, {
-    at: path,
-  });
-}
-
-export function withLayout(initialSymbolId: string, editor: CustomEditor) {
   const { normalizeNode } = editor;
 
-  editor.symbolId = initialSymbolId;
+  editor.symbolId = options.initialSymbolId;
 
   editor.normalizeNode = ([node, path]) => {
     const symbol = Blocks[editor.symbolId].symbol;
@@ -82,13 +57,21 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
     if (path.length === 0) {
       // Ensure there's a node for each layer and the container
       while (editor.children.length < layers.length + 1) {
-        insertBlock(
-          editor,
-          editor.children.length === 0
-            ? symbol
-            : layers[editor.children.length - 1],
-          path,
-        );
+        const isRoot = editor.children.length === 0;
+
+        const layer = layers[editor.children.length - 1];
+
+        const paragraph: ParagraphElement = {
+          type: 'paragraph',
+          children: [{ text: '' }],
+          symbolId: isRoot ? options.initialSymbolId : layer.symbolID,
+          layerId: isRoot ? options.rootLayerId : layer.do_objectID,
+          isRoot,
+        };
+
+        Transforms.insertNodes(editor, paragraph, {
+          at: path.concat(editor.children.length),
+        });
       }
 
       while (editor.children.length > layers.length + 1) {
@@ -103,9 +86,25 @@ export function withLayout(initialSymbolId: string, editor: CustomEditor) {
         const index = childPath[0];
 
         if (index === 0) {
-          setRootNodeProperties(editor, symbol, childPath, child);
+          setNodeProperties({
+            editor,
+            node: child,
+            path: childPath,
+            layerId: options.rootLayerId,
+            symbolId: options.initialSymbolId,
+            isRoot: true,
+          });
         } else {
-          setNestedNodeProperties(editor, layers[index - 1], childPath, child);
+          const layer = layers[index - 1];
+
+          setNodeProperties({
+            editor,
+            node: child,
+            path: childPath,
+            layerId: layer.do_objectID,
+            symbolId: layer.symbolID,
+            isRoot: false,
+          });
         }
       }
     }

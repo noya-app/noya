@@ -8,10 +8,10 @@ import { ReactEditor } from 'slate-react';
  */
 export type ParagraphElement = {
   type: 'paragraph';
-  label?: string;
   symbolId: string;
   children: Descendant[];
-  layerId?: string;
+  layerId: string;
+  isRoot: boolean;
 };
 
 export type CustomElement = ParagraphElement;

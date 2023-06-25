@@ -43,7 +43,7 @@ import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
 import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';
-import { extractBlockContent, fromSymbol, toContent } from './serialization';
+import { extractBlockContent, fromContent, toContent } from './serialization';
 import { CustomEditor, ParagraphElement } from './types';
 import { withLayout } from './withLayout';
 
@@ -77,10 +77,16 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const blockDefinition = Blocks[layer.symbolID];
 
   const editor = useLazyValue<CustomEditor>(() =>
-    withLayout(layer.symbolID, withHistory(withReact(createEditor()))),
+    withLayout(
+      {
+        rootLayerId: layer.do_objectID,
+        initialSymbolId: layer.symbolID,
+      },
+      withHistory(withReact(createEditor())),
+    ),
   );
 
-  const initialNodes = fromSymbol(
+  const initialNodes = fromContent(
     blockDefinition.symbol,
     extractBlockContent(layer),
   );
@@ -88,12 +94,11 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const setBlockNodes = useCallback(
     (
       nodes: Descendant[],
-      // If there's a layerId that means this is a nested block
-      symbolInfo?: { layerId?: string; symbolId: string },
+      symbolInfo?: { isRoot: boolean; layerId: string; symbolId: string },
     ) => {
       let content = toContent(blockDefinition.symbol, nodes);
 
-      if (symbolInfo && symbolInfo.layerId) {
+      if (symbolInfo && !symbolInfo.isRoot) {
         const override = SketchModel.overrideValue({
           overrideName: Overrides.encodeName([symbolInfo.layerId], 'symbolID'),
           value: symbolInfo.symbolId,
@@ -105,7 +110,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
         };
       }
 
-      if (symbolInfo && !symbolInfo.layerId) {
+      if (symbolInfo && symbolInfo.isRoot) {
         content.symbolId = symbolInfo.symbolId;
         controlledEditorRef.current?.updateInternal(nodes, symbolInfo.symbolId);
       } else {
@@ -157,8 +162,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
       Transforms.delete(editor, { at: target });
 
       setBlockNodes(editor.children, {
-        layerId: element.layerId,
         symbolId: item.id,
+        layerId: element.layerId,
+        isRoot: element.isRoot,
       });
 
       if (!Blocks[item.id].editorVersion) {
@@ -381,6 +387,25 @@ export const BlockEditor = forwardRef(function BlockEditor(
     return blockTypes;
   }, [blockDefinition.symbol, layer.overrideValues]);
 
+  const layerLabels = useMemo(() => {
+    const labels: Record<string, string> = {};
+    const children = flattenPassthroughLayers(blockDefinition.symbol);
+
+    for (const child of children) {
+      const symbolId = Overrides.getOverrideValue(
+        layer.overrideValues,
+        child.do_objectID,
+        'symbolID',
+      );
+
+      const label = Blocks[symbolId ?? child.symbolID].symbol.name;
+
+      labels[child.do_objectID] = label ?? child.name;
+    }
+
+    return labels;
+  }, [blockDefinition.symbol, layer.overrideValues]);
+
   const layerBlockTypesRef = useRef(layerBlockTypes);
 
   // layerBlockTypes is stale in the Editor onChange callback if we don't use a ref
@@ -391,20 +416,25 @@ export const BlockEditor = forwardRef(function BlockEditor(
   const renderElement = useCallback(
     (props: RenderElementProps) => {
       const layerId = props.element.layerId;
-      const isVisible = layerId ? layerVisibility[layerId] : true;
-      const placeholder = layerId ? layerPlaceholderText[layerId] : undefined;
 
       return (
         <ElementComponent
-          isVisible={isVisible}
+          isVisible={layerVisibility[layerId]}
           onSetVisible={onSetVisible}
           layerBlockTypes={layerBlockTypes}
-          placeholder={placeholder}
+          placeholder={layerPlaceholderText[layerId]}
+          label={layerLabels[layerId]}
           {...props}
         />
       );
     },
-    [layerBlockTypes, layerPlaceholderText, layerVisibility, onSetVisible],
+    [
+      layerBlockTypes,
+      layerLabels,
+      layerPlaceholderText,
+      layerVisibility,
+      onSetVisible,
+    ],
   );
 
   return (
@@ -443,6 +473,8 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
           setBlockNodes(editor.children, {
             symbolId: BLOCK_TYPE_SHORTCUTS[match],
+            layerId: layer.do_objectID,
+            isRoot: true,
           });
 
           return;
@@ -470,9 +502,9 @@ export const BlockEditor = forwardRef(function BlockEditor(
 
           if (elementPair) {
             const [element] = elementPair;
-            const targetSymbolId = element.layerId
-              ? layerBlockTypesRef.current[element.layerId]
-              : element.symbolId;
+            const targetSymbolId = element.isRoot
+              ? element.symbolId
+              : layerBlockTypesRef.current[element.layerId];
             const blockDefinition = Blocks[targetSymbolId];
 
             setHashtagItems(

@@ -14,7 +14,7 @@ import { withReact } from 'slate-react';
 import { withOptions } from 'tree-visit';
 import { Blocks } from '../ayon/blocks/blocks';
 import { heroSymbolV2Id } from '../ayon/blocks/symbolIds';
-import { extractBlockContent, fromSymbol } from '../ayon/editor/serialization';
+import { extractBlockContent, fromContent } from '../ayon/editor/serialization';
 import { withLayout } from '../ayon/editor/withLayout';
 
 const traverse = withOptions({
@@ -38,7 +38,7 @@ const diagram = (node: SlateNode) => {
     if (Editor.isEditor(node)) {
       return `Editor ${selectionToString(node.selection)}`;
     } else if (SlateElement.isElement(node)) {
-      return node.label ?? '?';
+      return Blocks[node.symbolId].symbol.name;
     } else {
       return SlateNode.string(node) || '(empty)';
     }
@@ -64,18 +64,19 @@ function toBlockName(node: Descendant) {
 
 test('serializes empty block', () => {
   const layer = SketchModel.symbolInstance({
+    do_objectID: 'a',
     symbolID: heroSymbolV2Id,
     frame: SketchModel.rect({ width: 400, height: 400 }),
   });
 
   const editor = withLayout(
-    layer.symbolID,
+    { initialSymbolId: layer.symbolID, rootLayerId: layer.do_objectID },
     withHistory(withReact(createEditor())),
   );
 
   Editor.normalize(editor, { force: true });
 
-  const nodes = fromSymbol(
+  const nodes = fromContent(
     Blocks[layer.symbolID].symbol,
     extractBlockContent(layer),
   );
@@ -108,7 +109,10 @@ test('insert and delete text', () => {
   });
 
   const editor = withLayout(
-    layer.symbolID,
+    {
+      initialSymbolId: layer.symbolID,
+      rootLayerId: layer.do_objectID,
+    },
     withHistory(withReact(createEditor())),
   );
 
