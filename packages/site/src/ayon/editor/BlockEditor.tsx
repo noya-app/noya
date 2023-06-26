@@ -382,6 +382,21 @@ export const BlockEditor = forwardRef(function BlockEditor(
     return placeholderText;
   }, [blockDefinition.symbol]);
 
+  const layerIndent = useMemo(() => {
+    const indent: Record<string, number> = {};
+    const children = flattenPassthroughLayers(blockDefinition.symbol);
+
+    for (const child of children) {
+      if (!child.layer.blockText) continue;
+
+      const layerPathString = child.layerPath.join('/');
+
+      indent[layerPathString] = child.indent;
+    }
+
+    return indent;
+  }, [blockDefinition.symbol]);
+
   const layerBlockTypes = useMemo(() => {
     const blockTypes: Record<string, string> = {};
     const children = flattenPassthroughLayers(blockDefinition.symbol);
@@ -439,6 +454,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
           onSetVisible={onSetVisible}
           layerBlockTypes={layerBlockTypes}
           placeholder={layerPlaceholderText[layerId]}
+          indent={layerIndent[layerId]}
           label={layerLabels[layerId]}
           {...props}
         />
@@ -446,6 +462,7 @@ export const BlockEditor = forwardRef(function BlockEditor(
     },
     [
       layerBlockTypes,
+      layerIndent,
       layerLabels,
       layerPlaceholderText,
       layerVisibility,

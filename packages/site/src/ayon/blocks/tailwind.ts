@@ -51,6 +51,8 @@ export const classGroups = {
   fill: /^fill-/,
   justify: /^justify/,
   items: /^items/,
+  width: /^w-/,
+  height: /^h-/,
   gap: /^gap-/,
   padding: /^p-/,
   paddingX: /^px-/,
@@ -140,6 +142,12 @@ function getSpacingValue(className: string): string | undefined {
 }
 
 const customValueRE = /[A-Za-z0-9-]*(?:\[(.*)\])?/;
+
+function configSelector(key: string) {
+  return (config.theme as any)[key];
+}
+
+const themeParameter = { theme: configSelector };
 
 export const resolveTailwindClass = memoize(function resolveTailwindClass(
   className: string,
@@ -381,6 +389,18 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'display': {
       return {
         display: className,
+      };
+    }
+    case 'width': {
+      const value = getValue(className);
+      return {
+        width: (config.theme as any).width(themeParameter)[value || 'auto'],
+      };
+    }
+    case 'height': {
+      const value = getValue(className);
+      return {
+        height: (config.theme as any).height(themeParameter)[value || 'auto'],
       };
     }
   }

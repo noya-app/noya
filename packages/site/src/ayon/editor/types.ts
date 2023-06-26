@@ -16,10 +16,7 @@ export type ParagraphElement = {
 
 export type CustomElement = ParagraphElement;
 
-export type EditorSchemaElement = Pick<
-  ParagraphElement,
-  'symbolId' | 'layerPath' | 'isRoot'
->;
+export type EditorSchemaElement = Omit<ParagraphElement, 'type' | 'children'>;
 
 export type EditorSchema = EditorSchemaElement[];
 

@@ -468,5 +468,6 @@ function fromString(value: string): CustomElement[] {
     symbolId: '',
     layerPath: [],
     isRoot: true,
+    indent: 0,
   }));
 }

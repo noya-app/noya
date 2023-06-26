@@ -9,24 +9,27 @@ import {
 } from 'slate-react';
 import styled from 'styled-components';
 
-const Container = styled.div<{ selected: boolean }>(({ selected }) => ({
-  background: selected ? 'white' : 'rgba(0,0,0,0.05)',
-  border: `1px solid ${selected ? 'black' : 'transparent'}`,
-  padding: '4px 8px',
-  display: 'flex',
-  alignItems: 'end',
-  position: 'relative',
+const Container = styled.div<{ selected: boolean; indent: number }>(
+  ({ selected, indent }) => ({
+    background: selected ? 'white' : 'rgba(0,0,0,0.05)',
+    border: `1px solid ${selected ? 'black' : 'transparent'}`,
+    padding: '4px 8px',
+    display: 'flex',
+    alignItems: 'end',
+    position: 'relative',
+    marginLeft: `${indent * 16}px`,
 
-  '&:hover .hide-on-hover': {
-    visibility: 'hidden',
-  },
-  '& .show-on-hover': {
-    visibility: 'hidden',
-  },
-  '&:hover .show-on-hover': {
-    visibility: 'visible',
-  },
-}));
+    '&:hover .hide-on-hover': {
+      visibility: 'hidden',
+    },
+    '& .show-on-hover': {
+      visibility: 'hidden',
+    },
+    '&:hover .show-on-hover': {
+      visibility: 'visible',
+    },
+  }),
+);
 
 const ComponentMenu = styled.span({
   color: 'rgba(0,0,0,0.4)',
@@ -51,6 +54,7 @@ interface Props extends RenderElementProps {
   label: string;
   placeholder?: string;
   layerBlockTypes: Record<string, string>;
+  indent: number;
 }
 
 export function ElementComponent(props: Props) {
@@ -61,7 +65,7 @@ export function ElementComponent(props: Props) {
     const EyeComponent = props.isVisible ? EyeOpenIcon : EyeNoneIcon;
 
     return (
-      <Container selected={selected}>
+      <Container selected={selected} indent={props.indent}>
         <div style={{ flex: '1', position: 'relative' }}>
           <DefaultElement {...props} />
           {props.placeholder && Node.string(props.element) === '' && (

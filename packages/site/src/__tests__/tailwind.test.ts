@@ -129,6 +129,26 @@ describe('resolves styles', () => {
     });
   });
 
+  it('width', () => {
+    expect(resolveTailwindClass('w-4')).toEqual({
+      width: '1rem',
+    });
+
+    expect(resolveTailwindClass('w-full')).toEqual({
+      width: '100%',
+    });
+  });
+
+  it('height', () => {
+    expect(resolveTailwindClass('h-4')).toEqual({
+      height: '1rem',
+    });
+
+    expect(resolveTailwindClass('h-full')).toEqual({
+      height: '100%',
+    });
+  });
+
   it('borderWidth', () => {
     expect(resolveTailwindClass('border')).toEqual({
       borderWidth: '1px',

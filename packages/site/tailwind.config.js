@@ -11,6 +11,8 @@ module.exports = {
   plugins: [
     require('tailwind-safelist-generator')({
       patterns: [
+        'w-{width}',
+        'h-{height}',
         'shadow-{boxShadow}',
         'border-{borderWidth}',
         'border-x-{borderWidth}',

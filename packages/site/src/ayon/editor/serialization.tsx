@@ -59,21 +59,23 @@ export function fromContent(
 ): Descendant[] {
   const children = flattenPassthroughLayers(symbol);
 
-  const layerNodes = children.map(({ layer, layerPath }): ParagraphElement => {
-    const value = Overrides.getOverrideValue(
-      content.overrides ?? [],
-      layerPath.join('/'),
-      'blockText',
-    );
+  const layerNodes = children.map(
+    ({ layer, layerPath, indent }): ParagraphElement => {
+      const value = Overrides.getOverrideValue(
+        content.overrides ?? [],
+        layerPath.join('/'),
+        'blockText',
+      );
 
-    return {
-      type: 'paragraph',
-      children: [{ text: value ?? '' }],
-      symbolId: layer.symbolID,
-      layerPath: layerPath,
-      isRoot: false,
-    };
-  });
+      return {
+        type: 'paragraph',
+        children: [{ text: value ?? '' }],
+        symbolId: layer.symbolID,
+        layerPath: layerPath,
+        isRoot: false,
+      };
+    },
+  );
 
   const rootNode: ParagraphElement = {
     type: 'paragraph',
