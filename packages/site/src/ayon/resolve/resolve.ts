@@ -68,8 +68,8 @@ export function resolveLayer({
   const cacheKey = cachePrefix ? `${cachePrefix}@${layerId}` : layerId;
 
   if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
-    const width = frame.width === 0 ? 512 : frame.width;
-    const height = frame.height === 0 ? 512 : frame.height;
+    const width = frame.width === 0 ? 1024 : frame.width;
+    const height = frame.height === 0 ? 1024 : frame.height;
 
     const terms = originalText
       .split(' ')

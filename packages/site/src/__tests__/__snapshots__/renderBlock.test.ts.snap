@@ -427,7 +427,9 @@ exports[`hero with bg 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Tag textColor=\\"#fff\\">The future is here</Tag>
+      <Tag textColor=\\"#000\\" bgColor=\\"#c2c8d0\\">
+        The future is here
+      </Tag>
       <Box display=\\"flex\\">
         <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
           Create, iterate, inspire.

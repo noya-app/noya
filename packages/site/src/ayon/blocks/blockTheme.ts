@@ -32,7 +32,7 @@ export const buttonColors = {
     color: '#000',
   },
   lightDisabled: {
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#c2c8d0',
     color: '#000',
   },
   dark: {

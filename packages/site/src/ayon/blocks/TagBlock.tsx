@@ -7,6 +7,7 @@ import {
 import { BlockDefinition } from 'noya-state';
 import { parseBlock } from '../parse';
 import { applyCommonProps } from './applyCommonProps';
+import { buttonColors } from './blockTheme';
 import { tagSymbol } from './symbols';
 import { parametersToTailwindStyle } from './tailwind';
 
@@ -16,11 +17,12 @@ const parser = 'regular';
 
 const variantKeys: TagVariant[] = ['outline', 'solid'];
 const sizeKeys: TagSize[] = ['small', 'medium'];
+const colorSchemeKeys = ['dark', 'light'];
 
 export const TagBlock: BlockDefinition = {
   symbol: tagSymbol,
   parser,
-  hashtags: [...variantKeys, ...sizeKeys],
+  hashtags: [...variantKeys, ...sizeKeys, ...colorSchemeKeys],
   placeholderText,
   infer: ({ frame, blockText }) => 0,
   render: ({ h, Components: { [component.id.Tag]: Tag } }, props) => {
@@ -29,10 +31,17 @@ export const TagBlock: BlockDefinition = {
       mutuallyExclusiveParameters: {
         variant: variantKeys,
         size: sizeKeys,
+        colorScheme: colorSchemeKeys,
       },
     });
 
     const style = parametersToTailwindStyle(parameters);
+
+    if (parameters.colorScheme === 'dark') {
+      Object.assign(style, buttonColors.darkDisabled);
+    } else if (parameters.colorScheme === 'light') {
+      Object.assign(style, buttonColors.lightDisabled);
+    }
 
     return h<TagProps>(
       Tag,
