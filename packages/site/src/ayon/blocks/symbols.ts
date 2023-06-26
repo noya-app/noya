@@ -26,6 +26,7 @@ import {
   spacerSymbolId,
   switchSymbolId,
   tableSymbolId,
+  tagSymbolId,
   textareaSymbolId,
   textSymbolId,
   tileCardSymbolId,
@@ -40,6 +41,11 @@ export const buttonSymbol = SketchModel.symbolMaster({
 export const linkSymbol = SketchModel.symbolMaster({
   symbolID: linkSymbolId,
   name: 'Link',
+});
+
+export const tagSymbol = SketchModel.symbolMaster({
+  symbolID: tagSymbolId,
+  name: 'Tag',
 });
 
 export const avatarSymbol = SketchModel.symbolMaster({
@@ -148,8 +154,8 @@ export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
-      symbolID: textSymbolId,
-      blockText: 'The future is here #text-blue-500 #font-bold',
+      symbolID: tagSymbolId,
+      blockText: 'The future is here',
     }),
     SketchModel.symbolInstance({
       do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',

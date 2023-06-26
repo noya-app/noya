@@ -26,6 +26,7 @@ import { SignInBlock } from './SignInBlock';
 import { SpacerBlock } from './SpacerBlock';
 import { SwitchBlock } from './SwitchBlock';
 import { TableBlock } from './TableBlock';
+import { TagBlock } from './TagBlock';
 import { TextBlock } from './TextBlock';
 import { TextareaBlock } from './TextareaBlock';
 import { TileCardBlock } from './TileCardBlock';
@@ -83,6 +84,7 @@ export const Blocks: Record<string, BlockDefinition> = {
   [TileCardBlock.symbol.symbolID]: TileCardBlock,
   [SignInBlock.symbol.symbolID]: SignInBlock,
   [LinkBlock.symbol.symbolID]: LinkBlock,
+  [TagBlock.symbol.symbolID]: TagBlock,
   [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
   [heroHeadlineStackSymbol.symbolID]: createPassthroughBlock(
     heroHeadlineStackSymbol,

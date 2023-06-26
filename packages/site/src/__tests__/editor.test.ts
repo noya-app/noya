@@ -87,7 +87,7 @@ test('serializes empty block', () => {
 
   expect(nodes.map(toBlockName)).toEqual([
     'Hero',
-    'Text',
+    'Tag',
     'Heading1',
     'Heading4',
     'Button',
@@ -96,7 +96,7 @@ test('serializes empty block', () => {
 
   expect(editor.children.map(toBlockName)).toEqual([
     'Hero',
-    'Text',
+    'Tag',
     'Heading1',
     'Heading4',
     'Button',

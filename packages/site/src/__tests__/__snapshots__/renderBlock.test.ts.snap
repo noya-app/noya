@@ -334,9 +334,7 @@ exports[`hero default 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Text textColor=\\"#3b82f6\\" fontWeight=\\"700\\" textAlign=\\"center\\">
-        The future is here
-      </Text>
+      <Tag>The future is here</Tag>
       <Box display=\\"flex\\">
         <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\">
           Create, iterate, inspire.
@@ -381,9 +379,7 @@ exports[`hero left aligned 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Text textColor=\\"#3b82f6\\" fontWeight=\\"700\\" textAlign=\\"left\\">
-        The future is here
-      </Text>
+      <Tag>The future is here</Tag>
       <Box display=\\"flex\\">
         <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"left\\">
           Create, iterate, inspire.
@@ -431,9 +427,7 @@ exports[`hero with bg 1`] = `
       flexDirection=\\"column\\"
       alignItems=\\"inherit\\"
     >
-      <Text textColor=\\"#fff\\" fontWeight=\\"700\\" textAlign=\\"center\\">
-        The future is here
-      </Text>
+      <Tag textColor=\\"#fff\\">The future is here</Tag>
       <Box display=\\"flex\\">
         <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
           Create, iterate, inspire.

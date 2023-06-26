@@ -1,3 +1,5 @@
+import { component } from '@noya-design-system/protocol';
+
 export const ayonLibraryId = 'e6cc1791-d9c1-410a-84b6-b381fe058bef';
 
 export const buttonSymbolId = 'cdf2346b-cb21-4f23-8d93-7c4fb2e3a5a0';
@@ -19,6 +21,7 @@ export const headerBarSymbolId = 'ab3fbd14-5b81-4c58-873c-95683f4b03d7';
 export const heroSymbolId = 'd15edd3e-df47-438a-9c92-059b4c14915d';
 export const heroSymbolV2Id = '61eb943b-7ee7-4b33-9315-aac7cb2d2764';
 export const heroWithImageSymbolId = 'ce98b3b6-b831-43c7-8c87-ea79e20f6601';
+export const tagSymbolId = component.id.Tag;
 export const iconSymbolId = '18682473-676a-46d3-8faf-68dc5b1c204f';
 export const sidebarSymbolId = '5733e3d6-9688-4c6d-b031-6be27d05767a';
 export const tableSymbolId = 'c152b560-d8af-4b16-8202-55111647d17a';
