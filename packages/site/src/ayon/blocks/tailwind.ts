@@ -86,6 +86,7 @@ export const classGroups = {
   autoCols: /^auto-cols/,
   autoRows: /^auto-rows/,
   gridFlow: /^grid-flow/,
+  lineHeight: /^leading-/,
   display:
     /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
   // Must be last!
@@ -401,6 +402,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = getValue(className);
       return {
         height: (config.theme as any).height(themeParameter)[value || 'auto'],
+      };
+    }
+    case 'lineHeight': {
+      const value = getValue(className);
+      return {
+        lineHeight: (config.theme as any).lineHeight[value || 'DEFAULT'],
       };
     }
   }

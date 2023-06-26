@@ -5,6 +5,7 @@ import { BoxBlock } from './BoxBlock';
 import { ButtonBlock } from './ButtonBlock';
 import { CardBlock } from './CardBlock';
 import { CheckboxBlock } from './CheckboxBlock';
+import { FeatureItemBlock } from './FeatureItemBlock';
 import { HeaderBarBlock } from './HeaderBarBlock';
 import {
   Heading1Block,
@@ -33,7 +34,12 @@ import { TileCardBlock } from './TileCardBlock';
 import { WriteBlock } from './WriteBlock';
 import { renderStack } from './render';
 import { heroSymbolId } from './symbolIds';
-import { heroButtonRowSymbol, heroHeadlineStackSymbol } from './symbols';
+import {
+  featureItemDetailsSymbol,
+  featureItemSymbol,
+  heroButtonRowSymbol,
+  heroHeadlineStackSymbol,
+} from './symbols';
 
 function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
   return {
@@ -88,6 +94,10 @@ export const Blocks: Record<string, BlockDefinition> = {
   [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
   [heroHeadlineStackSymbol.symbolID]: createPassthroughBlock(
     heroHeadlineStackSymbol,
+  ),
+  [featureItemSymbol.symbolID]: FeatureItemBlock,
+  [featureItemDetailsSymbol.symbolID]: createPassthroughBlock(
+    featureItemDetailsSymbol,
   ),
 };
 

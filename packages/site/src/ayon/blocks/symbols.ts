@@ -5,6 +5,7 @@ import {
   buttonSymbolId,
   cardSymbolId,
   checkboxSymbolId,
+  featureItemSymbolId,
   headerBarSymbolId,
   heading1SymbolId,
   heading2SymbolId,
@@ -323,4 +324,45 @@ export const textareaSymbol = SketchModel.symbolMaster({
 export const spacerSymbol = SketchModel.symbolMaster({
   symbolID: spacerSymbolId,
   name: 'Spacer',
+});
+
+export const featureItemDetailsSymbol = SketchModel.symbolMaster({
+  symbolID: '363aea13-2245-4cac-a07d-4be7c64c7a29',
+  name: 'FeatureItemDetails',
+  defaultBlockText: '#flex-1 #flex-col #gap-2',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: '91514627-b323-457e-bf05-228c5a96830d',
+      symbolID: heading5SymbolId,
+      blockText: 'Advanced Security #leading-8',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: '2b211bc6-86e0-4f93-8e14-514ae026afa6',
+      symbolID: textSymbolId,
+      blockText:
+        'We offer state-of-the-art security features such as end-to-end encryption in order to better protect your data.',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: '74b18902-9928-4a56-b2b3-f29c87f0e690',
+      symbolID: linkSymbolId,
+      blockText: 'Learn more #text-blue-500 #icon-arrow-forward #mt-2',
+    }),
+  ],
+});
+
+export const featureItemSymbol = SketchModel.symbolMaster({
+  symbolID: featureItemSymbolId,
+  name: 'FeatureItem',
+  defaultBlockText: '#flex-row #gap-4',
+  layers: [
+    SketchModel.symbolInstance({
+      do_objectID: '2894cbbb-a257-4372-ad17-50db6faf75a3',
+      symbolID: iconSymbolId,
+      blockText: 'fingerprint #bg-blue-500 #rounded #fill-white #p-1 #w-8 #h-8',
+    }),
+    SketchModel.symbolInstance({
+      do_objectID: 'f31dbb7c-05d0-44fe-975a-d8a3c17c419f',
+      symbolID: featureItemDetailsSymbol.symbolID,
+    }),
+  ],
 });
