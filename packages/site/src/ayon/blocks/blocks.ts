@@ -6,6 +6,7 @@ import { ButtonBlock } from './ButtonBlock';
 import { CardBlock } from './CardBlock';
 import { CheckboxBlock } from './CheckboxBlock';
 import { FeatureItemBlock } from './FeatureItemBlock';
+import { FeatureSectionBlock } from './FeatureSectionBlock';
 import { HeaderBarBlock } from './HeaderBarBlock';
 import {
   Heading1Block,
@@ -37,6 +38,7 @@ import { heroSymbolId } from './symbolIds';
 import {
   featureItemDetailsSymbol,
   featureItemSymbol,
+  featureRowSymbol,
   heroButtonRowSymbol,
   heroHeadlineStackSymbol,
 } from './symbols';
@@ -99,6 +101,8 @@ export const Blocks: Record<string, BlockDefinition> = {
   [featureItemDetailsSymbol.symbolID]: createPassthroughBlock(
     featureItemDetailsSymbol,
   ),
+  [FeatureSectionBlock.symbol.symbolID]: FeatureSectionBlock,
+  [featureRowSymbol.symbolID]: createPassthroughBlock(featureRowSymbol),
 };
 
 export const allInsertableBlocks = Object.entries(Blocks)

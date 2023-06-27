@@ -95,10 +95,10 @@ function getChildrenBlockProps({
           blockText,
           resolvedBlockData:
             layer.resolvedBlockData ?? fallbackLayer.resolvedBlockData,
-          overrideValues: Overrides.removePrefix(
-            overrideValues,
-            layer.do_objectID,
-          ),
+          overrideValues: [
+            ...layer.overrideValues,
+            ...Overrides.removePrefix(overrideValues, layer.do_objectID),
+          ],
           layer,
           ...(props.dataSet && {
             dataSet: {
