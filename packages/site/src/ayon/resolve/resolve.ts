@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import { applyOverrides, Layers, Overrides } from 'noya-state';
-import { isExternalUrl } from 'noya-utils';
+import { encodeQueryParameters, isExternalUrl } from 'noya-utils';
 import { Blocks } from '../blocks/blocks';
 import {
   iconSymbolId,
@@ -10,14 +10,15 @@ import {
 import { parseBlock } from '../parse';
 import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';
-import { RedirectResolver } from './RedirectResolver';
+import { Attribution, RandomImageResolver } from './RandomImageResolver';
 
-const redirectResolver = new RedirectResolver();
+// const redirectResolver = new RedirectResolver();
 const generateResolver = new GenerateResolver();
 const iconResolver = new IconResolver();
+const randomImageResolver = new RandomImageResolver();
 
 export function clearResolverCache(key: string) {
-  redirectResolver.clearCache(key);
+  randomImageResolver.clearCache(key);
   // generateResolver.clearCache();
   // iconResolver.clearCache();
 }
@@ -32,10 +33,14 @@ export function resolveLayer({
 }: {
   cachePrefix?: string;
   layer: Sketch.SymbolInstance;
-  onResolve: (data: Sketch.ResolvedBlockData | undefined) => void;
+  onResolve: (
+    data: Sketch.ResolvedBlockData | undefined,
+    attribution?: Attribution,
+  ) => void;
   onResolveOverride: (
     overrideName: string,
     data: Sketch.ResolvedBlockData | undefined,
+    attribution?: Attribution,
   ) => void;
 }): Subscription[] {
   const {
@@ -76,22 +81,29 @@ export function resolveLayer({
       .map((term) => term.trim())
       .join(',');
 
-    const unsplashUrl = `https://source.unsplash.com/${width}x${height}?${encodeURIComponent(
-      terms,
-    )}&buster=${encodeURIComponent(cacheKey)}`;
+    // http://localhost:31112/api/images/random?query=hat&width=10&height=20
+    const query = encodeQueryParameters({
+      query: terms,
+      width,
+      height,
+      buster: cacheKey,
+    });
 
     subscriptions.push(
-      redirectResolver.addListener(cacheKey, unsplashUrl, (resolvedText) => {
-        onResolve({
-          originalText,
-          resolvedText,
-          symbolID,
-          resolvedAt: new Date().toISOString(),
-        });
+      randomImageResolver.addListener(cacheKey, query, (response) => {
+        onResolve(
+          {
+            originalText,
+            resolvedText: response.url,
+            symbolID,
+            resolvedAt: new Date().toISOString(),
+          },
+          response,
+        );
       }),
     );
 
-    redirectResolver.resolve(cacheKey, unsplashUrl);
+    randomImageResolver.resolve(cacheKey, query);
   } else if (symbolID === writeSymbolId) {
     onResolve(undefined);
 
@@ -132,12 +144,12 @@ export function resolveLayer({
       ...resolveLayer({
         cachePrefix: cachePrefix ? `${cachePrefix}/${layerId}` : layerId,
         layer: child,
-        onResolve: (data) => {
+        onResolve: (data, attribution) => {
           const overrideName = Overrides.encodeName(
             [child.do_objectID],
             'resolvedBlockData',
           );
-          onResolveOverride(overrideName, data);
+          onResolveOverride(overrideName, data, attribution);
         },
         onResolveOverride,
       }),

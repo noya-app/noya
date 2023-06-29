@@ -46,6 +46,7 @@ export * from './components/Spacer';
 export * from './components/Stack';
 export * from './components/Switch';
 export * from './components/Text';
+export * from './components/Toast';
 export * from './components/Tooltip';
 export * from './components/TreeView';
 export * from './contexts/DesignSystemConfiguration';

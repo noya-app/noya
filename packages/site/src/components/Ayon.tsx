@@ -1,5 +1,4 @@
 import * as ChakraUI from '@chakra-ui/react';
-import { VStack } from '@chakra-ui/react';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -47,18 +46,18 @@ import {
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import {
-  createInitialWorkspaceState,
   Layers,
   Selectors,
   WorkspaceAction,
-  workspaceReducer,
   WorkspaceState,
+  createInitialWorkspaceState,
+  workspaceReducer,
 } from 'noya-state';
 import { UTF16 } from 'noya-utils';
 import React, {
   ComponentProps,
-  memo,
   Suspense,
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -66,9 +65,9 @@ import React, {
   useState,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
-import { allInsertableSymbols, Blocks } from '../ayon/blocks/blocks';
-import { ayonLibraryId, boxSymbolId } from '../ayon/blocks/symbolIds';
 import { Content, ViewType } from '../ayon/Content';
+import { Blocks, allInsertableSymbols } from '../ayon/blocks/blocks';
+import { ayonLibraryId, boxSymbolId } from '../ayon/blocks/symbolIds';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
 import { ClientStorage } from '../utils/clientStorage';
@@ -245,10 +244,10 @@ function Workspace({
           <RadioGroup.Item
             value="pointer"
             tooltip={
-              <VStack alignItems="start">
+              <Stack.V alignItems="start">
                 <Small fontWeight={600}>Pointer Tool</Small>
                 <Small>Click to select and drag blocks.</Small>
-              </VStack>
+              </Stack.V>
             }
           >
             <CursorArrowIcon />
@@ -268,7 +267,7 @@ function Workspace({
                 value="insert"
                 tooltip={
                   !showInsertBlockOnboarding && (
-                    <VStack alignItems="start">
+                    <Stack.V alignItems="start">
                       <Small fontWeight={600}>Insert Tool</Small>
                       <Small>Click and drag to draw a block.</Small>
                       <Small>
@@ -280,7 +279,7 @@ function Workspace({
                         </Chip>{' '}
                         to activate.
                       </Small>
-                    </VStack>
+                    </Stack.V>
                   )
                 }
               >
@@ -313,13 +312,13 @@ function Workspace({
           <RadioGroup.Item
             value="region"
             tooltip={
-              <VStack alignItems="start">
+              <Stack.V alignItems="start">
                 <Small fontWeight={600}>Region Tool</Small>
                 <Small>Click and drag to draw a region.</Small>
                 <Small>
                   Hold <Chip variant="secondary">Shift</Chip> to activate.
                 </Small>
-              </VStack>
+              </Stack.V>
             }
           >
             <GroupIcon />
