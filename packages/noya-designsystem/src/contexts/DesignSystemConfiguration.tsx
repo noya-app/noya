@@ -7,6 +7,7 @@ import React, {
   useMemo,
 } from 'react';
 import { ThemeProvider, useTheme } from 'styled-components';
+import { ToastProvider } from '../components/Toast';
 import { Theme } from '../theme';
 import { DialogProvider } from './DialogContext';
 
@@ -32,7 +33,9 @@ export const DesignSystemConfigurationProvider = memo(
     return (
       <DesignSystemConfigurationContext.Provider value={contextValue}>
         <ThemeProvider theme={theme}>
-          <DialogProvider>{children}</DialogProvider>
+          <DialogProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </DialogProvider>
         </ThemeProvider>
       </DesignSystemConfigurationContext.Provider>
     );

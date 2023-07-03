@@ -6,6 +6,7 @@ import {
   SimpleCanvas,
   convertPoint,
 } from 'noya-canvas';
+import { Toast } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
@@ -21,17 +22,26 @@ import {
 } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce } from 'noya-utils';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ImperativePanelHandle } from 'react-resizable-panels';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
+import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { Panel } from './Panel';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 import { Blocks } from './blocks/blocks';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
 import { parseBlock } from './parse';
+import { Attribution } from './resolve/RandomImageResolver';
 import { resolveLayer } from './resolve/resolve';
 import { Stacking } from './stacking';
 import { ViewType } from './types';
@@ -60,6 +70,12 @@ export const Content = memo(function Content({
   isPlayground?: boolean;
   designSystem: string;
 }) {
+  const [toastData, setToastData] = useState<
+    { attribution: Attribution; key: string } | undefined
+  >();
+
+  const setToastDataDebounced = useMemo(() => debounce(setToastData, 300), []);
+
   const { canvasSize, isContextMenuOpen } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
@@ -133,15 +149,30 @@ export const Content = memo(function Content({
       .flatMap((layer) =>
         resolveLayer({
           layer,
-          onResolve: (resolved) =>
-            dispatch('setResolvedBlockData', layer.do_objectID, resolved),
-          onResolveOverride: (overrideName, resolved) => {
+          onResolve: (resolved, attribution) => {
+            dispatch('setResolvedBlockData', layer.do_objectID, resolved);
+
+            if (attribution && resolved) {
+              setToastDataDebounced({
+                attribution,
+                key: resolved.resolvedText,
+              });
+            }
+          },
+          onResolveOverride: (overrideName, resolved, attribution) => {
             dispatch(
               'setOverrideValue',
               [layer.do_objectID],
               overrideName,
               resolved,
             );
+
+            if (attribution && resolved) {
+              setToastDataDebounced({
+                attribution,
+                key: resolved.resolvedText,
+              });
+            }
           },
         }),
       );
@@ -149,7 +180,7 @@ export const Content = memo(function Content({
     return () => {
       subscriptions.forEach((unsubscribe) => unsubscribe());
     };
-  }, [dispatch, layers]);
+  }, [dispatch, layers, setToastDataDebounced]);
 
   const canvasRef = useRef<ISimpleCanvas>(null);
 
@@ -173,230 +204,243 @@ export const Content = memo(function Content({
   );
 
   return (
-    <Panel.Root
-      direction="horizontal"
-      autoSaveId="ayon-canvas"
-      onLayout={(sizes) => {
-        if (onLayoutInitialized.current) {
-          onLayoutDebounced(sizes);
-        } else {
-          onLayoutInitialized.current = true;
-        }
-      }}
-    >
-      <Panel.Item ref={panelRef} collapsible defaultSize={75}>
-        <FileDropTarget
-          supportedFileTypes={[
-            'image/png' as const,
-            'image/jpeg' as const,
-            'image/webp' as const,
-          ]}
-          onDropFiles={addImageFiles}
-        >
-          <SimpleCanvas
-            ref={canvasRef}
-            padding={padding}
-            position={isPlayground ? undefined : 'top'}
-            logEvent={amplitude.logEvent}
-            interactions={
-              isPlayground
-                ? [
-                    Interactions.escape,
-                    Interactions.clipboard,
-                    Interactions.createEditBlock({ inferBlockType }),
-                    Interactions.selection,
-                    Interactions.marquee,
-                  ]
-                : [
-                    Interactions.selectionMode,
-                    Interactions.duplicate,
-                    Interactions.reorder,
-                    Interactions.zoom,
-                    Interactions.escape,
-                    Interactions.history,
-                    Interactions.clipboard,
-                    Interactions.editText,
-                    Interactions.createEditBlock({ inferBlockType }),
-                    Interactions.focus,
-                    Interactions.pan,
-                    Interactions.scale,
-                    Interactions.createInsertMode({ inferBlockType }),
-                    Interactions.selection,
-                    Interactions.move,
-                    Interactions.marquee,
-                    Interactions.createDrawing({
-                      allowDrawingFromNoneState: false,
-                      hasMovementThreshold: true,
-                      inferBlockType,
-                    }),
-                    Interactions.defaultCursor,
-                  ]
-            }
-            widgets={
-              viewType !== 'previewOnly' && (
-                <>
-                  {layers.map((layer) => (
-                    <Widget
-                      key={layer.do_objectID}
-                      layer={layer}
-                      inferBlockTypes={inferBlockTypes}
-                      onFocusCanvas={onFocusCanvas}
-                      showToolbar={!isPlayground}
-                      viewType={viewType}
-                      setOverriddenBlock={(blockContent) => {
-                        if (blockContent) {
-                          setOverriddenBlock({
-                            layerId: layer.do_objectID,
-                            blockContent,
+    <>
+      {toastData && (
+        <Toast
+          key={toastData.key}
+          title="Image loaded"
+          content={<AttributionCard {...toastData.attribution} />}
+        />
+      )}
+      <Panel.Root
+        direction="horizontal"
+        autoSaveId="ayon-canvas"
+        onLayout={(sizes) => {
+          if (onLayoutInitialized.current) {
+            onLayoutDebounced(sizes);
+          } else {
+            onLayoutInitialized.current = true;
+          }
+        }}
+      >
+        <Panel.Item ref={panelRef} collapsible defaultSize={75}>
+          <FileDropTarget
+            supportedFileTypes={[
+              'image/png' as const,
+              'image/jpeg' as const,
+              'image/webp' as const,
+            ]}
+            onDropFiles={addImageFiles}
+          >
+            <SimpleCanvas
+              ref={canvasRef}
+              padding={padding}
+              position={isPlayground ? undefined : 'top'}
+              logEvent={amplitude.logEvent}
+              interactions={
+                isPlayground
+                  ? [
+                      Interactions.escape,
+                      Interactions.clipboard,
+                      Interactions.createEditBlock({ inferBlockType }),
+                      Interactions.selection,
+                      Interactions.marquee,
+                    ]
+                  : [
+                      Interactions.selectionMode,
+                      Interactions.duplicate,
+                      Interactions.reorder,
+                      Interactions.zoom,
+                      Interactions.escape,
+                      Interactions.history,
+                      Interactions.clipboard,
+                      Interactions.editText,
+                      Interactions.createEditBlock({ inferBlockType }),
+                      Interactions.focus,
+                      Interactions.pan,
+                      Interactions.scale,
+                      Interactions.createInsertMode({ inferBlockType }),
+                      Interactions.selection,
+                      Interactions.move,
+                      Interactions.marquee,
+                      Interactions.createDrawing({
+                        allowDrawingFromNoneState: false,
+                        hasMovementThreshold: true,
+                        inferBlockType,
+                      }),
+                      Interactions.defaultCursor,
+                    ]
+              }
+              widgets={
+                viewType !== 'previewOnly' && (
+                  <>
+                    {layers.map((layer) => (
+                      <Widget
+                        key={layer.do_objectID}
+                        layer={layer}
+                        inferBlockTypes={inferBlockTypes}
+                        onFocusCanvas={onFocusCanvas}
+                        showToolbar={!isPlayground}
+                        viewType={viewType}
+                        setOverriddenBlock={(blockContent) => {
+                          if (blockContent) {
+                            setOverriddenBlock({
+                              layerId: layer.do_objectID,
+                              blockContent,
+                            });
+                          } else {
+                            setOverriddenBlock(undefined);
+                          }
+                        }}
+                        onChangeBlockType={(type: DrawableLayerType) => {
+                          if (typeof type === 'string') return;
+
+                          if (onboardingStep === 'insertedBlock') {
+                            setOnboardingStep?.('configuredBlockType');
+                          }
+
+                          amplitude.logEvent('Project - Block - Changed Type', {
+                            'Old Block Type': layer.symbolID,
+                            'New Block Type': type.symbolId,
+                            X: layer.frame.x,
+                            Y: layer.frame.y,
+                            Width: layer.frame.width,
+                            Height: layer.frame.height,
                           });
-                        } else {
-                          setOverriddenBlock(undefined);
-                        }
-                      }}
-                      onChangeBlockType={(type: DrawableLayerType) => {
-                        if (typeof type === 'string') return;
 
-                        if (onboardingStep === 'insertedBlock') {
-                          setOnboardingStep?.('configuredBlockType');
-                        }
+                          dispatch(
+                            'setSymbolInstanceSource',
+                            type.symbolId,
+                            'preserveCurrent',
+                          );
+                        }}
+                        onChangeBlockContent={(content: BlockContent) => {
+                          const nextBlock =
+                            Blocks[content.symbolId ?? layer.symbolID];
 
-                        amplitude.logEvent('Project - Block - Changed Type', {
-                          'Old Block Type': layer.symbolID,
-                          'New Block Type': type.symbolId,
-                          X: layer.frame.x,
-                          Y: layer.frame.y,
-                          Width: layer.frame.width,
-                          Height: layer.frame.height,
-                        });
+                          const contentWithNormalizedText: BlockContent = {
+                            ...content,
+                            normalizedText: parseBlock(
+                              content.blockText,
+                              nextBlock.parser,
+                              { placeholder: nextBlock.placeholderText },
+                            ).content,
+                          };
 
-                        dispatch(
-                          'setSymbolInstanceSource',
-                          type.symbolId,
-                          'preserveCurrent',
-                        );
-                      }}
-                      onChangeBlockContent={(content: BlockContent) => {
-                        const nextBlock =
-                          Blocks[content.symbolId ?? layer.symbolID];
-
-                        const contentWithNormalizedText: BlockContent = {
-                          ...content,
-                          normalizedText: parseBlock(
-                            content.blockText,
-                            nextBlock.parser,
-                            { placeholder: nextBlock.placeholderText },
-                          ).content,
-                        };
-
-                        dispatch('batch', [
-                          [
-                            'setBlockContent',
-                            layer.do_objectID,
-                            contentWithNormalizedText,
-                          ],
-                          ...(contentWithNormalizedText.blockText !== ''
-                            ? [
-                                [
-                                  'setSymbolIdIsFixed',
-                                  layer.do_objectID,
-                                  true,
-                                ] as Action,
-                              ]
-                            : []),
-                        ]);
-                      }}
-                      uploadAsset={uploadAsset}
-                    />
-                  ))}
-                  {state.interactionState.type === 'drawing' && (
-                    <DrawingWidget />
-                  )}
-                  {state.selectedLayerIds.length >= 2 && (
-                    <MultipleSelectionWidget />
-                  )}
-                </>
-              )
-            }
-          >
-            {({ size }) =>
-              viewType !== 'previewOnly' && (
-                <>
-                  <InteractiveRenderer size={size}>
-                    <RenderingModeProvider value="interactive">
-                      <Design.Root>
-                        <Design.Background />
-                        <Design.Page />
-                        <Design.PixelGrid />
-                        <Design.GradientEditor />
-                        <Design.InsertSymbol />
-                        <Design.DrawPath />
-                        <Design.EditPath />
-                      </Design.Root>
-                    </RenderingModeProvider>
-                  </InteractiveRenderer>
-                </>
-              )
-            }
-          </SimpleCanvas>
-        </FileDropTarget>
-        {(viewType === 'combined' || viewType === 'previewOnly') && (
-          <Overlay
-            style={
-              viewType === 'previewOnly' ? { pointerEvents: 'all' } : undefined
-            }
-          >
-            <DOMRenderer
-              overriddenBlock={overriddenBlock}
-              resizeBehavior="match-canvas"
-              designSystem={designSystem}
-            />
-          </Overlay>
-        )}
-        {viewType !== 'previewOnly' && (
-          <>
-            <Overlay>
-              <SVGRenderer size={canvasSize}>
-                <RenderingModeProvider value="interactive">
-                  <Design.Root>
-                    <Design.BoundingRect />
-                    <Design.LayerHighlight />
-                  </Design.Root>
-                </RenderingModeProvider>
-              </SVGRenderer>
-            </Overlay>
-            <Overlay
-              style={{
-                zIndex: isContextMenuOpen ? undefined : Stacking.level.overlay,
-              }}
+                          dispatch('batch', [
+                            [
+                              'setBlockContent',
+                              layer.do_objectID,
+                              contentWithNormalizedText,
+                            ],
+                            ...(contentWithNormalizedText.blockText !== ''
+                              ? [
+                                  [
+                                    'setSymbolIdIsFixed',
+                                    layer.do_objectID,
+                                    true,
+                                  ] as Action,
+                                ]
+                              : []),
+                          ]);
+                        }}
+                        uploadAsset={uploadAsset}
+                      />
+                    ))}
+                    {state.interactionState.type === 'drawing' && (
+                      <DrawingWidget />
+                    )}
+                    {state.selectedLayerIds.length >= 2 && (
+                      <MultipleSelectionWidget />
+                    )}
+                  </>
+                )
+              }
             >
-              <SVGRenderer size={canvasSize}>
-                <RenderingModeProvider value="interactive">
-                  <Design.Root>
-                    <Design.DrawLayer />
-                    <Design.SnapGuides showLabels={false} />
-                    <Design.MeasurementGuides showLabels={false} />
-                    {!isPlayground && <Design.DragHandles />}
-                    {!isPlayground && <Design.Marquee />}
-                  </Design.Root>
-                </RenderingModeProvider>
-              </SVGRenderer>
+              {({ size }) =>
+                viewType !== 'previewOnly' && (
+                  <>
+                    <InteractiveRenderer size={size}>
+                      <RenderingModeProvider value="interactive">
+                        <Design.Root>
+                          <Design.Background />
+                          <Design.Page />
+                          <Design.PixelGrid />
+                          <Design.GradientEditor />
+                          <Design.InsertSymbol />
+                          <Design.DrawPath />
+                          <Design.EditPath />
+                        </Design.Root>
+                      </RenderingModeProvider>
+                    </InteractiveRenderer>
+                  </>
+                )
+              }
+            </SimpleCanvas>
+          </FileDropTarget>
+          {(viewType === 'combined' || viewType === 'previewOnly') && (
+            <Overlay
+              style={
+                viewType === 'previewOnly'
+                  ? { pointerEvents: 'all' }
+                  : undefined
+              }
+            >
+              <DOMRenderer
+                overriddenBlock={overriddenBlock}
+                resizeBehavior="match-canvas"
+                designSystem={designSystem}
+              />
             </Overlay>
+          )}
+          {viewType !== 'previewOnly' && (
+            <>
+              <Overlay>
+                <SVGRenderer size={canvasSize}>
+                  <RenderingModeProvider value="interactive">
+                    <Design.Root>
+                      <Design.BoundingRect />
+                      <Design.LayerHighlight />
+                    </Design.Root>
+                  </RenderingModeProvider>
+                </SVGRenderer>
+              </Overlay>
+              <Overlay
+                style={{
+                  zIndex: isContextMenuOpen
+                    ? undefined
+                    : Stacking.level.overlay,
+                }}
+              >
+                <SVGRenderer size={canvasSize}>
+                  <RenderingModeProvider value="interactive">
+                    <Design.Root>
+                      <Design.DrawLayer />
+                      <Design.SnapGuides showLabels={false} />
+                      <Design.MeasurementGuides showLabels={false} />
+                      {!isPlayground && <Design.DragHandles />}
+                      {!isPlayground && <Design.Marquee />}
+                    </Design.Root>
+                  </RenderingModeProvider>
+                </SVGRenderer>
+              </Overlay>
+            </>
+          )}
+        </Panel.Item>
+        {viewType === 'split' && (
+          <>
+            <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
+            <Panel.Item collapsible>
+              <DOMRenderer
+                overriddenBlock={overriddenBlock}
+                padding={padding}
+                resizeBehavior="fit-container"
+                designSystem={designSystem}
+              />
+            </Panel.Item>
           </>
         )}
-      </Panel.Item>
-      {viewType === 'split' && (
-        <>
-          <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
-          <Panel.Item collapsible>
-            <DOMRenderer
-              overriddenBlock={overriddenBlock}
-              padding={padding}
-              resizeBehavior="fit-container"
-              designSystem={designSystem}
-            />
-          </Panel.Item>
-        </>
-      )}
-    </Panel.Root>
+      </Panel.Root>
+    </>
   );
 });
