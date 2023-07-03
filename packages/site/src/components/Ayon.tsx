@@ -17,7 +17,6 @@ import Sketch from 'noya-file-format';
 import { toZipFile } from 'noya-filesystem';
 import { Size } from 'noya-geometry';
 import {
-  BoxIcon,
   ChevronDownIcon,
   CodeIcon,
   CodeSandboxLogoIcon,
@@ -26,12 +25,10 @@ import {
   FileIcon,
   GroupIcon,
   ImageIcon,
-  OpenInNewWindowIcon,
   PlusIcon,
   SketchLogoIcon,
   StarFilledIcon,
   TransformIcon,
-  ViewVerticalIcon,
 } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
@@ -62,7 +59,6 @@ import React, {
   useEffect,
   useLayoutEffect,
   useReducer,
-  useState,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Content } from '../ayon/Content';
@@ -71,9 +67,7 @@ import { ayonLibraryId, boxSymbolId } from '../ayon/blocks/symbolIds';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
-import { ClientStorage } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
-import { NOYA_HOST } from '../utils/noyaClient';
 import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
@@ -86,9 +80,6 @@ export type ExportType =
   | 'react'
   | 'codesandbox';
 
-const persistedViewType =
-  (ClientStorage.getItem('preferredViewType') as ViewType) || 'split';
-
 function Workspace({
   fileId,
   uploadAsset,
@@ -97,7 +88,7 @@ function Workspace({
   name,
   onChangeName,
   onDuplicate,
-  viewType: initialViewType = persistedViewType,
+  viewType = 'combined',
   padding,
   canvasRendererType,
   downloadFile,
@@ -117,28 +108,9 @@ function Workspace({
 >): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const [viewType, setViewTypeMemory] = useState<ViewType>(initialViewType);
   const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
   const { onboardingStep, setOnboardingStep } = useOnboarding();
   const theme = useDesignSystemTheme();
-
-  const setViewType = useCallback(
-    (type: ViewType) => {
-      switch (type) {
-        case 'split':
-          amplitude.logEvent('Project - View - Switched to Split View');
-          break;
-        case 'combined':
-          amplitude.logEvent('Project - View - Switched to Combined View');
-          break;
-      }
-
-      ClientStorage.setItem('preferredViewType', type);
-
-      setViewTypeMemory(type);
-    },
-    [setViewTypeMemory],
-  );
 
   const reducer = useCallback(
     (state: WorkspaceState, action: WorkspaceAction) => {
@@ -341,50 +313,6 @@ function Workspace({
   useLayoutEffect(() => {
     setRightToolbar(
       <Stack.H gap={8}>
-        <DropdownMenu<ViewType | 'livePreview'>
-          items={[
-            {
-              value: 'split',
-              title: 'Split View',
-              icon: <ViewVerticalIcon />,
-              checked: viewType === 'split',
-            },
-            {
-              value: 'combined',
-              title: 'Combined View',
-              icon: <BoxIcon />,
-              checked: viewType === 'combined',
-            },
-            SEPARATOR_ITEM,
-            {
-              value: 'livePreview',
-              title: 'Live Preview',
-              icon: <OpenInNewWindowIcon />,
-            },
-          ]}
-          onSelect={(value) => {
-            switch (value) {
-              case 'combined':
-              case 'split': {
-                setViewType(value);
-                break;
-              }
-              case 'livePreview': {
-                window.open(`${NOYA_HOST}/app/projects/${fileId}/preview`);
-                break;
-              }
-            }
-          }}
-          onOpenChange={() => {
-            dispatch(['selectLayer', []]);
-          }}
-        >
-          <Button>
-            View
-            <Spacer.Horizontal size={4} />
-            <ChevronDownIcon />
-          </Button>
-        </DropdownMenu>
         <DropdownMenu<ExportType>
           items={[
             {
@@ -536,9 +464,7 @@ function Workspace({
     downloadFile,
     setRightToolbar,
     state.history.present,
-    viewType,
     artboard,
-    setViewType,
     name,
     onChangeName,
     fileId,

@@ -5,4 +5,4 @@ export type InferredBlockTypeResult = {
   score: number;
 };
 
-export type ViewType = 'split' | 'combined' | 'previewOnly';
+export type ViewType = 'combined' | 'previewOnly';

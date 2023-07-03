@@ -378,22 +378,18 @@ export const Content = memo(function Content({
               }
             </SimpleCanvas>
           </FileDropTarget>
-          {(viewType === 'combined' || viewType === 'previewOnly') && (
-            <Overlay
-              style={
-                viewType === 'previewOnly'
-                  ? { pointerEvents: 'all' }
-                  : undefined
-              }
-            >
-              <DOMRenderer
-                overriddenBlock={overriddenBlock}
-                resizeBehavior="match-canvas"
-                designSystem={designSystem}
-              />
-            </Overlay>
-          )}
-          {viewType !== 'previewOnly' && (
+          <Overlay
+            style={
+              viewType === 'previewOnly' ? { pointerEvents: 'all' } : undefined
+            }
+          >
+            <DOMRenderer
+              overriddenBlock={overriddenBlock}
+              resizeBehavior="match-canvas"
+              designSystem={designSystem}
+            />
+          </Overlay>
+          {viewType === 'combined' && (
             <>
               <Overlay>
                 <SVGRenderer size={canvasSize}>
@@ -427,19 +423,10 @@ export const Content = memo(function Content({
             </>
           )}
         </Panel.Item>
-        {viewType === 'split' && (
-          <>
-            <Panel.Handle onDoubleClick={() => panelRef.current?.resize(50)} />
-            <Panel.Item collapsible>
-              <DOMRenderer
-                overriddenBlock={overriddenBlock}
-                padding={padding}
-                resizeBehavior="fit-container"
-                designSystem={designSystem}
-              />
-            </Panel.Item>
-          </>
-        )}
+        <Panel.Handle onDoubleClick={() => panelRef.current?.resize(80)} />
+        <Panel.Item collapsible>
+          <div>Inspector</div>
+        </Panel.Item>
       </Panel.Root>
     </>
   );
