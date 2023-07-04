@@ -18,6 +18,7 @@ export function InspectorCarousel({
       <GridView.Section padding={0}>
         {items.map((props, index) => (
           <GridView.Item
+            key={index}
             id={props.blockId}
             title={Blocks[props.blockId].symbol.name}
             onClick={() => {

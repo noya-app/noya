@@ -143,7 +143,7 @@ export function AyonLayerInspector() {
             // const componentName = block.symbol.name;
 
             return (
-              <InputField.Root>
+              <InputField.Root key={index}>
                 <InputField.Label>Component</InputField.Label>
                 <InputField.Input
                   value={''}
