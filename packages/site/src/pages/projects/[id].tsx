@@ -5,9 +5,9 @@ import {
   Button,
   DesignSystemConfigurationProvider,
   Divider,
-  lightTheme,
   Spacer,
   Stack,
+  lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
@@ -24,8 +24,8 @@ import React, {
 } from 'react';
 import { ProjectTitle } from '../../components/ProjectTitle';
 import {
-  getSubscriptionOverage,
   SubscriptionUsageMeterSmall,
+  getSubscriptionOverage,
   usageMeterThreshold,
 } from '../../components/Subscription';
 
@@ -42,7 +42,10 @@ import {
 } from '../../hooks/useOnboardingUpsellExperiment';
 import { downloadUrl } from '../../utils/download';
 
-const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
+const Ayon = dynamic(
+  () => import('../../components/Ayon').then((mod) => mod.Ayon),
+  { ssr: false },
+);
 
 function FileTitle({ id }: { id: string }) {
   const { files } = useNoyaFiles();

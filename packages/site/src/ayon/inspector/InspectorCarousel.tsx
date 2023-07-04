@@ -1,21 +1,28 @@
 import { GridView, Stack } from 'noya-designsystem';
 import React from 'react';
+import {
+  BlockPreviewProps,
+  InteractiveBlockPreview,
+} from '../../docs/InteractiveBlockPreview';
+import { Blocks } from '../blocks/blocks';
 
-export function InspectorCarousel() {
+export function InspectorCarousel({
+  items,
+  onSelectItem,
+}: {
+  items: BlockPreviewProps[];
+  onSelectItem: (index: number) => void;
+}) {
   return (
-    <GridView.Root
-      onClick={() => {}}
-      scrollable={false}
-      size="xs"
-      textPosition="overlay"
-      bordered
-    >
+    <GridView.Root scrollable={false} size="xs" textPosition="overlay" bordered>
       <GridView.Section padding={0}>
-        {[...Array(3)].map((_, index) => (
+        {items.map((props, index) => (
           <GridView.Item
-            id="test"
-            title={'Hello'}
-            onClick={() => {}}
+            id={props.blockId}
+            title={Blocks[props.blockId].symbol.name}
+            onClick={() => {
+              onSelectItem(index);
+            }}
             selected={index === 0}
           >
             <Stack.V
@@ -26,6 +33,13 @@ export function InspectorCarousel() {
               // to what GridView sets it to. This should be coming from Chakra
               color="black"
             >
+              <InteractiveBlockPreview
+                key={props.blockId}
+                height="100%"
+                width="100%"
+                viewType="previewOnly"
+                {...props}
+              />
               {/* Block pointer events */}
               <Stack.V width="100%" height="100%" position="absolute" />
             </Stack.V>

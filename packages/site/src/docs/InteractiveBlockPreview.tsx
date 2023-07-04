@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
@@ -20,8 +19,7 @@ import { PreferredOverride, blockMetadata } from '../ayon/blocks/blockMetadata';
 import { Blocks } from '../ayon/blocks/blocks';
 import { parseBlock } from '../ayon/parse';
 import { ViewType } from '../ayon/types';
-
-const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
+import { useAyon } from '../components/AyonContext';
 
 function Content({
   blocks,
@@ -32,6 +30,8 @@ function Content({
   blockId: string;
   viewType?: ViewType;
 }) {
+  const Ayon = useAyon();
+
   const block = blocks[blockId];
 
   const client = useNoyaClient();
@@ -71,14 +71,16 @@ export function createBlockExample({
   height,
   blockText,
   resolvedBlockText,
-  overrides,
+  preferredOverrides,
+  overrideValues,
 }: {
   blockId: string;
   width: number;
   height: number;
   blockText?: string;
   resolvedBlockText?: string;
-  overrides?: PreferredOverride[];
+  preferredOverrides?: PreferredOverride[];
+  overrideValues?: Sketch.OverrideValue[];
 }) {
   const { content: originalText } = parseBlock(
     blockText,
@@ -98,8 +100,9 @@ export function createBlockExample({
 
   const layers = Blocks[blockId].symbol.layers;
 
-  const overrideValues: Sketch.OverrideValue[] = (overrides ?? []).flatMap(
-    (override) => {
+  const overrides: Sketch.OverrideValue[] =
+    overrideValues ??
+    (preferredOverrides ?? []).flatMap((override) => {
       const { content } = parseBlock(
         override.blockText,
         Blocks[override.symbolId].parser,
@@ -135,15 +138,14 @@ export function createBlockExample({
             ]
           : []),
       ];
-    },
-  );
+    });
 
   return {
     block: Blocks[blockId],
     size: { width, height },
     blockText,
     resolvedBlockData,
-    overrideValues,
+    overrideValues: overrides,
   };
 }
 
@@ -154,7 +156,8 @@ function Loader({
   viewType,
   blockText,
   resolvedBlockText,
-  overrides,
+  preferredOverrides,
+  overrideValues,
 }: {
   blockId: string;
   width: number;
@@ -162,7 +165,8 @@ function Loader({
   viewType?: ViewType;
   blockText?: string;
   resolvedBlockText?: string;
-  overrides?: PreferredOverride[];
+  preferredOverrides?: PreferredOverride[];
+  overrideValues?: Sketch.OverrideValue[];
 }) {
   const [client, setClient] = useState<NoyaAPI.Client | undefined>();
 
@@ -177,7 +181,8 @@ function Loader({
               height,
               blockText,
               resolvedBlockText,
-              overrides,
+              preferredOverrides,
+              overrideValues: overrideValues,
             }),
           ),
         ],
@@ -185,7 +190,15 @@ function Loader({
     });
 
     setClient(client);
-  }, [blockId, blockText, height, overrides, resolvedBlockText, width]);
+  }, [
+    blockId,
+    blockText,
+    height,
+    overrideValues,
+    preferredOverrides,
+    resolvedBlockText,
+    width,
+  ]);
 
   if (!blockId || !client) return null;
 
@@ -196,7 +209,7 @@ function Loader({
   );
 }
 
-interface Props {
+export interface BlockPreviewProps {
   blockId: string;
   width?: CSSProperties['width'];
   height?: CSSProperties['height'];
@@ -205,12 +218,13 @@ interface Props {
   viewType?: ViewType;
   blockText?: string;
   resolvedBlockText?: string;
-  overrides?: PreferredOverride[];
+  preferredOverrides?: PreferredOverride[];
+  overrideValues?: Sketch.OverrideValue[];
 }
 
 // We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
 // We load Ayon/Blocks async to work around a react-jsx transform issue when loading Chakra.
-export function InteractiveBlockPreview(props: Props) {
+export function InteractiveBlockPreview(props: BlockPreviewProps) {
   const config = useDesignSystemConfiguration();
 
   const blockWidth =
@@ -228,8 +242,9 @@ export function InteractiveBlockPreview(props: Props) {
   const resolvedBlockText =
     props.resolvedBlockText ??
     blockMetadata[props.blockId]?.preferredResolvedBlockText;
-  const overrides =
-    props.overrides ?? blockMetadata[props.blockId]?.preferredOverrides;
+  const preferredOverrides =
+    props.preferredOverrides ??
+    blockMetadata[props.blockId]?.preferredOverrides;
 
   return (
     <DesignSystemConfigurationProvider
@@ -237,6 +252,7 @@ export function InteractiveBlockPreview(props: Props) {
       theme={lightTheme}
     >
       <Stack.V
+        id="InteractiveBlockPreview"
         height={height}
         width={width}
         background={lightTheme.colors.canvas.background}
@@ -247,7 +263,8 @@ export function InteractiveBlockPreview(props: Props) {
           height={blockHeight}
           blockText={blockText}
           resolvedBlockText={resolvedBlockText}
-          overrides={overrides}
+          preferredOverrides={preferredOverrides}
+          overrideValues={props.overrideValues}
         />
       </Stack.V>
     </DesignSystemConfigurationProvider>

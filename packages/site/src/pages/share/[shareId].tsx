@@ -22,7 +22,10 @@ import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
 import { networkClientThatThrows, NOYA_HOST } from '../../utils/noyaClient';
 
-const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
+const Ayon = dynamic(
+  () => import('../../components/Ayon').then((mod) => mod.Ayon),
+  { ssr: false },
+);
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (!networkClientThatThrows) return;

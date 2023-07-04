@@ -1,4 +1,3 @@
-import { FileSystemHandle } from 'browser-fs-access';
 import {
   useApplicationState,
   useDispatch,
@@ -7,12 +6,12 @@ import {
 } from 'noya-app-state-context';
 import {
   Button,
-  createSectionedMenu,
   DropdownMenu,
   MenuItem,
   RegularMenuItem,
   Spacer,
   Tooltip,
+  createSectionedMenu,
 } from 'noya-designsystem';
 import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { LayerIcon } from 'noya-inspector';
@@ -68,7 +67,7 @@ interface Props {
   canStartEditingPath: boolean;
   zoomValue: number;
   hasSelectedLayer: boolean;
-  fileHandle?: FileSystemHandle;
+  fileHandle?: FileSystemFileHandle;
 }
 
 const ToolbarContent = memo(function ToolbarContent({

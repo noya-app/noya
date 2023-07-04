@@ -10,7 +10,10 @@ import { Interstitial } from '../../../components/Interstitial';
 import { addShareCookie } from '../../../utils/cookies';
 import { networkClientThatThrows } from '../../../utils/noyaClient';
 
-const Ayon = dynamic(() => import('../../../components/Ayon'), { ssr: false });
+const Ayon = dynamic(
+  () => import('../../../components/Ayon').then((mod) => mod.Ayon),
+  { ssr: false },
+);
 
 function Content({ shareId }: { shareId: string }) {
   const [initialFile, setInitialFile] = useState<

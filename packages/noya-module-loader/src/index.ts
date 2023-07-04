@@ -1,6 +1,7 @@
 import fetch from 'cross-fetch';
 
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { DesignSystemCache } from './cache';
 
 const requireModule = () => {};
 
@@ -25,6 +26,10 @@ export async function loadModule(url: string) {
 }
 
 export async function loadDesignSystem(name: string) {
+  if (DesignSystemCache.has(name)) {
+    return DesignSystemCache.get(name)!;
+  }
+
   const exports = await loadModule(
     `https://www.unpkg.com/@noya-design-system/${name}/dist/standalone.js`,
   );
@@ -33,5 +38,11 @@ export async function loadDesignSystem(name: string) {
     throw new Error('No DesignSystem exported');
   }
 
-  return (exports as any).DesignSystem as DesignSystemDefinition;
+  const designSystem = (exports as any).DesignSystem as DesignSystemDefinition;
+
+  DesignSystemCache.set(name, designSystem);
+
+  return designSystem;
 }
+
+export { DesignSystemCache };

@@ -198,7 +198,7 @@ export const Content = memo(function Content({
           content={<AttributionCard {...toastData.attribution} />}
         />
       )}
-      <Stack.H flex="1" alignItems="stretch">
+      <Stack.H flex="1" alignItems="stretch" overflow="hidden">
         <FileDropTarget
           supportedFileTypes={[
             'image/png' as const,
@@ -366,6 +366,7 @@ export const Content = memo(function Content({
         </Overlay>
         {viewType === 'combined' && (
           <>
+            {!isPlayground && <AyonInspector />}
             <Overlay>
               <SVGRenderer size={canvasSize}>
                 <RenderingModeProvider value="interactive">
@@ -395,7 +396,6 @@ export const Content = memo(function Content({
             </Overlay>
           </>
         )}
-        <AyonInspector />
       </Stack.H>
     </>
   );

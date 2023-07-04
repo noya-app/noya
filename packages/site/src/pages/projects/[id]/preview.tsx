@@ -7,7 +7,10 @@ import {
 } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
 
-const Ayon = dynamic(() => import('../../../components/Ayon'), { ssr: false });
+const Ayon = dynamic(
+  () => import('../../../components/Ayon').then((mod) => mod.Ayon),
+  { ssr: false },
+);
 
 function Content({ id }: { id: string }) {
   const client = useNoyaClient();

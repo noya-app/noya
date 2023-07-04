@@ -1,4 +1,3 @@
-import type { FileSystemHandle } from 'browser-fs-access';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { Insets, Size } from 'noya-geometry';
@@ -7,10 +6,10 @@ import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
 import {
-  createInitialHistoryState,
   HistoryAction,
-  historyReducer,
   HistoryState,
+  createInitialHistoryState,
+  historyReducer,
 } from './historyReducer';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
@@ -33,7 +32,7 @@ export type NextFocusAction =
  * want an "undo" action to change the user's preferences.
  */
 export type WorkspaceState = {
-  fileHandle?: FileSystemHandle;
+  fileHandle?: FileSystemFileHandle;
   history: HistoryState;
   highlightedLayer?: LayerHighlight;
   isContextMenuOpen: boolean;
@@ -54,8 +53,8 @@ export type WorkspaceState = {
 
 export type WorkspaceAction =
   | [type: 'newFile']
-  | [type: 'setFile', value: SketchFile, fileHandle?: FileSystemHandle]
-  | [type: 'setFileHandle', value?: FileSystemHandle]
+  | [type: 'setFile', value: SketchFile, fileHandle?: FileSystemFileHandle]
+  | [type: 'setFileHandle', value?: FileSystemFileHandle]
   | [type: 'setCanvasSize', size: Size, insets: Insets]
   | [type: 'setShowRulers', value: boolean]
   | [type: 'setShowPageListThumbnails', value: boolean]

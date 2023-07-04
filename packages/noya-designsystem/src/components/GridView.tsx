@@ -77,15 +77,25 @@ const GridContainer = styled.div(({ theme }) => ({
   position: 'relative',
 }));
 
-const ItemTitle = styled.span(({ theme }) => ({
-  ...theme.textStyles.small,
-  color: theme.colors.text,
-  fontWeight: 500,
-  userSelect: 'none',
-  whiteSpace: 'pre',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-}));
+const ItemTitle = styled.span<{ showBackground: boolean }>(
+  ({ theme, showBackground }) => ({
+    ...theme.textStyles.small,
+    color: theme.colors.text,
+    fontWeight: 500,
+    userSelect: 'none',
+    whiteSpace: 'pre',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+
+    ...(showBackground && {
+      background: theme.colors.sidebar.background,
+      // border: `1px solid ${theme.colors.dividerSubtle}`,
+      padding: '2px 4px',
+      borderRadius: '2px',
+      backdropFilter: 'blur(4px)',
+    }),
+  }),
+);
 
 const ItemDescription = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
@@ -116,10 +126,12 @@ const TextOverlay = styled.div({
   position: 'absolute',
   inset: 0,
   display: 'flex',
-  flexDirection: 'column',
   alignItems: 'end',
-  justifyContent: 'end',
-  padding: '4px 8px',
+  padding: '4px',
+  pointerEvents: 'none',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 interface ItemProps<MenuItemType extends string = string> {
@@ -184,13 +196,13 @@ const GridViewItem = forwardRef(function GridViewItem<
       {textPosition === 'below' && (
         <>
           <Spacer.Vertical size={8} />
-          <ItemTitle>{title || ' '}</ItemTitle>
+          <ItemTitle showBackground={false}>{title || ' '}</ItemTitle>
           <ItemDescription>{subtitle || ' '}</ItemDescription>
         </>
       )}
       {textPosition === 'overlay' && hovered && (
         <TextOverlay>
-          <ItemTitle>{title}</ItemTitle>
+          <ItemTitle showBackground={true}>{title}</ItemTitle>
           <ItemDescription>{subtitle}</ItemDescription>
         </TextOverlay>
       )}
@@ -222,7 +234,7 @@ const GridViewContext = createContext<GridViewContextValue>({
 
 interface GridViewRootProps extends Partial<GridViewContextValue> {
   children: ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
   scrollable?: boolean;
 }
 

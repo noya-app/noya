@@ -1,20 +1,17 @@
-import { fileSave, FileSystemHandle, FileWithHandle } from 'browser-fs-access';
+import { fileSave, FileWithHandle } from 'browser-fs-access';
 import { Base64 } from 'noya-utils';
 import { hostApp } from './hostApp';
 
 class FileManager {
   requestId = 0;
 
-  private handles: Map<FileSystemHandle, string> = new Map();
+  private handles: Map<FileSystemFileHandle, string> = new Map();
 
   private registerFile(name: string, path: string) {
-    const handle: FileSystemHandle = {
+    const handle: FileSystemFileHandle = {
       name,
       kind: 'file',
-      isSameEntry: () => Promise.resolve(false),
-      queryPermission: () => Promise.resolve('granted'),
-      requestPermission: () => Promise.resolve('granted'),
-    };
+    } as any;
 
     this.handles.set(handle, path);
 
@@ -57,9 +54,13 @@ class FileManager {
     existingHandle,
     throwIfExistingHandleNotGood,
   ) => {
-    const data = await blob.arrayBuffer();
+    const data = await (await blob).arrayBuffer();
 
     const base64 = Base64.encode(data);
+
+    if (Array.isArray(options)) {
+      throw new Error('options must be an object');
+    }
 
     const { file } = await hostApp.request(
       {

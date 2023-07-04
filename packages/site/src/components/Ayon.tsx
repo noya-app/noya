@@ -68,6 +68,7 @@ import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
 import { downloadBlob } from '../utils/download';
+import { AyonProvider } from './AyonContext';
 import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
@@ -512,7 +513,7 @@ function Workspace({
 
 let initialized = false;
 
-export default memo(function Ayon(
+export const Ayon = memo(function Ayon(
   props: ComponentProps<typeof Workspace>,
 ): JSX.Element {
   if (!initialized) {
@@ -521,18 +522,20 @@ export default memo(function Ayon(
   }
 
   return (
-    <Suspense fallback={null}>
-      <ImageCacheProvider>
-        <CanvasKitProvider
-          library={
-            props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
-          }
-        >
-          <FontManagerProvider>
-            <Workspace {...props} />
-          </FontManagerProvider>
-        </CanvasKitProvider>
-      </ImageCacheProvider>
-    </Suspense>
+    <AyonProvider value={Ayon}>
+      <Suspense fallback={null}>
+        <ImageCacheProvider>
+          <CanvasKitProvider
+            library={
+              props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
+            }
+          >
+            <FontManagerProvider>
+              <Workspace {...props} />
+            </FontManagerProvider>
+          </CanvasKitProvider>
+        </ImageCacheProvider>
+      </Suspense>
+    </AyonProvider>
   );
 });

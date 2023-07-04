@@ -18,7 +18,10 @@ import { ViewType } from '../ayon/types';
 import { Toolbar } from '../components/Toolbar';
 import { BlockExample, createBlockExample } from './InteractiveBlockPreview';
 
-const Ayon = dynamic(() => import('../components/Ayon'), { ssr: false });
+const Ayon = dynamic(
+  () => import('../components/Ayon').then((mod) => mod.Ayon),
+  { ssr: false },
+);
 
 function Content({
   fileId,
@@ -87,7 +90,7 @@ export function DesignSystemExplorer({
       const height = blockMetadata?.preferredSize.height ?? 400;
       const blockText = blockMetadata?.preferredBlockText;
       const resolvedBlockText = blockMetadata?.preferredResolvedBlockText;
-      const overrides = blockMetadata?.preferredOverrides;
+      const preferredOverrides = blockMetadata?.preferredOverrides;
 
       return createBlockExample({
         blockId,
@@ -95,7 +98,7 @@ export function DesignSystemExplorer({
         height,
         blockText,
         resolvedBlockText,
-        overrides,
+        preferredOverrides,
       });
     });
 

@@ -22,6 +22,8 @@ import {
 } from 'react-guidebook';
 import styled from 'styled-components';
 import guidebook from '../../guidebook';
+import { Ayon } from '../components/Ayon';
+import { AyonProvider } from '../components/AyonContext';
 import { NavigationLinks } from '../components/NavigationLinks';
 import { Toolbar } from '../components/Toolbar';
 import { BlockGrid } from './BlockGrid';
@@ -232,13 +234,15 @@ export function Docs({
             {/* A single child is required here for React.Children.only */}
             <MDXProvider components={MDXComponents}>
               <Stack.V overflowY="auto" ref={scrollElement}>
-                <Page
-                  rootNode={guidebook}
-                  searchPages={searchPages}
-                  searchTextMatch={searchTextMatch}
-                >
-                  {children}
-                </Page>
+                <AyonProvider value={Ayon}>
+                  <Page
+                    rootNode={guidebook}
+                    searchPages={searchPages}
+                    searchTextMatch={searchTextMatch}
+                  >
+                    {children}
+                  </Page>
+                </AyonProvider>
               </Stack.V>
             </MDXProvider>
           </GuidebookThemeProvider>

@@ -1,4 +1,3 @@
-import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
   useGetStateSnapshot,
@@ -7,12 +6,12 @@ import {
 } from 'noya-app-state-context';
 import {
   Button,
-  createSectionedMenu,
   DropdownMenu,
   MenuItem,
   Spacer,
+  createSectionedMenu,
 } from 'noya-designsystem';
-import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
+import { ApplicationMenuItemType, applicationMenu } from 'noya-embedded';
 import { HamburgerMenuIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { decode, encode } from 'noya-sketch-file';
@@ -22,7 +21,7 @@ import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useFileManager } from '../hooks/useFileManager';
 
 interface Props {
-  fileHandle?: FileSystemHandle;
+  fileHandle?: FileSystemFileHandle;
   getStateSnapshot: () => ApplicationState;
   setShowRulers: (value: boolean) => void;
   setShowPageListThumbnails: (value: boolean) => void;
@@ -89,7 +88,7 @@ const MenubarContent = memo(function MenubarContent({
         false,
       );
 
-      dispatch('setFileHandle', newFileHandle);
+      dispatch('setFileHandle', newFileHandle ?? undefined);
     },
     [dispatch, fileHandle, fileManager, getStateSnapshot],
   );

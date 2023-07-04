@@ -14,7 +14,7 @@ import {
   createResizeTransform,
   transformRect,
 } from 'noya-geometry';
-import { loadDesignSystem } from 'noya-module-loader';
+import { DesignSystemCache, loadDesignSystem } from 'noya-module-loader';
 import { useSize } from 'noya-react-utils';
 import {
   BlockProps,
@@ -165,7 +165,7 @@ function DynamicRenderer({
 
   const [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
-  >();
+  >(DesignSystemCache.get(designSystem));
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
 
   useEffect(() => {
@@ -174,9 +174,10 @@ function DynamicRenderer({
       setSystem(system);
     }
 
-    setSystem(undefined);
-
-    fetchLibrary();
+    if (!DesignSystemCache.has(designSystem)) {
+      setSystem(undefined);
+      fetchLibrary();
+    }
   }, [designSystem]);
 
   useEffect(() => {

@@ -13,6 +13,7 @@ import {
   heading5SymbolId,
   heading6SymbolId,
   heroSymbolV2Id,
+  heroWithImageSymbolId,
   iconSymbolId,
   imageSymbolId,
   inputSymbolId,
@@ -86,6 +87,11 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     name: 'Hero',
     category: 'marketing',
     preferredSize: { width: 600, height: 400 },
+  },
+  [heroWithImageSymbolId]: {
+    name: 'Hero with Image',
+    category: 'marketing',
+    preferredSize: { width: 1000, height: 600 },
   },
   [cardSymbolId]: {
     name: 'Card',
