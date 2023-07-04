@@ -34,7 +34,7 @@ export default memo(function PagesGrid() {
   );
 
   return (
-    <GridView.Root variant="large" onClick={() => {}}>
+    <GridView.Root size="large" onClick={() => {}}>
       <GridView.SectionHeader title="Pages" />
       <GridView.Section>
         {pages.map((item) => {

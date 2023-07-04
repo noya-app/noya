@@ -7,28 +7,31 @@ import React, {
   ReactNode,
   useCallback,
   useContext,
+  useMemo,
 } from 'react';
 import styled from 'styled-components';
+import { useHover } from '../hooks/useHover';
 import withSeparatorElements from '../utils/withSeparatorElements';
 import { ContextMenu } from './ContextMenu';
 import { MenuItem } from './internal/Menu';
 import { ScrollArea } from './ScrollArea';
 import { Spacer } from './Spacer';
 
-export type GridViewVariant = 'small' | 'large';
+export type GridViewSize = 'xs' | 'small' | 'large';
 
 const Grid = styled.div<{
-  variant: GridViewVariant;
+  size: GridViewSize;
   padding: CSSProperties['padding'];
-}>(({ theme, variant, padding }) => {
+}>(({ theme, size, padding }) => {
   return {
     color: theme.colors.text,
     display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(${
-      variant === 'large' ? 280 : 160
-    }px, 1fr))`,
-    gridAutoRows: variant === 'large' ? '280px' : '170px',
-    gap: `20px`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(
+      ${size === 'large' ? '280px' : size === 'small' ? '160px' : '116px'}
+    , 1fr))`,
+    gridAutoRows:
+      size === 'large' ? '280px' : size === 'small' ? '170px' : '116px',
+    gap: size === 'large' || size === 'small' ? `20px` : `12px`,
     padding,
   };
 });
@@ -41,15 +44,21 @@ const Container = styled.div<{ scrollable: boolean }>(
   }),
 );
 
-const ItemContainer = styled.div<{ selected?: boolean }>(
-  ({ theme, selected }) => ({
+const ItemContainer = styled.div<{ selected?: boolean; bordered: boolean }>(
+  ({ theme, selected, bordered }) => ({
     display: 'flex',
     flex: '1',
     backgroundColor: theme.colors.sidebar.background,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '2px',
-    border: `1px solid ${selected ? theme.colors.primary : 'transparent'}`,
+    border: `1px solid ${
+      selected
+        ? theme.colors.primary
+        : bordered
+        ? theme.colors.divider
+        : 'transparent'
+    }`,
     overflow: 'hidden',
 
     cursor: 'pointer',
@@ -103,6 +112,16 @@ const SectionHeaderContainer = styled.div(({ theme }) => ({
   padding: '0 20px',
 }));
 
+const TextOverlay = styled.div({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'end',
+  justifyContent: 'end',
+  padding: '4px 8px',
+});
+
 interface ItemProps<MenuItemType extends string = string> {
   id: string;
   title: string;
@@ -133,6 +152,14 @@ const GridViewItem = forwardRef(function GridViewItem<
   }: ItemProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLDivElement>,
 ) {
+  const [hovered, setHovered] = React.useState(false);
+
+  const { hoverProps } = useHover({
+    onHoverChange: setHovered,
+  });
+
+  const { textPosition, bordered } = useContext(GridViewContext);
+
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -144,8 +171,9 @@ const GridViewItem = forwardRef(function GridViewItem<
   );
 
   const element = (
-    <GridContainer id={id} ref={forwardedRef}>
+    <GridContainer id={id} ref={forwardedRef} {...hoverProps}>
       <ItemContainer
+        bordered={bordered}
         selected={selected}
         onClick={handleClick}
         onDoubleClick={onDoubleClick}
@@ -153,9 +181,19 @@ const GridViewItem = forwardRef(function GridViewItem<
       >
         {children}
       </ItemContainer>
-      <Spacer.Vertical size={8} />
-      <ItemTitle>{title || ' '}</ItemTitle>
-      <ItemDescription>{subtitle || ' '}</ItemDescription>
+      {textPosition === 'below' && (
+        <>
+          <Spacer.Vertical size={8} />
+          <ItemTitle>{title || ' '}</ItemTitle>
+          <ItemDescription>{subtitle || ' '}</ItemDescription>
+        </>
+      )}
+      {textPosition === 'overlay' && hovered && (
+        <TextOverlay>
+          <ItemTitle>{title}</ItemTitle>
+          <ItemDescription>{subtitle}</ItemDescription>
+        </TextOverlay>
+      )}
     </GridContainer>
   );
 
@@ -170,20 +208,31 @@ const GridViewItem = forwardRef(function GridViewItem<
   return element;
 });
 
-const GridViewContext = createContext<GridViewVariant>('small');
+type GridViewContextValue = {
+  size: GridViewSize;
+  textPosition: 'overlay' | 'below';
+  bordered: boolean;
+};
 
-interface GridViewRootProps {
-  variant?: GridViewVariant;
+const GridViewContext = createContext<GridViewContextValue>({
+  size: 'small',
+  textPosition: 'below',
+  bordered: false,
+});
+
+interface GridViewRootProps extends Partial<GridViewContextValue> {
   children: ReactNode;
   onClick: () => void;
   scrollable?: boolean;
 }
 
 function GridViewRoot({
-  variant,
+  size = 'small',
   children,
   scrollable = true,
   onClick,
+  textPosition = 'below',
+  bordered = false,
 }: GridViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -195,8 +244,17 @@ function GridViewRoot({
     [onClick],
   );
 
+  const contextValue = useMemo(
+    () => ({
+      size,
+      textPosition,
+      bordered,
+    }),
+    [bordered, size, textPosition],
+  );
+
   return (
-    <GridViewContext.Provider value={variant ?? 'small'}>
+    <GridViewContext.Provider value={contextValue}>
       <Container onClick={handleClick} scrollable={scrollable}>
         {scrollable ? <ScrollArea>{children}</ScrollArea> : children}
       </Container>
@@ -211,10 +269,10 @@ function GridViewSection({
   children?: ReactNode;
   padding?: CSSProperties['padding'];
 }) {
-  const variant = useContext(GridViewContext);
+  const { size } = useContext(GridViewContext);
 
   return (
-    <Grid variant={variant} padding={padding}>
+    <Grid size={size} padding={padding}>
       {children}
     </Grid>
   );

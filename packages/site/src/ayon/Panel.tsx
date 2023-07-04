@@ -1,9 +1,9 @@
 import { DotsVerticalIcon } from 'noya-icons';
 import React, { memo } from 'react';
 import {
-  Panel as ResizablePanel,
   PanelGroup,
   PanelResizeHandle,
+  Panel as ResizablePanel,
 } from 'react-resizable-panels';
 import styled from 'styled-components';
 
@@ -42,7 +42,7 @@ const ContainerElement = styled.div({
 
 const DotsElement = styled(DotsVerticalIcon)(({ theme }) => ({
   color: theme.colors.icon,
-  margin: '0 -4px',
+  margin: '0 -5px',
 }));
 
 const ResizeHandle = memo(function ResizeHandle({

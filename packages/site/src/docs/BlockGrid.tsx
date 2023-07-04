@@ -17,7 +17,7 @@ export function BlockGrid({ category }: { category: BlockCategory }) {
 
   return (
     <DesignSystemConfigurationProvider platform={platform} theme={darkTheme}>
-      <GridView.Root onClick={() => {}} scrollable={false} variant="large">
+      <GridView.Root onClick={() => {}} scrollable={false} size="large">
         <GridView.Section padding={0}>
           {Object.entries(blockMetadata)
             .filter(([, metadata]) => metadata.category === category)
