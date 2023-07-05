@@ -220,6 +220,7 @@ export function AyonLayerInspector({
         <InspectorCarousel
           key={selectedLayer.symbolID}
           items={relatedBlocks}
+          selectedIndex={0}
           onSelectItem={(index) => {
             dispatch(
               'setSymbolInstanceSource',
