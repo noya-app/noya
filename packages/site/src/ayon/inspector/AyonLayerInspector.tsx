@@ -6,15 +6,10 @@ import {
   Spacer,
   Stack,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { useShallowArray } from 'noya-react-utils';
-import {
-  Layers,
-  OverriddenBlockContent,
-  Selectors,
-  getSiblingBlocks,
-} from 'noya-state';
+import { OverriddenBlockContent, getSiblingBlocks } from 'noya-state';
 import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../docs/InteractiveBlockPreview';
 import { Blocks, allInsertableBlocks } from '../blocks/blocks';
@@ -46,16 +41,14 @@ const InspectorSection = ({
 
 export function AyonLayerInspector({
   setOverriddenBlock,
+  selectedLayer,
 }: {
+  selectedLayer: Sketch.SymbolInstance;
   setOverriddenBlock: (
     overriddenBlock: OverriddenBlockContent | undefined,
   ) => void;
 }) {
   const [state, dispatch] = useApplicationState();
-
-  const selectedLayers = useShallowArray(
-    Selectors.getSelectedLayers(state).filter(Layers.isSymbolInstance),
-  );
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -77,20 +70,44 @@ export function AyonLayerInspector({
     [dispatch],
   );
 
-  const onSetOverriddenBlock = (item: BlockPreviewProps | undefined) => {
-    if (item) {
-      setOverriddenBlock({
-        layerId: selectedLayer.do_objectID,
-        blockContent: {
-          symbolId: item.blockId,
-          blockText: item.blockText || '',
-          overrides: item.overrideValues,
-        },
-      });
-    } else {
-      setOverriddenBlock(undefined);
-    }
-  };
+  const onSetOverriddenBlock = useCallback(
+    (item: BlockPreviewProps | undefined) => {
+      if (item) {
+        setOverriddenBlock({
+          layerId: selectedLayer.do_objectID,
+          blockContent: {
+            symbolId: item.blockId,
+            blockText: item.blockText || '',
+            overrides: item.overrideValues,
+          },
+        });
+      } else {
+        setOverriddenBlock(undefined);
+      }
+    },
+    [selectedLayer.do_objectID, setOverriddenBlock],
+  );
+
+  const handleHoverBlockItem = useCallback(
+    (item: CompletionItem | undefined) => {
+      onSetOverriddenBlock(
+        item
+          ? {
+              blockId: item.id,
+              blockText: selectedLayer.blockText,
+              overrideValues: selectedLayer.overrideValues,
+              resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
+            }
+          : undefined,
+      );
+    },
+    [
+      onSetOverriddenBlock,
+      selectedLayer.blockText,
+      selectedLayer.overrideValues,
+      selectedLayer.resolvedBlockData?.resolvedText,
+    ],
+  );
 
   useKeyboardShortcuts({
     '/': () => {
@@ -98,12 +115,8 @@ export function AyonLayerInspector({
     },
   });
 
-  if (selectedLayers.length !== 1) return null;
-
-  const selectedLayer = selectedLayers[0];
   const block = Blocks[selectedLayer.symbolID];
   const componentName = block.symbol.name;
-
   const nestedLayers = flattenPassthroughLayers(block.symbol);
 
   const blockTypes = inferBlockTypes({
@@ -159,6 +172,7 @@ export function AyonLayerInspector({
           placeholder={componentName}
           items={blockCompletionItems}
           onSelectItem={handleSelectBlockItem}
+          onHoverItem={handleHoverBlockItem}
         >
           <InputField.Button>
             Pick
@@ -187,7 +201,7 @@ export function AyonLayerInspector({
         />
       </InspectorSection>
       <InspectorSection title="Style">
-        <InputFieldWithCompletions placeholder={''} items={[]}>
+        <InputFieldWithCompletions placeholder={'Styles'} items={[]}>
           <InputField.Button>
             Add
             <Spacer.Horizontal size={8} inline />

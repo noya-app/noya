@@ -275,7 +275,11 @@ export const InputElement = styled(TextInput).withConfig({
 );
 
 const InputFieldInput = forwardRef(function InputFieldInput(
-  props: TextInputProps & { textAlign?: Property.TextAlign; variant?: 'bare' },
+  // onFocusChange should only be passed from the root, never directly
+  props: TextInputProps & {
+    textAlign?: Property.TextAlign;
+    variant?: 'bare';
+  },
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
   const {
@@ -411,6 +415,7 @@ interface InputFieldRootProps {
   hasDropdown?: boolean;
   size?: Size;
   renderPopoverContent?: (options: { width: number }) => ReactNode;
+  onFocusChange?: (isFocused: boolean) => void;
 }
 
 function InputFieldRoot({
@@ -422,6 +427,7 @@ function InputFieldRoot({
   labelSize = 6,
   size = 'medium',
   renderPopoverContent,
+  onFocusChange,
 }: InputFieldRootProps) {
   const childrenArray = Children.toArray(children);
 
@@ -436,9 +442,13 @@ function InputFieldRoot({
 
   const [measuredWidth, setMeasuredWidth] = React.useState<number>();
 
-  const onFocusChange = useCallback((isFocused: boolean) => {
-    setIsFocused(isFocused);
-  }, []);
+  const handleFocusChange = useCallback(
+    (isFocused: boolean) => {
+      setIsFocused(isFocused);
+      onFocusChange?.(isFocused);
+    },
+    [onFocusChange],
+  );
 
   const [inputRef, setInputRef] =
     React.useState<ForwardedRef<HTMLInputElement>>();
@@ -461,7 +471,7 @@ function InputFieldRoot({
       hasLabel,
       size,
       isFocused,
-      onFocusChange,
+      onFocusChange: handleFocusChange,
       inputRef,
       setInputRef,
     }),
@@ -472,7 +482,7 @@ function InputFieldRoot({
       hasLabel,
       size,
       isFocused,
-      onFocusChange,
+      handleFocusChange,
       inputRef,
     ],
   );

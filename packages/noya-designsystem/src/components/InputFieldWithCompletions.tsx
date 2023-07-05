@@ -90,7 +90,7 @@ export const CompletionMenu = memo(
 interface Props {
   placeholder: string;
   items: CompletionItem[];
-  onHoverItem?: (item: CompletionItem) => void;
+  onHoverItem?: (item: CompletionItem | undefined) => void;
   onSelectItem?: (item: CompletionItem) => void;
   children?: React.ReactNode;
 }
@@ -101,14 +101,8 @@ export const InputFieldWithCompletions = memo(
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
     const [filter, setFilter] = useState('');
-    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndex, _setSelectedIndex] = useState(0);
     const listRef = React.useRef<ListView.VirtualizedList>(null);
-
-    useEffect(() => {
-      if (listRef.current) {
-        listRef.current.scrollToIndex(selectedIndex);
-      }
-    }, [selectedIndex]);
 
     const filteredItems = useMemo(
       () =>
@@ -121,55 +115,85 @@ export const InputFieldWithCompletions = memo(
       [items, filter],
     );
 
-    useEffect(() => {
-      onHoverItem?.(filteredItems[selectedIndex]);
-    }, [filteredItems, onHoverItem, selectedIndex]);
-
     const height = Math.min(
       filteredItems.length * ListView.rowHeight,
       ListView.rowHeight * 6.5,
     );
 
+    useEffect(() => {
+      if (listRef.current) {
+        listRef.current.scrollToIndex(selectedIndex);
+      }
+    }, [selectedIndex]);
+
+    const handleSelectIndex = useCallback(
+      (index: number | undefined) => {
+        _setSelectedIndex(index ?? 0);
+        onHoverItem?.(index === undefined ? undefined : filteredItems[index]);
+      },
+      [filteredItems, onHoverItem],
+    );
+
     const selectItem = useCallback(
       (item: CompletionListItem) => {
         onSelectItem?.(item);
+        handleSelectIndex(undefined);
 
         if (forwardedRef && typeof forwardedRef === 'object') {
           forwardedRef.current?.blur();
         }
       },
-      [onSelectItem, forwardedRef],
+      [onSelectItem, handleSelectIndex, forwardedRef],
     );
 
     const handleChange = useCallback(
       (value: string) => {
         setFilter(value);
-        setSelectedIndex(0);
+        handleSelectIndex(0);
       },
-      [setFilter, setSelectedIndex],
+      [handleSelectIndex],
     );
 
     const handleBlur = useCallback(() => {
       setFilter('');
-      setSelectedIndex(0);
-    }, [setFilter, setSelectedIndex]);
+      handleSelectIndex(undefined);
+    }, [handleSelectIndex]);
+
+    const handleFocus = useCallback(() => {
+      setFilter('');
+      handleSelectIndex(0);
+    }, [handleSelectIndex]);
 
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'ArrowDown') {
-          setSelectedIndex((i) => Math.min(i + 1, filteredItems.length - 1));
+          handleSelectIndex(
+            Math.min(selectedIndex + 1, filteredItems.length - 1),
+          );
+
           event.preventDefault();
           event.stopPropagation();
         } else if (event.key === 'ArrowUp') {
-          setSelectedIndex((i) => Math.max(i - 1, 0));
+          handleSelectIndex(Math.max(selectedIndex - 1, 0));
+
           event.preventDefault();
           event.stopPropagation();
         } else if (event.key === 'Enter') {
           const item = filteredItems[selectedIndex];
           selectItem(item);
+        } else if (event.key === 'Escape') {
+          if (forwardedRef && typeof forwardedRef === 'object') {
+            forwardedRef.current?.blur();
+          }
         }
       },
-      [filteredItems, selectItem, selectedIndex],
+      [
+        filteredItems,
+        forwardedRef,
+        handleSelectIndex,
+        selectItem,
+        selectedIndex,
+      ],
     );
 
     return (
@@ -186,7 +210,7 @@ export const InputFieldWithCompletions = memo(
                   items={filteredItems}
                   selectedIndex={selectedIndex}
                   onSelectItem={selectItem}
-                  onHoverIndex={setSelectedIndex}
+                  onHoverIndex={handleSelectIndex}
                   listSize={listSize}
                 />
               ) : (
@@ -209,6 +233,7 @@ export const InputFieldWithCompletions = memo(
           placeholder={placeholder}
           onChange={handleChange}
           onBlur={handleBlur}
+          onFocusCapture={handleFocus}
           onKeyDown={handleKeyDown}
         />
         {children}

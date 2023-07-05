@@ -24,6 +24,7 @@ import {
   signInSymbolId,
   switchSymbolId,
   tableSymbolId,
+  tagSymbolId,
   textareaSymbolId,
   textSymbolId,
   tileCardSymbolId,
@@ -92,6 +93,11 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     name: 'Hero with Image',
     category: 'marketing',
     preferredSize: { width: 1280, height: 720 },
+  },
+  [tagSymbolId]: {
+    name: 'Tag',
+    category: 'element',
+    preferredSize: { width: 140, height: 30 },
   },
   [cardSymbolId]: {
     name: 'Card',
