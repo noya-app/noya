@@ -69,4 +69,5 @@ export * from './utils/mouseEvent';
 export * from './utils/sketchColor';
 export * from './utils/sketchPattern';
 export * from './utils/completions';
+export * from './utils/fuzzyScorer';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

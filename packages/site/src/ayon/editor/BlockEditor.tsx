@@ -1,6 +1,6 @@
 import debounce from 'lodash.debounce';
 import { useDispatch } from 'noya-app-state-context';
-import { useDesignSystemTheme } from 'noya-designsystem';
+import { CompletionItem, useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   FALLTHROUGH,
@@ -39,7 +39,7 @@ import {
 import { Blocks, allInsertableSymbols } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { InferredBlockTypeResult } from '../types';
-import { CompletionItem, useCompletionMenu } from '../useCompletionMenu';
+import { useCompletionMenu } from '../useCompletionMenu';
 import { ControlledEditor, IControlledEditor } from './ControlledEditor';
 import { ElementComponent } from './ElementComponent';
 import { BLOCK_TYPE_SHORTCUTS, textCommand, textShortcut } from './commands';

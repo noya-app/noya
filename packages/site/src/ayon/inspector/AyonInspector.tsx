@@ -1,4 +1,4 @@
-import { Stack, useDesignSystemTheme } from 'noya-designsystem';
+import { ScrollArea, Stack, useDesignSystemTheme } from 'noya-designsystem';
 import React, { ComponentProps } from 'react';
 import { AyonLayerInspector } from './AyonLayerInspector';
 
@@ -12,7 +12,9 @@ export function AyonInspector(
       width={'400px'}
       borderLeft={`1px solid ${theme.colors.dividerStrong}`}
     >
-      <AyonLayerInspector {...props} />
+      <ScrollArea>
+        <AyonLayerInspector {...props} />
+      </ScrollArea>
     </Stack.V>
   );
 }

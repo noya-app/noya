@@ -1,18 +1,18 @@
 import * as Portal from '@radix-ui/react-portal';
 import {
+  CompletionItem,
+  CompletionListItem,
+  CompletionMenu,
   Divider,
   InputField,
   ListView,
   Small,
-  Spacer,
   Stack,
+  fuzzyFilter,
 } from 'noya-designsystem';
-import { Point, Size } from 'noya-geometry';
+import { Point } from 'noya-geometry';
 import { KeyMap, getCurrentPlatform, handleKeyboardEvent } from 'noya-keymap';
 import React, {
-  ForwardedRef,
-  ReactNode,
-  forwardRef,
   useCallback,
   useEffect,
   useMemo,
@@ -20,75 +20,7 @@ import React, {
   useState,
 } from 'react';
 import { Range } from 'slate';
-import styled from 'styled-components';
 import { IModalMenu, ModalMenu } from './ModalMenu';
-import { IScoredItem, IToken, fuzzyFilter, fuzzyTokenize } from './fuzzyScorer';
-
-export type CompletionItem = { id: string; name: string; icon?: ReactNode };
-
-const Token = styled.span<{ type: IToken['type'] }>(({ type }) => ({
-  fontWeight: type === 'match' ? 'bold' : 'normal',
-}));
-
-type CompletionListItem = CompletionItem & IScoredItem;
-
-const CompletionMenu = forwardRef(function CompletionMenu(
-  {
-    items,
-    selectedIndex,
-    select,
-    setIndex,
-    listSize,
-  }: {
-    items: CompletionListItem[];
-    selectedIndex: number;
-    select: (item: CompletionListItem) => void;
-    setIndex: (index: number) => void;
-    listSize: Size;
-  },
-  forwardedRef: ForwardedRef<ListView.VirtualizedList>,
-) {
-  return (
-    <ListView.Root
-      ref={forwardedRef}
-      scrollable
-      virtualized={listSize}
-      keyExtractor={(item) => item.id}
-      data={items}
-      renderItem={(item, i) => {
-        const tokens = fuzzyTokenize({
-          item: item.name,
-          itemScore: item,
-        });
-
-        return (
-          <ListView.Row
-            key={item.id}
-            selected={i === selectedIndex}
-            onPress={() => select(item)}
-            onHoverChange={(hovered) => {
-              if (hovered) {
-                setIndex(i);
-              }
-            }}
-          >
-            {tokens.map((token, j) => (
-              <Token key={j} type={token.type}>
-                {token.text}
-              </Token>
-            ))}
-            {item.icon && (
-              <>
-                <Spacer.Horizontal />
-                {item.icon}
-              </>
-            )}
-          </ListView.Row>
-        );
-      }}
-    />
-  );
-});
 
 export function SearchCompletionMenu({
   onSelect,
@@ -221,8 +153,8 @@ export function SearchCompletionMenu({
           listSize={listSize}
           items={results}
           selectedIndex={index}
-          select={onSelect}
-          setIndex={setIndex}
+          onSelectItem={onSelect}
+          onHoverIndex={setIndex}
         />
       ) : (
         <Stack.V
@@ -300,8 +232,8 @@ export function useCompletionMenu({
               listSize={listSize}
               items={results}
               selectedIndex={index}
-              select={(item) => select(range, item)}
-              setIndex={setIndex}
+              onSelectItem={(item) => select(range, item)}
+              onHoverIndex={setIndex}
             />
           </ModalMenu>
         </Portal.Root>

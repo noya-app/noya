@@ -15,11 +15,14 @@ import { InputField } from './InputField';
 import { ListView } from './ListView';
 import { Spacer } from './Spacer';
 import { Stack } from './Stack';
+import { Small } from './Text';
 
-const Token = styled.span<{ type: IToken['type'] }>(({ type }) => ({
-  fontWeight: type === 'match' ? 'bold' : 'normal',
-  whiteSpace: 'pre',
-}));
+export const CompletionToken = styled.span<{ type: IToken['type'] }>(
+  ({ type }) => ({
+    fontWeight: type === 'match' ? 'bold' : 'normal',
+    whiteSpace: 'pre',
+  }),
+);
 
 interface CompletionMenuProps {
   items: CompletionListItem[];
@@ -29,7 +32,7 @@ interface CompletionMenuProps {
   listSize: Size;
 }
 
-const CompletionMenu = memo(
+export const CompletionMenu = memo(
   forwardRef(function CompletionMenu(
     {
       items,
@@ -66,9 +69,9 @@ const CompletionMenu = memo(
               }}
             >
               {tokens.map((token, j) => (
-                <Token key={j} type={token.type}>
+                <CompletionToken key={j} type={token.type}>
                   {token.text}
-                </Token>
+                </CompletionToken>
               ))}
               {item.icon && (
                 <>
@@ -172,16 +175,29 @@ export const InputFieldWithCompletions = memo(
       <InputField.Root
         size="large"
         renderPopoverContent={({ width }) => {
+          const listSize = { width, height };
+
           return (
             <Stack.V flex={`0 0 ${height}px`}>
-              <CompletionMenu
-                ref={listRef}
-                items={filteredItems}
-                selectedIndex={selectedIndex}
-                onSelectItem={selectItem}
-                onHoverIndex={setSelectedIndex}
-                listSize={{ width, height }}
-              />
+              {filteredItems.length > 0 ? (
+                <CompletionMenu
+                  ref={listRef}
+                  items={filteredItems}
+                  selectedIndex={selectedIndex}
+                  onSelectItem={selectItem}
+                  onHoverIndex={setSelectedIndex}
+                  listSize={listSize}
+                />
+              ) : (
+                <Stack.V
+                  height="100px"
+                  padding="20px"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Small color="textDisabled">No results</Small>
+                </Stack.V>
+              )}
             </Stack.V>
           );
         }}
