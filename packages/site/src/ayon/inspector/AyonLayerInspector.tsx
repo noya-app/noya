@@ -1,5 +1,10 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { InputField, Spacer, Stack } from 'noya-designsystem';
+import {
+  CompletionItem,
+  InputField,
+  InputFieldWithCompletions,
+  Stack,
+} from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useShallowArray } from 'noya-react-utils';
@@ -9,9 +14,9 @@ import {
   Selectors,
   getSiblingBlocks,
 } from 'noya-state';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../docs/InteractiveBlockPreview';
-import { Blocks } from '../blocks/blocks';
+import { Blocks, allInsertableBlocks } from '../blocks/blocks';
 import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { boxSymbolId } from '../blocks/symbolIds';
 import { inferBlockTypes } from '../inferBlock';
@@ -52,6 +57,39 @@ export function AyonLayerInspector({
   );
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
+
+  const blockCompletionItems = useMemo(
+    () =>
+      allInsertableBlocks.map(
+        (block): CompletionItem => ({
+          id: block.symbol.symbolID,
+          name: block.symbol.name,
+        }),
+      ),
+    [],
+  );
+
+  const handleSelectBlockItem = useCallback(
+    (item: CompletionItem) => {
+      dispatch('setSymbolInstanceSource', item.id, 'preserveCurrent');
+    },
+    [dispatch],
+  );
+
+  const onSetOverriddenBlock = (item: BlockPreviewProps | undefined) => {
+    if (item) {
+      setOverriddenBlock({
+        layerId: selectedLayer.do_objectID,
+        blockContent: {
+          symbolId: item.blockId,
+          blockText: item.blockText || '',
+          overrides: item.overrideValues,
+        },
+      });
+    } else {
+      setOverriddenBlock(undefined);
+    }
+  };
 
   useKeyboardShortcuts({
     '/': () => {
@@ -112,44 +150,15 @@ export function AyonLayerInspector({
     },
   ];
 
-  const onSetOverriddenBlock = (item: BlockPreviewProps | undefined) => {
-    if (item) {
-      setOverriddenBlock({
-        layerId: selectedLayer.do_objectID,
-        blockContent: {
-          symbolId: item.blockId,
-          blockText: item.blockText || '',
-          overrides: item.overrideValues,
-        },
-      });
-    } else {
-      setOverriddenBlock(undefined);
-    }
-  };
-
   return (
     <Stack.V gap="1px">
       <InspectorSection>
-        <InputField.Root size="large">
-          <InputField.Label>Component</InputField.Label>
-          <InputField.Input
-            ref={componentSearchInputRef}
-            placeholder={componentName}
-            value=""
-            onSubmit={() => {}}
-          />
-          <InputField.Button>
-            Pick
-            <Spacer.Horizontal size={8} inline />
-            <span
-              style={{
-                opacity: 0.5,
-              }}
-            >
-              /
-            </span>
-          </InputField.Button>
-        </InputField.Root>
+        <InputFieldWithCompletions
+          ref={componentSearchInputRef}
+          placeholder={componentName}
+          items={blockCompletionItems}
+          onSelectItem={handleSelectBlockItem}
+        />
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>
             Related Components
@@ -172,7 +181,6 @@ export function AyonLayerInspector({
       </InspectorSection>
       <InspectorSection title="Style">
         <InputField.Root>
-          <InputField.Label>Style</InputField.Label>
           <InputField.Input value={componentName} onSubmit={() => {}} />
         </InputField.Root>
         <InspectorPrimitives.SectionHeader>
@@ -196,12 +204,12 @@ export function AyonLayerInspector({
       <InspectorSection title="Content">
         <Stack.V gap="4px">
           {nestedLayers.map(({ layer }, index) => {
-            // const block = Blocks[layer.symbolID];
-            // const componentName = block.symbol.name;
+            const block = Blocks[layer.symbolID];
+            const componentName = block.symbol.name;
 
             return (
               <InputField.Root key={index}>
-                <InputField.Label>Component</InputField.Label>
+                <InputField.Label>{componentName}</InputField.Label>
                 <InputField.Input
                   value={''}
                   placeholder={layer.blockText}

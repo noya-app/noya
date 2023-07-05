@@ -820,4 +820,5 @@ export namespace ListView {
     ListViewRowProps<MenuItemType>;
   export type VirtualizedList = IVirtualizedList;
   export const DragIndicator = ListViewDragIndicatorElement;
+  export const rowHeight = 31;
 }

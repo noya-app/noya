@@ -107,7 +107,8 @@ export const Blocks: Record<string, BlockDefinition> = {
 
 export const allInsertableBlocks = Object.entries(Blocks)
   .filter(([id, { isPassthrough }]) => id !== heroSymbolId && !isPassthrough)
-  .map(([, block]) => block);
+  .map(([, block]) => block)
+  .sort((a, b) => a.symbol.name.localeCompare(b.symbol.name));
 
 export const allInsertableSymbols = allInsertableBlocks.map(
   (block) => block.symbol,

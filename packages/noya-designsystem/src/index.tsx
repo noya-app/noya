@@ -29,6 +29,7 @@ export * from './components/Grid';
 export * from './components/GridView';
 export * from './components/IconButton';
 export * from './components/InputField';
+export * from './components/InputFieldWithCompletions';
 export { SEPARATOR_ITEM, KeyboardShortcut } from './components/internal/Menu';
 export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 export * from './components/Label';
@@ -67,4 +68,5 @@ export * from './utils/mouseEvent';
 // Utils
 export * from './utils/sketchColor';
 export * from './utils/sketchPattern';
+export * from './utils/completions';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

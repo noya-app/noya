@@ -11,6 +11,8 @@ import React, {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
+  useLayoutEffect,
   useMemo,
 } from 'react';
 import styled from 'styled-components';
@@ -19,23 +21,33 @@ import { Button } from './Button';
 import { DropdownMenu } from './DropdownMenu';
 import { MenuItem } from './internal/Menu';
 import TextInput, { TextInputProps } from './internal/TextInput';
+import { Popover } from './Popover';
+import { Stack } from './Stack';
 
 type LabelPosition = 'start' | 'end';
 
 type Size = 'small' | 'medium' | 'large';
 
-const InputFieldContext = createContext<{
+type InputFieldContextValue = {
   labelPosition: LabelPosition;
   labelSize: number;
   hasLabel: boolean;
   hasDropdown: boolean;
   size: Size;
-}>({
+  isFocused: boolean;
+  onFocusChange: (isFocused: boolean) => void;
+  inputRef?: ForwardedRef<HTMLInputElement>;
+  setInputRef?: (ref: ForwardedRef<HTMLInputElement>) => void;
+};
+
+const InputFieldContext = createContext<InputFieldContextValue>({
   labelPosition: 'end',
   labelSize: 6,
   hasLabel: false,
   hasDropdown: false,
   size: 'medium',
+  isFocused: false,
+  onFocusChange: () => {},
 });
 
 /* ----------------------------------------------------------------------------
@@ -94,7 +106,7 @@ const InputFieldLabel = memo(function InputFieldLabel({
  * Dropdown
  * ------------------------------------------------------------------------- */
 
-const RightFloatingContainer = styled.span(({ theme }) => ({
+const DropdownContainer = styled.span(({ theme }) => ({
   position: 'absolute',
   right: 0,
 }));
@@ -109,13 +121,13 @@ const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
   T extends string,
 >({ id, items, onSelect }: InputFieldDropdownProps<T>) {
   return (
-    <RightFloatingContainer>
+    <DropdownContainer>
       <DropdownMenu<T> items={items} onSelect={onSelect}>
         <Button id={id} variant="thin">
           <CaretDownIcon />
         </Button>
       </DropdownMenu>
-    </RightFloatingContainer>
+    </DropdownContainer>
   );
 });
 
@@ -123,22 +135,37 @@ const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
  * Button
  * ------------------------------------------------------------------------- */
 
+const ButtonContainer = styled.span<{ size: Size }>(({ theme, size }) => ({
+  position: 'absolute',
+  right: size === 'large' ? '9px' : '2px',
+  top: size === 'large' ? '8px' : '2px',
+}));
+
 const InputFieldButton = memo(function InputFieldButton({
   children,
 }: {
   children?: ReactNode;
 }) {
-  const { size } = useContext(InputFieldContext);
+  const { size, inputRef } = useContext(InputFieldContext);
+
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (inputRef && typeof inputRef !== 'function') {
+        inputRef.current?.focus();
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [inputRef],
+  );
 
   return (
-    <RightFloatingContainer
-      style={{
-        right: size === 'large' ? '9px' : '2px',
-        top: size === 'large' ? '8px' : '2px',
-      }}
-    >
-      <Button variant="floating">{children}</Button>
-    </RightFloatingContainer>
+    <ButtonContainer size={size}>
+      <Button variant="floating" onClick={handleClick}>
+        {children}
+      </Button>
+    </ButtonContainer>
   );
 });
 
@@ -190,6 +217,10 @@ export const InputElement = styled(TextInput).withConfig({
     variant = 'normal',
     size,
   }) => ({
+    // placeholder
+    '&::placeholder': {
+      color: theme.colors.textDisabled,
+    },
     ...theme.textStyles.small,
     color: readOnly
       ? theme.colors.textMuted
@@ -247,8 +278,26 @@ const InputFieldInput = forwardRef(function InputFieldInput(
   props: TextInputProps & { textAlign?: Property.TextAlign; variant?: 'bare' },
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
-  const { labelPosition, labelSize, hasDropdown, hasLabel, size } =
-    useContext(InputFieldContext);
+  const {
+    labelPosition,
+    labelSize,
+    hasDropdown,
+    hasLabel,
+    size,
+    onFocusChange,
+    setInputRef,
+  } = useContext(InputFieldContext);
+
+  const handleFocusChange = useCallback(
+    (isFocused: boolean) => {
+      onFocusChange(isFocused);
+    },
+    [onFocusChange],
+  );
+
+  useLayoutEffect(() => {
+    setInputRef?.(forwardedRef);
+  }, [forwardedRef, setInputRef]);
 
   return (
     <InputElement
@@ -258,6 +307,7 @@ const InputFieldInput = forwardRef(function InputFieldInput(
       hasLabel={hasLabel}
       hasDropdown={hasDropdown}
       size={size}
+      onFocusChange={handleFocusChange}
       {...props}
     />
   );
@@ -360,6 +410,7 @@ interface InputFieldRootProps {
   labelSize?: number;
   hasDropdown?: boolean;
   size?: Size;
+  renderPopoverContent?: (options: { width: number }) => ReactNode;
 }
 
 function InputFieldRoot({
@@ -370,6 +421,7 @@ function InputFieldRoot({
   labelPosition = 'end',
   labelSize = 6,
   size = 'medium',
+  renderPopoverContent,
 }: InputFieldRootProps) {
   const childrenArray = Children.toArray(children);
 
@@ -380,16 +432,83 @@ function InputFieldRoot({
     (child) => isValidElement(child) && child.type === InputFieldLabel,
   );
 
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  const [measuredWidth, setMeasuredWidth] = React.useState<number>();
+
+  const onFocusChange = useCallback((isFocused: boolean) => {
+    setIsFocused(isFocused);
+  }, []);
+
+  const [inputRef, setInputRef] =
+    React.useState<ForwardedRef<HTMLInputElement>>();
+
+  useEffect(() => {
+    if (inputRef && typeof inputRef !== 'function') {
+      setMeasuredWidth?.(
+        isFocused
+          ? inputRef?.current?.getBoundingClientRect().width
+          : undefined,
+      );
+    }
+  }, [inputRef, isFocused]);
+
   const contextValue = useMemo(
-    () => ({ labelPosition, labelSize, hasDropdown, hasLabel, size }),
-    [labelPosition, labelSize, hasDropdown, hasLabel, size],
+    (): InputFieldContextValue => ({
+      labelPosition,
+      labelSize,
+      hasDropdown,
+      hasLabel,
+      size,
+      isFocused,
+      onFocusChange,
+      inputRef,
+      setInputRef,
+    }),
+    [
+      labelPosition,
+      labelSize,
+      hasDropdown,
+      hasLabel,
+      size,
+      isFocused,
+      onFocusChange,
+      inputRef,
+    ],
+  );
+
+  const rootElement = (
+    <RootContainer id={id} width={width} flex={flex}>
+      {children}
+    </RootContainer>
   );
 
   return (
     <InputFieldContext.Provider value={contextValue}>
-      <RootContainer id={id} width={width} flex={flex}>
-        {children}
-      </RootContainer>
+      {renderPopoverContent ? (
+        <Popover
+          open={true}
+          trigger={rootElement}
+          sideOffset={3}
+          showArrow={false}
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+        >
+          {measuredWidth && (
+            <Stack.V width={measuredWidth} overflow="hidden">
+              {renderPopoverContent({ width: measuredWidth })}
+            </Stack.V>
+          )}
+        </Popover>
+      ) : (
+        rootElement
+      )}
     </InputFieldContext.Provider>
   );
 }

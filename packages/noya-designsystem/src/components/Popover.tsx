@@ -56,6 +56,7 @@ interface Props
   onOpenChange?: (open: boolean) => void;
   sideOffset?: number;
   onClickClose?: () => void;
+  showArrow?: boolean;
 }
 
 export function Popover({
@@ -66,6 +67,7 @@ export function Popover({
   open,
   side,
   sideOffset = 4,
+  showArrow = true,
   onOpenChange,
   onOpenAutoFocus,
   onCloseAutoFocus,
@@ -98,7 +100,7 @@ export function Popover({
           }}
         >
           {children}
-          <ArrowElement />
+          {showArrow && <ArrowElement />}
           {closable && (
             <PopoverClose>
               <IconButton iconName="Cross2Icon" onClick={onClickClose} />

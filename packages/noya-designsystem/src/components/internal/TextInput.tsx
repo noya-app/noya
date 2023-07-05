@@ -26,6 +26,7 @@ type Props = {
   onClick?: MouseEventHandler;
   onPointerDown?: PointerEventHandler;
   onFocusCapture?: FocusEventHandler;
+  onFocusChange?: (isFocused: boolean) => void;
   onBlur?: FocusEventHandler;
 } & Pick<
   InputHTMLAttributes<HTMLInputElement>,
@@ -56,9 +57,35 @@ type ControlledProps = Props & {
 };
 
 const ControlledTextInput = forwardRef(function ControlledTextInput(
-  { onKeyDown, value, onChange, ...rest }: ControlledProps,
+  {
+    onKeyDown,
+    value,
+    onChange,
+    onFocusChange,
+    onBlur,
+    onFocusCapture,
+    ...rest
+  }: ControlledProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
+  const handleBlur = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onBlur?.(event);
+
+      onFocusChange?.(false);
+    },
+    [onBlur, onFocusChange],
+  );
+
+  const handleFocusCapture = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onFocusCapture?.(event);
+
+      onFocusChange?.(true);
+    },
+    [onFocusCapture, onFocusChange],
+  );
+
   return (
     <input
       ref={forwardedRef}
@@ -70,6 +97,8 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
           onChange(event.target.value),
         [onChange],
       )}
+      onBlur={handleBlur}
+      onFocusCapture={handleFocusCapture}
     />
   );
 });
@@ -85,6 +114,8 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     value,
     onSubmit,
     onBlur,
+    onFocusChange,
+    onFocusCapture,
     allowSubmittingWithSameValue = false,
     ...rest
   }: SubmittableProps,
@@ -156,9 +187,20 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     (event: React.FocusEvent<HTMLInputElement>) => {
       onBlur?.(event);
 
+      onFocusChange?.(false);
+
       handleSubmit();
     },
-    [onBlur, handleSubmit],
+    [onBlur, onFocusChange, handleSubmit],
+  );
+
+  const handleFocusCapture = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onFocusCapture?.(event);
+
+      onFocusChange?.(true);
+    },
+    [onFocusCapture, onFocusChange],
   );
 
   return (
@@ -169,6 +211,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       onKeyDown={handleKeyDown}
       onChange={handleChange}
       onBlur={handleBlur}
+      onFocusCapture={handleFocusCapture}
     />
   );
 });
