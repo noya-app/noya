@@ -28,34 +28,22 @@ import {
   BlockContent,
   BlockProps,
   DrawableLayerType,
-  InferBlockProps,
   Layers,
   Overrides,
   Selectors,
-  getSiblingBlocks,
 } from 'noya-state';
 import * as React from 'react';
-import {
-  ReactNode,
-  forwardRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import ConfigureBlockTextWebp from '../assets/ConfigureBlockText.webp';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { Blocks, allInsertableSymbols } from './blocks/blocks';
 import { getRenderableBlockProps } from './blocks/render';
 import { boxSymbolId, imageSymbolId } from './blocks/symbolIds';
-import { BlockEditor, IBlockEditor } from './editor/BlockEditor';
-import { BlockEditorV1 } from './editor/BlockEditorV1';
+import { IBlockEditor } from './editor/BlockEditor';
 import { clearResolverCache } from './resolve/resolve';
 import { Stacking } from './stacking';
-import { InferredBlockTypeResult, ViewType } from './types';
 import { SearchCompletionMenu } from './useCompletionMenu';
 
 function getElementRect(element: HTMLElement) {
@@ -207,73 +195,21 @@ function BlockTypeOnboardingPopover({
   );
 }
 
-function BlockContentOnboardingPopover({
-  show,
-  dismiss,
-  trigger,
+export const Widget = function Widget({
+  layer,
+  onChangeBlockType,
+  onChangeBlockContent,
+  setOverriddenBlock,
+  uploadAsset,
+  showToolbar = true,
 }: {
-  show: boolean;
-  dismiss?: () => void;
-  trigger: ReactNode;
+  layer: Sketch.AnyLayer;
+  onChangeBlockType: (type: DrawableLayerType) => void;
+  onChangeBlockContent: (content: BlockContent) => void;
+  setOverriddenBlock: (preview: BlockContent | undefined) => void;
+  uploadAsset: (file: ArrayBuffer) => Promise<string>;
+  showToolbar?: boolean;
 }) {
-  if (!show) return <>{trigger}</>;
-
-  return (
-    <Popover
-      trigger={trigger}
-      open={show}
-      closable
-      side="right"
-      onCloseAutoFocus={(event) => {
-        event.preventDefault();
-      }}
-      onOpenAutoFocus={(event) => {
-        event.preventDefault();
-      }}
-      onClickClose={() => {
-        dismiss?.();
-      }}
-    >
-      <Stack.V width={300} padding={20} gap={10} alignItems="start">
-        <Small fontWeight={'bold'}>Step 3: Set Block Content</Small>
-        <Small>
-          Many blocks are customizable. Double click a block or press{' '}
-          <Chip variant="secondary">Enter</Chip> to edit its content.
-        </Small>
-        <Small>
-          You can also type hashtag <Chip variant="secondary">#</Chip> commands
-          to change the block's style.
-        </Small>
-        <OnboardingAnimation src={ConfigureBlockTextWebp.src} />
-      </Stack.V>
-    </Popover>
-  );
-}
-
-export const Widget = forwardRef(function Widget(
-  {
-    layer,
-    inferBlockTypes,
-    onChangeBlockType,
-    onChangeBlockContent,
-    setOverriddenBlock,
-    uploadAsset,
-    onFocusCanvas,
-    showToolbar = true,
-    viewType,
-  }: {
-    layer: Sketch.AnyLayer;
-    inferBlockTypes: (input: InferBlockProps) => InferredBlockTypeResult[];
-    onChangeBlockType: (type: DrawableLayerType) => void;
-    onChangeBlockContent: (content: BlockContent) => void;
-    setOverriddenBlock: (preview: BlockContent | undefined) => void;
-    uploadAsset: (file: ArrayBuffer) => Promise<string>;
-    onFocusCanvas: () => void;
-    showToolbar?: boolean;
-    viewType: ViewType;
-  },
-  forwardedRef: React.Ref<HTMLDivElement>,
-) {
   const { canvasInsets } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const { isContextMenuOpen } = useWorkspace();
@@ -281,18 +217,11 @@ export const Widget = forwardRef(function Widget(
   const page = Selectors.getCurrentPage(state);
   const rect = Selectors.getBoundingRect(page, [layer.do_objectID])!;
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
-  const indexPath = Layers.findIndexPath(
-    page,
-    (l) => l.do_objectID === layer.do_objectID,
-  )!;
-  const parent = Selectors.getParentLayer(page, indexPath) as Sketch.Artboard;
-
   const symbol = Layers.isSymbolInstance(layer)
     ? Blocks[layer.symbolID].symbol
     : undefined;
 
   const isPrimarySelected = state.selectedLayerIds[0] === layer.do_objectID;
-  const isSelected = state.selectedLayerIds.includes(layer.do_objectID);
 
   const isEditing =
     state.interactionState.type === 'editingBlock' &&
@@ -325,8 +254,6 @@ export const Widget = forwardRef(function Widget(
     state.selectedLayerIds.length === 1;
 
   const showTypeOnboarding = showWidgetUI && onboardingStep === 'insertedBlock';
-  const showTextOnboarding =
-    showWidgetUI && onboardingStep === 'configuredBlockType';
 
   // Hide the block picker whenever the widget UI is hidden
   useEffect(() => {
@@ -434,12 +361,6 @@ export const Widget = forwardRef(function Widget(
   if (!Layers.isSymbolInstance(layer)) return null;
 
   const blockText = layer.blockText ?? '';
-
-  const blockTypes = inferBlockTypes({
-    frame: rect,
-    blockText,
-    siblingBlocks: getSiblingBlocks(state),
-  });
 
   return (
     <WidgetContainer
@@ -574,88 +495,12 @@ export const Widget = forwardRef(function Widget(
                 </ContentElement>
               }
             />
-            {/* {!showTypeOnboarding &&
-              !showTextOnboarding &&
-              !layer.symbolIDIsFixed && (
-                <TopSuggestions
-                  blockText={blockText}
-                  blockTypes={blockTypes}
-                  onChangeBlockType={onChangeBlockType}
-                  onChangeBlockContent={onChangeBlockContent}
-                  currentBlockType={layer.symbolID}
-                />
-              )} */}
           </Stack.V>
         )
       }
-    >
-      <BlockContentOnboardingPopover
-        show={showTextOnboarding}
-        dismiss={() => setOnboardingStep('configuredBlockText')}
-        trigger={
-          <div
-            ref={forwardedRef}
-            style={{
-              position: 'absolute',
-              inset: 1,
-              background: isEditing ? '#fff' : '#eee',
-              // If the layer is selected, we render an outline at the canvas
-              // level already and don't need one here
-              outline: isSelected ? 'none' : `1px solid #ddd`,
-              pointerEvents: isEditing ? 'all' : 'none',
-              // Children of the page don't appear in the rendered output,
-              // so we make them partially transparent
-              opacity:
-                // In combined view, we show the block preview behind the widget,
-                // so we make the widget transparent
-                showBlockPicker && viewType === 'combined'
-                  ? 0
-                  : Layers.isPageLayer(parent)
-                  ? 0.3
-                  : isEditing
-                  ? 0.9
-                  : 0.7,
-              overflow: 'hidden',
-              cursor: isEditing ? 'text' : 'pointer',
-            }}
-            onFocusCapture={(event) => event.stopPropagation()}
-            onPointerDownCapture={(event) => event.stopPropagation()}
-            onPointerMoveCapture={(event) => event.stopPropagation()}
-            onPointerUpCapture={(event) => event.stopPropagation()}
-          >
-            {Blocks[layer.symbolID].editorVersion ? (
-              <BlockEditor
-                ref={blockEditorRef}
-                isEditing={isEditing}
-                isSelected={isSelected}
-                blockTypes={blockTypes}
-                layer={layer}
-                parent={parent}
-                onChangeBlockContent={onChangeBlockContent}
-                onFocusCanvas={onFocusCanvas}
-              />
-            ) : (
-              <BlockEditorV1
-                ref={blockEditorRef}
-                isEditing={isEditing}
-                isSelected={isSelected}
-                blockTypes={blockTypes}
-                blockText={blockText}
-                layer={layer}
-                parent={parent}
-                onChangeBlockType={onChangeBlockType}
-                onChangeBlockText={(text) => {
-                  onChangeBlockContent({ blockText: text });
-                }}
-                onFocusCanvas={onFocusCanvas}
-              />
-            )}
-          </div>
-        }
-      />
-    </WidgetContainer>
+    />
   );
-});
+};
 
 export function DrawingWidget() {
   const [state] = useApplicationState();

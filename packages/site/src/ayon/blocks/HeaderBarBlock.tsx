@@ -41,7 +41,7 @@ export const HeaderBarBlock: BlockDefinition = {
         frame.y < 30
         ? 1
         : 0,
-      0.1,
+      0,
     );
   },
   render: (env, props) => {

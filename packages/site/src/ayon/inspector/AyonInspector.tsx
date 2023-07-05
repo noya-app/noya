@@ -1,8 +1,10 @@
 import { Stack, useDesignSystemTheme } from 'noya-designsystem';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { AyonLayerInspector } from './AyonLayerInspector';
 
-export function AyonInspector() {
+export function AyonInspector(
+  props: ComponentProps<typeof AyonLayerInspector>,
+) {
   const theme = useDesignSystemTheme();
 
   return (
@@ -10,7 +12,7 @@ export function AyonInspector() {
       width={'400px'}
       borderLeft={`1px solid ${theme.colors.dividerStrong}`}
     >
-      <AyonLayerInspector />
+      <AyonLayerInspector {...props} />
     </Stack.V>
   );
 }

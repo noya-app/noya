@@ -4,9 +4,9 @@ import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from 'noya-keymap';
 import React, {
   CSSProperties,
   ForwardedRef,
+  ReactNode,
   forwardRef,
   memo,
-  ReactNode,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -53,6 +53,7 @@ export interface CanvasElementProps extends ReactDOMEventHandlers {
   children: ({ size }: { size: Size }) => ReactNode;
   widgets?: ReactNode;
   cursor?: CSSProperties['cursor'];
+  autoFocus?: boolean;
 }
 
 export const CanvasElement = memo(
@@ -64,6 +65,7 @@ export const CanvasElement = memo(
       insets = ZERO_INSETS,
       widgets,
       cursor,
+      autoFocus,
       ...props
     }: CanvasElementProps,
     forwardedRef: ForwardedRef<ICanvasElement>,
@@ -108,8 +110,10 @@ export const CanvasElement = memo(
 
     useLayoutEffect(() => {
       // Initial focus
-      inputRef.current?.focus();
-    }, []);
+      if (autoFocus) {
+        inputRef.current?.focus();
+      }
+    }, [autoFocus]);
 
     return (
       <Container

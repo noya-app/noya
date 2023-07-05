@@ -168,16 +168,22 @@ function DynamicRenderer({
   >(DesignSystemCache.get(designSystem));
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
 
+  const isInitialRender = useRef(true);
+
   useEffect(() => {
     async function fetchLibrary() {
       const system = await loadDesignSystem(designSystem);
       setSystem(system);
     }
 
-    if (!DesignSystemCache.has(designSystem)) {
-      setSystem(undefined);
-      fetchLibrary();
+    if (isInitialRender.current && DesignSystemCache.has(designSystem)) {
+      isInitialRender.current = false;
+      return;
     }
+
+    isInitialRender.current = false;
+    setSystem(undefined);
+    fetchLibrary();
   }, [designSystem]);
 
   useEffect(() => {
@@ -251,6 +257,8 @@ function overrideBlockContent<T extends Sketch.AnyLayer>(
       if (Layers.isSymbolInstance(layer)) {
         layer.symbolID =
           overriddenBlock.blockContent.symbolId ?? layer.symbolID;
+        layer.blockText =
+          overriddenBlock.blockContent.blockText ?? layer.blockText;
       }
     }
   });

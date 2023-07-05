@@ -2,7 +2,12 @@ import { useApplicationState } from 'noya-app-state-context';
 import { InputField, Stack } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
-import { Layers, Selectors, getSiblingBlocks } from 'noya-state';
+import {
+  Layers,
+  OverriddenBlockContent,
+  Selectors,
+  getSiblingBlocks,
+} from 'noya-state';
 import React from 'react';
 import { BlockPreviewProps } from '../../docs/InteractiveBlockPreview';
 import { Blocks } from '../blocks/blocks';
@@ -32,7 +37,13 @@ const InspectorSection = ({
   </Stack.V>
 );
 
-export function AyonLayerInspector() {
+export function AyonLayerInspector({
+  setOverriddenBlock,
+}: {
+  setOverriddenBlock: (
+    overriddenBlock: OverriddenBlockContent | undefined,
+  ) => void;
+}) {
   const [state, dispatch] = useApplicationState();
 
   const selectedLayers = useShallowArray(
@@ -92,6 +103,21 @@ export function AyonLayerInspector() {
     },
   ];
 
+  const onSetOverriddenBlock = (item: BlockPreviewProps | undefined) => {
+    if (item) {
+      setOverriddenBlock({
+        layerId: selectedLayer.do_objectID,
+        blockContent: {
+          symbolId: item.blockId,
+          blockText: item.blockText || '',
+          overrides: item.overrideValues,
+        },
+      });
+    } else {
+      setOverriddenBlock(undefined);
+    }
+  };
+
   return (
     <Stack.V gap="1px">
       <InspectorSection>
@@ -114,6 +140,9 @@ export function AyonLayerInspector() {
               'preserveCurrent',
             );
           }}
+          onHoverItemChange={(index, isHovering) => {
+            onSetOverriddenBlock(isHovering ? relatedBlocks[index] : undefined);
+          }}
         />
       </InspectorSection>
       <InspectorSection title="Style">
@@ -133,6 +162,9 @@ export function AyonLayerInspector() {
               presetStyles[index].blockText || '',
               'preserveCurrent',
             );
+          }}
+          onHoverItemChange={(index, isHovering) => {
+            onSetOverriddenBlock(isHovering ? presetStyles[index] : undefined);
           }}
         />
       </InspectorSection>

@@ -1,7 +1,6 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   CanvasKitRenderer,
-  ISimpleCanvas,
   Interactions,
   SimpleCanvas,
   convertPoint,
@@ -22,14 +21,7 @@ import {
 } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce } from 'noya-utils';
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { measureImage } from '../utils/measureImage';
@@ -37,7 +29,7 @@ import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 import { Blocks } from './blocks/blocks';
-import { inferBlockType, inferBlockTypes } from './inferBlock';
+import { inferBlockType } from './inferBlock';
 import { AyonInspector } from './inspector/AyonInspector';
 import { parseBlock } from './parse';
 import { Attribution } from './resolve/RandomImageResolver';
@@ -94,14 +86,21 @@ export const Content = memo(function Content({
     (value: OverriddenBlockContent | undefined) => {
       if (
         value?.layerId === overriddenBlock?.layerId &&
-        value?.blockContent.symbolId === overriddenBlock?.blockContent.symbolId
+        value?.blockContent.symbolId ===
+          overriddenBlock?.blockContent.symbolId &&
+        value?.blockContent.blockText ===
+          overriddenBlock?.blockContent.blockText
       ) {
         return;
       }
 
       _setOverriddenBlock(value);
     },
-    [overriddenBlock?.blockContent.symbolId, overriddenBlock?.layerId],
+    [
+      overriddenBlock?.blockContent.blockText,
+      overriddenBlock?.blockContent.symbolId,
+      overriddenBlock?.layerId,
+    ],
   );
 
   const addImageFiles = async (files: File[], offsetPoint: OffsetPoint) => {
@@ -180,12 +179,6 @@ export const Content = memo(function Content({
     };
   }, [dispatch, layers, setToastDataDebounced]);
 
-  const canvasRef = useRef<ISimpleCanvas>(null);
-
-  const onFocusCanvas = useCallback(() => {
-    canvasRef.current?.focus();
-  }, []);
-
   const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
@@ -208,7 +201,7 @@ export const Content = memo(function Content({
           onDropFiles={addImageFiles}
         >
           <SimpleCanvas
-            ref={canvasRef}
+            autoFocus={!isPlayground}
             padding={padding}
             position={isPlayground ? undefined : 'top'}
             logEvent={amplitude.logEvent}
@@ -253,10 +246,7 @@ export const Content = memo(function Content({
                     <Widget
                       key={layer.do_objectID}
                       layer={layer}
-                      inferBlockTypes={inferBlockTypes}
-                      onFocusCanvas={onFocusCanvas}
                       showToolbar={!isPlayground}
-                      viewType={viewType}
                       setOverriddenBlock={(blockContent) => {
                         if (blockContent) {
                           setOverriddenBlock({
@@ -366,7 +356,9 @@ export const Content = memo(function Content({
         </Overlay>
         {viewType === 'combined' && (
           <>
-            {!isPlayground && <AyonInspector />}
+            {!isPlayground && (
+              <AyonInspector setOverriddenBlock={setOverriddenBlock} />
+            )}
             <Overlay>
               <SVGRenderer size={canvasSize}>
                 <RenderingModeProvider value="interactive">

@@ -141,6 +141,7 @@ interface ItemProps<MenuItemType extends string = string> {
   selected?: boolean;
   onClick?: (event: React.MouseEvent) => void;
   onDoubleClick?: () => void;
+  onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
   menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
@@ -157,6 +158,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     selected,
     onClick,
     onDoubleClick,
+    onHoverChange,
     children,
     menuItems,
     onSelectMenuItem,
@@ -167,7 +169,10 @@ const GridViewItem = forwardRef(function GridViewItem<
   const [hovered, setHovered] = React.useState(false);
 
   const { hoverProps } = useHover({
-    onHoverChange: setHovered,
+    onHoverChange: (isHovering) => {
+      onHoverChange?.(isHovering);
+      setHovered(isHovering);
+    },
   });
 
   const { textPosition, bordered } = useContext(GridViewContext);

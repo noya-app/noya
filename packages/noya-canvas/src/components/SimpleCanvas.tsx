@@ -29,6 +29,7 @@ interface Props {
   rendererZIndex?: CanvasElementProps['rendererZIndex'];
   children: CanvasElementProps['children'];
   widgets?: CanvasElementProps['widgets'];
+  autoFocus?: CanvasElementProps['autoFocus'];
   interactions?: Interaction[];
   padding?: number;
   logEvent?: ILogEvent;
@@ -49,6 +50,7 @@ export const SimpleCanvas = memo(
       padding = 0,
       position,
       logEvent,
+      autoFocus,
     }: Props,
     forwardedRef: ForwardedRef<ISimpleCanvas>,
   ) {
@@ -118,6 +120,7 @@ export const SimpleCanvas = memo(
           rendererZIndex={rendererZIndex}
           widgets={widgets}
           cursor={cursor}
+          autoFocus={autoFocus}
         >
           {children}
         </CanvasElement>

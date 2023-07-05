@@ -9,9 +9,11 @@ import { Blocks } from '../blocks/blocks';
 export function InspectorCarousel({
   items,
   onSelectItem,
+  onHoverItemChange,
 }: {
   items: BlockPreviewProps[];
   onSelectItem: (index: number) => void;
+  onHoverItemChange?: (index: number, isHovering: boolean) => void;
 }) {
   return (
     <GridView.Root scrollable={false} size="xs" textPosition="overlay" bordered>
@@ -23,6 +25,9 @@ export function InspectorCarousel({
             title={Blocks[props.blockId].symbol.name}
             onClick={() => {
               onSelectItem(index);
+            }}
+            onHoverChange={(isHovering) => {
+              onHoverItemChange?.(index, isHovering);
             }}
             selected={index === 0}
           >
