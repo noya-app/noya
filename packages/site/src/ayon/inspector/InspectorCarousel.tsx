@@ -10,10 +10,12 @@ export function InspectorCarousel({
   items,
   onSelectItem,
   onHoverItemChange,
+  selectedIndex,
 }: {
   items: BlockPreviewProps[];
   onSelectItem: (index: number) => void;
   onHoverItemChange?: (index: number, isHovering: boolean) => void;
+  selectedIndex?: number;
 }) {
   return (
     <GridView.Root scrollable={false} size="xs" textPosition="overlay" bordered>
@@ -29,7 +31,7 @@ export function InspectorCarousel({
             onHoverChange={(isHovering) => {
               onHoverItemChange?.(index, isHovering);
             }}
-            selected={index === 0}
+            selected={index === selectedIndex}
           >
             <Stack.V
               background={'white'}

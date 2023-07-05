@@ -14,13 +14,21 @@ export const SectionHeader = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-export const Title = styled.div(({ theme }) => ({
+export const Title = styled.div<{
+  textStyle?: 'small';
+}>(({ theme, textStyle }) => ({
   ...theme.textStyles.label,
   color: theme.colors.textSubtle,
   fontWeight: 'bold',
   display: 'flex',
   flexDirection: 'row',
   userSelect: 'none',
+
+  ...(textStyle && {
+    ...theme.textStyles[textStyle],
+    textTransform: 'initial',
+    color: theme.colors.text,
+  }),
 }));
 
 export const Row = styled.div(({ theme }) => ({

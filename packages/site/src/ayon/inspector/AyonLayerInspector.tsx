@@ -1,5 +1,6 @@
 import { useApplicationState } from 'noya-app-state-context';
 import {
+  Chip,
   CompletionItem,
   InputField,
   InputFieldWithCompletions,
@@ -13,17 +14,20 @@ import { OverriddenBlockContent, getSiblingBlocks } from 'noya-state';
 import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../docs/InteractiveBlockPreview';
 import { Blocks, allInsertableBlocks } from '../blocks/blocks';
-import { flattenPassthroughLayers } from '../blocks/flattenPassthroughLayers';
 import { boxSymbolId } from '../blocks/symbolIds';
+import { parametersToTailwindStyle } from '../blocks/tailwind';
 import { inferBlockTypes } from '../inferBlock';
+import { parseBlock } from '../parse';
 import { InspectorCarousel } from './InspectorCarousel';
 
 const InspectorSection = ({
   children,
   title,
+  titleTextStyle,
 }: {
   children: React.ReactNode;
   title?: string;
+  titleTextStyle?: 'small';
 }) => (
   <Stack.V
     padding={title ? '32px 12px 12px' : '12px'}
@@ -32,7 +36,9 @@ const InspectorSection = ({
   >
     {title && (
       <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
+        <InspectorPrimitives.Title textStyle={titleTextStyle}>
+          {title}
+        </InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
     )}
     {children}
@@ -51,6 +57,7 @@ export function AyonLayerInspector({
   const [state, dispatch] = useApplicationState();
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
 
   const blockCompletionItems = useMemo(
     () =>
@@ -113,12 +120,13 @@ export function AyonLayerInspector({
     '/': () => {
       componentSearchInputRef.current?.focus();
     },
+    '#': () => {
+      styleSearchInputRef.current?.focus();
+    },
   });
 
   const block = Blocks[selectedLayer.symbolID];
   const componentName = block.symbol.name;
-  const nestedLayers = flattenPassthroughLayers(block.symbol);
-
   const blockTypes = inferBlockTypes({
     frame: selectedLayer.frame,
     blockText: selectedLayer.blockText,
@@ -149,20 +157,44 @@ export function AyonLayerInspector({
       ),
   ];
 
+  const { parameters, content } = parseBlock(
+    selectedLayer.blockText,
+    block.parser,
+    {
+      placeholder: block.placeholderText,
+    },
+  );
+
   const presetStyles: BlockPreviewProps[] = [
     {
       blockId: selectedLayer.symbolID,
-      blockText: selectedLayer.blockText?.replace(/#dark/g, ''),
+      blockText: content,
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
     {
       blockId: selectedLayer.symbolID,
-      blockText: [selectedLayer.blockText, '#dark'].filter(Boolean).join(' '),
+      blockText: [content, '#dark'].filter(Boolean).join(' '),
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
   ];
+
+  const styleItems = useMemo(
+    () =>
+      (block.hashtags ?? []).map((item) => ({
+        name: item,
+        id: item,
+        icon: <HashtagIcon item={item} />,
+      })),
+    [block.hashtags],
+  );
+
+  const hashtags = Object.keys(parameters);
+
+  const unusedStyleItems = styleItems.filter(
+    (item) => !(item.name in parameters),
+  );
 
   return (
     <Stack.V gap="1px">
@@ -200,19 +232,75 @@ export function AyonLayerInspector({
           }}
         />
       </InspectorSection>
-      <InspectorSection title="Style">
-        <InputFieldWithCompletions placeholder={'Styles'} items={[]}>
+      <InspectorSection title="Style" titleTextStyle="small">
+        <InputFieldWithCompletions
+          ref={styleSearchInputRef}
+          placeholder={'Styles'}
+          items={unusedStyleItems}
+          onSelectItem={(item) => {
+            dispatch(
+              'setBlockText',
+              undefined,
+              `${selectedLayer.blockText} #${item.name}`,
+              'preserveCurrent',
+            );
+          }}
+          onHoverItem={(item) => {
+            if (item) {
+              onSetOverriddenBlock({
+                blockId: selectedLayer.symbolID,
+                blockText: `${selectedLayer.blockText} #${item.name}`,
+                overrideValues: selectedLayer.overrideValues,
+                resolvedBlockText:
+                  selectedLayer.resolvedBlockData?.resolvedText,
+              });
+            } else {
+              onSetOverriddenBlock(undefined);
+            }
+          }}
+        >
           <InputField.Button>
             Add
             <Spacer.Horizontal size={8} inline />
             <span style={{ opacity: 0.5 }}>#</span>
           </InputField.Button>
         </InputFieldWithCompletions>
+        {hashtags.length > 0 && (
+          <Stack.H flexWrap="wrap" gap="8px">
+            {hashtags.map((item) => (
+              <Chip
+                deletable
+                onDelete={() => {
+                  dispatch(
+                    'setBlockText',
+                    undefined,
+                    (selectedLayer.blockText || '').replace(`#${item}`, ''),
+                    'preserveCurrent',
+                  );
+                }}
+                style={{
+                  backgroundColor: '#545454',
+                  color: 'white',
+                }}
+                key={item}
+              >
+                {item}
+              </Chip>
+            ))}
+          </Stack.H>
+        )}
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           items={presetStyles}
+          selectedIndex={
+            hashtags.length === 0
+              ? 0
+              : hashtags.length === 1 && parameters['dark']
+              ? 1
+              : undefined
+          }
           onSelectItem={(index) => {
             dispatch(
               'setBlockText',
@@ -226,7 +314,7 @@ export function AyonLayerInspector({
           }}
         />
       </InspectorSection>
-      <InspectorSection title="Content">
+      {/* <InspectorSection title="Content">
         <Stack.V gap="4px">
           {nestedLayers.map(({ layer }, index) => {
             const block = Blocks[layer.symbolID];
@@ -244,7 +332,32 @@ export function AyonLayerInspector({
             );
           })}
         </Stack.V>
-      </InspectorSection>
+      </InspectorSection> */}
     </Stack.V>
+  );
+}
+
+function HashtagIcon({ item }: { item: string }) {
+  const resolvedStyle = parametersToTailwindStyle({
+    [item]: true,
+  });
+
+  return (
+    <div
+      style={{
+        width: 19,
+        height: 19,
+        borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
+        background: /^rounded/.test(item)
+          ? 'rgb(148 163 184)'
+          : /^opacity/.test(item)
+          ? 'black'
+          : undefined,
+        ...resolvedStyle,
+      }}
+      className={/^(p\w?-|m\w?-)/.test(item) ? undefined : item}
+    >
+      {/^(text|font)/.test(item) ? 'Tt' : null}
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   buttonSymbolId,
   cardSymbolId,
   checkboxSymbolId,
+  featureItemSymbolId,
   headerBarSymbolId,
   heading1SymbolId,
   heading2SymbolId,
@@ -200,5 +201,10 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     name: 'Switch',
     category: 'element',
     preferredSize: { width: 50, height: 35 },
+  },
+  [featureItemSymbolId]: {
+    name: 'Feature Item',
+    category: 'marketing',
+    preferredSize: { width: 400, height: 160 },
   },
 };

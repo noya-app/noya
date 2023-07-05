@@ -15,13 +15,13 @@ export const FeatureItemBlock: BlockDefinition = {
       isWithinRectRange({
         rect: frame,
         minWidth: 200,
-        minHeight: 250,
-        maxWidth: 300,
-        maxHeight: 400,
-      })
-        ? 1
+        maxWidth: 600,
+        minHeight: 150,
+        maxHeight: 300,
+      }) && frame.width > frame.height
+        ? 0.5
         : 0,
-      0.1,
+      0,
     );
   },
   render: (env, props) => renderStack(env, { props, block: FeatureItemBlock }),

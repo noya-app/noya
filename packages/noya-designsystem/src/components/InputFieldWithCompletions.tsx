@@ -100,8 +100,38 @@ export const InputFieldWithCompletions = memo(
     { placeholder, items, onSelectItem, onHoverItem, children }: Props,
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
-    const [filter, setFilter] = useState('');
-    const [selectedIndex, _setSelectedIndex] = useState(0);
+    const [state, _setState] = useState({
+      filter: '',
+      selectedIndex: 0,
+    });
+
+    const updateState = useCallback(
+      (
+        newState: { filter?: string; selectedIndex?: number },
+        hoverItem?: 'resetHover',
+      ) => {
+        const nextState = { ...state, ...newState };
+
+        if (hoverItem === 'resetHover') {
+          onHoverItem?.(undefined);
+        } else {
+          const nextItems = fuzzyFilter({
+            items: items.map((item) => item.name),
+            query: nextState.filter,
+          }).map(
+            (item): CompletionListItem => ({ ...item, ...items[item.index] }),
+          );
+
+          onHoverItem?.(nextItems[nextState.selectedIndex]);
+        }
+
+        _setState(nextState);
+      },
+      [items, onHoverItem, state],
+    );
+
+    const { filter, selectedIndex } = state;
+
     const listRef = React.useRef<ListView.VirtualizedList>(null);
 
     const filteredItems = useMemo(
@@ -126,55 +156,52 @@ export const InputFieldWithCompletions = memo(
       }
     }, [selectedIndex]);
 
-    const handleSelectIndex = useCallback(
-      (index: number | undefined) => {
-        _setSelectedIndex(index ?? 0);
-        onHoverItem?.(index === undefined ? undefined : filteredItems[index]);
-      },
-      [filteredItems, onHoverItem],
-    );
-
     const selectItem = useCallback(
       (item: CompletionListItem) => {
         onSelectItem?.(item);
-        handleSelectIndex(undefined);
+        onHoverItem?.(undefined);
 
         if (forwardedRef && typeof forwardedRef === 'object') {
           forwardedRef.current?.blur();
         }
       },
-      [onSelectItem, handleSelectIndex, forwardedRef],
+      [onSelectItem, onHoverItem, forwardedRef],
     );
 
     const handleChange = useCallback(
-      (value: string) => {
-        setFilter(value);
-        handleSelectIndex(0);
-      },
-      [handleSelectIndex],
+      (value: string) => updateState({ selectedIndex: 0, filter: value }),
+      [updateState],
     );
 
-    const handleBlur = useCallback(() => {
-      setFilter('');
-      handleSelectIndex(undefined);
-    }, [handleSelectIndex]);
+    const handleBlur = useCallback(
+      () => updateState({ selectedIndex: 0, filter: '' }, 'resetHover'),
+      [updateState],
+    );
 
-    const handleFocus = useCallback(() => {
-      setFilter('');
-      handleSelectIndex(0);
-    }, [handleSelectIndex]);
+    const handleFocus = useCallback(
+      () => updateState({ selectedIndex: 0, filter: '' }),
+      [updateState],
+    );
+
+    const handleIndexChange = useCallback(
+      (index: number) => updateState({ selectedIndex: index }),
+      [updateState],
+    );
 
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'ArrowDown') {
-          handleSelectIndex(
-            Math.min(selectedIndex + 1, filteredItems.length - 1),
+          const nextIndex = Math.min(
+            selectedIndex + 1,
+            filteredItems.length - 1,
           );
+          handleIndexChange(nextIndex);
 
           event.preventDefault();
           event.stopPropagation();
         } else if (event.key === 'ArrowUp') {
-          handleSelectIndex(Math.max(selectedIndex - 1, 0));
+          const nextIndex = Math.max(selectedIndex - 1, 0);
+          handleIndexChange(nextIndex);
 
           event.preventDefault();
           event.stopPropagation();
@@ -190,7 +217,7 @@ export const InputFieldWithCompletions = memo(
       [
         filteredItems,
         forwardedRef,
-        handleSelectIndex,
+        handleIndexChange,
         selectItem,
         selectedIndex,
       ],
@@ -210,7 +237,7 @@ export const InputFieldWithCompletions = memo(
                   items={filteredItems}
                   selectedIndex={selectedIndex}
                   onSelectItem={selectItem}
-                  onHoverIndex={handleSelectIndex}
+                  onHoverIndex={handleIndexChange}
                   listSize={listSize}
                 />
               ) : (
