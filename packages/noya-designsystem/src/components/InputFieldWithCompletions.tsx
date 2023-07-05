@@ -92,11 +92,12 @@ interface Props {
   items: CompletionItem[];
   onHoverItem?: (item: CompletionItem) => void;
   onSelectItem?: (item: CompletionItem) => void;
+  children?: React.ReactNode;
 }
 
 export const InputFieldWithCompletions = memo(
   forwardRef(function InputFieldWithCompletions(
-    { placeholder, items, onSelectItem, onHoverItem }: Props,
+    { placeholder, items, onSelectItem, onHoverItem, children }: Props,
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
     const [filter, setFilter] = useState('');
@@ -210,11 +211,7 @@ export const InputFieldWithCompletions = memo(
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
         />
-        <InputField.Button>
-          Pick
-          <Spacer.Horizontal size={8} inline />
-          <span style={{ opacity: 0.5 }}>/</span>
-        </InputField.Button>
+        {children}
       </InputField.Root>
     );
   }),

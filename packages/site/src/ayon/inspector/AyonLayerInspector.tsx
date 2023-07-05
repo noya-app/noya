@@ -3,6 +3,7 @@ import {
   CompletionItem,
   InputField,
   InputFieldWithCompletions,
+  Spacer,
   Stack,
 } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
@@ -158,7 +159,13 @@ export function AyonLayerInspector({
           placeholder={componentName}
           items={blockCompletionItems}
           onSelectItem={handleSelectBlockItem}
-        />
+        >
+          <InputField.Button>
+            Pick
+            <Spacer.Horizontal size={8} inline />
+            <span style={{ opacity: 0.5 }}>/</span>
+          </InputField.Button>
+        </InputFieldWithCompletions>
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>
             Related Components
@@ -180,9 +187,13 @@ export function AyonLayerInspector({
         />
       </InspectorSection>
       <InspectorSection title="Style">
-        <InputField.Root>
-          <InputField.Input value={componentName} onSubmit={() => {}} />
-        </InputField.Root>
+        <InputFieldWithCompletions placeholder={''} items={[]}>
+          <InputField.Button>
+            Add
+            <Spacer.Horizontal size={8} inline />
+            <span style={{ opacity: 0.5 }}>#</span>
+          </InputField.Button>
+        </InputFieldWithCompletions>
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
         </InspectorPrimitives.SectionHeader>

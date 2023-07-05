@@ -91,7 +91,7 @@ export const blockMetadata: Record<string, BlockMetadata> = {
   [heroWithImageSymbolId]: {
     name: 'Hero with Image',
     category: 'marketing',
-    preferredSize: { width: 1000, height: 600 },
+    preferredSize: { width: 1280, height: 720 },
   },
   [cardSymbolId]: {
     name: 'Card',
