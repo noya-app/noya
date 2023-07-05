@@ -10,10 +10,10 @@ import {
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import {
-  getMultiNumberValue,
-  getMultiValue,
   Layers,
   Selectors,
+  getMultiNumberValue,
+  getMultiValue,
 } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 
@@ -128,7 +128,7 @@ export default memo(function PointControlsInspector() {
             )}
           />
           <InspectorPrimitives.HorizontalSeparator />
-          <InputField.Root id={pointRadiusInputId} size={50}>
+          <InputField.Root id={pointRadiusInputId} width={50}>
             <InputField.NumberInput
               value={cornerRadius}
               placeholder={cornerRadius === undefined ? 'multi' : undefined}

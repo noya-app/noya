@@ -73,7 +73,7 @@ export const ExportFormatsRow = memo(function ExportFormatsRow({
     exportFormat.namingScheme === Sketch.ExportFormatNamingScheme.Prefix;
 
   const elements = [
-    <InputField.Root id={scaleInputId} size={55}>
+    <InputField.Root id={scaleInputId} width={55}>
       <InputField.Input
         disabled={!canChangeScale}
         value={scaleString}
@@ -121,7 +121,7 @@ export const ExportFormatsRow = memo(function ExportFormatsRow({
       />
       <InputField.Label>...</InputField.Label>
     </InputField.Root>,
-    <InputField.Root size={65} id={fileFormatInputId}>
+    <InputField.Root width={65} id={fileFormatInputId}>
       <Select
         id={`${id}-file-format-select`}
         value={exportFormat.fileFormat}

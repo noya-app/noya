@@ -35,7 +35,7 @@ export const DimensionInput = memo(function DimensionInput({
   );
 
   return (
-    <InputField.Root id={id} size={size}>
+    <InputField.Root id={id} width={size}>
       <InputField.NumberInput
         value={value === undefined ? value : round(value, 2)}
         placeholder={value === undefined ? placeholder : undefined}

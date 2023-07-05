@@ -161,7 +161,7 @@ export const GradientInspector = memo(function GradientInspector({
               <InputField.Label>#</InputField.Label>
             </InputField.Root>
             <InspectorPrimitives.HorizontalSeparator />
-            <InputField.Root id={opacityInputId} size={50}>
+            <InputField.Root id={opacityInputId} width={50}>
               <InputField.NumberInput
                 value={Math.round(selectedcolor.alpha * 100)}
                 onSubmit={handleSubmitOpacity}

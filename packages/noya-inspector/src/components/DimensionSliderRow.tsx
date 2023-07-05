@@ -43,7 +43,7 @@ export const DimensionSliderRow = memo(function DimensionSliderRow({
         max={max}
       />
       <InspectorPrimitives.HorizontalSeparator />
-      <InputField.Root id={`${id}-input`} size={50}>
+      <InputField.Root id={`${id}-input`} width={50}>
         <InputField.NumberInput
           value={value}
           placeholder={value === undefined ? 'multi' : undefined}

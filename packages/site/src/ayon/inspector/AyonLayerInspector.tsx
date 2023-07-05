@@ -1,6 +1,7 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { InputField, Stack } from 'noya-designsystem';
+import { InputField, Spacer, Stack } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { useShallowArray } from 'noya-react-utils';
 import {
   Layers,
@@ -49,6 +50,14 @@ export function AyonLayerInspector({
   const selectedLayers = useShallowArray(
     Selectors.getSelectedLayers(state).filter(Layers.isSymbolInstance),
   );
+
+  const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
+
+  useKeyboardShortcuts({
+    '/': () => {
+      componentSearchInputRef.current?.focus();
+    },
+  });
 
   if (selectedLayers.length !== 1) return null;
 
@@ -121,9 +130,25 @@ export function AyonLayerInspector({
   return (
     <Stack.V gap="1px">
       <InspectorSection>
-        <InputField.Root>
+        <InputField.Root size="large">
           <InputField.Label>Component</InputField.Label>
-          <InputField.Input value={componentName} onSubmit={() => {}} />
+          <InputField.Input
+            ref={componentSearchInputRef}
+            placeholder={componentName}
+            value=""
+            onSubmit={() => {}}
+          />
+          <InputField.Button>
+            Pick
+            <Spacer.Horizontal size={8} inline />
+            <span
+              style={{
+                opacity: 0.5,
+              }}
+            >
+              /
+            </span>
+          </InputField.Button>
         </InputField.Root>
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>

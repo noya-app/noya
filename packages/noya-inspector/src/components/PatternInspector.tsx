@@ -2,15 +2,15 @@ import { fileOpen } from 'browser-fs-access';
 import {
   InputField,
   PatternPreviewBackground,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
   Select,
   SketchPattern,
   Slider,
   SupportedImageUploadType,
-  SUPPORTED_IMAGE_UPLOAD_TYPES,
   useHover,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { FileDropTarget, isSupportedFile, TypedFile } from 'noya-react-utils';
+import { FileDropTarget, TypedFile, isSupportedFile } from 'noya-react-utils';
 import { getFileExtensionForType, uuid } from 'noya-utils';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -220,7 +220,7 @@ export const PatternInspector = memo(function PatternInspector({
                 max={200}
               />
               <InspectorPrimitives.HorizontalSeparator />
-              <InputField.Root size={50}>
+              <InputField.Root width={50}>
                 <InputField.NumberInput
                   value={scale}
                   onSubmit={onSubmitTileScale}

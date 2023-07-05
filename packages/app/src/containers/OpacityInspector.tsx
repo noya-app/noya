@@ -2,7 +2,7 @@ import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { InputField, Slider, Spacer } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
-import { getMultiNumberValue, Selectors } from 'noya-state';
+import { Selectors, getMultiNumberValue } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 
 export default memo(function OpacityInspector() {
@@ -57,7 +57,7 @@ export default memo(function OpacityInspector() {
               max={100}
             />
             <InspectorPrimitives.HorizontalSeparator />
-            <InputField.Root id="opacity-input" size={50}>
+            <InputField.Root id="opacity-input" width={50}>
               <InputField.NumberInput
                 value={roundedValue}
                 placeholder={roundedValue === undefined ? 'multi' : undefined}

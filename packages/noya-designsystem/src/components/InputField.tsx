@@ -22,16 +22,20 @@ import TextInput, { TextInputProps } from './internal/TextInput';
 
 type LabelPosition = 'start' | 'end';
 
+type Size = 'small' | 'medium' | 'large';
+
 const InputFieldContext = createContext<{
   labelPosition: LabelPosition;
   labelSize: number;
   hasLabel: boolean;
   hasDropdown: boolean;
+  size: Size;
 }>({
   labelPosition: 'end',
   labelSize: 6,
   hasLabel: false,
   hasDropdown: false,
+  size: 'medium',
 });
 
 /* ----------------------------------------------------------------------------
@@ -90,7 +94,7 @@ const InputFieldLabel = memo(function InputFieldLabel({
  * Dropdown
  * ------------------------------------------------------------------------- */
 
-const DropdownContainer = styled.span(({ theme }) => ({
+const RightFloatingContainer = styled.span(({ theme }) => ({
   position: 'absolute',
   right: 0,
 }));
@@ -105,13 +109,36 @@ const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
   T extends string,
 >({ id, items, onSelect }: InputFieldDropdownProps<T>) {
   return (
-    <DropdownContainer>
+    <RightFloatingContainer>
       <DropdownMenu<T> items={items} onSelect={onSelect}>
         <Button id={id} variant="thin">
           <CaretDownIcon />
         </Button>
       </DropdownMenu>
-    </DropdownContainer>
+    </RightFloatingContainer>
+  );
+});
+
+/* ----------------------------------------------------------------------------
+ * Button
+ * ------------------------------------------------------------------------- */
+
+const InputFieldButton = memo(function InputFieldButton({
+  children,
+}: {
+  children?: ReactNode;
+}) {
+  const { size } = useContext(InputFieldContext);
+
+  return (
+    <RightFloatingContainer
+      style={{
+        right: size === 'large' ? '9px' : '2px',
+        top: size === 'large' ? '8px' : '2px',
+      }}
+    >
+      <Button variant="floating">{children}</Button>
+    </RightFloatingContainer>
   );
 });
 
@@ -149,6 +176,7 @@ export const InputElement = styled(TextInput).withConfig({
   disabled?: boolean;
   variant?: InputFieldVariant;
   readOnly?: boolean;
+  size: Size;
 }>(
   ({
     theme,
@@ -160,6 +188,7 @@ export const InputElement = styled(TextInput).withConfig({
     hasLabel,
     readOnly,
     variant = 'normal',
+    size,
   }) => ({
     ...theme.textStyles.small,
     color: readOnly
@@ -176,12 +205,14 @@ export const InputElement = styled(TextInput).withConfig({
     textAlign: textAlign ?? 'left',
     alignSelf: 'stretch',
     borderRadius: '4px',
-    paddingTop: '4px',
-    paddingBottom: '4px',
+    paddingTop: size === 'large' ? '10px' : '4px',
+    paddingBottom: size === 'large' ? '10px' : '4px',
     paddingLeft:
-      6 + (hasLabel && labelPosition === 'start' ? 6 + labelSize : 0) + 'px',
+      (size === 'large' ? 10 : 6) +
+      (hasLabel && labelPosition === 'start' ? 6 + labelSize : 0) +
+      'px',
     paddingRight:
-      6 +
+      (size === 'large' ? 10 : 6) +
       (hasLabel && labelPosition === 'end' ? 6 + labelSize : 0) +
       (hasDropdown ? 11 : 0) +
       'px',
@@ -216,7 +247,7 @@ const InputFieldInput = forwardRef(function InputFieldInput(
   props: TextInputProps & { textAlign?: Property.TextAlign; variant?: 'bare' },
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
-  const { labelPosition, labelSize, hasDropdown, hasLabel } =
+  const { labelPosition, labelSize, hasDropdown, hasLabel, size } =
     useContext(InputFieldContext);
 
   return (
@@ -226,6 +257,7 @@ const InputFieldInput = forwardRef(function InputFieldInput(
       labelSize={labelSize}
       hasLabel={hasLabel}
       hasDropdown={hasDropdown}
+      size={size}
       {...props}
     />
   );
@@ -309,13 +341,13 @@ function InputFieldNumberInput(props: InputFieldNumberInputProps) {
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.div<{ size?: number; flex?: string }>(
-  ({ theme, flex, size }) => ({
+const RootContainer = styled.div<{ width?: number; flex?: string }>(
+  ({ theme, flex, width }) => ({
     flex: flex ?? '1',
     display: 'flex',
     flexDirection: 'row',
     position: 'relative',
-    maxWidth: typeof size === 'number' ? `${size}px` : undefined,
+    maxWidth: typeof width === 'number' ? `${width}px` : undefined,
   }),
 );
 
@@ -323,19 +355,21 @@ interface InputFieldRootProps {
   id?: string;
   flex?: string;
   children?: ReactNode;
-  size?: number;
+  width?: number;
   labelPosition?: LabelPosition;
   labelSize?: number;
   hasDropdown?: boolean;
+  size?: Size;
 }
 
 function InputFieldRoot({
   id,
   flex,
   children,
-  size,
+  width,
   labelPosition = 'end',
   labelSize = 6,
+  size = 'medium',
 }: InputFieldRootProps) {
   const childrenArray = Children.toArray(children);
 
@@ -347,13 +381,13 @@ function InputFieldRoot({
   );
 
   const contextValue = useMemo(
-    () => ({ labelPosition, labelSize, hasDropdown, hasLabel }),
-    [labelPosition, labelSize, hasDropdown, hasLabel],
+    () => ({ labelPosition, labelSize, hasDropdown, hasLabel, size }),
+    [labelPosition, labelSize, hasDropdown, hasLabel, size],
   );
 
   return (
     <InputFieldContext.Provider value={contextValue}>
-      <RootContainer id={id} size={size} flex={flex}>
+      <RootContainer id={id} width={width} flex={flex}>
         {children}
       </RootContainer>
     </InputFieldContext.Provider>
@@ -365,5 +399,6 @@ export namespace InputField {
   export const Input = memo(InputFieldInput);
   export const NumberInput = memo(InputFieldNumberInput);
   export const DropdownMenu = InputFieldDropdownMenu;
+  export const Button = InputFieldButton;
   export const Label = InputFieldLabel;
 }

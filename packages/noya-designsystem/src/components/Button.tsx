@@ -14,6 +14,7 @@ type ButtonVariant =
   | 'secondary'
   | 'secondaryBrightLarge'
   | 'thin'
+  | 'floating'
   | 'none';
 
 /* ----------------------------------------------------------------------------
@@ -88,6 +89,13 @@ const ButtonElement = styled.button<{
     '&:active': {
       opacity: 0.9,
     },
+  }),
+  ...(variant === 'floating' && {
+    background: 'white',
+    color: theme.colors.text,
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+    fontSize: '12px',
+    padding: '2px 6px',
   }),
   display: 'flex',
   alignItems: 'center',

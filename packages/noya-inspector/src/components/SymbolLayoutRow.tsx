@@ -157,7 +157,7 @@ export const SymbolLayoutRow = memo(function SymbolLayoutRow({
           <InspectorPrimitives.Row>
             <InspectorPrimitives.Text>Minimum Width</InspectorPrimitives.Text>
             <Spacer.Horizontal size={75} />
-            <InputField.Root id="font-size" size={70}>
+            <InputField.Root id="font-size" width={70}>
               <InputField.NumberInput
                 placeholder={'None'}
                 value={minWidth}
