@@ -1,6 +1,6 @@
 import { IconProps, LinkProps, component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { linkSymbolId } from './symbolIds';
 import { linkSymbol } from './symbols';
@@ -8,11 +8,8 @@ import { parametersToTailwindStyle, tailwindTextClasses } from './tailwind';
 
 const placeholderText = 'Read More';
 
-const parser = 'regular';
-
 export const LinkBlock: BlockDefinition = {
   symbol: linkSymbol,
-  parser,
   hashtags: [
     'icon-arrow-forward',
     'left',
@@ -33,9 +30,8 @@ export const LinkBlock: BlockDefinition = {
     },
     props,
   ) => {
-    const { content, parameters } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
+    const content = props.blockText ?? placeholderText;
+    const parameters = getParameters(props.blockParameters);
 
     const style = parametersToTailwindStyle(parameters);
 

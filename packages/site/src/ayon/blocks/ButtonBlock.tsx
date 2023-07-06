@@ -26,11 +26,8 @@ const globalHashtags = [
   'disabled',
 ];
 
-const parser = 'regular';
-
 export const ButtonBlock: BlockDefinition = {
   symbol: buttonSymbol,
-  parser,
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>

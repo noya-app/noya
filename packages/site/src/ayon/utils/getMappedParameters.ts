@@ -26,3 +26,9 @@ export function getMappedParameters<T extends Record<string, string[]>>(
 
   return result;
 }
+
+export function getParameters(parameters?: string[]): Record<string, boolean> {
+  if (!parameters) return {};
+
+  return Object.fromEntries(parameters.map((v) => [v, true]));
+}

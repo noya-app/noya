@@ -21,7 +21,6 @@ const parser = 'regular';
 
 export const InputBlock: BlockDefinition = {
   symbol: inputSymbol,
-  parser,
   hashtags: globalHashtags,
   infer: ({ frame, blockText }) =>
     isWithinRectRange({

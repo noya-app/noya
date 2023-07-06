@@ -1,6 +1,6 @@
 import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { isWithinRectRange } from './score';
 import { checkboxSymbolId } from './symbolIds';
@@ -10,11 +10,8 @@ const placeholderText = '#off Remember me';
 
 const globalHashtags = ['on', 'off', 'disabled', 'no-label'];
 
-const parser = 'regular';
-
 export const CheckboxBlock: BlockDefinition = {
   symbol: checkboxSymbol,
-  parser,
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
@@ -35,11 +32,11 @@ export const CheckboxBlock: BlockDefinition = {
     props,
   ) => {
     const {
-      content,
-      parameters: { on, disabled, 'no-label': noLabel },
-    } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
+      on,
+      disabled,
+      'no-label': noLabel,
+    } = getParameters(props.blockParameters);
+    const content = props.blockText ?? placeholderText;
 
     const inner = h(Checkbox, {
       ...applyCommonProps(props),

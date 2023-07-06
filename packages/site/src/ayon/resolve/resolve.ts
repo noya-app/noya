@@ -7,7 +7,6 @@ import {
   imageSymbolId,
   writeSymbolId,
 } from '../blocks/symbolIds';
-import { parseBlock } from '../parse';
 import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';
 import { Attribution, RandomImageResolver } from './RandomImageResolver';
@@ -57,11 +56,7 @@ export function resolveLayer({
 
   if (!blockDefinition) return [];
 
-  const { content: originalText } = parseBlock(
-    blockText,
-    blockDefinition.parser,
-    { placeholder: blockDefinition.placeholderText },
-  );
+  const originalText = blockText ?? blockDefinition.placeholderText;
 
   // Already resolved
   if (resolvedBlockData && resolvedBlockData.originalText === originalText) {

@@ -31,7 +31,6 @@ import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 import { Blocks } from './blocks/blocks';
 import { inferBlockType } from './inferBlock';
 import { AyonInspector } from './inspector/AyonInspector';
-import { parseBlock } from './parse';
 import { Attribution } from './resolve/RandomImageResolver';
 import { resolveLayer } from './resolve/resolve';
 import { Stacking } from './stacking';
@@ -292,11 +291,8 @@ export const Content = memo(function Content({
 
                         const contentWithNormalizedText: BlockContent = {
                           ...content,
-                          normalizedText: parseBlock(
-                            content.blockText,
-                            nextBlock.parser,
-                            { placeholder: nextBlock.placeholderText },
-                          ).content,
+                          normalizedText:
+                            content.blockText ?? nextBlock.placeholderText,
                         };
 
                         dispatch('batch', [

@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { ParsedBlockItem } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { getBlockThemeColorClasses } from './colors';
 import { isWithinRectRange } from './score';
 import {
@@ -14,13 +15,10 @@ import { headerBarSymbol } from './symbols';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 
-const parser = 'commaSeparated';
-
 export const HeaderBarBlock: BlockDefinition = {
   symbol: headerBarSymbol,
   hashtags: ['dark', 'accent', 'search', 'title'],
   placeholderText,
-  parser,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
     if (
@@ -45,12 +43,10 @@ export const HeaderBarBlock: BlockDefinition = {
     );
   },
   render: (env, props) => {
-    const {
-      items,
-      parameters: { dark, title, accent, search },
-    } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
+    const items: ParsedBlockItem[] = [];
+    const { dark, title, accent, search } = getParameters(
+      props.blockParameters,
+    );
 
     const hasActiveItem = items
       .slice(title ? 1 : 0)

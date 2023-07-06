@@ -47,7 +47,6 @@ function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
   return {
     symbol,
     infer: () => 0,
-    parser: 'regular',
     isPassthrough: true,
     editorVersion: 2,
     render: (env, props) =>

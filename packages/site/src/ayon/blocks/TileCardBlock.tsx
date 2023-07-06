@@ -7,7 +7,6 @@ import { tileCardSymbol } from './symbols';
 export const TileCardBlock: BlockDefinition = {
   editorVersion: 2,
   symbol: tileCardSymbol,
-  parser: 'regular',
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {

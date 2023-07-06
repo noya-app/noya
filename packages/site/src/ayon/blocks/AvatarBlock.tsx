@@ -1,7 +1,7 @@
 import { applyCommonProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { isApproximatelySquare, isWithinRectRange } from './score';
 import { avatarSymbolId } from './symbolIds';
 import { avatarSymbol } from './symbols';
@@ -9,11 +9,8 @@ import { getBlockClassName } from './tailwind';
 
 const AVATAR_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'];
 
-const parser = 'regular';
-
 export const AvatarBlock: BlockDefinition = {
   symbol: avatarSymbol,
-  parser,
   infer: ({ frame, blockText }) =>
     isWithinRectRange({
       rect: frame,
@@ -25,7 +22,8 @@ export const AvatarBlock: BlockDefinition = {
       ? 0.8
       : 0,
   render: ({ h, Components: { [avatarSymbolId]: Avatar } }, props) => {
-    const { content, parameters } = parseBlock(props.blockText, parser);
+    const parameters = getParameters(props.blockParameters);
+    const content = props.blockText ?? '';
     const src = isExternalUrl(content) ? content : undefined;
     const name = !src ? content : undefined;
     const hashtags = Object.keys(parameters);

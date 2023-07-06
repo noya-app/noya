@@ -10,7 +10,6 @@ const heroSymbolIds = [heroSymbolV2.symbolID, heroWithImageSymbolId];
 export const HeroBlockV2: BlockDefinition = {
   editorVersion: 2,
   symbol: heroSymbolV2,
-  parser: 'regular',
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {
@@ -37,7 +36,6 @@ export const HeroBlockV2: BlockDefinition = {
 export const HeroWithImageBlock: BlockDefinition = {
   editorVersion: 2,
   symbol: heroWithImageSymbol,
-  parser: 'regular',
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {

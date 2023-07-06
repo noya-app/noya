@@ -1,6 +1,6 @@
 import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { isWithinRectRange } from './score';
 import { radioSymbolId } from './symbolIds';
@@ -10,11 +10,8 @@ const placeholderText = '#off Daily';
 
 const globalHashtags = ['on', 'off', 'disabled', 'no-label'];
 
-const parser = 'regular';
-
 export const RadioBlock: BlockDefinition = {
   symbol: radioSymbol,
-  parser,
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
@@ -31,12 +28,12 @@ export const RadioBlock: BlockDefinition = {
     { h, Components: { [radioSymbolId]: Radio, [component.id.Box]: Box } },
     props,
   ) => {
+    const content = props.blockText ?? placeholderText;
     const {
-      content,
-      parameters: { on, disabled, 'no-label': noLabel },
-    } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
+      on,
+      disabled,
+      'no-label': noLabel,
+    } = getParameters(props.blockParameters);
 
     const inner = h(Radio, {
       ...applyCommonProps(props),

@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { ParsedBlockItem } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { getBlockThemeColorClasses } from './colors';
 import { isWithinRectRange } from './score';
 import { boxSymbolId, buttonSymbolId, heading5SymbolId } from './symbolIds';
@@ -14,11 +15,8 @@ Settings
 
 const globalHashtags = ['dark', 'accent', 'title'];
 
-const parser = 'newlineSeparated';
-
 export const SidebarBlock: BlockDefinition = {
   symbol: sidebarSymbol,
-  parser,
   hashtags: globalHashtags,
   placeholderText,
   isComposedBlock: true,
@@ -43,12 +41,8 @@ export const SidebarBlock: BlockDefinition = {
     );
   },
   render: (env, props) => {
-    const {
-      items,
-      parameters: { dark, accent, title },
-    } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
+    const items: ParsedBlockItem[] = [];
+    const { dark, accent, title } = getParameters(props.blockParameters);
 
     const hasActiveItem = items
       .slice(title ? 1 : 0)

@@ -6,7 +6,6 @@ import { featureSectionSymbol } from './symbols';
 export const FeatureSectionBlock: BlockDefinition = {
   editorVersion: 2,
   symbol: featureSectionSymbol,
-  parser: 'regular',
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => 0,

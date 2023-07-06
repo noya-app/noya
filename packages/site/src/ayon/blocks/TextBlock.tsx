@@ -1,5 +1,5 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { boxSymbolId, textSymbolId } from './symbolIds';
 import { textSymbol } from './symbols';
@@ -11,7 +11,6 @@ import {
 
 export const TextBlock: BlockDefinition = {
   symbol: textSymbol,
-  parser: 'regular',
   hashtags: ['left', 'center', 'right', ...tailwindTextClasses, 'flex-1'],
   infer: ({ frame, blockText }) =>
     Math.max(
@@ -25,7 +24,8 @@ export const TextBlock: BlockDefinition = {
     { h, Components: { [textSymbolId]: Text, [boxSymbolId]: Box } },
     props,
   ) => {
-    const { content, parameters } = parseBlock(props.blockText, 'regular');
+    const content = props.blockText;
+    const parameters = getParameters(props.blockParameters);
     const style = parametersToTailwindStyle(
       parameters,
       simpleAlignmentResolver,

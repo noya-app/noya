@@ -1,6 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { findLast } from 'noya-utils';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { boxSymbolId } from './symbolIds';
@@ -9,11 +9,10 @@ import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   symbol: boxSymbol,
-  parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   hashtags: ['left', 'center', 'right', 'dark', ...tailwindBlockClasses],
   render: ({ h, Components: { [boxSymbolId]: Box } }, props) => {
-    const { parameters } = parseBlock(props.blockText, 'regular');
+    const parameters = getParameters(props.blockParameters);
     const hashtags = Object.keys(parameters);
 
     const themeStyle = parameters.dark

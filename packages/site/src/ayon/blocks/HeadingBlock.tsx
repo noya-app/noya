@@ -2,7 +2,8 @@ import { BoxProps, TextProps } from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
-import { getTextAlign, parseBlock } from '../parse';
+import { getTextAlign } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { isWithinRectRange } from './score';
 import { boxSymbolId, textSymbolId } from './symbolIds';
@@ -25,7 +26,6 @@ const createHeadingBlock = (
   variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
 ): BlockDefinition => ({
   symbol,
-  parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   isComposedBlock: true,
   infer: ({ frame, blockText }) =>
@@ -43,7 +43,8 @@ const createHeadingBlock = (
     { h, Components: { [textSymbolId]: Text, [boxSymbolId]: Box } },
     props,
   ) => {
-    const { content, parameters } = parseBlock(props.blockText, 'regular');
+    const content = props.blockText;
+    const parameters = getParameters(props.blockParameters);
     const hashtags = Object.keys(parameters);
 
     const [flexClasses, otherClasses] = partition(hashtags, (hashtag) => {

@@ -15,7 +15,6 @@ const placeholderText = 'landscape';
 
 export const ImageBlock: BlockDefinition = {
   symbol: imageSymbol,
-  parser: 'regular',
   infer: ({ frame, blockText }) => 0.1,
   hashtags: ['contain', 'fill', ...tailwindBlockClasses],
   usesResolver: true,

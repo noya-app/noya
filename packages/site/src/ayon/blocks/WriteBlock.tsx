@@ -1,12 +1,12 @@
 import { BlockDefinition } from 'noya-state';
-import { getTextAlign, parseBlock } from '../parse';
+import { getTextAlign } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { boxSymbolId, textSymbolId } from './symbolIds';
 import { writeSymbol } from './symbols';
 import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
   symbol: writeSymbol,
-  parser: 'regular',
   hashtags: ['left', 'right', 'center', ...tailwindTextClasses],
   usesResolver: true,
   isComposedBlock: true,
@@ -15,8 +15,8 @@ export const WriteBlock: BlockDefinition = {
     { h, Components: { [textSymbolId]: Text, [boxSymbolId]: Box } },
     props,
   ) => {
-    const { content, parameters } = parseBlock(props.blockText, 'regular');
-
+    const content = props.blockText;
+    const parameters = getParameters(props.blockParameters);
     const hashtags = Object.keys(parameters);
 
     return h(

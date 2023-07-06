@@ -1,5 +1,6 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { ParsedBlockItem } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
@@ -14,11 +15,8 @@ Admin`.trim();
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 
-const parser = 'newlineSeparated';
-
 export const SelectBlock: BlockDefinition = {
   symbol: selectSymbol,
-  parser,
   hashtags: globalHashtags,
   placeholderText,
   infer: ({ frame, blockText }) =>
@@ -32,13 +30,13 @@ export const SelectBlock: BlockDefinition = {
       ? 0.7
       : 0,
   render: ({ h, Components: { [selectSymbolId]: Select } }, props) => {
-    const {
-      items,
-      parameters: { dark, accent, disabled },
-    } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
-
+    const items: ParsedBlockItem[] = [
+      {
+        content: props.blockText ?? placeholderText,
+        parameters: {},
+      },
+    ];
+    const { dark, accent, disabled } = getParameters(props.blockParameters);
     const { backgroundColor, color, borderColor } = getBlockThemeColors({
       dark,
       accent,

@@ -17,7 +17,6 @@ import {
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { PreferredOverride, blockMetadata } from '../ayon/blocks/blockMetadata';
 import { Blocks } from '../ayon/blocks/blocks';
-import { parseBlock } from '../ayon/parse';
 import { ViewType } from '../ayon/types';
 import { useAyon } from '../components/AyonContext';
 
@@ -85,11 +84,7 @@ export function createBlockExample({
   preferredOverrides?: PreferredOverride[];
   overrideValues?: Sketch.OverrideValue[];
 }): BlockExample {
-  const { content: originalText } = parseBlock(
-    blockText,
-    Blocks[blockId].parser,
-    { placeholder: Blocks[blockId].placeholderText },
-  );
+  const originalText = blockText ?? Blocks[blockId].placeholderText ?? '';
 
   const resolvedBlockData: Sketch.ResolvedBlockData | undefined =
     resolvedBlockText
@@ -106,11 +101,8 @@ export function createBlockExample({
   const overrides: Sketch.OverrideValue[] =
     overrideValues ??
     (preferredOverrides ?? []).flatMap((override) => {
-      const { content } = parseBlock(
-        override.blockText,
-        Blocks[override.symbolId].parser,
-        { placeholder: Blocks[override.symbolId].placeholderText },
-      );
+      const content =
+        override.blockText ?? Blocks[blockId].placeholderText ?? '';
 
       const layer = layers.find(
         (layer): layer is Sketch.SymbolInstance =>

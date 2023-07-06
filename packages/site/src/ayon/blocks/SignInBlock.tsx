@@ -6,7 +6,6 @@ import { signInSymbol } from './symbols';
 export const SignInBlock: BlockDefinition = {
   editorVersion: 2,
   symbol: signInSymbol,
-  parser: 'regular',
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {

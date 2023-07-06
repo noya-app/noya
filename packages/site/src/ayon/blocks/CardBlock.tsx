@@ -7,7 +7,6 @@ import { cardSymbol } from './symbols';
 export const CardBlock: BlockDefinition = {
   editorVersion: 2,
   symbol: cardSymbol,
-  parser: 'regular',
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
   infer: ({ frame, blockText, siblingBlocks }) => {

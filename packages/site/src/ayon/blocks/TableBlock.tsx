@@ -1,6 +1,7 @@
 import { TableProps, component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { ParsedCompositeBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { tableSymbol } from './symbols';
@@ -20,21 +21,14 @@ Strawberries, $3, 89
 
 const globalHashtags = ['dark', 'accent', 'sm', 'md', 'lg'];
 
-const parser = 'table';
-
 export const TableBlock: BlockDefinition = {
   symbol: tableSymbol,
-  parser,
   hashtags: globalHashtags,
   placeholderText,
   infer: () => 0,
   render: ({ h, Components: { [component.id.Table]: Table } }, props) => {
-    const {
-      rows,
-      parameters: { dark, accent },
-    } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-    });
+    const rows: ParsedCompositeBlock[] = [];
+    const { dark, accent } = getParameters(props.blockParameters);
 
     const { backgroundColor, color } = getBlockThemeColors({
       dark,

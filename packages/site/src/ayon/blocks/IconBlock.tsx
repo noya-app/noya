@@ -10,7 +10,6 @@ import {
 
 export const IconBlock: BlockDefinition = {
   symbol: iconSymbol,
-  parser: 'regular',
   usesResolver: true,
   hashtags: [
     ...getTailwindClassesByGroup('borderRadius'),

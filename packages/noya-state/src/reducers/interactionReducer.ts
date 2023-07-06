@@ -68,7 +68,7 @@ export type BlockRenderingEnvironment = {
 
 export type BlockDefinition = {
   symbol: Sketch.SymbolMaster;
-  parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
+  // parser: 'regular' | 'newlineSeparated' | 'commaSeparated' | 'table';
   infer: (props: InferBlockProps) => number;
   render: (
     env: BlockRenderingEnvironment,

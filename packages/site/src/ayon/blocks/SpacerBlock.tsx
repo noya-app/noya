@@ -6,7 +6,6 @@ import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
 
 export const SpacerBlock: BlockDefinition = {
   symbol: spacerSymbol,
-  parser: 'regular',
   hashtags: tailwindBlockClasses,
   infer: ({ frame, blockText }) => 0,
   isPassthrough: true,
