@@ -27,9 +27,6 @@
     "next": "^12",
     "react-guidebook": "^0.13.0",
     "react-resizable-panels": "^0.0.33",
-    "slate": "^0.90.0",
-    "slate-history": "^0.86.0",
-    "slate-react": "^0.90.0",
     "vscode-fuzzy-scorer": "^0.0.4"
   },
   "devDependencies": {

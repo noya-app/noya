@@ -19,7 +19,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Range } from 'slate';
 import { IModalMenu, ModalMenu } from './ModalMenu';
 
 export function SearchCompletionMenu({

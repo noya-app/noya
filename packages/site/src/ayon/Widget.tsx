@@ -33,7 +33,7 @@ import {
   Selectors,
 } from 'noya-state';
 import * as React from 'react';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
@@ -41,7 +41,6 @@ import { useOnboarding } from '../contexts/OnboardingContext';
 import { Blocks, allInsertableSymbols } from './blocks/blocks';
 import { getRenderableBlockProps } from './blocks/render';
 import { boxSymbolId, imageSymbolId } from './blocks/symbolIds';
-import { IBlockEditor } from './editor/BlockEditor';
 import { clearResolverCache } from './resolve/resolve';
 import { Stacking } from './stacking';
 import { SearchCompletionMenu } from './useCompletionMenu';
@@ -226,14 +225,6 @@ export const Widget = function Widget({
   const isEditing =
     state.interactionState.type === 'editingBlock' &&
     state.interactionState.layerId === layer.do_objectID;
-
-  const blockEditorRef = useRef<IBlockEditor>(null);
-
-  useEffect(() => {
-    if (isEditing) {
-      blockEditorRef.current?.focus();
-    }
-  }, [isEditing]);
 
   const symbolItems = useMemo(
     () =>
