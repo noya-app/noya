@@ -186,6 +186,8 @@ function Workspace({
       : 'pointer';
 
   useEffect(() => {
+    if (isPlayground) return;
+
     setLeftToolbar(
       <Stack.H alignSelf={'center'} width={99}>
         <RadioGroup.Root
@@ -301,6 +303,7 @@ function Workspace({
     );
   }, [
     cursorType,
+    isPlayground,
     setLeftToolbar,
     setOnboardingStep,
     showInsertBlockOnboarding,
@@ -312,6 +315,8 @@ function Workspace({
     state.history.present.sketch.document.designSystem?.id ?? 'chakra';
 
   useLayoutEffect(() => {
+    if (isPlayground) return;
+
     setRightToolbar(
       <Stack.H gap={8}>
         <DropdownMenu<ExportType>
@@ -470,9 +475,12 @@ function Workspace({
     onChangeName,
     fileId,
     designSystem,
+    isPlayground,
   ]);
 
   useLayoutEffect(() => {
+    if (isPlayground) return;
+
     setCenterToolbar(
       <StateProvider state={state} dispatch={dispatch}>
         <Popover
@@ -495,7 +503,15 @@ function Workspace({
         </Popover>
       </StateProvider>,
     );
-  }, [designSystem, name, onChangeName, onDuplicate, setCenterToolbar, state]);
+  }, [
+    designSystem,
+    isPlayground,
+    name,
+    onChangeName,
+    onDuplicate,
+    setCenterToolbar,
+    state,
+  ]);
 
   return (
     <StateProvider state={state} dispatch={dispatch}>

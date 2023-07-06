@@ -1,6 +1,10 @@
-import { ButtonProps, ButtonVariant } from '@noya-design-system/protocol';
+import {
+  ButtonProps,
+  ButtonSize,
+  ButtonVariant,
+} from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getMappedParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
@@ -10,7 +14,7 @@ import { parametersToTailwindStyle } from './tailwind';
 
 const placeholderText = 'Submit';
 const colorSchemeKeys = ['dark', 'light'];
-const sizeKeys = ['small', 'medium', 'large'];
+const sizeKeys: ButtonSize[] = ['small', 'medium', 'large'];
 const positionKeys = ['left', 'center', 'right'];
 const variantKeys: ButtonVariant[] = ['outline', 'solid', 'text'];
 
@@ -40,60 +44,46 @@ export const ButtonBlock: BlockDefinition = {
       ? 0.8
       : 0,
   render: ({ h, Components: { [buttonSymbolId]: Button } }, props) => {
-    const { content, parameters } = parseBlock(props.blockText, parser, {
-      placeholder: placeholderText,
-      mutuallyExclusiveParameters: {
-        colorScheme: colorSchemeKeys,
-        size: sizeKeys,
+    const content = props.blockText ?? placeholderText;
+    const style = parametersToTailwindStyle(props.blockParameters);
+    const parameters = new Set(props.blockParameters);
+
+    const { variant, size, position, colorScheme } = getMappedParameters(
+      parameters,
+      {
         variant: variantKeys,
+        size: sizeKeys,
         position: positionKeys,
+        colorScheme: colorSchemeKeys,
       },
-    });
+    );
+    const disabled = parameters.has('disabled');
 
-    const style = parametersToTailwindStyle(parameters);
-
-    if (parameters.colorScheme === 'dark') {
+    if (colorScheme === 'dark') {
       Object.assign(
         style,
-        parameters.disabled ? buttonColors.darkDisabled : buttonColors.dark,
+        disabled ? buttonColors.darkDisabled : buttonColors.dark,
       );
-    } else if (parameters.colorScheme === 'light') {
+    } else if (colorScheme === 'light') {
       Object.assign(
         style,
-        parameters.disabled ? buttonColors.lightDisabled : buttonColors.light,
+        disabled ? buttonColors.lightDisabled : buttonColors.light,
       );
     }
-
-    // if (props.frame && size === undefined) {
-    //   if (props.frame.height < 30) {
-    //     size = 'xs' as const;
-    //   } else if (props.frame.height > 50) {
-    //     size = 'lg' as const;
-    //   } else {
-    //     size = 'md' as const;
-    //   }
-    // }
 
     return h<ButtonProps>(
       Button,
       {
         ...applyCommonProps(props),
-        ...(parameters.disabled && { disabled: true }),
-        ...(parameters.variant && {
-          variant: parameters.variant as ButtonProps['variant'],
-        }),
-        ...(parameters.size && {
-          size: parameters.size as ButtonProps['size'],
-        }),
+        ...(disabled && { disabled: true }),
+        ...(variant && { variant }),
+        ...(size && { size }),
         style: {
           ...style,
-          ...(parameters.position &&
-            parameters.position !== 'center' && {
-              textAlign: parameters.position as 'left' | 'center' | 'right',
-              justifyContent: parameters.position as
-                | 'left'
-                | 'center'
-                | 'right',
+          ...(position &&
+            position !== 'center' && {
+              textAlign: position as 'left' | 'center' | 'right',
+              justifyContent: position as 'left' | 'center' | 'right',
             }),
           ...(props.frame && {
             width: `${props.frame.width}px`,

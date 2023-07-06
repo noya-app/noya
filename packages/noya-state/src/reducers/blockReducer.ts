@@ -5,10 +5,11 @@ import { layerPropertyReducer } from './layerPropertyReducer';
 import { symbolsReducer } from './symbolsReducer';
 
 export type BlockContent = {
-  blockText: string;
+  blockText?: string;
   normalizedText?: string;
   overrides?: Sketch.OverrideValue[];
   symbolId?: string;
+  blockParameters?: Sketch.BlockParameter[];
 };
 
 export type OverriddenBlockContent = {

@@ -54,8 +54,13 @@ export type LayerPropertyAction =
   | [
       type: 'setBlockText',
       layerId: string | string[] | undefined,
-      value: string,
+      value?: string,
       normalizedText?: string,
+    ]
+  | [
+      type: 'setBlockParameters',
+      layerId: string | string[] | undefined,
+      value: string[],
     ]
   | [
       type: 'setResolvedBlockData',
@@ -385,6 +390,18 @@ export function layerPropertyReducer(
           ) {
             delete layer.resolvedBlockData;
           }
+        });
+      });
+    }
+    case 'setBlockParameters': {
+      const [, id, value] = action;
+      const { pageIndex, indexPaths } = getTargetIndexPaths(id);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, indexPaths).forEach((layer) => {
+          if (!Layers.isSymbolInstance(layer)) return;
+
+          layer.blockParameters = value;
         });
       });
     }

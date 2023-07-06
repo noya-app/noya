@@ -44,6 +44,7 @@ export type BlockProps = {
   layer?: Sketch.SymbolInstance;
   frame?: Rect;
   blockText?: string;
+  blockParameters?: string[];
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
   getBlock: (symbolId: string) => BlockDefinition;
   children?: ReactNode;

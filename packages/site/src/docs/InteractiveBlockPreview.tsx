@@ -61,6 +61,7 @@ export type BlockExample = {
   block: BlockDefinition;
   size: Size;
   blockText?: string;
+  blockParameters?: string[];
   resolvedBlockData?: Sketch.ResolvedBlockData;
   overrideValues?: Sketch.OverrideValue[];
 };
@@ -70,6 +71,7 @@ export function createBlockExample({
   width,
   height,
   blockText,
+  blockParameters,
   resolvedBlockText,
   preferredOverrides,
   overrideValues,
@@ -78,10 +80,11 @@ export function createBlockExample({
   width: number;
   height: number;
   blockText?: string;
+  blockParameters?: string[];
   resolvedBlockText?: string;
   preferredOverrides?: PreferredOverride[];
   overrideValues?: Sketch.OverrideValue[];
-}) {
+}): BlockExample {
   const { content: originalText } = parseBlock(
     blockText,
     Blocks[blockId].parser,
@@ -144,6 +147,7 @@ export function createBlockExample({
     block: Blocks[blockId],
     size: { width, height },
     blockText,
+    blockParameters,
     resolvedBlockData,
     overrideValues: overrides,
   };
@@ -155,6 +159,7 @@ function Loader({
   height,
   viewType,
   blockText,
+  blockParameters,
   resolvedBlockText,
   preferredOverrides,
   overrideValues,
@@ -164,6 +169,7 @@ function Loader({
   height: number;
   viewType?: ViewType;
   blockText?: string;
+  blockParameters?: string[];
   resolvedBlockText?: string;
   preferredOverrides?: PreferredOverride[];
   overrideValues?: Sketch.OverrideValue[];
@@ -180,6 +186,7 @@ function Loader({
               width,
               height,
               blockText,
+              blockParameters,
               resolvedBlockText,
               preferredOverrides,
               overrideValues: overrideValues,
@@ -192,6 +199,7 @@ function Loader({
     setClient(client);
   }, [
     blockId,
+    blockParameters,
     blockText,
     height,
     overrideValues,
@@ -217,6 +225,7 @@ export interface BlockPreviewProps {
   blockWidth?: number;
   viewType?: ViewType;
   blockText?: string;
+  blockParameters?: string[];
   resolvedBlockText?: string;
   preferredOverrides?: PreferredOverride[];
   overrideValues?: Sketch.OverrideValue[];
@@ -275,6 +284,7 @@ function createLocalFile({
   block,
   size,
   blockText,
+  blockParameters,
   resolvedBlockData,
   overrideValues,
 }: BlockExample) {
@@ -285,6 +295,7 @@ function createLocalFile({
       height: size.height,
     }),
     blockText,
+    blockParameters,
     resolvedBlockData,
     overrideValues,
   });

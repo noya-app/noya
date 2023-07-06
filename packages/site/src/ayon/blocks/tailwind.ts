@@ -431,9 +431,11 @@ export function simpleAlignmentResolver(
 }
 
 export function parametersToTailwindStyle(
-  parameters: ParsedBlockItemParameters | string[],
+  parameters?: ParsedBlockItemParameters | string[],
   resolve?: (className: string) => CSSProperties | null,
 ): CSSProperties {
+  if (!parameters) return {};
+
   const hashtags = Array.isArray(parameters)
     ? parameters
     : Object.keys(parameters);

@@ -20,7 +20,7 @@ import {
   Selectors,
 } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import { debounce } from 'noya-utils';
+import { debounce, isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
@@ -89,7 +89,11 @@ export const Content = memo(function Content({
         value?.blockContent.symbolId ===
           overriddenBlock?.blockContent.symbolId &&
         value?.blockContent.blockText ===
-          overriddenBlock?.blockContent.blockText
+          overriddenBlock?.blockContent.blockText &&
+        isDeepEqual(
+          value?.blockContent.blockParameters,
+          overriddenBlock?.blockContent.blockParameters,
+        )
       ) {
         return;
       }
@@ -99,6 +103,7 @@ export const Content = memo(function Content({
     [
       overriddenBlock?.blockContent.blockText,
       overriddenBlock?.blockContent.symbolId,
+      overriddenBlock?.blockContent.blockParameters,
       overriddenBlock?.layerId,
     ],
   );
@@ -141,6 +146,8 @@ export const Content = memo(function Content({
   };
 
   useEffect(() => {
+    if (isPlayground) return;
+
     const subscriptions = layers
       .filter(Layers.isSymbolInstance)
       .flatMap((layer) =>
@@ -177,7 +184,7 @@ export const Content = memo(function Content({
     return () => {
       subscriptions.forEach((unsubscribe) => unsubscribe());
     };
-  }, [dispatch, layers, setToastDataDebounced]);
+  }, [dispatch, isPlayground, layers, setToastDataDebounced]);
 
   const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
@@ -352,6 +359,7 @@ export const Content = memo(function Content({
             overriddenBlock={overriddenBlock}
             resizeBehavior="match-canvas"
             designSystem={designSystem}
+            sync={!isPlayground}
           />
         </Overlay>
         {viewType === 'combined' && (

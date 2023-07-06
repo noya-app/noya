@@ -63,10 +63,10 @@ const ItemContainer = styled.div<{ selected?: boolean; bordered: boolean }>(
 
     cursor: 'pointer',
     '&:hover': {
-      opacity: 0.9,
+      opacity: 0.85,
     },
     '&:active': {
-      opacity: 0.95,
+      opacity: 0.7,
     },
   }),
 );

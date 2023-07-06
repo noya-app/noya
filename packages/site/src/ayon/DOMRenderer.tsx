@@ -75,6 +75,7 @@ function renderDynamicContent(
     frame,
     symbolId,
     blockText,
+    blockParameters,
     resolvedBlockData,
     getBlock,
   }: BlockProps & { frame: Rect; symbolId: string; key: string }) {
@@ -102,6 +103,7 @@ function renderDynamicContent(
         symbolId,
         frame,
         blockText,
+        blockParameters,
         resolvedBlockData,
         getBlock,
         overrideValues: layer?.overrideValues,
@@ -121,6 +123,7 @@ function renderDynamicContent(
         frame: layer.frame,
         symbolId: layer.symbolID,
         blockText: layer.blockText,
+        blockParameters: layer.blockParameters,
         resolvedBlockData: layer.resolvedBlockData,
         getBlock,
         overrideValues: layer.overrideValues,
@@ -156,10 +159,12 @@ function DynamicRenderer({
   artboard,
   designSystem,
   drawing,
+  sync,
 }: {
   artboard: Sketch.Artboard;
   designSystem: string;
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined;
+  sync: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -209,8 +214,10 @@ function DynamicRenderer({
   useLayoutEffect(() => {
     if (!root || !system) return;
 
-    root.render(renderDynamicContent(system, artboard.layers, drawing, theme));
-  }, [artboard.layers, designSystem, drawing, root, system, theme]);
+    root.render(renderDynamicContent(system, artboard.layers, drawing, theme), {
+      sync,
+    });
+  }, [artboard.layers, designSystem, drawing, root, sync, system, theme]);
 
   return (
     <>
@@ -259,6 +266,8 @@ function overrideBlockContent<T extends Sketch.AnyLayer>(
           overriddenBlock.blockContent.symbolId ?? layer.symbolID;
         layer.blockText =
           overriddenBlock.blockContent.blockText ?? layer.blockText;
+        layer.blockParameters =
+          overriddenBlock.blockContent.blockParameters ?? layer.blockParameters;
       }
     }
   });
@@ -270,12 +279,14 @@ function DOMRendererContent({
   padding = 0,
   designSystem,
   overriddenBlock,
+  sync,
 }: {
   size: Size;
   resizeBehavior: ResizeBehavior;
   padding?: number;
   designSystem: string;
   overriddenBlock?: OverriddenBlockContent;
+  sync: boolean;
 }): JSX.Element {
   const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
@@ -323,6 +334,7 @@ function DOMRendererContent({
       >
         <ErrorBoundary>
           <DynamicRenderer
+            sync={sync}
             artboard={overriddenArtboard}
             designSystem={designSystem}
             drawing={

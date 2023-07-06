@@ -1137,6 +1137,8 @@ export type ResolvedBlockData = {
   resolvedAt?: string;
 };
 
+export type BlockParameter = string;
+
 /**
  * Symbol instance layers represent an instance of a symbol source
  */
@@ -1171,6 +1173,7 @@ export type SymbolInstance = {
   verticalSpacing: number;
   horizontalSpacing: number;
   blockText?: string;
+  blockParameters?: BlockParameter[];
   resolvedBlockData?: ResolvedBlockData;
   symbolIDIsFixed?: boolean;
 };

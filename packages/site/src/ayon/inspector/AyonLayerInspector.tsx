@@ -17,7 +17,6 @@ import { Blocks, allInsertableBlocks } from '../blocks/blocks';
 import { boxSymbolId } from '../blocks/symbolIds';
 import { parametersToTailwindStyle } from '../blocks/tailwind';
 import { inferBlockTypes } from '../inferBlock';
-import { parseBlock } from '../parse';
 import { InspectorCarousel } from './InspectorCarousel';
 
 const InspectorSection = ({
@@ -84,8 +83,9 @@ export function AyonLayerInspector({
           layerId: selectedLayer.do_objectID,
           blockContent: {
             symbolId: item.blockId,
-            blockText: item.blockText || '',
+            blockText: item.blockText,
             overrides: item.overrideValues,
+            blockParameters: item.blockParameters,
           },
         });
       } else {
@@ -137,6 +137,7 @@ export function AyonLayerInspector({
     {
       blockId: selectedLayer.symbolID,
       blockText: selectedLayer.blockText,
+      blockParameters: selectedLayer.blockParameters,
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
@@ -151,30 +152,28 @@ export function AyonLayerInspector({
         (blockId): BlockPreviewProps => ({
           blockId,
           blockText: selectedLayer.blockText,
+          blockParameters: selectedLayer.blockParameters,
           overrideValues: selectedLayer.overrideValues,
           resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
         }),
       ),
   ];
 
-  const { parameters, content } = parseBlock(
-    selectedLayer.blockText,
-    block.parser,
-    {
-      placeholder: block.placeholderText,
-    },
-  );
-
   const presetStyles: BlockPreviewProps[] = [
     {
       blockId: selectedLayer.symbolID,
-      blockText: content,
+      blockText: selectedLayer.blockText,
+      blockParameters: [],
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
     {
       blockId: selectedLayer.symbolID,
-      blockText: [content, '#dark'].filter(Boolean).join(' '),
+      blockText: selectedLayer.blockText,
+      blockParameters: [
+        ...(selectedLayer.blockParameters ?? []).filter((p) => p !== 'dark'),
+        'dark',
+      ],
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
@@ -190,10 +189,8 @@ export function AyonLayerInspector({
     [block.hashtags],
   );
 
-  const hashtags = Object.keys(parameters);
-
   const unusedStyleItems = styleItems.filter(
-    (item) => !(item.name in parameters),
+    (item) => !selectedLayer.blockParameters?.includes(item.name),
   );
 
   return (
@@ -239,18 +236,19 @@ export function AyonLayerInspector({
           placeholder={'Styles'}
           items={unusedStyleItems}
           onSelectItem={(item) => {
-            dispatch(
-              'setBlockText',
-              undefined,
-              `${selectedLayer.blockText} #${item.name}`,
-              'preserveCurrent',
-            );
+            dispatch('setBlockParameters', undefined, [
+              ...(selectedLayer.blockParameters ?? []),
+              item.name,
+            ]);
           }}
           onHoverItem={(item) => {
             if (item) {
               onSetOverriddenBlock({
                 blockId: selectedLayer.symbolID,
-                blockText: `${selectedLayer.blockText} #${item.name}`,
+                blockText: selectedLayer.blockText,
+                blockParameters: (selectedLayer.blockParameters ?? []).concat(
+                  item.name,
+                ),
                 overrideValues: selectedLayer.overrideValues,
                 resolvedBlockText:
                   selectedLayer.resolvedBlockData?.resolvedText,
@@ -266,48 +264,51 @@ export function AyonLayerInspector({
             <span style={{ opacity: 0.5 }}>#</span>
           </InputField.Button>
         </InputFieldWithCompletions>
-        {hashtags.length > 0 && (
-          <Stack.H flexWrap="wrap" gap="8px">
-            {hashtags.map((item) => (
-              <Chip
-                deletable
-                onDelete={() => {
-                  dispatch(
-                    'setBlockText',
-                    undefined,
-                    (selectedLayer.blockText || '').replace(`#${item}`, ''),
-                    'preserveCurrent',
-                  );
-                }}
-                style={{
-                  backgroundColor: '#545454',
-                  color: 'white',
-                }}
-                key={item}
-              >
-                {item}
-              </Chip>
-            ))}
-          </Stack.H>
-        )}
+        {selectedLayer.blockParameters &&
+          selectedLayer.blockParameters.length > 0 && (
+            <Stack.H flexWrap="wrap" gap="8px">
+              {selectedLayer.blockParameters.map((parameter) => (
+                <Chip
+                  deletable
+                  onDelete={() => {
+                    dispatch(
+                      'setBlockParameters',
+                      undefined,
+                      (selectedLayer.blockParameters ?? []).filter(
+                        (p) => p !== parameter,
+                      ),
+                    );
+                  }}
+                  style={{
+                    backgroundColor: '#545454',
+                    color: 'white',
+                  }}
+                  key={parameter}
+                >
+                  {parameter}
+                </Chip>
+              ))}
+            </Stack.H>
+          )}
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           items={presetStyles}
           selectedIndex={
-            hashtags.length === 0
+            !selectedLayer.blockParameters ||
+            selectedLayer.blockParameters.length === 0
               ? 0
-              : hashtags.length === 1 && parameters['dark']
+              : selectedLayer.blockParameters.length === 1 &&
+                selectedLayer.blockParameters[0] === 'dark'
               ? 1
               : undefined
           }
           onSelectItem={(index) => {
             dispatch(
-              'setBlockText',
+              'setBlockParameters',
               undefined,
-              presetStyles[index].blockText || '',
-              'preserveCurrent',
+              presetStyles[index].blockParameters ?? [],
             );
           }}
           onHoverItemChange={(index, isHovering) => {

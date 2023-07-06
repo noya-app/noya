@@ -26,9 +26,9 @@ import { BlockAction, blockReducer } from './blockReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
 import { ExportAction, exportReducer } from './exportReducer';
 import {
+  InteractionState,
   createInitialInteractionState,
   interactionReducer,
-  InteractionState,
 } from './interactionReducer';
 import {
   LayerPropertyAction,
@@ -36,7 +36,7 @@ import {
 } from './layerPropertyReducer';
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
-import { markLayersAsEdited, PointAction, pointReducer } from './pointReducer';
+import { PointAction, markLayersAsEdited, pointReducer } from './pointReducer';
 import { StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextEditorAction, textEditorReducer } from './textEditorReducer';
@@ -217,6 +217,7 @@ export function applicationReducer(
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
     case 'setBlockText':
+    case 'setBlockParameters':
     case 'setResolvedBlockData':
     case 'setSymbolIdIsFixed':
       return layerPropertyReducer(state, action, CanvasKit);
