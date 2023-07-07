@@ -4,13 +4,13 @@ import {
   ButtonVariant,
 } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
+import { parametersToTailwindStyle } from '../tailwind/tailwind';
 import { getMappedParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { buttonColors } from './blockTheme';
 import { isWithinRectRange } from './score';
 import { buttonSymbolId } from './symbolIds';
 import { buttonSymbol } from './symbols';
-import { parametersToTailwindStyle } from './tailwind';
 
 const placeholderText = 'Submit';
 const colorSchemeKeys = ['dark', 'light'];

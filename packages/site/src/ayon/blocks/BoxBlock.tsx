@@ -1,11 +1,14 @@
 import { BlockDefinition } from 'noya-state';
 import { findLast } from 'noya-utils';
+import {
+  parametersToTailwindStyle,
+  tailwindBlockClasses,
+} from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { boxSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
-import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
 
 export const BoxBlock: BlockDefinition = {
   symbol: boxSymbol,

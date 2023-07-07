@@ -1,15 +1,15 @@
 import { ImageProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { boxSymbolId, imageSymbolId } from './symbolIds';
-import { imageSymbol } from './symbols';
 import {
   getBlockClassName,
   parametersToTailwindStyle,
   tailwindBlockClasses,
-} from './tailwind';
+} from '../tailwind/tailwind';
+import { getParameters } from '../utils/getMappedParameters';
+import { applyCommonProps } from './applyCommonProps';
+import { boxSymbolId, imageSymbolId } from './symbolIds';
+import { imageSymbol } from './symbols';
 
 const placeholderText = 'landscape';
 

@@ -3,6 +3,11 @@ import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
 import { getTextAlign } from '../parse';
+import {
+  classGroups,
+  parametersToTailwindStyle,
+  tailwindTextClasses,
+} from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { isWithinRectRange } from './score';
@@ -15,11 +20,6 @@ import {
   heading5Symbol,
   heading6Symbol,
 } from './symbols';
-import {
-  classGroups,
-  parametersToTailwindStyle,
-  tailwindTextClasses,
-} from './tailwind';
 
 const createHeadingBlock = (
   symbol: Sketch.SymbolMaster,

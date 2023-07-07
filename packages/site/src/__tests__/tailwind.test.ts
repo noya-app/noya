@@ -2,10 +2,11 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import {
   getBlockClassName,
+  getColor,
   parametersToTailwindStyle,
   resolveTailwindClass,
   simpleAlignmentResolver,
-} from '../ayon/blocks/tailwind';
+} from '../ayon/tailwind/tailwind';
 
 // Jest doesn't know how to import a text file, so we mock it
 jest.mock('../../safelist.txt', () => {
@@ -24,6 +25,10 @@ it('applies one class within every group', () => {
   expect(getBlockClassName(['text-red-500', 'bg-blue-500'])).toEqual(
     'text-red-500 bg-blue-500',
   );
+});
+
+it('gets color', () => {
+  expect(getColor('text-red-500')).toEqual('#ef4444');
 });
 
 describe('resolves styles', () => {

@@ -1,8 +1,6 @@
-import { groupBy, memoize } from 'noya-utils';
+import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
-import { ParsedBlockItemParameters } from '../parse';
-import { ThemeValue, config } from './tailwind.config';
-import { resolveColor } from './tailwindColors';
+import { ThemeValue, config, tailwindColors } from './tailwind.config';
 
 const allClassNames = (
   require('../../../safelist.txt').default as string
@@ -144,11 +142,23 @@ function getSpacingValue(className: string): string | undefined {
 
 const customValueRE = /[A-Za-z0-9-]*(?:\[(.*)\])?/;
 
-function configSelector(key: string) {
-  return (config.theme as any)[key];
+function configSelector(...keyPath: string[]) {
+  return get(config.theme as any, keyPath);
 }
 
-const themeParameter = { theme: configSelector };
+const themeParameter = { theme: configSelector, colors: tailwindColors };
+
+export function getColor(className: string) {
+  const custom = customValueRE.exec(className)?.[1];
+
+  if (custom) {
+    return custom;
+  }
+
+  const value = className.split('-').slice(1);
+
+  return get((config.theme as any).colors(themeParameter), value);
+}
 
 export const resolveTailwindClass = memoize(function resolveTailwindClass(
   className: string,
@@ -159,12 +169,11 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'fontSize':
       // Not used?
       return {};
-    case 'background':
-      const custom = customValueRE.exec(className)?.[1];
-
+    case 'background': {
       return {
-        backgroundColor: custom || resolveColor(className),
+        backgroundColor: getColor(className),
       };
+    }
     case 'backdropFilter': {
       const key = /backdrop-blur-(.+)/.exec(className)?.[1];
       const value = (config.theme as any).blur[key || 'DEFAULT'];
@@ -175,11 +184,11 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     }
     case 'textColor':
       return {
-        color: resolveColor(className),
+        color: getColor(className),
       };
     case 'fill':
       return {
-        fill: resolveColor(className),
+        fill: getColor(className),
       };
     case 'justify':
       return {
@@ -347,7 +356,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     }
     case 'borderColor': {
       return {
-        borderColor: resolveColor(className),
+        borderColor: getColor(className),
       };
     }
     case 'fontWeight': {
@@ -431,7 +440,7 @@ export function simpleAlignmentResolver(
 }
 
 export function parametersToTailwindStyle(
-  parameters?: ParsedBlockItemParameters | string[],
+  parameters?: Record<string, unknown> | string[],
   resolve?: (className: string) => CSSProperties | null,
 ): CSSProperties {
   if (!parameters) return {};

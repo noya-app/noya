@@ -1,8 +1,11 @@
 import { BlockDefinition } from 'noya-state';
+import {
+  parametersToTailwindStyle,
+  tailwindBlockClasses,
+} from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { boxSymbolId } from './symbolIds';
 import { spacerSymbol } from './symbols';
-import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
 
 export const SpacerBlock: BlockDefinition = {
   symbol: spacerSymbol,

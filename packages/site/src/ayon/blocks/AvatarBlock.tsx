@@ -1,11 +1,11 @@
 import { applyCommonProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
+import { getBlockClassName } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { isApproximatelySquare, isWithinRectRange } from './score';
 import { avatarSymbolId } from './symbolIds';
 import { avatarSymbol } from './symbols';
-import { getBlockClassName } from './tailwind';
 
 const AVATAR_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'];
 

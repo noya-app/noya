@@ -15,8 +15,8 @@ import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { Blocks, allInsertableBlocks } from '../../blocks/blocks';
 import { boxSymbolId } from '../../blocks/symbolIds';
-import { parametersToTailwindStyle } from '../../blocks/tailwind';
 import { inferBlockTypes } from '../../inferBlock';
+import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 
 const InspectorSection = ({

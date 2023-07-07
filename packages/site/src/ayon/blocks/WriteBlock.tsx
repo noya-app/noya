@@ -1,9 +1,9 @@
 import { BlockDefinition } from 'noya-state';
 import { getTextAlign } from '../parse';
+import { getBlockClassName, tailwindTextClasses } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { boxSymbolId, textSymbolId } from './symbolIds';
 import { writeSymbol } from './symbols';
-import { getBlockClassName, tailwindTextClasses } from './tailwind';
 
 export const WriteBlock: BlockDefinition = {
   symbol: writeSymbol,

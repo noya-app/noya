@@ -1,14 +1,14 @@
 import { BlockDefinition } from 'noya-state';
+import {
+  getTailwindClassesByGroup,
+  parametersToTailwindStyle,
+} from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
 import { inputSymbolId } from './symbolIds';
 import { inputSymbol } from './symbols';
-import {
-  getTailwindClassesByGroup,
-  parametersToTailwindStyle,
-} from './tailwind';
 
 const globalHashtags = [
   'dark',
