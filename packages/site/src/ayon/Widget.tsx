@@ -418,7 +418,7 @@ export const Widget = function Widget({
                         }}
                       />
                     )}
-                    {Blocks[layer.symbolID].editorVersion === 2 && (
+                    {Blocks[layer.symbolID].isComposedBlock && (
                       <IconButton
                         iconName="LinkBreak2Icon"
                         onPointerDown={(event) => {

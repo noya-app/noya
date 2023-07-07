@@ -76,7 +76,6 @@ export type BlockDefinition = {
   ) => JSX.Element | null;
   hashtags?: string[];
   placeholderText?: string;
-  editorVersion?: number;
   usesResolver?: boolean;
   isPassthrough?: boolean;
   isComposedBlock?: boolean;

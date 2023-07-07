@@ -8,7 +8,6 @@ import { heroSymbolV2, heroWithImageSymbol } from './symbols';
 const heroSymbolIds = [heroSymbolV2.symbolID, heroWithImageSymbolId];
 
 export const HeroBlockV2: BlockDefinition = {
-  editorVersion: 2,
   symbol: heroSymbolV2,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
@@ -34,7 +33,6 @@ export const HeroBlockV2: BlockDefinition = {
 };
 
 export const HeroWithImageBlock: BlockDefinition = {
-  editorVersion: 2,
   symbol: heroWithImageSymbol,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,

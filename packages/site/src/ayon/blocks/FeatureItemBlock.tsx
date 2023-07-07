@@ -5,7 +5,6 @@ import { isWithinRectRange } from './score';
 import { featureItemSymbol } from './symbols';
 
 export const FeatureItemBlock: BlockDefinition = {
-  editorVersion: 2,
   symbol: featureItemSymbol,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,

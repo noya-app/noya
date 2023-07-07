@@ -4,7 +4,6 @@ import { renderStack } from './render';
 import { featureSectionSymbol } from './symbols';
 
 export const FeatureSectionBlock: BlockDefinition = {
-  editorVersion: 2,
   symbol: featureSectionSymbol,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,

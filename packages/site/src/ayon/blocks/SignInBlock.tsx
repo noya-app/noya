@@ -4,7 +4,6 @@ import { renderStack } from './render';
 import { signInSymbol } from './symbols';
 
 export const SignInBlock: BlockDefinition = {
-  editorVersion: 2,
   symbol: signInSymbol,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,

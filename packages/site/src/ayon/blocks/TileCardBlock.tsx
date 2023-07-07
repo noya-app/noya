@@ -5,7 +5,6 @@ import { isWithinRectRange } from './score';
 import { tileCardSymbol } from './symbols';
 
 export const TileCardBlock: BlockDefinition = {
-  editorVersion: 2,
   symbol: tileCardSymbol,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,

@@ -5,7 +5,6 @@ import { isWithinRectRange } from './score';
 import { cardSymbol } from './symbols';
 
 export const CardBlock: BlockDefinition = {
-  editorVersion: 2,
   symbol: cardSymbol,
   hashtags: BoxBlock.hashtags,
   isComposedBlock: true,
