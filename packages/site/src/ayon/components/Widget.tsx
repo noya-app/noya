@@ -35,15 +35,15 @@ import {
 import * as React from 'react';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
-import { OnboardingAnimation } from '../components/OnboardingAnimation';
-import { useOnboarding } from '../contexts/OnboardingContext';
+import ConfigureBlockTypeWebp from '../../assets/ConfigureBlockType.webp';
+import { OnboardingAnimation } from '../../components/OnboardingAnimation';
+import { useOnboarding } from '../../contexts/OnboardingContext';
+import { Blocks, allInsertableSymbols } from '../blocks/blocks';
+import { getRenderableBlockProps } from '../blocks/render';
+import { boxSymbolId, imageSymbolId } from '../blocks/symbolIds';
+import { clearResolverCache } from '../resolve/resolve';
+import { Stacking } from '../stacking';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
-import { Blocks, allInsertableSymbols } from './blocks/blocks';
-import { getRenderableBlockProps } from './blocks/render';
-import { boxSymbolId, imageSymbolId } from './blocks/symbolIds';
-import { clearResolverCache } from './resolve/resolve';
-import { Stacking } from './stacking';
 
 function getElementRect(element: HTMLElement) {
   const style = window.getComputedStyle(element);

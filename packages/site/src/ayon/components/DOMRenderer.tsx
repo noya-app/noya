@@ -31,7 +31,7 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { Blocks } from './blocks/blocks';
+import { Blocks } from '../blocks/blocks';
 
 class ErrorBoundary extends React.Component<any> {
   constructor(props: { children: React.ReactNode }) {

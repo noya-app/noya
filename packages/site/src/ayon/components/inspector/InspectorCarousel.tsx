@@ -3,8 +3,8 @@ import React from 'react';
 import {
   BlockPreviewProps,
   InteractiveBlockPreview,
-} from '../../docs/InteractiveBlockPreview';
-import { Blocks } from '../blocks/blocks';
+} from '../../../docs/InteractiveBlockPreview';
+import { Blocks } from '../../blocks/blocks';
 
 export function InspectorCarousel({
   items,

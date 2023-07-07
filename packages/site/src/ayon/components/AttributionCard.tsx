@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
-import { Attribution } from './resolve/RandomImageResolver';
+import { Attribution } from '../resolve/RandomImageResolver';
 
 function AttributionLink({ url, children }: { url: string; children: string }) {
   return (

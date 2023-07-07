@@ -23,18 +23,18 @@ import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce, isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useOnboarding } from '../contexts/OnboardingContext';
-import { measureImage } from '../utils/measureImage';
+import { useOnboarding } from '../../contexts/OnboardingContext';
+import { measureImage } from '../../utils/measureImage';
+import { Blocks } from '../blocks/blocks';
+import { inferBlockType } from '../inferBlock';
+import { Attribution } from '../resolve/RandomImageResolver';
+import { resolveLayer } from '../resolve/resolve';
+import { Stacking } from '../stacking';
+import { ViewType } from '../types';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
-import { Blocks } from './blocks/blocks';
-import { inferBlockType } from './inferBlock';
 import { AyonInspector } from './inspector/AyonInspector';
-import { Attribution } from './resolve/RandomImageResolver';
-import { resolveLayer } from './resolve/resolve';
-import { Stacking } from './stacking';
-import { ViewType } from './types';
 
 const Overlay = styled.div({
   position: 'absolute',
