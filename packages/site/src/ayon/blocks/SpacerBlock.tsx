@@ -1,5 +1,5 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { boxSymbolId } from './symbolIds';
 import { spacerSymbol } from './symbols';
 import { parametersToTailwindStyle, tailwindBlockClasses } from './tailwind';
@@ -11,7 +11,7 @@ export const SpacerBlock: BlockDefinition = {
   isPassthrough: true,
   isComposedBlock: true,
   render: ({ h, Components: { [boxSymbolId]: Box } }, props) => {
-    const { parameters } = parseBlock(props.blockText, 'regular');
+    const parameters = getParameters(props.blockParameters);
     const style = parametersToTailwindStyle(parameters);
 
     return h(Box, {

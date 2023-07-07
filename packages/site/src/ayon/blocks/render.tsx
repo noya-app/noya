@@ -7,13 +7,8 @@ import {
   Overrides,
 } from 'noya-state';
 import { zip } from 'noya-utils';
-import {
-  encodeBlockItem,
-  getTextAlign,
-  mergeBlockItems,
-  parseBlock,
-  ParsedBlockItemParameters,
-} from '../parse';
+import { getTextAlign, ParsedBlockItemParameters } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { spacerSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
 
@@ -27,9 +22,9 @@ export function getContainerBlockProps({
   props,
   block,
 }: BlockRenderOptions): BlockProps {
-  const fallback = parseBlock(block.symbol.defaultBlockText, 'regular');
-  const item = parseBlock(props.layer?.blockText, 'regular');
-  const blockText = encodeBlockItem(mergeBlockItems([item, fallback]));
+  const fallback = block.symbol.defaultBlockText;
+  const item = props.layer?.blockText;
+  const blockText = item ?? fallback;
 
   return {
     frame: props.frame,
@@ -71,22 +66,23 @@ function getChildrenBlockProps({
           Overrides.encodeName([layer.do_objectID], 'blockText')
         );
       });
-      const hasOverride = !!(override && override.value);
+      // const hasOverride = !!(override && override.value);
 
-      const fallback = parseBlock(fallbackLayer.blockText, 'regular');
-      const item = parseBlock(layer?.blockText, 'regular');
-      const merged = mergeBlockItems([
-        ...(!hasOverride && extraParameters
-          ? [{ content: '', parameters: extraParameters }]
-          : []),
-        item,
-        ...(hasOverride && extraParameters
-          ? [{ content: '', parameters: extraParameters }]
-          : []),
-        fallback,
-      ]);
-
-      const blockText = encodeBlockItem(merged);
+      const fallback = fallbackLayer.blockText;
+      const item = layer?.blockText;
+      // const merged = mergeBlockItems([
+      //   ...(!hasOverride && extraParameters
+      //     ? [{ content: '', parameters: extraParameters }]
+      //     : []),
+      //   item,
+      //   ...(hasOverride && extraParameters
+      //     ? [{ content: '', parameters: extraParameters }]
+      //     : []),
+      //   fallback,
+      // ]);
+      // const blockText = encodeBlockItem(merged);
+      const blockText =
+        (override?.value as string | undefined) ?? item ?? fallback;
 
       return [
         {
@@ -119,7 +115,7 @@ export function getRenderableBlockProps({
 }: BlockRenderOptions) {
   const container = getContainerBlockProps({ props, block });
 
-  const { parameters } = parseBlock(container.blockText, 'regular');
+  const parameters = getParameters(container.blockParameters);
   const hashtags = Object.keys(parameters);
 
   const background = Object.keys(parameters)

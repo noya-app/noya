@@ -1,7 +1,7 @@
 import { ImageProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { imageSymbol } from './symbols';
@@ -23,12 +23,10 @@ export const ImageBlock: BlockDefinition = {
     { h, Components: { [imageSymbolId]: Image, [boxSymbolId]: Box } },
     props,
   ) => {
-    const {
-      content,
-      parameters: { contain, fill, ...parameters },
-    } = parseBlock(props.blockText, 'regular', {
-      placeholder: placeholderText,
-    });
+    const content = props.blockText ?? placeholderText;
+    const { contain, fill, ...parameters } = getParameters(
+      props.blockParameters,
+    );
     const hashtags = Object.keys(parameters);
 
     const src = isExternalUrl(content)

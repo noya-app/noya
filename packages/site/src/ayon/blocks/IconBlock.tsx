@@ -1,5 +1,5 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { isApproximatelySquare, isWithinRectRange } from './score';
 import { boxSymbolId, imageSymbolId } from './symbolIds';
 import { iconSymbol } from './symbols';
@@ -34,7 +34,7 @@ export const IconBlock: BlockDefinition = {
     const src =
       props.resolvedBlockData?.resolvedText ??
       'https://api.iconify.design/material-symbols/menu.svg';
-    const { parameters } = parseBlock(props.blockText, 'regular');
+    const parameters = getParameters(props.blockParameters);
     const style = parametersToTailwindStyle(parameters);
 
     const { fill, ...remainingStyles } = style;

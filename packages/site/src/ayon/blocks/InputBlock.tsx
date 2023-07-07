@@ -1,5 +1,5 @@
 import { BlockDefinition } from 'noya-state';
-import { parseBlock } from '../parse';
+import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
 import { isWithinRectRange } from './score';
@@ -17,8 +17,6 @@ const globalHashtags = [
   ...getTailwindClassesByGroup('flexBasis'),
 ];
 
-const parser = 'regular';
-
 export const InputBlock: BlockDefinition = {
   symbol: inputSymbol,
   hashtags: globalHashtags,
@@ -33,10 +31,10 @@ export const InputBlock: BlockDefinition = {
       ? 0.75
       : 0,
   render: ({ h, Components: { [inputSymbolId]: Input } }, props) => {
-    const {
-      content,
-      parameters: { dark, accent, disabled, ...parameters },
-    } = parseBlock(props.blockText, parser);
+    const content = props.blockText;
+    const { dark, accent, disabled, ...parameters } = getParameters(
+      props.blockParameters,
+    );
 
     // const height = props.frame?.height ?? 30;
     // const size = height >= 45 ? 'lg' : height >= 30 ? 'md' : 'sm';
