@@ -26,7 +26,7 @@ import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { measureImage } from '../../utils/measureImage';
 import { Blocks } from '../blocks/blocks';
-import { inferBlockType } from '../inferBlock';
+import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
 import { Stacking } from '../stacking';

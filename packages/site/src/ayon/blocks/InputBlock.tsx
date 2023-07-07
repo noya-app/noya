@@ -1,4 +1,5 @@
 import { BlockDefinition } from 'noya-state';
+import { isWithinRectRange } from '../infer/score';
 import {
   getTailwindClassesByGroup,
   parametersToTailwindStyle,
@@ -6,7 +7,6 @@ import {
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
-import { isWithinRectRange } from './score';
 import { inputSymbolId } from './symbolIds';
 import { inputSymbol } from './symbols';
 

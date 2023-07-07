@@ -1,8 +1,7 @@
 import { BlockDefinition } from 'noya-state';
-import { ParsedBlockItem } from '../parse';
+import { isWithinRectRange } from '../infer/score';
 import { getParameters } from '../utils/getMappedParameters';
 import { getBlockThemeColorClasses } from './colors';
-import { isWithinRectRange } from './score';
 import { boxSymbolId, buttonSymbolId, heading5SymbolId } from './symbolIds';
 import { sidebarSymbol } from './symbols';
 
@@ -41,7 +40,8 @@ export const SidebarBlock: BlockDefinition = {
     );
   },
   render: (env, props) => {
-    const items: ParsedBlockItem[] = [];
+    const items: { content: string; parameters: Record<string, boolean> }[] =
+      [];
     const { dark, accent, title } = getParameters(props.blockParameters);
 
     const hasActiveItem = items

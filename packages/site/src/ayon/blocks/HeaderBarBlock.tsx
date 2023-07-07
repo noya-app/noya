@@ -1,8 +1,7 @@
 import { BlockDefinition } from 'noya-state';
-import { ParsedBlockItem } from '../parse';
+import { isWithinRectRange } from '../infer/score';
 import { getParameters } from '../utils/getMappedParameters';
 import { getBlockThemeColorClasses } from './colors';
-import { isWithinRectRange } from './score';
 import {
   avatarSymbolId,
   boxSymbolId,
@@ -43,7 +42,8 @@ export const HeaderBarBlock: BlockDefinition = {
     );
   },
   render: (env, props) => {
-    const items: ParsedBlockItem[] = [];
+    const items: { content: string; parameters: Record<string, boolean> }[] =
+      [];
     const { dark, title, accent, search } = getParameters(
       props.blockParameters,
     );

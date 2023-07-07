@@ -1,7 +1,7 @@
 import { BlockDefinition } from 'noya-state';
+import { isWithinRectRange } from '../infer/score';
 import { BoxBlock } from './BoxBlock';
 import { renderStack } from './render';
-import { isWithinRectRange } from './score';
 import { cardSymbol } from './symbols';
 
 export const CardBlock: BlockDefinition = {

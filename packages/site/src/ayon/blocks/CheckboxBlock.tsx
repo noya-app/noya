@@ -1,8 +1,8 @@
 import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
+import { isWithinRectRange } from '../infer/score';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
-import { isWithinRectRange } from './score';
 import { checkboxSymbolId } from './symbolIds';
 import { checkboxSymbol } from './symbols';
 

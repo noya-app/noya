@@ -7,7 +7,7 @@ import {
   Overrides,
 } from 'noya-state';
 import { zip } from 'noya-utils';
-import { getTextAlign, ParsedBlockItemParameters } from '../parse';
+import { getTextAlign } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { spacerSymbolId } from './symbolIds';
 import { boxSymbol } from './symbols';
@@ -15,7 +15,7 @@ import { boxSymbol } from './symbols';
 interface BlockRenderOptions {
   props: BlockProps;
   block: Pick<BlockDefinition, 'symbol' | 'placeholderText' | 'isPassthrough'>;
-  extraParameters?: ParsedBlockItemParameters;
+  extraParameters?: Record<string, boolean>;
 }
 
 export function getContainerBlockProps({

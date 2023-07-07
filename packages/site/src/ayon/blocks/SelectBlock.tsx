@@ -1,9 +1,8 @@
 import { BlockDefinition } from 'noya-state';
-import { ParsedBlockItem } from '../parse';
+import { isWithinRectRange } from '../infer/score';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
-import { isWithinRectRange } from './score';
 import { selectSymbolId } from './symbolIds';
 import { selectSymbol } from './symbols';
 
@@ -30,7 +29,7 @@ export const SelectBlock: BlockDefinition = {
       ? 0.7
       : 0,
   render: ({ h, Components: { [selectSymbolId]: Select } }, props) => {
-    const items: ParsedBlockItem[] = [
+    const items: { content: string; parameters: Record<string, boolean> }[] = [
       {
         content: props.blockText ?? placeholderText,
         parameters: {},

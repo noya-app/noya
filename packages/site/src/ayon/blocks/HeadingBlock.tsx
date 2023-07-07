@@ -2,15 +2,15 @@ import { BoxProps, TextProps } from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
 import { partition } from 'noya-utils';
-import { getTextAlign } from '../parse';
+import { isWithinRectRange } from '../infer/score';
 import {
   classGroups,
+  getTextAlign,
   parametersToTailwindStyle,
   tailwindTextClasses,
 } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
-import { isWithinRectRange } from './score';
 import { boxSymbolId, textSymbolId } from './symbolIds';
 import {
   heading1Symbol,

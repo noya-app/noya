@@ -37,6 +37,21 @@ export function getBlockClassName(hashtags: string[]) {
   return className || undefined;
 }
 
+const textAlignKeys = new Set(['left', 'right', 'center']);
+
+export function getTextAlign(hashtags: string[]) {
+  const textAlignKey = hashtags
+    .slice()
+    .reverse()
+    .find((key) => textAlignKeys.has(key)) as
+    | 'left'
+    | 'right'
+    | 'center'
+    | undefined;
+
+  return textAlignKey;
+}
+
 export const classGroups = {
   fontSize: /^(text-base|text-sm|text-xs)/,
   fontWeight:

@@ -27,16 +27,3 @@ export function isApproximatelySquare(rect: Rect, tolerance: number) {
     tolerance * Math.min(rect.width, rect.height)
   );
 }
-
-export function commonPrefixLength(a?: string, b?: string) {
-  if (!a || !b) {
-    return 0;
-  }
-  if (a === b) {
-    return a.length;
-  }
-  const firstDiffCharIndex = [...a].findIndex(
-    (character, index) => character !== b[index],
-  );
-  return firstDiffCharIndex === -1 ? 0 : firstDiffCharIndex;
-}

@@ -1,9 +1,9 @@
 import { applyCommonProps } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
 import { isExternalUrl } from 'noya-utils';
+import { isApproximatelySquare, isWithinRectRange } from '../infer/score';
 import { getBlockClassName } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
-import { isApproximatelySquare, isWithinRectRange } from './score';
 import { avatarSymbolId } from './symbolIds';
 import { avatarSymbol } from './symbols';
 
