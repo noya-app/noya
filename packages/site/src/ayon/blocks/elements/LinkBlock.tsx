@@ -1,13 +1,13 @@
 import { IconProps, LinkProps, component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
+import { linkSymbolId } from '../../symbols/symbolIds';
+import { linkSymbol } from '../../symbols/symbols';
 import {
   parametersToTailwindStyle,
   tailwindTextClasses,
 } from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { applyCommonProps } from '../applyCommonProps';
-import { linkSymbolId } from '../symbolIds';
-import { linkSymbol } from '../symbols';
 
 const placeholderText = 'Read More';
 

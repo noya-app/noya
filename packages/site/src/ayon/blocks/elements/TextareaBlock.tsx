@@ -1,9 +1,9 @@
 import { BlockDefinition } from 'noya-state';
+import { textareaSymbolId } from '../../symbols/symbolIds';
+import { textareaSymbol } from '../../symbols/symbols';
 import { getParameters } from '../../utils/getMappedParameters';
 import { applyCommonProps } from '../applyCommonProps';
 import { getBlockThemeColors } from '../blockTheme';
-import { textareaSymbolId } from '../symbolIds';
-import { textareaSymbol } from '../symbols';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 

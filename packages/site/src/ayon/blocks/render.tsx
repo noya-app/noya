@@ -7,10 +7,10 @@ import {
   Overrides,
 } from 'noya-state';
 import { zip } from 'noya-utils';
+import { spacerSymbolId } from '../symbols/symbolIds';
+import { boxSymbol } from '../symbols/symbols';
 import { getTextAlign } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
-import { spacerSymbolId } from './symbolIds';
-import { boxSymbol } from './symbols';
 
 interface BlockRenderOptions {
   props: BlockProps;

@@ -1,4 +1,6 @@
 import { BlockDefinition } from 'noya-state';
+import { boxSymbolId, textSymbolId } from '../../symbols/symbolIds';
+import { textSymbol } from '../../symbols/symbols';
 import {
   parametersToTailwindStyle,
   simpleAlignmentResolver,
@@ -6,8 +8,6 @@ import {
 } from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { applyCommonProps } from '../applyCommonProps';
-import { boxSymbolId, textSymbolId } from '../symbolIds';
-import { textSymbol } from '../symbols';
 
 export const TextBlock: BlockDefinition = {
   symbol: textSymbol,

@@ -1,9 +1,13 @@
 import { BlockDefinition } from 'noya-state';
 import { isWithinRectRange } from '../infer/score';
+import {
+  boxSymbolId,
+  buttonSymbolId,
+  heading5SymbolId,
+} from '../symbols/symbolIds';
+import { sidebarSymbol } from '../symbols/symbols';
 import { getParameters } from '../utils/getMappedParameters';
 import { getBlockThemeColorClasses } from './blockTheme';
-import { boxSymbolId, buttonSymbolId, heading5SymbolId } from './symbolIds';
-import { sidebarSymbol } from './symbols';
 
 const placeholderText = `
 *Dashboard 

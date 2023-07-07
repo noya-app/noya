@@ -1,12 +1,12 @@
 import { BlockDefinition } from 'noya-state';
+import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
+import { writeSymbol } from '../symbols/symbols';
 import {
   getBlockClassName,
   getTextAlign,
   tailwindTextClasses,
 } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
-import { boxSymbolId, textSymbolId } from './symbolIds';
-import { writeSymbol } from './symbols';
 
 export const WriteBlock: BlockDefinition = {
   symbol: writeSymbol,

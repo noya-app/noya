@@ -1,12 +1,12 @@
 import { BlockDefinition } from 'noya-state';
 import { isApproximatelySquare, isWithinRectRange } from '../infer/score';
+import { boxSymbolId, imageSymbolId } from '../symbols/symbolIds';
+import { iconSymbol } from '../symbols/symbols';
 import {
   getTailwindClassesByGroup,
   parametersToTailwindStyle,
 } from '../tailwind/tailwind';
 import { getParameters } from '../utils/getMappedParameters';
-import { boxSymbolId, imageSymbolId } from './symbolIds';
-import { iconSymbol } from './symbols';
 
 export const IconBlock: BlockDefinition = {
   symbol: iconSymbol,

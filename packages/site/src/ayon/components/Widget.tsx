@@ -40,9 +40,9 @@ import { OnboardingAnimation } from '../../components/OnboardingAnimation';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { Blocks, allInsertableSymbols } from '../blocks/blocks';
 import { getRenderableBlockProps } from '../blocks/render';
-import { boxSymbolId, imageSymbolId } from '../blocks/symbolIds';
 import { clearResolverCache } from '../resolve/resolve';
 import { Stacking } from '../stacking';
+import { boxSymbolId, imageSymbolId } from '../symbols/symbolIds';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
 
 function getElementRect(element: HTMLElement) {

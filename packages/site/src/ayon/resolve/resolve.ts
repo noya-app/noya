@@ -6,7 +6,7 @@ import {
   iconSymbolId,
   imageSymbolId,
   writeSymbolId,
-} from '../blocks/symbolIds';
+} from '../symbols/symbolIds';
 import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';
 import { Attribution, RandomImageResolver } from './RandomImageResolver';

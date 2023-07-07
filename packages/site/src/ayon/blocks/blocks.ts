@@ -1,5 +1,20 @@
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
+import { heroSymbolId } from '../symbols/symbolIds';
+import {
+  InferBlockMap,
+  cardSymbol,
+  featureItemDetailsSymbol,
+  featureItemSymbol,
+  featureRowSymbol,
+  featureSectionSymbol,
+  heroButtonRowSymbol,
+  heroHeadlineStackSymbol,
+  heroSymbolV2,
+  heroWithImageSymbol,
+  signInSymbol,
+  tileCardSymbol,
+} from '../symbols/symbols';
 import { HeaderBarBlock } from './HeaderBarBlock';
 import {
   Heading1Block,
@@ -28,21 +43,6 @@ import { TagBlock } from './elements/TagBlock';
 import { TextBlock } from './elements/TextBlock';
 import { TextareaBlock } from './elements/TextareaBlock';
 import { renderStack } from './render';
-import { heroSymbolId } from './symbolIds';
-import {
-  InferBlockMap,
-  cardSymbol,
-  featureItemDetailsSymbol,
-  featureItemSymbol,
-  featureRowSymbol,
-  featureSectionSymbol,
-  heroButtonRowSymbol,
-  heroHeadlineStackSymbol,
-  heroSymbolV2,
-  heroWithImageSymbol,
-  signInSymbol,
-  tileCardSymbol,
-} from './symbols';
 
 function createStandardBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
   return {

@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext } from 'next';
 import React from 'react';
 import { blockMetadata } from '../ayon/blocks/blockMetadata';
-import { avatarSymbolId } from '../ayon/blocks/symbolIds';
+import { avatarSymbolId } from '../ayon/symbols/symbolIds';
 import { DesignSystemExplorer } from '../docs/DesignSystemExplorer';
 
 const blockInstances = Object.entries(blockMetadata);

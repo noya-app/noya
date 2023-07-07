@@ -1,7 +1,5 @@
 import { BlockDefinition } from 'noya-state';
 import { isWithinRectRange } from '../infer/score';
-import { getParameters } from '../utils/getMappedParameters';
-import { getBlockThemeColorClasses } from './blockTheme';
 import {
   avatarSymbolId,
   boxSymbolId,
@@ -9,8 +7,10 @@ import {
   heading6SymbolId,
   inputSymbolId,
   spacerSymbolId,
-} from './symbolIds';
-import { headerBarSymbol } from './symbols';
+} from '../symbols/symbolIds';
+import { headerBarSymbol } from '../symbols/symbols';
+import { getParameters } from '../utils/getMappedParameters';
+import { getBlockThemeColorClasses } from './blockTheme';
 
 const placeholderText = `*Home, Projects, Team, FAQ`;
 

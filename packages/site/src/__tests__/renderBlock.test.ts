@@ -22,7 +22,7 @@ import {
   imageSymbolId,
   linkSymbolId,
   textSymbolId,
-} from '../ayon/blocks/symbolIds';
+} from '../ayon/symbols/symbolIds';
 
 jest.setTimeout(20000);
 
