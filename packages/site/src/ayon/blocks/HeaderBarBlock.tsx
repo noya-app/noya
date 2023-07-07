@@ -1,7 +1,7 @@
 import { BlockDefinition } from 'noya-state';
 import { isWithinRectRange } from '../infer/score';
 import { getParameters } from '../utils/getMappedParameters';
-import { getBlockThemeColorClasses } from './colors';
+import { getBlockThemeColorClasses } from './blockTheme';
 import {
   avatarSymbolId,
   boxSymbolId,

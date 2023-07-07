@@ -3,11 +3,11 @@ import {
   parametersToTailwindStyle,
   simpleAlignmentResolver,
   tailwindTextClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { boxSymbolId, textSymbolId } from './symbolIds';
-import { textSymbol } from './symbols';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { boxSymbolId, textSymbolId } from '../symbolIds';
+import { textSymbol } from '../symbols';
 
 export const TextBlock: BlockDefinition = {
   symbol: textSymbol,

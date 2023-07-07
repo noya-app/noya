@@ -3,11 +3,11 @@ import { BlockDefinition } from 'noya-state';
 import {
   parametersToTailwindStyle,
   tailwindTextClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { linkSymbolId } from './symbolIds';
-import { linkSymbol } from './symbols';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { linkSymbolId } from '../symbolIds';
+import { linkSymbol } from '../symbols';
 
 const placeholderText = 'Read More';
 

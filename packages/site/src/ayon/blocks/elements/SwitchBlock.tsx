@@ -1,8 +1,8 @@
 import { BlockDefinition } from 'noya-state';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { switchSymbolId } from './symbolIds';
-import { switchSymbol } from './symbols';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { switchSymbolId } from '../symbolIds';
+import { switchSymbol } from '../symbols';
 
 const globalHashtags = ['on', 'off', 'disabled'];
 

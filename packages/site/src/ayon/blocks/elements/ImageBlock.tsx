@@ -5,11 +5,11 @@ import {
   getBlockClassName,
   parametersToTailwindStyle,
   tailwindBlockClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { boxSymbolId, imageSymbolId } from './symbolIds';
-import { imageSymbol } from './symbols';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { boxSymbolId, imageSymbolId } from '../symbolIds';
+import { imageSymbol } from '../symbols';
 
 const placeholderText = 'landscape';
 

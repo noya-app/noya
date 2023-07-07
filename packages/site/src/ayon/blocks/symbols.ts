@@ -1,5 +1,7 @@
 import { SketchModel } from 'noya-sketch-model';
-import { Overrides } from 'noya-state';
+import { InferBlockProps, Overrides } from 'noya-state';
+import { isWithinRectRange } from '../infer/score';
+import { tailwindBlockClasses } from '../tailwind/tailwind';
 import {
   avatarSymbolId,
   boxSymbolId,
@@ -36,6 +38,17 @@ import {
   tileCardSymbolId,
   writeSymbolId,
 } from './symbolIds';
+
+const boxBlockHashtags = [
+  'left',
+  'center',
+  'right',
+  'dark',
+  ...tailwindBlockClasses,
+];
+
+export const InferBlockMap: Record<string, (props: InferBlockProps) => number> =
+  {};
 
 export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
@@ -173,6 +186,10 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
   defaultBlockText: '#flex-col #center #p-4 #gap-3',
+  blockDefinition: {
+    hashtags: boxBlockHashtags,
+    isComposedBlock: true,
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: 'd6593501-b089-4390-bbe2-fb10afb5df5a',
@@ -192,10 +209,35 @@ export const heroSymbolV2 = SketchModel.symbolMaster({
   ],
 });
 
+const heroSymbolIds = [heroSymbolV2Id, heroWithImageSymbolId];
+
+InferBlockMap[heroSymbolV2Id] = ({ frame, blockText, siblingBlocks }) => {
+  if (siblingBlocks.some((block) => heroSymbolIds.includes(block.symbolId))) {
+    return 0;
+  }
+
+  return Math.max(
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 400,
+      minHeight: 200,
+      maxWidth: 2000,
+      maxHeight: 550,
+    }) && frame.y < 180
+      ? 1
+      : 0,
+    0.1,
+  );
+};
+
 export const heroWithImageSymbol = SketchModel.symbolMaster({
   symbolID: heroWithImageSymbolId,
   name: 'Hero with Image',
   defaultBlockText: '#grid #grid-flow-col #auto-cols-fr	',
+  blockDefinition: {
+    hashtags: boxBlockHashtags,
+    isComposedBlock: true,
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: 'bc20968b-328a-4831-b242-ed0572e6459d',
@@ -209,6 +251,29 @@ export const heroWithImageSymbol = SketchModel.symbolMaster({
     }),
   ],
 });
+
+InferBlockMap[heroWithImageSymbolId] = ({
+  frame,
+  blockText,
+  siblingBlocks,
+}) => {
+  if (siblingBlocks.some((block) => heroSymbolIds.includes(block.symbolId))) {
+    return 0;
+  }
+
+  return Math.max(
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 1000,
+      minHeight: 400,
+      maxWidth: 2000,
+      maxHeight: 800,
+    }) && frame.y < 180
+      ? 1.2
+      : 0,
+    0.1,
+  );
+};
 
 export const signInSymbol = SketchModel.symbolMaster({
   symbolID: signInSymbolId,
@@ -248,9 +313,21 @@ export const signInSymbol = SketchModel.symbolMaster({
   ],
 });
 
+InferBlockMap[signInSymbolId] = ({ frame, blockText, siblingBlocks }) => {
+  if (siblingBlocks.find((block) => block.symbolId === signInSymbol.symbolID)) {
+    return 0;
+  }
+
+  return 0.1;
+};
+
 export const cardSymbol = SketchModel.symbolMaster({
   symbolID: cardSymbolId,
   name: 'Card',
+  blockDefinition: {
+    hashtags: boxBlockHashtags,
+    isComposedBlock: true,
+  },
   defaultBlockText: '#flex-col #bg-white #p-4 #shadow #rounded-md',
   layers: [
     SketchModel.symbolInstance({
@@ -271,10 +348,29 @@ export const cardSymbol = SketchModel.symbolMaster({
   ],
 });
 
+InferBlockMap[cardSymbolId] = ({ frame, blockText, siblingBlocks }) => {
+  return Math.max(
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 200,
+      minHeight: 250,
+      maxWidth: 300,
+      maxHeight: 400,
+    })
+      ? 1
+      : 0,
+    0.1,
+  );
+};
+
 export const tileCardSymbol = SketchModel.symbolMaster({
   symbolID: tileCardSymbolId,
   name: 'TileCard',
   defaultBlockText: '#flex-col #bg-blue-50 #p-6 #left',
+  blockDefinition: {
+    hashtags: boxBlockHashtags,
+    isComposedBlock: true,
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '2894cbbb-a257-4372-ad17-50db6faf75a3',
@@ -293,6 +389,21 @@ export const tileCardSymbol = SketchModel.symbolMaster({
     }),
   ],
 });
+
+InferBlockMap[tileCardSymbolId] = ({ frame, blockText, siblingBlocks }) => {
+  return Math.max(
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 200,
+      minHeight: 200,
+      maxWidth: 250,
+      maxHeight: 250,
+    })
+      ? 1.2
+      : 0,
+    0.1,
+  );
+};
 
 export const iconSymbol = SketchModel.symbolMaster({
   symbolID: iconSymbolId,
@@ -362,6 +473,10 @@ export const featureItemSymbol = SketchModel.symbolMaster({
   symbolID: featureItemSymbolId,
   name: 'Feature Item',
   defaultBlockText: '#flex-row #gap-4',
+  blockDefinition: {
+    hashtags: boxBlockHashtags,
+    isComposedBlock: true,
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: featureItemIconLayerId,
@@ -374,6 +489,21 @@ export const featureItemSymbol = SketchModel.symbolMaster({
     }),
   ],
 });
+
+InferBlockMap[featureItemSymbolId] = ({ frame, blockText, siblingBlocks }) => {
+  return Math.max(
+    isWithinRectRange({
+      rect: frame,
+      minWidth: 200,
+      maxWidth: 600,
+      minHeight: 150,
+      maxHeight: 300,
+    }) && frame.width > frame.height
+      ? 0.5
+      : 0,
+    0,
+  );
+};
 
 export const featureRowSymbol = SketchModel.symbolMaster({
   symbolID: featureRowSymbolId,
@@ -415,6 +545,10 @@ export const featureSectionSymbol = SketchModel.symbolMaster({
   symbolID: featureSectionSymbolId,
   name: 'Feature Section',
   defaultBlockText: '#flex-col #center #px-20',
+  blockDefinition: {
+    hashtags: boxBlockHashtags,
+    isComposedBlock: true,
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',

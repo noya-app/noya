@@ -1,9 +1,9 @@
 import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { getBlockThemeColors } from './colors';
-import { tableSymbol } from './symbols';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { getBlockThemeColors } from '../blockTheme';
+import { tableSymbol } from '../symbols';
 
 const placeholderText = `
 Products, Price, Quantity 

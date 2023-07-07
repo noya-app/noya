@@ -536,6 +536,7 @@ export type SymbolMaster = {
     | Bitmap
   )[];
   defaultBlockText?: string;
+  blockDefinition?: BlockDefinition;
 };
 /**
  * Enumeration of the boolean operations that can be applied to combine shapes
@@ -1129,6 +1130,14 @@ export enum TextBehaviour {
  * A string representation of a series of 2D points, in the format {{x, y}, {x,y}}.
  */
 export type PointListString = string;
+
+export type BlockDefinition = {
+  hashtags?: string[];
+  placeholderText?: string;
+  usesResolver?: boolean;
+  isPassthrough?: boolean;
+  isComposedBlock?: boolean;
+};
 
 export type ResolvedBlockData = {
   symbolID: string;

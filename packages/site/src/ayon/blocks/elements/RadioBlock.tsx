@@ -1,10 +1,10 @@
 import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { isWithinRectRange } from '../infer/score';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { radioSymbolId } from './symbolIds';
-import { radioSymbol } from './symbols';
+import { isWithinRectRange } from '../../infer/score';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { radioSymbolId } from '../symbolIds';
+import { radioSymbol } from '../symbols';
 
 const placeholderText = '#off Daily';
 

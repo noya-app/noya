@@ -5,11 +5,11 @@ import {
   component,
 } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { parametersToTailwindStyle } from '../tailwind/tailwind';
-import { getMappedParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { buttonColors } from './blockTheme';
-import { tagSymbol } from './symbols';
+import { parametersToTailwindStyle } from '../../tailwind/tailwind';
+import { getMappedParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { buttonColors } from '../blockTheme';
+import { tagSymbol } from '../symbols';
 
 const placeholderText = 'New';
 

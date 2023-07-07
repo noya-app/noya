@@ -1,6 +1,6 @@
 import { BlockDefinition } from 'noya-state';
 import { isWithinRectRange } from '../infer/score';
-import { BoxBlock } from './BoxBlock';
+import { BoxBlock } from './elements/BoxBlock';
 import { renderStack } from './render';
 import { tileCardSymbol } from './symbols';
 

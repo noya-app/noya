@@ -3,12 +3,12 @@ import { findLast } from 'noya-utils';
 import {
   parametersToTailwindStyle,
   tailwindBlockClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { getBlockThemeColors } from './colors';
-import { boxSymbolId } from './symbolIds';
-import { boxSymbol } from './symbols';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { getBlockThemeColors } from '../blockTheme';
+import { boxSymbolId } from '../symbolIds';
+import { boxSymbol } from '../symbols';
 
 export const BoxBlock: BlockDefinition = {
   symbol: boxSymbol,

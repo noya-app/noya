@@ -1,12 +1,5 @@
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
-import { AvatarBlock } from './AvatarBlock';
-import { BoxBlock } from './BoxBlock';
-import { ButtonBlock } from './ButtonBlock';
-import { CardBlock } from './CardBlock';
-import { CheckboxBlock } from './CheckboxBlock';
-import { FeatureItemBlock } from './FeatureItemBlock';
-import { FeatureSectionBlock } from './FeatureSectionBlock';
 import { HeaderBarBlock } from './HeaderBarBlock';
 import {
   Heading1Block,
@@ -16,46 +9,56 @@ import {
   Heading5Block,
   Heading6Block,
 } from './HeadingBlock';
-import { HeroBlockV2, HeroWithImageBlock } from './HeroBlock';
 import { IconBlock } from './IconBlock';
-import { ImageBlock } from './ImageBlock';
-import { InputBlock } from './InputBlock';
-import { LinkBlock } from './LinkBlock';
-import { RadioBlock } from './RadioBlock';
-import { SelectBlock } from './SelectBlock';
 import { SidebarBlock } from './SidebarBlock';
-import { SignInBlock } from './SignInBlock';
 import { SpacerBlock } from './SpacerBlock';
-import { SwitchBlock } from './SwitchBlock';
-import { TableBlock } from './TableBlock';
-import { TagBlock } from './TagBlock';
-import { TextBlock } from './TextBlock';
-import { TextareaBlock } from './TextareaBlock';
-import { TileCardBlock } from './TileCardBlock';
 import { WriteBlock } from './WriteBlock';
+import { AvatarBlock } from './elements/AvatarBlock';
+import { BoxBlock } from './elements/BoxBlock';
+import { ButtonBlock } from './elements/ButtonBlock';
+import { CheckboxBlock } from './elements/CheckboxBlock';
+import { ImageBlock } from './elements/ImageBlock';
+import { InputBlock } from './elements/InputBlock';
+import { LinkBlock } from './elements/LinkBlock';
+import { RadioBlock } from './elements/RadioBlock';
+import { SelectBlock } from './elements/SelectBlock';
+import { SwitchBlock } from './elements/SwitchBlock';
+import { TableBlock } from './elements/TableBlock';
+import { TagBlock } from './elements/TagBlock';
+import { TextBlock } from './elements/TextBlock';
+import { TextareaBlock } from './elements/TextareaBlock';
 import { renderStack } from './render';
 import { heroSymbolId } from './symbolIds';
 import {
+  InferBlockMap,
+  cardSymbol,
   featureItemDetailsSymbol,
   featureItemSymbol,
   featureRowSymbol,
+  featureSectionSymbol,
   heroButtonRowSymbol,
   heroHeadlineStackSymbol,
+  heroSymbolV2,
+  heroWithImageSymbol,
+  signInSymbol,
+  tileCardSymbol,
 } from './symbols';
+
+function createStandardBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
+  return {
+    symbol,
+    ...symbol.blockDefinition,
+    infer: InferBlockMap[symbol.symbolID] ?? (() => 0),
+    render(env, props) {
+      return renderStack(env, { props, block: this });
+    },
+  };
+}
 
 function createPassthroughBlock(symbol: Sketch.SymbolMaster): BlockDefinition {
   return {
-    symbol,
-    infer: () => 0,
+    ...createStandardBlock(symbol),
     isPassthrough: true,
-    render: (env, props) =>
-      renderStack(env, {
-        props,
-        block: {
-          placeholderText: '',
-          symbol,
-        },
-      }),
   };
 }
 
@@ -71,9 +74,9 @@ export const Blocks: Record<string, BlockDefinition> = {
   [Heading4Block.symbol.symbolID]: Heading4Block,
   [Heading5Block.symbol.symbolID]: Heading5Block,
   [Heading6Block.symbol.symbolID]: Heading6Block,
-  [heroSymbolId]: HeroBlockV2,
-  [HeroBlockV2.symbol.symbolID]: HeroBlockV2,
-  [HeroWithImageBlock.symbol.symbolID]: HeroWithImageBlock,
+  [heroSymbolId]: createStandardBlock(heroSymbolV2),
+  [heroSymbolV2.symbolID]: createStandardBlock(heroSymbolV2),
+  [heroWithImageSymbol.symbolID]: createStandardBlock(heroWithImageSymbol),
   [ImageBlock.symbol.symbolID]: ImageBlock,
   [InputBlock.symbol.symbolID]: InputBlock,
   [SwitchBlock.symbol.symbolID]: SwitchBlock,
@@ -86,20 +89,20 @@ export const Blocks: Record<string, BlockDefinition> = {
   [RadioBlock.symbol.symbolID]: RadioBlock,
   [TextareaBlock.symbol.symbolID]: TextareaBlock,
   [SpacerBlock.symbol.symbolID]: SpacerBlock,
-  [CardBlock.symbol.symbolID]: CardBlock,
-  [TileCardBlock.symbol.symbolID]: TileCardBlock,
-  [SignInBlock.symbol.symbolID]: SignInBlock,
   [LinkBlock.symbol.symbolID]: LinkBlock,
   [TagBlock.symbol.symbolID]: TagBlock,
+  [cardSymbol.symbolID]: createStandardBlock(cardSymbol),
+  [tileCardSymbol.symbolID]: createStandardBlock(tileCardSymbol),
+  [signInSymbol.symbolID]: createStandardBlock(signInSymbol),
   [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
   [heroHeadlineStackSymbol.symbolID]: createPassthroughBlock(
     heroHeadlineStackSymbol,
   ),
-  [featureItemSymbol.symbolID]: FeatureItemBlock,
+  [featureItemSymbol.symbolID]: createStandardBlock(featureItemSymbol),
   [featureItemDetailsSymbol.symbolID]: createPassthroughBlock(
     featureItemDetailsSymbol,
   ),
-  [FeatureSectionBlock.symbol.symbolID]: FeatureSectionBlock,
+  [featureSectionSymbol.symbolID]: createStandardBlock(featureSectionSymbol),
   [featureRowSymbol.symbolID]: createPassthroughBlock(featureRowSymbol),
 };
 

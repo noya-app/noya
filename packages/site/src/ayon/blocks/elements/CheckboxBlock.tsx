@@ -1,10 +1,10 @@
 import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { isWithinRectRange } from '../infer/score';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { checkboxSymbolId } from './symbolIds';
-import { checkboxSymbol } from './symbols';
+import { isWithinRectRange } from '../../infer/score';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { checkboxSymbolId } from '../symbolIds';
+import { checkboxSymbol } from '../symbols';
 
 const placeholderText = '#off Remember me';
 

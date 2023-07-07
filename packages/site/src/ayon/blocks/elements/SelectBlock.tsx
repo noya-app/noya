@@ -1,10 +1,10 @@
 import { BlockDefinition } from 'noya-state';
-import { isWithinRectRange } from '../infer/score';
-import { getParameters } from '../utils/getMappedParameters';
-import { applyCommonProps } from './applyCommonProps';
-import { getBlockThemeColors } from './colors';
-import { selectSymbolId } from './symbolIds';
-import { selectSymbol } from './symbols';
+import { isWithinRectRange } from '../../infer/score';
+import { getParameters } from '../../utils/getMappedParameters';
+import { applyCommonProps } from '../applyCommonProps';
+import { getBlockThemeColors } from '../blockTheme';
+import { selectSymbolId } from '../symbolIds';
+import { selectSymbol } from '../symbols';
 
 const placeholderText = `
 Role
