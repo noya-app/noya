@@ -1,6 +1,5 @@
-import { TableProps, component } from '@noya-design-system/protocol';
+import { component } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
-import { ParsedCompositeBlock } from '../parse';
 import { getParameters } from '../utils/getMappedParameters';
 import { applyCommonProps } from './applyCommonProps';
 import { getBlockThemeColors } from './colors';
@@ -27,7 +26,6 @@ export const TableBlock: BlockDefinition = {
   placeholderText,
   infer: () => 0,
   render: ({ h, Components: { [component.id.Table]: Table } }, props) => {
-    const rows: ParsedCompositeBlock[] = [];
     const { dark, accent } = getParameters(props.blockParameters);
 
     const { backgroundColor, color } = getBlockThemeColors({
@@ -35,23 +33,10 @@ export const TableBlock: BlockDefinition = {
       accent,
     });
 
-    const columns: TableProps<Record<string, any>>['columns'] =
-      rows[0].items.map((cell, index) => ({
-        title: cell.content,
-        dataKey: index.toString(),
-      }));
-
-    const data = rows.slice(1).map((row) =>
-      row.items.reduce<Record<string, any>>((result, cell, index) => {
-        result[index.toString()] = cell.content;
-        return result;
-      }, {}),
-    );
-
     return h(Table, {
       ...applyCommonProps(props),
-      data,
-      columns,
+      data: [],
+      columns: [],
       style: {
         ...(props.frame && {
           width: `${props.frame.width}px`,

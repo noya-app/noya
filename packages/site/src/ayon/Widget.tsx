@@ -38,12 +38,12 @@ import styled from 'styled-components';
 import ConfigureBlockTypeWebp from '../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../components/OnboardingAnimation';
 import { useOnboarding } from '../contexts/OnboardingContext';
+import { SearchCompletionMenu } from './SearchCompletionMenu';
 import { Blocks, allInsertableSymbols } from './blocks/blocks';
 import { getRenderableBlockProps } from './blocks/render';
 import { boxSymbolId, imageSymbolId } from './blocks/symbolIds';
 import { clearResolverCache } from './resolve/resolve';
 import { Stacking } from './stacking';
-import { SearchCompletionMenu } from './useCompletionMenu';
 
 function getElementRect(element: HTMLElement) {
   const style = window.getComputedStyle(element);

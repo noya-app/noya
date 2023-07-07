@@ -3,12 +3,12 @@ import { useRouter } from 'next/router';
 import { useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
-  createSectionedMenu,
   Heading2,
   ListView,
   Small,
   Spacer,
   Stack,
+  createSectionedMenu,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
@@ -16,7 +16,7 @@ import { DashboardIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
-import { createAyonDocument } from '../ayon/createAyonDocument';
+import { createAyonDocument } from '../ayon/utils/createAyonDocument';
 import { ClientStorage } from '../utils/clientStorage';
 import { NOYA_HOST } from '../utils/noyaClient';
 import { Card } from './Subscription';

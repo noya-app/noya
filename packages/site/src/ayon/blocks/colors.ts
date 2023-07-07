@@ -1,12 +1,11 @@
-import { ParsedBlockParameter } from '../parse';
 import { accentColor, neutralColor } from './blockTheme';
 
 export function getBlockThemeColors({
   dark,
   accent,
 }: {
-  dark: ParsedBlockParameter;
-  accent: ParsedBlockParameter;
+  dark: boolean;
+  accent: boolean;
 }) {
   const permutation = `${dark ? 'dark' : 'light'}${
     accent ? '-accent' : ''
@@ -51,8 +50,8 @@ export function getBlockThemeColorClasses({
   dark,
   accent,
 }: {
-  dark: ParsedBlockParameter;
-  accent: ParsedBlockParameter;
+  dark: boolean;
+  accent: boolean;
 }) {
   const permutation = `${dark ? 'dark' : 'light'}${
     accent ? '-accent' : ''

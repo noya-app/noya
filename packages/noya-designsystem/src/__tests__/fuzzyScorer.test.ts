@@ -1,4 +1,4 @@
-import { fuzzyFilter, fuzzyScore, fuzzyTokenize } from '../ayon/fuzzyScorer';
+import { fuzzyFilter, fuzzyScore, fuzzyTokenize } from '../utils/fuzzyScorer';
 
 test('prefix match', () => {
   const result = fuzzyScore({ item: 'font-bold', query: 'font' });
