@@ -170,10 +170,7 @@ export function AyonLayerInspector({
     {
       blockId: selectedLayer.symbolID,
       blockText: selectedLayer.blockText,
-      blockParameters: [
-        ...(selectedLayer.blockParameters ?? []).filter((p) => p !== 'dark'),
-        'dark',
-      ],
+      blockParameters: ['dark'],
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
