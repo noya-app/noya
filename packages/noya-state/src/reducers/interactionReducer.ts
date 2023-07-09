@@ -69,10 +69,7 @@ export type BlockRenderingEnvironment = {
 export type BlockDefinition = {
   symbol: Sketch.SymbolMaster;
   infer: (props: InferBlockProps) => number;
-  render: (
-    env: BlockRenderingEnvironment,
-    props: BlockProps,
-  ) => JSX.Element | null;
+  render: (env: BlockRenderingEnvironment, props: BlockProps) => ReactNode;
   hashtags?: string[];
   placeholderText?: string;
   usesResolver?: boolean;

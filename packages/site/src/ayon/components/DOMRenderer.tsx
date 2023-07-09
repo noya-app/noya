@@ -8,17 +8,11 @@ import {
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import {
-  Rect,
-  Size,
-  createResizeTransform,
-  transformRect,
-} from 'noya-geometry';
+import { Size, createResizeTransform, transformRect } from 'noya-geometry';
 import { DesignSystemCache, loadDesignSystem } from 'noya-module-loader';
 import { useSize } from 'noya-react-utils';
+import { SketchModel } from 'noya-sketch-model';
 import {
-  BlockProps,
-  BlockRenderingEnvironment,
   InteractionState,
   Layers,
   OverriddenBlockContent,
@@ -26,12 +20,17 @@ import {
 } from 'noya-state';
 import React, {
   ComponentProps,
+  ReactNode,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
 } from 'react';
-import { Blocks } from '../blocks/blocks';
+import { symbolMap } from '../blocks/blocks';
+import { boxSymbolId } from '../symbols/symbolIds';
+import { RenderProps } from '../symbols/types';
+import { recreateElement } from '../utils/recreateElement';
 
 class ErrorBoundary extends React.Component<any> {
   constructor(props: { children: React.ReactNode }) {
@@ -54,105 +53,112 @@ class ErrorBoundary extends React.Component<any> {
 function renderDynamicContent(
   system: DesignSystemDefinition,
   layers: Sketch.Artboard['layers'],
+  getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster,
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined,
   theme: unknown,
 ) {
-  const {
-    createElement: h,
-    components: { [component.id.Provider]: Provider },
-  } = system;
-  const env: BlockRenderingEnvironment = {
-    h: system.createElement as any,
-    Components: system.components,
-  };
+  const Provider = system.components[component.id.Provider];
 
-  const getBlock = (symbolId: string) => Blocks[symbolId];
+  function renderDefaultContent({ instance }: RenderProps) {
+    const master = getSymbolMaster(instance.symbolID);
 
-  function SymbolRenderer({
-    key,
-    layer,
-    dataSet,
-    frame,
-    symbolId,
-    blockText,
-    blockParameters,
-    resolvedBlockData,
-    getBlock,
-  }: BlockProps & { frame: Rect; symbolId: string; key: string }) {
-    const block = getBlock(symbolId);
+    // Render the backing box for the symbol
+    const box = produce(instance, (draft) => {
+      draft.symbolID = boxSymbolId;
+    });
 
-    if (!env.Components[symbolId] && !block.isComposedBlock) {
-      return null;
-    }
+    const children = master.layers
+      .filter(Layers.isSymbolInstance)
+      .map((s) => renderSymbol({ instance: s }));
 
-    return h(
-      'div',
-      {
-        key,
-        style: {
+    return renderSymbol({
+      instance: box,
+      children,
+    });
+  }
+
+  function renderSymbol({
+    instance,
+    children,
+  }: {
+    instance: Sketch.SymbolInstance;
+    children?: React.ReactNode;
+  }): ReactNode {
+    const symbol = symbolMap[instance.symbolID];
+
+    if (!symbol) return null;
+
+    const master = getSymbolMaster(instance.symbolID);
+
+    const render = symbol.blockDefinition?.render ?? renderDefaultContent;
+
+    const layer = produce(instance, (draft) => {
+      draft.blockParameters =
+        instance.blockParameters ??
+        master.blockDefinition?.placeholderParameters;
+    });
+
+    const content: ReactNode = render({
+      Components: system.components,
+      instance: layer,
+      getSymbolMaster,
+      children,
+    });
+
+    return content;
+  }
+
+  function renderTopLevelSymbol({
+    instance,
+  }: {
+    instance: Sketch.SymbolInstance;
+  }): ReactNode {
+    const content = renderSymbol({ instance });
+
+    return (
+      <div
+        key={instance.do_objectID}
+        style={{
           position: 'absolute',
-          left: frame.x,
-          top: frame.y,
-          width: frame.width,
-          height: frame.height,
-        },
-      },
-      getBlock(symbolId).render(env, {
-        layer,
-        dataSet,
-        symbolId,
-        frame,
-        blockText,
-        blockParameters,
-        resolvedBlockData,
-        getBlock,
-        overrideValues: layer?.overrideValues,
-      }),
+          left: instance.frame.x,
+          top: instance.frame.y,
+          width: instance.frame.width,
+          height: instance.frame.height,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+        }}
+      >
+        {content}
+      </div>
     );
   }
 
+  const drawingLayer = drawing
+    ? SketchModel.symbolInstance({
+        do_objectID: 'drawing',
+        frame: SketchModel.rect(
+          Selectors.getDrawnLayerRect(
+            drawing.origin,
+            drawing.current,
+            drawing.options,
+          ),
+        ),
+        symbolID:
+          typeof drawing.shapeType === 'string'
+            ? component.id.Button
+            : drawing.shapeType.symbolId,
+      })
+    : undefined;
+
   const content = [
-    layers.filter(Layers.isSymbolInstance).map((layer) => {
-      return SymbolRenderer({
-        key: layer.do_objectID,
-        layer,
-        dataSet: {
-          id: layer.do_objectID,
-          parentId: layer.do_objectID,
-        },
-        frame: layer.frame,
-        symbolId: layer.symbolID,
-        blockText: layer.blockText,
-        blockParameters: layer.blockParameters,
-        resolvedBlockData: layer.resolvedBlockData,
-        getBlock,
-        overrideValues: layer.overrideValues,
-      });
-    }),
-    ...(drawing
-      ? [
-          SymbolRenderer({
-            key: 'drawing',
-            frame: Selectors.getDrawnLayerRect(
-              drawing.origin,
-              drawing.current,
-              drawing.options,
-            ),
-            symbolId:
-              typeof drawing.shapeType === 'string'
-                ? component.id.Button
-                : drawing.shapeType.symbolId,
-            getBlock,
-          }),
-        ]
-      : []),
+    ...layers
+      .filter(Layers.isSymbolInstance)
+      .map((s) => renderTopLevelSymbol({ instance: s })),
+    ...(drawingLayer ? [renderTopLevelSymbol({ instance: drawingLayer })] : []),
   ];
 
-  return (h as unknown as any)(
-    'div',
-    {},
-    Provider ? (h as unknown as any)(Provider, { theme }, content) : content,
-  );
+  return Provider ? <Provider theme={theme}>{content}</Provider> : content;
 }
 
 function DynamicRenderer({
@@ -166,6 +172,7 @@ function DynamicRenderer({
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined;
   sync: boolean;
 }) {
+  const [state] = useApplicationState();
   const ref = useRef<HTMLDivElement>(null);
 
   const [system, setSystem] = React.useState<
@@ -174,6 +181,11 @@ function DynamicRenderer({
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
 
   const isInitialRender = useRef(true);
+
+  const getSymbolMaster = useCallback(
+    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
+    [state],
+  );
 
   useEffect(() => {
     async function fetchLibrary() {
@@ -214,10 +226,25 @@ function DynamicRenderer({
   useLayoutEffect(() => {
     if (!root || !system) return;
 
-    root.render(renderDynamicContent(system, artboard.layers, drawing, theme), {
-      sync,
-    });
-  }, [artboard.layers, designSystem, drawing, root, sync, system, theme]);
+    const content = renderDynamicContent(
+      system,
+      artboard.layers,
+      getSymbolMaster,
+      drawing,
+      theme,
+    );
+
+    root.render(recreateElement(system, content), { sync });
+  }, [
+    artboard.layers,
+    designSystem,
+    drawing,
+    getSymbolMaster,
+    root,
+    sync,
+    system,
+    theme,
+  ]);
 
   return (
     <>

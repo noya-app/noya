@@ -61,7 +61,7 @@ import React, {
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
-import { Blocks, allInsertableSymbols } from '../ayon/blocks/blocks';
+import { Blocks, allSymbols } from '../ayon/blocks/blocks';
 import { Content } from '../ayon/components/Content';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
@@ -136,13 +136,13 @@ function Workspace({
 
       draft.history.present.isolatedLayerId = artboardId;
 
-      draft.history.present.sketch.document.foreignSymbols =
-        allInsertableSymbols.map((symbol) =>
+      draft.history.present.sketch.document.foreignSymbols = allSymbols.map(
+        (symbol) =>
           SketchModel.foreignSymbol({
             symbolMaster: symbol,
             libraryID: ayonLibraryId,
           }),
-        );
+      );
 
       return draft;
     });

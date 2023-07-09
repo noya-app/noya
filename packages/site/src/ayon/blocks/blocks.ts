@@ -1,5 +1,13 @@
 import Sketch from 'noya-file-format';
 import { BlockDefinition } from 'noya-state';
+import { avatarSymbol } from '../symbols/AvatarSymbol';
+import { boxSymbol } from '../symbols/BoxSymbol';
+import { buttonSymbol } from '../symbols/ButtonSymbol';
+import {
+  heroButtonRowSymbol,
+  heroHeadlineStackSymbol,
+  heroSymbolX,
+} from '../symbols/HeroSymbol';
 import { heroSymbolId } from '../symbols/symbolIds';
 import {
   InferBlockMap,
@@ -8,10 +16,6 @@ import {
   featureItemSymbol,
   featureRowSymbol,
   featureSectionSymbol,
-  heroButtonRowSymbol,
-  heroHeadlineStackSymbol,
-  heroSymbolV2,
-  heroWithImageSymbol,
   signInSymbol,
   tileCardSymbol,
 } from '../symbols/symbols';
@@ -74,9 +78,6 @@ export const Blocks: Record<string, BlockDefinition> = {
   [Heading4Block.symbol.symbolID]: Heading4Block,
   [Heading5Block.symbol.symbolID]: Heading5Block,
   [Heading6Block.symbol.symbolID]: Heading6Block,
-  [heroSymbolId]: createStandardBlock(heroSymbolV2),
-  [heroSymbolV2.symbolID]: createStandardBlock(heroSymbolV2),
-  [heroWithImageSymbol.symbolID]: createStandardBlock(heroWithImageSymbol),
   [ImageBlock.symbol.symbolID]: ImageBlock,
   [InputBlock.symbol.symbolID]: InputBlock,
   [SwitchBlock.symbol.symbolID]: SwitchBlock,
@@ -94,16 +95,17 @@ export const Blocks: Record<string, BlockDefinition> = {
   [cardSymbol.symbolID]: createStandardBlock(cardSymbol),
   [tileCardSymbol.symbolID]: createStandardBlock(tileCardSymbol),
   [signInSymbol.symbolID]: createStandardBlock(signInSymbol),
-  [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
-  [heroHeadlineStackSymbol.symbolID]: createPassthroughBlock(
-    heroHeadlineStackSymbol,
-  ),
   [featureItemSymbol.symbolID]: createStandardBlock(featureItemSymbol),
   [featureItemDetailsSymbol.symbolID]: createPassthroughBlock(
     featureItemDetailsSymbol,
   ),
   [featureSectionSymbol.symbolID]: createStandardBlock(featureSectionSymbol),
   [featureRowSymbol.symbolID]: createPassthroughBlock(featureRowSymbol),
+  [heroHeadlineStackSymbol.symbolID]: createPassthroughBlock(
+    heroHeadlineStackSymbol,
+  ),
+  [heroButtonRowSymbol.symbolID]: createPassthroughBlock(heroButtonRowSymbol),
+  [heroSymbolX.symbolID]: createStandardBlock(heroSymbolX),
 };
 
 export const allInsertableBlocks = Object.entries(Blocks)
@@ -111,6 +113,21 @@ export const allInsertableBlocks = Object.entries(Blocks)
   .map(([, block]) => block)
   .sort((a, b) => a.symbol.name.localeCompare(b.symbol.name));
 
-export const allInsertableSymbols = allInsertableBlocks.map(
-  (block) => block.symbol,
+export const allInsertableSymbols = [
+  avatarSymbol,
+  buttonSymbol,
+  boxSymbol,
+  heroSymbolX,
+];
+
+export const nonInsertableSymbols = [
+  heroHeadlineStackSymbol,
+  heroButtonRowSymbol,
+];
+
+export const allSymbols = [...allInsertableSymbols, ...nonInsertableSymbols];
+
+// Add extra mappings here (e.g. heroV1 => heroV2)
+export const symbolMap = Object.fromEntries(
+  allSymbols.map((symbol) => [symbol.symbolID, symbol]),
 );

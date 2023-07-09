@@ -41,10 +41,6 @@ export const BoxBlock: BlockDefinition = {
           display: 'flex',
           ...themeStyle,
           ...style,
-          ...(props.frame && {
-            width: `${props.frame.width}px`,
-            height: `${props.frame.height}px`,
-          }),
         },
       },
       props.children,

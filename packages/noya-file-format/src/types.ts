@@ -1134,9 +1134,13 @@ export type PointListString = string;
 export type BlockDefinition = {
   hashtags?: string[];
   placeholderText?: string;
+  placeholderParameters?: string[];
   usesResolver?: boolean;
   isPassthrough?: boolean;
   isComposedBlock?: boolean;
+  infer?: (props: { frame: Rect }) => number;
+  render?: (props: any) => any;
+  schema?: Record<string, string[]>;
 };
 
 export type ResolvedBlockData = {

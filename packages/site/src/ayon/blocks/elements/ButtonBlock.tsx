@@ -4,11 +4,13 @@ import {
   ButtonVariant,
 } from '@noya-design-system/protocol';
 import { BlockDefinition } from 'noya-state';
+import React from 'react';
 import { isWithinRectRange } from '../../infer/score';
 import { buttonSymbolId } from '../../symbols/symbolIds';
 import { buttonSymbol } from '../../symbols/symbols';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { getMappedParameters } from '../../utils/getMappedParameters';
+import { recreateElement } from '../../utils/recreateElement';
 import { applyCommonProps } from '../applyCommonProps';
 import { buttonColors } from '../blockTheme';
 
@@ -40,7 +42,8 @@ export const ButtonBlock: BlockDefinition = {
     })
       ? 0.8
       : 0,
-  render: ({ h, Components: { [buttonSymbolId]: Button } }, props) => {
+  render: ({ h, Components }, props) => {
+    const Button = Components[buttonSymbolId] as React.FC<ButtonProps>;
     const content = props.blockText ?? placeholderText;
     const style = parametersToTailwindStyle(props.blockParameters);
     const parameters = new Set(props.blockParameters);
@@ -68,14 +71,14 @@ export const ButtonBlock: BlockDefinition = {
       );
     }
 
-    return h<ButtonProps>(
-      Button,
-      {
-        ...applyCommonProps(props),
-        ...(disabled && { disabled: true }),
-        ...(variant && { variant }),
-        ...(size && { size }),
-        style: {
+    return recreateElement(
+      { createElement: h, components: Components },
+      <Button
+        {...applyCommonProps(props)}
+        {...(disabled && { disabled: true })}
+        {...(variant && { variant })}
+        {...(size && { size })}
+        style={{
           ...style,
           ...(position &&
             position !== 'center' && {
@@ -85,9 +88,10 @@ export const ButtonBlock: BlockDefinition = {
           ...(props.frame && {
             width: `${props.frame.width}px`,
           }),
-        },
-      },
-      content,
+        }}
+      >
+        {content}
+      </Button>,
     );
   },
 };

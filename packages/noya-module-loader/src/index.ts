@@ -40,6 +40,11 @@ export async function loadDesignSystem(name: string) {
 
   const designSystem = (exports as any).DesignSystem as DesignSystemDefinition;
 
+  // Tag with id
+  for (let [key, value] of Object.entries(designSystem.components)) {
+    Object.assign(value, { __id: key });
+  }
+
   DesignSystemCache.set(name, designSystem);
 
   return designSystem;
