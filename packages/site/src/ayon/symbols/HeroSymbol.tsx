@@ -15,6 +15,7 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
   symbolID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
   name: 'Hero Button Row',
   blockDefinition: {
+    isPassthrough: true,
     placeholderParameters: ['flex-row', 'items-center', 'gap-6', 'mt-4'],
   },
   layers: [
@@ -36,6 +37,7 @@ export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
   symbolID: '511cf6e2-b92b-45a3-a239-b13e9dbbfe9f',
   name: 'Hero Headline Stack',
   blockDefinition: {
+    isPassthrough: true,
     placeholderParameters: ['flex-col', 'items-inherit'],
   },
   layers: [
@@ -56,7 +58,7 @@ export const heroSymbolX = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
   blockDefinition: {
-    placeholderParameters: ['flex-col', 'center', 'p-4', 'gap-3'],
+    placeholderParameters: ['flex-1', 'flex-col', 'center', 'p-4', 'gap-3'],
     infer({ frame }) {
       return Math.max(
         isWithinRectRange({

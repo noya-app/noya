@@ -113,19 +113,18 @@ export const allInsertableBlocks = Object.entries(Blocks)
   .map(([, block]) => block)
   .sort((a, b) => a.symbol.name.localeCompare(b.symbol.name));
 
-export const allInsertableSymbols = [
+export const allSymbols = [
   avatarSymbol,
   buttonSymbol,
   boxSymbol,
   heroSymbolX,
-];
-
-export const nonInsertableSymbols = [
   heroHeadlineStackSymbol,
   heroButtonRowSymbol,
 ];
 
-export const allSymbols = [...allInsertableSymbols, ...nonInsertableSymbols];
+export const allInsertableSymbols = allSymbols.filter(
+  (symbol) => !symbol.blockDefinition?.isPassthrough,
+);
 
 // Add extra mappings here (e.g. heroV1 => heroV2)
 export const symbolMap = Object.fromEntries(

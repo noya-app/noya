@@ -10,7 +10,11 @@ import {
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { OverriddenBlockContent, getSiblingBlocks } from 'noya-state';
+import {
+  OverriddenBlockContent,
+  getSiblingBlocks,
+  getSymbolMaster,
+} from 'noya-state';
 import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { Blocks, allInsertableBlocks } from '../../blocks/blocks';
@@ -133,11 +137,16 @@ export function AyonLayerInspector({
     siblingBlocks: getSiblingBlocks(state),
   });
 
+  const master = getSymbolMaster(state, selectedLayer.symbolID);
+  const parameters =
+    selectedLayer.blockParameters ??
+    master.blockDefinition?.placeholderParameters;
+
   const relatedBlocks: BlockPreviewProps[] = [
     {
       blockId: selectedLayer.symbolID,
       blockText: selectedLayer.blockText,
-      blockParameters: selectedLayer.blockParameters,
+      blockParameters: parameters,
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     },
@@ -152,7 +161,7 @@ export function AyonLayerInspector({
         (blockId): BlockPreviewProps => ({
           blockId,
           blockText: selectedLayer.blockText,
-          blockParameters: selectedLayer.blockParameters,
+          blockParameters: parameters,
           overrideValues: selectedLayer.overrideValues,
           resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
         }),
@@ -187,7 +196,7 @@ export function AyonLayerInspector({
   );
 
   const unusedStyleItems = styleItems.filter(
-    (item) => !selectedLayer.blockParameters?.includes(item.name),
+    (item) => !parameters?.includes(item.name),
   );
 
   return (
@@ -234,7 +243,7 @@ export function AyonLayerInspector({
           items={unusedStyleItems}
           onSelectItem={(item) => {
             dispatch('setBlockParameters', undefined, [
-              ...(selectedLayer.blockParameters ?? []),
+              ...(parameters ?? []),
               item.name,
             ]);
           }}
@@ -243,9 +252,7 @@ export function AyonLayerInspector({
               onSetOverriddenBlock({
                 blockId: selectedLayer.symbolID,
                 blockText: selectedLayer.blockText,
-                blockParameters: (selectedLayer.blockParameters ?? []).concat(
-                  item.name,
-                ),
+                blockParameters: (parameters ?? []).concat(item.name),
                 overrideValues: selectedLayer.overrideValues,
                 resolvedBlockText:
                   selectedLayer.resolvedBlockData?.resolvedText,
@@ -261,43 +268,54 @@ export function AyonLayerInspector({
             <span style={{ opacity: 0.5 }}>#</span>
           </InputField.Button>
         </InputFieldWithCompletions>
-        {selectedLayer.blockParameters &&
-          selectedLayer.blockParameters.length > 0 && (
-            <Stack.H flexWrap="wrap" gap="8px">
-              {selectedLayer.blockParameters.map((parameter) => (
-                <Chip
-                  deletable
-                  onDelete={() => {
-                    dispatch(
-                      'setBlockParameters',
-                      undefined,
-                      (selectedLayer.blockParameters ?? []).filter(
+        {parameters && parameters.length > 0 && (
+          <Stack.H flexWrap="wrap" gap="8px">
+            {parameters.map((parameter) => (
+              <Chip
+                deletable
+                onHoverDeleteChange={(isHovering) => {
+                  if (isHovering) {
+                    onSetOverriddenBlock({
+                      blockId: selectedLayer.symbolID,
+                      blockText: selectedLayer.blockText,
+                      blockParameters: (parameters ?? []).filter(
                         (p) => p !== parameter,
                       ),
-                    );
-                  }}
-                  style={{
-                    backgroundColor: '#545454',
-                    color: 'white',
-                  }}
-                  key={parameter}
-                >
-                  {parameter}
-                </Chip>
-              ))}
-            </Stack.H>
-          )}
+                      overrideValues: selectedLayer.overrideValues,
+                      resolvedBlockText:
+                        selectedLayer.resolvedBlockData?.resolvedText,
+                    });
+                  } else {
+                    onSetOverriddenBlock(undefined);
+                  }
+                }}
+                onDelete={() => {
+                  dispatch(
+                    'setBlockParameters',
+                    undefined,
+                    (parameters ?? []).filter((p) => p !== parameter),
+                  );
+                }}
+                style={{
+                  backgroundColor: '#545454',
+                  color: 'white',
+                }}
+                key={parameter}
+              >
+                {parameter}
+              </Chip>
+            ))}
+          </Stack.H>
+        )}
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           items={presetStyles}
           selectedIndex={
-            !selectedLayer.blockParameters ||
-            selectedLayer.blockParameters.length === 0
+            !parameters || parameters.length === 0
               ? 0
-              : selectedLayer.blockParameters.length === 1 &&
-                selectedLayer.blockParameters[0] === 'dark'
+              : parameters.length === 1 && parameters[0] === 'dark'
               ? 1
               : undefined
           }
