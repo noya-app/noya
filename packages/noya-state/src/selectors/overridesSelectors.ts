@@ -1,10 +1,13 @@
 import produce from 'immer';
 import Sketch from 'noya-file-format';
+import { withOptions } from 'tree-visit';
 import { Layers } from '../layer';
 import { PageLayer } from '../layers';
 import { decodeName, encodeName, getLayerOverride } from '../overrides';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { replaceTextInRange } from './attributedStringSelectors';
 import { getEncodedStringAttributes } from './textStyleSelectors';
+import { getSymbolMaster } from './themeSelectors';
 
 interface SymbolProps {
   overrideValues: Sketch.SymbolInstance['overrideValues'];
@@ -108,3 +111,25 @@ export function applyOverrides({
     });
   });
 }
+
+export const createOverrideHierarchy = (state: ApplicationState) =>
+  withOptions<Sketch.AnyLayer>({
+    getChildren: (layer) => {
+      if (Layers.isSymbolInstance(layer)) {
+        const master = getSymbolMaster(state, layer.symbolID);
+
+        if (!master) throw new Error(`Missing symbol master ${layer.symbolID}`);
+
+        const overridden = applyOverrides({
+          overrideValues: layer.overrideValues,
+          symbolMaster: master,
+          layerStyles: state.sketch.document.layerStyles,
+          layerTextStyles: state.sketch.document.layerTextStyles,
+        });
+
+        return overridden.layers;
+      }
+
+      return Layers.isParentLayer(layer) ? layer.layers : [];
+    },
+  });
