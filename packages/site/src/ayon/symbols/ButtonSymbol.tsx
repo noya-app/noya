@@ -28,6 +28,14 @@ export const buttonSymbol = SketchModel.symbolMaster({
   blockDefinition: {
     placeholderText: 'Submit',
     schema,
+    stylePresets: [
+      { name: 'Default', parameters: [] },
+      { name: 'Small', parameters: ['small'] },
+      { name: 'Large', parameters: ['large'] },
+      { name: 'Outlined', parameters: ['outline'] },
+      { name: 'Text', parameters: ['text'] },
+      { name: 'Dark', parameters: ['bg-slate-800'] },
+    ],
     infer: ({ frame }) =>
       isWithinRectRange({
         rect: frame,

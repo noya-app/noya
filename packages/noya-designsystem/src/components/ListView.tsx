@@ -43,7 +43,7 @@ type ListRowContextValue = {
   sortable: boolean;
   expandable: boolean;
   divider: boolean;
-  padded: boolean;
+  variant: ListViewVariant;
   indentation: number;
   pressEventName: PressEventName;
 };
@@ -54,7 +54,7 @@ const ListRowContext = createContext<ListRowContextValue>({
   sortable: false,
   expandable: true,
   divider: true,
-  padded: false,
+  variant: 'normal',
   indentation: 12,
   pressEventName: 'onClick',
 });
@@ -129,7 +129,7 @@ const RowContainer = styled.div<{
   selectedPosition: ListRowPosition;
   disabled: boolean;
   hovered: boolean;
-  padded: boolean;
+  variant: ListViewVariant;
   divider: boolean;
   isSectionHeader: boolean;
   showsActiveState: boolean;
@@ -141,7 +141,7 @@ const RowContainer = styled.div<{
     selectedPosition,
     disabled,
     hovered,
-    padded,
+    variant,
     divider,
     isSectionHeader,
     showsActiveState,
@@ -154,16 +154,18 @@ const RowContainer = styled.div<{
       flex: '0 0 auto',
       userSelect: 'none',
       cursor: 'default',
-      paddingTop: '6px',
-      paddingRight: '12px',
-      paddingBottom: '6px',
-      paddingLeft: '12px',
-      ...(padded && {
-        borderRadius: '2px',
-        marginLeft: '8px',
-        marginRight: '8px',
-        marginTop: `${margin.top}px`,
-        marginBottom: `${margin.bottom}px`,
+      ...(variant !== 'bare' && {
+        paddingTop: '6px',
+        paddingRight: '12px',
+        paddingBottom: '6px',
+        paddingLeft: '12px',
+        ...(variant === 'padded' && {
+          borderRadius: '2px',
+          marginLeft: '8px',
+          marginRight: '8px',
+          marginTop: `${margin.top}px`,
+          marginBottom: `${margin.bottom}px`,
+        }),
       }),
       color: theme.colors.textMuted,
       ...(isSectionHeader && {
@@ -286,7 +288,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     sortable,
     indentation,
     pressEventName,
-    padded,
+    variant,
     divider,
   } = useContext(ListRowContext);
   const { hoverProps } = useHover({
@@ -337,7 +339,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         disabled={disabled}
         hovered={hovered}
         selected={selected}
-        padded={padded}
+        variant={variant}
         selectedPosition={selectedPosition}
         showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
@@ -537,11 +539,14 @@ type RenderProps<T> = {
   data: T[];
   renderItem: (item: T, index: number, info: ListViewItemInfo) => ReactNode;
   keyExtractor: (item: T, index: number) => string;
+  /**
+   * Each item must have an `id` in order to be sortable
+   */
   sortable?: boolean;
   virtualized?: Size;
 };
 
-type ListViewVariant = 'normal' | 'padded';
+type ListViewVariant = 'normal' | 'padded' | 'bare';
 
 type ListViewRootProps = {
   onPress?: () => void;
@@ -573,7 +578,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     renderItem,
     keyExtractor,
     virtualized,
-    variant,
+    variant = 'normal',
     pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
@@ -664,7 +669,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
         divider,
         indentation,
         pressEventName,
-        padded: variant === 'padded',
+        variant,
       };
     },
     [

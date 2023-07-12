@@ -112,19 +112,32 @@ export function applyOverrides({
   });
 }
 
-export const createOverrideHierarchy = (state: ApplicationState) =>
-  withOptions<Sketch.AnyLayer>({
+export const createOverrideHierarchy = (
+  state: ApplicationState | ((id: string) => Sketch.SymbolMaster),
+) => {
+  const context =
+    typeof state === 'function'
+      ? {
+          getSymbolMaster: state,
+        }
+      : {
+          getSymbolMaster: (id: string) => getSymbolMaster(state, id),
+          layerStyles: state.sketch.document.layerStyles,
+          layerTextStyles: state.sketch.document.layerTextStyles,
+        };
+
+  return withOptions<Sketch.AnyLayer>({
     getChildren: (layer) => {
       if (Layers.isSymbolInstance(layer)) {
-        const master = getSymbolMaster(state, layer.symbolID);
+        const master = context.getSymbolMaster(layer.symbolID);
 
         if (!master) throw new Error(`Missing symbol master ${layer.symbolID}`);
 
         const overridden = applyOverrides({
           overrideValues: layer.overrideValues,
           symbolMaster: master,
-          layerStyles: state.sketch.document.layerStyles,
-          layerTextStyles: state.sketch.document.layerTextStyles,
+          layerStyles: context.layerStyles,
+          layerTextStyles: context.layerTextStyles,
         });
 
         return overridden.layers;
@@ -133,3 +146,4 @@ export const createOverrideHierarchy = (state: ApplicationState) =>
       return Layers.isParentLayer(layer) ? layer.layers : [];
     },
   });
+};

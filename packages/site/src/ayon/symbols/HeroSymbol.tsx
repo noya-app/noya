@@ -1,13 +1,6 @@
 import { SketchModel } from 'noya-sketch-model';
 import { isWithinRectRange } from '../infer/score';
-import {
-  buttonSymbolId,
-  heading1SymbolId,
-  heading4SymbolId,
-  heroSymbolV2Id,
-  linkSymbolId,
-  tagSymbolId,
-} from './symbolIds';
+import { buttonSymbolId, heroSymbolV2Id } from './symbolIds';
 
 // const heroSymbolIds = [heroSymbolV2Id, heroWithImageSymbolId];
 
@@ -24,12 +17,12 @@ export const heroButtonRowSymbol = SketchModel.symbolMaster({
       symbolID: buttonSymbolId,
       blockText: 'Get started',
     }),
-    SketchModel.symbolInstance({
-      do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
-      symbolID: linkSymbolId,
-      blockText: 'Learn more #no-underline #icon-arrow-forward',
-      isVisible: false,
-    }),
+    // SketchModel.symbolInstance({
+    //   do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
+    //   symbolID: linkSymbolId,
+    //   blockText: 'Learn more #no-underline #icon-arrow-forward',
+    //   isVisible: false,
+    // }),
   ],
 });
 
@@ -41,16 +34,16 @@ export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
     placeholderParameters: ['flex-col', 'items-inherit'],
   },
   layers: [
-    SketchModel.symbolInstance({
-      do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
-      symbolID: tagSymbolId,
-      blockText: 'The future is here',
-    }),
-    SketchModel.symbolInstance({
-      do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
-      symbolID: heading1SymbolId,
-      blockText: 'Create, iterate, inspire.',
-    }),
+    // SketchModel.symbolInstance({
+    //   do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
+    //   symbolID: tagSymbolId,
+    //   blockText: 'The future is here',
+    // }),
+    // SketchModel.symbolInstance({
+    //   do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
+    //   symbolID: heading1SymbolId,
+    //   blockText: 'Create, iterate, inspire.',
+    // }),
   ],
 });
 
@@ -59,6 +52,11 @@ export const heroSymbolX = SketchModel.symbolMaster({
   name: 'Hero',
   blockDefinition: {
     placeholderParameters: ['flex-1', 'flex-col', 'center', 'p-4', 'gap-3'],
+    stylePresets: [
+      { parameters: ['flex-1', 'flex-col', 'p-4', 'gap-3', 'center'] },
+      { parameters: ['flex-1', 'flex-col', 'p-4', 'gap-3', 'left'] },
+      { parameters: ['flex-1', 'flex-col', 'p-4', 'gap-3', 'dark'] },
+    ],
     infer({ frame }) {
       return Math.max(
         isWithinRectRange({
@@ -80,11 +78,11 @@ export const heroSymbolX = SketchModel.symbolMaster({
       symbolID: heroHeadlineStackSymbol.symbolID,
       blockText: '',
     }),
-    SketchModel.symbolInstance({
-      do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
-      symbolID: heading4SymbolId,
-      blockText: 'Turn great ideas into new possibilities.',
-    }),
+    // SketchModel.symbolInstance({
+    //   do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
+    //   symbolID: heading4SymbolId,
+    //   blockText: 'Turn great ideas into new possibilities.',
+    // }),
     SketchModel.symbolInstance({
       do_objectID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
       symbolID: heroButtonRowSymbol.symbolID,

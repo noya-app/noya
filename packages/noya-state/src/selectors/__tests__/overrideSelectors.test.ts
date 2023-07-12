@@ -115,11 +115,21 @@ it('Override hierarchy nested', () => {
     ),
   );
 
+  const hierarchy = createOverrideHierarchy(state);
+
   expect(
-    createOverrideHierarchy(state).find<Sketch.Text>(
+    hierarchy.find<Sketch.Text>(
       instance,
       (l): l is Sketch.Text =>
         Layers.isTextLayer(l) && l.do_objectID === nestedText.do_objectID,
     )?.attributedString.string,
   ).toBe('World');
+
+  expect(
+    hierarchy.accessPath(instance, [0, 0]).map((l) => l.do_objectID),
+  ).toEqual([
+    instance.do_objectID,
+    nestedInstance.do_objectID,
+    nestedText.do_objectID,
+  ]);
 });

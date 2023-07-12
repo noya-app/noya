@@ -17,6 +17,7 @@ import {
   Layers,
   OverriddenBlockContent,
   Selectors,
+  createOverrideHierarchy,
 } from 'noya-state';
 import React, {
   ComponentProps,
@@ -28,8 +29,7 @@ import React, {
   useRef,
 } from 'react';
 import { symbolMap } from '../blocks/blocks';
-import { boxSymbolId } from '../symbols/symbolIds';
-import { RenderProps } from '../symbols/types';
+import { boxSymbol } from '../symbols/BoxSymbol';
 import { recreateElement } from '../utils/recreateElement';
 
 class ErrorBoundary extends React.Component<any> {
@@ -52,57 +52,35 @@ class ErrorBoundary extends React.Component<any> {
 
 function renderDynamicContent(
   system: DesignSystemDefinition,
-  layers: Sketch.Artboard['layers'],
+  artboard: Sketch.Artboard,
   getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster,
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined,
   theme: unknown,
 ) {
   const Provider = system.components[component.id.Provider];
 
-  function renderDefaultContent({ instance }: RenderProps) {
-    const master = getSymbolMaster(instance.symbolID);
-
-    // Render the backing box for the symbol
-    const box = produce(instance, (draft) => {
-      draft.symbolID = boxSymbolId;
-    });
-
-    const children = master.layers
-      .filter(Layers.isSymbolInstance)
-      .map((s) => renderSymbol({ instance: s }));
-
-    return renderSymbol({
-      instance: box,
-      children,
-    });
-  }
-
-  function renderSymbol({
-    instance,
-    children,
-  }: {
+  type RenderableItem = {
     instance: Sketch.SymbolInstance;
-    children?: React.ReactNode;
-  }): ReactNode {
-    const symbol = symbolMap[instance.symbolID];
+    nested: RenderableItem[];
+  };
 
-    if (!symbol) return null;
+  function renderSymbol({ instance, nested }: RenderableItem): ReactNode {
+    const master = symbolMap[instance.symbolID];
 
-    const master = getSymbolMaster(instance.symbolID);
+    if (!master) return null;
 
-    const render = symbol.blockDefinition?.render ?? renderDefaultContent;
-
-    const layer = produce(instance, (draft) => {
-      draft.blockParameters =
-        instance.blockParameters ??
-        master.blockDefinition?.placeholderParameters;
-    });
+    const render =
+      master.blockDefinition?.render ?? boxSymbol.blockDefinition!.render!;
 
     const content: ReactNode = render({
       Components: system.components,
-      instance: layer,
+      instance: produce(instance, (draft) => {
+        draft.blockParameters =
+          instance.blockParameters ??
+          master.blockDefinition?.placeholderParameters;
+      }),
       getSymbolMaster,
-      children,
+      children: nested.map(renderSymbol),
     });
 
     return content;
@@ -110,10 +88,9 @@ function renderDynamicContent(
 
   function renderTopLevelSymbol({
     instance,
-  }: {
-    instance: Sketch.SymbolInstance;
-  }): ReactNode {
-    const content = renderSymbol({ instance });
+    nested,
+  }: RenderableItem): ReactNode {
+    const content = renderSymbol({ instance, nested });
 
     return (
       <div
@@ -151,11 +128,20 @@ function renderDynamicContent(
       })
     : undefined;
 
+  const hierarchy = createOverrideHierarchy(
+    getSymbolMaster,
+  ).map<RenderableItem>(artboard, (instance, transformedChildren) => {
+    return {
+      instance: instance as Sketch.SymbolInstance,
+      nested: transformedChildren,
+    };
+  });
+
   const content = [
-    ...layers
-      .filter(Layers.isSymbolInstance)
-      .map((s) => renderTopLevelSymbol({ instance: s })),
-    ...(drawingLayer ? [renderTopLevelSymbol({ instance: drawingLayer })] : []),
+    ...hierarchy.nested.map(renderTopLevelSymbol),
+    ...(drawingLayer
+      ? [renderTopLevelSymbol({ instance: drawingLayer, nested: [] })]
+      : []),
   ];
 
   return Provider ? <Provider theme={theme}>{content}</Provider> : content;
@@ -228,7 +214,7 @@ function DynamicRenderer({
 
     const content = renderDynamicContent(
       system,
-      artboard.layers,
+      artboard,
       getSymbolMaster,
       drawing,
       theme,
@@ -236,7 +222,7 @@ function DynamicRenderer({
 
     root.render(recreateElement(system, content), { sync });
   }, [
-    artboard.layers,
+    artboard,
     designSystem,
     drawing,
     getSymbolMaster,

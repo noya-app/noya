@@ -6,18 +6,24 @@ import {
   InputFieldWithCompletions,
   Spacer,
   Stack,
+  TreeView,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { DragHandleDots2Icon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import {
+  Layers,
   OverriddenBlockContent,
+  Overrides,
+  createOverrideHierarchy,
   getSiblingBlocks,
   getSymbolMaster,
 } from 'noya-state';
+import { isDeepEqual } from 'noya-utils';
 import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
-import { Blocks, allInsertableBlocks } from '../../blocks/blocks';
+import { Blocks, allInsertableBlocks, symbolMap } from '../../blocks/blocks';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
@@ -168,22 +174,14 @@ export function AyonLayerInspector({
       ),
   ];
 
-  const presetStyles: BlockPreviewProps[] = [
-    {
+  const presetStyles: BlockPreviewProps[] =
+    master.blockDefinition?.stylePresets?.map((preset) => ({
       blockId: selectedLayer.symbolID,
       blockText: selectedLayer.blockText,
-      blockParameters: [],
+      blockParameters: preset.parameters,
       overrideValues: selectedLayer.overrideValues,
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
-    },
-    {
-      blockId: selectedLayer.symbolID,
-      blockText: selectedLayer.blockText,
-      blockParameters: ['dark'],
-      overrideValues: selectedLayer.overrideValues,
-      resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
-    },
-  ];
+    })) ?? [];
 
   const styleItems = useMemo(
     () =>
@@ -197,6 +195,35 @@ export function AyonLayerInspector({
 
   const unusedStyleItems = styleItems.filter(
     (item) => !parameters?.includes(item.name),
+  );
+
+  type LayerTreeItem = {
+    instance: Sketch.SymbolInstance;
+    depth: number;
+    path: string[];
+  };
+
+  const Hierarchy = createOverrideHierarchy(state);
+
+  const flattened = Hierarchy.flatMap(
+    selectedLayer,
+    (layer, indexPath): LayerTreeItem[] => {
+      if (!Layers.isSymbolInstance(layer)) return [];
+
+      if (!master.blockDefinition?.render && indexPath.length === 0) {
+        return [];
+      }
+
+      return [
+        {
+          instance: layer,
+          depth: indexPath.length,
+          path: Hierarchy.accessPath(selectedLayer, indexPath)
+            .slice(1)
+            .map((layer) => layer.do_objectID),
+        },
+      ];
+    },
   );
 
   return (
@@ -222,7 +249,8 @@ export function AyonLayerInspector({
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           key={selectedLayer.symbolID}
-          items={relatedBlocks}
+          items={[]}
+          // items={relatedBlocks}
           selectedIndex={0}
           onSelectItem={(index) => {
             dispatch(
@@ -296,10 +324,10 @@ export function AyonLayerInspector({
                     (parameters ?? []).filter((p) => p !== parameter),
                   );
                 }}
-                style={{
-                  backgroundColor: '#545454',
-                  color: 'white',
-                }}
+                // style={{
+                //   backgroundColor: '#545454',
+                //   color: 'white',
+                // }}
                 key={parameter}
               >
                 {parameter}
@@ -312,13 +340,9 @@ export function AyonLayerInspector({
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           items={presetStyles}
-          selectedIndex={
-            !parameters || parameters.length === 0
-              ? 0
-              : parameters.length === 1 && parameters[0] === 'dark'
-              ? 1
-              : undefined
-          }
+          selectedIndex={presetStyles.findIndex((style) =>
+            isDeepEqual(style.blockParameters, parameters),
+          )}
           onSelectItem={(index) => {
             dispatch(
               'setBlockParameters',
@@ -331,9 +355,57 @@ export function AyonLayerInspector({
           }}
         />
       </InspectorSection>
-      {/* <InspectorSection title="Content">
+      <InspectorSection title="Content" titleTextStyle="small">
         <Stack.V gap="4px">
-          {nestedLayers.map(({ layer }, index) => {
+          <TreeView.Root
+            keyExtractor={({ instance: layer }) => layer.do_objectID}
+            data={flattened}
+            expandable={false}
+            variant="bare"
+            indentation={24}
+            renderItem={({ instance: layer, depth, path }, index) => {
+              const symbol = symbolMap[layer.symbolID];
+
+              const componentName = symbol?.name.toUpperCase();
+              const placeholderText = symbol?.blockDefinition?.placeholderText;
+
+              return (
+                <TreeView.Row
+                  depth={depth - 1}
+                  icon={depth !== 0 && <DragHandleDots2Icon />}
+                >
+                  <Stack.H flex="1" padding={'4px 0'}>
+                    <InputField.Root
+                      key={[layer.do_objectID, index].join('_')}
+                      labelPosition="end"
+                      labelSize={60}
+                    >
+                      <InputField.Input
+                        value={layer.blockText ?? ''}
+                        placeholder={placeholderText}
+                        onChange={(value) => {
+                          if (depth === 0) {
+                            dispatch('setBlockText', undefined, value);
+                          } else {
+                            dispatch(
+                              'setOverrideValue',
+                              undefined,
+                              Overrides.encodeName(path, 'blockText'),
+                              value,
+                            );
+                          }
+                        }}
+                      />
+                      {componentName && (
+                        <InputField.Label>{componentName}</InputField.Label>
+                      )}
+                    </InputField.Root>
+                  </Stack.H>
+                </TreeView.Row>
+              );
+            }}
+          />
+          {/* {nestedLayers.map(({ layer }, index) => {
             const block = Blocks[layer.symbolID];
             const componentName = block.symbol.name;
 
@@ -347,9 +419,9 @@ export function AyonLayerInspector({
                 />
               </InputField.Root>
             );
-          })}
+          })} */}
         </Stack.V>
-      </InspectorSection> */}
+      </InspectorSection>
     </Stack.V>
   );
 }

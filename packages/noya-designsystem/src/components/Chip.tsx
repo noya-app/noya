@@ -7,8 +7,9 @@ type ChipVariant = 'primary' | 'secondary';
 
 const ChipElement = styled.span<{ variant?: ChipVariant }>(
   ({ theme, variant }) => ({
-    ...theme.textStyles.label,
-    lineHeight: 'inherit',
+    fontFamily: theme.fonts.monospace,
+    fontSize: '11px',
+    textTransform: 'initial',
     padding: '4px 8px',
     borderRadius: 4,
     userSelect: 'none',

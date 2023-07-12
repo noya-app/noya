@@ -1131,10 +1131,16 @@ export enum TextBehaviour {
  */
 export type PointListString = string;
 
+export type BlockStylePreset = {
+  name?: string;
+  parameters: string[];
+};
+
 export type BlockDefinition = {
   hashtags?: string[];
   placeholderText?: string;
   placeholderParameters?: string[];
+  stylePresets?: BlockStylePreset[];
   usesResolver?: boolean;
   isPassthrough?: boolean;
   isComposedBlock?: boolean;
