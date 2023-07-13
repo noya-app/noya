@@ -32,6 +32,7 @@ export const avatarSymbol = SketchModel.symbolMaster({
         <Avatar
           key={instance.do_objectID}
           src={src}
+          name={content}
           style={{
             ...style,
             ...(instance.frame && {

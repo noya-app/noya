@@ -1144,8 +1144,15 @@ export type BlockDefinition = {
   usesResolver?: boolean;
   isPassthrough?: boolean;
   isComposedBlock?: boolean;
-  infer?: (props: { frame: Rect }) => number;
-  render?: (props: any) => any;
+  infer?: (props: {
+    frame: Omit<Rect, '_class' | 'constrainProportions'>;
+  }) => number;
+  render?: (props: {
+    Components: any;
+    instance: SymbolInstance;
+    children?: any;
+    getSymbolMaster: (symbolId: string) => SymbolMaster;
+  }) => any;
   schema?: Record<string, string[]>;
 };
 

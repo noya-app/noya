@@ -1,15 +1,14 @@
 import { useApplicationState } from 'noya-app-state-context';
 import {
-  Button,
   Chip,
   CompletionItem,
-  IconButton,
   InputField,
   InputFieldWithCompletions,
   RelativeDropPosition,
   Spacer,
   Stack,
   TreeView,
+  lightTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { DragHandleDots2Icon } from 'noya-icons';
@@ -17,6 +16,7 @@ import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { SketchModel } from 'noya-sketch-model';
 import {
+  Action,
   Layers,
   OverriddenBlockContent,
   Overrides,
@@ -27,13 +27,9 @@ import {
 import { isDeepEqual } from 'noya-utils';
 import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
-import { Blocks, allInsertableBlocks, symbolMap } from '../../blocks/blocks';
+import { allInsertableSymbols, symbolMap } from '../../blocks/blocks';
 import { inferBlockTypes } from '../../infer/inferBlock';
-import {
-  avatarSymbolId,
-  boxSymbolId,
-  buttonSymbolId,
-} from '../../symbols/symbolIds';
+import { boxSymbolId } from '../../symbols/symbolIds';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 
@@ -79,10 +75,10 @@ export function AyonLayerInspector({
 
   const blockCompletionItems = useMemo(
     () =>
-      allInsertableBlocks.map(
+      allInsertableSymbols.map(
         (block): CompletionItem => ({
-          id: block.symbol.symbolID,
-          name: block.symbol.name,
+          id: block.symbolID,
+          name: block.name,
         }),
       ),
     [],
@@ -147,15 +143,14 @@ export function AyonLayerInspector({
     },
   });
 
-  const block = Blocks[selectedLayer.symbolID];
-  const componentName = block.symbol.name;
+  const master = getSymbolMaster(state, selectedLayer.symbolID);
+  const componentName = master.name;
   const blockTypes = inferBlockTypes({
     frame: selectedLayer.frame,
     blockText: selectedLayer.blockText,
     siblingBlocks: getSiblingBlocks(state),
   });
 
-  const master = getSymbolMaster(state, selectedLayer.symbolID);
   const parameters =
     selectedLayer.blockParameters ??
     master.blockDefinition?.placeholderParameters;
@@ -197,12 +192,12 @@ export function AyonLayerInspector({
 
   const styleItems = useMemo(
     () =>
-      (block.hashtags ?? []).map((item) => ({
+      (master.blockDefinition?.hashtags ?? []).map((item) => ({
         name: item,
         id: item,
         icon: <HashtagIcon item={item} />,
       })),
-    [block.hashtags],
+    [master.blockDefinition?.hashtags],
   );
 
   const unusedStyleItems = styleItems.filter(
@@ -245,16 +240,18 @@ export function AyonLayerInspector({
   // });
 
   const setAllOverrides = (updatedLayer: Sketch.SymbolInstance) => {
-    updatedLayer.overrideValues
+    const actions = updatedLayer.overrideValues
       .filter((override) => override.overrideName.endsWith('layers'))
-      .forEach((override) => {
-        dispatch(
+      .map((override): Action => {
+        return [
           'setOverrideValue',
           [updatedLayer.do_objectID],
           override.overrideName,
           override.value,
-        );
+        ];
       });
+
+    dispatch('batch', actions);
   };
 
   return (
@@ -355,6 +352,9 @@ export function AyonLayerInspector({
                     (parameters ?? []).filter((p) => p !== parameter),
                   );
                 }}
+                style={{
+                  fontFamily: lightTheme.fonts.monospace,
+                }}
                 // style={{
                 //   backgroundColor: '#545454',
                 //   color: 'white',
@@ -390,16 +390,7 @@ export function AyonLayerInspector({
         <InputFieldWithCompletions
           ref={nestedComponentSearchInputRef}
           placeholder={'Content'}
-          items={[
-            {
-              name: 'Avatar',
-              id: avatarSymbolId,
-            },
-            {
-              name: 'Button',
-              id: buttonSymbolId,
-            },
-          ]}
+          items={blockCompletionItems}
           onSelectItem={(item) => {
             dispatch('setOverrideValue', undefined, 'layers', [
               ...Hierarchy.getChildren(selectedLayer, []),
@@ -570,7 +561,7 @@ export function AyonLayerInspector({
                         <InputField.Label>{componentName}</InputField.Label>
                       )}
                     </InputField.Root>
-                    <Button
+                    {/* <Button
                       variant="floating"
                       onClick={() => {
                         const updated = Hierarchy.insert(selectedLayer, {
@@ -596,27 +587,12 @@ export function AyonLayerInspector({
 
                         setAllOverrides(updated);
                       }}
-                    />
+                    /> */}
                   </Stack.H>
                 </TreeView.Row>
               );
             }}
           />
-          {/* {nestedLayers.map(({ layer }, index) => {
-            const block = Blocks[layer.symbolID];
-            const componentName = block.symbol.name;
-
-            return (
-              <InputField.Root key={index}>
-                <InputField.Label>{componentName}</InputField.Label>
-                <InputField.Input
-                  value={''}
-                  placeholder={layer.blockText}
-                  onSubmit={() => {}}
-                />
-              </InputField.Root>
-            );
-          })} */}
         </Stack.V>
       </InspectorSection>
     </Stack.V>

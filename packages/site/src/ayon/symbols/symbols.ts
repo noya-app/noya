@@ -3,11 +3,8 @@ import { InferBlockProps, Overrides } from 'noya-state';
 import { isWithinRectRange } from '../infer/score';
 import { tailwindBlockClasses } from '../tailwind/tailwind';
 import {
-  avatarSymbolId,
-  boxSymbolId,
   buttonSymbolId,
   cardSymbolId,
-  checkboxSymbolId,
   featureItemSymbolId,
   featureRowSymbolId,
   featureSectionSymbolId,
@@ -26,12 +23,9 @@ import {
   inputSymbolId,
   linkSymbolId,
   radioSymbolId,
-  selectSymbolId,
   sidebarSymbolId,
   signInSymbolId,
   spacerSymbolId,
-  switchSymbolId,
-  tableSymbolId,
   tagSymbolId,
   textSymbolId,
   textareaSymbolId,
@@ -49,56 +43,6 @@ const boxBlockHashtags = [
 
 export const InferBlockMap: Record<string, (props: InferBlockProps) => number> =
   {};
-
-export const buttonSymbol = SketchModel.symbolMaster({
-  symbolID: buttonSymbolId,
-  name: 'Button',
-});
-
-export const linkSymbol = SketchModel.symbolMaster({
-  symbolID: linkSymbolId,
-  name: 'Link',
-});
-
-export const tagSymbol = SketchModel.symbolMaster({
-  symbolID: tagSymbolId,
-  name: 'Tag',
-});
-
-export const avatarSymbol = SketchModel.symbolMaster({
-  symbolID: avatarSymbolId,
-  name: 'Avatar',
-});
-
-export const boxSymbol = SketchModel.symbolMaster({
-  symbolID: boxSymbolId,
-  name: 'Box',
-});
-
-export const checkboxSymbol = SketchModel.symbolMaster({
-  symbolID: checkboxSymbolId,
-  name: 'Checkbox',
-});
-
-export const inputSymbol = SketchModel.symbolMaster({
-  symbolID: inputSymbolId,
-  name: 'Input',
-});
-
-export const switchSymbol = SketchModel.symbolMaster({
-  symbolID: switchSymbolId,
-  name: 'Switch',
-});
-
-export const textSymbol = SketchModel.symbolMaster({
-  symbolID: textSymbolId,
-  name: 'Text',
-});
-
-export const imageSymbol = SketchModel.symbolMaster({
-  symbolID: imageSymbolId,
-  name: 'Image',
-});
 
 export const heading1Symbol = SketchModel.symbolMaster({
   symbolID: heading1SymbolId,
@@ -413,16 +357,6 @@ export const iconSymbol = SketchModel.symbolMaster({
 export const sidebarSymbol = SketchModel.symbolMaster({
   symbolID: sidebarSymbolId,
   name: 'Sidebar',
-});
-
-export const tableSymbol = SketchModel.symbolMaster({
-  symbolID: tableSymbolId,
-  name: 'Table',
-});
-
-export const selectSymbol = SketchModel.symbolMaster({
-  symbolID: selectSymbolId,
-  name: 'Select',
 });
 
 export const radioSymbol = SketchModel.symbolMaster({

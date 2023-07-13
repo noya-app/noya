@@ -46,7 +46,6 @@ export type BlockProps = {
   blockText?: string;
   blockParameters?: string[];
   resolvedBlockData?: Sketch.SymbolInstance['resolvedBlockData'];
-  getBlock: (symbolId: string) => BlockDefinition;
   children?: ReactNode;
   overrideValues?: Sketch.OverrideValue[];
   dataSet?: {
@@ -64,17 +63,6 @@ export type InferBlockProps = {
 export type BlockRenderingEnvironment = {
   Components: Record<string, React.FC<any>>;
   h: typeof createElement;
-};
-
-export type BlockDefinition = {
-  symbol: Sketch.SymbolMaster;
-  infer: (props: InferBlockProps) => number;
-  render: (env: BlockRenderingEnvironment, props: BlockProps) => ReactNode;
-  hashtags?: string[];
-  placeholderText?: string;
-  usesResolver?: boolean;
-  isPassthrough?: boolean;
-  isComposedBlock?: boolean;
 };
 
 export type InteractionMethod = 'mouse' | 'keyboard';

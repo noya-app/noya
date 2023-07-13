@@ -61,7 +61,7 @@ import React, {
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
-import { Blocks, allSymbols } from '../ayon/blocks/blocks';
+import { allSymbols, symbolMap } from '../ayon/blocks/blocks';
 import { Content } from '../ayon/components/Content';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
@@ -406,7 +406,7 @@ function Workspace({
                 const result = await compile({
                   name,
                   artboard,
-                  Blocks,
+                  symbolMap,
                   DesignSystem: designSystem,
                   target: 'standalone',
                 });
@@ -429,7 +429,7 @@ function Workspace({
                 const result = await compile({
                   name,
                   artboard,
-                  Blocks,
+                  symbolMap,
                   DesignSystem: designSystem,
                   target: 'codesandbox',
                 });

@@ -1,6 +1,6 @@
 import { SketchModel } from 'noya-sketch-model';
-import { isWithinRectRange } from '../infer/score';
-import { buttonSymbolId, heroSymbolV2Id } from './symbolIds';
+import { isWithinRectRange } from '../../infer/score';
+import { buttonSymbolId, heroSymbolV2Id } from '../symbolIds';
 
 // const heroSymbolIds = [heroSymbolV2Id, heroWithImageSymbolId];
 
@@ -47,7 +47,7 @@ export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
   ],
 });
 
-export const heroSymbolX = SketchModel.symbolMaster({
+export const heroSymbol = SketchModel.symbolMaster({
   symbolID: heroSymbolV2Id,
   name: 'Hero',
   blockDefinition: {

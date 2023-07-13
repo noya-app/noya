@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { applyOverrides, Layers, Overrides } from 'noya-state';
 import { encodeQueryParameters, isExternalUrl } from 'noya-utils';
-import { Blocks } from '../blocks/blocks';
+import { symbolMap } from '../blocks/blocks';
 import {
   iconSymbolId,
   imageSymbolId,
@@ -52,7 +52,7 @@ export function resolveLayer({
 
   if (typeof blockText !== 'string') return [];
 
-  const blockDefinition = Blocks[symbolID];
+  const blockDefinition = symbolMap[symbolID].blockDefinition;
 
   if (!blockDefinition) return [];
 
@@ -131,7 +131,7 @@ export function resolveLayer({
 
   const master = applyOverrides({
     overrideValues: layer.overrideValues,
-    symbolMaster: blockDefinition.symbol,
+    symbolMaster: symbolMap[symbolID],
   });
 
   master.layers.filter(Layers.isSymbolInstance).forEach((child) => {

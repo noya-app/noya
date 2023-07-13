@@ -141,14 +141,14 @@ function createLocalFile({
   const padding = 40;
   let y = padding;
 
-  const groups = groupBy(examples, (example) => example.block.symbol.symbolID);
+  const groups = groupBy(examples, (example) => example.master.symbolID);
 
   const instances = Object.values(groups).flatMap((examples) => {
     let x = padding;
 
     const group = examples.map((example) => {
       const instance = SketchModel.symbolInstance({
-        symbolID: example.block.symbol.symbolID,
+        symbolID: example.master.symbolID,
         frame: SketchModel.rect({
           x,
           y,

@@ -12,7 +12,6 @@ import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import {
-  Action,
   BlockContent,
   DrawableLayerType,
   Layers,
@@ -25,7 +24,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { measureImage } from '../../utils/measureImage';
-import { Blocks } from '../blocks/blocks';
 import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
@@ -286,31 +284,29 @@ export const Content = memo(function Content({
                         );
                       }}
                       onChangeBlockContent={(content: BlockContent) => {
-                        const nextBlock =
-                          Blocks[content.symbolId ?? layer.symbolID];
-
-                        const contentWithNormalizedText: BlockContent = {
-                          ...content,
-                          normalizedText:
-                            content.blockText ?? nextBlock.placeholderText,
-                        };
-
-                        dispatch('batch', [
-                          [
-                            'setBlockContent',
-                            layer.do_objectID,
-                            contentWithNormalizedText,
-                          ],
-                          ...(contentWithNormalizedText.blockText !== ''
-                            ? [
-                                [
-                                  'setSymbolIdIsFixed',
-                                  layer.do_objectID,
-                                  true,
-                                ] as Action,
-                              ]
-                            : []),
-                        ]);
+                        // const nextBlock =
+                        //   Blocks[content.symbolId ?? layer.symbolID];
+                        // const contentWithNormalizedText: BlockContent = {
+                        //   ...content,
+                        //   normalizedText:
+                        //     content.blockText ?? nextBlock.placeholderText,
+                        // };
+                        // dispatch('batch', [
+                        //   [
+                        //     'setBlockContent',
+                        //     layer.do_objectID,
+                        //     contentWithNormalizedText,
+                        //   ],
+                        //   ...(contentWithNormalizedText.blockText !== ''
+                        //     ? [
+                        //         [
+                        //           'setSymbolIdIsFixed',
+                        //           layer.do_objectID,
+                        //           true,
+                        //         ] as Action,
+                        //       ]
+                        //     : []),
+                        // ]);
                       }}
                       uploadAsset={uploadAsset}
                     />

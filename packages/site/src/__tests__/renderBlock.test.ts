@@ -12,7 +12,7 @@ import { loadDesignSystem } from 'noya-module-loader';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides } from 'noya-state';
 import path from 'path';
-import { Blocks } from '../ayon/blocks/blocks';
+import { symbolMap } from '../ayon/blocks/blocks';
 import {
   buttonSymbolId,
   cardSymbolId,
@@ -47,7 +47,9 @@ function generate(
 ) {
   return clean(
     print(
-      createElementCode(mapBlockToElement({ Blocks, DesignSystem }, symbol)!),
+      createElementCode(
+        mapBlockToElement({ symbolMap, DesignSystem }, symbol)!,
+      ),
     ),
   );
 }
@@ -187,7 +189,7 @@ describe('card with no border radius on image', () => {
       }),
     });
 
-    Blocks[symbol.symbolID].symbol.layers
+    symbolMap[symbol.symbolID].layers
       .filter(Layers.isSymbolInstance)
       .filter((layer) => layer.symbolID === imageSymbolId)
       .forEach((layer) => {
@@ -247,7 +249,7 @@ describe('generate file', () => {
       await compile({
         name: 'My App',
         artboard,
-        Blocks,
+        symbolMap,
         DesignSystem: ChakraDesignSystem,
         target: 'standalone',
       }),
@@ -276,7 +278,7 @@ describe('generate file', () => {
       await compile({
         name: 'My App',
         artboard,
-        Blocks,
+        symbolMap,
         DesignSystem: MaterialDesignSystem,
         target: 'standalone',
       }),

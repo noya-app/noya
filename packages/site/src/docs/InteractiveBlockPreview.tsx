@@ -8,30 +8,21 @@ import {
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
-import {
-  BlockDefinition,
-  Layers,
-  Overrides,
-  createSketchFile,
-} from 'noya-state';
+import { Layers, Overrides, createSketchFile } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { PreferredOverride, blockMetadata } from '../ayon/blocks/blockMetadata';
-import { Blocks } from '../ayon/blocks/blocks';
+import { symbolMap } from '../ayon/blocks/blocks';
 import { ViewType } from '../ayon/types';
 import { useAyon } from '../components/AyonContext';
 
 function Content({
-  blocks,
   blockId,
   viewType = 'combined',
 }: {
-  blocks: Record<string, BlockDefinition>;
   blockId: string;
   viewType?: ViewType;
 }) {
   const Ayon = useAyon();
-
-  const block = blocks[blockId];
 
   const client = useNoyaClient();
 
@@ -45,7 +36,7 @@ function Content({
 
   return (
     <Ayon
-      fileId={block.symbol.do_objectID}
+      fileId={blockId}
       canvasRendererType="svg"
       initialDocument={initialFile.data.document}
       name={initialFile.data.name}
@@ -57,7 +48,7 @@ function Content({
 }
 
 export type BlockExample = {
-  block: BlockDefinition;
+  master: Sketch.SymbolMaster;
   size: Size;
   blockText?: string;
   blockParameters?: string[];
@@ -84,7 +75,8 @@ export function createBlockExample({
   preferredOverrides?: PreferredOverride[];
   overrideValues?: Sketch.OverrideValue[];
 }): BlockExample {
-  const originalText = blockText ?? Blocks[blockId].placeholderText ?? '';
+  const originalText =
+    blockText ?? symbolMap[blockId].blockDefinition?.placeholderText ?? '';
 
   const resolvedBlockData: Sketch.ResolvedBlockData | undefined =
     resolvedBlockText
@@ -96,13 +88,15 @@ export function createBlockExample({
         }
       : undefined;
 
-  const layers = Blocks[blockId].symbol.layers;
+  const layers = symbolMap[blockId].layers;
 
   const overrides: Sketch.OverrideValue[] =
     overrideValues ??
     (preferredOverrides ?? []).flatMap((override) => {
       const content =
-        override.blockText ?? Blocks[blockId].placeholderText ?? '';
+        override.blockText ??
+        symbolMap[blockId].blockDefinition?.placeholderText ??
+        '';
 
       const layer = layers.find(
         (layer): layer is Sketch.SymbolInstance =>
@@ -136,7 +130,7 @@ export function createBlockExample({
     });
 
   return {
-    block: Blocks[blockId],
+    master: symbolMap[blockId],
     size: { width, height },
     blockText,
     blockParameters,
@@ -204,7 +198,7 @@ function Loader({
 
   return (
     <NoyaAPIProvider value={client}>
-      <Content blocks={Blocks} blockId={blockId} viewType={viewType} />
+      <Content blockId={blockId} viewType={viewType} />
     </NoyaAPIProvider>
   );
 }
@@ -273,7 +267,7 @@ export function InteractiveBlockPreview(props: BlockPreviewProps) {
 }
 
 function createLocalFile({
-  block,
+  master,
   size,
   blockText,
   blockParameters,
@@ -281,7 +275,7 @@ function createLocalFile({
   overrideValues,
 }: BlockExample) {
   const instance = SketchModel.symbolInstance({
-    symbolID: block.symbol.symbolID,
+    symbolID: master.symbolID,
     frame: SketchModel.rect({
       width: size.width,
       height: size.height,
@@ -308,10 +302,10 @@ function createLocalFile({
   const file: NoyaAPI.File = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    id: block.symbol.symbolID,
+    id: master.symbolID,
     version: 0,
     data: {
-      name: block.symbol.name,
+      name: master.name,
       schemaVersion: '0.1.0',
       document,
       type: 'io.noya.ayon',

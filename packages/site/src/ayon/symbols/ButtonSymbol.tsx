@@ -28,6 +28,7 @@ export const buttonSymbol = SketchModel.symbolMaster({
   blockDefinition: {
     placeholderText: 'Submit',
     schema,
+    hashtags: Object.values(schema).flat(),
     stylePresets: [
       { name: 'Default', parameters: [] },
       { name: 'Small', parameters: ['small'] },
@@ -56,12 +57,10 @@ export const buttonSymbol = SketchModel.symbolMaster({
       const style = parametersToTailwindStyle(instance.blockParameters);
       const parameters = new Set(instance.blockParameters);
 
-      const { variant, size, position } = getMappedParameters(parameters, {
-        variant: variantKeys,
-        size: sizeKeys,
-        position: positionKeys,
-        colorScheme: colorSchemeKeys,
-      });
+      const { variant, size, position } = getMappedParameters(
+        parameters,
+        schema,
+      );
 
       const disabled = parameters.has('disabled');
 

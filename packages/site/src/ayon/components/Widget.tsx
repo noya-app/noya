@@ -1,9 +1,5 @@
 import { fileOpen } from 'browser-fs-access';
-import {
-  FlatDispatcher,
-  useApplicationState,
-  useWorkspace,
-} from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   Button,
   Chip,
@@ -15,46 +11,30 @@ import {
   Stack,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import {
-  AffineTransform,
-  Rect,
-  createBounds,
-  transformRect,
-} from 'noya-geometry';
+import { AffineTransform, Rect, transformRect } from 'noya-geometry';
 import { ChevronDownIcon } from 'noya-icons';
-import { SketchModel } from 'noya-sketch-model';
-import {
-  Action,
-  BlockContent,
-  BlockProps,
-  DrawableLayerType,
-  Layers,
-  Overrides,
-  Selectors,
-} from 'noya-state';
+import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ConfigureBlockTypeWebp from '../../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../../components/OnboardingAnimation';
 import { useOnboarding } from '../../contexts/OnboardingContext';
-import { Blocks, allInsertableSymbols } from '../blocks/blocks';
-import { getRenderableBlockProps } from '../blocks/render';
-import { clearResolverCache } from '../resolve/resolve';
+import { allInsertableSymbols } from '../blocks/blocks';
 import { Stacking } from '../stacking';
-import { boxSymbolId, imageSymbolId } from '../symbols/symbolIds';
+import { imageSymbolId } from '../symbols/symbolIds';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
 
-function getElementRect(element: HTMLElement) {
-  const style = window.getComputedStyle(element);
-  const width = parseFloat(style.width);
-  const height = parseFloat(style.height);
-  const marginLeft = parseFloat(style.marginLeft);
-  const marginTop = parseFloat(style.marginTop);
-  const left = element.offsetLeft - marginLeft;
-  const top = element.offsetTop - marginTop;
-  return { width, height, x: left, y: top };
-}
+// function getElementRect(element: HTMLElement) {
+//   const style = window.getComputedStyle(element);
+//   const width = parseFloat(style.width);
+//   const height = parseFloat(style.height);
+//   const marginLeft = parseFloat(style.marginLeft);
+//   const marginTop = parseFloat(style.marginTop);
+//   const left = element.offsetLeft - marginLeft;
+//   const top = element.offsetTop - marginTop;
+//   return { width, height, x: left, y: top };
+// }
 
 const ContentElement = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
@@ -217,7 +197,7 @@ export const Widget = function Widget({
   const rect = Selectors.getBoundingRect(page, [layer.do_objectID])!;
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const symbol = Layers.isSymbolInstance(layer)
-    ? Blocks[layer.symbolID].symbol
+    ? Selectors.getSymbolMaster(state, layer.symbolID)
     : undefined;
 
   const isPrimarySelected = state.selectedLayerIds[0] === layer.do_objectID;
@@ -255,100 +235,6 @@ export const Widget = function Widget({
     }
   }, [showWidgetUI, isEditing]);
 
-  const onDetach = () => {
-    if (!Layers.isSymbolInstance(layer)) return;
-
-    const Block = Blocks[layer.symbolID];
-
-    const blockProps: BlockProps = {
-      layer,
-      getBlock: (id) => Blocks[id],
-      symbolId: layer.symbolID,
-      frame: layer.frame,
-      resolvedBlockData: layer.resolvedBlockData,
-      blockText: layer.blockText,
-      dataSet: {
-        id: layer.do_objectID,
-        parentId: layer.do_objectID,
-      },
-      overrideValues: layer.overrideValues,
-    };
-
-    const {
-      container: containerBlockProps,
-      children: childrenBlockProps,
-      extraParameters,
-    } = getRenderableBlockProps({
-      props: blockProps,
-      block: Block,
-    });
-
-    const flattenedChildrenBlockProps = childrenBlockProps.flatMap(
-      (childProps) => {
-        const block = blockProps.getBlock(childProps.symbolId);
-
-        if (block.isPassthrough) {
-          return getRenderableBlockProps({
-            props: childProps,
-            block: block,
-            extraParameters,
-          }).children;
-        }
-
-        return [childProps];
-      },
-    );
-
-    const containerLayer = SketchModel.symbolInstance({
-      symbolID: boxSymbolId,
-      blockText: containerBlockProps.blockText,
-      frame: layer.frame,
-    });
-
-    const actions: Action[] = [];
-
-    const layers = flattenedChildrenBlockProps.flatMap((child) => {
-      if (!child.dataSet) return [];
-
-      const element = document.querySelector<HTMLElement>(
-        `[data-noya-id="${child.dataSet.id}"][data-noya-parent-id="${child.dataSet.parentId}"]`,
-      );
-
-      if (!element) return [];
-
-      const elementRect = getElementRect(element);
-
-      const clone = SketchModel.symbolInstance({
-        symbolID: child.symbolId,
-        blockText: child.blockText,
-        frame: SketchModel.rect({
-          x: layer.frame.x + Math.round(elementRect.x),
-          y: layer.frame.y + Math.round(elementRect.y),
-          width: Math.ceil(elementRect.width),
-          height: Math.ceil(elementRect.height),
-        }),
-      });
-
-      return [clone];
-    });
-
-    actions.push(['deleteLayer', layer.do_objectID]);
-
-    const layersToInsert = [containerLayer, ...layers];
-
-    layersToInsert.forEach((child) => {
-      const bounds = createBounds(child.frame);
-
-      actions.push([
-        'addLayer',
-        child,
-        { point: { x: bounds.midX, y: bounds.midY } },
-      ]);
-    });
-
-    dispatch('batch', actions);
-  };
-
   if (!Layers.isSymbolInstance(layer)) return null;
 
   const blockText = layer.blockText ?? '';
@@ -380,17 +266,6 @@ export const Widget = function Widget({
                       <DividerVertical variant="strong" overflow={4} />
                     }
                   >
-                    {shouldShowReload(layer) && (
-                      <IconButton
-                        key="reload"
-                        iconName="ShuffleIcon"
-                        onClick={(event) => {
-                          event.preventDefault();
-
-                          clearResolvedData({ layer, dispatch });
-                        }}
-                      />
-                    )}
                     {layer.symbolID === imageSymbolId && (
                       <IconButton
                         iconName="UploadIcon"
@@ -415,16 +290,6 @@ export const Widget = function Widget({
                           onChangeBlockContent({
                             blockText: url,
                           });
-                        }}
-                      />
-                    )}
-                    {Blocks[layer.symbolID].isComposedBlock && (
-                      <IconButton
-                        iconName="LinkBreak2Icon"
-                        onPointerDown={(event) => {
-                          event.preventDefault();
-
-                          onDetach();
                         }}
                       />
                     )}
@@ -535,7 +400,7 @@ export function DrawingWidget() {
 }
 
 export function MultipleSelectionWidget() {
-  const [state, dispatch] = useApplicationState();
+  const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
   const transform = Selectors.getCanvasTransform(state, canvasInsets);
 
@@ -551,7 +416,7 @@ export function MultipleSelectionWidget() {
 
   const rect = transformRect(boundingRect, transform);
 
-  const layers = Selectors.getSelectedLayers(state);
+  // const layers = Selectors.getSelectedLayers(state);
 
   return (
     <WidgetContainer
@@ -565,23 +430,6 @@ export function MultipleSelectionWidget() {
             gap={6}
             separator={<DividerVertical variant="strong" overflow={4} />}
           >
-            {layers.filter(Layers.isSymbolInstance).some(shouldShowReload) && (
-              <IconButton
-                key="reload"
-                iconName="ShuffleIcon"
-                onClick={(event) => {
-                  event.preventDefault();
-
-                  const layers = Selectors.getSelectedLayers(state).filter(
-                    Layers.isSymbolInstance,
-                  );
-
-                  layers.forEach((layer) =>
-                    clearResolvedData({ layer, dispatch }),
-                  );
-                }}
-              />
-            )}
             <Button variant="none">Multiple</Button>
           </Stack.H>
         </ContentElement>
@@ -590,43 +438,43 @@ export function MultipleSelectionWidget() {
   );
 }
 
-function shouldShowReload(layer: Sketch.SymbolInstance): boolean {
-  const block = Blocks[layer.symbolID];
+// function shouldShowReload(layer: Sketch.SymbolInstance): boolean {
+//   const block = Blocks[layer.symbolID];
 
-  if (!block) return false;
+//   if (!block) return false;
 
-  if (block.usesResolver) return true;
+//   if (block.usesResolver) return true;
 
-  return block.symbol.layers
-    .filter(Layers.isSymbolInstance)
-    .some(shouldShowReload);
-}
+//   return block.symbol.layers
+//     .filter(Layers.isSymbolInstance)
+//     .some(shouldShowReload);
+// }
 
-function clearResolvedData({
-  layer,
-  dispatch,
-}: {
-  layer: Sketch.SymbolInstance;
-  dispatch: FlatDispatcher;
-}) {
-  dispatch('setResolvedBlockData', layer.do_objectID, undefined);
+// function clearResolvedData({
+//   layer,
+//   dispatch,
+// }: {
+//   layer: Sketch.SymbolInstance;
+//   dispatch: FlatDispatcher;
+// }) {
+//   dispatch('setResolvedBlockData', layer.do_objectID, undefined);
 
-  clearResolverCache(layer.do_objectID);
+//   clearResolverCache(layer.do_objectID);
 
-  layer.overrideValues.forEach((override) => {
-    const { layerIdPath, propertyType } = Overrides.decodeName(
-      override.overrideName,
-    );
+//   layer.overrideValues.forEach((override) => {
+//     const { layerIdPath, propertyType } = Overrides.decodeName(
+//       override.overrideName,
+//     );
 
-    if (propertyType === 'resolvedBlockData') {
-      clearResolverCache(`${layer.do_objectID}@${layerIdPath.join('/')}`);
+//     if (propertyType === 'resolvedBlockData') {
+//       clearResolverCache(`${layer.do_objectID}@${layerIdPath.join('/')}`);
 
-      dispatch(
-        'setOverrideValue',
-        [layer.do_objectID],
-        override.overrideName,
-        undefined,
-      );
-    }
-  });
-}
+//       dispatch(
+//         'setOverrideValue',
+//         [layer.do_objectID],
+//         override.overrideName,
+//         undefined,
+//       );
+//     }
+//   });
+// }

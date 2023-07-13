@@ -4,7 +4,7 @@ import {
 } from '@noya-design-system/protocol';
 import Sketch from 'noya-file-format';
 import { loadDesignSystem } from 'noya-module-loader';
-import { BlockDefinition, Layers } from 'noya-state';
+import { Layers } from 'noya-state';
 import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
@@ -138,7 +138,7 @@ function isSafeForJsxText(text: string) {
 export interface CompilerConfiguration {
   name: string;
   artboard: Sketch.Artboard;
-  Blocks: Record<string, BlockDefinition>;
+  symbolMap: Record<string, Sketch.SymbolMaster>;
   DesignSystem: string | DesignSystemDefinition;
   target: 'standalone' | 'codesandbox';
 }
@@ -228,37 +228,23 @@ function createSimpleElement(
 
 export function mapBlockToElement(
   {
-    Blocks,
+    symbolMap,
     DesignSystem,
   }: {
-    Blocks: CompilerConfiguration['Blocks'];
+    symbolMap: CompilerConfiguration['symbolMap'];
     DesignSystem: DesignSystemDefinition;
   },
   layer: Sketch.SymbolInstance,
 ): SimpleElement | undefined {
-  const block = Blocks[layer.symbolID];
+  const block = symbolMap[layer.symbolID];
 
-  if (!block) return;
+  if (!block || !block.blockDefinition?.render) return;
 
-  const element = block.render(
-    {
-      h: DesignSystem.createElement as any,
-      Components: DesignSystem.components,
-    },
-    {
-      layer: layer,
-      frame: layer.frame,
-      symbolId: layer.symbolID,
-      blockText: layer.blockText,
-      resolvedBlockData: layer.resolvedBlockData,
-      getBlock: (id) => Blocks[id],
-      overrideValues: layer.overrideValues,
-      dataSet: {
-        id: layer.do_objectID,
-        parentId: layer.do_objectID,
-      },
-    },
-  );
+  const element = block.blockDefinition.render({
+    Components: DesignSystem.components,
+    getSymbolMaster: (symbolId) => symbolMap[symbolId],
+    instance: layer,
+  });
 
   if (!element || !isValidElement(element)) return;
 
@@ -321,7 +307,7 @@ export async function compile(configuration: CompilerConfiguration) {
     .flatMap((layer) => {
       const element = mapBlockToElement(
         {
-          Blocks: configuration.Blocks,
+          symbolMap: configuration.symbolMap,
           DesignSystem,
         },
         layer,

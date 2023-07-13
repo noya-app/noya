@@ -4,7 +4,7 @@ import {
   BlockPreviewProps,
   InteractiveBlockPreview,
 } from '../../../docs/InteractiveBlockPreview';
-import { Blocks } from '../../blocks/blocks';
+import { symbolMap } from '../../blocks/blocks';
 
 export function InspectorCarousel({
   items,
@@ -24,7 +24,7 @@ export function InspectorCarousel({
           <GridView.Item
             key={index}
             id={props.blockId}
-            title={Blocks[props.blockId].symbol.name}
+            title={symbolMap[props.blockId].name}
             onClick={() => {
               onSelectItem(index);
             }}

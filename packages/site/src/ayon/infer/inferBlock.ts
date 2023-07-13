@@ -1,5 +1,5 @@
 import { DrawableLayerType, InferBlockProps, InferBlockType } from 'noya-state';
-import { allInsertableBlocks } from '../blocks/blocks';
+import { allInsertableSymbols } from '../blocks/blocks';
 import { InferredBlockTypeResult } from '../types';
 
 export function inferBlockTypes(
@@ -7,10 +7,13 @@ export function inferBlockTypes(
 ): InferredBlockTypeResult[] {
   let results: InferredBlockTypeResult[] = [];
 
-  for (const block of allInsertableBlocks) {
+  for (const symbol of allInsertableSymbols) {
     results.push({
-      type: { symbolId: block.symbol.symbolID },
-      score: block.infer(input),
+      type: { symbolId: symbol.symbolID },
+      score:
+        symbol.blockDefinition?.infer?.({
+          frame: input.frame,
+        }) ?? 0,
     });
   }
 
