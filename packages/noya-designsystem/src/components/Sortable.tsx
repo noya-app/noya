@@ -255,7 +255,9 @@ function SortableRoot({
         {renderOverlay &&
           createPortal(
             <DragOverlay dropAnimation={null}>
-              {activeIndex !== undefined && renderOverlay(activeIndex)}
+              {activeIndex !== undefined &&
+                activeIndex >= 0 &&
+                renderOverlay(activeIndex)}
             </DragOverlay>,
             document.body,
           )}

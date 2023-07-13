@@ -74,6 +74,7 @@ export type LayerAction =
       data: Sketch.AnyLayer | Sketch.AnyLayer[],
       options?: AddLayerOptions,
     ]
+  | [type: 'setLayers', layers: Sketch.SymbolInstance[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,

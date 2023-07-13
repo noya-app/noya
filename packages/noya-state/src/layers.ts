@@ -296,6 +296,8 @@ export const {
   diagram,
   flat,
   flatMap,
+  remove,
+  insert,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
 });
@@ -343,10 +345,10 @@ export const {
 });
 
 export {
+  EXCLUDE_AND_SKIP,
+  INCLUDE_AND_SKIP,
   SKIP,
   STOP,
-  INCLUDE_AND_SKIP,
-  EXCLUDE_AND_SKIP,
   findAllLayerIndexPaths as findAllIndexPaths,
 };
 

@@ -1,6 +1,15 @@
 import produce from 'immer';
+import cloneDeep from 'lodash/cloneDeep';
 import Sketch from 'noya-file-format';
-import { withOptions } from 'tree-visit';
+import { SketchModel } from 'noya-sketch-model';
+import { Overrides } from 'noya-state';
+import {
+  IndexPath,
+  InsertOptions,
+  MoveOptions,
+  RemoveOptions,
+  withOptions,
+} from 'tree-visit';
 import { Layers } from '../layer';
 import { PageLayer } from '../layers';
 import { decodeName, encodeName, getLayerOverride } from '../overrides';
@@ -23,7 +32,17 @@ export function applyOverrides({
   layerTextStyles,
 }: SymbolProps): Sketch.SymbolMaster {
   return produce(symbolMaster, (draft) => {
+    const layersOverride = overrideValues.find(
+      (value) => value.overrideName === 'layers',
+    );
+
+    if (layersOverride) {
+      draft.layers = cloneDeep((layersOverride?.value as any) ?? []);
+    }
+
     overrideValues.forEach(({ overrideName, value }) => {
+      if (overrideName === 'layers') return;
+
       const {
         layerIdPath: [layerId, ...remainingLayerIdPath],
         propertyType,
@@ -36,15 +55,21 @@ export function applyOverrides({
 
       if (!targetLayer) return;
 
-      if (remainingLayerIdPath.length > 0) {
+      if (remainingLayerIdPath.length > 0 || propertyType === 'layers') {
         if (!Layers.isSymbolInstance(targetLayer)) return;
 
+        const name = encodeName(remainingLayerIdPath, propertyType);
+
         // Propagate the override into the nested symbol and handle it there instead
-        targetLayer.overrideValues.push({
-          _class: 'overrideValue',
-          overrideName: encodeName(remainingLayerIdPath, propertyType),
-          value,
-        });
+        targetLayer.overrideValues = [
+          ...(targetLayer.overrideValues ?? []).filter(
+            (override) => override.overrideName !== name,
+          ),
+          SketchModel.overrideValue({
+            overrideName: name,
+            value,
+          }),
+        ];
       } else {
         const override = getLayerOverride(targetLayer, propertyType, value);
 
@@ -126,9 +151,15 @@ export const createOverrideHierarchy = (
           layerTextStyles: state.sketch.document.layerTextStyles,
         };
 
-  return withOptions<Sketch.AnyLayer>({
+  const Hierarchy = withOptions<Sketch.AnyLayer>({
     getChildren: (layer) => {
       if (Layers.isSymbolInstance(layer)) {
+        // console.log(
+        //   'getChildren',
+        //   layer.do_objectID,
+        //   layer.overrideValues.map((o) => o.overrideName),
+        // );
+
         const master = context.getSymbolMaster(layer.symbolID);
 
         if (!master) throw new Error(`Missing symbol master ${layer.symbolID}`);
@@ -146,4 +177,89 @@ export const createOverrideHierarchy = (
       return Layers.isParentLayer(layer) ? layer.layers : [];
     },
   });
+
+  const create =
+    (draft: Sketch.SymbolInstance) =>
+    (
+      node: Sketch.AnyLayer,
+      children: Sketch.AnyLayer[],
+      indexPath: IndexPath,
+    ) => {
+      const path = Hierarchy.accessPath(draft, indexPath)
+        .slice(1)
+        .map((layer) => layer.do_objectID);
+
+      const overrideName = Overrides.encodeName(path, 'layers');
+
+      const override = draft.overrideValues.find(
+        (override) => override.overrideName === overrideName,
+      );
+
+      // console.log('updating', overrideName);
+
+      if (override) {
+        override.value = [...children];
+      } else {
+        draft.overrideValues.push(
+          SketchModel.overrideValue({
+            overrideName,
+            value: [...children],
+          }),
+        );
+      }
+
+      return node;
+    };
+
+  return {
+    ...Hierarchy,
+    insert: (
+      rootLayer: Sketch.SymbolInstance,
+      options: Omit<InsertOptions<Sketch.AnyLayer>, 'create' | 'getChildren'>,
+    ) => {
+      return produce(rootLayer, (draft) => {
+        Hierarchy.insert(draft, { ...options, create: create(draft) });
+      });
+    },
+    remove: (
+      rootLayer: Sketch.SymbolInstance,
+      options: Omit<RemoveOptions<Sketch.AnyLayer>, 'create' | 'getChildren'>,
+    ) => {
+      return produce(rootLayer, (draft) => {
+        Hierarchy.remove(draft, { ...options, create: create(draft) });
+      });
+    },
+    move: (
+      rootLayer: Sketch.SymbolInstance,
+      options: Omit<MoveOptions<Sketch.AnyLayer>, 'create' | 'getChildren'>,
+    ) => {
+      // TODO: Unit tests that test Hero & button specifically
+      // console.log('move', options);
+
+      // function describeOverrides(layer: Sketch.SymbolInstance) {
+      //   return layer.overrideValues
+      //     .filter((override) => override.overrideName.endsWith('layers'))
+      //     .map((override) => {
+      //       return (
+      //         override.overrideName +
+      //         ' ' +
+      //         (override.value as Sketch.SymbolInstance[])
+      //           .map((layer) => layer.do_objectID)
+      //           .join(', ')
+      //       );
+      //     })
+      //     .join('\n');
+      // }
+
+      // console.log('before', describeOverrides(rootLayer));
+
+      const result = produce(rootLayer, (draft) => {
+        Hierarchy.move(draft, { ...options, create: create(draft) });
+      });
+
+      // console.log('after', describeOverrides(result));
+
+      return result;
+    },
+  };
 };

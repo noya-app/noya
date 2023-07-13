@@ -13,7 +13,7 @@ export function decodeName(overrideName: string) {
 }
 
 export function encodeName(layerIdPath: string[], propertyType: PropertyType) {
-  return [layerIdPath.join('/'), propertyType].join('_');
+  return [layerIdPath.join('/'), propertyType].filter(Boolean).join('_');
 }
 
 type PropertyValue = Sketch.OverrideValue['value'];
@@ -28,6 +28,7 @@ export type PropertyTypeMap = {
   blockText: string;
   resolvedBlockData: Sketch.ResolvedBlockData;
   isVisible: boolean;
+  layers: Sketch.AnyLayer[];
 };
 
 export type PropertyType = keyof PropertyTypeMap;
@@ -46,6 +47,9 @@ export function isValidProperty<T extends PropertyType>(
     }
     case 'image': {
       return typeof value !== 'string';
+    }
+    case 'layers': {
+      return Array.isArray(value);
     }
     case 'resolvedBlockData': {
       return true;
@@ -71,6 +75,14 @@ export function getLayerOverride(
       return { type: propertyType, value, layer } as const;
     }
     case 'resolvedBlockData':
+      if (
+        !Layers.isSymbolInstance(layer) ||
+        !isValidProperty(propertyType, value)
+      )
+        return;
+
+      return { type: propertyType, value, layer } as const;
+    case 'layers':
       if (
         !Layers.isSymbolInstance(layer) ||
         !isValidProperty(propertyType, value)

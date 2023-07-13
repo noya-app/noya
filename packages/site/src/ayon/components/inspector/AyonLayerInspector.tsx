@@ -1,9 +1,12 @@
 import { useApplicationState } from 'noya-app-state-context';
 import {
+  Button,
   Chip,
   CompletionItem,
+  IconButton,
   InputField,
   InputFieldWithCompletions,
+  RelativeDropPosition,
   Spacer,
   Stack,
   TreeView,
@@ -12,6 +15,7 @@ import Sketch from 'noya-file-format';
 import { DragHandleDots2Icon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
+import { SketchModel } from 'noya-sketch-model';
 import {
   Layers,
   OverriddenBlockContent,
@@ -25,7 +29,11 @@ import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { Blocks, allInsertableBlocks, symbolMap } from '../../blocks/blocks';
 import { inferBlockTypes } from '../../infer/inferBlock';
-import { boxSymbolId } from '../../symbols/symbolIds';
+import {
+  avatarSymbolId,
+  boxSymbolId,
+  buttonSymbolId,
+} from '../../symbols/symbolIds';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 
@@ -67,6 +75,7 @@ export function AyonLayerInspector({
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
   const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const nestedComponentSearchInputRef = React.useRef<HTMLInputElement>(null);
 
   const blockCompletionItems = useMemo(
     () =>
@@ -132,6 +141,9 @@ export function AyonLayerInspector({
     },
     '#': () => {
       styleSearchInputRef.current?.focus();
+    },
+    '+': () => {
+      nestedComponentSearchInputRef.current?.focus();
     },
   });
 
@@ -201,6 +213,7 @@ export function AyonLayerInspector({
     instance: Sketch.SymbolInstance;
     depth: number;
     path: string[];
+    indexPath: number[];
   };
 
   const Hierarchy = createOverrideHierarchy(state);
@@ -210,7 +223,7 @@ export function AyonLayerInspector({
     (layer, indexPath): LayerTreeItem[] => {
       if (!Layers.isSymbolInstance(layer)) return [];
 
-      if (!master.blockDefinition?.render && indexPath.length === 0) {
+      if (indexPath.length === 0 && !master.blockDefinition?.render) {
         return [];
       }
 
@@ -218,6 +231,7 @@ export function AyonLayerInspector({
         {
           instance: layer,
           depth: indexPath.length,
+          indexPath: indexPath.slice(),
           path: Hierarchy.accessPath(selectedLayer, indexPath)
             .slice(1)
             .map((layer) => layer.do_objectID),
@@ -225,6 +239,23 @@ export function AyonLayerInspector({
       ];
     },
   );
+
+  // console.log({
+  //   overrides: selectedLayer.overrideValues,
+  // });
+
+  const setAllOverrides = (updatedLayer: Sketch.SymbolInstance) => {
+    updatedLayer.overrideValues
+      .filter((override) => override.overrideName.endsWith('layers'))
+      .forEach((override) => {
+        dispatch(
+          'setOverrideValue',
+          [updatedLayer.do_objectID],
+          override.overrideName,
+          override.value,
+        );
+      });
+  };
 
   return (
     <Stack.V gap="1px">
@@ -356,6 +387,35 @@ export function AyonLayerInspector({
         />
       </InspectorSection>
       <InspectorSection title="Content" titleTextStyle="small">
+        <InputFieldWithCompletions
+          ref={nestedComponentSearchInputRef}
+          placeholder={'Content'}
+          items={[
+            {
+              name: 'Avatar',
+              id: avatarSymbolId,
+            },
+            {
+              name: 'Button',
+              id: buttonSymbolId,
+            },
+          ]}
+          onSelectItem={(item) => {
+            dispatch('setOverrideValue', undefined, 'layers', [
+              ...Hierarchy.getChildren(selectedLayer, []),
+              SketchModel.symbolInstance({
+                symbolID: item.id,
+              }),
+            ]);
+          }}
+          onHoverItem={(item) => {}}
+        >
+          <InputField.Button>
+            Insert
+            <Spacer.Horizontal size={8} inline />
+            <span style={{ opacity: 0.5 }}>+</span>
+          </InputField.Button>
+        </InputFieldWithCompletions>
         <Stack.V gap="4px">
           <TreeView.Root
             keyExtractor={({ instance: layer }) => layer.do_objectID}
@@ -363,20 +423,130 @@ export function AyonLayerInspector({
             expandable={false}
             variant="bare"
             indentation={24}
-            renderItem={({ instance: layer, depth, path }, index) => {
+            sortable
+            acceptsDrop={(
+              sourceId: string,
+              destinationId: string,
+              relationDropPosition: RelativeDropPosition,
+            ) => {
+              const sourcePaths = Hierarchy.findAllIndexPaths(
+                selectedLayer,
+                (layer) => sourceId === layer.do_objectID,
+              );
+              const destinationPath = Hierarchy.findIndexPath(
+                selectedLayer,
+                (layer) => layer.do_objectID === destinationId,
+              );
+
+              if (sourcePaths.length === 0 || !destinationPath) return false;
+
+              // Don't allow dragging into a descendant
+              if (
+                sourcePaths.some((sourcePath) =>
+                  isDeepEqual(
+                    sourcePath,
+                    destinationPath.slice(0, sourcePath.length),
+                  ),
+                )
+              )
+                return false;
+
+              // const sourceLayers = sourcePaths.map((sourcePath) =>
+              //   Hierarchy.access(selectedLayer, sourcePath),
+              // );
+
+              const destinationLayer = Hierarchy.access(
+                selectedLayer,
+                destinationPath,
+              );
+
+              const destinationExpanded =
+                destinationLayer.layerListExpandedType !==
+                Sketch.LayerListExpanded.Collapsed;
+
+              // Don't allow dragging below expanded layers - we'll fall back to inside
+              if (
+                destinationExpanded &&
+                Layers.isParentLayer(destinationLayer) &&
+                destinationLayer.layers.length > 0 &&
+                relationDropPosition === 'below'
+              ) {
+                return false;
+              }
+
+              // // Only allow dropping inside of parent layers
+              // if (
+              //   relationDropPosition === 'inside' &&
+              //   !Layers.isParentLayer(destinationLayer)
+              // ) {
+              //   return false;
+              // }
+
+              return true;
+            }}
+            onMoveItem={(
+              sourceIndex: number,
+              destinationIndex: number,
+              position: RelativeDropPosition,
+            ) => {
+              const sourceItem = flattened[sourceIndex];
+              const destinationItem = flattened[destinationIndex];
+
+              function applyUpdate() {
+                switch (position) {
+                  case 'above': {
+                    return Hierarchy.move(selectedLayer, {
+                      indexPaths: [sourceItem.indexPath],
+                      to: destinationItem.indexPath,
+                    });
+                  }
+                  case 'below': {
+                    return Hierarchy.move(selectedLayer, {
+                      indexPaths: [sourceItem.indexPath],
+                      to: [
+                        ...destinationItem.indexPath.slice(0, -1),
+                        destinationItem.indexPath.at(-1)! + 1,
+                      ],
+                    });
+                  }
+                  case 'inside': {
+                    return Hierarchy.move(selectedLayer, {
+                      indexPaths: [sourceItem.indexPath],
+                      to: [...destinationItem.indexPath, 0],
+                    });
+                  }
+                }
+              }
+
+              const updated = applyUpdate();
+
+              setAllOverrides(updated);
+            }}
+            renderItem={(
+              { instance: layer, depth, path, indexPath },
+              index,
+              { isDragging },
+            ) => {
               const symbol = symbolMap[layer.symbolID];
 
               const componentName = symbol?.name.toUpperCase();
               const placeholderText = symbol?.blockDefinition?.placeholderText;
+              const key = path.join('/');
 
               return (
                 <TreeView.Row
+                  key={key}
+                  id={layer.do_objectID}
                   depth={depth - 1}
                   icon={depth !== 0 && <DragHandleDots2Icon />}
                 >
-                  <Stack.H flex="1" padding={'4px 0'}>
+                  <Stack.H
+                    flex="1"
+                    padding={'4px 0'}
+                    opacity={isDragging ? 0.5 : 1}
+                  >
                     <InputField.Root
-                      key={[layer.do_objectID, index].join('_')}
+                      key={key}
                       labelPosition="end"
                       labelSize={60}
                     >
@@ -400,6 +570,33 @@ export function AyonLayerInspector({
                         <InputField.Label>{componentName}</InputField.Label>
                       )}
                     </InputField.Root>
+                    <Button
+                      variant="floating"
+                      onClick={() => {
+                        const updated = Hierarchy.insert(selectedLayer, {
+                          at: [...indexPath, 1000],
+                          nodes: [
+                            SketchModel.symbolInstance({
+                              symbolID: buttonSymbolId,
+                            }),
+                          ],
+                        });
+
+                        setAllOverrides(updated);
+                      }}
+                    >
+                      +
+                    </Button>
+                    <IconButton
+                      iconName="TrashIcon"
+                      onClick={() => {
+                        const updated = Hierarchy.remove(selectedLayer, {
+                          indexPaths: [indexPath],
+                        });
+
+                        setAllOverrides(updated);
+                      }}
+                    />
                   </Stack.H>
                 </TreeView.Row>
               );

@@ -1203,7 +1203,14 @@ export type OverrideValue = {
   _class: 'overrideValue';
   do_objectID?: Uuid;
   overrideName: OverrideName;
-  value: boolean | string | Uuid | FileRef | DataRef | ResolvedBlockData;
+  value:
+    | boolean
+    | string
+    | Uuid
+    | FileRef
+    | DataRef
+    | ResolvedBlockData
+    | AnyLayer[];
 };
 
 /**
