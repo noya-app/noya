@@ -59,6 +59,7 @@ export const imageSymbol = SketchModel.symbolMaster({
 
       return (
         <Image
+          key={instance.do_objectID}
           src={src}
           style={{
             minHeight: 0,

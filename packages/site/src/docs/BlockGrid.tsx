@@ -5,7 +5,7 @@ import {
   Stack,
   useDesignSystemConfiguration,
 } from 'noya-designsystem';
-import { BlockCategory, blockMetadata } from '../ayon/blocks/blockMetadata';
+import { BlockCategory, blockMetadata } from '../ayon/symbols/metadata';
 
 import { useRouter } from 'next/router';
 import React from 'react';

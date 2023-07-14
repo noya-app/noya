@@ -27,7 +27,11 @@ export const textSymbol = SketchModel.symbolMaster({
       );
 
       return (
-        <Text variant={undefined as any} style={style}>
+        <Text
+          key={instance.do_objectID}
+          variant={undefined as any}
+          style={style}
+        >
           {content}
         </Text>
       );

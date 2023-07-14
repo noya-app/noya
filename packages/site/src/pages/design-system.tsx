@@ -1,6 +1,6 @@
 import { GetServerSidePropsContext } from 'next';
 import React from 'react';
-import { blockMetadata } from '../ayon/blocks/blockMetadata';
+import { blockMetadata } from '../ayon/symbols/metadata';
 import { avatarSymbolId } from '../ayon/symbols/symbolIds';
 import { DesignSystemExplorer } from '../docs/DesignSystemExplorer';
 

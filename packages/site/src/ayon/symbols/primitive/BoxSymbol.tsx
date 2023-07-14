@@ -2,10 +2,10 @@ import { BoxProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import { findLast } from 'noya-utils';
 import React from 'react';
-import { getBlockThemeColors } from '../../blocks/blockTheme';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { boxSymbolId } from '../symbolIds';
+import { getBlockThemeColors } from '../symbolTheme';
 import { RenderProps } from '../types';
 
 export const boxSymbol = SketchModel.symbolMaster({

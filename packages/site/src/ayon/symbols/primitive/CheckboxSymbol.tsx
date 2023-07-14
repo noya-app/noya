@@ -39,6 +39,7 @@ export const checkboxSymbol = SketchModel.symbolMaster({
 
       return (
         <Checkbox
+          key={instance.do_objectID}
           checked={!!on}
           disabled={!!disabled}
           style={parametersToTailwindStyle(instance.blockParameters)}

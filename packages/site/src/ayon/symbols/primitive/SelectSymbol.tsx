@@ -1,10 +1,10 @@
 import { SelectProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../../blocks/blockTheme';
 import { isWithinRectRange } from '../../infer/score';
 import { getParameters } from '../../utils/getMappedParameters';
 import { selectSymbolId } from '../symbolIds';
+import { getBlockThemeColors } from '../symbolTheme';
 import { RenderProps } from '../types';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
@@ -53,6 +53,7 @@ export const selectSymbol = SketchModel.symbolMaster({
 
       return (
         <Select
+          key={instance.do_objectID}
           style={{
             backgroundColor,
             color,

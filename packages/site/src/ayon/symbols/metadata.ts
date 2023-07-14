@@ -30,7 +30,7 @@ import {
   textSymbolId,
   tileCardSymbolId,
   writeSymbolId,
-} from '../symbols/symbolIds';
+} from './symbolIds';
 
 export type BlockCategory = 'application' | 'marketing' | 'element';
 

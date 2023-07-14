@@ -1,9 +1,9 @@
 import { TableProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../../blocks/blockTheme';
 import { getParameters } from '../../utils/getMappedParameters';
 import { tableSymbolId } from '../symbolIds';
+import { getBlockThemeColors } from '../symbolTheme';
 import { RenderProps } from '../types';
 
 const placeholderText = `
@@ -40,6 +40,7 @@ export const tableSymbol = SketchModel.symbolMaster({
 
       return (
         <Table
+          key={instance.do_objectID}
           data={[]}
           columns={[]}
           style={{

@@ -1,10 +1,10 @@
 import { TagProps, TagSize, TagVariant } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { buttonColors } from '../../blocks/blockTheme';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { getMappedParameters } from '../../utils/getMappedParameters';
 import { tagSymbolId } from '../symbolIds';
+import { buttonColors } from '../symbolTheme';
 import { RenderProps } from '../types';
 
 const placeholderText = 'New';
@@ -41,6 +41,7 @@ export const tagSymbol = SketchModel.symbolMaster({
 
       return (
         <Tag
+          key={instance.do_objectID}
           style={style}
           {...(variant && { variant })}
           {...(size && { size })}

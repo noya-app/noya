@@ -1,9 +1,9 @@
 import { InputProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../../blocks/blockTheme';
 import { getParameters } from '../../utils/getMappedParameters';
 import { textareaSymbolId } from '../symbolIds';
+import { getBlockThemeColors } from '../symbolTheme';
 import { RenderProps } from '../types';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
@@ -29,6 +29,7 @@ export const textareaSymbol = SketchModel.symbolMaster({
 
       return (
         <Textarea
+          key={instance.do_objectID}
           value={content}
           disabled={!!disabled}
           style={{

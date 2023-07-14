@@ -18,7 +18,13 @@ export const switchSymbol = SketchModel.symbolMaster({
 
       const { on, disabled } = getParameters(instance.blockParameters);
 
-      return <Switch checked={!!on} disabled={!!disabled} />;
+      return (
+        <Switch
+          key={instance.do_objectID}
+          checked={!!on}
+          disabled={!!disabled}
+        />
+      );
     },
   },
 });

@@ -1,7 +1,6 @@
 import { InputProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../../blocks/blockTheme';
 import { isWithinRectRange } from '../../infer/score';
 import {
   getTailwindClassesByGroup,
@@ -9,6 +8,7 @@ import {
 } from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { inputSymbolId } from '../symbolIds';
+import { getBlockThemeColors } from '../symbolTheme';
 import { RenderProps } from '../types';
 
 const globalHashtags = [
@@ -50,6 +50,7 @@ export const inputSymbol = SketchModel.symbolMaster({
 
       return (
         <Input
+          key={instance.do_objectID}
           placeholder={content}
           disabled={!!disabled}
           style={{

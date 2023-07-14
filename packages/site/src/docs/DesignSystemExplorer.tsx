@@ -13,7 +13,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from 'noya-state';
 import { groupBy, uuid } from 'noya-utils';
 import React, { useEffect, useMemo, useState } from 'react';
-import { BlockMetadata } from '../ayon/blocks/blockMetadata';
+import { BlockMetadata } from '../ayon/symbols/metadata';
 import { ViewType } from '../ayon/types';
 import { Toolbar } from '../components/Toolbar';
 import { BlockExample, createBlockExample } from './InteractiveBlockPreview';

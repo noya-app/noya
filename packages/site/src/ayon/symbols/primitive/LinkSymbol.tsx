@@ -38,7 +38,7 @@ export const linkSymbol = SketchModel.symbolMaster({
       const hasIcon = parameters['icon-arrow-forward'];
 
       return (
-        <Link style={style} href="#">
+        <Link key={instance.do_objectID} style={style} href="#">
           {content}
           {hasIcon && (
             <IconArrowForward

@@ -38,6 +38,7 @@ export const radioSymbol = SketchModel.symbolMaster({
 
       return (
         <Radio
+          key={instance.do_objectID}
           checked={!!on}
           disabled={!!disabled}
           {...(!noLabel && { label: content })}

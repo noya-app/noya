@@ -3,7 +3,6 @@ import { isWithinRectRange } from '../../infer/score';
 import {
   buttonSymbolId,
   cardSymbolId,
-  heading5SymbolId,
   imageSymbolId,
   textSymbolId,
   tileCardSymbolId,
@@ -39,7 +38,8 @@ export const cardSymbol = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
-      symbolID: heading5SymbolId,
+      symbolID: textSymbolId,
+      // symbolID: heading5SymbolId,
       blockText: 'News #mt-4',
     }),
     SketchModel.symbolInstance({
@@ -80,7 +80,8 @@ export const tileCardSymbol = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       do_objectID: '91514627-b323-457e-bf05-228c5a96830d',
-      symbolID: heading5SymbolId,
+      symbolID: textSymbolId,
+      // symbolID: heading5SymbolId,
       blockText: 'How we can help your business. #flex-1 #mt-1',
     }),
     SketchModel.symbolInstance({
