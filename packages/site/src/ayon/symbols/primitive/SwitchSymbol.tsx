@@ -13,18 +13,12 @@ export const switchSymbol = SketchModel.symbolMaster({
   blockDefinition: {
     hashtags: globalHashtags,
     infer: ({ frame }) => 0.1,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Switch: React.FC<SwitchProps> = Components[switchSymbolId];
 
       const { on, disabled } = getParameters(instance.blockParameters);
 
-      return (
-        <Switch
-          key={instance.do_objectID}
-          checked={!!on}
-          disabled={!!disabled}
-        />
-      );
+      return <Switch {...passthrough} checked={!!on} disabled={!!disabled} />;
     },
   },
 });

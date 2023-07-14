@@ -1,4 +1,4 @@
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import {
   Chip,
   CompletionItem,
@@ -68,7 +68,6 @@ export function AyonLayerInspector({
   ) => void;
 }) {
   const [state, dispatch] = useApplicationState();
-  const theme = useDesignSystemTheme();
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
   const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
@@ -513,159 +512,188 @@ export function AyonLayerInspector({
             index,
             { isDragging },
           ) => {
-            const symbol = symbolMap[layer.symbolID];
-
-            const componentName = symbol?.name.toUpperCase();
-            const placeholderText = symbol?.blockDefinition?.placeholderText;
             const key = path.join('/');
 
             return (
-              <TreeView.Row
+              <ContentItem
                 key={key}
-                id={layer.do_objectID}
-                depth={depth - 1}
-                icon={depth !== 0 && <DragHandleDots2Icon />}
-              >
-                <Stack.V
-                  flex="1"
-                  border={`1px solid ${theme.colors.divider}`}
-                  padding="1px"
-                  margin="4px 0"
-                  borderRadius="6px"
-                  gap="2px"
-                >
-                  <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
-                    <InputField.Root
-                      key={key}
-                      labelPosition="end"
-                      labelSize={60}
-                    >
-                      <InputField.Input
-                        style={{
-                          background: 'transparent',
-                        }}
-                        value={layer.blockText ?? ''}
-                        placeholder={placeholderText}
-                        onChange={(value) => {
-                          if (depth === 0) {
-                            dispatch('setBlockText', undefined, value);
-                          } else {
-                            dispatch(
-                              'setOverrideValue',
-                              undefined,
-                              Overrides.encodeName(path, 'blockText'),
-                              value,
-                            );
-                          }
-                        }}
-                      />
-                      {componentName && (
-                        <InputField.Label>{componentName}</InputField.Label>
-                      )}
-                    </InputField.Root>
-                    {/* <Button
-                      variant="floating"
-                      onClick={() => {
-                        const updated = Hierarchy.insert(selectedLayer, {
-                          at: [...indexPath, 1000],
-                          nodes: [
-                            SketchModel.symbolInstance({
-                              symbolID: buttonSymbolId,
-                            }),
-                          ],
-                        });
-
-                        setAllOverrides(updated);
-                      }}
-                    >
-                      +
-                    </Button>
-                    <IconButton
-                      iconName="TrashIcon"
-                      onClick={() => {
-                        const updated = Hierarchy.remove(selectedLayer, {
-                          indexPaths: [indexPath],
-                        });
-
-                        setAllOverrides(updated);
-                      }}
-                    /> */}
-                  </Stack.H>
-                  {layer.blockParameters && layer.blockParameters.length > 0 && (
-                    <Stack.H flexWrap="wrap" gap="2px">
-                      {layer.blockParameters.map((parameter) => (
-                        <Chip
-                          key={parameter}
-                          size="small"
-                          deletable
-                          monospace
-                          onHoverDeleteChange={(isHovering) => {
-                            const updatedParameters = (
-                              layer.blockParameters ?? []
-                            ).filter((p) => p !== parameter);
-
-                            const overrideName = Overrides.encodeName(
-                              path,
-                              'blockParameters',
-                            );
-
-                            const updatedOverrideValues =
-                              selectedLayer.overrideValues
-                                .filter(
-                                  (override) =>
-                                    override.overrideName !== overrideName,
-                                )
-                                .concat(
-                                  SketchModel.overrideValue({
-                                    overrideName,
-                                    value: updatedParameters,
-                                  }),
-                                );
-
-                            if (isHovering) {
-                              onSetOverriddenBlock({
-                                blockId: selectedLayer.symbolID,
-                                blockText: selectedLayer.blockText,
-                                blockParameters: selectedLayer.blockParameters,
-                                overrideValues: updatedOverrideValues,
-                                resolvedBlockText:
-                                  selectedLayer.resolvedBlockData?.resolvedText,
-                              });
-                            } else {
-                              onSetOverriddenBlock(undefined);
-                            }
-                          }}
-                          onDelete={() => {
-                            const updatedParameters = (
-                              layer.blockParameters ?? []
-                            ).filter((p) => p !== parameter);
-
-                            const overrideName = Overrides.encodeName(
-                              path,
-                              'blockParameters',
-                            );
-
-                            dispatch(
-                              'setOverrideValue',
-                              undefined,
-                              overrideName,
-                              updatedParameters,
-                            );
-                          }}
-                        >
-                          {parameter}
-                        </Chip>
-                      ))}
-                    </Stack.H>
-                  )}
-                </Stack.V>
-              </TreeView.Row>
+                layer={layer}
+                depth={depth}
+                path={path}
+                selectedLayer={selectedLayer}
+                isDragging={isDragging}
+                onSetOverriddenBlock={onSetOverriddenBlock}
+              />
             );
           }}
         />
         <Spacer.Vertical size={32} />
       </InspectorSection>
     </Stack.V>
+  );
+}
+
+function ContentItem({
+  layer,
+  depth,
+  path,
+  selectedLayer,
+  isDragging,
+  onSetOverriddenBlock,
+}: {
+  layer: Sketch.SymbolInstance;
+  depth: number;
+  path: string[];
+  selectedLayer: Sketch.SymbolInstance;
+  isDragging: boolean;
+  onSetOverriddenBlock: (
+    overriddenBlock: BlockPreviewProps | undefined,
+  ) => void;
+}) {
+  const theme = useDesignSystemTheme();
+  const dispatch = useDispatch();
+  const symbol = symbolMap[layer.symbolID];
+
+  const componentName = symbol?.name.toUpperCase();
+  const placeholderText = symbol?.blockDefinition?.placeholderText;
+  const key = path.join('/');
+
+  return (
+    <TreeView.Row
+      key={key}
+      id={layer.do_objectID}
+      depth={depth - 1}
+      icon={depth !== 0 && <DragHandleDots2Icon />}
+    >
+      <Stack.V
+        flex="1"
+        border={`1px solid ${theme.colors.divider}`}
+        padding="1px"
+        margin="4px 0"
+        borderRadius="6px"
+        gap="2px"
+      >
+        <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
+          <InputField.Root key={key} labelPosition="end" labelSize={60}>
+            <InputField.Input
+              style={{
+                background: 'transparent',
+              }}
+              value={layer.blockText ?? ''}
+              placeholder={placeholderText}
+              onChange={(value) => {
+                if (depth === 0) {
+                  dispatch('setBlockText', undefined, value);
+                } else {
+                  dispatch(
+                    'setOverrideValue',
+                    undefined,
+                    Overrides.encodeName(path, 'blockText'),
+                    value,
+                  );
+                }
+              }}
+            />
+            {componentName && (
+              <InputField.Label>{componentName}</InputField.Label>
+            )}
+            <InputField.Button>Edit</InputField.Button>
+          </InputField.Root>
+          {/* <Button
+            variant="floating"
+            onClick={() => {
+              const updated = Hierarchy.insert(selectedLayer, {
+                at: [...indexPath, 1000],
+                nodes: [
+                  SketchModel.symbolInstance({
+                    symbolID: buttonSymbolId,
+                  }),
+                ],
+              });
+
+              setAllOverrides(updated);
+            }}
+          >
+            +
+          </Button>
+          <IconButton
+            iconName="TrashIcon"
+            onClick={() => {
+              const updated = Hierarchy.remove(selectedLayer, {
+                indexPaths: [indexPath],
+              });
+
+              setAllOverrides(updated);
+            }}
+          /> */}
+        </Stack.H>
+        {layer.blockParameters && layer.blockParameters.length > 0 && (
+          <Stack.H flexWrap="wrap" gap="2px">
+            {layer.blockParameters.map((parameter) => (
+              <Chip
+                key={parameter}
+                size="small"
+                deletable
+                monospace
+                onHoverDeleteChange={(isHovering) => {
+                  const updatedParameters = (
+                    layer.blockParameters ?? []
+                  ).filter((p) => p !== parameter);
+
+                  const overrideName = Overrides.encodeName(
+                    path,
+                    'blockParameters',
+                  );
+
+                  const updatedOverrideValues = selectedLayer.overrideValues
+                    .filter(
+                      (override) => override.overrideName !== overrideName,
+                    )
+                    .concat(
+                      SketchModel.overrideValue({
+                        overrideName,
+                        value: updatedParameters,
+                      }),
+                    );
+
+                  if (isHovering) {
+                    onSetOverriddenBlock({
+                      blockId: selectedLayer.symbolID,
+                      blockText: selectedLayer.blockText,
+                      blockParameters: selectedLayer.blockParameters,
+                      overrideValues: updatedOverrideValues,
+                      resolvedBlockText:
+                        selectedLayer.resolvedBlockData?.resolvedText,
+                    });
+                  } else {
+                    onSetOverriddenBlock(undefined);
+                  }
+                }}
+                onDelete={() => {
+                  const updatedParameters = (
+                    layer.blockParameters ?? []
+                  ).filter((p) => p !== parameter);
+
+                  const overrideName = Overrides.encodeName(
+                    path,
+                    'blockParameters',
+                  );
+
+                  dispatch(
+                    'setOverrideValue',
+                    undefined,
+                    overrideName,
+                    updatedParameters,
+                  );
+                }}
+              >
+                {parameter}
+              </Chip>
+            ))}
+          </Stack.H>
+        )}
+      </Stack.V>
+    </TreeView.Row>
   );
 }
 

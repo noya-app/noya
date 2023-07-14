@@ -25,7 +25,7 @@ export const linkSymbol = SketchModel.symbolMaster({
     ],
     placeholderText,
     infer: ({ frame }) => 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Link: React.FC<LinkProps> = Components[linkSymbolId];
       const IconArrowForward: React.FC<IconProps> =
         Components[component.id.IconArrowForward];
@@ -38,7 +38,7 @@ export const linkSymbol = SketchModel.symbolMaster({
       const hasIcon = parameters['icon-arrow-forward'];
 
       return (
-        <Link key={instance.do_objectID} style={style} href="#">
+        <Link {...passthrough} style={style} href="#">
           {content}
           {hasIcon && (
             <IconArrowForward

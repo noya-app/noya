@@ -20,7 +20,7 @@ export const tagSymbol = SketchModel.symbolMaster({
     hashtags: [...variantKeys, ...sizeKeys, ...colorSchemeKeys],
     placeholderText,
     infer: ({ frame }) => 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Tag: React.FC<TagProps> = Components[tagSymbolId];
 
       const content = instance.blockText ?? placeholderText;
@@ -41,7 +41,7 @@ export const tagSymbol = SketchModel.symbolMaster({
 
       return (
         <Tag
-          key={instance.do_objectID}
+          {...passthrough}
           style={style}
           {...(variant && { variant })}
           {...(size && { size })}

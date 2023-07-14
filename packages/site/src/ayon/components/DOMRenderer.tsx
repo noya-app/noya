@@ -62,9 +62,14 @@ function renderDynamicContent(
   type RenderableItem = {
     instance: Sketch.SymbolInstance;
     nested: RenderableItem[];
+    indexPath: number[];
   };
 
-  function renderSymbol({ instance, nested }: RenderableItem): ReactNode {
+  function renderSymbol({
+    instance,
+    nested,
+    indexPath,
+  }: RenderableItem): ReactNode {
     const master = symbolMap[instance.symbolID];
 
     if (!master) return null;
@@ -73,6 +78,9 @@ function renderDynamicContent(
       master.blockDefinition?.render ?? boxSymbol.blockDefinition!.render!;
 
     const content: ReactNode = render({
+      passthrough: {
+        key: `${indexPath.join('.')}-${instance.do_objectID}}`,
+      },
       Components: system.components,
       instance: produce(instance, (draft) => {
         draft.blockParameters =
@@ -86,11 +94,9 @@ function renderDynamicContent(
     return content;
   }
 
-  function renderTopLevelSymbol({
-    instance,
-    nested,
-  }: RenderableItem): ReactNode {
-    const content = renderSymbol({ instance, nested });
+  function renderTopLevelSymbol(item: RenderableItem): ReactNode {
+    const content = renderSymbol(item);
+    const { instance } = item;
 
     return (
       <div
@@ -130,17 +136,27 @@ function renderDynamicContent(
 
   const hierarchy = createOverrideHierarchy(
     getSymbolMaster,
-  ).map<RenderableItem>(artboard, (instance, transformedChildren) => {
-    return {
-      instance: instance as Sketch.SymbolInstance,
-      nested: transformedChildren,
-    };
-  });
+  ).map<RenderableItem>(
+    artboard,
+    (instance, transformedChildren, indexPath) => {
+      return {
+        instance: instance as Sketch.SymbolInstance,
+        nested: transformedChildren,
+        indexPath: [...indexPath],
+      };
+    },
+  );
 
   const content = [
     ...hierarchy.nested.map(renderTopLevelSymbol),
     ...(drawingLayer
-      ? [renderTopLevelSymbol({ instance: drawingLayer, nested: [] })]
+      ? [
+          renderTopLevelSymbol({
+            instance: drawingLayer,
+            nested: [],
+            indexPath: [-1],
+          }),
+        ]
       : []),
   ];
 

@@ -31,7 +31,7 @@ export const selectSymbol = SketchModel.symbolMaster({
       })
         ? 0.7
         : 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Select: React.FC<SelectProps> = Components[selectSymbolId];
 
       const items: { content: string; parameters: Record<string, boolean> }[] =
@@ -53,7 +53,7 @@ export const selectSymbol = SketchModel.symbolMaster({
 
       return (
         <Select
-          key={instance.do_objectID}
+          {...passthrough}
           style={{
             backgroundColor,
             color,

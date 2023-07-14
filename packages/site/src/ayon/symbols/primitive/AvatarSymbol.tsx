@@ -21,7 +21,7 @@ export const avatarSymbol = SketchModel.symbolMaster({
       }) && isApproximatelySquare(frame, 0.2)
         ? 0.8
         : 0,
-    render({ Components, instance }: RenderProps) {
+    render({ Components, instance, passthrough }: RenderProps) {
       const Avatar: React.FC<AvatarProps> = Components[avatarSymbolId];
 
       const content = instance.blockText ?? '';
@@ -30,7 +30,7 @@ export const avatarSymbol = SketchModel.symbolMaster({
 
       return (
         <Avatar
-          key={instance.do_objectID}
+          {...passthrough}
           src={src}
           name={content}
           style={{

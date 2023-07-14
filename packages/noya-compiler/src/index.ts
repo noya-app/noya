@@ -241,6 +241,7 @@ export function mapBlockToElement(
   if (!block || !block.blockDefinition?.render) return;
 
   const element = block.blockDefinition.render({
+    passthrough: {},
     Components: DesignSystem.components,
     getSymbolMaster: (symbolId) => symbolMap[symbolId],
     instance: layer,

@@ -20,7 +20,7 @@ export const imageSymbol = SketchModel.symbolMaster({
     hashtags: ['contain', 'fill', ...tailwindBlockClasses],
     usesResolver: true,
     placeholderText,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Image: React.FC<ImageProps> = Components[imageSymbolId];
       const Box: React.FC<ImageProps> = Components[boxSymbolId];
 
@@ -43,6 +43,7 @@ export const imageSymbol = SketchModel.symbolMaster({
 
         return (
           <Box
+            {...passthrough}
             style={{
               ...style,
               display: 'flex',
@@ -59,7 +60,7 @@ export const imageSymbol = SketchModel.symbolMaster({
 
       return (
         <Image
-          key={instance.do_objectID}
+          {...passthrough}
           src={src}
           style={{
             minHeight: 0,

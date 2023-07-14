@@ -28,7 +28,7 @@ export const tableSymbol = SketchModel.symbolMaster({
     hashtags: globalHashtags,
     placeholderText,
     infer: () => 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Table: React.FC<TableProps<any>> = Components[tableSymbolId];
 
       const { dark, accent } = getParameters(instance.blockParameters);
@@ -40,7 +40,7 @@ export const tableSymbol = SketchModel.symbolMaster({
 
       return (
         <Table
-          key={instance.do_objectID}
+          {...passthrough}
           data={[]}
           columns={[]}
           style={{

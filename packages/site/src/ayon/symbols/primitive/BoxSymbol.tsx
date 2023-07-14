@@ -16,7 +16,7 @@ export const boxSymbol = SketchModel.symbolMaster({
   name: 'Box',
   blockDefinition: {
     hashtags: tailwindBlockClasses,
-    render({ Components, instance, children }: RenderProps) {
+    render({ Components, instance, children, passthrough }: RenderProps) {
       const Box: React.FC<BoxProps> = Components[boxSymbolId];
       const parameters = getParameters(instance.blockParameters);
       const hashtags = Object.keys(parameters);
@@ -38,7 +38,7 @@ export const boxSymbol = SketchModel.symbolMaster({
 
       return (
         <Box
-          key={instance.do_objectID}
+          {...passthrough}
           style={{
             display: 'flex',
             ...themeStyle,

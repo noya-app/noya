@@ -47,7 +47,12 @@ export const buttonSymbol = SketchModel.symbolMaster({
       })
         ? 0.8
         : 0,
-    render({ Components, instance, getSymbolMaster }: RenderProps) {
+    render({
+      Components,
+      instance,
+      getSymbolMaster,
+      passthrough,
+    }: RenderProps) {
       const Button: React.FC<ButtonProps> = Components[buttonSymbolId];
 
       const master = getSymbolMaster(instance.symbolID);
@@ -78,7 +83,7 @@ export const buttonSymbol = SketchModel.symbolMaster({
 
       return (
         <Button
-          key={instance.do_objectID}
+          {...passthrough}
           {...(disabled && { disabled: true })}
           {...(variant && { variant })}
           {...(size && { size })}

@@ -33,7 +33,7 @@ export const inputSymbol = SketchModel.symbolMaster({
       })
         ? 0.75
         : 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Input: React.FC<InputProps> = Components[inputSymbolId];
 
       const content = instance.blockText;
@@ -50,7 +50,7 @@ export const inputSymbol = SketchModel.symbolMaster({
 
       return (
         <Input
-          key={instance.do_objectID}
+          {...passthrough}
           placeholder={content}
           disabled={!!disabled}
           style={{

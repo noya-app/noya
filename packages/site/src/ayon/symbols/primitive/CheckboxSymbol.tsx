@@ -27,7 +27,7 @@ export const checkboxSymbol = SketchModel.symbolMaster({
       })
         ? 0.8
         : 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Checkbox: React.FC<CheckboxProps> = Components[checkboxSymbolId];
 
       const {
@@ -39,7 +39,7 @@ export const checkboxSymbol = SketchModel.symbolMaster({
 
       return (
         <Checkbox
-          key={instance.do_objectID}
+          {...passthrough}
           checked={!!on}
           disabled={!!disabled}
           style={parametersToTailwindStyle(instance.blockParameters)}

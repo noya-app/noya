@@ -14,7 +14,7 @@ export const textareaSymbol = SketchModel.symbolMaster({
   blockDefinition: {
     hashtags: globalHashtags,
     infer: ({ frame }) => 0.1,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Textarea: React.FC<InputProps> = Components[textareaSymbolId];
 
       const content = instance.blockText;
@@ -29,7 +29,7 @@ export const textareaSymbol = SketchModel.symbolMaster({
 
       return (
         <Textarea
-          key={instance.do_objectID}
+          {...passthrough}
           value={content}
           disabled={!!disabled}
           style={{

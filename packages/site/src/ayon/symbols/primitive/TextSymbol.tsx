@@ -16,7 +16,7 @@ export const textSymbol = SketchModel.symbolMaster({
   blockDefinition: {
     hashtags: ['left', 'center', 'right', ...tailwindTextClasses, 'flex-1'],
     infer: ({ frame }) => 0.1,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Text: React.FC<TextProps> = Components[textSymbolId];
 
       const content = instance.blockText;
@@ -27,11 +27,7 @@ export const textSymbol = SketchModel.symbolMaster({
       );
 
       return (
-        <Text
-          key={instance.do_objectID}
-          variant={undefined as any}
-          style={style}
-        >
+        <Text {...passthrough} variant={undefined as any} style={style}>
           {content}
         </Text>
       );

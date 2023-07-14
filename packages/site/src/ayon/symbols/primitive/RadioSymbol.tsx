@@ -26,7 +26,7 @@ export const radioSymbol = SketchModel.symbolMaster({
       })
         ? 0.8
         : 0,
-    render: ({ Components, instance }: RenderProps) => {
+    render: ({ Components, instance, passthrough }: RenderProps) => {
       const Radio: React.FC<RadioProps> = Components[radioSymbolId];
 
       const content = instance.blockText ?? placeholderText;
@@ -38,7 +38,7 @@ export const radioSymbol = SketchModel.symbolMaster({
 
       return (
         <Radio
-          key={instance.do_objectID}
+          {...passthrough}
           checked={!!on}
           disabled={!!disabled}
           {...(!noLabel && { label: content })}

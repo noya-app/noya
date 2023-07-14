@@ -1148,6 +1148,7 @@ export type BlockDefinition = {
     frame: Omit<Rect, '_class' | 'constrainProportions'>;
   }) => number;
   render?: (props: {
+    passthrough: Record<string, any>;
     Components: any;
     instance: SymbolInstance;
     children?: any;
