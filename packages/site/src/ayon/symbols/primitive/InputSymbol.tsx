@@ -1,15 +1,15 @@
 import { InputProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../blocks/blockTheme';
-import { isWithinRectRange } from '../infer/score';
+import { getBlockThemeColors } from '../../blocks/blockTheme';
+import { isWithinRectRange } from '../../infer/score';
 import {
   getTailwindClassesByGroup,
   parametersToTailwindStyle,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { inputSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { inputSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const globalHashtags = [
   'dark',

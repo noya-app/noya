@@ -5,11 +5,11 @@ import {
 } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { isWithinRectRange } from '../infer/score';
-import { parametersToTailwindStyle } from '../tailwind/tailwind';
-import { getMappedParameters } from '../utils/getMappedParameters';
-import { buttonSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+import { isWithinRectRange } from '../../infer/score';
+import { parametersToTailwindStyle } from '../../tailwind/tailwind';
+import { getMappedParameters } from '../../utils/getMappedParameters';
+import { buttonSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const colorSchemeKeys = ['dark', 'light'];
 const sizeKeys: ButtonSize[] = ['small', 'medium', 'large'];

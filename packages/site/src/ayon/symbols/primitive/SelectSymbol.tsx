@@ -1,11 +1,11 @@
 import { SelectProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../blocks/blockTheme';
-import { isWithinRectRange } from '../infer/score';
-import { getParameters } from '../utils/getMappedParameters';
-import { selectSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+import { getBlockThemeColors } from '../../blocks/blockTheme';
+import { isWithinRectRange } from '../../infer/score';
+import { getParameters } from '../../utils/getMappedParameters';
+import { selectSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 

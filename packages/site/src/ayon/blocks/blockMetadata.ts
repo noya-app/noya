@@ -13,7 +13,7 @@ import {
   heading4SymbolId,
   heading5SymbolId,
   heading6SymbolId,
-  heroSymbolV2Id,
+  heroSymbolId,
   heroWithImageSymbolId,
   iconSymbolId,
   imageSymbolId,
@@ -85,7 +85,7 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     category: 'element',
     preferredSize: { width: 200, height: 200 },
   },
-  [heroSymbolV2Id]: {
+  [heroSymbolId]: {
     name: 'Hero',
     category: 'marketing',
     preferredSize: { width: 600, height: 400 },

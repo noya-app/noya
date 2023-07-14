@@ -1,10 +1,10 @@
 import { InputProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getBlockThemeColors } from '../blocks/blockTheme';
-import { getParameters } from '../utils/getMappedParameters';
-import { textareaSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+import { getBlockThemeColors } from '../../blocks/blockTheme';
+import { getParameters } from '../../utils/getMappedParameters';
+import { textareaSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const globalHashtags = ['dark', 'accent', 'disabled'];
 

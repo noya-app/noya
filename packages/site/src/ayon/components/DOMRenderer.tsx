@@ -29,7 +29,7 @@ import React, {
   useRef,
 } from 'react';
 import { symbolMap } from '../blocks/blocks';
-import { boxSymbol } from '../symbols/BoxSymbol';
+import { boxSymbol } from '../symbols/primitive/BoxSymbol';
 import { recreateElement } from '../utils/recreateElement';
 
 class ErrorBoundary extends React.Component<any> {

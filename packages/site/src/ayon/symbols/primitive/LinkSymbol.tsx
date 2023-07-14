@@ -4,10 +4,10 @@ import React from 'react';
 import {
   parametersToTailwindStyle,
   tailwindTextClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { linkSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { linkSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const placeholderText = 'Read More';
 

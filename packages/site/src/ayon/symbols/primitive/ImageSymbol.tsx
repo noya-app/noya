@@ -5,10 +5,10 @@ import React from 'react';
 import {
   parametersToTailwindStyle,
   tailwindBlockClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { imageSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { imageSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const placeholderText = 'landscape';
 

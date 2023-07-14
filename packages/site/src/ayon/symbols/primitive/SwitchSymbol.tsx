@@ -1,9 +1,9 @@
 import { SwitchProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
-import { getParameters } from '../utils/getMappedParameters';
-import { switchSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+import { getParameters } from '../../utils/getMappedParameters';
+import { switchSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 const globalHashtags = ['on', 'off', 'disabled'];
 

@@ -5,10 +5,10 @@ import {
   parametersToTailwindStyle,
   simpleAlignmentResolver,
   tailwindTextClasses,
-} from '../tailwind/tailwind';
-import { getParameters } from '../utils/getMappedParameters';
-import { textSymbolId } from './symbolIds';
-import { RenderProps } from './types';
+} from '../../tailwind/tailwind';
+import { getParameters } from '../../utils/getMappedParameters';
+import { textSymbolId } from '../symbolIds';
+import { RenderProps } from '../types';
 
 export const textSymbol = SketchModel.symbolMaster({
   symbolID: textSymbolId,

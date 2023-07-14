@@ -17,7 +17,7 @@ import {
   buttonSymbolId,
   cardSymbolId,
   checkboxSymbolId,
-  heroSymbolV2Id,
+  heroSymbolId,
   iconSymbolId,
   imageSymbolId,
   linkSymbolId,
@@ -142,7 +142,7 @@ describe('icon', () => {
 describe('hero', () => {
   test('default', () => {
     const symbol = SketchModel.symbolInstance({
-      symbolID: heroSymbolV2Id,
+      symbolID: heroSymbolId,
       frame: SketchModel.rect({
         width: 400,
         height: 400,
@@ -154,7 +154,7 @@ describe('hero', () => {
 
   test('left aligned', () => {
     const symbol = SketchModel.symbolInstance({
-      symbolID: heroSymbolV2Id,
+      symbolID: heroSymbolId,
       frame: SketchModel.rect({
         width: 400,
         height: 400,
@@ -167,7 +167,7 @@ describe('hero', () => {
 
   test('with bg', () => {
     const symbol = SketchModel.symbolInstance({
-      symbolID: heroSymbolV2Id,
+      symbolID: heroSymbolId,
       frame: SketchModel.rect({
         width: 400,
         height: 400,
