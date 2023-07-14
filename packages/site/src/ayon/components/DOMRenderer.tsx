@@ -29,7 +29,6 @@ import React, {
   useRef,
 } from 'react';
 import { boxSymbol } from '../symbols/primitive/BoxSymbol';
-import { symbolMap } from '../symbols/symbols';
 import { recreateElement } from '../utils/recreateElement';
 
 class ErrorBoundary extends React.Component<any> {
@@ -70,7 +69,7 @@ function renderDynamicContent(
     nested,
     indexPath,
   }: RenderableItem): ReactNode {
-    const master = symbolMap[instance.symbolID];
+    const master = getSymbolMaster(instance.symbolID);
 
     if (!master) return null;
 

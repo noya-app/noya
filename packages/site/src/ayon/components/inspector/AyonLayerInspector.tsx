@@ -20,16 +20,16 @@ import {
   Layers,
   OverriddenBlockContent,
   Overrides,
+  Selectors,
   createOverrideHierarchy,
   getSiblingBlocks,
-  getSymbolMaster,
 } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
-import { allInsertableSymbols, symbolMap } from '../../symbols/symbols';
+import { allInsertableSymbols } from '../../symbols/symbols';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 
@@ -97,7 +97,7 @@ export function AyonLayerInspector({
         setOverriddenBlock({
           layerId: selectedLayer.do_objectID,
           blockContent: {
-            symbolId: item.blockId,
+            symbolId: item.symbolId,
             blockText: item.blockText,
             overrides: item.overrideValues,
             blockParameters: item.blockParameters,
@@ -115,7 +115,7 @@ export function AyonLayerInspector({
       onSetOverriddenBlock(
         item
           ? {
-              blockId: item.id,
+              symbolId: item.id,
               blockText: selectedLayer.blockText,
               overrideValues: selectedLayer.overrideValues,
               resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
@@ -143,7 +143,11 @@ export function AyonLayerInspector({
     },
   });
 
-  const master = getSymbolMaster(state, selectedLayer.symbolID);
+  const getSymbolMaster = useCallback(
+    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
+    [state],
+  );
+  const master = getSymbolMaster(selectedLayer.symbolID);
   const componentName = master.name;
   const blockTypes = inferBlockTypes({
     frame: selectedLayer.frame,
@@ -157,7 +161,8 @@ export function AyonLayerInspector({
 
   const relatedBlocks: BlockPreviewProps[] = [
     {
-      blockId: selectedLayer.symbolID,
+      name: componentName,
+      symbolId: selectedLayer.symbolID,
       blockText: selectedLayer.blockText,
       blockParameters: parameters,
       overrideValues: selectedLayer.overrideValues,
@@ -166,13 +171,14 @@ export function AyonLayerInspector({
     ...blockTypes
       .flatMap(({ type }) => (typeof type === 'string' ? [] : type.symbolId))
       .filter(
-        (blockId) =>
-          blockId !== boxSymbolId && blockId !== selectedLayer.symbolID,
+        (symbolId) =>
+          symbolId !== boxSymbolId && symbolId !== selectedLayer.symbolID,
       )
       .slice(0, 2)
       .map(
-        (blockId): BlockPreviewProps => ({
-          blockId,
+        (symbolId): BlockPreviewProps => ({
+          name: getSymbolMaster(symbolId).name,
+          symbolId: symbolId,
           blockText: selectedLayer.blockText,
           blockParameters: parameters,
           overrideValues: selectedLayer.overrideValues.filter(
@@ -185,7 +191,8 @@ export function AyonLayerInspector({
 
   const presetStyles: BlockPreviewProps[] =
     master.blockDefinition?.stylePresets?.map((preset) => ({
-      blockId: selectedLayer.symbolID,
+      name: componentName,
+      symbolId: selectedLayer.symbolID,
       blockText: selectedLayer.blockText,
       blockParameters: preset.parameters,
       overrideValues: selectedLayer.overrideValues,
@@ -282,10 +289,11 @@ export function AyonLayerInspector({
           key={selectedLayer.symbolID}
           items={relatedBlocks}
           selectedIndex={0}
+          getSymbolMaster={getSymbolMaster}
           onSelectItem={(index) => {
             dispatch(
               'setSymbolInstanceSource',
-              relatedBlocks[index].blockId,
+              relatedBlocks[index].symbolId,
               'preserveCurrent',
             );
           }}
@@ -309,7 +317,7 @@ export function AyonLayerInspector({
           onHoverItem={(item) => {
             if (item) {
               onSetOverriddenBlock({
-                blockId: selectedLayer.symbolID,
+                symbolId: selectedLayer.symbolID,
                 blockText: selectedLayer.blockText,
                 blockParameters: (parameters ?? []).concat(item.name),
                 overrideValues: selectedLayer.overrideValues,
@@ -337,7 +345,7 @@ export function AyonLayerInspector({
                 onHoverDeleteChange={(isHovering) => {
                   if (isHovering) {
                     onSetOverriddenBlock({
-                      blockId: selectedLayer.symbolID,
+                      symbolId: selectedLayer.symbolID,
                       blockText: selectedLayer.blockText,
                       blockParameters: (parameters ?? []).filter(
                         (p) => p !== parameter,
@@ -369,6 +377,7 @@ export function AyonLayerInspector({
               <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
             </InspectorPrimitives.SectionHeader>
             <InspectorCarousel
+              getSymbolMaster={getSymbolMaster}
               items={presetStyles}
               selectedIndex={presetStyles.findIndex((style) =>
                 isDeepEqual(style.blockParameters, parameters),
@@ -562,11 +571,14 @@ function ContentItem({
 }) {
   const theme = useDesignSystemTheme();
   const [state, dispatch] = useApplicationState();
-  const symbol = symbolMap[layer.symbolID];
-  const master = getSymbolMaster(state, layer.symbolID);
+  const getSymbolMaster = useCallback(
+    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
+    [state],
+  );
+  const master = getSymbolMaster(layer.symbolID);
 
-  const componentName = symbol?.name.toUpperCase();
-  const placeholderText = symbol?.blockDefinition?.placeholderText;
+  const componentName = master.name.toUpperCase();
+  const placeholderText = master.blockDefinition?.placeholderText;
   const key = path.join('/');
 
   const [hovered, setHovered] = React.useState(false);

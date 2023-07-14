@@ -73,6 +73,10 @@ export const Content = memo(function Content({
   const CanvasKit = useCanvasKit();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
+  const getSymbolMaster = useCallback(
+    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
+    [state],
+  );
 
   const [overriddenBlock, _setOverriddenBlock] = React.useState<
     OverriddenBlockContent | undefined
@@ -150,6 +154,7 @@ export const Content = memo(function Content({
       .flatMap((layer) =>
         resolveLayer({
           layer,
+          getSymbolMaster,
           onResolve: (resolved, attribution) => {
             dispatch('setResolvedBlockData', layer.do_objectID, resolved);
 
@@ -181,7 +186,7 @@ export const Content = memo(function Content({
     return () => {
       subscriptions.forEach((unsubscribe) => unsubscribe());
     };
-  }, [dispatch, isPlayground, layers, setToastDataDebounced]);
+  }, [dispatch, getSymbolMaster, isPlayground, layers, setToastDataDebounced]);
 
   const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;

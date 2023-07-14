@@ -63,7 +63,7 @@ import React, {
 import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Content } from '../ayon/components/Content';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
-import { allSymbols, symbolMap } from '../ayon/symbols/symbols';
+import { allSymbols } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
@@ -158,6 +158,11 @@ function Workspace({
 
     onChangeDocument?.(documentWithoutForeignSymbols);
   }, [state.history.present.sketch, onChangeDocument]);
+
+  const getSymbolMaster = useCallback(
+    (id: string) => Selectors.getSymbolMaster(state.history.present, id),
+    [state.history.present],
+  );
 
   const artboard = Layers.find<Sketch.Artboard>(
     Selectors.getCurrentPage(state.history.present),
@@ -406,7 +411,7 @@ function Workspace({
                 const result = await compile({
                   name,
                   artboard,
-                  symbolMap,
+                  getSymbolMaster,
                   DesignSystem: designSystem,
                   target: 'standalone',
                 });
@@ -429,7 +434,7 @@ function Workspace({
                 const result = await compile({
                   name,
                   artboard,
-                  symbolMap,
+                  getSymbolMaster,
                   DesignSystem: designSystem,
                   target: 'codesandbox',
                 });
@@ -476,6 +481,7 @@ function Workspace({
     fileId,
     designSystem,
     isPlayground,
+    getSymbolMaster,
   ]);
 
   useLayoutEffect(() => {

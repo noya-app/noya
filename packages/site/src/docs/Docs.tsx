@@ -5,7 +5,13 @@ import { useRouter } from 'next/router';
 import { darkTheme, Divider, Stack } from 'noya-designsystem';
 import * as Icons from 'noya-icons';
 import { amplitude } from 'noya-log';
-import React, { ReactNode, useEffect, useMemo, useRef } from 'react';
+import React, {
+  ComponentProps,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import {
   Anchor,
   defaultTheme,
@@ -22,6 +28,7 @@ import {
 } from 'react-guidebook';
 import styled from 'styled-components';
 import guidebook from '../../guidebook';
+import { symbolMap } from '../ayon/symbols/symbols';
 import { Ayon } from '../components/Ayon';
 import { AyonProvider } from '../components/AyonContext';
 import { NavigationLinks } from '../components/NavigationLinks';
@@ -103,12 +110,18 @@ const StyledTable = guidebookStyled(PageComponents.table)({
   marginBottom: 0,
 });
 
+const getSymbolMaster = (symbolId: string) => symbolMap[symbolId];
+
 const MDXComponents = {
   ...PageComponents,
   a: StyledAnchor,
   kbd: InlineCode,
-  InteractiveBlockPreview,
-  BlockGrid,
+  InteractiveBlockPreview: (
+    props: ComponentProps<typeof InteractiveBlockPreview>,
+  ) => <InteractiveBlockPreview {...props} getSymbolMaster={getSymbolMaster} />,
+  BlockGrid: (
+    props: ComponentProps<typeof BlockGrid> & { category: string },
+  ) => <BlockGrid {...props} getSymbolMaster={getSymbolMaster} />,
   InlineIcon: ({ name }: { name: keyof typeof Icons }) => {
     const Component = Icons[name];
 

@@ -1,19 +1,12 @@
 import Sketch from 'noya-file-format';
 import { applyOverrides, Layers, Overrides } from 'noya-state';
 import { encodeQueryParameters, isExternalUrl } from 'noya-utils';
-import {
-  iconSymbolId,
-  imageSymbolId,
-  writeSymbolId,
-} from '../symbols/symbolIds';
-import { symbolMap } from '../symbols/symbols';
-import { GenerateResolver } from './GenerateResolver';
-import { IconResolver } from './IconResolver';
+import { imageSymbolId } from '../symbols/symbolIds';
 import { Attribution, RandomImageResolver } from './RandomImageResolver';
 
 // const redirectResolver = new RedirectResolver();
-const generateResolver = new GenerateResolver();
-const iconResolver = new IconResolver();
+// const generateResolver = new GenerateResolver();
+// const iconResolver = new IconResolver();
 const randomImageResolver = new RandomImageResolver();
 
 export function clearResolverCache(key: string) {
@@ -27,11 +20,13 @@ type Subscription = () => void;
 export function resolveLayer({
   cachePrefix,
   layer,
+  getSymbolMaster,
   onResolve,
   onResolveOverride,
 }: {
   cachePrefix?: string;
   layer: Sketch.SymbolInstance;
+  getSymbolMaster: (symbolID: string) => Sketch.SymbolMaster;
   onResolve: (
     data: Sketch.ResolvedBlockData | undefined,
     attribution?: Attribution,
@@ -52,7 +47,7 @@ export function resolveLayer({
 
   if (typeof blockText !== 'string') return [];
 
-  const blockDefinition = symbolMap[symbolID].blockDefinition;
+  const blockDefinition = getSymbolMaster(symbolID)?.blockDefinition;
 
   if (!blockDefinition) return [];
 
@@ -99,39 +94,40 @@ export function resolveLayer({
     );
 
     randomImageResolver.resolve(cacheKey, query);
-  } else if (symbolID === writeSymbolId) {
-    onResolve(undefined);
-
-    subscriptions.push(
-      generateResolver.addListener(cacheKey, originalText, (resolvedText) => {
-        onResolve({
-          originalText,
-          resolvedText,
-          symbolID,
-          resolvedAt: new Date().toISOString(),
-        });
-      }),
-    );
-
-    generateResolver.resolve(cacheKey, originalText);
-  } else if (symbolID === iconSymbolId) {
-    subscriptions.push(
-      iconResolver.addListener(cacheKey, originalText, (resolvedText) => {
-        onResolve({
-          originalText,
-          resolvedText,
-          symbolID,
-          resolvedAt: new Date().toISOString(),
-        });
-      }),
-    );
-
-    iconResolver.resolve(cacheKey, originalText);
   }
+  // else if (symbolID === writeSymbolId) {
+  //   onResolve(undefined);
+
+  //   subscriptions.push(
+  //     generateResolver.addListener(cacheKey, originalText, (resolvedText) => {
+  //       onResolve({
+  //         originalText,
+  //         resolvedText,
+  //         symbolID,
+  //         resolvedAt: new Date().toISOString(),
+  //       });
+  //     }),
+  //   );
+
+  //   generateResolver.resolve(cacheKey, originalText);
+  // } else if (symbolID === iconSymbolId) {
+  //   subscriptions.push(
+  //     iconResolver.addListener(cacheKey, originalText, (resolvedText) => {
+  //       onResolve({
+  //         originalText,
+  //         resolvedText,
+  //         symbolID,
+  //         resolvedAt: new Date().toISOString(),
+  //       });
+  //     }),
+  //   );
+
+  //   iconResolver.resolve(cacheKey, originalText);
+  // }
 
   const master = applyOverrides({
     overrideValues: layer.overrideValues,
-    symbolMaster: symbolMap[symbolID],
+    symbolMaster: getSymbolMaster(symbolID),
   });
 
   master.layers.filter(Layers.isSymbolInstance).forEach((child) => {
@@ -139,6 +135,7 @@ export function resolveLayer({
       ...resolveLayer({
         cachePrefix: cachePrefix ? `${cachePrefix}/${layerId}` : layerId,
         layer: child,
+        getSymbolMaster,
         onResolve: (data, attribution) => {
           const overrideName = Overrides.encodeName(
             [child.do_objectID],

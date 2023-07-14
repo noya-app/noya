@@ -1,10 +1,10 @@
-import { checkboxSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { checkboxSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={checkboxSymbolId} />
+<InteractiveBlockPreview symbolId={checkboxSymbolId} />
 
 ## Configuration
 
@@ -19,6 +19,6 @@ right. The checkbox has a few different states that can be configured by adding:
 Here's an example with a text label, `#on` and `#disabled`:
 
 <InteractiveBlockPreview
-  blockId={checkboxSymbolId}
+  symbolId={checkboxSymbolId}
   blockText="Enable daily notifications #on #disabled"
 />

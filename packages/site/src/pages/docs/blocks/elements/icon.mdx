@@ -1,10 +1,10 @@
-import { iconSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { iconSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={iconSymbolId} />
+<InteractiveBlockPreview symbolId={iconSymbolId} />
 
 ## Configuration
 
@@ -14,14 +14,14 @@ Type within the icon block to search
 The icon block will use the top recommended search result automatically, e.g.
 for `twitter`:
 
-<InteractiveBlockPreview blockId={iconSymbolId} blockText="twitter" />
+<InteractiveBlockPreview symbolId={iconSymbolId} blockText="twitter" />
 
 You can also search [iconify](https://icon-sets.iconify.design/?query=twitter)
 yourself in another browser tab and use a specific icon name directly, e.g.
 `iconoir:twitter-verified-badge`:
 
 <InteractiveBlockPreview
-  blockId={iconSymbolId}
+  symbolId={iconSymbolId}
   blockText="iconoir:twitter-verified-badge"
 />
 
@@ -29,6 +29,6 @@ You can configure the icon color using a `#fill-` command, such as
 `#fill-blue-400`:
 
 <InteractiveBlockPreview
-  blockId={iconSymbolId}
+  symbolId={iconSymbolId}
   blockText="twitter #fill-blue-400"
 />

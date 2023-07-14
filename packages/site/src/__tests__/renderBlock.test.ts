@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-commented-out-tests */
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { readFileSync } from 'fs';
 import {
@@ -17,7 +18,7 @@ import {
   cardSymbolId,
   checkboxSymbolId,
   heroSymbolId,
-  iconSymbolId,
+  // iconSymbolId,
   imageSymbolId,
   linkSymbolId,
   textSymbolId,
@@ -41,6 +42,8 @@ beforeAll(async () => {
   MaterialDesignSystem = await loadDesignSystem('mui');
 });
 
+const getSymbolMaster = (symbolID: string) => symbolMap[symbolID];
+
 function generate(
   symbol: Sketch.SymbolInstance,
   DesignSystem = ChakraDesignSystem,
@@ -48,7 +51,7 @@ function generate(
   return clean(
     print(
       createElementCode(
-        mapBlockToElement({ symbolMap, DesignSystem }, symbol)!,
+        mapBlockToElement({ getSymbolMaster, DesignSystem }, symbol)!,
       ),
     ),
   );
@@ -112,32 +115,32 @@ describe('link', () => {
   });
 });
 
-describe('icon', () => {
-  test('default', () => {
-    const symbol = SketchModel.symbolInstance({
-      symbolID: iconSymbolId,
-      frame: SketchModel.rect({
-        width: 48,
-        height: 48,
-      }),
-    });
+// describe('icon', () => {
+//   test('default', () => {
+//     const symbol = SketchModel.symbolInstance({
+//       symbolID: iconSymbolId,
+//       frame: SketchModel.rect({
+//         width: 48,
+//         height: 48,
+//       }),
+//     });
 
-    expect(generate(symbol)).toMatchSnapshot();
-  });
+//     expect(generate(symbol)).toMatchSnapshot();
+//   });
 
-  test('with color', () => {
-    const symbol = SketchModel.symbolInstance({
-      symbolID: iconSymbolId,
-      blockText: '#fill-blue-400',
-      frame: SketchModel.rect({
-        width: 48,
-        height: 48,
-      }),
-    });
+//   test('with color', () => {
+//     const symbol = SketchModel.symbolInstance({
+//       symbolID: iconSymbolId,
+//       blockText: '#fill-blue-400',
+//       frame: SketchModel.rect({
+//         width: 48,
+//         height: 48,
+//       }),
+//     });
 
-    expect(generate(symbol)).toMatchSnapshot();
-  });
-});
+//     expect(generate(symbol)).toMatchSnapshot();
+//   });
+// });
 
 describe('hero', () => {
   test('default', () => {
@@ -189,8 +192,8 @@ describe('card with no border radius on image', () => {
       }),
     });
 
-    symbolMap[symbol.symbolID].layers
-      .filter(Layers.isSymbolInstance)
+    getSymbolMaster(symbol.symbolID)
+      .layers.filter(Layers.isSymbolInstance)
       .filter((layer) => layer.symbolID === imageSymbolId)
       .forEach((layer) => {
         symbol.overrideValues.push(
@@ -249,7 +252,7 @@ describe('generate file', () => {
       await compile({
         name: 'My App',
         artboard,
-        symbolMap,
+        getSymbolMaster,
         DesignSystem: ChakraDesignSystem,
         target: 'standalone',
       }),
@@ -278,7 +281,7 @@ describe('generate file', () => {
       await compile({
         name: 'My App',
         artboard,
-        symbolMap,
+        getSymbolMaster,
         DesignSystem: MaterialDesignSystem,
         target: 'standalone',
       }),

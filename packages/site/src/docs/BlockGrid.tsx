@@ -5,13 +5,20 @@ import {
   Stack,
   useDesignSystemConfiguration,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { BlockCategory, blockMetadata } from '../ayon/symbols/metadata';
 
 import { useRouter } from 'next/router';
 import React from 'react';
 import { InteractiveBlockPreview } from './InteractiveBlockPreview';
 
-export function BlockGrid({ category }: { category: BlockCategory }) {
+export function BlockGrid({
+  category,
+  getSymbolMaster,
+}: {
+  category: BlockCategory;
+  getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
+}) {
   const { platform } = useDesignSystemConfiguration();
   const router = useRouter();
 
@@ -46,7 +53,8 @@ export function BlockGrid({ category }: { category: BlockCategory }) {
                   color="black"
                 >
                   <InteractiveBlockPreview
-                    blockId={blockId}
+                    getSymbolMaster={getSymbolMaster}
+                    symbolId={blockId}
                     height="100%"
                     viewType="previewOnly"
                   />

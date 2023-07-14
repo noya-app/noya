@@ -1,10 +1,10 @@
-import { radioSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { radioSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={radioSymbolId} />
+<InteractiveBlockPreview symbolId={radioSymbolId} />
 
 ## Configuration
 
@@ -19,6 +19,6 @@ right. The radio has a few different states that can be configured by adding:
 Here's an example with a text label, `#on` and `#disabled`:
 
 <InteractiveBlockPreview
-  blockId={radioSymbolId}
+  symbolId={radioSymbolId}
   blockText="Only on Fridays #on #disabled"
 />

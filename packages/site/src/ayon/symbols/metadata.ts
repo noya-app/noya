@@ -6,22 +6,13 @@ import {
   cardSymbolId,
   checkboxSymbolId,
   featureItemSymbolId,
-  headerBarSymbolId,
-  heading1SymbolId,
-  heading2SymbolId,
-  heading3SymbolId,
-  heading4SymbolId,
-  heading5SymbolId,
-  heading6SymbolId,
   heroSymbolId,
   heroWithImageSymbolId,
-  iconSymbolId,
   imageSymbolId,
   inputSymbolId,
   linkSymbolId,
   radioSymbolId,
   selectSymbolId,
-  sidebarSymbolId,
   signInSymbolId,
   switchSymbolId,
   tableSymbolId,
@@ -29,7 +20,6 @@ import {
   textareaSymbolId,
   textSymbolId,
   tileCardSymbolId,
-  writeSymbolId,
 } from './symbolIds';
 
 export type BlockCategory = 'application' | 'marketing' | 'element';
@@ -50,17 +40,17 @@ export type BlockMetadata = {
   hideInDocs?: boolean;
 };
 
-const headingMetadata: BlockMetadata = {
-  name: 'Heading',
-  category: 'element',
-  preferredSize: { width: 700, height: 100 },
-  preferredBlockText: 'All About Cats',
-};
+// const headingMetadata: BlockMetadata = {
+//   name: 'Heading',
+//   category: 'element',
+//   preferredSize: { width: 700, height: 100 },
+//   preferredBlockText: 'All About Cats',
+// };
 
-const headingNMetadata: BlockMetadata = {
-  ...headingMetadata,
-  hideInDocs: true,
-};
+// const headingNMetadata: BlockMetadata = {
+//   ...headingMetadata,
+//   hideInDocs: true,
+// };
 
 // This is in a separate file so docs don't have to import Chakra components directly.
 // Docs can import this synchronously and import(Ayon)
@@ -118,11 +108,11 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     category: 'marketing',
     preferredSize: { width: 250, height: 250 },
   },
-  [iconSymbolId]: {
-    name: 'Icon',
-    category: 'element',
-    preferredSize: { width: 48, height: 48 },
-  },
+  // [iconSymbolId]: {
+  //   name: 'Icon',
+  //   category: 'element',
+  //   preferredSize: { width: 48, height: 48 },
+  // },
   [imageSymbolId]: {
     name: 'Image',
     category: 'element',
@@ -131,14 +121,14 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     preferredResolvedBlockText:
       'https://images.unsplash.com/photo-1514917860136-ee8b88e8c9c9?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8bGFuZHNjYXBlLGJ1c3Rlcnx8fHx8fDE2Nzc2NDIxNDM&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=300',
   },
-  [writeSymbolId]: {
-    name: 'Write',
-    category: 'element',
-    preferredSize: { width: 300, height: 300 },
-    preferredBlockText: 'Cats are great pets',
-    preferredResolvedBlockText:
-      'Cats are incredibly intelligent creatures with personalities all of their own. They make loyal and loving companions who can provide years of fun and joy. Cats come in all shapes, sizes, and colors and offer a variety of health benefits to their human owners. From their natural mouse-catching abilities to their playful antics, cats make terrific pet choices for a wide variety of households.',
-  },
+  // [writeSymbolId]: {
+  //   name: 'Write',
+  //   category: 'element',
+  //   preferredSize: { width: 300, height: 300 },
+  //   preferredBlockText: 'Cats are great pets',
+  //   preferredResolvedBlockText:
+  //     'Cats are incredibly intelligent creatures with personalities all of their own. They make loyal and loving companions who can provide years of fun and joy. Cats come in all shapes, sizes, and colors and offer a variety of health benefits to their human owners. From their natural mouse-catching abilities to their playful antics, cats make terrific pet choices for a wide variety of households.',
+  // },
   [textSymbolId]: {
     name: 'Text',
     category: 'element',
@@ -146,12 +136,12 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     preferredBlockText:
       'Cats are great pets. They make loyal and loving companions who can provide years of fun and joy.',
   },
-  [heading1SymbolId]: headingMetadata,
-  [heading2SymbolId]: headingNMetadata,
-  [heading3SymbolId]: headingNMetadata,
-  [heading4SymbolId]: headingNMetadata,
-  [heading5SymbolId]: headingNMetadata,
-  [heading6SymbolId]: headingNMetadata,
+  // [heading1SymbolId]: headingMetadata,
+  // [heading2SymbolId]: headingNMetadata,
+  // [heading3SymbolId]: headingNMetadata,
+  // [heading4SymbolId]: headingNMetadata,
+  // [heading5SymbolId]: headingNMetadata,
+  // [heading6SymbolId]: headingNMetadata,
   [signInSymbolId]: {
     name: 'Sign In',
     category: 'application',
@@ -162,16 +152,16 @@ export const blockMetadata: Record<string, BlockMetadata> = {
     category: 'application',
     preferredSize: { width: 600, height: 400 },
   },
-  [sidebarSymbolId]: {
-    name: 'Sidebar',
-    category: 'application',
-    preferredSize: { width: 250, height: 600 },
-  },
-  [headerBarSymbolId]: {
-    name: 'Header Bar',
-    category: 'application',
-    preferredSize: { width: 800, height: 80 },
-  },
+  // [sidebarSymbolId]: {
+  //   name: 'Sidebar',
+  //   category: 'application',
+  //   preferredSize: { width: 250, height: 600 },
+  // },
+  // [headerBarSymbolId]: {
+  //   name: 'Header Bar',
+  //   category: 'application',
+  //   preferredSize: { width: 800, height: 80 },
+  // },
   [checkboxSymbolId]: {
     name: 'Checkbox',
     category: 'element',

@@ -1,10 +1,10 @@
-import { avatarSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { avatarSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={avatarSymbolId} />
+<InteractiveBlockPreview symbolId={avatarSymbolId} />
 
 ## Configuration
 
@@ -12,13 +12,13 @@ You can double click the block to edit its contents.
 
 Type any letter into the avatar block to display a monogram instead of an image.
 
-<InteractiveBlockPreview blockId={avatarSymbolId} blockText="D" />
+<InteractiveBlockPreview symbolId={avatarSymbolId} blockText="D" />
 
 ### Image
 
 You can also use any url:
 
 <InteractiveBlockPreview
-  blockId={avatarSymbolId}
+  symbolId={avatarSymbolId}
   blockText="https://picsum.photos/id/1/100/100"
 />

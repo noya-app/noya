@@ -1,21 +1,23 @@
 import { GridView, Stack } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import React from 'react';
 import {
   BlockPreviewProps,
   InteractiveBlockPreview,
 } from '../../../docs/InteractiveBlockPreview';
-import { symbolMap } from '../../symbols/symbols';
 
 export function InspectorCarousel({
   items,
   onSelectItem,
   onHoverItemChange,
   selectedIndex,
+  getSymbolMaster,
 }: {
   items: BlockPreviewProps[];
   onSelectItem: (index: number) => void;
   onHoverItemChange?: (index: number, isHovering: boolean) => void;
   selectedIndex?: number;
+  getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
 }) {
   return (
     <GridView.Root scrollable={false} size="xs" textPosition="overlay" bordered>
@@ -23,8 +25,8 @@ export function InspectorCarousel({
         {items.map((props, index) => (
           <GridView.Item
             key={index}
-            id={props.blockId}
-            title={symbolMap[props.blockId].name}
+            id={props.symbolId}
+            title={props.name ?? ''}
             onClick={() => {
               onSelectItem(index);
             }}
@@ -43,10 +45,11 @@ export function InspectorCarousel({
               color="black"
             >
               <InteractiveBlockPreview
-                key={props.blockId}
+                key={props.symbolId}
                 height="100%"
                 width="100%"
                 viewType="previewOnly"
+                getSymbolMaster={getSymbolMaster}
                 {...props}
               />
               {/* Block pointer events */}

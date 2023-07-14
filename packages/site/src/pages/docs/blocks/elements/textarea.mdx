@@ -1,10 +1,10 @@
-import { textareaSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { textareaSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={textareaSymbolId} />
+<InteractiveBlockPreview symbolId={textareaSymbolId} />
 
 ## Configuration
 
@@ -19,7 +19,7 @@ You can further configure the textarea's style by adding:
 Here's an example configuration that uses these options (double click to edit):
 
 <InteractiveBlockPreview
-  blockId={textareaSymbolId}
+  symbolId={textareaSymbolId}
   blockText={`Leave a message for the guestbook after you sign in.
 #dark #accent #disabled`}
 />

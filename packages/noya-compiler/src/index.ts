@@ -138,7 +138,7 @@ function isSafeForJsxText(text: string) {
 export interface CompilerConfiguration {
   name: string;
   artboard: Sketch.Artboard;
-  symbolMap: Record<string, Sketch.SymbolMaster>;
+  getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
   DesignSystem: string | DesignSystemDefinition;
   target: 'standalone' | 'codesandbox';
 }
@@ -228,22 +228,22 @@ function createSimpleElement(
 
 export function mapBlockToElement(
   {
-    symbolMap,
+    getSymbolMaster,
     DesignSystem,
   }: {
-    symbolMap: CompilerConfiguration['symbolMap'];
+    getSymbolMaster: CompilerConfiguration['getSymbolMaster'];
     DesignSystem: DesignSystemDefinition;
   },
   layer: Sketch.SymbolInstance,
 ): SimpleElement | undefined {
-  const block = symbolMap[layer.symbolID];
+  const block = getSymbolMaster(layer.symbolID);
 
   if (!block || !block.blockDefinition?.render) return;
 
   const element = block.blockDefinition.render({
     passthrough: {},
     Components: DesignSystem.components,
-    getSymbolMaster: (symbolId) => symbolMap[symbolId],
+    getSymbolMaster,
     instance: layer,
   });
 
@@ -296,7 +296,7 @@ function findSourceByName(
 }
 
 export async function compile(configuration: CompilerConfiguration) {
-  const { artboard } = configuration;
+  const { artboard, getSymbolMaster } = configuration;
 
   const DesignSystem =
     typeof configuration.DesignSystem === 'string'
@@ -307,10 +307,7 @@ export async function compile(configuration: CompilerConfiguration) {
     .filter(Layers.isSymbolInstance)
     .flatMap((layer) => {
       const element = mapBlockToElement(
-        {
-          symbolMap: configuration.symbolMap,
-          DesignSystem,
-        },
+        { getSymbolMaster, DesignSystem },
         layer,
       );
 

@@ -1,10 +1,10 @@
-import { linkSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { linkSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={linkSymbolId} />
+<InteractiveBlockPreview symbolId={linkSymbolId} />
 
 ## Configuration
 
@@ -13,6 +13,6 @@ The text block accepts many `#` commands for styling text, such as
 to add an arrow icon:
 
 <InteractiveBlockPreview
-  blockId={linkSymbolId}
+  symbolId={linkSymbolId}
   blockText="View all cats #text-red-600 #font-bold #icon-arrow-forward"
 />

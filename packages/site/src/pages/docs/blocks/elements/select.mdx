@@ -1,10 +1,10 @@
-import { selectSymbolId } from '../../../../ayon/blocks/symbolIds';
+import { selectSymbolId } from '../../../../ayon/symbols/symbolIds';
 
 ## Live Preview
 
 You can double click the block to edit its contents.
 
-<InteractiveBlockPreview blockId={selectSymbolId} />
+<InteractiveBlockPreview symbolId={selectSymbolId} />
 
 ## Configuration
 
@@ -19,7 +19,7 @@ You can further configure the select's style by adding:
 Here's an example configuration that uses these options (double click to edit):
 
 <InteractiveBlockPreview
-  blockId={selectSymbolId}
+  symbolId={selectSymbolId}
   blockText={`Category
 Apartment
 Condo

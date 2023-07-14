@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
@@ -14,14 +13,11 @@ import { createSketchFile } from 'noya-state';
 import { groupBy, uuid } from 'noya-utils';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BlockMetadata } from '../ayon/symbols/metadata';
+import { symbolMap } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
+import { Ayon } from '../components/Ayon';
 import { Toolbar } from '../components/Toolbar';
 import { BlockExample, createBlockExample } from './InteractiveBlockPreview';
-
-const Ayon = dynamic(
-  () => import('../components/Ayon').then((mod) => mod.Ayon),
-  { ssr: false },
-);
 
 function Content({
   fileId,
@@ -74,8 +70,6 @@ interface Props {
   blockInstances: [string, BlockMetadata][];
 }
 
-// We load a placeholder UI as soon as possible. Then wait for Ayon/Blocks to load.
-// We load Ayon/Blocks async to work around a react-jsx transform issue when loading Chakra.
 export function DesignSystemExplorer({
   blockInstances,
   designSystemId,
@@ -83,9 +77,10 @@ export function DesignSystemExplorer({
   const config = useDesignSystemConfiguration();
   const client = useNoyaClient();
   const router = useRouter();
+  const getSymbolMaster = (symbolId: string) => symbolMap[symbolId];
 
   const file = useMemo(() => {
-    const examples = blockInstances.map(([blockId, blockMetadata]) => {
+    const examples = blockInstances.map(([symbolId, blockMetadata]) => {
       const width = blockMetadata?.preferredSize.width ?? 600;
       const height = blockMetadata?.preferredSize.height ?? 400;
       const blockText = blockMetadata?.preferredBlockText;
@@ -93,7 +88,8 @@ export function DesignSystemExplorer({
       const preferredOverrides = blockMetadata?.preferredOverrides;
 
       return createBlockExample({
-        blockId,
+        getSymbolMaster,
+        symbolId,
         width,
         height,
         blockText,
