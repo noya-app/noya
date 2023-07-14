@@ -20,9 +20,9 @@ import styled from 'styled-components';
 import ConfigureBlockTypeWebp from '../../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../../components/OnboardingAnimation';
 import { useOnboarding } from '../../contexts/OnboardingContext';
-import { allInsertableSymbols } from '../blocks/blocks';
 import { Stacking } from '../stacking';
 import { imageSymbolId } from '../symbols/symbolIds';
+import { allInsertableSymbols } from '../symbols/symbols';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
 
 // function getElementRect(element: HTMLElement) {

@@ -27,9 +27,9 @@ import {
 import { isDeepEqual } from 'noya-utils';
 import React, { useCallback, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
-import { allInsertableSymbols, symbolMap } from '../../blocks/blocks';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
+import { allInsertableSymbols, symbolMap } from '../../symbols/symbols';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 

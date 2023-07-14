@@ -1,12 +1,12 @@
 import Sketch from 'noya-file-format';
 import { applyOverrides, Layers, Overrides } from 'noya-state';
 import { encodeQueryParameters, isExternalUrl } from 'noya-utils';
-import { symbolMap } from '../blocks/blocks';
 import {
   iconSymbolId,
   imageSymbolId,
   writeSymbolId,
 } from '../symbols/symbolIds';
+import { symbolMap } from '../symbols/symbols';
 import { GenerateResolver } from './GenerateResolver';
 import { IconResolver } from './IconResolver';
 import { Attribution, RandomImageResolver } from './RandomImageResolver';

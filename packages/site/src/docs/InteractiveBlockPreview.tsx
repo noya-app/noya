@@ -11,7 +11,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides, createSketchFile } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { PreferredOverride, blockMetadata } from '../ayon/blocks/blockMetadata';
-import { symbolMap } from '../ayon/blocks/blocks';
+import { symbolMap } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
 import { useAyon } from '../components/AyonContext';
 

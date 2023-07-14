@@ -12,7 +12,6 @@ import { loadDesignSystem } from 'noya-module-loader';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides } from 'noya-state';
 import path from 'path';
-import { symbolMap } from '../ayon/blocks/blocks';
 import {
   buttonSymbolId,
   cardSymbolId,
@@ -23,6 +22,7 @@ import {
   linkSymbolId,
   textSymbolId,
 } from '../ayon/symbols/symbolIds';
+import { symbolMap } from '../ayon/symbols/symbols';
 
 jest.setTimeout(20000);
 

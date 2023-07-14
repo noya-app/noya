@@ -4,7 +4,7 @@ import {
   BlockPreviewProps,
   InteractiveBlockPreview,
 } from '../../../docs/InteractiveBlockPreview';
-import { symbolMap } from '../../blocks/blocks';
+import { symbolMap } from '../../symbols/symbols';
 
 export function InspectorCarousel({
   items,

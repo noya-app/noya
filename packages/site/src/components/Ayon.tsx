@@ -61,9 +61,9 @@ import React, {
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
-import { allSymbols, symbolMap } from '../ayon/blocks/blocks';
 import { Content } from '../ayon/components/Content';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
+import { allSymbols, symbolMap } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';

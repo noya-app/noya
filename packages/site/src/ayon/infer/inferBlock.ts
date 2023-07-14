@@ -1,5 +1,5 @@
 import { DrawableLayerType, InferBlockProps, InferBlockType } from 'noya-state';
-import { allInsertableSymbols } from '../blocks/blocks';
+import { allInsertableSymbols } from '../symbols/symbols';
 import { InferredBlockTypeResult } from '../types';
 
 export function inferBlockTypes(

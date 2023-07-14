@@ -28,8 +28,8 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { symbolMap } from '../blocks/blocks';
 import { boxSymbol } from '../symbols/primitive/BoxSymbol';
+import { symbolMap } from '../symbols/symbols';
 import { recreateElement } from '../utils/recreateElement';
 
 class ErrorBoundary extends React.Component<any> {
