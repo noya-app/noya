@@ -281,6 +281,8 @@ function overrideBlockContent<T extends Sketch.AnyLayer>(
           overriddenBlock.blockContent.blockText ?? layer.blockText;
         layer.blockParameters =
           overriddenBlock.blockContent.blockParameters ?? layer.blockParameters;
+        layer.overrideValues =
+          overriddenBlock.blockContent.overrides ?? layer.overrideValues;
       }
     }
   });

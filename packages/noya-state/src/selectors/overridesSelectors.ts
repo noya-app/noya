@@ -126,6 +126,11 @@ export function applyOverrides({
 
             override.layer.blockText = override.value;
             break;
+          case 'blockParameters':
+            if (!override.value) return;
+
+            override.layer.blockParameters = override.value;
+            break;
           case 'resolvedBlockData':
             if (!override.value) return;
 
@@ -233,33 +238,9 @@ export const createOverrideHierarchy = (
       rootLayer: Sketch.SymbolInstance,
       options: Omit<MoveOptions<Sketch.AnyLayer>, 'create' | 'getChildren'>,
     ) => {
-      // TODO: Unit tests that test Hero & button specifically
-      // console.log('move', options);
-
-      // function describeOverrides(layer: Sketch.SymbolInstance) {
-      //   return layer.overrideValues
-      //     .filter((override) => override.overrideName.endsWith('layers'))
-      //     .map((override) => {
-      //       return (
-      //         override.overrideName +
-      //         ' ' +
-      //         (override.value as Sketch.SymbolInstance[])
-      //           .map((layer) => layer.do_objectID)
-      //           .join(', ')
-      //       );
-      //     })
-      //     .join('\n');
-      // }
-
-      // console.log('before', describeOverrides(rootLayer));
-
-      const result = produce(rootLayer, (draft) => {
+      return produce(rootLayer, (draft) => {
         Hierarchy.move(draft, { ...options, create: create(draft) });
       });
-
-      // console.log('after', describeOverrides(result));
-
-      return result;
     },
   };
 };

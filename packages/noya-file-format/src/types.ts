@@ -1213,6 +1213,7 @@ export type OverrideValue = {
   value:
     | boolean
     | string
+    | string[]
     | Uuid
     | FileRef
     | DataRef

@@ -8,7 +8,7 @@ import {
   Spacer,
   Stack,
   TreeView,
-  lightTheme,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { DragHandleDots2Icon } from 'noya-icons';
@@ -68,6 +68,7 @@ export function AyonLayerInspector({
   ) => void;
 }) {
   const [state, dispatch] = useApplicationState();
+  const theme = useDesignSystemTheme();
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
   const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
@@ -329,7 +330,9 @@ export function AyonLayerInspector({
           <Stack.H flexWrap="wrap" gap="8px">
             {parameters.map((parameter) => (
               <Chip
+                key={parameter}
                 deletable
+                monospace
                 onHoverDeleteChange={(isHovering) => {
                   if (isHovering) {
                     onSetOverriddenBlock({
@@ -353,14 +356,6 @@ export function AyonLayerInspector({
                     (parameters ?? []).filter((p) => p !== parameter),
                   );
                 }}
-                style={{
-                  fontFamily: lightTheme.fonts.monospace,
-                }}
-                // style={{
-                //   backgroundColor: '#545454',
-                //   color: 'white',
-                // }}
-                key={parameter}
               >
                 {parameter}
               </Chip>
@@ -408,141 +403,147 @@ export function AyonLayerInspector({
             <span style={{ opacity: 0.5 }}>+</span>
           </InputField.Button>
         </InputFieldWithCompletions>
-        <Stack.V gap="4px">
-          <TreeView.Root
-            keyExtractor={({ instance: layer }) => layer.do_objectID}
-            data={flattened}
-            expandable={false}
-            variant="bare"
-            indentation={24}
-            sortable
-            acceptsDrop={(
-              sourceId: string,
-              destinationId: string,
-              relationDropPosition: RelativeDropPosition,
-            ) => {
-              const sourcePaths = Hierarchy.findAllIndexPaths(
-                selectedLayer,
-                (layer) => sourceId === layer.do_objectID,
-              );
-              const destinationPath = Hierarchy.findIndexPath(
-                selectedLayer,
-                (layer) => layer.do_objectID === destinationId,
-              );
+        <TreeView.Root
+          keyExtractor={({ instance: layer }) => layer.do_objectID}
+          data={flattened}
+          expandable={false}
+          variant="bare"
+          indentation={24}
+          sortable
+          acceptsDrop={(
+            sourceId: string,
+            destinationId: string,
+            relationDropPosition: RelativeDropPosition,
+          ) => {
+            const sourcePaths = Hierarchy.findAllIndexPaths(
+              selectedLayer,
+              (layer) => sourceId === layer.do_objectID,
+            );
+            const destinationPath = Hierarchy.findIndexPath(
+              selectedLayer,
+              (layer) => layer.do_objectID === destinationId,
+            );
 
-              if (sourcePaths.length === 0 || !destinationPath) return false;
+            if (sourcePaths.length === 0 || !destinationPath) return false;
 
-              // Don't allow dragging into a descendant
-              if (
-                sourcePaths.some((sourcePath) =>
-                  isDeepEqual(
-                    sourcePath,
-                    destinationPath.slice(0, sourcePath.length),
-                  ),
-                )
+            // Don't allow dragging into a descendant
+            if (
+              sourcePaths.some((sourcePath) =>
+                isDeepEqual(
+                  sourcePath,
+                  destinationPath.slice(0, sourcePath.length),
+                ),
               )
-                return false;
+            )
+              return false;
 
-              // const sourceLayers = sourcePaths.map((sourcePath) =>
-              //   Hierarchy.access(selectedLayer, sourcePath),
-              // );
+            // const sourceLayers = sourcePaths.map((sourcePath) =>
+            //   Hierarchy.access(selectedLayer, sourcePath),
+            // );
 
-              const destinationLayer = Hierarchy.access(
-                selectedLayer,
-                destinationPath,
-              );
+            const destinationLayer = Hierarchy.access(
+              selectedLayer,
+              destinationPath,
+            );
 
-              const destinationExpanded =
-                destinationLayer.layerListExpandedType !==
-                Sketch.LayerListExpanded.Collapsed;
+            const destinationExpanded =
+              destinationLayer.layerListExpandedType !==
+              Sketch.LayerListExpanded.Collapsed;
 
-              // Don't allow dragging below expanded layers - we'll fall back to inside
-              if (
-                destinationExpanded &&
-                Layers.isParentLayer(destinationLayer) &&
-                destinationLayer.layers.length > 0 &&
-                relationDropPosition === 'below'
-              ) {
-                return false;
-              }
+            // Don't allow dragging below expanded layers - we'll fall back to inside
+            if (
+              destinationExpanded &&
+              Layers.isParentLayer(destinationLayer) &&
+              destinationLayer.layers.length > 0 &&
+              relationDropPosition === 'below'
+            ) {
+              return false;
+            }
 
-              // // Only allow dropping inside of parent layers
-              // if (
-              //   relationDropPosition === 'inside' &&
-              //   !Layers.isParentLayer(destinationLayer)
-              // ) {
-              //   return false;
-              // }
+            // // Only allow dropping inside of parent layers
+            // if (
+            //   relationDropPosition === 'inside' &&
+            //   !Layers.isParentLayer(destinationLayer)
+            // ) {
+            //   return false;
+            // }
 
-              return true;
-            }}
-            onMoveItem={(
-              sourceIndex: number,
-              destinationIndex: number,
-              position: RelativeDropPosition,
-            ) => {
-              const sourceItem = flattened[sourceIndex];
-              const destinationItem = flattened[destinationIndex];
+            return true;
+          }}
+          onMoveItem={(
+            sourceIndex: number,
+            destinationIndex: number,
+            position: RelativeDropPosition,
+          ) => {
+            const sourceItem = flattened[sourceIndex];
+            const destinationItem = flattened[destinationIndex];
 
-              function applyUpdate() {
-                switch (position) {
-                  case 'above': {
-                    return Hierarchy.move(selectedLayer, {
-                      indexPaths: [sourceItem.indexPath],
-                      to: destinationItem.indexPath,
-                    });
-                  }
-                  case 'below': {
-                    return Hierarchy.move(selectedLayer, {
-                      indexPaths: [sourceItem.indexPath],
-                      to: [
-                        ...destinationItem.indexPath.slice(0, -1),
-                        destinationItem.indexPath.at(-1)! + 1,
-                      ],
-                    });
-                  }
-                  case 'inside': {
-                    return Hierarchy.move(selectedLayer, {
-                      indexPaths: [sourceItem.indexPath],
-                      to: [...destinationItem.indexPath, 0],
-                    });
-                  }
+            function applyUpdate() {
+              switch (position) {
+                case 'above': {
+                  return Hierarchy.move(selectedLayer, {
+                    indexPaths: [sourceItem.indexPath],
+                    to: destinationItem.indexPath,
+                  });
+                }
+                case 'below': {
+                  return Hierarchy.move(selectedLayer, {
+                    indexPaths: [sourceItem.indexPath],
+                    to: [
+                      ...destinationItem.indexPath.slice(0, -1),
+                      destinationItem.indexPath.at(-1)! + 1,
+                    ],
+                  });
+                }
+                case 'inside': {
+                  return Hierarchy.move(selectedLayer, {
+                    indexPaths: [sourceItem.indexPath],
+                    to: [...destinationItem.indexPath, 0],
+                  });
                 }
               }
+            }
 
-              const updated = applyUpdate();
+            const updated = applyUpdate();
 
-              setAllOverrides(updated);
-            }}
-            renderItem={(
-              { instance: layer, depth, path, indexPath },
-              index,
-              { isDragging },
-            ) => {
-              const symbol = symbolMap[layer.symbolID];
+            setAllOverrides(updated);
+          }}
+          renderItem={(
+            { instance: layer, depth, path, indexPath },
+            index,
+            { isDragging },
+          ) => {
+            const symbol = symbolMap[layer.symbolID];
 
-              const componentName = symbol?.name.toUpperCase();
-              const placeholderText = symbol?.blockDefinition?.placeholderText;
-              const key = path.join('/');
+            const componentName = symbol?.name.toUpperCase();
+            const placeholderText = symbol?.blockDefinition?.placeholderText;
+            const key = path.join('/');
 
-              return (
-                <TreeView.Row
-                  key={key}
-                  id={layer.do_objectID}
-                  depth={depth - 1}
-                  icon={depth !== 0 && <DragHandleDots2Icon />}
+            return (
+              <TreeView.Row
+                key={key}
+                id={layer.do_objectID}
+                depth={depth - 1}
+                icon={depth !== 0 && <DragHandleDots2Icon />}
+              >
+                <Stack.V
+                  flex="1"
+                  border={`1px solid ${theme.colors.divider}`}
+                  padding="1px"
+                  margin="4px 0"
+                  borderRadius="6px"
+                  gap="2px"
                 >
-                  <Stack.H
-                    flex="1"
-                    padding={'4px 0'}
-                    opacity={isDragging ? 0.5 : 1}
-                  >
+                  <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
                     <InputField.Root
                       key={key}
                       labelPosition="end"
                       labelSize={60}
                     >
                       <InputField.Input
+                        style={{
+                          background: 'transparent',
+                        }}
                         value={layer.blockText ?? ''}
                         placeholder={placeholderText}
                         onChange={(value) => {
@@ -590,11 +591,79 @@ export function AyonLayerInspector({
                       }}
                     /> */}
                   </Stack.H>
-                </TreeView.Row>
-              );
-            }}
-          />
-        </Stack.V>
+                  {layer.blockParameters && layer.blockParameters.length > 0 && (
+                    <Stack.H flexWrap="wrap" gap="2px">
+                      {layer.blockParameters.map((parameter) => (
+                        <Chip
+                          key={parameter}
+                          size="small"
+                          deletable
+                          monospace
+                          onHoverDeleteChange={(isHovering) => {
+                            const updatedParameters = (
+                              layer.blockParameters ?? []
+                            ).filter((p) => p !== parameter);
+
+                            const overrideName = Overrides.encodeName(
+                              path,
+                              'blockParameters',
+                            );
+
+                            const updatedOverrideValues =
+                              selectedLayer.overrideValues
+                                .filter(
+                                  (override) =>
+                                    override.overrideName !== overrideName,
+                                )
+                                .concat(
+                                  SketchModel.overrideValue({
+                                    overrideName,
+                                    value: updatedParameters,
+                                  }),
+                                );
+
+                            if (isHovering) {
+                              onSetOverriddenBlock({
+                                blockId: selectedLayer.symbolID,
+                                blockText: selectedLayer.blockText,
+                                blockParameters: selectedLayer.blockParameters,
+                                overrideValues: updatedOverrideValues,
+                                resolvedBlockText:
+                                  selectedLayer.resolvedBlockData?.resolvedText,
+                              });
+                            } else {
+                              onSetOverriddenBlock(undefined);
+                            }
+                          }}
+                          onDelete={() => {
+                            const updatedParameters = (
+                              layer.blockParameters ?? []
+                            ).filter((p) => p !== parameter);
+
+                            const overrideName = Overrides.encodeName(
+                              path,
+                              'blockParameters',
+                            );
+
+                            dispatch(
+                              'setOverrideValue',
+                              undefined,
+                              overrideName,
+                              updatedParameters,
+                            );
+                          }}
+                        >
+                          {parameter}
+                        </Chip>
+                      ))}
+                    </Stack.H>
+                  )}
+                </Stack.V>
+              </TreeView.Row>
+            );
+          }}
+        />
+        <Spacer.Vertical size={32} />
       </InspectorSection>
     </Stack.V>
   );
