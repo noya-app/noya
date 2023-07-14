@@ -160,9 +160,19 @@ const InputFieldButton = memo(function InputFieldButton({
     [inputRef],
   );
 
+  const handlePointerDown = useCallback((event: React.PointerEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  }, []);
+
   return (
     <ButtonContainer size={size}>
-      <Button variant="floating" onClick={handleClick} tabIndex={-1}>
+      <Button
+        variant="floating"
+        onClick={handleClick}
+        onPointerDown={handlePointerDown}
+        tabIndex={-1}
+      >
         {children}
       </Button>
     </ButtonContainer>

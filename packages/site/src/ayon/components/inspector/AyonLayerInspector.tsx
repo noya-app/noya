@@ -409,6 +409,7 @@ export function AyonLayerInspector({
           variant="bare"
           indentation={24}
           sortable
+          pressEventName="onPointerDown"
           acceptsDrop={(
             sourceId: string,
             destinationId: string,
@@ -558,12 +559,15 @@ function ContentItem({
   const placeholderText = symbol?.blockDefinition?.placeholderText;
   const key = path.join('/');
 
+  const [hovered, setHovered] = React.useState(false);
+
   return (
     <TreeView.Row
       key={key}
       id={layer.do_objectID}
       depth={depth - 1}
       icon={depth !== 0 && <DragHandleDots2Icon />}
+      onHoverChange={setHovered}
     >
       <Stack.V
         flex="1"
@@ -594,10 +598,11 @@ function ContentItem({
                 }
               }}
             />
-            {componentName && (
+            {hovered ? (
+              <InputField.Button>Edit</InputField.Button>
+            ) : (
               <InputField.Label>{componentName}</InputField.Label>
             )}
-            <InputField.Button>Edit</InputField.Button>
           </InputField.Root>
           {/* <Button
             variant="floating"
