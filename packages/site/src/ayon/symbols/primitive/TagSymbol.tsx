@@ -20,7 +20,7 @@ export const tagSymbol = SketchModel.symbolMaster({
     hashtags: [...variantKeys, ...sizeKeys, ...colorSchemeKeys],
     placeholderText,
     infer: ({ frame }) => 0,
-    render: ({ Components, instance, getSymbolMaster }: RenderProps) => {
+    render: ({ Components, instance }: RenderProps) => {
       const Tag: React.FC<TagProps> = Components[tagSymbolId];
 
       const content = instance.blockText ?? placeholderText;

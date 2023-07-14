@@ -1,9 +1,9 @@
 import { SketchModel } from 'noya-sketch-model';
 import {
+  boxSymbolId,
   buttonSymbolId,
   inputSymbolId,
   signInSymbolId,
-  spacerSymbolId,
   textSymbolId,
 } from '../symbolIds';
 
@@ -34,7 +34,8 @@ export const signInSymbol = SketchModel.symbolMaster({
     }),
     SketchModel.symbolInstance({
       do_objectID: '6fe57c3a-20f0-4999-b602-7531cf082d70',
-      symbolID: spacerSymbolId,
+      symbolID: boxSymbolId,
+      // symbolID: spacerSymbolId,
       blockText: '#basis-2 #flex-auto',
     }),
     SketchModel.symbolInstance({

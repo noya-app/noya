@@ -42,11 +42,11 @@ export const cardSymbol = SketchModel.symbolMaster({
       // symbolID: heading5SymbolId,
       blockText: 'News #mt-4',
     }),
-    SketchModel.symbolInstance({
-      do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
-      symbolID: textSymbolId,
-      blockText: 'Here you can explore the latest news and information. #mt-1',
-    }),
+    // SketchModel.symbolInstance({
+    //   do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
+    //   symbolID: textSymbolId,
+    //   blockText: 'Here you can explore the latest news and information. #mt-1',
+    // }),
   ],
 });
 

@@ -2,10 +2,10 @@ import { SketchModel } from 'noya-sketch-model';
 import { Overrides } from 'noya-state';
 import { isWithinRectRange } from '../../infer/score';
 import {
+  boxSymbolId,
   featureItemSymbolId,
   featureRowSymbolId,
   featureSectionSymbolId,
-  iconSymbolId,
   linkSymbolId,
   tagSymbolId,
   textSymbolId,
@@ -66,7 +66,8 @@ export const featureItemSymbol = SketchModel.symbolMaster({
   layers: [
     SketchModel.symbolInstance({
       do_objectID: featureItemIconLayerId,
-      symbolID: iconSymbolId,
+      symbolID: boxSymbolId,
+      // symbolID: iconSymbolId,
       blockText: 'fingerprint #bg-blue-500 #rounded #fill-white #p-1 #w-8 #h-8',
     }),
     SketchModel.symbolInstance({

@@ -7,7 +7,7 @@ import {
   tailwindBlockClasses,
 } from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
-import { imageSymbolId } from '../symbolIds';
+import { boxSymbolId, imageSymbolId } from '../symbolIds';
 import { RenderProps } from '../types';
 
 const placeholderText = 'landscape';
@@ -22,14 +22,14 @@ export const imageSymbol = SketchModel.symbolMaster({
     placeholderText,
     render: ({ Components, instance }: RenderProps) => {
       const Image: React.FC<ImageProps> = Components[imageSymbolId];
-      const Box: React.FC<ImageProps> = Components[imageSymbolId];
+      const Box: React.FC<ImageProps> = Components[boxSymbolId];
 
       const content = instance.blockText ?? placeholderText;
       const { contain, fill, ...parameters } = getParameters(
         instance.blockParameters,
       );
 
-      const src = isExternalUrl(content) ? content : undefined;
+      const src = isExternalUrl(content) ? content : '';
       // : props.resolvedBlockData?.resolvedText;
 
       const style = parametersToTailwindStyle(parameters);
