@@ -363,25 +363,31 @@ export function AyonLayerInspector({
             ))}
           </Stack.H>
         )}
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <InspectorCarousel
-          items={presetStyles}
-          selectedIndex={presetStyles.findIndex((style) =>
-            isDeepEqual(style.blockParameters, parameters),
-          )}
-          onSelectItem={(index) => {
-            dispatch(
-              'setBlockParameters',
-              undefined,
-              presetStyles[index].blockParameters ?? [],
-            );
-          }}
-          onHoverItemChange={(index, isHovering) => {
-            onSetOverriddenBlock(isHovering ? presetStyles[index] : undefined);
-          }}
-        />
+        {presetStyles.length > 0 && (
+          <>
+            <InspectorPrimitives.SectionHeader>
+              <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
+            </InspectorPrimitives.SectionHeader>
+            <InspectorCarousel
+              items={presetStyles}
+              selectedIndex={presetStyles.findIndex((style) =>
+                isDeepEqual(style.blockParameters, parameters),
+              )}
+              onSelectItem={(index) => {
+                dispatch(
+                  'setBlockParameters',
+                  undefined,
+                  presetStyles[index].blockParameters ?? [],
+                );
+              }}
+              onHoverItemChange={(index, isHovering) => {
+                onSetOverriddenBlock(
+                  isHovering ? presetStyles[index] : undefined,
+                );
+              }}
+            />
+          </>
+        )}
       </InspectorSection>
       <InspectorSection title="Content" titleTextStyle="small">
         <InputFieldWithCompletions
