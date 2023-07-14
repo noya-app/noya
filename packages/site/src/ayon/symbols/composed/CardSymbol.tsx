@@ -47,9 +47,8 @@ export const cardSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
       symbolID: textSymbolId,
-      // symbolID: heading5SymbolId,
       blockText: 'News',
-      blockParameters: ['mt-4'],
+      blockParameters: ['h5', 'mt-4'],
     }),
     SketchModel.symbolInstance({
       do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
@@ -63,9 +62,9 @@ export const cardSymbol = SketchModel.symbolMaster({
 export const tileCardSymbol = SketchModel.symbolMaster({
   symbolID: tileCardSymbolId,
   name: 'TileCard',
-  defaultBlockText: '#flex-col #bg-blue-50 #p-6 #left',
   blockDefinition: {
     hashtags: [],
+    placeholderParameters: ['flex-1', 'flex-col', 'bg-blue-50', 'p-6', 'left'],
     isComposedBlock: true,
     infer: ({ frame }) => {
       return Math.max(
@@ -91,13 +90,14 @@ export const tileCardSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: '91514627-b323-457e-bf05-228c5a96830d',
       symbolID: textSymbolId,
-      // symbolID: heading5SymbolId,
-      blockText: 'How we can help your business. #flex-1 #mt-1',
+      blockText: 'How we can help your business',
+      blockParameters: ['h5', 'flex-1', 'mt-1'],
     }),
     SketchModel.symbolInstance({
       do_objectID: '2b211bc6-86e0-4f93-8e14-514ae026afa6',
       symbolID: buttonSymbolId,
-      blockText: 'Learn more #dark',
+      blockText: 'Learn more',
+      blockParameters: ['dark'],
     }),
   ],
 });

@@ -26,14 +26,14 @@ import { Stack } from './Stack';
 
 type LabelPosition = 'start' | 'end';
 
-type Size = 'small' | 'medium' | 'large';
+export type InputFieldSize = 'small' | 'medium' | 'large';
 
 type InputFieldContextValue = {
   labelPosition: LabelPosition;
   labelSize: number;
   hasLabel: boolean;
   hasDropdown: boolean;
-  size: Size;
+  size: InputFieldSize;
   isFocused: boolean;
   onFocusChange: (isFocused: boolean) => void;
   inputRef?: ForwardedRef<HTMLInputElement>;
@@ -135,20 +135,24 @@ const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
  * Button
  * ------------------------------------------------------------------------- */
 
-const ButtonContainer = styled.span<{ size: Size }>(({ theme, size }) => ({
-  position: 'absolute',
-  right: size === 'large' ? '9px' : '2px',
-  top: size === 'large' ? '8px' : '2px',
-}));
+const ButtonContainer = styled.span<{ size: InputFieldSize }>(
+  ({ theme, size }) => ({
+    position: 'absolute',
+    right: size === 'large' ? '9px' : '2px',
+    top: size === 'large' ? '8px' : '2px',
+  }),
+);
 
 const InputFieldButton = memo(function InputFieldButton({
   children,
+  onClick,
 }: {
   children?: ReactNode;
+  onClick?: () => void;
 }) {
   const { size, inputRef } = useContext(InputFieldContext);
 
-  const handleClick = useCallback(
+  const defaultHandleClick = useCallback(
     (event: React.MouseEvent) => {
       if (inputRef && typeof inputRef !== 'function') {
         inputRef.current?.focus();
@@ -169,7 +173,7 @@ const InputFieldButton = memo(function InputFieldButton({
     <ButtonContainer size={size}>
       <Button
         variant="floating"
-        onClick={handleClick}
+        onClick={onClick ?? defaultHandleClick}
         onPointerDown={handlePointerDown}
         tabIndex={-1}
       >
@@ -213,7 +217,7 @@ export const InputElement = styled(TextInput).withConfig({
   disabled?: boolean;
   variant?: InputFieldVariant;
   readOnly?: boolean;
-  size: Size;
+  size: InputFieldSize;
 }>(
   ({
     theme,
@@ -423,7 +427,7 @@ interface InputFieldRootProps {
   labelPosition?: LabelPosition;
   labelSize?: number;
   hasDropdown?: boolean;
-  size?: Size;
+  size?: InputFieldSize;
   renderPopoverContent?: (options: { width: number }) => ReactNode;
   onFocusChange?: (isFocused: boolean) => void;
 }

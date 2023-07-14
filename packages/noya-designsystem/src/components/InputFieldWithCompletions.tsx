@@ -11,7 +11,7 @@ import React, {
 import styled from 'styled-components';
 import { CompletionItem, CompletionListItem } from '../utils/completions';
 import { IToken, fuzzyFilter, fuzzyTokenize } from '../utils/fuzzyScorer';
-import { InputField } from './InputField';
+import { InputField, InputFieldSize } from './InputField';
 import { ListView } from './ListView';
 import { Spacer } from './Spacer';
 import { Stack } from './Stack';
@@ -92,12 +92,24 @@ interface Props {
   items: CompletionItem[];
   onHoverItem?: (item: CompletionItem | undefined) => void;
   onSelectItem?: (item: CompletionItem) => void;
+  onBlur?: () => void;
+  size?: InputFieldSize;
+  style?: React.CSSProperties;
   children?: React.ReactNode;
 }
 
 export const InputFieldWithCompletions = memo(
   forwardRef(function InputFieldWithCompletions(
-    { placeholder, items, onSelectItem, onHoverItem, children }: Props,
+    {
+      placeholder,
+      items,
+      size,
+      onSelectItem,
+      onHoverItem,
+      onBlur,
+      style,
+      children,
+    }: Props,
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
     const [state, _setState] = useState({
@@ -173,10 +185,10 @@ export const InputFieldWithCompletions = memo(
       [updateState],
     );
 
-    const handleBlur = useCallback(
-      () => updateState({ selectedIndex: 0, filter: '' }, 'resetHover'),
-      [updateState],
-    );
+    const handleBlur = useCallback(() => {
+      updateState({ selectedIndex: 0, filter: '' }, 'resetHover');
+      onBlur?.();
+    }, [onBlur, updateState]);
 
     const handleFocus = useCallback(
       () => updateState({ selectedIndex: 0, filter: '' }),
@@ -225,7 +237,7 @@ export const InputFieldWithCompletions = memo(
 
     return (
       <InputField.Root
-        size="large"
+        size={size}
         renderPopoverContent={({ width }) => {
           const listSize = { width, height };
 
@@ -262,6 +274,7 @@ export const InputFieldWithCompletions = memo(
           onBlur={handleBlur}
           onFocusCapture={handleFocus}
           onKeyDown={handleKeyDown}
+          style={style}
         />
         {children}
       </InputField.Root>

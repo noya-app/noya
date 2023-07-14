@@ -47,7 +47,7 @@ export const heroSymbol = SketchModel.symbolMaster({
   layers: [
     SketchModel.symbolInstance({
       symbolID: boxSymbolId,
-      blockParameters: ['flex-col', 'items-inherit'],
+      blockParameters: ['flex-col', 'items-inherit', 'gap-2'],
       overrideValues: [
         SketchModel.overrideValue({
           overrideName: 'layers',
@@ -60,8 +60,8 @@ export const heroSymbol = SketchModel.symbolMaster({
             SketchModel.symbolInstance({
               do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
               symbolID: textSymbolId,
-              // symbolID: heading1SymbolId,
               blockText: 'Create, iterate, inspire.',
+              blockParameters: ['h1'],
             }),
           ],
         }),
@@ -70,8 +70,8 @@ export const heroSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
       symbolID: textSymbolId,
-      // symbolID: heading4SymbolId,
       blockText: 'Turn great ideas into new possibilities.',
+      blockParameters: ['h4'],
     }),
     SketchModel.symbolInstance({
       symbolID: boxSymbolId,

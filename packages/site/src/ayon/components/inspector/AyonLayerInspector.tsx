@@ -1,4 +1,4 @@
-import { useApplicationState, useDispatch } from 'noya-app-state-context';
+import { useApplicationState } from 'noya-app-state-context';
 import {
   Chip,
   CompletionItem,
@@ -25,7 +25,7 @@ import {
   getSymbolMaster,
 } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
@@ -257,10 +257,11 @@ export function AyonLayerInspector({
   };
 
   return (
-    <Stack.V gap="1px">
+    <Stack.V gap="1px" position="relative">
       <InspectorSection>
         <InputFieldWithCompletions
           ref={componentSearchInputRef}
+          size="large"
           placeholder={componentName}
           items={blockCompletionItems}
           onSelectItem={handleSelectBlockItem}
@@ -296,6 +297,7 @@ export function AyonLayerInspector({
       <InspectorSection title="Style" titleTextStyle="small">
         <InputFieldWithCompletions
           ref={styleSearchInputRef}
+          size="large"
           placeholder={'Styles'}
           items={unusedStyleItems}
           onSelectItem={(item) => {
@@ -384,6 +386,7 @@ export function AyonLayerInspector({
       <InspectorSection title="Content" titleTextStyle="small">
         <InputFieldWithCompletions
           ref={nestedComponentSearchInputRef}
+          size="large"
           placeholder={'Content'}
           items={blockCompletionItems}
           onSelectItem={(item) => {
@@ -528,7 +531,7 @@ export function AyonLayerInspector({
             );
           }}
         />
-        <Spacer.Vertical size={32} />
+        <Spacer.Vertical size={200} />
       </InspectorSection>
     </Stack.V>
   );
@@ -552,14 +555,38 @@ function ContentItem({
   ) => void;
 }) {
   const theme = useDesignSystemTheme();
-  const dispatch = useDispatch();
+  const [state, dispatch] = useApplicationState();
   const symbol = symbolMap[layer.symbolID];
+  const master = getSymbolMaster(state, layer.symbolID);
 
   const componentName = symbol?.name.toUpperCase();
   const placeholderText = symbol?.blockDefinition?.placeholderText;
   const key = path.join('/');
 
   const [hovered, setHovered] = React.useState(false);
+  const [isSearching, setIsSearching] = React.useState(false);
+
+  const styleItems = useMemo(
+    () =>
+      (master.blockDefinition?.hashtags ?? []).map((item) => ({
+        name: item,
+        id: item,
+        icon: <HashtagIcon item={item} />,
+      })),
+    [master.blockDefinition?.hashtags],
+  );
+
+  const unusedStyleItems = styleItems.filter(
+    (item) => !layer.blockParameters?.includes(item.name),
+  );
+
+  const modalSearchInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isSearching) {
+      modalSearchInputRef.current?.focus();
+    }
+  }, [isSearching]);
 
   return (
     <TreeView.Row
@@ -578,59 +605,79 @@ function ContentItem({
         gap="2px"
       >
         <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
-          <InputField.Root key={key} labelPosition="end" labelSize={60}>
-            <InputField.Input
+          {isSearching ? (
+            <InputFieldWithCompletions
+              ref={modalSearchInputRef}
+              placeholder={'Find component/style'}
+              items={unusedStyleItems}
+              onBlur={() => {
+                setIsSearching(false);
+              }}
+              onSelectItem={(item) => {
+                const updatedParameters = (layer.blockParameters ?? []).concat(
+                  item.name,
+                );
+
+                const overrideName = Overrides.encodeName(
+                  path,
+                  'blockParameters',
+                );
+
+                dispatch(
+                  'setOverrideValue',
+                  undefined,
+                  overrideName,
+                  updatedParameters,
+                );
+              }}
               style={{
                 background: 'transparent',
               }}
-              value={layer.blockText ?? ''}
-              placeholder={placeholderText}
-              onChange={(value) => {
-                if (depth === 0) {
-                  dispatch('setBlockText', undefined, value);
-                } else {
-                  dispatch(
-                    'setOverrideValue',
-                    undefined,
-                    Overrides.encodeName(path, 'blockText'),
-                    value,
-                  );
-                }
-              }}
             />
-            {hovered ? (
-              <InputField.Button>Edit</InputField.Button>
-            ) : (
-              <InputField.Label>{componentName}</InputField.Label>
-            )}
-          </InputField.Root>
-          {/* <Button
-            variant="floating"
-            onClick={() => {
-              const updated = Hierarchy.insert(selectedLayer, {
-                at: [...indexPath, 1000],
-                nodes: [
-                  SketchModel.symbolInstance({
-                    symbolID: buttonSymbolId,
-                  }),
-                ],
-              });
+          ) : (
+            <InputField.Root key={key} labelPosition="end" labelSize={60}>
+              <InputField.Input
+                style={{
+                  background: 'transparent',
+                }}
+                value={layer.blockText ?? ''}
+                placeholder={placeholderText}
+                onKeyDown={(event) => {
+                  switch (event.key) {
+                    case '#': {
+                      event.preventDefault();
+                      event.stopPropagation();
 
-              setAllOverrides(updated);
-            }}
-          >
-            +
-          </Button>
-          <IconButton
-            iconName="TrashIcon"
-            onClick={() => {
-              const updated = Hierarchy.remove(selectedLayer, {
-                indexPaths: [indexPath],
-              });
-
-              setAllOverrides(updated);
-            }}
-          /> */}
+                      setIsSearching(true);
+                    }
+                  }
+                }}
+                onChange={(value) => {
+                  if (depth === 0) {
+                    dispatch('setBlockText', undefined, value);
+                  } else {
+                    dispatch(
+                      'setOverrideValue',
+                      undefined,
+                      Overrides.encodeName(path, 'blockText'),
+                      value,
+                    );
+                  }
+                }}
+              />
+              {hovered ? (
+                <InputField.Button
+                  onClick={() => {
+                    setIsSearching(true);
+                  }}
+                >
+                  Edit
+                </InputField.Button>
+              ) : (
+                <InputField.Label>{componentName}</InputField.Label>
+              )}
+            </InputField.Root>
+          )}
         </Stack.H>
         {layer.blockParameters && layer.blockParameters.length > 0 && (
           <Stack.H flexWrap="wrap" gap="2px">
@@ -640,40 +687,43 @@ function ContentItem({
                 size="small"
                 deletable
                 monospace
-                onHoverDeleteChange={(isHovering) => {
-                  const updatedParameters = (
-                    layer.blockParameters ?? []
-                  ).filter((p) => p !== parameter);
+                // TODO: This seems to permanently mutate block parameters in the layer tree.
+                // Afterwards, if we add/remove block parameters they don't get rendered.
+                // Refreshing the page fixes it.
+                // onHoverDeleteChange={(isHovering) => {
+                //   const updatedParameters = (
+                //     layer.blockParameters ?? []
+                //   ).filter((p) => p !== parameter);
 
-                  const overrideName = Overrides.encodeName(
-                    path,
-                    'blockParameters',
-                  );
+                //   const overrideName = Overrides.encodeName(
+                //     path,
+                //     'blockParameters',
+                //   );
 
-                  const updatedOverrideValues = selectedLayer.overrideValues
-                    .filter(
-                      (override) => override.overrideName !== overrideName,
-                    )
-                    .concat(
-                      SketchModel.overrideValue({
-                        overrideName,
-                        value: updatedParameters,
-                      }),
-                    );
+                //   const updatedOverrideValues = selectedLayer.overrideValues
+                //     .filter(
+                //       (override) => override.overrideName !== overrideName,
+                //     )
+                //     .concat(
+                //       SketchModel.overrideValue({
+                //         overrideName,
+                //         value: updatedParameters,
+                //       }),
+                //     );
 
-                  if (isHovering) {
-                    onSetOverriddenBlock({
-                      blockId: selectedLayer.symbolID,
-                      blockText: selectedLayer.blockText,
-                      blockParameters: selectedLayer.blockParameters,
-                      overrideValues: updatedOverrideValues,
-                      resolvedBlockText:
-                        selectedLayer.resolvedBlockData?.resolvedText,
-                    });
-                  } else {
-                    onSetOverriddenBlock(undefined);
-                  }
-                }}
+                //   if (isHovering) {
+                //     onSetOverriddenBlock({
+                //       blockId: selectedLayer.symbolID,
+                //       blockText: selectedLayer.blockText,
+                //       blockParameters: selectedLayer.blockParameters,
+                //       overrideValues: updatedOverrideValues,
+                //       resolvedBlockText:
+                //         selectedLayer.resolvedBlockData?.resolvedText,
+                //     });
+                //   } else {
+                //     onSetOverriddenBlock(undefined);
+                //   }
+                // }}
                 onDelete={() => {
                   const updatedParameters = (
                     layer.blockParameters ?? []
