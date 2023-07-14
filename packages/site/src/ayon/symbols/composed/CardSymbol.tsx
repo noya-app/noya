@@ -12,6 +12,14 @@ export const cardSymbol = SketchModel.symbolMaster({
   symbolID: cardSymbolId,
   name: 'Card',
   blockDefinition: {
+    placeholderParameters: [
+      'flex-1',
+      'flex-col',
+      'bg-white',
+      'p-4',
+      'shadow',
+      'rounded-md',
+    ],
     hashtags: [],
     isComposedBlock: true,
     infer: ({ frame }) => {
@@ -29,24 +37,26 @@ export const cardSymbol = SketchModel.symbolMaster({
       );
     },
   },
-  defaultBlockText: '#flex-col #bg-white #p-4 #shadow #rounded-md',
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '66a7337d-3e71-48de-b415-7d1551cd7be1',
       symbolID: imageSymbolId,
-      blockText: 'landscape #rounded-lg #flex-1',
+      blockText: 'landscape',
+      blockParameters: ['rounded-lg', 'flex-1'],
     }),
     SketchModel.symbolInstance({
       do_objectID: 'f7a4bcee-9e41-455a-b29e-7ba3598eeb26',
       symbolID: textSymbolId,
       // symbolID: heading5SymbolId,
-      blockText: 'News #mt-4',
+      blockText: 'News',
+      blockParameters: ['mt-4'],
     }),
-    // SketchModel.symbolInstance({
-    //   do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
-    //   symbolID: textSymbolId,
-    //   blockText: 'Here you can explore the latest news and information. #mt-1',
-    // }),
+    SketchModel.symbolInstance({
+      do_objectID: 'f5b4c896-fd40-4141-999e-90eef2c0a8f3',
+      symbolID: textSymbolId,
+      blockText: 'Here you can explore the latest news and information.',
+      blockParameters: ['mt-1'],
+    }),
   ],
 });
 
