@@ -130,6 +130,7 @@ const ButtonContent = styled.span(({ theme }) => ({
 export interface ButtonRootProps {
   id?: string;
   flex?: CSSProperties['flex'];
+  tabIndex?: number;
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;
@@ -143,6 +144,7 @@ export const Button = forwardRef(function Button(
   {
     id,
     flex,
+    tabIndex,
     tooltip,
     active = false,
     disabled = false,
@@ -158,6 +160,7 @@ export const Button = forwardRef(function Button(
       ref={forwardedRef}
       id={id}
       flex={flex}
+      tabIndex={tabIndex}
       active={active}
       disabled={disabled}
       variant={variant}

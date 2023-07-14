@@ -175,7 +175,9 @@ export function AyonLayerInspector({
           blockId,
           blockText: selectedLayer.blockText,
           blockParameters: parameters,
-          overrideValues: selectedLayer.overrideValues,
+          overrideValues: selectedLayer.overrideValues.filter(
+            (override) => !override.overrideName.endsWith('layers'),
+          ),
           resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
         }),
       ),
@@ -277,8 +279,7 @@ export function AyonLayerInspector({
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           key={selectedLayer.symbolID}
-          items={[]}
-          // items={relatedBlocks}
+          items={relatedBlocks}
           selectedIndex={0}
           onSelectItem={(index) => {
             dispatch(

@@ -72,6 +72,7 @@ interface Props extends StyleProps {
   separator?: Parameters<typeof withSeparatorElements>[1];
   breakpoints?: StackBreakpointList | null | false;
   href?: string; // Shouldn't be here, ideally
+  tabIndex?: number;
 }
 
 const Element = styled.div<{
@@ -83,7 +84,7 @@ const Element = styled.div<{
 }));
 
 const StackBase = forwardRef(function StackBase(
-  { id, as, children, separator, breakpoints, href, ...rest }: Props,
+  { id, as, children, separator, breakpoints, tabIndex, href, ...rest }: Props,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
   const elements = separator
@@ -104,6 +105,7 @@ const StackBase = forwardRef(function StackBase(
       as={as}
       styleProps={styleProps}
       breakpoints={breakpoints}
+      tabIndex={tabIndex}
       {...(href && { href })}
     >
       {elements}

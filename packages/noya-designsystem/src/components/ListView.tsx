@@ -349,6 +349,7 @@ const ListViewRow = forwardRef(function ListViewRow<
           { onPointerDown: renderProps.onPointerDown },
           { [pressEventName]: handlePress },
         )}
+        tabIndex={-1}
       >
         {relativeDropPosition && (
           <ListViewDragIndicatorElement

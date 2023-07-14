@@ -34,6 +34,7 @@ export function InspectorCarousel({
             selected={index === selectedIndex}
           >
             <Stack.V
+              tabIndex={-1}
               background={'white'}
               width="100%"
               height="100%"

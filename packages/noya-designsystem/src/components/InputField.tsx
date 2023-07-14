@@ -162,7 +162,7 @@ const InputFieldButton = memo(function InputFieldButton({
 
   return (
     <ButtonContainer size={size}>
-      <Button variant="floating" onClick={handleClick}>
+      <Button variant="floating" onClick={handleClick} tabIndex={-1}>
         {children}
       </Button>
     </ButtonContainer>

@@ -1,6 +1,7 @@
 import { SketchModel } from 'noya-sketch-model';
 import { isWithinRectRange } from '../../infer/score';
 import {
+  boxSymbolId,
   buttonSymbolId,
   heroSymbolId,
   heroSymbolV1Id,
@@ -16,50 +17,6 @@ import {
 export const heroSymbolV1 = SketchModel.symbolMaster({
   symbolID: heroSymbolV1Id,
   name: 'Hero V1 (update available)',
-});
-
-export const heroButtonRowSymbol = SketchModel.symbolMaster({
-  symbolID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
-  name: 'Hero Button Row',
-  blockDefinition: {
-    isPassthrough: true,
-    placeholderParameters: ['flex-row', 'items-center', 'gap-6', 'mt-4'],
-  },
-  layers: [
-    SketchModel.symbolInstance({
-      do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',
-      symbolID: buttonSymbolId,
-      blockText: 'Get started',
-    }),
-    SketchModel.symbolInstance({
-      do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
-      symbolID: linkSymbolId,
-      blockText: 'Learn more #no-underline #icon-arrow-forward',
-      // isVisible: false,
-    }),
-  ],
-});
-
-export const heroHeadlineStackSymbol = SketchModel.symbolMaster({
-  symbolID: '511cf6e2-b92b-45a3-a239-b13e9dbbfe9f',
-  name: 'Hero Headline Stack',
-  blockDefinition: {
-    isPassthrough: true,
-    placeholderParameters: ['flex-col', 'items-inherit'],
-  },
-  layers: [
-    SketchModel.symbolInstance({
-      do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
-      symbolID: tagSymbolId,
-      blockText: 'The future is here',
-    }),
-    SketchModel.symbolInstance({
-      do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
-      symbolID: textSymbolId,
-      // symbolID: heading1SymbolId,
-      blockText: 'Create, iterate, inspire.',
-    }),
-  ],
 });
 
 export const heroSymbol = SketchModel.symbolMaster({
@@ -89,9 +46,26 @@ export const heroSymbol = SketchModel.symbolMaster({
   },
   layers: [
     SketchModel.symbolInstance({
-      do_objectID: 'd6593501-b089-4390-bbe2-fb10afb5df5a',
-      symbolID: heroHeadlineStackSymbol.symbolID,
-      blockText: '',
+      symbolID: boxSymbolId,
+      blockParameters: ['flex-col', 'items-inherit'],
+      overrideValues: [
+        SketchModel.overrideValue({
+          overrideName: 'layers',
+          value: [
+            SketchModel.symbolInstance({
+              do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
+              symbolID: tagSymbolId,
+              blockText: 'The future is here',
+            }),
+            SketchModel.symbolInstance({
+              do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
+              symbolID: textSymbolId,
+              // symbolID: heading1SymbolId,
+              blockText: 'Create, iterate, inspire.',
+            }),
+          ],
+        }),
+      ],
     }),
     SketchModel.symbolInstance({
       do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
@@ -100,9 +74,27 @@ export const heroSymbol = SketchModel.symbolMaster({
       blockText: 'Turn great ideas into new possibilities.',
     }),
     SketchModel.symbolInstance({
-      do_objectID: '83d2fdeb-6f4d-4948-a677-fe1f2aac64d5',
-      symbolID: heroButtonRowSymbol.symbolID,
-      blockText: '',
+      symbolID: boxSymbolId,
+      do_objectID: '4483d3dc-5391-47c6-ab96-c99a23cb4293',
+      blockParameters: ['flex-row', 'items-center', 'gap-6', 'mt-4'],
+      overrideValues: [
+        SketchModel.overrideValue({
+          overrideName: 'layers',
+          value: [
+            SketchModel.symbolInstance({
+              do_objectID: '6b386c69-d6cf-4c2f-ae06-c92af43268d5',
+              symbolID: buttonSymbolId,
+              blockText: 'Get started',
+            }),
+            SketchModel.symbolInstance({
+              do_objectID: 'eee85c94-7361-4bcf-8afb-f59c6e8661f7',
+              symbolID: linkSymbolId,
+              blockText: 'Learn more',
+              blockParameters: ['no-underline', 'icon-arrow-forward'],
+            }),
+          ],
+        }),
+      ],
     }),
   ],
 });
@@ -110,8 +102,8 @@ export const heroSymbol = SketchModel.symbolMaster({
 export const heroWithImageSymbol = SketchModel.symbolMaster({
   symbolID: heroWithImageSymbolId,
   name: 'Hero with Image',
-  defaultBlockText: '#grid #grid-flow-col #auto-cols-fr	',
   blockDefinition: {
+    placeholderParameters: ['flex-1', 'grid', 'grid-flow-col', 'auto-cols-fr'],
     hashtags: [],
     isComposedBlock: true,
     infer: ({ frame }) => {
@@ -137,12 +129,20 @@ export const heroWithImageSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'bc20968b-328a-4831-b242-ed0572e6459d',
       symbolID: heroSymbolId,
-      blockText: '#left #px-20',
+      blockParameters: [
+        'flex-1',
+        'flex-col',
+        'center',
+        'py-4',
+        'px-20',
+        'gap-3',
+      ],
     }),
     SketchModel.symbolInstance({
       do_objectID: 'e65f7c76-ef83-4924-9545-3e50ac18b32a',
       symbolID: imageSymbolId,
-      blockText: 'landscape #w-full #h-full',
+      blockText: 'landscape',
+      blockParameters: ['w-full', 'h-full'],
     }),
   ],
 });
