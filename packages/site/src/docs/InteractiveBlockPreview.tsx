@@ -232,6 +232,10 @@ export function InteractiveBlockPreview(
     getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
   },
 ) {
+  // console.log('InteractiveBlockPreview', props.getSymbolMaster(props.symbolId));
+
+  // return null;
+
   const config = useDesignSystemConfiguration();
 
   const blockWidth =

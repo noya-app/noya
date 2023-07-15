@@ -63,7 +63,7 @@ import React, {
 import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Content } from '../ayon/components/Content';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
-import { allSymbols } from '../ayon/symbols/symbols';
+import { librarySymbols } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
@@ -136,7 +136,7 @@ function Workspace({
 
       draft.history.present.isolatedLayerId = artboardId;
 
-      draft.history.present.sketch.document.foreignSymbols = allSymbols.map(
+      draft.history.present.sketch.document.foreignSymbols = librarySymbols.map(
         (symbol) =>
           SketchModel.foreignSymbol({
             symbolMaster: symbol,

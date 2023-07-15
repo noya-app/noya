@@ -23,7 +23,7 @@ import {
   linkSymbolId,
   textSymbolId,
 } from '../ayon/symbols/symbolIds';
-import { symbolMap } from '../ayon/symbols/symbols';
+import { librarySymbolMap } from '../ayon/symbols/symbols';
 
 jest.setTimeout(20000);
 
@@ -42,7 +42,7 @@ beforeAll(async () => {
   MaterialDesignSystem = await loadDesignSystem('mui');
 });
 
-const getSymbolMaster = (symbolID: string) => symbolMap[symbolID];
+const getSymbolMaster = (symbolID: string) => librarySymbolMap[symbolID];
 
 function generate(
   symbol: Sketch.SymbolInstance,

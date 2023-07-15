@@ -229,6 +229,7 @@ export function applicationReducer(
     case 'selectLayer':
     case 'selectAllLayers':
     case 'ungroupLayers':
+    case 'convertInstanceToSymbol':
     case 'createSymbol':
     case 'detachSymbol':
     case 'deleteSymbol':

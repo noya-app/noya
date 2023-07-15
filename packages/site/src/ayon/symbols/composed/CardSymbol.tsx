@@ -1,5 +1,6 @@
 import { SketchModel } from 'noya-sketch-model';
 import { isWithinRectRange } from '../../infer/score';
+import { tailwindBlockClasses } from '../../tailwind/tailwind';
 import {
   buttonSymbolId,
   cardSymbolId,
@@ -20,7 +21,7 @@ export const cardSymbol = SketchModel.symbolMaster({
       'shadow',
       'rounded-md',
     ],
-    hashtags: [],
+    hashtags: tailwindBlockClasses,
     isComposedBlock: true,
     infer: ({ frame }) => {
       return Math.max(

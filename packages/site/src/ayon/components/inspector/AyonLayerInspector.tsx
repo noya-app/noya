@@ -1,5 +1,6 @@
 import { useApplicationState } from 'noya-app-state-context';
 import {
+  Button,
   Chip,
   CompletionItem,
   InputField,
@@ -9,6 +10,7 @@ import {
   Stack,
   TreeView,
   useDesignSystemTheme,
+  useOpenInputDialog,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { DragHandleDots2Icon } from 'noya-icons';
@@ -29,7 +31,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
-import { allInsertableSymbols } from '../../symbols/symbols';
+import { getAllInsertableSymbols } from '../../symbols/symbols';
 import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 
@@ -68,6 +70,7 @@ export function AyonLayerInspector({
   ) => void;
 }) {
   const [state, dispatch] = useApplicationState();
+  const openInputDialog = useOpenInputDialog();
 
   const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
   const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
@@ -75,13 +78,13 @@ export function AyonLayerInspector({
 
   const blockCompletionItems = useMemo(
     () =>
-      allInsertableSymbols.map(
+      getAllInsertableSymbols(state).map(
         (block): CompletionItem => ({
           id: block.symbolID,
           name: block.name,
         }),
       ),
-    [],
+    [state],
   );
 
   const handleSelectBlockItem = useCallback(
@@ -409,6 +412,7 @@ export function AyonLayerInspector({
               ...Hierarchy.getChildren(selectedLayer, []),
               SketchModel.symbolInstance({
                 symbolID: item.id,
+                name: item.name,
               }),
             ]);
           }}
@@ -547,6 +551,18 @@ export function AyonLayerInspector({
           }}
         />
         <Spacer.Vertical size={200} />
+        <Button
+          onClick={async () => {
+            const name = await openInputDialog('New Component Name');
+
+            if (!name) return;
+
+            dispatch('convertInstanceToSymbol', name);
+            // dispatch('createSymbol', [selectedLayer.do_objectID], name);
+          }}
+        >
+          New Component
+        </Button>
       </InspectorSection>
     </Stack.V>
   );

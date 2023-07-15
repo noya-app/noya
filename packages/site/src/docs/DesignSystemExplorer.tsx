@@ -13,7 +13,7 @@ import { createSketchFile } from 'noya-state';
 import { groupBy, uuid } from 'noya-utils';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BlockMetadata } from '../ayon/symbols/metadata';
-import { symbolMap } from '../ayon/symbols/symbols';
+import { librarySymbolMap } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
 import { Ayon } from '../components/Ayon';
 import { Toolbar } from '../components/Toolbar';
@@ -77,7 +77,7 @@ export function DesignSystemExplorer({
   const config = useDesignSystemConfiguration();
   const client = useNoyaClient();
   const router = useRouter();
-  const getSymbolMaster = (symbolId: string) => symbolMap[symbolId];
+  const getSymbolMaster = (symbolId: string) => librarySymbolMap[symbolId];
 
   const file = useMemo(() => {
     const examples = blockInstances.map(([symbolId, blockMetadata]) => {

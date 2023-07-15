@@ -22,7 +22,7 @@ import { OnboardingAnimation } from '../../components/OnboardingAnimation';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { Stacking } from '../stacking';
 import { imageSymbolId } from '../symbols/symbolIds';
-import { allInsertableSymbols } from '../symbols/symbols';
+import { getAllInsertableSymbols } from '../symbols/symbols';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
 
 // function getElementRect(element: HTMLElement) {
@@ -208,11 +208,11 @@ export const Widget = function Widget({
 
   const symbolItems = useMemo(
     () =>
-      allInsertableSymbols.map((symbol) => ({
+      getAllInsertableSymbols(state).map((symbol) => ({
         name: symbol.name,
         id: symbol.symbolID,
       })),
-    [],
+    [state],
   );
 
   const [showBlockPicker, setShowBlockPicker] = useState(false);

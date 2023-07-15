@@ -1,9 +1,9 @@
-import Sketch from 'noya-file-format';
 import { Draft } from 'immer';
+import Sketch from 'noya-file-format';
 import { Point } from 'noya-geometry';
 import { PointString, SketchModel } from 'noya-sketch-model';
-import type { ApplicationState } from '../reducers/applicationReducer';
 import { Layers } from '../layer';
+import type { ApplicationState } from '../reducers/applicationReducer';
 
 export type EncodedPageMetadata = {
   zoomValue: number;
@@ -32,6 +32,10 @@ export const isSymbolsPage = (page: Pick<Sketch.Page, 'name'>) =>
 
 export const getSymbolsPageIndex = (state: ApplicationState) => {
   return state.sketch.pages.findIndex(isSymbolsPage);
+};
+
+export const getSymbolsPage = (state: ApplicationState) => {
+  return state.sketch.pages.find(isSymbolsPage);
 };
 
 export const getCurrentPage = (state: Draft<ApplicationState>) => {

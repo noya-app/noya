@@ -20,9 +20,10 @@ import * as feature from './composed/FeatureSymbol';
 import * as hero from './composed/HeroSymbol';
 import * as signIn from './composed/SignInSymbol';
 
+import { ApplicationState, Selectors } from 'noya-state';
 import { heroSymbolV1Id } from './symbolIds';
 
-export const allSymbols = [
+export const librarySymbols = [
   ...Object.values(avatar),
   ...Object.values(box),
   ...Object.values(button),
@@ -43,11 +44,20 @@ export const allSymbols = [
   ...Object.values(textarea),
 ];
 
-export const allInsertableSymbols = allSymbols.filter(
-  (symbol) =>
-    !symbol.blockDefinition?.isPassthrough &&
-    symbol.symbolID !== heroSymbolV1Id,
+function filterInsertableSymbol(
+  symbol: Sketch.SymbolMaster,
+): symbol is Sketch.SymbolMaster {
+  return (
+    symbol.symbolID !== heroSymbolV1Id && !symbol.blockDefinition?.isPassthrough
+  );
+}
+
+export const insertableLibrarySymbols = librarySymbols.filter(
+  filterInsertableSymbol,
 );
 
-export const symbolMap: Record<string, Sketch.SymbolMaster> =
-  Object.fromEntries(allSymbols.map((symbol) => [symbol.symbolID, symbol]));
+export const librarySymbolMap: Record<string, Sketch.SymbolMaster> =
+  Object.fromEntries(librarySymbols.map((symbol) => [symbol.symbolID, symbol]));
+
+export const getAllInsertableSymbols = (state: ApplicationState) =>
+  Selectors.getSymbols(state).filter(filterInsertableSymbol);

@@ -28,7 +28,7 @@ import {
 } from 'react-guidebook';
 import styled from 'styled-components';
 import guidebook from '../../guidebook';
-import { symbolMap } from '../ayon/symbols/symbols';
+import { librarySymbolMap } from '../ayon/symbols/symbols';
 import { Ayon } from '../components/Ayon';
 import { AyonProvider } from '../components/AyonContext';
 import { NavigationLinks } from '../components/NavigationLinks';
@@ -110,7 +110,7 @@ const StyledTable = guidebookStyled(PageComponents.table)({
   marginBottom: 0,
 });
 
-const getSymbolMaster = (symbolId: string) => symbolMap[symbolId];
+const getSymbolMaster = (symbolId: string) => librarySymbolMap[symbolId];
 
 const MDXComponents = {
   ...PageComponents,

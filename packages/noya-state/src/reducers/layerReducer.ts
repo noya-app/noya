@@ -22,6 +22,7 @@ import { PageLayer } from '../layers';
 import {
   addSiblingLayer,
   addToParentLayer,
+  applyOverrides,
   deleteLayers,
   findPageLayerIndexPaths,
   getBoundingRect,
@@ -36,6 +37,7 @@ import {
   getRightMostLayerBounds,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedSymbols,
+  getSymbolMaster,
   getSymbols,
   getSymbolsInstancesIndexPaths,
   getSymbolsPageIndex,
@@ -44,7 +46,7 @@ import {
   moveLayer,
   removeLayer,
 } from '../selectors';
-import { createPage } from '../selectors/pageSelectors';
+import { createPage, getSymbolsPage } from '../selectors/pageSelectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import type { ApplicationState } from './applicationReducer';
 
@@ -65,6 +67,7 @@ export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayers', layerId: string | string[]]
   | [type: 'ungroupLayers', layerId: string | string[]]
+  | [type: 'convertInstanceToSymbol', name: string]
   | [type: 'createSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
@@ -345,6 +348,70 @@ export function layerReducer(
         updateSelection(draft.selectedLayerIds, ids, 'replace');
       });
     }
+    case 'convertInstanceToSymbol': {
+      const [, name] = action;
+
+      state = ensureSymbolsPage(state);
+
+      const currentPage = getCurrentPage(state);
+
+      const selectedLayer = Layers.find(
+        currentPage,
+        (layer) => layer.do_objectID === state.selectedLayerIds[0],
+      );
+
+      if (!selectedLayer || !Layers.isSymbolInstance(selectedLayer)) {
+        return state;
+      }
+
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        currentPage,
+        (layer) => layer.do_objectID === selectedLayer.do_objectID,
+      )!;
+
+      const oldMaster = applyOverrides({
+        symbolMaster: getSymbolMaster(state, selectedLayer.symbolID),
+        overrideValues: selectedLayer.overrideValues,
+        layerStyles: state.sketch.document.layerStyles,
+        layerTextStyles: state.sketch.document.layerTextStyles,
+      });
+
+      state = produce(state, (draft) => {
+        const newMaster = SketchModel.symbolMaster({
+          ...oldMaster,
+          blockDefinition: {
+            ...oldMaster.blockDefinition,
+            placeholderParameters: selectedLayer.blockParameters,
+            placeholderText: selectedLayer.blockText,
+          },
+          symbolID: uuid(),
+          name,
+        });
+
+        const symbolsPage = getSymbolsPage(draft)!;
+
+        symbolsPage.layers.push(newMaster);
+
+        deleteLayers([indexPath], draft.sketch.pages[pageIndex]);
+
+        const symbolInstance = SketchModel.symbolInstance({
+          name,
+          symbolID: newMaster.symbolID,
+          frame: selectedLayer.frame,
+        });
+
+        addSiblingLayer(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+          symbolInstance,
+        );
+
+        draft.selectedLayerIds = [symbolInstance.do_objectID];
+      });
+
+      return state;
+    }
     case 'createSymbol': {
       const [, id, name] = action;
       const ids = typeof id === 'string' ? [id] : id;
@@ -375,6 +442,8 @@ export function layerReducer(
         });
       }
 
+      state = ensureSymbolsPage(state);
+
       const symbolsPageIndex = getSymbolsPageIndex(state);
       const indexPaths = getIndexPathsForGroup(state, ids);
       const symbolMaster = createGroup(
@@ -402,10 +471,7 @@ export function layerReducer(
 
         deleteLayers(indexPaths, pages[pageIndex]);
 
-        const symbolsPage =
-          symbolsPageIndex === -1
-            ? createPage(pages, draft.sketch.user, uuid(), 'Symbols')
-            : pages[symbolsPageIndex];
+        const symbolsPage = pages[symbolsPageIndex];
 
         const symbolInstance = SketchModel.symbolInstance({
           name: symbolMaster.name,
@@ -672,5 +738,13 @@ function copyLayer(targetLayer: PageLayer) {
         layer.symbolID = uuid();
       }
     });
+  });
+}
+
+function ensureSymbolsPage(state: ApplicationState) {
+  if (getSymbolsPage(state)) return state;
+
+  return produce(state, (draft) => {
+    createPage(draft.sketch.pages, draft.sketch.user, uuid(), 'Symbols');
   });
 }
