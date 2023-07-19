@@ -6,6 +6,7 @@ import {
   lightTheme,
 } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
+import { DSEditor } from '../../../components/DSEditor';
 
 const Ayon = dynamic(
   () => import('../../../components/Ayon').then((mod) => mod.Ayon),
@@ -21,7 +22,17 @@ function Content({ id }: { id: string }) {
     client.files.read(id).then(setInitialFile);
   }, [client, id]);
 
-  if (!initialFile || initialFile.data.type !== 'io.noya.ayon') return null;
+  if (!initialFile) return null;
+
+  if (initialFile.data.type === 'io.noya.ds') {
+    return (
+      <DSEditor
+        initialDocument={initialFile.data.document}
+        name={initialFile.data.name}
+        viewType="preview"
+      />
+    );
+  }
 
   return (
     <Ayon

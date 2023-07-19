@@ -15,7 +15,12 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
-import { ChevronDownIcon, DashboardIcon, PlusIcon } from 'noya-icons';
+import {
+  ChevronDownIcon,
+  DashboardIcon,
+  MixerVerticalIcon,
+  PlusIcon,
+} from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -251,7 +256,11 @@ export function Projects() {
                     />
                     <Stack.V flex="1">
                       <Stack.H alignItems="center">
-                        <DashboardIcon />
+                        {file.data.type === 'io.noya.ds' ? (
+                          <MixerVerticalIcon />
+                        ) : (
+                          <DashboardIcon />
+                        )}
                         <Spacer.Horizontal size={10} />
                         {renaming === file.id ? (
                           <ListView.EditableRowTitle
@@ -296,8 +305,8 @@ export function Projects() {
 function getThumbnailSize(file: NoyaAPI.File) {
   if (file.data.type === 'io.noya.ds') {
     return {
-      width: 64,
-      height: 64,
+      width: 512,
+      height: 512,
     };
   }
 

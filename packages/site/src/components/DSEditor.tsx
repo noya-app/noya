@@ -42,8 +42,9 @@ import { ProjectTitle } from './ProjectTitle';
 interface Props {
   name: string;
   initialDocument: DS;
-  onChangeDocument: (document: DS) => void;
-  onChangeName: (name: string) => void;
+  onChangeDocument?: (document: DS) => void;
+  onChangeName?: (name: string) => void;
+  viewType?: 'preview';
 }
 
 const designSystems = {
@@ -58,11 +59,14 @@ const colorGroups = Object.entries(tailwindColors).flatMap(([name, colors]) => {
   return name;
 });
 
+const noop = () => {};
+
 export function DSEditor({
   initialDocument,
-  onChangeDocument,
+  onChangeDocument = noop,
   name: fileName,
-  onChangeName,
+  onChangeName = noop,
+  viewType,
 }: Props) {
   const theme = useDesignSystemTheme();
 
@@ -230,109 +234,114 @@ export function DSEditor({
     root.render(withProvider);
   }, [dsTheme, root, state, system, theme.colors.canvas.background]);
 
+  const inspector = (
+    <Stack.V width="300px" background="white">
+      <ScrollArea>
+        <Stack.V gap="1px" background={theme.colors.canvas.background}>
+          <InspectorSection title="Design System" titleTextStyle="heading4">
+            <InspectorPrimitives.LabeledRow label="Name">
+              <InputField.Root>
+                <InputField.Input value={fileName} onChange={onChangeName} />
+              </InputField.Root>
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Base Library">
+              <Select
+                id="design-system"
+                value={sourceName}
+                options={Object.keys(designSystems)}
+                getTitle={(value) =>
+                  designSystems[value as keyof typeof designSystems]
+                }
+                onChange={(value) => {
+                  setState((state) =>
+                    produce(state, (draft) => {
+                      draft.source.name = value;
+                    }),
+                  );
+                }}
+              >
+                <Button flex="1">
+                  {designSystems[sourceName as keyof typeof designSystems]}
+                  <Spacer.Horizontal />
+                  <ChevronDownIcon />
+                </Button>
+              </Select>
+            </InspectorPrimitives.LabeledRow>
+          </InspectorSection>
+          <InspectorSection title="Theme" titleTextStyle="heading4">
+            <InspectorPrimitives.LabeledRow label="Primary Color">
+              <Select
+                id="primary-color"
+                value={primary}
+                options={colorGroups}
+                getTitle={upperFirst}
+                onChange={(value) => {
+                  setState((state) =>
+                    produce(state, (draft) => {
+                      draft.config.colors.primary = value;
+                    }),
+                  );
+                }}
+              >
+                <Button flex="1">
+                  {primary}
+                  <Spacer.Horizontal />
+                  <ChevronDownIcon />
+                </Button>
+              </Select>
+            </InspectorPrimitives.LabeledRow>
+          </InspectorSection>
+          {system && (
+            <InspectorSection title="Library Details" titleTextStyle="heading4">
+              {/* <InspectorPrimitives.LabeledRow label="Template">
+          <Text variant="code" fontSize="12px">
+            {sourceName}
+          </Text>
+        </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.LabeledRow label="Template Version">
+          <Text variant="code" fontSize="12px">
+            {system.version}
+          </Text>
+        </InspectorPrimitives.LabeledRow> */}
+              {system.dependencies && (
+                <Stack.V>
+                  <InspectorPrimitives.SectionHeader>
+                    <InspectorPrimitives.Title>
+                      Dependencies
+                    </InspectorPrimitives.Title>
+                  </InspectorPrimitives.SectionHeader>
+                  <Spacer.Vertical size={8} />
+                  <Stack.V background={theme.colors.codeBackground}>
+                    <ListView.Root>
+                      {Object.entries(system.dependencies).map(
+                        ([key, value]) => (
+                          <ListView.Row key={key}>
+                            <Text variant="code" flex="1">
+                              {key}
+                            </Text>
+                            <Text variant="code">{value}</Text>
+                          </ListView.Row>
+                        ),
+                      )}
+                    </ListView.Root>
+                  </Stack.V>
+                </Stack.V>
+              )}
+            </InspectorSection>
+          )}
+        </Stack.V>
+      </ScrollArea>
+    </Stack.V>
+  );
+
   return (
     <Stack.H flex="1">
-      <Stack.V width="300px" background="white">
-        <ScrollArea>
-          <Stack.V gap="1px" background={theme.colors.canvas.background}>
-            <InspectorSection title="Design System" titleTextStyle="heading4">
-              <InspectorPrimitives.LabeledRow label="Name">
-                <InputField.Root>
-                  <InputField.Input value={fileName} onChange={onChangeName} />
-                </InputField.Root>
-              </InspectorPrimitives.LabeledRow>
-              <InspectorPrimitives.LabeledRow label="Base Library">
-                <Select
-                  id="design-system"
-                  value={sourceName}
-                  options={Object.keys(designSystems)}
-                  getTitle={(value) =>
-                    designSystems[value as keyof typeof designSystems]
-                  }
-                  onChange={(value) => {
-                    setState((state) =>
-                      produce(state, (draft) => {
-                        draft.source.name = value;
-                      }),
-                    );
-                  }}
-                >
-                  <Button flex="1">
-                    {designSystems[sourceName as keyof typeof designSystems]}
-                    <Spacer.Horizontal />
-                    <ChevronDownIcon />
-                  </Button>
-                </Select>
-              </InspectorPrimitives.LabeledRow>
-            </InspectorSection>
-            <InspectorSection title="Theme" titleTextStyle="heading4">
-              <InspectorPrimitives.LabeledRow label="Primary Color">
-                <Select
-                  id="primary-color"
-                  value={primary}
-                  options={colorGroups}
-                  getTitle={upperFirst}
-                  onChange={(value) => {
-                    setState((state) =>
-                      produce(state, (draft) => {
-                        draft.config.colors.primary = value;
-                      }),
-                    );
-                  }}
-                >
-                  <Button flex="1">
-                    {primary}
-                    <Spacer.Horizontal />
-                    <ChevronDownIcon />
-                  </Button>
-                </Select>
-              </InspectorPrimitives.LabeledRow>
-            </InspectorSection>
-            {system && (
-              <InspectorSection
-                title="Library Details"
-                titleTextStyle="heading4"
-              >
-                {/* <InspectorPrimitives.LabeledRow label="Template">
-                  <Text variant="code" fontSize="12px">
-                    {sourceName}
-                  </Text>
-                </InspectorPrimitives.LabeledRow>
-                <InspectorPrimitives.LabeledRow label="Template Version">
-                  <Text variant="code" fontSize="12px">
-                    {system.version}
-                  </Text>
-                </InspectorPrimitives.LabeledRow> */}
-                {system.dependencies && (
-                  <Stack.V>
-                    <InspectorPrimitives.SectionHeader>
-                      <InspectorPrimitives.Title>
-                        Dependencies
-                      </InspectorPrimitives.Title>
-                    </InspectorPrimitives.SectionHeader>
-                    <Spacer.Vertical size={8} />
-                    <Stack.V background={theme.colors.codeBackground}>
-                      <ListView.Root>
-                        {Object.entries(system.dependencies).map(
-                          ([key, value]) => (
-                            <ListView.Row key={key}>
-                              <Text variant="code" flex="1">
-                                {key}
-                              </Text>
-                              <Text variant="code">{value}</Text>
-                            </ListView.Row>
-                          ),
-                        )}
-                      </ListView.Root>
-                    </Stack.V>
-                  </Stack.V>
-                )}
-              </InspectorSection>
-            )}
-          </Stack.V>
-        </ScrollArea>
-      </Stack.V>
-      <DividerVertical />
+      {viewType !== 'preview' && (
+        <>
+          {inspector}
+          <DividerVertical />
+        </>
+      )}
       <Stack.V flex="1" position="relative">
         <iframe
           title="Design System Preview"
