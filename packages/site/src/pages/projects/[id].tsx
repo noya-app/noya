@@ -7,6 +7,7 @@ import {
   Divider,
   Spacer,
   Stack,
+  Text,
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -22,7 +23,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { ProjectTitle } from '../../components/ProjectTitle';
 import {
   SubscriptionUsageMeterSmall,
   getSubscriptionOverage,
@@ -54,7 +54,7 @@ function FileTitle({ id }: { id: string }) {
 
   if (!cachedFile) return null;
 
-  return <ProjectTitle>{cachedFile.data.name}</ProjectTitle>;
+  return <Text variant="small">{cachedFile.data.name}</Text>;
 }
 
 function FileEditor({ fileId }: { fileId: string }) {

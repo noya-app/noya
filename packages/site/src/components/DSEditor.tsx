@@ -1,4 +1,5 @@
 import {
+  AvatarProps,
   ButtonProps,
   CheckboxProps,
   DesignSystemDefinition,
@@ -101,7 +102,11 @@ export function DSEditor({
 
   useLayoutEffect(() => {
     setCenterToolbar(
-      <Popover trigger={<ProjectTitle>{fileName}</ProjectTitle>}>
+      <Popover
+        trigger={
+          <ProjectTitle projectType="io.noya.ds">{fileName}</ProjectTitle>
+        }
+      >
         <Stack.V width={240}>
           <InspectorPrimitives.Section>
             <InspectorPrimitives.SectionHeader>
@@ -186,6 +191,8 @@ export function DSEditor({
     const Input: React.FC<InputProps> = system.components[component.id.Input];
     const Textarea: React.FC<InputProps> =
       system.components[component.id.Textarea];
+    const Avatar: React.FC<AvatarProps> =
+      system.components[component.id.Avatar];
 
     // const renderBox = boxSymbol.blockDefinition!.render!;
 
@@ -245,6 +252,19 @@ export function DSEditor({
             <Tag variant="solid">Tag</Tag>
             <Tag variant="outline">Tag</Tag>
             <Link href="#">Link</Link>
+            <Avatar
+              name="Devin Abbott"
+              style={{
+                width: '32px',
+                height: '32px',
+              }}
+            />
+            <Avatar
+              style={{
+                width: '32px',
+                height: '32px',
+              }}
+            />
           </div>
           <div style={subSectionStyle}>
             <Checkbox checked label="Checkbox" />
@@ -413,6 +433,7 @@ export function DSEditor({
         <iframe
           title="Design System Preview"
           ref={ref}
+          srcDoc="<!DOCTYPE html>"
           style={{
             width: '100%',
             height: '100%',

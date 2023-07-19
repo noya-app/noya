@@ -15,18 +15,14 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
-import {
-  ChevronDownIcon,
-  DashboardIcon,
-  MixerVerticalIcon,
-  PlusIcon,
-} from 'noya-icons';
+import { ChevronDownIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/utils/createAyonDocument';
 import { ClientStorage } from '../utils/clientStorage';
 import { NOYA_HOST } from '../utils/noyaClient';
+import { ProjectTypeIcon } from './ProjectTypeIcon';
 import { Card } from './Subscription';
 
 const thumbnailSize = { width: 64, height: 64 };
@@ -256,11 +252,7 @@ export function Projects() {
                     />
                     <Stack.V flex="1">
                       <Stack.H alignItems="center">
-                        {file.data.type === 'io.noya.ds' ? (
-                          <MixerVerticalIcon />
-                        ) : (
-                          <DashboardIcon />
-                        )}
+                        <ProjectTypeIcon type={file.data.type} />
                         <Spacer.Horizontal size={10} />
                         {renaming === file.id ? (
                           <ListView.EditableRowTitle
