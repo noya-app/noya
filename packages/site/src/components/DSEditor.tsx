@@ -2,10 +2,13 @@ import {
   ButtonProps,
   CheckboxProps,
   DesignSystemDefinition,
+  InputProps,
+  LinkProps,
   RadioProps,
   RenderableRoot,
   SelectProps,
   SwitchProps,
+  TagProps,
   Theme,
   component,
   transform,
@@ -30,7 +33,14 @@ import { InspectorPrimitives } from 'noya-inspector';
 import { loadDesignSystem } from 'noya-module-loader';
 import { SketchModel } from 'noya-sketch-model';
 import { upperFirst } from 'noya-utils';
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, {
+  CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
+import styled from 'styled-components';
 import { heroSymbol } from '../ayon/symbols/composed/HeroSymbol';
 import { librarySymbolMap } from '../ayon/symbols/symbols';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
@@ -60,6 +70,12 @@ const colorGroups = Object.entries(tailwindColors).flatMap(([name, colors]) => {
 });
 
 const noop = () => {};
+
+const SwatchGrid = styled.div({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(24px, 1fr))',
+  gap: '4px',
+});
 
 export function DSEditor({
   initialDocument,
@@ -165,6 +181,11 @@ export function DSEditor({
       system.components[component.id.Select];
     const Switch: React.FC<SwitchProps> =
       system.components[component.id.Switch];
+    const Tag: React.FC<TagProps> = system.components[component.id.Tag];
+    const Link: React.FC<LinkProps> = system.components[component.id.Link];
+    const Input: React.FC<InputProps> = system.components[component.id.Input];
+    const Textarea: React.FC<InputProps> =
+      system.components[component.id.Textarea];
 
     // const renderBox = boxSymbol.blockDefinition!.render!;
 
@@ -185,11 +206,18 @@ export function DSEditor({
       'automatic-layout',
     );
 
-    const sectionStyle = {
+    const sectionStyle: CSSProperties = {
       padding: '20px',
       borderRadius: '4px',
       background: 'white',
       border: '1px solid #eee',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px',
+      position: 'relative',
+    } as const;
+
+    const subSectionStyle = {
       display: 'flex',
       gap: '20px',
       flexWrap: 'wrap',
@@ -201,24 +229,36 @@ export function DSEditor({
       <div
         style={{
           padding: '20px',
-          gap: '10px',
+          gap: '12px',
           display: 'flex',
           flexDirection: 'column',
-          fontSize: 'initial',
           background: theme.colors.canvas.background,
           minHeight: '100%',
         }}
       >
-        <span>Form Elements</span>
+        <span>Primitive Elements</span>
         <div style={sectionStyle}>
-          <Button>Button</Button>
-          <Checkbox checked label="Checkbox" />
-          <Radio checked label="Radio" />
-          <Select
-            options={['Option 1', 'Option 2', 'Option 3']}
-            value="Option 1"
-          />
-          <Switch checked />
+          <div style={subSectionStyle}>
+            <Button variant="solid">Button</Button>
+            <Button variant="outline">Button</Button>
+            <Button variant="text">Button</Button>
+            <Tag variant="solid">Tag</Tag>
+            <Tag variant="outline">Tag</Tag>
+            <Link href="#">Link</Link>
+          </div>
+          <div style={subSectionStyle}>
+            <Checkbox checked label="Checkbox" />
+            <Radio checked label="Radio" />
+            <Select
+              options={['Option 1', 'Option 2', 'Option 3']}
+              value="Option 1"
+            />
+            <Switch checked />
+          </div>
+          <div style={subSectionStyle}>
+            <Input placeholder="Input" />
+            <Textarea placeholder="Textarea" />
+          </div>
         </div>
         <span>Hero</span>
         <div style={sectionStyle}>{hero}</div>
@@ -290,6 +330,33 @@ export function DSEditor({
                 </Button>
               </Select>
             </InspectorPrimitives.LabeledRow>
+            <SwatchGrid>
+              {colorGroups.map((name) => (
+                <div
+                  key={name}
+                  role="button"
+                  onClick={() => {
+                    setState((state) =>
+                      produce(state, (draft) => {
+                        draft.config.colors.primary = name;
+                      }),
+                    );
+                  }}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    background: (tailwindColors as any)[name as any][500],
+                    // Selected
+                    boxShadow:
+                      name === primary
+                        ? `0 0 0 2px ${theme.colors.primary}, 0 0 0 1px white inset`
+                        : undefined,
+                  }}
+                />
+              ))}
+            </SwatchGrid>
           </InspectorSection>
           {system && (
             <InspectorSection title="Library Details" titleTextStyle="heading4">
