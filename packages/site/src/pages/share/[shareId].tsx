@@ -94,7 +94,7 @@ function Content({
     );
   }
 
-  if (!initialFile) return null;
+  if (!initialFile || initialFile.data.type !== 'io.noya.ayon') return null;
 
   const artboard = Layers.find(
     initialFile.data.document.pages[0],

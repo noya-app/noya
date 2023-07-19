@@ -27,14 +27,44 @@ export const noyaAssetSchema = z.object({
   id: z.string(),
 });
 
-export const noyaFileDataSchema = z
-  .object({
+export const noyaFileDataSchema = z.union([
+  z.object({
     name: z.string(),
     type: z.literal('io.noya.ayon'),
     schemaVersion: z.literal('0.1.0'),
     document: z.custom<SketchFile>(),
-  })
-  .passthrough();
+  }),
+  z.object({
+    name: z.string(),
+    type: z.literal('io.noya.ds'),
+    schemaVersion: z.literal('0.1.0'),
+    document: z.custom<DS>(),
+  }),
+]);
+
+export type DSSource = {
+  type: 'npm';
+  name: string;
+  version: string;
+};
+
+export type DSConfig = {
+  colors: {
+    primary: string;
+  };
+};
+
+export type DS = {
+  source: DSSource;
+  config: DSConfig;
+};
+
+export const dsDataSchema = z.object({
+  name: z.string(),
+  type: z.literal('io.noya.ds'),
+  schemaVersion: z.literal('0.1.0'),
+  document: z.custom<DS>(),
+});
 
 export const noyaFileSchema = z.object({
   id: z.string(),

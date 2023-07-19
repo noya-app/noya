@@ -29,6 +29,7 @@ import {
   usageMeterThreshold,
 } from '../../components/Subscription';
 
+import { DSEditor } from '../../components/DSEditor';
 import { Toolbar } from '../../components/Toolbar';
 import { UpgradeDialog } from '../../components/UpgradeDialog';
 import { OnboardingProvider } from '../../contexts/OnboardingContext';
@@ -133,6 +134,17 @@ function FileEditor({ fileId }: { fileId: string }) {
   );
 
   if (!initialFile || !cachedFile) return null;
+
+  if (initialFile.data.type === 'io.noya.ds') {
+    return (
+      <DSEditor
+        name={cachedFile.data.name}
+        onChangeName={updateName}
+        initialDocument={initialFile.data.document}
+        onChangeDocument={onChangeDocument}
+      />
+    );
+  }
 
   return (
     <Ayon

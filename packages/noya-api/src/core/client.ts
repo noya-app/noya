@@ -211,7 +211,7 @@ export class NoyaClient {
   ) => {
     const file = this.#getLocalFile(id);
 
-    return this.#updateFile(id, { ...file.data, document });
+    return this.#updateFile(id, { ...file.data, document } as NoyaFileData);
   };
 
   throttledUpdateFileMap = new Map<

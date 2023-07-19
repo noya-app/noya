@@ -111,13 +111,13 @@ export const textStyles = {
   heading4: {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[5]}rem`,
-    fontWeight: 'bold',
+    fontWeight: 500,
     lineHeight: '1.75',
   } as CSSObject,
   heading5: {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[6]}rem`,
-    fontWeight: 'bold',
+    fontWeight: 500,
     lineHeight: '1.75',
   } as CSSObject,
   body: {

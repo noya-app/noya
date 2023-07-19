@@ -5,11 +5,11 @@ import { DesignSystemCache } from './cache';
 
 const requireModule = () => {};
 
-function evaluateModule(content: string) {
+function evaluateModule(content: string, Function: FunctionConstructor) {
   const exports = {};
   const module = { exports };
 
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   new Function('exports', 'module', 'require', `{\n${content};\n}`)(
     exports,
     module,
@@ -19,20 +19,25 @@ function evaluateModule(content: string) {
   return module.exports;
 }
 
-export async function loadModule(url: string) {
+export async function loadModule(url: string, Function = window.Function) {
   const response = await fetch(url);
   const text = await response.text();
-  return evaluateModule(text);
+  return evaluateModule(text, Function);
 }
 
-export async function loadDesignSystem(name: string) {
+export async function loadDesignSystem(
+  name: string,
+  Function = window.Function,
+) {
   if (DesignSystemCache.has(name)) {
     return DesignSystemCache.get(name)!;
   }
 
-  const exports = await loadModule(
-    `https://www.unpkg.com/@noya-design-system/${name}/dist/standalone.js`,
-  );
+  const url = name.includes('@')
+    ? `https://www.unpkg.com/${name}/dist/standalone`
+    : `https://www.unpkg.com/@noya-design-system/${name}/dist/standalone`;
+
+  const exports = await loadModule(url, Function);
 
   if (!(exports as any).DesignSystem) {
     throw new Error('No DesignSystem exported');

@@ -1,7 +1,6 @@
 import {
   DesignSystemDefinition,
   RenderableRoot,
-  component,
   defaultTheme,
   transform,
 } from '@noya-design-system/protocol';
@@ -11,25 +10,22 @@ import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
 import { DesignSystemCache, loadDesignSystem } from 'noya-module-loader';
 import { useSize } from 'noya-react-utils';
-import { SketchModel } from 'noya-sketch-model';
 import {
   InteractionState,
   Layers,
   OverriddenBlockContent,
   Selectors,
-  createOverrideHierarchy,
 } from 'noya-state';
 import React, {
   ComponentProps,
-  ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
 } from 'react';
-import { boxSymbol } from '../symbols/primitive/BoxSymbol';
 import { recreateElement } from '../utils/recreateElement';
+import { renderDynamicContent } from '../utils/renderDynamicContent';
 
 class ErrorBoundary extends React.Component<any> {
   constructor(props: { children: React.ReactNode }) {
@@ -47,119 +43,6 @@ class ErrorBoundary extends React.Component<any> {
   render() {
     return this.props.children;
   }
-}
-
-function renderDynamicContent(
-  system: DesignSystemDefinition,
-  artboard: Sketch.Artboard,
-  getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster,
-  drawing: Extract<InteractionState, { type: 'drawing' }> | undefined,
-  theme: unknown,
-) {
-  const Provider = system.components[component.id.Provider];
-
-  type RenderableItem = {
-    instance: Sketch.SymbolInstance;
-    nested: RenderableItem[];
-    indexPath: number[];
-  };
-
-  function renderSymbol({
-    instance,
-    nested,
-    indexPath,
-  }: RenderableItem): ReactNode {
-    const master = getSymbolMaster(instance.symbolID);
-
-    if (!master) return null;
-
-    const render =
-      master.blockDefinition?.render ?? boxSymbol.blockDefinition!.render!;
-
-    const content: ReactNode = render({
-      passthrough: {
-        key: `${indexPath.join('.')}-${instance.do_objectID}}`,
-      },
-      Components: system.components,
-      instance: produce(instance, (draft) => {
-        draft.blockParameters =
-          instance.blockParameters ??
-          master.blockDefinition?.placeholderParameters;
-      }),
-      getSymbolMaster,
-      children: nested.map(renderSymbol),
-    });
-
-    return content;
-  }
-
-  function renderTopLevelSymbol(item: RenderableItem): ReactNode {
-    const content = renderSymbol(item);
-    const { instance } = item;
-
-    return (
-      <div
-        key={instance.do_objectID}
-        style={{
-          position: 'absolute',
-          left: instance.frame.x,
-          top: instance.frame.y,
-          width: instance.frame.width,
-          height: instance.frame.height,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'stretch',
-        }}
-      >
-        {content}
-      </div>
-    );
-  }
-
-  const drawingLayer = drawing
-    ? SketchModel.symbolInstance({
-        do_objectID: 'drawing',
-        frame: SketchModel.rect(
-          Selectors.getDrawnLayerRect(
-            drawing.origin,
-            drawing.current,
-            drawing.options,
-          ),
-        ),
-        symbolID:
-          typeof drawing.shapeType === 'string'
-            ? component.id.Button
-            : drawing.shapeType.symbolId,
-      })
-    : undefined;
-
-  const hierarchy = createOverrideHierarchy(
-    getSymbolMaster,
-  ).map<RenderableItem>(
-    artboard,
-    (instance, transformedChildren, indexPath) => {
-      return {
-        instance: instance as Sketch.SymbolInstance,
-        nested: transformedChildren,
-        indexPath: [...indexPath],
-      };
-    },
-  );
-
-  const content = [
-    ...hierarchy.nested.map(renderTopLevelSymbol),
-    ...(drawingLayer
-      ? [
-          renderTopLevelSymbol({
-            instance: drawingLayer,
-            nested: [],
-            indexPath: [-1],
-          }),
-        ]
-      : []),
-  ];
-
-  return Provider ? <Provider theme={theme}>{content}</Provider> : content;
 }
 
 function DynamicRenderer({
@@ -233,6 +116,7 @@ function DynamicRenderer({
       getSymbolMaster,
       drawing,
       theme,
+      'absolute-layout',
     );
 
     root.render(recreateElement(system, content), { sync });

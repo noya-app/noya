@@ -1,21 +1,24 @@
 import { formatDistance, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
-import { useNoyaClient, useNoyaFiles } from 'noya-api';
+import { DS, NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
+  DividerVertical,
+  DropdownMenu,
   Heading2,
   ListView,
   Small,
   Spacer,
   Stack,
   createSectionedMenu,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
-import { DashboardIcon, PlusIcon } from 'noya-icons';
+import { ChevronDownIcon, DashboardIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/utils/createAyonDocument';
 import { ClientStorage } from '../utils/clientStorage';
 import { NOYA_HOST } from '../utils/noyaClient';
@@ -27,6 +30,7 @@ export function Projects() {
   const { push } = useRouter();
   const { files, loading } = useNoyaFiles();
   const client = useNoyaClient();
+  const theme = useDesignSystemTheme();
 
   const [showWelcomeCard, _setShowWelcomeCard] = useState(false);
   const hasFiles = files.length > 0;
@@ -56,35 +60,61 @@ export function Projects() {
   const [selected, setSelected] = useState<string | undefined>();
   const [renaming, setRenaming] = useState<string | undefined>();
 
+  const handleCreateProject = useCallback(
+    (data: NoyaAPI.FileData) => {
+      client.files
+        .create({ data })
+        .then((file) => {
+          // Wait till after navigating to show new file, since it looks bad
+          // if the list updates before transitioning to the new page
+          setHideWhileNavigating(file.id);
+
+          amplitude.logEvent('Project - Created');
+
+          return push(`/projects/${file.id}`);
+        })
+        .then(() => {
+          setHideWhileNavigating(undefined);
+        });
+    },
+    [client, push],
+  );
+
+  const handleCreateDesign = useCallback(() => {
+    const document = createAyonDocument();
+
+    handleCreateProject({
+      name: 'Untitled',
+      type: 'io.noya.ayon',
+      schemaVersion: '0.1.0',
+      document,
+    });
+  }, [handleCreateProject]);
+
+  const handleCreateDesignSystem = useCallback(() => {
+    const document: DS = {
+      source: {
+        type: 'npm',
+        name: '@noya-design-system/chakra',
+        version: 'latest',
+      },
+      config: {
+        colors: {
+          primary: 'blue',
+        },
+      },
+    };
+
+    handleCreateProject({
+      name: 'Untitled',
+      type: 'io.noya.ds',
+      schemaVersion: '0.1.0',
+      document,
+    });
+  }, [handleCreateProject]);
+
   const newProjectButton = (
-    <Button
-      variant="secondary"
-      onClick={() => {
-        const document = createAyonDocument();
-
-        client.files
-          .create({
-            data: {
-              name: 'Untitled',
-              type: 'io.noya.ayon',
-              schemaVersion: '0.1.0',
-              document,
-            },
-          })
-          .then((file) => {
-            // Wait till after navigating to show new file, since it looks bad
-            // if the list updates before transitioning to the new page
-            setHideWhileNavigating(file.id);
-
-            amplitude.logEvent('Project - Created');
-
-            return push(`/projects/${file.id}`);
-          })
-          .then(() => {
-            setHideWhileNavigating(undefined);
-          });
-      }}
-    >
+    <Button variant="secondary" onClick={handleCreateDesign}>
       <PlusIcon />
       <Spacer.Horizontal size={8} />
       New Project
@@ -96,7 +126,28 @@ export function Projects() {
       <Stack.H alignItems="center">
         <Heading2 color="text">Projects</Heading2>
         <Spacer.Horizontal />
-        {newProjectButton}
+        <Stack.H
+          background={theme.colors.secondary}
+          borderRadius={4}
+          separator={<DividerVertical />}
+        >
+          {newProjectButton}
+          <DropdownMenu<string>
+            items={[{ title: 'New Design System', value: 'new-ds' }]}
+            onSelect={(value) => {
+              switch (value) {
+                case 'new-ds': {
+                  handleCreateDesignSystem();
+                  return;
+                }
+              }
+            }}
+          >
+            <Button variant="secondary">
+              <ChevronDownIcon />
+            </Button>
+          </DropdownMenu>
+        </Stack.H>
       </Stack.H>
       <Spacer.Vertical size={44} />
       {showWelcomeCard && (
@@ -134,17 +185,7 @@ export function Projects() {
           {sortedFiles
             .filter((file) => file.id !== hideWhileNavigating)
             .map((file) => {
-              const artboard = Layers.find<Sketch.Artboard>(
-                file.data.document.pages[0],
-                Layers.isArtboard,
-              );
-              const scaledThumbnailSize = artboard
-                ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
-                : thumbnailSize;
-              scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
-              scaledThumbnailSize.height = Math.round(
-                scaledThumbnailSize.height,
-              );
+              const scaledThumbnailSize = getThumbnailSize(file);
 
               return (
                 <ListView.Row
@@ -250,4 +291,25 @@ export function Projects() {
       </Stack.V>
     </Stack.V>
   );
+}
+
+function getThumbnailSize(file: NoyaAPI.File) {
+  if (file.data.type === 'io.noya.ds') {
+    return {
+      width: 64,
+      height: 64,
+    };
+  }
+
+  const artboard = Layers.find<Sketch.Artboard>(
+    file.data.document.pages[0],
+    Layers.isArtboard,
+  );
+  const scaledThumbnailSize = artboard
+    ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
+    : thumbnailSize;
+  scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
+  scaledThumbnailSize.height = Math.round(scaledThumbnailSize.height);
+
+  return scaledThumbnailSize;
 }

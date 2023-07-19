@@ -21,7 +21,7 @@ function Content({ id }: { id: string }) {
     client.files.read(id).then(setInitialFile);
   }, [client, id]);
 
-  if (!initialFile) return null;
+  if (!initialFile || initialFile.data.type !== 'io.noya.ayon') return null;
 
   return (
     <Ayon

@@ -15,20 +15,21 @@ export const SectionHeader = styled.div(({ theme }) => ({
 }));
 
 export const Title = styled.div<{
-  textStyle?: 'small';
+  textStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
 }>(({ theme, textStyle }) => ({
-  ...theme.textStyles.label,
-  color: theme.colors.textSubtle,
-  fontWeight: 'bold',
   display: 'flex',
   flexDirection: 'row',
   userSelect: 'none',
 
-  ...(textStyle && {
-    ...theme.textStyles[textStyle],
-    textTransform: 'initial',
-    color: theme.colors.text,
-  }),
+  ...(textStyle
+    ? {
+        ...theme.textStyles[textStyle],
+      }
+    : {
+        ...theme.textStyles.label,
+        color: theme.colors.textSubtle,
+        fontWeight: 'bold',
+      }),
 }));
 
 export const Row = styled.div(({ theme }) => ({
@@ -66,23 +67,35 @@ const SliderRowLabel = styled.span(({ theme }) => ({
   marginBottom: '-6px',
 }));
 
-const RowLabel = styled.span(({ theme }) => ({
-  ...theme.textStyles.small,
-  color: theme.colors.textMuted,
-  marginBottom: '4px',
+const RowLabel = styled.span<{
+  textStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
+}>(({ theme, textStyle }) => ({
+  marginBottom: '6px',
+
+  ...(textStyle
+    ? {
+        ...theme.textStyles[textStyle],
+      }
+    : {
+        ...theme.textStyles.label,
+        color: theme.colors.textSubtle,
+        fontWeight: 'bold',
+      }),
 }));
 
 export const LabeledRow = memo(function LabeledRow({
   children,
   label,
+  labelTextStyle,
 }: {
   children: ReactNode;
   label: string;
+  labelTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
 }) {
   return (
     <Row>
       <Column>
-        <RowLabel>{label}</RowLabel>
+        <RowLabel textStyle={labelTextStyle}>{label}</RowLabel>
         <Row>{children}</Row>
       </Column>
     </Row>

@@ -4,6 +4,9 @@ import { NoyaLocalStorageClient } from './core/localStorageClient';
 import { NoyaMemoryClient } from './core/memoryClient';
 import { NoyaNetworkClient } from './core/networkClient';
 import {
+  DS,
+  DSConfig,
+  DSSource,
   NoyaExportFormat,
   NoyaFile,
   NoyaFileData,
@@ -52,3 +55,5 @@ export namespace NoyaAPI {
   export type Share = NoyaShare;
   export type SharedFile = NoyaSharedFile;
 }
+
+export type { DS, DSConfig, DSSource };

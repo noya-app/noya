@@ -50,7 +50,7 @@ function Content({ shareId }: { shareId: string }) {
     );
   }
 
-  if (!initialFile) return null;
+  if (!initialFile || initialFile.data.type !== 'io.noya.ayon') return null;
 
   return (
     <Ayon
