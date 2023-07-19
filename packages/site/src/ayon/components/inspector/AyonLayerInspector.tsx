@@ -550,8 +550,14 @@ export function AyonLayerInspector({
             );
           }}
         />
-        <Spacer.Vertical size={200} />
+      </InspectorSection>
+      <InspectorSection
+        title="Component"
+        titleTextStyle="small"
+        key={selectedLayer.do_objectID}
+      >
         <Button
+          variant="secondary"
           onClick={async () => {
             const name = await openInputDialog('New Component Name');
 
@@ -563,6 +569,7 @@ export function AyonLayerInspector({
         >
           New Component
         </Button>
+        <Spacer.Vertical size={100} />
       </InspectorSection>
     </Stack.V>
   );

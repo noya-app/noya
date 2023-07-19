@@ -11,7 +11,7 @@ import {
 
 export const cardSymbol = SketchModel.symbolMaster({
   symbolID: cardSymbolId,
-  name: 'Card',
+  name: 'Article Card',
   blockDefinition: {
     placeholderParameters: [
       'flex-1',
