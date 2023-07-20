@@ -26,7 +26,16 @@ export const heroSymbol = SketchModel.symbolMaster({
     placeholderParameters: ['flex-1', 'flex-col', 'center', 'p-4', 'gap-3'],
     stylePresets: [
       { parameters: ['flex-1', 'flex-col', 'p-4', 'gap-3', 'center'] },
-      { parameters: ['flex-1', 'flex-col', 'p-4', 'gap-3', 'left'] },
+      {
+        parameters: [
+          'flex-1',
+          'flex-col',
+          'px-20',
+          'gap-3',
+          'items-start',
+          'justify-center',
+        ],
+      },
       { parameters: ['flex-1', 'flex-col', 'p-4', 'gap-3', 'dark'] },
     ],
     infer({ frame }) {

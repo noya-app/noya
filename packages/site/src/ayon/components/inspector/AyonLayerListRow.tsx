@@ -4,6 +4,7 @@ import {
   CompletionItem,
   InputField,
   InputFieldWithCompletions,
+  Spacer,
   Stack,
   TreeView,
 } from 'noya-designsystem';
@@ -61,12 +62,14 @@ function getCompletionItems({
 }
 
 export function AyonLayerListRow({
+  inspectorMode,
   layer,
   depth,
   path,
   isDragging,
   onSetOverriddenBlock,
 }: {
+  inspectorMode: 'compact' | 'advanced';
   layer: Sketch.SymbolInstance;
   depth: number;
   path: string[];
@@ -169,7 +172,9 @@ export function AyonLayerListRow({
       key={key}
       id={layer.do_objectID}
       depth={depth - 1}
-      icon={depth !== 0 && <DragHandleDots2Icon />}
+      icon={
+        depth !== 0 && inspectorMode === 'advanced' && <DragHandleDots2Icon />
+      }
       onHoverChange={setHovered}
     >
       <InputWrapper
@@ -242,13 +247,15 @@ export function AyonLayerListRow({
                   }
                 }}
               />
-              {hovered ? (
+              {hovered && (inspectorMode === 'advanced' || depth === 0) ? (
                 <InputField.Button
                   onClick={() => {
                     setIsSearching(true);
                   }}
                 >
-                  Edit
+                  Command
+                  <Spacer.Horizontal size={8} inline />
+                  <span style={{ opacity: 0.5 }}>/</span>
                 </InputField.Button>
               ) : (
                 <InputField.Label>{componentName}</InputField.Label>
@@ -256,7 +263,8 @@ export function AyonLayerListRow({
             </InputField.Root>
           ) : null}
         </Stack.H>
-        {!(!supportsBlockText && isSearching) &&
+        {(inspectorMode === 'advanced' || depth === 0) &&
+          !(!supportsBlockText && isSearching) &&
           (!supportsBlockText ||
             (layer.blockParameters && layer.blockParameters.length > 0)) && (
             <Stack.H

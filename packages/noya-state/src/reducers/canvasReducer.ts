@@ -5,6 +5,9 @@ import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
   AffineTransform,
+  Point,
+  ResizePosition,
+  Size,
   createBounds,
   createRect,
   distance,
@@ -13,32 +16,29 @@ import {
   getClosestPointOnLine,
   getLinePercentage,
   insetRect,
-  Point,
   rectContainsPoint,
   resize,
-  ResizePosition,
   roundPoint,
-  Size,
   transformRect,
 } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
-  decodeCurvePoint,
   DecodedCurvePoint,
-  encodeCurvePoint,
   LastEditedTextStyle,
   Primitives,
   Selectors,
+  decodeCurvePoint,
+  encodeCurvePoint,
 } from 'noya-state';
 import { lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
-import { getScalingOptions, ScalingOptions } from '../primitives';
+import { ScalingOptions, getScalingOptions } from '../primitives';
 import { getLineDragHandleIndexForDirection } from '../selection';
 import {
+  EncodedPageMetadata,
   addToParentLayer,
   computeCurvePointBoundingRect,
-  EncodedPageMetadata,
   fixGradientPositions,
   fixGroupFrameHierarchy,
   fixZeroLayerDimensions,
@@ -75,8 +75,8 @@ import type {
 import {
   DrawableLayerType,
   InteractionAction,
-  interactionReducer,
   SnapshotInteractionAction,
+  interactionReducer,
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
@@ -371,6 +371,8 @@ export function canvasReducer(
                   name: symbol.name,
                   symbolID: symbol.symbolID,
                   frame: SketchModel.rect(rect),
+                  blockParameters:
+                    symbol.blockDefinition?.placeholderParameters?.slice(),
                 });
 
                 return layer;

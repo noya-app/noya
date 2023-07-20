@@ -1,5 +1,10 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { RelativeDropPosition, Stack, TreeView } from 'noya-designsystem';
+import {
+  RelativeDropPosition,
+  Select,
+  Stack,
+  TreeView,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import {
@@ -10,7 +15,7 @@ import {
   createOverrideHierarchy,
   getSiblingBlocks,
 } from 'noya-state';
-import { isDeepEqual } from 'noya-utils';
+import { isDeepEqual, upperFirst } from 'noya-utils';
 import React, { useCallback } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
@@ -147,19 +152,29 @@ export function AyonLayerInspector({
 
   const Hierarchy = createOverrideHierarchy(state);
 
+  const [inspectorMode, setInspectorMode] = React.useState<
+    'compact' | 'advanced'
+  >('compact');
+
   const flattened = Hierarchy.flatMap(
     selectedLayer,
     (layer, indexPath): LayerTreeItem[] => {
       if (!Layers.isSymbolInstance(layer)) return [];
 
-      // if (indexPath.length === 0 && !master.blockDefinition?.render) {
-      //   return [];
-      // }
+      const depth = indexPath.length;
+
+      if (
+        depth !== 0 &&
+        inspectorMode === 'compact' &&
+        !getSymbolMaster(layer.symbolID).blockDefinition?.supportsBlockText
+      ) {
+        return [];
+      }
 
       return [
         {
           instance: layer,
-          depth: indexPath.length,
+          depth,
           indexPath: indexPath.slice(),
           path: Hierarchy.accessPath(selectedLayer, indexPath)
             .slice(1)
@@ -168,10 +183,6 @@ export function AyonLayerInspector({
       ];
     },
   );
-
-  // console.log({
-  //   overrides: selectedLayer.overrideValues,
-  // });
 
   const setAllOverrides = (updatedLayer: Sketch.SymbolInstance) => {
     const actions = updatedLayer.overrideValues
@@ -239,7 +250,21 @@ export function AyonLayerInspector({
           </>
         )}
       </InspectorSection>
-      <InspectorSection title="Content" titleTextStyle="heading4">
+      <InspectorSection
+        title="Content"
+        titleTextStyle="heading4"
+        right={
+          <Stack.H width="100px">
+            <Select<'compact' | 'advanced'>
+              id="inspector-mode"
+              value={inspectorMode}
+              onChange={setInspectorMode}
+              getTitle={upperFirst}
+              options={['compact', 'advanced']}
+            />
+          </Stack.H>
+        }
+      >
         {/* <InputFieldWithCompletions
           ref={nestedComponentSearchInputRef}
           size="large"
@@ -267,8 +292,8 @@ export function AyonLayerInspector({
           data={flattened}
           expandable={false}
           variant="bare"
-          indentation={24}
-          sortable
+          indentation={inspectorMode === 'advanced' ? 24 : 0}
+          sortable={inspectorMode === 'advanced'}
           pressEventName="onPointerDown"
           acceptsDrop={(
             sourceId: string,
@@ -386,6 +411,7 @@ export function AyonLayerInspector({
                 path={path}
                 isDragging={isDragging}
                 onSetOverriddenBlock={onSetOverriddenBlock}
+                inspectorMode={inspectorMode}
               />
             );
           }}
