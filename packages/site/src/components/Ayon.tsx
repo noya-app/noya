@@ -1,6 +1,11 @@
 import produce from 'immer';
 import { DS, NoyaAPI, useNoyaFiles } from 'noya-api';
-import { StateProvider } from 'noya-app-state-context';
+import {
+  StateProvider,
+  useApplicationState,
+  useWorkspaceDispatch,
+  useWorkspaceState,
+} from 'noya-app-state-context';
 import {
   Button,
   Chip,
@@ -90,8 +95,6 @@ export type ExportType =
 function Workspace({
   fileId,
   uploadAsset,
-  initialDocument,
-  onChangeDocument,
   name,
   onChangeName,
   onDuplicate,
@@ -102,8 +105,6 @@ function Workspace({
   isPlayground,
 }: {
   fileId: string;
-  initialDocument: SketchFile;
-  onChangeDocument?: (document: SketchFile) => void;
   onDuplicate?: () => void;
   name: string;
   onChangeName?: (name: string) => void;
@@ -113,71 +114,24 @@ function Workspace({
   ComponentProps<typeof Content>,
   'uploadAsset' | 'padding' | 'canvasRendererType' | 'isPlayground'
 >): JSX.Element {
-  const CanvasKit = useCanvasKit();
-  const fontManager = useFontManager();
+  const [state, dispatch] = useApplicationState();
   const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
   const { onboardingStep, setOnboardingStep } = useOnboarding();
   const theme = useDesignSystemTheme();
 
-  const reducer = useCallback(
-    (state: WorkspaceState, action: WorkspaceAction) => {
-      if (window.noyaPageWillReload) return state;
-
-      return workspaceReducer(state, action, CanvasKit, fontManager);
-    },
-    [CanvasKit, fontManager],
-  );
-
-  const [state, dispatch] = useReducer(reducer, undefined, () => {
-    const workspace = createInitialWorkspaceState(initialDocument);
-
-    return produce(workspace, (draft) => {
-      draft.preferences.showDotGrid = true;
-      draft.preferences.wireframeMode = true;
-
-      const artboardId = Layers.find(
-        draft.history.present.sketch.pages[0],
-        Layers.isArtboard,
-      )?.do_objectID;
-
-      draft.history.present.isolatedLayerId = artboardId;
-
-      draft.history.present.sketch.document.foreignSymbols = librarySymbols.map(
-        (symbol) =>
-          SketchModel.foreignSymbol({
-            symbolMaster: symbol,
-            libraryID: ayonLibraryId,
-          }),
-      );
-
-      return draft;
-    });
-  });
-
-  useEffect(() => {
-    const documentWithoutForeignSymbols = produce(
-      state.history.present.sketch,
-      (draft) => {
-        draft.document.foreignSymbols = [];
-      },
-    );
-
-    onChangeDocument?.(documentWithoutForeignSymbols);
-  }, [state.history.present.sketch, onChangeDocument]);
-
   const getSymbolMaster = useCallback(
-    (id: string) => Selectors.getSymbolMaster(state.history.present, id),
-    [state.history.present],
+    (id: string) => Selectors.getSymbolMaster(state, id),
+    [state],
   );
 
   const artboard = Layers.find<Sketch.Artboard>(
-    Selectors.getCurrentPage(state.history.present),
+    Selectors.getCurrentPage(state),
     Layers.isArtboard,
   );
 
   const showInsertBlockOnboarding = onboardingStep === 'started';
 
-  const interactionState = state.history.present.interactionState;
+  const interactionState = state.interactionState;
   const cursorType =
     interactionState.type === 'insert' ||
     interactionState.type === 'drawing' ||
@@ -207,20 +161,21 @@ function Workspace({
           allowEmpty
           onValueChange={(value: typeof cursorType) => {
             if (!value || value === 'pointer') {
-              dispatch(['interaction', ['reset']]);
+              dispatch('interaction', ['reset']);
               return;
             }
 
             switch (value) {
               case 'region': {
-                dispatch(['interaction', ['enableSelectionMode', 'mouse']]);
+                dispatch('interaction', ['enableSelectionMode', 'mouse']);
                 break;
               }
               case 'insert': {
                 setOnboardingStep?.('insertedBlock');
-                dispatch([
-                  'interaction',
-                  ['insert', { symbolId: boxSymbolId }, 'mouse'],
+                dispatch('interaction', [
+                  'insert',
+                  { symbolId: boxSymbolId },
+                  'mouse',
                 ]);
                 break;
               }
@@ -314,6 +269,7 @@ function Workspace({
     );
   }, [
     cursorType,
+    dispatch,
     isPlayground,
     setLeftToolbar,
     setOnboardingStep,
@@ -325,9 +281,7 @@ function Workspace({
   const { files } = useNoyaFiles();
 
   const designSystem: DS | undefined = useMemo(() => {
-    const x =
-      state.history.present.sketch.document.designSystem ??
-      DEFAULT_DESIGN_SYSTEM;
+    const x = state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
 
     switch (x.type) {
       case 'standard': {
@@ -356,7 +310,7 @@ function Workspace({
         return file.data.document;
       }
     }
-  }, [files, state.history.present.sketch.document.designSystem]);
+  }, [files, state.sketch.document.designSystem]);
 
   useLayoutEffect(() => {
     if (isPlayground) return;
@@ -487,7 +441,7 @@ function Workspace({
             }
           }}
           onOpenChange={() => {
-            dispatch(['selectLayer', []]);
+            dispatch('selectLayer', []);
           }}
         >
           <Button>
@@ -505,7 +459,7 @@ function Workspace({
             </Button>
           }
           onOpenChange={() => {
-            dispatch(['selectLayer', []]);
+            dispatch('selectLayer', []);
           }}
         >
           <Stack.V width={240}>
@@ -517,7 +471,7 @@ function Workspace({
   }, [
     downloadFile,
     setRightToolbar,
-    state.history.present,
+    state,
     artboard,
     name,
     onChangeName,
@@ -525,17 +479,21 @@ function Workspace({
     designSystem,
     isPlayground,
     getSymbolMaster,
+    dispatch,
   ]);
+
+  const workspaceState = useWorkspaceState();
+  const workspaceDispatch = useWorkspaceDispatch();
 
   useLayoutEffect(() => {
     if (isPlayground) return;
 
     setCenterToolbar(
-      <StateProvider state={state} dispatch={dispatch}>
+      <StateProvider state={workspaceState} dispatch={workspaceDispatch}>
         <Popover
           trigger={<ProjectTitle>{name}</ProjectTitle>}
           onOpenChange={() => {
-            dispatch(['selectLayer', []]);
+            dispatch('selectLayer', []);
           }}
         >
           <Stack.V width={240}>
@@ -543,7 +501,7 @@ function Workspace({
               name={name}
               designSystem={designSystem}
               onChangeDesignSystem={(type, id) => {
-                dispatch(['setDesignSystem', type, id]);
+                dispatch('setDesignSystem', type, id);
               }}
               onChangeName={onChangeName || (() => {})}
               onDuplicate={onDuplicate || (() => {})}
@@ -554,12 +512,14 @@ function Workspace({
     );
   }, [
     designSystem,
+    dispatch,
     isPlayground,
     name,
     onChangeName,
     onDuplicate,
     setCenterToolbar,
-    state,
+    workspaceDispatch,
+    workspaceState,
   ]);
 
   if (!designSystem) {
@@ -572,23 +532,87 @@ function Workspace({
   }
 
   return (
-    <StateProvider state={state} dispatch={dispatch}>
-      <Content
-        canvasRendererType={canvasRendererType}
-        uploadAsset={uploadAsset}
-        viewType={viewType}
-        padding={padding}
-        isPlayground={isPlayground}
-        designSystem={designSystem}
-      />
-    </StateProvider>
+    <Content
+      canvasRendererType={canvasRendererType}
+      uploadAsset={uploadAsset}
+      viewType={viewType}
+      padding={padding}
+      isPlayground={isPlayground}
+      designSystem={designSystem}
+    />
   );
 }
 
 let initialized = false;
 
+const AyonControlledState = memo(function AyonWithState({
+  initialDocument,
+  onChangeDocument,
+  children,
+}: {
+  initialDocument: SketchFile;
+  onChangeDocument?: (document: SketchFile) => void;
+  children: React.ReactNode;
+}) {
+  const CanvasKit = useCanvasKit();
+  const fontManager = useFontManager();
+
+  const reducer = useCallback(
+    (state: WorkspaceState, action: WorkspaceAction) => {
+      if (window.noyaPageWillReload) return state;
+
+      return workspaceReducer(state, action, CanvasKit, fontManager);
+    },
+    [CanvasKit, fontManager],
+  );
+
+  const [state, dispatch] = useReducer(reducer, undefined, () => {
+    const workspace = createInitialWorkspaceState(initialDocument);
+
+    return produce(workspace, (draft) => {
+      draft.preferences.showDotGrid = true;
+      draft.preferences.wireframeMode = true;
+
+      const artboardId = Layers.find(
+        draft.history.present.sketch.pages[0],
+        Layers.isArtboard,
+      )?.do_objectID;
+
+      draft.history.present.isolatedLayerId = artboardId;
+
+      draft.history.present.sketch.document.foreignSymbols = librarySymbols.map(
+        (symbol) =>
+          SketchModel.foreignSymbol({
+            symbolMaster: symbol,
+            libraryID: ayonLibraryId,
+          }),
+      );
+
+      return draft;
+    });
+  });
+
+  useEffect(() => {
+    const documentWithoutForeignSymbols = produce(
+      state.history.present.sketch,
+      (draft) => {
+        draft.document.foreignSymbols = [];
+      },
+    );
+
+    onChangeDocument?.(documentWithoutForeignSymbols);
+  }, [state.history.present.sketch, onChangeDocument]);
+
+  return (
+    <StateProvider state={state} dispatch={dispatch}>
+      {children}
+    </StateProvider>
+  );
+});
+
 export const Ayon = memo(function Ayon(
-  props: ComponentProps<typeof Workspace>,
+  props: ComponentProps<typeof Workspace> &
+    Omit<ComponentProps<typeof AyonControlledState>, 'children'>,
 ): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
@@ -605,7 +629,12 @@ export const Ayon = memo(function Ayon(
             }
           >
             <FontManagerProvider>
-              <Workspace {...props} />
+              <AyonControlledState
+                initialDocument={props.initialDocument}
+                onChangeDocument={props.onChangeDocument}
+              >
+                <Workspace {...props} />
+              </AyonControlledState>
             </FontManagerProvider>
           </CanvasKitProvider>
         </ImageCacheProvider>

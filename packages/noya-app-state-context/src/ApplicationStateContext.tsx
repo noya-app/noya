@@ -1,9 +1,9 @@
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
 import React, {
+  ReactNode,
   createContext,
   memo,
-  ReactNode,
   useCallback,
   useContext,
   useLayoutEffect,
@@ -56,6 +56,10 @@ export const useWorkspaceState = (): WorkspaceState => {
   }
 
   return value;
+};
+
+export const useWorkspaceDispatch = (): Dispatcher => {
+  return useContext(DispatchContext);
 };
 
 /**
