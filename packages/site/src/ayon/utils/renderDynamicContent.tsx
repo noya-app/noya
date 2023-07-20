@@ -101,10 +101,16 @@ export function renderDynamicContent(
       })
     : undefined;
 
+  const drawingArtboard = drawingLayer
+    ? produce(artboard, (draft) => {
+        draft.layers.push(drawingLayer);
+      })
+    : artboard;
+
   const hierarchy = createOverrideHierarchy(
     getSymbolMaster,
   ).map<RenderableItem>(
-    artboard,
+    drawingArtboard,
     (instance, transformedChildren, indexPath) => {
       return {
         instance: instance as Sketch.SymbolInstance,
@@ -114,18 +120,7 @@ export function renderDynamicContent(
     },
   );
 
-  const content = [
-    ...hierarchy.nested.map(renderTopLevelSymbol),
-    ...(drawingLayer
-      ? [
-          renderTopLevelSymbol({
-            instance: drawingLayer,
-            nested: [],
-            indexPath: [-1],
-          }),
-        ]
-      : []),
-  ];
+  const content = hierarchy.nested.map(renderTopLevelSymbol);
 
   return Provider ? <Provider theme={theme}>{content}</Provider> : content;
 }

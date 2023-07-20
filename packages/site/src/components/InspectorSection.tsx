@@ -12,7 +12,7 @@ export const InspectorSection = ({
   titleTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
 }) => (
   <Stack.V
-    padding={title ? '32px 12px 12px' : '12px'}
+    padding={titleTextStyle === 'heading3' ? '12px' : '24px 12px 12px'}
     gap="12px"
     background="white"
   >

@@ -207,7 +207,7 @@ function DOMRendererContent({
 
   const containerTransform = createResizeTransform(artboard.frame, size, {
     scalingMode: 'down',
-    resizePosition: 'top',
+    // resizePosition: 'top',
     padding,
   });
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);

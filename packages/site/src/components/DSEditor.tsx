@@ -299,7 +299,7 @@ export function DSEditor({
     <Stack.V width="300px" background="white">
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
-          <InspectorSection title="Design System" titleTextStyle="heading4">
+          <InspectorSection title="Design System" titleTextStyle="heading3">
             <InspectorPrimitives.LabeledRow label="Name">
               <InputField.Root>
                 <InputField.Input value={fileName} onChange={onChangeName} />

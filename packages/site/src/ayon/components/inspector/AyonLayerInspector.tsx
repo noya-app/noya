@@ -1,67 +1,23 @@
 import { useApplicationState } from 'noya-app-state-context';
-import {
-  Button,
-  Chip,
-  CompletionItem,
-  InputField,
-  InputFieldWithCompletions,
-  RelativeDropPosition,
-  Spacer,
-  Stack,
-  TreeView,
-  useDesignSystemTheme,
-  useOpenInputDialog,
-} from 'noya-designsystem';
+import { RelativeDropPosition, Stack, TreeView } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { DragHandleDots2Icon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
-import { useKeyboardShortcuts } from 'noya-keymap';
-import { SketchModel } from 'noya-sketch-model';
 import {
   Action,
   Layers,
   OverriddenBlockContent,
-  Overrides,
   Selectors,
   createOverrideHierarchy,
   getSiblingBlocks,
 } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback } from 'react';
+import { InspectorSection } from '../../../components/InspectorSection';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
-import { getAllInsertableSymbols } from '../../symbols/symbols';
-import {
-  allClassNames,
-  parametersToTailwindStyle,
-} from '../../tailwind/tailwind';
+import { AyonLayerListRow } from './AyonLayerListRow';
 import { InspectorCarousel } from './InspectorCarousel';
-
-const InspectorSection = ({
-  children,
-  title,
-  titleTextStyle,
-}: {
-  children: React.ReactNode;
-  title?: string;
-  titleTextStyle?: 'small';
-}) => (
-  <Stack.V
-    padding={title ? '32px 12px 12px' : '12px'}
-    gap="12px"
-    background="white"
-  >
-    {title && (
-      <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title textStyle={titleTextStyle}>
-          {title}
-        </InspectorPrimitives.Title>
-      </InspectorPrimitives.SectionHeader>
-    )}
-    {children}
-  </Stack.V>
-);
 
 export function AyonLayerInspector({
   setOverriddenBlock,
@@ -73,29 +29,6 @@ export function AyonLayerInspector({
   ) => void;
 }) {
   const [state, dispatch] = useApplicationState();
-  const openInputDialog = useOpenInputDialog();
-
-  const componentSearchInputRef = React.useRef<HTMLInputElement>(null);
-  const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
-  const nestedComponentSearchInputRef = React.useRef<HTMLInputElement>(null);
-
-  const blockCompletionItems = useMemo(
-    () =>
-      getAllInsertableSymbols(state).map(
-        (block): CompletionItem => ({
-          id: block.symbolID,
-          name: block.name,
-        }),
-      ),
-    [state],
-  );
-
-  const handleSelectBlockItem = useCallback(
-    (item: CompletionItem) => {
-      dispatch('setSymbolInstanceSource', item.id, 'preserveCurrent');
-    },
-    [dispatch],
-  );
 
   const onSetOverriddenBlock = useCallback(
     (item: BlockPreviewProps | undefined) => {
@@ -116,38 +49,38 @@ export function AyonLayerInspector({
     [selectedLayer.do_objectID, setOverriddenBlock],
   );
 
-  const handleHoverBlockItem = useCallback(
-    (item: CompletionItem | undefined) => {
-      onSetOverriddenBlock(
-        item
-          ? {
-              symbolId: item.id,
-              blockText: selectedLayer.blockText,
-              overrideValues: selectedLayer.overrideValues,
-              resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
-            }
-          : undefined,
-      );
-    },
-    [
-      onSetOverriddenBlock,
-      selectedLayer.blockText,
-      selectedLayer.overrideValues,
-      selectedLayer.resolvedBlockData?.resolvedText,
-    ],
-  );
+  // const handleHoverBlockItem = useCallback(
+  //   (item: CompletionItem | undefined) => {
+  //     onSetOverriddenBlock(
+  //       item
+  //         ? {
+  //             symbolId: item.id,
+  //             blockText: selectedLayer.blockText,
+  //             overrideValues: selectedLayer.overrideValues,
+  //             resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
+  //           }
+  //         : undefined,
+  //     );
+  //   },
+  //   [
+  //     onSetOverriddenBlock,
+  //     selectedLayer.blockText,
+  //     selectedLayer.overrideValues,
+  //     selectedLayer.resolvedBlockData?.resolvedText,
+  //   ],
+  // );
 
-  useKeyboardShortcuts({
-    '/': () => {
-      componentSearchInputRef.current?.focus();
-    },
-    '#': () => {
-      styleSearchInputRef.current?.focus();
-    },
-    '+': () => {
-      nestedComponentSearchInputRef.current?.focus();
-    },
-  });
+  // useKeyboardShortcuts({
+  //   '/': () => {
+  //     componentSearchInputRef.current?.focus();
+  //   },
+  //   '#': () => {
+  //     styleSearchInputRef.current?.focus();
+  //   },
+  //   '+': () => {
+  //     nestedComponentSearchInputRef.current?.focus();
+  //   },
+  // });
 
   const getSymbolMaster = useCallback(
     (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
@@ -205,20 +138,6 @@ export function AyonLayerInspector({
       resolvedBlockText: selectedLayer.resolvedBlockData?.resolvedText,
     })) ?? [];
 
-  const styleItems = useMemo(
-    () =>
-      (master.blockDefinition?.hashtags ?? allClassNames).map((item) => ({
-        name: item,
-        id: item,
-        icon: <HashtagIcon item={item} />,
-      })),
-    [master.blockDefinition?.hashtags],
-  );
-
-  const unusedStyleItems = styleItems.filter(
-    (item) => !parameters?.includes(item.name),
-  );
-
   type LayerTreeItem = {
     instance: Sketch.SymbolInstance;
     depth: number;
@@ -233,9 +152,9 @@ export function AyonLayerInspector({
     (layer, indexPath): LayerTreeItem[] => {
       if (!Layers.isSymbolInstance(layer)) return [];
 
-      if (indexPath.length === 0 && !master.blockDefinition?.render) {
-        return [];
-      }
+      // if (indexPath.length === 0 && !master.blockDefinition?.render) {
+      //   return [];
+      // }
 
       return [
         {
@@ -271,21 +190,7 @@ export function AyonLayerInspector({
 
   return (
     <Stack.V gap="1px" position="relative">
-      <InspectorSection>
-        <InputFieldWithCompletions
-          ref={componentSearchInputRef}
-          size="large"
-          placeholder={componentName}
-          items={blockCompletionItems}
-          onSelectItem={handleSelectBlockItem}
-          onHoverItem={handleHoverBlockItem}
-        >
-          <InputField.Button>
-            Pick
-            <Spacer.Horizontal size={8} inline />
-            <span style={{ opacity: 0.5 }}>/</span>
-          </InputField.Button>
-        </InputFieldWithCompletions>
+      <InspectorSection title={componentName} titleTextStyle="heading3">
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>
             Related Components
@@ -307,76 +212,6 @@ export function AyonLayerInspector({
             onSetOverriddenBlock(isHovering ? relatedBlocks[index] : undefined);
           }}
         />
-      </InspectorSection>
-      <InspectorSection title="Style" titleTextStyle="small">
-        <InputFieldWithCompletions
-          ref={styleSearchInputRef}
-          size="large"
-          placeholder={'Styles'}
-          items={unusedStyleItems}
-          onSelectItem={(item) => {
-            dispatch('setBlockParameters', undefined, [
-              ...(parameters ?? []),
-              item.name,
-            ]);
-          }}
-          onHoverItem={(item) => {
-            if (item) {
-              onSetOverriddenBlock({
-                symbolId: selectedLayer.symbolID,
-                blockText: selectedLayer.blockText,
-                blockParameters: (parameters ?? []).concat(item.name),
-                overrideValues: selectedLayer.overrideValues,
-                resolvedBlockText:
-                  selectedLayer.resolvedBlockData?.resolvedText,
-              });
-            } else {
-              onSetOverriddenBlock(undefined);
-            }
-          }}
-        >
-          <InputField.Button>
-            Add
-            <Spacer.Horizontal size={8} inline />
-            <span style={{ opacity: 0.5 }}>#</span>
-          </InputField.Button>
-        </InputFieldWithCompletions>
-        {parameters && parameters.length > 0 && (
-          <Stack.H flexWrap="wrap" gap="8px">
-            {parameters.map((parameter) => (
-              <Chip
-                key={parameter}
-                deletable
-                monospace
-                onHoverDeleteChange={(isHovering) => {
-                  if (isHovering) {
-                    onSetOverriddenBlock({
-                      symbolId: selectedLayer.symbolID,
-                      blockText: selectedLayer.blockText,
-                      blockParameters: (parameters ?? []).filter(
-                        (p) => p !== parameter,
-                      ),
-                      overrideValues: selectedLayer.overrideValues,
-                      resolvedBlockText:
-                        selectedLayer.resolvedBlockData?.resolvedText,
-                    });
-                  } else {
-                    onSetOverriddenBlock(undefined);
-                  }
-                }}
-                onDelete={() => {
-                  dispatch(
-                    'setBlockParameters',
-                    undefined,
-                    (parameters ?? []).filter((p) => p !== parameter),
-                  );
-                }}
-              >
-                {parameter}
-              </Chip>
-            ))}
-          </Stack.H>
-        )}
         {presetStyles.length > 0 && (
           <>
             <InspectorPrimitives.SectionHeader>
@@ -404,8 +239,8 @@ export function AyonLayerInspector({
           </>
         )}
       </InspectorSection>
-      <InspectorSection title="Content" titleTextStyle="small">
-        <InputFieldWithCompletions
+      <InspectorSection title="Content" titleTextStyle="heading4">
+        {/* <InputFieldWithCompletions
           ref={nestedComponentSearchInputRef}
           size="large"
           placeholder={'Content'}
@@ -426,7 +261,7 @@ export function AyonLayerInspector({
             <Spacer.Horizontal size={8} inline />
             <span style={{ opacity: 0.5 }}>+</span>
           </InputField.Button>
-        </InputFieldWithCompletions>
+        </InputFieldWithCompletions> */}
         <TreeView.Root
           keyExtractor={({ instance: layer }) => layer.do_objectID}
           data={flattened}
@@ -450,6 +285,9 @@ export function AyonLayerInspector({
             );
 
             if (sourcePaths.length === 0 || !destinationPath) return false;
+
+            // Don't allow dragging into root
+            if (destinationPath.length === 0) return false;
 
             // Don't allow dragging into a descendant
             if (
@@ -541,12 +379,11 @@ export function AyonLayerInspector({
             const key = path.join('/');
 
             return (
-              <ContentItem
+              <AyonLayerListRow
                 key={key}
                 layer={layer}
                 depth={depth}
                 path={path}
-                selectedLayer={selectedLayer}
                 isDragging={isDragging}
                 onSetOverriddenBlock={onSetOverriddenBlock}
               />
@@ -554,269 +391,6 @@ export function AyonLayerInspector({
           }}
         />
       </InspectorSection>
-      <InspectorSection
-        title="Component"
-        titleTextStyle="small"
-        key={selectedLayer.do_objectID}
-      >
-        <Button
-          variant="secondary"
-          onClick={async () => {
-            const name = await openInputDialog('New Component Name');
-
-            if (!name) return;
-
-            dispatch('convertInstanceToSymbol', name);
-            // dispatch('createSymbol', [selectedLayer.do_objectID], name);
-          }}
-        >
-          New Component
-        </Button>
-        <Spacer.Vertical size={100} />
-      </InspectorSection>
     </Stack.V>
-  );
-}
-
-function ContentItem({
-  layer,
-  depth,
-  path,
-  selectedLayer,
-  isDragging,
-  onSetOverriddenBlock,
-}: {
-  layer: Sketch.SymbolInstance;
-  depth: number;
-  path: string[];
-  selectedLayer: Sketch.SymbolInstance;
-  isDragging: boolean;
-  onSetOverriddenBlock: (
-    overriddenBlock: BlockPreviewProps | undefined,
-  ) => void;
-}) {
-  const theme = useDesignSystemTheme();
-  const [state, dispatch] = useApplicationState();
-  const getSymbolMaster = useCallback(
-    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
-    [state],
-  );
-  const master = getSymbolMaster(layer.symbolID);
-
-  const componentName = master.name.toUpperCase();
-  const placeholderText = master.blockDefinition?.placeholderText;
-  const key = path.join('/');
-
-  const [hovered, setHovered] = React.useState(false);
-  const [isSearching, setIsSearching] = React.useState(false);
-
-  const styleItems = useMemo(
-    () =>
-      (master.blockDefinition?.hashtags ?? []).map((item) => ({
-        name: item,
-        id: item,
-        icon: <HashtagIcon item={item} />,
-      })),
-    [master.blockDefinition?.hashtags],
-  );
-
-  const unusedStyleItems = styleItems.filter(
-    (item) => !layer.blockParameters?.includes(item.name),
-  );
-
-  const modalSearchInputRef = React.useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isSearching) {
-      modalSearchInputRef.current?.focus();
-    }
-  }, [isSearching]);
-
-  return (
-    <TreeView.Row
-      key={key}
-      id={layer.do_objectID}
-      depth={depth - 1}
-      icon={depth !== 0 && <DragHandleDots2Icon />}
-      onHoverChange={setHovered}
-    >
-      <Stack.V
-        flex="1"
-        border={`1px solid ${theme.colors.divider}`}
-        padding="1px"
-        margin="4px 0"
-        borderRadius="6px"
-        gap="2px"
-      >
-        <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
-          {isSearching ? (
-            <InputFieldWithCompletions
-              ref={modalSearchInputRef}
-              placeholder={'Find component/style'}
-              items={unusedStyleItems}
-              onBlur={() => {
-                setIsSearching(false);
-              }}
-              onSelectItem={(item) => {
-                const updatedParameters = (layer.blockParameters ?? []).concat(
-                  item.name,
-                );
-
-                const overrideName = Overrides.encodeName(
-                  path,
-                  'blockParameters',
-                );
-
-                dispatch(
-                  'setOverrideValue',
-                  undefined,
-                  overrideName,
-                  updatedParameters,
-                );
-              }}
-              style={{
-                background: 'transparent',
-              }}
-            />
-          ) : (
-            <InputField.Root key={key} labelPosition="end" labelSize={60}>
-              <InputField.Input
-                style={{
-                  background: 'transparent',
-                }}
-                value={layer.blockText ?? ''}
-                placeholder={placeholderText}
-                onKeyDown={(event) => {
-                  switch (event.key) {
-                    case '#': {
-                      event.preventDefault();
-                      event.stopPropagation();
-
-                      setIsSearching(true);
-                    }
-                  }
-                }}
-                onChange={(value) => {
-                  if (depth === 0) {
-                    dispatch('setBlockText', undefined, value);
-                  } else {
-                    dispatch(
-                      'setOverrideValue',
-                      undefined,
-                      Overrides.encodeName(path, 'blockText'),
-                      value,
-                    );
-                  }
-                }}
-              />
-              {hovered ? (
-                <InputField.Button
-                  onClick={() => {
-                    setIsSearching(true);
-                  }}
-                >
-                  Edit
-                </InputField.Button>
-              ) : (
-                <InputField.Label>{componentName}</InputField.Label>
-              )}
-            </InputField.Root>
-          )}
-        </Stack.H>
-        {layer.blockParameters && layer.blockParameters.length > 0 && (
-          <Stack.H flexWrap="wrap" gap="2px">
-            {layer.blockParameters.map((parameter) => (
-              <Chip
-                key={parameter}
-                size="small"
-                deletable
-                monospace
-                // TODO: This seems to permanently mutate block parameters in the layer tree.
-                // Afterwards, if we add/remove block parameters they don't get rendered.
-                // Refreshing the page fixes it.
-                // onHoverDeleteChange={(isHovering) => {
-                //   const updatedParameters = (
-                //     layer.blockParameters ?? []
-                //   ).filter((p) => p !== parameter);
-
-                //   const overrideName = Overrides.encodeName(
-                //     path,
-                //     'blockParameters',
-                //   );
-
-                //   const updatedOverrideValues = selectedLayer.overrideValues
-                //     .filter(
-                //       (override) => override.overrideName !== overrideName,
-                //     )
-                //     .concat(
-                //       SketchModel.overrideValue({
-                //         overrideName,
-                //         value: updatedParameters,
-                //       }),
-                //     );
-
-                //   if (isHovering) {
-                //     onSetOverriddenBlock({
-                //       blockId: selectedLayer.symbolID,
-                //       blockText: selectedLayer.blockText,
-                //       blockParameters: selectedLayer.blockParameters,
-                //       overrideValues: updatedOverrideValues,
-                //       resolvedBlockText:
-                //         selectedLayer.resolvedBlockData?.resolvedText,
-                //     });
-                //   } else {
-                //     onSetOverriddenBlock(undefined);
-                //   }
-                // }}
-                onDelete={() => {
-                  const updatedParameters = (
-                    layer.blockParameters ?? []
-                  ).filter((p) => p !== parameter);
-
-                  const overrideName = Overrides.encodeName(
-                    path,
-                    'blockParameters',
-                  );
-
-                  dispatch(
-                    'setOverrideValue',
-                    undefined,
-                    overrideName,
-                    updatedParameters,
-                  );
-                }}
-              >
-                {parameter}
-              </Chip>
-            ))}
-          </Stack.H>
-        )}
-      </Stack.V>
-    </TreeView.Row>
-  );
-}
-
-function HashtagIcon({ item }: { item: string }) {
-  const resolvedStyle = parametersToTailwindStyle({
-    [item]: true,
-  });
-
-  return (
-    <div
-      style={{
-        width: 19,
-        height: 19,
-        borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
-        background: /^rounded/.test(item)
-          ? 'rgb(148 163 184)'
-          : /^opacity/.test(item)
-          ? 'black'
-          : undefined,
-        ...resolvedStyle,
-      }}
-      className={/^(p\w?-|m\w?-)/.test(item) ? undefined : item}
-    >
-      {/^(text|font)/.test(item) ? 'Tt' : null}
-    </div>
   );
 }
