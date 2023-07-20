@@ -1662,6 +1662,7 @@ export type Document = {
 };
 export type DesignSystem = {
   id: string;
+  type: 'standard' | 'custom';
 };
 /**
  * Union of all layers

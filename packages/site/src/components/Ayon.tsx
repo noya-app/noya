@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { NoyaAPI } from 'noya-api';
+import { DS, NoyaAPI, useNoyaFiles } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import {
   Button,
@@ -58,6 +58,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
@@ -73,6 +74,11 @@ import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';
+
+const DEFAULT_DESIGN_SYSTEM: Sketch.DesignSystem = {
+  type: 'standard',
+  id: '@noya-design-system/chakra',
+};
 
 export type ExportType =
   | NoyaAPI.ExportFormat
@@ -316,8 +322,41 @@ function Workspace({
     theme.colors.dividerStrong,
   ]);
 
-  const designSystem =
-    state.history.present.sketch.document.designSystem?.id ?? 'chakra';
+  const { files } = useNoyaFiles();
+
+  const designSystem: DS | undefined = useMemo(() => {
+    const x =
+      state.history.present.sketch.document.designSystem ??
+      DEFAULT_DESIGN_SYSTEM;
+
+    switch (x.type) {
+      case 'standard': {
+        const result: DS = {
+          source: {
+            name: x.id,
+            version: 'latest',
+            type: 'npm',
+          },
+          config: {
+            colors: {
+              primary: 'blue',
+            },
+          },
+        };
+        return result;
+      }
+      case 'custom': {
+        const file = files.find((file) => file.id === x.id);
+
+        if (!file || file.data.type !== 'io.noya.ds') {
+          console.error(`Could not find custom design system with id ${x.id}`);
+          return;
+        }
+
+        return file.data.document;
+      }
+    }
+  }, [files, state.history.present.sketch.document.designSystem]);
 
   useLayoutEffect(() => {
     if (isPlayground) return;
@@ -406,6 +445,8 @@ function Workspace({
                 downloadFile?.('pdf', artboard.frame, `Drag into Sketch.pdf`);
                 return;
               case 'react': {
+                if (!designSystem) return;
+
                 amplitude.logEvent('Project - Export - Exported React Code');
                 const { compile } = await import('noya-compiler');
                 const result = await compile({
@@ -428,6 +469,8 @@ function Workspace({
                 return;
               }
               case 'codesandbox': {
+                if (!designSystem) return;
+
                 const { compile, openInCodesandbox } = await import(
                   'noya-compiler'
                 );
@@ -499,8 +542,8 @@ function Workspace({
             <ProjectMenu
               name={name}
               designSystem={designSystem}
-              onChangeDesignSystem={(value) => {
-                dispatch(['setDesignSystemId', value]);
+              onChangeDesignSystem={(type, id) => {
+                dispatch(['setDesignSystem', type, id]);
               }}
               onChangeName={onChangeName || (() => {})}
               onDuplicate={onDuplicate || (() => {})}
@@ -518,6 +561,15 @@ function Workspace({
     setCenterToolbar,
     state,
   ]);
+
+  if (!designSystem) {
+    return (
+      <div>
+        <h1>Could not find design system</h1>
+        <span>Change the design system in the project menu.</span>
+      </div>
+    );
+  }
 
   return (
     <StateProvider state={state} dispatch={dispatch}>

@@ -6,6 +6,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import React from 'react';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
+import { useResolvedDesignSystem } from '../../../hooks/useResolvedDesignSystem';
 import { blockMetadata } from '../../symbols/metadata';
 import { DOMRenderer } from '../DOMRenderer';
 
@@ -45,6 +46,11 @@ export function InspectorCarousel({
   getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
 }) {
   const state = useWorkspaceState();
+  const ds = useResolvedDesignSystem(
+    state.history.present.sketch.document.designSystem,
+  );
+
+  if (!ds) return null;
 
   return (
     <GridView.Root scrollable={false} size="xs" textPosition="overlay" bordered>
@@ -111,7 +117,7 @@ export function InspectorCarousel({
                 <StateProvider state={customState}>
                   <DOMRenderer
                     resizeBehavior={'fit-container'}
-                    designSystem={'chakra'}
+                    designSystem={ds}
                     sync={false}
                     padding={0}
                   />

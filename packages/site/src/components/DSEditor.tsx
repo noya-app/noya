@@ -136,10 +136,11 @@ export function DSEditor({
 
   useEffect(() => {
     async function fetchLibrary() {
-      const system = await loadDesignSystem(
-        sourceName,
-        ref.current!.contentWindow!['Function' as any] as any,
-      );
+      const system = await loadDesignSystem(sourceName, {
+        Function: ref.current!.contentWindow!['Function' as any] as any,
+        enableCache: false,
+      });
+
       setSystem(system);
     }
 

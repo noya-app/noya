@@ -183,6 +183,7 @@ function createLocalFile({
 
   document.document.designSystem = {
     id: designSystemId,
+    type: 'standard',
   };
 
   const file: NoyaAPI.File = {

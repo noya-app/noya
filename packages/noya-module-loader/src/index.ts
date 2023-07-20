@@ -27,9 +27,14 @@ export async function loadModule(url: string, Function = window.Function) {
 
 export async function loadDesignSystem(
   name: string,
-  Function = window.Function,
+  options: {
+    Function?: typeof window.Function;
+    enableCache?: boolean;
+  } = {},
 ) {
-  if (DesignSystemCache.has(name)) {
+  const { Function = window.Function, enableCache = true } = options;
+
+  if (enableCache && DesignSystemCache.has(name)) {
     return DesignSystemCache.get(name)!;
   }
 
@@ -50,7 +55,9 @@ export async function loadDesignSystem(
     Object.assign(value, { __id: key });
   }
 
-  DesignSystemCache.set(name, designSystem);
+  if (enableCache) {
+    DesignSystemCache.set(name, designSystem);
+  }
 
   return designSystem;
 }

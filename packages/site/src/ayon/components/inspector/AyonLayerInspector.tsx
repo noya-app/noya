@@ -32,7 +32,10 @@ import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
 import { getAllInsertableSymbols } from '../../symbols/symbols';
-import { parametersToTailwindStyle } from '../../tailwind/tailwind';
+import {
+  allClassNames,
+  parametersToTailwindStyle,
+} from '../../tailwind/tailwind';
 import { InspectorCarousel } from './InspectorCarousel';
 
 const InspectorSection = ({
@@ -204,7 +207,7 @@ export function AyonLayerInspector({
 
   const styleItems = useMemo(
     () =>
-      (master.blockDefinition?.hashtags ?? []).map((item) => ({
+      (master.blockDefinition?.hashtags ?? allClassNames).map((item) => ({
         name: item,
         id: item,
         icon: <HashtagIcon item={item} />,

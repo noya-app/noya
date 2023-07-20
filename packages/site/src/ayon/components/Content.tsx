@@ -1,3 +1,4 @@
+import { DS } from 'noya-api';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   CanvasKitRenderer,
@@ -56,7 +57,7 @@ export const Content = memo(function Content({
   padding?: number;
   canvasRendererType?: CanvasRendererType;
   isPlayground?: boolean;
-  designSystem: string;
+  designSystem: DS;
 }) {
   const [toastData, setToastData] = useState<
     { attribution: Attribution; key: string } | undefined

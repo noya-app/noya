@@ -1,10 +1,11 @@
 import {
   DesignSystemDefinition,
   RenderableRoot,
-  defaultTheme,
+  Theme,
   transform,
 } from '@noya-design-system/protocol';
 import produce from 'immer';
+import { DS } from 'noya-api';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
@@ -24,6 +25,7 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
+import { tailwindColors } from '../tailwind/tailwind.config';
 import { recreateElement } from '../utils/recreateElement';
 import { renderDynamicContent } from '../utils/renderDynamicContent';
 
@@ -52,7 +54,7 @@ function DynamicRenderer({
   sync,
 }: {
   artboard: Sketch.Artboard;
-  designSystem: string;
+  designSystem: DS;
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined;
   sync: boolean;
 }) {
@@ -61,7 +63,7 @@ function DynamicRenderer({
 
   const [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
-  >(DesignSystemCache.get(designSystem));
+  >(DesignSystemCache.get(designSystem.source.name));
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
 
   const isInitialRender = useRef(true);
@@ -73,11 +75,14 @@ function DynamicRenderer({
 
   useEffect(() => {
     async function fetchLibrary() {
-      const system = await loadDesignSystem(designSystem);
+      const system = await loadDesignSystem(designSystem.source.name);
       setSystem(system);
     }
 
-    if (isInitialRender.current && DesignSystemCache.has(designSystem)) {
+    if (
+      isInitialRender.current &&
+      DesignSystemCache.has(designSystem.source.name)
+    ) {
       isInitialRender.current = false;
       return;
     }
@@ -99,13 +104,19 @@ function DynamicRenderer({
   const theme = useMemo(() => {
     if (!system || !system.themeTransformer) return undefined;
 
-    const themeValue = transform(
-      { theme: defaultTheme },
-      system.themeTransformer,
-    );
+    const t: Theme = {
+      colors: {
+        primary: (tailwindColors as any)[
+          designSystem.config.colors.primary as any
+        ],
+        neutral: tailwindColors.slate,
+      },
+    };
+
+    const themeValue = transform({ theme: t }, system.themeTransformer);
 
     return themeValue;
-  }, [system]);
+  }, [designSystem.config.colors.primary, system]);
 
   useLayoutEffect(() => {
     if (!root || !system) return;
@@ -198,7 +209,7 @@ function DOMRendererContent({
   size: Size;
   resizeBehavior: ResizeBehavior;
   padding?: number;
-  designSystem: string;
+  designSystem: DS;
   overriddenBlock?: OverriddenBlockContent;
   sync: boolean;
 }): JSX.Element {

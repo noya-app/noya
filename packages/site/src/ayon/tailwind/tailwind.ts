@@ -2,7 +2,7 @@ import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
 import { ThemeValue, config, tailwindColors } from './tailwind.config';
 
-const allClassNames = (
+export const allClassNames = (
   require('../../../safelist.txt').default as string
 ).split('\n');
 

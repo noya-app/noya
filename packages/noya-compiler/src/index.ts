@@ -2,6 +2,7 @@ import {
   component,
   DesignSystemDefinition,
 } from '@noya-design-system/protocol';
+import { DS } from 'noya-api';
 import Sketch from 'noya-file-format';
 import { loadDesignSystem } from 'noya-module-loader';
 import { Layers } from 'noya-state';
@@ -139,7 +140,7 @@ export interface CompilerConfiguration {
   name: string;
   artboard: Sketch.Artboard;
   getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
-  DesignSystem: string | DesignSystemDefinition;
+  DesignSystem: DS | DesignSystemDefinition;
   target: 'standalone' | 'codesandbox';
 }
 
@@ -299,8 +300,8 @@ export async function compile(configuration: CompilerConfiguration) {
   const { artboard, getSymbolMaster } = configuration;
 
   const DesignSystem =
-    typeof configuration.DesignSystem === 'string'
-      ? await loadDesignSystem(configuration.DesignSystem)
+    'source' in configuration.DesignSystem
+      ? await loadDesignSystem(configuration.DesignSystem.source.name)
       : configuration.DesignSystem;
 
   const components = artboard.layers
