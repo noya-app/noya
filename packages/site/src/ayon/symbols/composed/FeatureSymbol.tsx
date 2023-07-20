@@ -15,14 +15,16 @@ const featureItemTitleLayerId = '91514627-b323-457e-bf05-228c5a96830d';
 
 export const featureItemDetailsSymbol = SketchModel.symbolMaster({
   symbolID: '363aea13-2245-4cac-a07d-4be7c64c7a29',
-  name: 'FeatureItemDetails',
-  defaultBlockText: '#flex-1 #flex-col #gap-2',
+  name: 'Feature Item Details',
+  blockDefinition: {
+    placeholderParameters: ['flex-1', 'flex-col', 'gap-2'],
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: featureItemTitleLayerId,
       symbolID: textSymbolId,
-      // symbolID: heading5SymbolId,
-      blockText: 'Advanced Security #leading-8',
+      blockText: 'Advanced Security',
+      blockParameters: ['h5', 'leading-8'],
     }),
     SketchModel.symbolInstance({
       do_objectID: '2b211bc6-86e0-4f93-8e14-514ae026afa6',
@@ -33,7 +35,8 @@ export const featureItemDetailsSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: '74b18902-9928-4a56-b2b3-f29c87f0e690',
       symbolID: linkSymbolId,
-      blockText: 'Learn more #text-blue-500 #icon-arrow-forward #mt-2',
+      blockText: 'Learn more',
+      blockParameters: ['text-blue-500', 'icon-arrow-forward', 'mt-2'],
     }),
   ],
 });
@@ -44,8 +47,8 @@ const featureItemDetailsLayerId = '91514627-b323-457e-bf05-228c5a96830d';
 export const featureItemSymbol = SketchModel.symbolMaster({
   symbolID: featureItemSymbolId,
   name: 'Feature Item',
-  defaultBlockText: '#flex-row #gap-4',
   blockDefinition: {
+    placeholderParameters: ['flex-row', 'gap-4'],
     infer: ({ frame }) => {
       return Math.max(
         isWithinRectRange({
@@ -66,7 +69,14 @@ export const featureItemSymbol = SketchModel.symbolMaster({
       do_objectID: featureItemIconLayerId,
       symbolID: boxSymbolId,
       // symbolID: iconSymbolId,
-      blockText: 'fingerprint #bg-blue-500 #rounded #fill-white #p-1 #w-8 #h-8',
+      blockParameters: [
+        'bg-blue-500',
+        'rounded',
+        'fill-white',
+        'p-1',
+        'w-8',
+        'h-8',
+      ],
     }),
     SketchModel.symbolInstance({
       do_objectID: featureItemDetailsLayerId,
@@ -78,7 +88,9 @@ export const featureItemSymbol = SketchModel.symbolMaster({
 export const featureRowSymbol = SketchModel.symbolMaster({
   symbolID: featureRowSymbolId,
   name: 'Feature Row',
-  defaultBlockText: '#flex-row #gap-8 #mt-24',
+  blockDefinition: {
+    placeholderParameters: ['flex-row', 'gap-8', 'mt-24'],
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: 'dd07568f-9508-40bd-b92d-688b177f868c',
@@ -114,8 +126,9 @@ export const featureRowSymbol = SketchModel.symbolMaster({
 export const featureSectionSymbol = SketchModel.symbolMaster({
   symbolID: featureSectionSymbolId,
   name: 'Feature Section',
-  defaultBlockText: '#flex-col #center #px-20',
-  blockDefinition: {},
+  blockDefinition: {
+    placeholderParameters: ['flex-col', 'items-center', 'px-20'],
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',
@@ -125,14 +138,14 @@ export const featureSectionSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'ef2d5b26-aa1c-40d3-8bab-37c10bccc5cb',
       symbolID: textSymbolId,
-      // symbolID: heading2SymbolId,
-      blockText: 'From idea to launch #mt-2',
+      blockText: 'From idea to launch',
+      blockParameters: ['h2', 'mt-2'],
     }),
     SketchModel.symbolInstance({
       do_objectID: 'aa722c35-9ba4-4bf3-a5d0-f7d17f02c361',
       symbolID: textSymbolId,
-      // symbolID: heading5SymbolId,
-      blockText: "Build the business you've always wanted. #mt-2",
+      blockText: "Build the business you've always wanted.",
+      blockParameters: ['h5', 'mt-2'],
     }),
     SketchModel.symbolInstance({
       do_objectID: '75f1af59-564e-484a-8b46-34a18d2d3054',

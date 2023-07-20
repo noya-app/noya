@@ -10,7 +10,9 @@ import {
 export const signInSymbol = SketchModel.symbolMaster({
   symbolID: signInSymbolId,
   name: 'SignIn',
-  defaultBlockText: '#flex-col #bg-transparent #p-4 #gap-1',
+  blockDefinition: {
+    placeholderParameters: ['flex-col', 'bg-transparent', 'p-4', 'gap-1'],
+  },
   layers: [
     SketchModel.symbolInstance({
       do_objectID: 'cc9e5670-301e-44ad-a06e-a8160926b7d2',

@@ -17,6 +17,7 @@ export function AyonInspector(
 
   return (
     <Stack.V
+      background={'white'}
       width={'400px'}
       borderLeft={`1px solid ${theme.colors.dividerStrong}`}
     >

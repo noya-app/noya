@@ -488,7 +488,13 @@ function Workspace({
   if (!ds) {
     return (
       <div>
-        <h1>Could not find design system</h1>
+        <span
+          style={{
+            fontSize: '15px',
+          }}
+        >
+          Could not find design system
+        </span>
         <span>Change the design system in the project menu.</span>
       </div>
     );

@@ -4,6 +4,7 @@ import {
   Select,
   Stack,
   TreeView,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
@@ -20,6 +21,7 @@ import { isDeepEqual, upperFirst } from 'noya-utils';
 import React, { useCallback } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
+import { usePersistentState } from '../../../utils/clientStorage';
 import { inferBlockTypes } from '../../infer/inferBlock';
 import { boxSymbolId } from '../../symbols/symbolIds';
 import { AyonLayerListRow } from './AyonLayerListRow';
@@ -153,9 +155,9 @@ export function AyonLayerInspector({
 
   const Hierarchy = createOverrideHierarchy(state);
 
-  const [inspectorMode, setInspectorMode] = React.useState<
+  const [inspectorMode, setInspectorMode] = usePersistentState<
     'compact' | 'advanced'
-  >('advanced');
+  >('ayonLayerInspectorView', 'compact');
 
   const flattened = Hierarchy.flatMap(
     selectedLayer,
@@ -200,8 +202,14 @@ export function AyonLayerInspector({
     dispatch('batch', actions);
   };
 
+  const theme = useDesignSystemTheme();
+
   return (
-    <Stack.V gap="1px" position="relative">
+    <Stack.V
+      gap="1px"
+      position="relative"
+      background={theme.colors.canvas.background}
+    >
       <InspectorSection title={componentName} titleTextStyle="heading3">
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>
@@ -266,28 +274,6 @@ export function AyonLayerInspector({
           </Stack.H>
         }
       >
-        {/* <InputFieldWithCompletions
-          ref={nestedComponentSearchInputRef}
-          size="large"
-          placeholder={'Content'}
-          items={blockCompletionItems}
-          onSelectItem={(item) => {
-            dispatch('setOverrideValue', undefined, 'layers', [
-              ...Hierarchy.getChildren(selectedLayer, []),
-              SketchModel.symbolInstance({
-                symbolID: item.id,
-                name: item.name,
-              }),
-            ]);
-          }}
-          onHoverItem={(item) => {}}
-        >
-          <InputField.Button>
-            Insert
-            <Spacer.Horizontal size={8} inline />
-            <span style={{ opacity: 0.5 }}>+</span>
-          </InputField.Button>
-        </InputFieldWithCompletions> */}
         <TreeView.Root
           keyExtractor={({ instance: layer }) => layer.do_objectID}
           data={flattened}

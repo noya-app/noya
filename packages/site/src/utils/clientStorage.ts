@@ -4,6 +4,7 @@ const ClientStorageDefinitions = {
   preferredViewType: 'noya-ayon-preferred-view-type',
   ayonOnboardingStep: 'noya-ayon-onboarding-step',
   welcomeCardDismissed: 'noya-ayon-welcome-card-dismissed',
+  ayonLayerInspectorView: 'noya-ayon-layer-inspector-view',
 };
 
 export const ayonOnboardingStep = [
@@ -44,6 +45,13 @@ export const ClientStorage = {
   },
 };
 
+export function usePersistentState<T extends string = string>(
+  storageKey: ClientStorageKey,
+): readonly [T | null, (newValue: T) => void];
+export function usePersistentState<T extends string = string>(
+  storageKey: ClientStorageKey,
+  defaultValue: T,
+): readonly [T, (newValue: T) => void];
 export function usePersistentState<T extends string = string>(
   storageKey: ClientStorageKey,
   defaultValue?: T,

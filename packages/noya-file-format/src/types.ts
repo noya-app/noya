@@ -535,7 +535,6 @@ export type SymbolMaster = {
     | Hotspot
     | Bitmap
   )[];
-  defaultBlockText?: string;
   blockDefinition?: BlockDefinition;
 };
 /**
