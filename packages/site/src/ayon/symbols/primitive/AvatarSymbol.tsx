@@ -11,6 +11,7 @@ export const avatarSymbol = SketchModel.symbolMaster({
   symbolID: avatarSymbolId,
   name: 'Avatar',
   blockDefinition: {
+    supportsBlockText: true,
     infer: ({ frame }) =>
       isWithinRectRange({
         rect: frame,

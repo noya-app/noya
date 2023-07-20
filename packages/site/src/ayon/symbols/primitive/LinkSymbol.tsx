@@ -15,6 +15,7 @@ export const linkSymbol = SketchModel.symbolMaster({
   symbolID: linkSymbolId,
   name: 'Link',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: [
       'icon-arrow-forward',
       'left',

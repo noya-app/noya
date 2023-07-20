@@ -1142,8 +1142,8 @@ export type BlockDefinition = {
   placeholderParameters?: string[];
   stylePresets?: BlockStylePreset[];
   usesResolver?: boolean;
-  isPassthrough?: boolean;
-  isComposedBlock?: boolean;
+  isInsertable?: boolean;
+  supportsBlockText?: boolean;
   infer?: (props: {
     frame: Omit<Rect, '_class' | 'constrainProportions'>;
   }) => number;

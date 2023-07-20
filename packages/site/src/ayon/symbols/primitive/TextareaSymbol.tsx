@@ -12,6 +12,7 @@ export const textareaSymbol = SketchModel.symbolMaster({
   symbolID: textareaSymbolId,
   name: 'Textarea',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: globalHashtags,
     infer: ({ frame }) => 0.1,
     render: ({ Components, instance, passthrough }: RenderProps) => {

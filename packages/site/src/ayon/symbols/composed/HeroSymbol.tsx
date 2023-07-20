@@ -104,7 +104,6 @@ export const heroWithImageSymbol = SketchModel.symbolMaster({
   name: 'Hero with Image',
   blockDefinition: {
     placeholderParameters: ['flex-1', 'grid', 'grid-flow-col', 'auto-cols-fr'],
-    isComposedBlock: true,
     infer: ({ frame }) => {
       // if (siblingBlocks.some((block) => heroSymbolIds.includes(block.symbolId))) {
       //   return 0;

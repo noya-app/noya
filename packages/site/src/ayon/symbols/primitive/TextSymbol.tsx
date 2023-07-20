@@ -20,6 +20,7 @@ export const textSymbol = SketchModel.symbolMaster({
   symbolID: textSymbolId,
   name: 'Text',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: [
       ...variantKeys,
       ...positionKeys,

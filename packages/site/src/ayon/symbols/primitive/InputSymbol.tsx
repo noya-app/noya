@@ -22,6 +22,7 @@ export const inputSymbol = SketchModel.symbolMaster({
   symbolID: inputSymbolId,
   name: 'Input',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: globalHashtags,
     infer: ({ frame }) =>
       isWithinRectRange({

@@ -16,6 +16,7 @@ export const imageSymbol = SketchModel.symbolMaster({
   symbolID: imageSymbolId,
   name: 'Image',
   blockDefinition: {
+    supportsBlockText: true,
     infer: ({ frame }) => 0.1,
     hashtags: ['contain', 'fill', ...tailwindBlockClasses],
     usesResolver: true,

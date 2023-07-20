@@ -26,6 +26,7 @@ export const buttonSymbol = SketchModel.symbolMaster({
   symbolID: buttonSymbolId,
   name: 'Button',
   blockDefinition: {
+    supportsBlockText: true,
     placeholderText: 'Submit',
     schema,
     hashtags: Object.values(schema).flat(),

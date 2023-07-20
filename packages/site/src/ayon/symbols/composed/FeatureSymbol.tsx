@@ -46,8 +46,6 @@ export const featureItemSymbol = SketchModel.symbolMaster({
   name: 'Feature Item',
   defaultBlockText: '#flex-row #gap-4',
   blockDefinition: {
-    hashtags: [],
-    isComposedBlock: true,
     infer: ({ frame }) => {
       return Math.max(
         isWithinRectRange({
@@ -117,10 +115,7 @@ export const featureSectionSymbol = SketchModel.symbolMaster({
   symbolID: featureSectionSymbolId,
   name: 'Feature Section',
   defaultBlockText: '#flex-col #center #px-20',
-  blockDefinition: {
-    hashtags: [],
-    isComposedBlock: true,
-  },
+  blockDefinition: {},
   layers: [
     SketchModel.symbolInstance({
       do_objectID: '1dea1c4d-f1bd-473b-a1aa-a0c6a1481ae2',

@@ -15,6 +15,7 @@ export const checkboxSymbol = SketchModel.symbolMaster({
   symbolID: checkboxSymbolId,
   name: 'Checkbox',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: globalHashtags,
     placeholderText,
     infer: ({ frame }) =>

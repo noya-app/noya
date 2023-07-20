@@ -48,7 +48,8 @@ function filterInsertableSymbol(
   symbol: Sketch.SymbolMaster,
 ): symbol is Sketch.SymbolMaster {
   return (
-    symbol.symbolID !== heroSymbolV1Id && !symbol.blockDefinition?.isPassthrough
+    symbol.symbolID !== heroSymbolV1Id &&
+    symbol.blockDefinition?.isInsertable !== false
   );
 }
 

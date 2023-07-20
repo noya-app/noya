@@ -17,6 +17,7 @@ export const tagSymbol = SketchModel.symbolMaster({
   symbolID: tagSymbolId,
   name: 'Tag',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: [...variantKeys, ...sizeKeys, ...colorSchemeKeys],
     placeholderText,
     infer: ({ frame }) => 0,

@@ -22,7 +22,6 @@ export const cardSymbol = SketchModel.symbolMaster({
       'rounded-md',
     ],
     hashtags: tailwindBlockClasses,
-    isComposedBlock: true,
     infer: ({ frame }) => {
       return Math.max(
         isWithinRectRange({
@@ -64,9 +63,7 @@ export const tileCardSymbol = SketchModel.symbolMaster({
   symbolID: tileCardSymbolId,
   name: 'TileCard',
   blockDefinition: {
-    hashtags: [],
     placeholderParameters: ['flex-1', 'flex-col', 'bg-blue-50', 'p-6', 'left'],
-    isComposedBlock: true,
     infer: ({ frame }) => {
       return Math.max(
         isWithinRectRange({

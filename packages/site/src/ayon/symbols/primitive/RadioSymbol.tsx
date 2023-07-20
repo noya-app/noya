@@ -14,6 +14,7 @@ export const radioSymbol = SketchModel.symbolMaster({
   symbolID: radioSymbolId,
   name: 'Radio',
   blockDefinition: {
+    supportsBlockText: true,
     hashtags: globalHashtags,
     placeholderText,
     infer: ({ frame }) =>

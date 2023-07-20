@@ -6,16 +6,30 @@ import {
   InputFieldWithCompletions,
   Stack,
   TreeView,
-  useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { DragHandleDots2Icon } from 'noya-icons';
+import { Component1Icon, DragHandleDots2Icon } from 'noya-icons';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import styled from 'styled-components';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { getAllInsertableSymbols } from '../../symbols/symbols';
 import { allClassNames } from '../../tailwind/tailwind';
 import { HashtagIcon } from './HashtagIcon';
+
+const InputWrapper = styled.div(({ theme }) => ({
+  flex: '1',
+  border: `1px solid ${theme.colors.divider}`,
+  padding: '1px',
+  margin: '4px 0',
+  borderRadius: '6px',
+  outline: 'none',
+  minHeight: '30px',
+  '&:focus': {
+    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+  },
+}));
 
 function getCompletionItems({
   state,
@@ -30,6 +44,7 @@ function getCompletionItems({
     (block): CompletionItem => ({
       id: 'block:' + block.symbolID,
       name: block.name,
+      icon: <Component1Icon />,
     }),
   );
 
@@ -60,7 +75,6 @@ export function AyonLayerListRow({
     overriddenBlock: BlockPreviewProps | undefined,
   ) => void;
 }) {
-  const theme = useDesignSystemTheme();
   const [state, dispatch] = useApplicationState();
   const getSymbolMaster = useCallback(
     (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
@@ -73,6 +87,16 @@ export function AyonLayerListRow({
 
   const [hovered, setHovered] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
+
+  useKeyboardShortcuts(
+    depth === 0
+      ? {
+          '/': () => {
+            setIsSearching(true);
+          },
+        }
+      : {},
+  );
 
   const completionItems = useMemo(
     () =>
@@ -136,6 +160,10 @@ export function AyonLayerListRow({
       (layer.blockParameters ?? []).filter((p) => p !== parameter),
     );
 
+  const supportsBlockText = master.blockDefinition?.supportsBlockText ?? false;
+
+  const inputWrapperRef = React.useRef<HTMLDivElement>(null);
+
   return (
     <TreeView.Row
       key={key}
@@ -144,13 +172,29 @@ export function AyonLayerListRow({
       icon={depth !== 0 && <DragHandleDots2Icon />}
       onHoverChange={setHovered}
     >
-      <Stack.V
-        flex="1"
-        border={`1px solid ${theme.colors.divider}`}
-        padding="1px"
-        margin="4px 0"
-        borderRadius="6px"
-        gap="2px"
+      <InputWrapper
+        ref={inputWrapperRef}
+        style={
+          supportsBlockText
+            ? {
+                gap: '2px',
+              }
+            : {}
+        }
+        tabIndex={!supportsBlockText ? 0 : undefined}
+        onClick={() => {
+          inputWrapperRef.current?.focus();
+        }}
+        onKeyDown={(event) => {
+          switch (event.key) {
+            case '/': {
+              event.preventDefault();
+              event.stopPropagation();
+
+              setIsSearching(true);
+            }
+          }
+        }}
       >
         <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
           {isSearching ? (
@@ -167,7 +211,7 @@ export function AyonLayerListRow({
                 background: 'transparent',
               }}
             />
-          ) : (
+          ) : supportsBlockText ? (
             <InputField.Root key={key} labelPosition="end" labelSize={60}>
               <InputField.Input
                 style={{
@@ -210,58 +254,65 @@ export function AyonLayerListRow({
                 <InputField.Label>{componentName}</InputField.Label>
               )}
             </InputField.Root>
-          )}
+          ) : null}
         </Stack.H>
-        {layer.blockParameters && layer.blockParameters.length > 0 && (
-          <Stack.H flexWrap="wrap" gap="2px">
-            {layer.blockParameters.map((parameter) => (
-              <Chip
-                key={parameter}
-                size="small"
-                deletable
-                monospace
-                // TODO: This seems to permanently mutate block parameters in the layer tree.
-                // Afterwards, if we add/remove block parameters they don't get rendered.
-                // Refreshing the page fixes it.
-                // onHoverDeleteChange={(isHovering) => {
-                //   const updatedParameters = (
-                //     layer.blockParameters ?? []
-                //   ).filter((p) => p !== parameter);
-                //   const overrideName = Overrides.encodeName(
-                //     path,
-                //     'blockParameters',
-                //   );
-                //   const updatedOverrideValues = selectedLayer.overrideValues
-                //     .filter(
-                //       (override) => override.overrideName !== overrideName,
-                //     )
-                //     .concat(
-                //       SketchModel.overrideValue({
-                //         overrideName,
-                //         value: updatedParameters,
-                //       }),
-                //     );
-                //   if (isHovering) {
-                //     onSetOverriddenBlock({
-                //       blockId: selectedLayer.symbolID,
-                //       blockText: selectedLayer.blockText,
-                //       blockParameters: selectedLayer.blockParameters,
-                //       overrideValues: updatedOverrideValues,
-                //       resolvedBlockText:
-                //         selectedLayer.resolvedBlockData?.resolvedText,
-                //     });
-                //   } else {
-                //     onSetOverriddenBlock(undefined);
-                //   }
-                // }}
-                onDelete={() => handleDeleteParameer(parameter)}
-              >
-                {parameter}
-              </Chip>
-            ))}
-          </Stack.H>
-        )}
-      </Stack.V>
+        {!(!supportsBlockText && isSearching) &&
+          (!supportsBlockText ||
+            (layer.blockParameters && layer.blockParameters.length > 0)) && (
+            <Stack.H
+              flexWrap="wrap"
+              gap="2px"
+              padding={!supportsBlockText ? '1px' : 0}
+            >
+              {(layer.blockParameters || []).map((parameter) => (
+                <Chip
+                  key={parameter}
+                  size={supportsBlockText ? 'small' : 'medium'}
+                  deletable
+                  monospace
+                  onDelete={() => handleDeleteParameer(parameter)}
+                >
+                  {parameter}
+                </Chip>
+              ))}
+            </Stack.H>
+          )}
+      </InputWrapper>
     </TreeView.Row>
   );
 }
+
+// TODO: This seems to permanently mutate block parameters in the layer tree.
+// Afterwards, if we add/remove block parameters they don't get rendered.
+// Refreshing the page fixes it.
+// onHoverDeleteChange={(isHovering) => {
+//   const updatedParameters = (
+//     layer.blockParameters ?? []
+//   ).filter((p) => p !== parameter);
+//   const overrideName = Overrides.encodeName(
+//     path,
+//     'blockParameters',
+//   );
+//   const updatedOverrideValues = selectedLayer.overrideValues
+//     .filter(
+//       (override) => override.overrideName !== overrideName,
+//     )
+//     .concat(
+//       SketchModel.overrideValue({
+//         overrideName,
+//         value: updatedParameters,
+//       }),
+//     );
+//   if (isHovering) {
+//     onSetOverriddenBlock({
+//       blockId: selectedLayer.symbolID,
+//       blockText: selectedLayer.blockText,
+//       blockParameters: selectedLayer.blockParameters,
+//       overrideValues: updatedOverrideValues,
+//       resolvedBlockText:
+//         selectedLayer.resolvedBlockData?.resolvedText,
+//     });
+//   } else {
+//     onSetOverriddenBlock(undefined);
+//   }
+// }}
