@@ -50,14 +50,14 @@ export const Content = memo(function Content({
   padding,
   canvasRendererType = 'canvas',
   isPlayground,
-  designSystem,
+  ds,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
   padding?: number;
   canvasRendererType?: CanvasRendererType;
   isPlayground?: boolean;
-  designSystem: DS;
+  ds: DS;
 }) {
   const [toastData, setToastData] = useState<
     { attribution: Attribution; key: string } | undefined
@@ -356,7 +356,7 @@ export const Content = memo(function Content({
           <DOMRenderer
             overriddenBlock={overriddenBlock}
             resizeBehavior="match-canvas"
-            designSystem={designSystem}
+            ds={ds}
             sync={!isPlayground}
           />
         </Overlay>

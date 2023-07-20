@@ -5,8 +5,8 @@ import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import React from 'react';
+import { useDS } from '../../../components/DSContext';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
-import { useResolvedDesignSystem } from '../../../hooks/useResolvedDesignSystem';
 import { blockMetadata } from '../../symbols/metadata';
 import { DOMRenderer } from '../DOMRenderer';
 
@@ -46,9 +46,7 @@ export function InspectorCarousel({
   getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
 }) {
   const state = useWorkspaceState();
-  const ds = useResolvedDesignSystem(
-    state.history.present.sketch.document.designSystem,
-  );
+  const ds = useDS();
 
   if (!ds) return null;
 
@@ -117,7 +115,7 @@ export function InspectorCarousel({
                 <StateProvider state={customState}>
                   <DOMRenderer
                     resizeBehavior={'fit-container'}
-                    designSystem={ds}
+                    ds={ds}
                     sync={false}
                     padding={0}
                   />

@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { DS, NoyaAPI, useNoyaFiles } from 'noya-api';
+import { NoyaAPI } from 'noya-api';
 import {
   StateProvider,
   useApplicationState,
@@ -63,7 +63,6 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
@@ -75,15 +74,11 @@ import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
 import { downloadBlob } from '../utils/download';
 import { AyonProvider } from './AyonContext';
+import { DSProvider, useDS } from './DSContext';
 import { OnboardingAnimation } from './OnboardingAnimation';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';
-
-const DEFAULT_DESIGN_SYSTEM: Sketch.DesignSystem = {
-  type: 'standard',
-  id: '@noya-design-system/chakra',
-};
 
 export type ExportType =
   | NoyaAPI.ExportFormat
@@ -278,39 +273,7 @@ function Workspace({
     theme.colors.dividerStrong,
   ]);
 
-  const { files } = useNoyaFiles();
-
-  const designSystem: DS | undefined = useMemo(() => {
-    const x = state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
-
-    switch (x.type) {
-      case 'standard': {
-        const result: DS = {
-          source: {
-            name: x.id,
-            version: 'latest',
-            type: 'npm',
-          },
-          config: {
-            colors: {
-              primary: 'blue',
-            },
-          },
-        };
-        return result;
-      }
-      case 'custom': {
-        const file = files.find((file) => file.id === x.id);
-
-        if (!file || file.data.type !== 'io.noya.ds') {
-          console.error(`Could not find custom design system with id ${x.id}`);
-          return;
-        }
-
-        return file.data.document;
-      }
-    }
-  }, [files, state.sketch.document.designSystem]);
+  const ds = useDS();
 
   useLayoutEffect(() => {
     if (isPlayground) return;
@@ -399,7 +362,7 @@ function Workspace({
                 downloadFile?.('pdf', artboard.frame, `Drag into Sketch.pdf`);
                 return;
               case 'react': {
-                if (!designSystem) return;
+                if (!ds) return;
 
                 amplitude.logEvent('Project - Export - Exported React Code');
                 const { compile } = await import('noya-compiler');
@@ -407,7 +370,7 @@ function Workspace({
                   name,
                   artboard,
                   getSymbolMaster,
-                  DesignSystem: designSystem,
+                  DesignSystem: ds,
                   target: 'standalone',
                 });
                 const zipFile = await toZipFile(
@@ -423,7 +386,7 @@ function Workspace({
                 return;
               }
               case 'codesandbox': {
-                if (!designSystem) return;
+                if (!ds) return;
 
                 const { compile, openInCodesandbox } = await import(
                   'noya-compiler'
@@ -432,7 +395,7 @@ function Workspace({
                   name,
                   artboard,
                   getSymbolMaster,
-                  DesignSystem: designSystem,
+                  DesignSystem: ds,
                   target: 'codesandbox',
                 });
                 openInCodesandbox({ files: result });
@@ -476,10 +439,10 @@ function Workspace({
     name,
     onChangeName,
     fileId,
-    designSystem,
     isPlayground,
     getSymbolMaster,
     dispatch,
+    ds,
   ]);
 
   const workspaceState = useWorkspaceState();
@@ -499,7 +462,7 @@ function Workspace({
           <Stack.V width={240}>
             <ProjectMenu
               name={name}
-              designSystem={designSystem}
+              designSystem={ds}
               onChangeDesignSystem={(type, id) => {
                 dispatch('setDesignSystem', type, id);
               }}
@@ -511,8 +474,8 @@ function Workspace({
       </StateProvider>,
     );
   }, [
-    designSystem,
     dispatch,
+    ds,
     isPlayground,
     name,
     onChangeName,
@@ -522,7 +485,7 @@ function Workspace({
     workspaceState,
   ]);
 
-  if (!designSystem) {
+  if (!ds) {
     return (
       <div>
         <h1>Could not find design system</h1>
@@ -538,7 +501,7 @@ function Workspace({
       viewType={viewType}
       padding={padding}
       isPlayground={isPlayground}
-      designSystem={designSystem}
+      ds={ds}
     />
   );
 }
@@ -605,15 +568,21 @@ const AyonControlledState = memo(function AyonWithState({
 
   return (
     <StateProvider state={state} dispatch={dispatch}>
-      {children}
+      <DSProvider
+        savedDesignSystem={state.history.present.sketch.document.designSystem}
+      >
+        {children}
+      </DSProvider>
     </StateProvider>
   );
 });
 
-export const Ayon = memo(function Ayon(
-  props: ComponentProps<typeof Workspace> &
-    Omit<ComponentProps<typeof AyonControlledState>, 'children'>,
-): JSX.Element {
+export const Ayon = memo(function Ayon({
+  initialDocument,
+  onChangeDocument,
+  ...props
+}: ComponentProps<typeof Workspace> &
+  Omit<ComponentProps<typeof AyonControlledState>, 'children'>): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
     initialized = true;
@@ -630,8 +599,8 @@ export const Ayon = memo(function Ayon(
           >
             <FontManagerProvider>
               <AyonControlledState
-                initialDocument={props.initialDocument}
-                onChangeDocument={props.onChangeDocument}
+                initialDocument={initialDocument}
+                onChangeDocument={onChangeDocument}
               >
                 <Workspace {...props} />
               </AyonControlledState>

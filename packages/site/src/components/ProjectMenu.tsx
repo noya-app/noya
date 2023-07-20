@@ -1,4 +1,4 @@
-import { DS, useNoyaFiles } from 'noya-api';
+import { DS, NoyaAPI, useNoyaClient } from 'noya-api';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
@@ -13,7 +13,7 @@ import Sketch from 'noya-file-format';
 import { ChevronDownIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -40,7 +40,12 @@ export function ProjectMenu({
   onDuplicate: () => void;
 }) {
   const [state, dispatch] = useApplicationState();
-  const { files } = useNoyaFiles();
+  const [files, setFiles] = useState<NoyaAPI.File[]>([]);
+  const client = useNoyaClient();
+
+  useEffect(() => {
+    client.networkClient.files.list().then(setFiles);
+  }, [client.networkClient.files]);
 
   const customDesignSystems = files
     .filter((file) => file.data.type === 'io.noya.ds')

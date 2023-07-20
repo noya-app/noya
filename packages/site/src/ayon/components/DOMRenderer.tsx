@@ -49,12 +49,12 @@ class ErrorBoundary extends React.Component<any> {
 
 function DynamicRenderer({
   artboard,
-  designSystem,
+  ds,
   drawing,
   sync,
 }: {
   artboard: Sketch.Artboard;
-  designSystem: DS;
+  ds: DS;
   drawing: Extract<InteractionState, { type: 'drawing' }> | undefined;
   sync: boolean;
 }) {
@@ -63,7 +63,7 @@ function DynamicRenderer({
 
   const [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
-  >(DesignSystemCache.get(designSystem.source.name));
+  >(DesignSystemCache.get(ds.source.name));
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
 
   const isInitialRender = useRef(true);
@@ -75,14 +75,11 @@ function DynamicRenderer({
 
   useEffect(() => {
     async function fetchLibrary() {
-      const system = await loadDesignSystem(designSystem.source.name);
+      const system = await loadDesignSystem(ds.source.name);
       setSystem(system);
     }
 
-    if (
-      isInitialRender.current &&
-      DesignSystemCache.has(designSystem.source.name)
-    ) {
+    if (isInitialRender.current && DesignSystemCache.has(ds.source.name)) {
       isInitialRender.current = false;
       return;
     }
@@ -90,7 +87,7 @@ function DynamicRenderer({
     isInitialRender.current = false;
     setSystem(undefined);
     fetchLibrary();
-  }, [designSystem]);
+  }, [ds]);
 
   useEffect(() => {
     if (system && !root) {
@@ -106,9 +103,7 @@ function DynamicRenderer({
 
     const t: Theme = {
       colors: {
-        primary: (tailwindColors as any)[
-          designSystem.config.colors.primary as any
-        ],
+        primary: (tailwindColors as any)[ds.config.colors.primary as any],
         neutral: tailwindColors.slate,
       },
     };
@@ -116,7 +111,7 @@ function DynamicRenderer({
     const themeValue = transform({ theme: t }, system.themeTransformer);
 
     return themeValue;
-  }, [designSystem.config.colors.primary, system]);
+  }, [ds.config.colors.primary, system]);
 
   useLayoutEffect(() => {
     if (!root || !system) return;
@@ -131,16 +126,7 @@ function DynamicRenderer({
     );
 
     root.render(recreateElement(system, content), { sync });
-  }, [
-    artboard,
-    designSystem,
-    drawing,
-    getSymbolMaster,
-    root,
-    sync,
-    system,
-    theme,
-  ]);
+  }, [artboard, ds, drawing, getSymbolMaster, root, sync, system, theme]);
 
   return (
     <>
@@ -202,14 +188,14 @@ function DOMRendererContent({
   size,
   resizeBehavior,
   padding = 0,
-  designSystem,
+  ds,
   overriddenBlock,
   sync,
 }: {
   size: Size;
   resizeBehavior: ResizeBehavior;
   padding?: number;
-  designSystem: DS;
+  ds: DS;
   overriddenBlock?: OverriddenBlockContent;
   sync: boolean;
 }): JSX.Element {
@@ -261,7 +247,7 @@ function DOMRendererContent({
           <DynamicRenderer
             sync={sync}
             artboard={overriddenArtboard}
-            designSystem={designSystem}
+            ds={ds}
             drawing={
               state.interactionState.type === 'drawing'
                 ? state.interactionState
