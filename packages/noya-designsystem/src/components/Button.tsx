@@ -21,7 +21,7 @@ type ButtonVariant =
  * Element
  * ------------------------------------------------------------------------- */
 
-const ButtonElement = styled.button<{
+export const ButtonElement = styled.button<{
   active: boolean;
   variant: ButtonVariant;
   flex?: CSSProperties['flex'];

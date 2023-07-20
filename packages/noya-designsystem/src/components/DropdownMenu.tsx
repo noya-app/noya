@@ -10,15 +10,15 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { MenuItemProps, MenuProps } from './ContextMenu';
+import { Spacer } from './Spacer';
 import {
   CHECKBOX_RIGHT_INSET,
   CHECKBOX_WIDTH,
-  getKeyboardShortcutsForMenuItems,
   KeyboardShortcut,
   SEPARATOR_ITEM,
+  getKeyboardShortcutsForMenuItems,
   styles,
 } from './internal/Menu';
-import { Spacer } from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -135,7 +135,8 @@ const DropdownMenuRoot = forwardRef(function DropdownMenuRoot<T extends string>(
     isNested,
     shouldBindKeyboardShortcuts,
     onOpenChange,
-  }: MenuProps<T>,
+    open,
+  }: MenuProps<T> & { open?: boolean },
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
   const hasCheckedItem = items.some(
@@ -163,7 +164,7 @@ const DropdownMenuRoot = forwardRef(function DropdownMenuRoot<T extends string>(
   const contentStyle = useMemo(() => ({ zIndex: 1000 }), []);
 
   return (
-    <RootComponent onOpenChange={onOpenChange}>
+    <RootComponent onOpenChange={onOpenChange} open={open}>
       <TriggerComponent ref={forwardedRef as ForwardedRef<any>} asChild>
         {children}
       </TriggerComponent>

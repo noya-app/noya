@@ -7,9 +7,10 @@ import {
   Spacer,
   Stack,
   TreeView,
+  createSectionedMenu,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Component1Icon, DragHandleDots2Icon } from 'noya-icons';
+import { Component1Icon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -17,6 +18,7 @@ import styled from 'styled-components';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { getAllInsertableSymbols } from '../../symbols/symbols';
 import { allClassNames } from '../../tailwind/tailwind';
+import { DraggableMenuButton } from './DraggableMenuButton';
 import { HashtagIcon } from './HashtagIcon';
 
 const InputWrapper = styled.div(({ theme }) => ({
@@ -67,6 +69,8 @@ export function AyonLayerListRow({
   depth,
   path,
   isDragging,
+  onInsertChild,
+  onDelete,
   onSetOverriddenBlock,
 }: {
   inspectorMode: 'compact' | 'advanced';
@@ -74,6 +78,8 @@ export function AyonLayerListRow({
   depth: number;
   path: string[];
   isDragging: boolean;
+  onInsertChild: () => void;
+  onDelete: () => void;
   onSetOverriddenBlock: (
     overriddenBlock: BlockPreviewProps | undefined,
   ) => void;
@@ -111,11 +117,11 @@ export function AyonLayerListRow({
     [layer, master, state],
   );
 
-  const modalSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isSearching) {
-      modalSearchInputRef.current?.focus();
+      searchInputRef.current?.focus();
     }
   }, [isSearching]);
 
@@ -167,13 +173,65 @@ export function AyonLayerListRow({
 
   const inputWrapperRef = React.useRef<HTMLDivElement>(null);
 
+  const menuItems = createSectionedMenu(
+    [
+      {
+        title: 'Change Component',
+        value: 'setComponent',
+        shortcut: '/',
+      },
+      {
+        title: 'Add Style',
+        value: 'addStyle',
+        shortcut: '/',
+      },
+    ],
+    [
+      {
+        title: 'Insert Component',
+        value: 'insertChild',
+      },
+    ],
+    [
+      {
+        title: 'Delete',
+        value: 'delete',
+      } as const,
+    ],
+  );
+
   return (
     <TreeView.Row
       key={key}
       id={layer.do_objectID}
       depth={depth - 1}
       icon={
-        depth !== 0 && inspectorMode === 'advanced' && <DragHandleDots2Icon />
+        depth !== 0 &&
+        inspectorMode === 'advanced' && (
+          <DraggableMenuButton
+            items={menuItems}
+            onSelect={(value) => {
+              switch (value) {
+                case 'delete': {
+                  onDelete();
+                  return;
+                }
+                case 'addStyle':
+                case 'setComponent': {
+                  setIsSearching(true);
+                  setTimeout(() => {
+                    searchInputRef.current?.focus();
+                  }, 0);
+                  return;
+                }
+                case 'insertChild': {
+                  onInsertChild();
+                  return;
+                }
+              }
+            }}
+          />
+        )
       }
       onHoverChange={setHovered}
     >
@@ -204,7 +262,7 @@ export function AyonLayerListRow({
         <Stack.H flex="1" opacity={isDragging ? 0.5 : 1}>
           {isSearching ? (
             <InputFieldWithCompletions
-              ref={modalSearchInputRef}
+              ref={searchInputRef}
               placeholder={'Find component/style'}
               items={completionItems}
               onBlur={() => {
@@ -289,38 +347,3 @@ export function AyonLayerListRow({
     </TreeView.Row>
   );
 }
-
-// TODO: This seems to permanently mutate block parameters in the layer tree.
-// Afterwards, if we add/remove block parameters they don't get rendered.
-// Refreshing the page fixes it.
-// onHoverDeleteChange={(isHovering) => {
-//   const updatedParameters = (
-//     layer.blockParameters ?? []
-//   ).filter((p) => p !== parameter);
-//   const overrideName = Overrides.encodeName(
-//     path,
-//     'blockParameters',
-//   );
-//   const updatedOverrideValues = selectedLayer.overrideValues
-//     .filter(
-//       (override) => override.overrideName !== overrideName,
-//     )
-//     .concat(
-//       SketchModel.overrideValue({
-//         overrideName,
-//         value: updatedParameters,
-//       }),
-//     );
-//   if (isHovering) {
-//     onSetOverriddenBlock({
-//       blockId: selectedLayer.symbolID,
-//       blockText: selectedLayer.blockText,
-//       blockParameters: selectedLayer.blockParameters,
-//       overrideValues: updatedOverrideValues,
-//       resolvedBlockText:
-//         selectedLayer.resolvedBlockData?.resolvedText,
-//     });
-//   } else {
-//     onSetOverriddenBlock(undefined);
-//   }
-// }}

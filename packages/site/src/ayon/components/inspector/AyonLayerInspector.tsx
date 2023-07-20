@@ -7,6 +7,7 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
+import { SketchModel } from 'noya-sketch-model';
 import {
   Action,
   Layers,
@@ -154,7 +155,7 @@ export function AyonLayerInspector({
 
   const [inspectorMode, setInspectorMode] = React.useState<
     'compact' | 'advanced'
-  >('compact');
+  >('advanced');
 
   const flattened = Hierarchy.flatMap(
     selectedLayer,
@@ -311,8 +312,12 @@ export function AyonLayerInspector({
 
             if (sourcePaths.length === 0 || !destinationPath) return false;
 
-            // Don't allow dragging into root
-            if (destinationPath.length === 0) return false;
+            // Don't allow dragging above or below the root
+            if (
+              destinationPath.length === 0 &&
+              relationDropPosition !== 'inside'
+            )
+              return false;
 
             // Don't allow dragging into a descendant
             if (
@@ -412,6 +417,29 @@ export function AyonLayerInspector({
                 isDragging={isDragging}
                 onSetOverriddenBlock={onSetOverriddenBlock}
                 inspectorMode={inspectorMode}
+                onDelete={() => {
+                  const updated = Hierarchy.remove(selectedLayer, {
+                    indexPaths: [indexPath],
+                  });
+
+                  setAllOverrides(updated);
+                }}
+                onInsertChild={() => {
+                  const updated = Hierarchy.insert(selectedLayer, {
+                    at: [
+                      ...indexPath,
+                      Hierarchy.getChildren(selectedLayer, indexPath).length,
+                    ],
+                    nodes: [
+                      SketchModel.symbolInstance({
+                        symbolID: boxSymbolId,
+                        name: 'Box',
+                      }),
+                    ],
+                  });
+
+                  setAllOverrides(updated);
+                }}
               />
             );
           }}
