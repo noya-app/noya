@@ -39,7 +39,11 @@ export function renderDynamicContent(
     if (!master) return null;
 
     const render =
-      master.blockDefinition?.render ?? boxSymbol.blockDefinition!.render!;
+      master.blockDefinition?.render ??
+      (master.blockDefinition?.primitiveSymbolID
+        ? getSymbolMaster(master.blockDefinition.primitiveSymbolID)
+            .blockDefinition!.render!
+        : boxSymbol.blockDefinition!.render!);
 
     const content: ReactNode = render({
       passthrough: {

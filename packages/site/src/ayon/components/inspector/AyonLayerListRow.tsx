@@ -71,6 +71,7 @@ export function AyonLayerListRow({
   isDragging,
   onInsertChild,
   onDelete,
+  onDuplicate,
   onSetOverriddenBlock,
 }: {
   inspectorMode: 'compact' | 'advanced';
@@ -80,6 +81,7 @@ export function AyonLayerListRow({
   isDragging: boolean;
   onInsertChild: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onSetOverriddenBlock: (
     overriddenBlock: BlockPreviewProps | undefined,
   ) => void;
@@ -188,6 +190,10 @@ export function AyonLayerListRow({
     ],
     [
       {
+        title: 'Duplicate',
+        value: 'duplicate',
+      },
+      {
         title: 'Add Child Component',
         value: 'insertChild',
       },
@@ -196,7 +202,7 @@ export function AyonLayerListRow({
       {
         title: 'Delete',
         value: 'delete',
-      } as const,
+      },
     ],
   );
 
@@ -214,6 +220,10 @@ export function AyonLayerListRow({
               switch (value) {
                 case 'delete': {
                   onDelete();
+                  return;
+                }
+                case 'duplicate': {
+                  onDuplicate();
                   return;
                 }
                 case 'addStyle':

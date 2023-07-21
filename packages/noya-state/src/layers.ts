@@ -296,6 +296,7 @@ export const {
   diagram,
   flat,
   flatMap,
+  map,
   remove,
   insert,
 } = withOptions<Sketch.AnyLayer>({

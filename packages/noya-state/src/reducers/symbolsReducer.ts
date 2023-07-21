@@ -198,8 +198,10 @@ export function symbolsReducer(
         );
 
         if (!symbolMaster) return;
+
         symbols.forEach((symbol) => {
           symbol.symbolID = symbolId;
+          symbol.blockParameters = undefined;
 
           if (dimensions === 'resetToMaster') {
             symbol.frame.width = symbolMaster.frame.width;

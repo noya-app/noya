@@ -18,6 +18,7 @@ import * as textarea from './primitive/TextareaSymbol';
 import * as card from './composed/CardSymbol';
 import * as feature from './composed/FeatureSymbol';
 import * as hero from './composed/HeroSymbol';
+import * as sidebar from './composed/SidebarSymbol';
 import * as signIn from './composed/SignInSymbol';
 
 import { ApplicationState, Selectors } from 'noya-state';
@@ -37,6 +38,7 @@ export const librarySymbols = [
   ...Object.values(radio),
   ...Object.values(select),
   ...Object.values(signIn),
+  ...Object.values(sidebar),
   ...Object.values(switch_),
   ...Object.values(table),
   ...Object.values(tag),

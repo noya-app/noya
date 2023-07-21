@@ -17,7 +17,7 @@ import {
   createOverrideHierarchy,
   getSiblingBlocks,
 } from 'noya-state';
-import { isDeepEqual, upperFirst } from 'noya-utils';
+import { isDeepEqual, upperFirst, uuid } from 'noya-utils';
 import React, { useCallback } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
@@ -406,6 +406,21 @@ export function AyonLayerInspector({
                 onDelete={() => {
                   const updated = Hierarchy.remove(selectedLayer, {
                     indexPaths: [indexPath],
+                  });
+
+                  setAllOverrides(updated);
+                }}
+                onDuplicate={() => {
+                  const updated = Hierarchy.insert(selectedLayer, {
+                    at: indexPath,
+                    nodes: [
+                      Layers.map(layer, (child) => {
+                        return {
+                          ...child,
+                          do_objectID: uuid(),
+                        };
+                      }),
+                    ],
                   });
 
                   setAllOverrides(updated);

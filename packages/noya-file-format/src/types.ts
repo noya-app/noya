@@ -1136,6 +1136,7 @@ export type BlockStylePreset = {
 };
 
 export type BlockDefinition = {
+  primitiveSymbolID?: string;
   hashtags?: string[];
   placeholderText?: string;
   placeholderParameters?: string[];

@@ -27,7 +27,9 @@ export const textSymbol = SketchModel.symbolMaster({
       ...tailwindTextClasses,
       'flex-1',
     ],
-    infer: ({ frame }) => 0.1,
+    infer: ({ frame }) => {
+      return frame.width > frame.height * 5 ? 1 : 0.1;
+    },
     render: ({ Components, instance, passthrough }: RenderProps) => {
       const Text: React.FC<TextProps> = Components[textSymbolId];
 
