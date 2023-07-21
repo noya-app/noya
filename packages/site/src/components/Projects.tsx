@@ -257,6 +257,7 @@ export function Projects() {
                         {renaming === file.id ? (
                           <ListView.EditableRowTitle
                             value={file.data.name}
+                            placeholder="Untitled"
                             autoFocus
                             onSubmitEditing={(value) => {
                               setRenaming(undefined);
@@ -268,7 +269,7 @@ export function Projects() {
                           />
                         ) : (
                           <ListView.RowTitle>
-                            {file.data.name}
+                            {file.data.name || 'Untitled'}
                           </ListView.RowTitle>
                         )}
                         <Spacer.Horizontal size={10} />

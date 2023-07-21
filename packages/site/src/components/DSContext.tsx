@@ -34,7 +34,7 @@ const useDSReference = (fileId: string | undefined) => {
 
 export const DSContext = React.createContext<DS | undefined>(undefined);
 
-const DEFAULT_DESIGN_SYSTEM: Sketch.DesignSystem = {
+export const DEFAULT_DESIGN_SYSTEM: Sketch.DesignSystem = {
   type: 'standard',
   id: '@noya-design-system/chakra',
 };

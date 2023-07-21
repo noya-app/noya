@@ -263,12 +263,12 @@ export function AyonLayerInspector({
         title="Content"
         titleTextStyle="heading4"
         right={
-          <Stack.H width="100px">
+          <Stack.H width="130px">
             <Select<'compact' | 'advanced'>
               id="inspector-mode"
               value={inspectorMode}
               onChange={setInspectorMode}
-              getTitle={upperFirst}
+              getTitle={(title) => `${upperFirst(title)} View`}
               options={['compact', 'advanced']}
             />
           </Stack.H>

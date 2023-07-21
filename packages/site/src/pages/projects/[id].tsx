@@ -30,6 +30,7 @@ import {
 } from '../../components/Subscription';
 
 import { DSEditor } from '../../components/DSEditor';
+import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { Toolbar } from '../../components/Toolbar';
 import { UpgradeDialog } from '../../components/UpgradeDialog';
 import { OnboardingProvider } from '../../contexts/OnboardingContext';
@@ -54,7 +55,15 @@ function FileTitle({ id }: { id: string }) {
 
   if (!cachedFile) return null;
 
-  return <Text variant="small">{cachedFile.data.name}</Text>;
+  return (
+    <Stack.H lineHeight="1" alignItems="center" justifyContent="center">
+      <ProjectTypeIcon type={cachedFile.data.type} />
+      <Spacer.Horizontal size={6} />
+      <Text position="relative" top="1px" variant="small">
+        {cachedFile.data.name || 'Untitled'}
+      </Text>
+    </Stack.H>
+  );
 }
 
 function FileEditor({ fileId }: { fileId: string }) {
@@ -78,7 +87,7 @@ function FileEditor({ fileId }: { fileId: string }) {
 
   const updateName = useCallback(
     async (newName: string) => {
-      if (!newName) return;
+      // if (!newName) return;
 
       client.files.updateFileName(fileId, newName);
     },

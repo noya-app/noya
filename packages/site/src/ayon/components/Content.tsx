@@ -51,6 +51,9 @@ export const Content = memo(function Content({
   canvasRendererType = 'canvas',
   isPlayground,
   ds,
+  onDuplicate,
+  name,
+  onChangeName,
 }: {
   uploadAsset: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
@@ -58,6 +61,9 @@ export const Content = memo(function Content({
   canvasRendererType?: CanvasRendererType;
   isPlayground?: boolean;
   ds: DS;
+  onDuplicate?: () => void;
+  name: string;
+  onChangeName?: (name: string) => void;
 }) {
   const [toastData, setToastData] = useState<
     { attribution: Attribution; key: string } | undefined
@@ -363,7 +369,12 @@ export const Content = memo(function Content({
         {viewType === 'combined' && (
           <>
             {!isPlayground && (
-              <AyonInspector setOverriddenBlock={setOverriddenBlock} />
+              <AyonInspector
+                setOverriddenBlock={setOverriddenBlock}
+                name={name}
+                onChangeName={onChangeName}
+                onDuplicate={onDuplicate}
+              />
             )}
             <Overlay>
               <SVGRenderer size={canvasSize}>

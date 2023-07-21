@@ -1,11 +1,6 @@
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
-import {
-  StateProvider,
-  useApplicationState,
-  useWorkspaceDispatch,
-  useWorkspaceState,
-} from 'noya-app-state-context';
+import { StateProvider, useApplicationState } from 'noya-app-state-context';
 import {
   Button,
   Chip,
@@ -76,8 +71,6 @@ import { downloadBlob } from '../utils/download';
 import { AyonProvider } from './AyonContext';
 import { DSProvider, useDS } from './DSContext';
 import { OnboardingAnimation } from './OnboardingAnimation';
-import { ProjectMenu } from './ProjectMenu';
-import { ProjectTitle } from './ProjectTitle';
 import { ShareMenu } from './ShareMenu';
 
 export type ExportType =
@@ -110,7 +103,7 @@ function Workspace({
   'uploadAsset' | 'padding' | 'canvasRendererType' | 'isPlayground'
 >): JSX.Element {
   const [state, dispatch] = useApplicationState();
-  const { setRightToolbar, setCenterToolbar, setLeftToolbar } = useProject();
+  const { setRightToolbar, setLeftToolbar } = useProject();
   const { onboardingStep, setOnboardingStep } = useOnboarding();
   const theme = useDesignSystemTheme();
 
@@ -437,52 +430,11 @@ function Workspace({
     state,
     artboard,
     name,
-    onChangeName,
     fileId,
     isPlayground,
     getSymbolMaster,
     dispatch,
     ds,
-  ]);
-
-  const workspaceState = useWorkspaceState();
-  const workspaceDispatch = useWorkspaceDispatch();
-
-  useLayoutEffect(() => {
-    if (isPlayground) return;
-
-    setCenterToolbar(
-      <StateProvider state={workspaceState} dispatch={workspaceDispatch}>
-        <Popover
-          trigger={<ProjectTitle>{name}</ProjectTitle>}
-          onOpenChange={() => {
-            dispatch('selectLayer', []);
-          }}
-        >
-          <Stack.V width={240}>
-            <ProjectMenu
-              name={name}
-              designSystem={ds}
-              onChangeDesignSystem={(type, id) => {
-                dispatch('setDesignSystem', type, id);
-              }}
-              onChangeName={onChangeName || (() => {})}
-              onDuplicate={onDuplicate || (() => {})}
-            />
-          </Stack.V>
-        </Popover>
-      </StateProvider>,
-    );
-  }, [
-    dispatch,
-    ds,
-    isPlayground,
-    name,
-    onChangeName,
-    onDuplicate,
-    setCenterToolbar,
-    workspaceDispatch,
-    workspaceState,
   ]);
 
   if (!ds) {
@@ -502,6 +454,9 @@ function Workspace({
 
   return (
     <Content
+      name={name}
+      onChangeName={onChangeName}
+      onDuplicate={onDuplicate}
       canvasRendererType={canvasRendererType}
       uploadAsset={uploadAsset}
       viewType={viewType}

@@ -21,7 +21,6 @@ import {
   DividerVertical,
   InputField,
   ListView,
-  Popover,
   ScrollArea,
   Select,
   Spacer,
@@ -46,9 +45,7 @@ import { heroSymbol } from '../ayon/symbols/composed/HeroSymbol';
 import { librarySymbolMap } from '../ayon/symbols/symbols';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { renderDynamicContent } from '../ayon/utils/renderDynamicContent';
-import { useProject } from '../contexts/ProjectContext';
 import { InspectorSection } from './InspectorSection';
-import { ProjectTitle } from './ProjectTitle';
 
 interface Props {
   name: string;
@@ -97,34 +94,6 @@ export function DSEditor({
       colors: { primary },
     },
   } = state;
-
-  const { setCenterToolbar } = useProject();
-
-  useLayoutEffect(() => {
-    setCenterToolbar(
-      <Popover
-        trigger={
-          <ProjectTitle projectType="io.noya.ds">{fileName}</ProjectTitle>
-        }
-      >
-        <Stack.V width={240}>
-          <InspectorPrimitives.Section>
-            <InspectorPrimitives.SectionHeader>
-              <InspectorPrimitives.Title>
-                Project Name
-              </InspectorPrimitives.Title>
-            </InspectorPrimitives.SectionHeader>
-            <InspectorPrimitives.VerticalSeparator />
-            <InspectorPrimitives.Row>
-              <InputField.Root>
-                <InputField.Input value={fileName} onSubmit={onChangeName} />
-              </InputField.Root>
-            </InspectorPrimitives.Row>
-          </InspectorPrimitives.Section>
-        </Stack.V>
-      </Popover>,
-    );
-  }, [fileName, onChangeName, setCenterToolbar, sourceName]);
 
   useEffect(() => {
     onChangeDocument(state);

@@ -78,12 +78,14 @@ interface EditableRowProps {
   value: string;
   onSubmitEditing: (value: string) => void;
   autoFocus: boolean;
+  placeholder?: string;
 }
 
 function ListViewEditableRowTitle({
   value,
   onSubmitEditing,
   autoFocus,
+  placeholder,
 }: EditableRowProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -106,6 +108,7 @@ function ListViewEditableRowTitle({
       ref={inputRef}
       variant="bare"
       value={value}
+      placeholder={placeholder}
       onSubmit={onSubmitEditing}
       allowSubmittingWithSameValue
     />

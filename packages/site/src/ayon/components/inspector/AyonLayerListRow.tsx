@@ -188,7 +188,7 @@ export function AyonLayerListRow({
     ],
     [
       {
-        title: 'Insert Component',
+        title: 'Add Child Component',
         value: 'insertChild',
       },
     ],

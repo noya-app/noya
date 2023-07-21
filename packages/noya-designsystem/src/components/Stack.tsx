@@ -60,6 +60,7 @@ interface StyleProps {
   color?: CSSProperties['color'];
   order?: CSSProperties['order'];
   pointerEvents?: CSSProperties['pointerEvents'];
+  lineHeight?: CSSProperties['lineHeight'];
 }
 
 export type StackBreakpointList = BreakpointCollection<StyleProps>;

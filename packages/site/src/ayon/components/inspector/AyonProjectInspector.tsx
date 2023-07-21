@@ -1,19 +1,21 @@
-import { DS, NoyaAPI, useNoyaClient } from 'noya-api';
+import { NoyaAPI, useNoyaClient } from 'noya-api';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
-  Divider,
   DropdownMenu,
   InputField,
   RegularMenuItem,
   Spacer,
+  Stack,
   createSectionedMenu,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { ChevronDownIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import React, { useEffect, useState } from 'react';
+import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
+import { InspectorSection } from '../../../components/InspectorSection';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -21,31 +23,31 @@ const designSystems = {
   '@noya-design-system/chakra': 'Chakra UI',
 };
 
-const DEFAULT_DESIGN_SYSTEM: Sketch.DesignSystem = {
-  type: 'standard',
-  id: '@noya-design-system/chakra',
-};
+const noop = () => {};
 
-export function ProjectMenu({
+export function AyonProjectInspector({
   name,
-  designSystem,
-  onChangeName,
-  onChangeDesignSystem,
-  onDuplicate,
+  onChangeName = noop,
+  onDuplicate = noop,
+  onChangeDesignSystem = noop,
 }: {
   name: string;
-  designSystem?: DS;
-  onChangeName: (name: string) => void;
-  onChangeDesignSystem: (type: 'standard' | 'custom', name: string) => void;
-  onDuplicate: () => void;
+  onChangeName?: (name: string) => void;
+  onDuplicate?: () => void;
+  onChangeDesignSystem?: (type: 'standard' | 'custom', name: string) => void;
 }) {
   const [state, dispatch] = useApplicationState();
-  const [files, setFiles] = useState<NoyaAPI.File[]>([]);
+  const [{ files, loading }, setFiles] = useState<{
+    files: NoyaAPI.File[];
+    loading: boolean;
+  }>({ files: [], loading: true });
   const client = useNoyaClient();
 
   useEffect(() => {
-    client.networkClient.files.list().then(setFiles);
-  }, [client.networkClient.files]);
+    client.networkClient.files.list().then((files) => {
+      setFiles({ files, loading: false });
+    });
+  }, [client]);
 
   const customDesignSystems = files
     .filter((file) => file.data.type === 'io.noya.ds')
@@ -72,28 +74,27 @@ export function ProjectMenu({
   const currentDesignSystem =
     state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
 
+  const theme = useDesignSystemTheme();
+
   if (!artboard) return null;
 
   return (
-    <>
-      <InspectorPrimitives.Section>
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Project Name</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.VerticalSeparator />
-        <InspectorPrimitives.Row>
+    <Stack.V
+      gap="1px"
+      position="relative"
+      background={theme.colors.canvas.background}
+    >
+      <InspectorSection title="Project" titleTextStyle="heading3">
+        <InspectorPrimitives.LabeledRow label="Name">
           <InputField.Root>
-            <InputField.Input value={name} onSubmit={onChangeName} />
+            <InputField.Input
+              placeholder="Untitled"
+              value={name}
+              onChange={onChangeName}
+            />
           </InputField.Root>
-        </InspectorPrimitives.Row>
-      </InspectorPrimitives.Section>
-      <Divider />
-      <InspectorPrimitives.Section>
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Canvas Size</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.VerticalSeparator />
-        <InspectorPrimitives.Row>
+        </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.LabeledRow label="Canvas Size">
           <DimensionInput
             value={artboard.frame.width}
             onSetValue={(value, mode) => {
@@ -119,18 +120,13 @@ export function ProjectMenu({
             }}
             label="H"
           />
-        </InspectorPrimitives.Row>
-      </InspectorPrimitives.Section>
-      <Divider />
-      <InspectorPrimitives.Section>
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Design System</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.VerticalSeparator />
-        <InspectorPrimitives.Row>
+        </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.LabeledRow label="Design System">
           <DropdownMenu
             items={designSystemMenu}
             onSelect={(value) => {
+              if (loading) return;
+
               if (value.startsWith('@noya-design-system')) {
                 onChangeDesignSystem('standard', value);
               } else {
@@ -150,16 +146,11 @@ export function ProjectMenu({
               <ChevronDownIcon />
             </Button>
           </DropdownMenu>
-        </InspectorPrimitives.Row>
-      </InspectorPrimitives.Section>
-      <Divider />
-      <InspectorPrimitives.Section>
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Project Actions</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.VerticalSeparator />
+        </InspectorPrimitives.LabeledRow>
+      </InspectorSection>
+      <InspectorSection title="Actions" titleTextStyle="heading4">
         <Button onClick={onDuplicate}>Duplicate Project</Button>
-      </InspectorPrimitives.Section>
-    </>
+      </InspectorSection>
+    </Stack.V>
   );
 }
