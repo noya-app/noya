@@ -27,7 +27,8 @@ export const signInSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: 'be955c6f-a85e-468c-8fba-f720a1ed4b81',
       symbolID: textSymbolId,
-      blockText: 'Password #mt-2',
+      blockText: 'Password',
+      blockParameters: ['mt-2'],
     }),
     SketchModel.symbolInstance({
       do_objectID: '28352154-ef46-4761-a498-92d697a737a8',
@@ -37,13 +38,14 @@ export const signInSymbol = SketchModel.symbolMaster({
     SketchModel.symbolInstance({
       do_objectID: '6fe57c3a-20f0-4999-b602-7531cf082d70',
       symbolID: boxSymbolId,
-      // symbolID: spacerSymbolId,
-      blockText: '#basis-2 #flex-auto',
+      blockText: '',
+      blockParameters: ['flex-auto', 'basis-2'],
     }),
     SketchModel.symbolInstance({
       do_objectID: 'c211148b-3dd1-45a1-83f8-708e49a25d49',
       symbolID: buttonSymbolId,
-      blockText: 'Sign In #primary',
+      blockText: 'Sign In',
+      blockParameters: ['primary'],
     }),
   ],
 });
