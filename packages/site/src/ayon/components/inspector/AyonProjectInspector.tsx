@@ -29,12 +29,10 @@ export function AyonProjectInspector({
   name,
   onChangeName = noop,
   onDuplicate = noop,
-  onChangeDesignSystem = noop,
 }: {
   name: string;
   onChangeName?: (name: string) => void;
   onDuplicate?: () => void;
-  onChangeDesignSystem?: (type: 'standard' | 'custom', name: string) => void;
 }) {
   const [state, dispatch] = useApplicationState();
   const [{ files, loading }, setFiles] = useState<{
@@ -128,9 +126,9 @@ export function AyonProjectInspector({
               if (loading) return;
 
               if (value.startsWith('@noya-design-system')) {
-                onChangeDesignSystem('standard', value);
+                dispatch('setDesignSystem', 'standard', value);
               } else {
-                onChangeDesignSystem('custom', value);
+                dispatch('setDesignSystem', 'custom', value);
               }
             }}
           >

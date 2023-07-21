@@ -4,7 +4,11 @@ import React, { ComponentProps, memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 const DotButtonElement = styled.div(({ theme }) => ({
+  cursor: 'pointer',
   borderRadius: '4px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   padding: '2px 0',
   '&:hover': {
     background: theme.colors.inputBackgroundLight,
@@ -16,6 +20,7 @@ const DotButtonElement = styled.div(({ theme }) => ({
 
 const TriggerElement = styled.div({
   pointerEvents: 'none',
+  height: '15px',
 });
 
 /**
