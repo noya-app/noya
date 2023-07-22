@@ -29,7 +29,6 @@ import {
   usageMeterThreshold,
 } from '../../components/Subscription';
 
-import { DSEditor } from '../../components/DSEditor';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { Toolbar } from '../../components/Toolbar';
 import { UpgradeDialog } from '../../components/UpgradeDialog';
@@ -38,6 +37,7 @@ import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
+import { DSEditor } from '../../dseditor/DSEditor';
 import {
   useIsSubscribed,
   useOnboardingUpsell,

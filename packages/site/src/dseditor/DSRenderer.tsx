@@ -27,6 +27,11 @@ const Frame = styled.iframe({
   height: '100%',
 });
 
+export type DSRenderProps = {
+  system: DesignSystemDefinition;
+  theme: any;
+};
+
 export function DSRenderer({
   sourceName,
   primary,
@@ -34,10 +39,7 @@ export function DSRenderer({
 }: {
   sourceName: string;
   primary: string;
-  renderContent: (options: {
-    system: DesignSystemDefinition;
-    theme: any;
-  }) => React.ReactNode;
+  renderContent: (options: DSRenderProps) => React.ReactNode;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();

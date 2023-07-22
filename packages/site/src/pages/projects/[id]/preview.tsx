@@ -6,7 +6,7 @@ import {
   lightTheme,
 } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
-import { DSEditor } from '../../../components/DSEditor';
+import { DSEditor } from '../../../dseditor/DSEditor';
 
 const Ayon = dynamic(
   () => import('../../../components/Ayon').then((mod) => mod.Ayon),
