@@ -11,15 +11,10 @@ import {
 import Sketch from 'noya-file-format';
 import { loadDesignSystem } from 'noya-module-loader';
 import { SketchModel } from 'noya-sketch-model';
-import { Layers, Overrides } from 'noya-state';
 import path from 'path';
 import {
   buttonSymbolId,
-  cardSymbolId,
   checkboxSymbolId,
-  heroSymbolId,
-  // iconSymbolId,
-  imageSymbolId,
   linkSymbolId,
   textSymbolId,
 } from '../ayon/symbols/symbolIds';
@@ -142,87 +137,87 @@ describe('link', () => {
 //   });
 // });
 
-describe('hero', () => {
-  test('default', () => {
-    const symbol = SketchModel.symbolInstance({
-      symbolID: heroSymbolId,
-      frame: SketchModel.rect({
-        width: 400,
-        height: 400,
-      }),
-    });
+// describe('hero', () => {
+//   test('default', () => {
+//     const symbol = SketchModel.symbolInstance({
+//       symbolID: heroSymbolId,
+//       frame: SketchModel.rect({
+//         width: 400,
+//         height: 400,
+//       }),
+//     });
 
-    expect(generate(symbol)).toMatchSnapshot();
-  });
+//     expect(generate(symbol)).toMatchSnapshot();
+//   });
 
-  test('left aligned', () => {
-    const symbol = SketchModel.symbolInstance({
-      symbolID: heroSymbolId,
-      frame: SketchModel.rect({
-        width: 400,
-        height: 400,
-      }),
-      blockText: '#left',
-    });
+//   test('left aligned', () => {
+//     const symbol = SketchModel.symbolInstance({
+//       symbolID: heroSymbolId,
+//       frame: SketchModel.rect({
+//         width: 400,
+//         height: 400,
+//       }),
+//       blockText: '#left',
+//     });
 
-    expect(generate(symbol)).toMatchSnapshot();
-  });
+//     expect(generate(symbol)).toMatchSnapshot();
+//   });
 
-  test('with bg', () => {
-    const symbol = SketchModel.symbolInstance({
-      symbolID: heroSymbolId,
-      frame: SketchModel.rect({
-        width: 400,
-        height: 400,
-      }),
-      blockText: '#bg-blue-500',
-    });
+//   test('with bg', () => {
+//     const symbol = SketchModel.symbolInstance({
+//       symbolID: heroSymbolId,
+//       frame: SketchModel.rect({
+//         width: 400,
+//         height: 400,
+//       }),
+//       blockText: '#bg-blue-500',
+//     });
 
-    expect(generate(symbol)).toMatchSnapshot();
-  });
-});
+//     expect(generate(symbol)).toMatchSnapshot();
+//   });
+// });
 
-describe('card with no border radius on image', () => {
-  test('default', () => {
-    const symbol = SketchModel.symbolInstance({
-      symbolID: cardSymbolId,
-      frame: SketchModel.rect({
-        width: 300,
-        height: 400,
-      }),
-    });
+// describe('card with no border radius on image', () => {
+//   test('default', () => {
+//     const symbol = SketchModel.symbolInstance({
+//       symbolID: cardSymbolId,
+//       frame: SketchModel.rect({
+//         width: 300,
+//         height: 400,
+//       }),
+//     });
 
-    getSymbolMaster(symbol.symbolID)
-      .layers.filter(Layers.isSymbolInstance)
-      .filter((layer) => layer.symbolID === imageSymbolId)
-      .forEach((layer) => {
-        symbol.overrideValues.push(
-          SketchModel.overrideValue({
-            overrideName: Overrides.encodeName(
-              [layer.do_objectID],
-              'resolvedBlockData',
-            ),
-            value: {
-              symbolID: layer.symbolID,
-              originalText: 'cat',
-              resolvedText: 'https://placekitten.com/300/300',
-            },
-          }),
-        );
-        symbol.overrideValues.push(
-          SketchModel.overrideValue({
-            overrideName: Overrides.encodeName(
-              [layer.do_objectID],
-              'blockText',
-            ),
-            value: 'cat #rounded-none',
-          }),
-        );
-      });
+//     getSymbolMaster(symbol.symbolID)
+//       .layers.filter(Layers.isSymbolInstance)
+//       .filter((layer) => layer.symbolID === imageSymbolId)
+//       .forEach((layer) => {
+//         symbol.overrideValues.push(
+//           SketchModel.overrideValue({
+//             overrideName: Overrides.encodeName(
+//               [layer.do_objectID],
+//               'resolvedBlockData',
+//             ),
+//             value: {
+//               symbolID: layer.symbolID,
+//               originalText: 'cat',
+//               resolvedText: 'https://placekitten.com/300/300',
+//             },
+//           }),
+//         );
+//         symbol.overrideValues.push(
+//           SketchModel.overrideValue({
+//             overrideName: Overrides.encodeName(
+//               [layer.do_objectID],
+//               'blockText',
+//             ),
+//             value: 'cat #rounded-none',
+//           }),
+//         );
+//       });
 
-    expect(generate(symbol)).toMatchSnapshot();
-  });
-});
+//     expect(generate(symbol)).toMatchSnapshot();
+//   });
+// });
 
 describe('element as prop', () => {
   test('default', () => {

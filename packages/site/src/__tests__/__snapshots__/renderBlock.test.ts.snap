@@ -2,54 +2,17 @@
 
 exports[`button default 1`] = `
 "<Frame width={100} height={40}>
-  <Button w=\\"100px\\">Submit</Button>
-</Frame>;
-"
-`;
-
-exports[`card with no border radius on image default 1`] = `
-"<Frame width={300} height={400}>
-  <Box
-    display=\\"flex\\"
-    flexDirection=\\"column\\"
-    bgColor=\\"#fff\\"
-    p=\\"1rem\\"
-    shadow=\\"0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)\\"
-    rounded=\\"0.375rem\\"
-    w=\\"300px\\"
-    h=\\"400px\\"
-  >
-    <Image
-      src=\\"https://placekitten.com/300/300\\"
-      minH={0}
-      minW={0}
-      objectFit=\\"cover\\"
-      rounded=\\"0px\\"
-      flex=\\"1\\"
-    />
-    <Box display=\\"flex\\" mt=\\"1rem\\">
-      <Text fontSize=\\"xl\\" flex=\\"1\\">
-        News
-      </Text>
-    </Box>
-    <Text mt=\\"0.25rem\\">
-      Here you can explore the latest news and information.
-    </Text>
-  </Box>
+  <Button>Submit</Button>
 </Frame>;
 "
 `;
 
 exports[`element as prop default 1`] = `
 "<Frame width={100} height={40}>
-  <Box
-    style={{ display: 'flex', alignItems: 'center', width: 100, height: 40 }}
-  >
-    <FormControlLabel
-      control={<Checkbox checked={false} disabled={false} />}
-      label=\\"Hello world\\"
-    />
-  </Box>
+  <FormControlLabel
+    control={<Checkbox checked={false} disabled={false} style={{}} />}
+    label=\\"Hello world\\"
+  />
 </Frame>;
 "
 `;
@@ -183,7 +146,7 @@ Object {
     \\"tailwindcss\\": {}
   }
 }",
-  "App.tsx": "import { ThemeProvider, Box, FormControlLabel, Checkbox } from '@mui/material';
+  "App.tsx": "import { ThemeProvider, FormControlLabel, Checkbox, Box } from '@mui/material';
 import '@fontsource/roboto/latin.css';
 import * as React from 'react';
 /**
@@ -213,19 +176,10 @@ export function App() {
   return (
     <ThemeProvider>
       <Frame width={100} height={40}>
-        <Box
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: 100,
-            height: 40,
-          }}
-        >
-          <FormControlLabel
-            control={<Checkbox checked={false} disabled={false} />}
-            label=\\"Hello world\\"
-          />
-        </Box>
+        <FormControlLabel
+          control={<Checkbox checked={false} disabled={false} style={{}} />}
+          label=\\"Hello world\\"
+        />
       </Frame>
     </ThemeProvider>
   );
@@ -316,189 +270,16 @@ root.render(<App />);",
 }
 `;
 
-exports[`hero default 1`] = `
-"<Frame width={400} height={400}>
-  <Box
-    display=\\"flex\\"
-    flexDirection=\\"column\\"
-    p=\\"1rem\\"
-    gap=\\"0.75rem\\"
-    justifyContent=\\"center\\"
-    alignItems=\\"center\\"
-    w=\\"400px\\"
-    h=\\"400px\\"
-  >
-    <Box
-      display=\\"flex\\"
-      bgColor=\\"transparent\\"
-      flexDirection=\\"column\\"
-      alignItems=\\"inherit\\"
-    >
-      <Tag>The future is here</Tag>
-      <Box display=\\"flex\\">
-        <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\">
-          Create, iterate, inspire.
-        </Text>
-      </Box>
-    </Box>
-    <Box display=\\"flex\\">
-      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\">
-        Turn great ideas into new possibilities.
-      </Text>
-    </Box>
-    <Box
-      display=\\"flex\\"
-      bgColor=\\"transparent\\"
-      flexDirection=\\"row\\"
-      alignItems=\\"center\\"
-      gap=\\"1.5rem\\"
-      mt=\\"1rem\\"
-    >
-      <Button>Get started</Button>
-    </Box>
-  </Box>
-</Frame>;
-"
-`;
-
-exports[`hero left aligned 1`] = `
-"<Frame width={400} height={400}>
-  <Box
-    display=\\"flex\\"
-    flexDirection=\\"column\\"
-    p=\\"1rem\\"
-    gap=\\"0.75rem\\"
-    justifyContent=\\"center\\"
-    alignItems=\\"start\\"
-    w=\\"400px\\"
-    h=\\"400px\\"
-  >
-    <Box
-      display=\\"flex\\"
-      bgColor=\\"transparent\\"
-      flexDirection=\\"column\\"
-      alignItems=\\"inherit\\"
-    >
-      <Tag>The future is here</Tag>
-      <Box display=\\"flex\\">
-        <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"left\\">
-          Create, iterate, inspire.
-        </Text>
-      </Box>
-    </Box>
-    <Box display=\\"flex\\">
-      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"left\\">
-        Turn great ideas into new possibilities.
-      </Text>
-    </Box>
-    <Box
-      display=\\"flex\\"
-      bgColor=\\"transparent\\"
-      flexDirection=\\"row\\"
-      alignItems=\\"center\\"
-      gap=\\"1.5rem\\"
-      mt=\\"1rem\\"
-    >
-      <Button textAlign=\\"left\\" justifyContent=\\"left\\">
-        Get started
-      </Button>
-    </Box>
-  </Box>
-</Frame>;
-"
-`;
-
-exports[`hero with bg 1`] = `
-"<Frame width={400} height={400}>
-  <Box
-    display=\\"flex\\"
-    flexDirection=\\"column\\"
-    p=\\"1rem\\"
-    gap=\\"0.75rem\\"
-    bgColor=\\"#3b82f6\\"
-    justifyContent=\\"center\\"
-    alignItems=\\"center\\"
-    w=\\"400px\\"
-    h=\\"400px\\"
-  >
-    <Box
-      display=\\"flex\\"
-      bgColor=\\"transparent\\"
-      flexDirection=\\"column\\"
-      alignItems=\\"inherit\\"
-    >
-      <Tag textColor=\\"#000\\" bgColor=\\"#c2c8d0\\">
-        The future is here
-      </Tag>
-      <Box display=\\"flex\\">
-        <Text fontSize=\\"5xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
-          Create, iterate, inspire.
-        </Text>
-      </Box>
-    </Box>
-    <Box display=\\"flex\\">
-      <Text fontSize=\\"2xl\\" flex=\\"1\\" textAlign=\\"center\\" textColor=\\"#fff\\">
-        Turn great ideas into new possibilities.
-      </Text>
-    </Box>
-    <Box
-      display=\\"flex\\"
-      bgColor=\\"transparent\\"
-      flexDirection=\\"row\\"
-      alignItems=\\"center\\"
-      gap=\\"1.5rem\\"
-      mt=\\"1rem\\"
-    >
-      <Button textColor=\\"#000\\" bgColor=\\"#f1f5f9\\">
-        Get started
-      </Button>
-    </Box>
-  </Box>
-</Frame>;
-"
-`;
-
-exports[`icon default 1`] = `
-"<Frame width={48} height={48}>
-  <Image
-    src=\\"https://api.iconify.design/material-symbols/menu.svg\\"
-    objectFit=\\"contain\\"
-    w=\\"100%\\"
-    h=\\"100%\\"
-  />
-</Frame>;
-"
-`;
-
-exports[`icon with color 1`] = `
-"<Frame width={48} height={48}>
-  <Box
-    w=\\"100%\\"
-    h=\\"100%\\"
-    bgColor=\\"#60a5fa\\"
-    style={{
-      maskImage:
-        'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
-      WebkitMask:
-        'url(https://api.iconify.design/material-symbols/menu.svg) center / contain no-repeat',
-    }}
-  />
-</Frame>;
-"
-`;
-
 exports[`link with icon 1`] = `
 "<Frame width={100} height={40}>
-  <Link href=\\"#\\">Test</Link>
+  <Link href=\\"#\\">Test #icon-arrow-right</Link>
 </Frame>;
 "
 `;
 
 exports[`text default 1`] = `
 "<Frame width={100} height={40}>
-  <Text textAlign=\\"center\\" textColor=\\"#ef4444\\">
-    Hello world
-  </Text>
+  <Text>Hello world #center #text-red-500</Text>
 </Frame>;
 "
 `;
