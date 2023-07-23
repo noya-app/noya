@@ -16,8 +16,7 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { loadDesignSystem } from 'noya-module-loader';
-import { SketchModel } from 'noya-sketch-model';
-import { fixedPoint, upperFirst, uuid } from 'noya-utils';
+import { upperFirst, uuid } from 'noya-utils';
 import React, { ReactNode, useEffect } from 'react';
 import styled from 'styled-components';
 import { withOptions } from 'tree-visit';
@@ -34,17 +33,31 @@ import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { renderDSOverview } from './renderDSOverview';
-import { NoyaComponent, NoyaElement, NoyaNode } from './types';
+import {
+  NoyaComponent,
+  NoyaElement,
+  NoyaNode,
+  NoyaResolvedNode,
+} from './types';
 
 const elements: NoyaElement[] = [
-  SketchModel.noyaElement({
-    type: 'primitive',
-    componentID: avatarSymbolId,
-    name: 'Avatar',
-  }),
   {
-    _class: 'noyaElement',
-    type: 'primitive',
+    _class: 'noyaPrimitiveElement',
+    name: 'Avatar',
+    classNames: [],
+    componentID: avatarSymbolId,
+    do_objectID: uuid(),
+    children: [
+      {
+        _class: 'noyaString',
+        do_objectID: uuid(),
+        value: 'Devin Abbott',
+      },
+    ],
+  },
+  {
+    _class: 'noyaPrimitiveElement',
+    name: 'Button',
     classNames: [],
     componentID: buttonSymbolId,
     do_objectID: uuid(),
@@ -55,18 +68,19 @@ const elements: NoyaElement[] = [
         value: 'Submit',
       },
     ],
-    name: 'Button',
   },
-  SketchModel.noyaElement({
-    type: 'instance',
-    componentID: heroSymbolId,
+  {
+    _class: 'noyaCompositeElement',
     name: 'Hero',
-  }),
-  SketchModel.noyaElement({
-    type: 'instance',
-    componentID: heroWithImageSymbolId,
+    componentID: heroSymbolId,
+    do_objectID: uuid(),
+  },
+  {
+    _class: 'noyaCompositeElement',
     name: 'Hero with Image',
-  }),
+    componentID: heroWithImageSymbolId,
+    do_objectID: uuid(),
+  },
 ];
 
 const components: NoyaComponent[] = [
@@ -77,16 +91,14 @@ const components: NoyaComponent[] = [
     componentID: heroSymbolId,
     rootElement: {
       name: 'Box',
-      _class: 'noyaElement',
-      type: 'primitive',
+      _class: 'noyaPrimitiveElement',
       classNames: ['flex', 'items-center', 'gap-4'],
       componentID: boxSymbolId,
       do_objectID: uuid(),
       children: [
         {
           name: 'Button',
-          _class: 'noyaElement',
-          type: 'primitive',
+          _class: 'noyaPrimitiveElement',
           classNames: [],
           componentID: buttonSymbolId,
           do_objectID: uuid(),
@@ -100,8 +112,7 @@ const components: NoyaComponent[] = [
         },
         {
           name: 'Link',
-          _class: 'noyaElement',
-          type: 'primitive',
+          _class: 'noyaPrimitiveElement',
           classNames: [],
           componentID: linkSymbolId,
           do_objectID: uuid(),
@@ -122,58 +133,72 @@ const components: NoyaComponent[] = [
     do_objectID: uuid(),
     componentID: heroWithImageSymbolId,
     rootElement: {
-      _class: 'noyaElement',
+      name: 'Hero (i)',
+      _class: 'noyaCompositeElement',
       componentID: heroSymbolId,
-      children: [],
       do_objectID: uuid(),
-      type: 'instance',
-      classNames: [],
     },
   },
 ];
 
-const ElementHierarchy = withOptions<NoyaNode>({
-  getChildren: (element) => {
-    if (element._class === 'noyaString') return [];
+// const CompositeElementHierarchy = withOptions<NoyaNode>({
+//   getChildren: (node) => {
+//     if (
+//       node._class === 'noyaString' ||
+//       node._class === 'noyaCompositeElement'
+//     ) {
+//       return [];
+//     }
 
-    return element.children;
+//     return node.children;
+//   },
+// });
+
+const ResolvedElementHierarchy = withOptions<NoyaResolvedNode>({
+  getChildren: (node) => {
+    if (!node) return [];
+
+    if (node._class === 'noyaString') {
+      return [];
+    }
+
+    return node.children;
   },
 });
 
 function resolveComponentHierarchy(
-  getComponent: (options: {
-    type: string;
-    id: string;
-  }) => NoyaComponent | undefined,
-  element: NoyaElement,
-): NoyaNode {
-  function resolveElement(element: NoyaElement): NoyaElement {
-    const component = getComponent({
-      type: element.type,
-      id: element.componentID,
-    });
+  getCompositeComponent: (id: string) => NoyaComponent | undefined,
+  node: NoyaNode,
+): NoyaResolvedNode {
+  if (node._class === 'noyaString') return node;
 
-    if (component) {
-      return component.rootElement;
-    }
+  if (node._class === 'noyaPrimitiveElement') {
+    const children = node.children.map<NoyaResolvedNode>((child) =>
+      resolveComponentHierarchy(getCompositeComponent, child),
+    );
 
-    return element;
+    return {
+      ...node,
+      children,
+    };
   }
 
-  // TODO: Handle passing children?
-  return ElementHierarchy.map<NoyaNode>(element, (element, children) => {
-    if (element._class === 'noyaString') return element;
+  if (node._class === 'noyaCompositeElement') {
+    const component = getCompositeComponent(node.componentID);
 
-    const resolved = fixedPoint(resolveElement, element);
-
-    if (!resolved) {
+    if (!component) {
       throw new Error(
-        `Failed to resolve element ${element.name} with Component ID ${element.componentID}`,
+        `Failed to resolve composite element ${node.name} with Component ID ${node.componentID}`,
       );
     }
 
-    return resolved;
-  });
+    return resolveComponentHierarchy(
+      getCompositeComponent,
+      component.rootElement,
+    );
+  }
+
+  return null;
 }
 
 interface Props {
@@ -253,20 +278,26 @@ export function DSEditor({
 
         if (!element) return null;
 
-        const findComponent = ({ type, id }: { type: string; id: string }) =>
+        const findComponent = (id: string) =>
           components.find((component) => component.componentID === id);
 
         const resolved = resolveComponentHierarchy(findComponent, element);
 
         console.info(
-          ElementHierarchy.diagram(resolved, (node) =>
-            node._class === 'noyaString' ? 's:' + node.value : node.name ?? '',
+          ResolvedElementHierarchy.diagram(resolved, (node) =>
+            !node
+              ? '(null)'
+              : node._class === 'noyaString'
+              ? 's:' + node.value
+              : node.name ?? '',
           ),
         );
 
-        return ElementHierarchy.map<ReactNode>(
+        return ResolvedElementHierarchy.map<ReactNode>(
           resolved,
           (element, transformedChildren) => {
+            if (!element) return null;
+
             if (element._class === 'noyaString') return element.value;
 
             const PrimitiveComponent: React.FC<any> =
