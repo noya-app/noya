@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { uuid } from 'noya-utils';
 import { withOptions } from 'tree-visit';
 import {
   avatarSymbolId,
@@ -9,6 +8,7 @@ import {
   heroWithImageSymbolId,
   linkSymbolId,
 } from '../ayon/symbols/symbolIds';
+import { Model } from './builders';
 import {
   NoyaComponent,
   NoyaElement,
@@ -18,103 +18,53 @@ import {
 } from './types';
 
 export const elements: NoyaElement[] = [
-  {
-    type: 'noyaPrimitiveElement',
+  Model.primitiveElement({
     name: 'Avatar',
-    classNames: [],
     componentID: avatarSymbolId,
-    id: uuid(),
-    children: [
-      {
-        type: 'noyaString',
-        id: uuid(),
-        value: 'Devin Abbott',
-      },
-    ],
-  },
-  {
-    type: 'noyaPrimitiveElement',
+    children: [Model.string('Devin Abbott')],
+  }),
+  Model.primitiveElement({
     name: 'Button',
-    classNames: [],
     componentID: buttonSymbolId,
-    id: uuid(),
-    children: [
-      {
-        type: 'noyaString',
-        id: uuid(),
-        value: 'Submit',
-      },
-    ],
-  },
-  {
-    type: 'noyaCompositeElement',
+    children: [Model.string('Submit')],
+  }),
+  Model.compositeElement({
     name: 'Hero',
     componentID: heroSymbolId,
-    id: uuid(),
-  },
-  {
-    type: 'noyaCompositeElement',
+  }),
+  Model.compositeElement({
     name: 'Hero with Image',
     componentID: heroWithImageSymbolId,
-    id: uuid(),
-  },
+  }),
 ];
 
 export const initialComponents: NoyaComponent[] = [
-  {
+  Model.component({
     name: 'Hero',
-    type: 'noyaComponent',
-    id: uuid(),
     componentID: heroSymbolId,
-    rootElement: {
+    rootElement: Model.primitiveElement({
+      id: 'a',
       name: 'Box',
-      type: 'noyaPrimitiveElement',
       classNames: ['flex', 'items-center', 'gap-4'],
       componentID: boxSymbolId,
-      id: 'a',
       children: [
-        {
+        Model.primitiveElement({
           name: 'Button',
-          type: 'noyaPrimitiveElement',
-          classNames: [],
           componentID: buttonSymbolId,
-          id: uuid(),
-          children: [
-            {
-              type: 'noyaString',
-              id: uuid(),
-              value: 'Get Started',
-            },
-          ],
-        },
-        {
+          children: [Model.string('Get Started')],
+        }),
+        Model.primitiveElement({
           name: 'Link',
-          type: 'noyaPrimitiveElement',
-          classNames: [],
           componentID: linkSymbolId,
-          id: uuid(),
-          children: [
-            {
-              type: 'noyaString',
-              id: uuid(),
-              value: 'Learn More',
-            },
-          ],
-        },
+          children: [Model.string('Learn More')],
+        }),
       ],
-    },
-  },
-  {
+    }),
+  }),
+  Model.component({
     name: 'Hero with Image',
-    type: 'noyaComponent',
-    id: uuid(),
     componentID: heroWithImageSymbolId,
-    rootElement: {
-      name: 'Hero (i)',
-      type: 'noyaCompositeElement',
-      componentID: heroSymbolId,
-      id: uuid(),
-    },
+    rootElement: Model.compositeElement(heroSymbolId),
     diff: {
       operations: [
         {
@@ -124,7 +74,7 @@ export const initialComponents: NoyaComponent[] = [
         },
       ],
     },
-  },
+  }),
 ];
 
 // const CompositeElementHierarchy = withOptions<NoyaNode>({
