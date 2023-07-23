@@ -31,10 +31,20 @@ export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
 
 export type NoyaResolvedNode = NoyaResolvedElement | NoyaString | null;
 
+export type NoyaComponentOperation = {
+  type: 'setParameters';
+  path: string[];
+  value: string[];
+};
+export type NoyaComponentDiff = {
+  operations: NoyaComponentOperation[];
+};
+
 export type NoyaComponent = {
   do_objectID: string;
   _class: 'noyaComponent';
   name: string;
   rootElement: NoyaElement;
   componentID: string;
+  diff?: NoyaComponentDiff;
 };
