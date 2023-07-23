@@ -1,9 +1,9 @@
 import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import {
-  createSectionedMenu,
   MenuConfig,
   MenuItem,
   RegularMenuItem,
+  createSectionedMenu,
   useOpenInputDialog,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -31,6 +31,7 @@ function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
     case 'symbolInstance':
     case 'symbolMaster':
     case 'text':
+    case 'noyaComponentLayer':
       return false;
   }
 }
@@ -54,6 +55,7 @@ function isValidMaskChainBreakerType(type: Sketch.AnyLayer['_class']): boolean {
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
+    case 'noyaComponentLayer':
       return false;
   }
 }

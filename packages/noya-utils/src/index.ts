@@ -31,5 +31,6 @@ export * from './unique';
 export * from './url';
 export * from './debounce';
 export * from './partition';
+export * from './fixedPoint';
 export * as delimitedPath from './delimitedPath';
 export { v4 as uuid } from 'uuid';

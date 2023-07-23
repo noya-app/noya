@@ -1,8 +1,8 @@
 import Sketch from 'noya-file-format';
 import { uuid } from 'noya-utils';
 
-export * from './debugDescription';
 export { PointString } from './PointString';
+export * from './debugDescription';
 
 type ModelOptions<T> = Partial<Omit<T, '_class'>>;
 
@@ -511,7 +511,7 @@ function text(options?: ModelOptions<Sketch.Text>): Sketch.Text {
     automaticallyDrawOnUnderlyingPath: false,
     dontSynchroniseWithSymbol: false,
     glyphBounds: '{{0, 5}, {126, 17}}',
-    lineSpacingBehaviour: 3,
+    lineSpacingBehaviour: 3 as Sketch.LineSpacingBehaviour,
     textBehaviour: Sketch.TextBehaviour.Flexible,
     ...options,
     _class: Sketch.ClassValue.Text,
@@ -774,6 +774,43 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
   };
 }
 
+function noyaElement(
+  options: ModelOptions<Sketch.NoyaElement> &
+    Pick<Sketch.NoyaElement, 'componentID' | 'type'>,
+): Sketch.NoyaElement {
+  return {
+    children: [],
+    classNames: [],
+    ...options,
+    do_objectID: options?.do_objectID ?? uuid(),
+    _class: Sketch.ClassValue.NoyaElement,
+  };
+}
+
+function noyaComponent(
+  options: ModelOptions<Sketch.NoyaComponent> &
+    Pick<Sketch.NoyaComponent, 'rootElement'>,
+): Sketch.NoyaComponent {
+  return {
+    name: 'Component',
+    ...options,
+    do_objectID: options?.do_objectID ?? uuid(),
+    componentID: options?.componentID ?? uuid(),
+    _class: Sketch.ClassValue.NoyaComponent,
+  };
+}
+
+function noyaComponentLayer(
+  options?: ModelOptions<Sketch.NoyaComponentLayer>,
+): Sketch.NoyaComponentLayer {
+  return {
+    ...newLayerBase(options),
+    name: 'Component',
+    ...options,
+    _class: Sketch.ClassValue.NoyaComponentLayer,
+  };
+}
+
 const WHITE = color({ red: 1, green: 1, blue: 1, alpha: 1 });
 const BLACK = color({ red: 0, green: 0, blue: 0, alpha: 1 });
 const TRANSPARENT = color({ red: 0, green: 0, blue: 0, alpha: 0 });
@@ -827,4 +864,7 @@ export const SketchModel = {
   text,
   textStyle,
   user,
+  noyaComponentLayer,
+  noyaComponent,
+  noyaElement,
 };

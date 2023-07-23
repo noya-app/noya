@@ -534,6 +534,7 @@ export type SymbolMaster = {
     | Slice
     | Hotspot
     | Bitmap
+    | NoyaComponentLayer
   )[];
   blockDefinition?: BlockDefinition;
 };
@@ -764,9 +765,39 @@ export type Group = {
     | Slice
     | Hotspot
     | Bitmap
+    | NoyaComponentLayer
   )[];
   _class: 'group';
 };
+
+export type NoyaElementType = 'primitive' | 'instance';
+
+export type NoyaElement = {
+  do_objectID: Uuid;
+  _class: 'noyaElement';
+  name?: string;
+  type: NoyaElementType;
+  componentID: Uuid;
+  // Can strings be children?
+  children: NoyaElement[];
+  classNames: string[];
+};
+
+export type NoyaComponent = {
+  do_objectID: Uuid;
+  _class: 'noyaComponent';
+  name: string;
+  rootElement: NoyaElement;
+  componentID: Uuid;
+};
+
+export type NoyaComponentLayer = Omit<
+  Group,
+  '_class' | 'layers' | 'hasClickThrough'
+> & {
+  _class: 'noyaComponentLayer';
+};
+
 /**
  * Oval layers are the result of adding an oval shape to the canvas
  */
@@ -1047,6 +1078,7 @@ export type ShapeGroup = {
     | Slice
     | Hotspot
     | Bitmap
+    | NoyaComponentLayer
   )[];
   _class: 'shapeGroup';
   windingRule: WindingRule;
@@ -1455,6 +1487,7 @@ export type Page = {
     | Slice
     | Hotspot
     | Bitmap
+    | NoyaComponentLayer
   )[];
 };
 /**
@@ -1511,6 +1544,7 @@ export type Artboard = {
     | Slice
     | Hotspot
     | Bitmap
+    | NoyaComponentLayer
   )[];
 };
 /**
@@ -1683,7 +1717,8 @@ export type AnyLayer =
   | Hotspot
   | Bitmap
   | Page
-  | Artboard;
+  | Artboard
+  | NoyaComponentLayer;
 /**
  * Union of all group layers
  */
@@ -1756,7 +1791,9 @@ export type AnyObject =
   | FontRef
   | PatchInfo
   | Page
-  | Artboard;
+  | Artboard
+  | NoyaComponentLayer
+  | NoyaElement;
 /**
  * Enum of all possible _class property values
  */
@@ -1826,6 +1863,9 @@ export enum ClassValue {
   Text = 'text',
   TextStyle = 'textStyle',
   Triangle = 'triangle',
+  NoyaComponentLayer = 'noyaComponentLayer',
+  NoyaComponent = 'noyaComponent',
+  NoyaElement = 'noyaElement',
 }
 /**
  * A mapping of class values to object types
@@ -1896,4 +1936,7 @@ export type ClassMap = {
   MSImmutableForeignLayerStyle: ForeignLayerStyle;
   MSImmutableFlowConnection: FlowConnection;
   MSImmutableColorAsset: ColorAsset;
+  noyaComponentLayer: NoyaComponentLayer;
+  noyaComponent: NoyaComponent;
+  noyaElement: NoyaElement;
 };
