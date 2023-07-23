@@ -13,9 +13,9 @@ import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { renderDSOverview } from './renderDSOverview';
 import {
   ResolvedElementHierarchy,
-  components,
   elements,
   getIdPath,
+  initialComponents,
   resolveComponentHierarchy,
 } from './traversal';
 
@@ -79,7 +79,7 @@ export function DSEditor({
         if (!element) return null;
 
         const findComponent = (id: string) =>
-          components.find((component) => component.componentID === id);
+          initialComponents.find((component) => component.componentID === id);
 
         const resolved = resolveComponentHierarchy(findComponent, element);
 
@@ -87,7 +87,7 @@ export function DSEditor({
           ResolvedElementHierarchy.diagram(resolved, (node, indexPath) => {
             if (!node) return '()';
 
-            if (node._class === 'noyaString') return `"${node.value}"`;
+            if (node.type === 'noyaString') return `"${node.value}"`;
 
             return [node.name, `(${getIdPath(resolved, indexPath)})`]
               .filter(Boolean)
@@ -100,7 +100,7 @@ export function DSEditor({
           (element, transformedChildren, indexPath) => {
             if (!element) return null;
 
-            if (element._class === 'noyaString') return element.value;
+            if (element.type === 'noyaString') return element.value;
 
             const idPath = getIdPath(resolved, indexPath);
 

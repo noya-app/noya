@@ -19,84 +19,84 @@ import {
 
 export const elements: NoyaElement[] = [
   {
-    _class: 'noyaPrimitiveElement',
+    type: 'noyaPrimitiveElement',
     name: 'Avatar',
     classNames: [],
     componentID: avatarSymbolId,
-    do_objectID: uuid(),
+    id: uuid(),
     children: [
       {
-        _class: 'noyaString',
-        do_objectID: uuid(),
+        type: 'noyaString',
+        id: uuid(),
         value: 'Devin Abbott',
       },
     ],
   },
   {
-    _class: 'noyaPrimitiveElement',
+    type: 'noyaPrimitiveElement',
     name: 'Button',
     classNames: [],
     componentID: buttonSymbolId,
-    do_objectID: uuid(),
+    id: uuid(),
     children: [
       {
-        _class: 'noyaString',
-        do_objectID: uuid(),
+        type: 'noyaString',
+        id: uuid(),
         value: 'Submit',
       },
     ],
   },
   {
-    _class: 'noyaCompositeElement',
+    type: 'noyaCompositeElement',
     name: 'Hero',
     componentID: heroSymbolId,
-    do_objectID: uuid(),
+    id: uuid(),
   },
   {
-    _class: 'noyaCompositeElement',
+    type: 'noyaCompositeElement',
     name: 'Hero with Image',
     componentID: heroWithImageSymbolId,
-    do_objectID: uuid(),
+    id: uuid(),
   },
 ];
 
-export const components: NoyaComponent[] = [
+export const initialComponents: NoyaComponent[] = [
   {
     name: 'Hero',
-    _class: 'noyaComponent',
-    do_objectID: uuid(),
+    type: 'noyaComponent',
+    id: uuid(),
     componentID: heroSymbolId,
     rootElement: {
       name: 'Box',
-      _class: 'noyaPrimitiveElement',
+      type: 'noyaPrimitiveElement',
       classNames: ['flex', 'items-center', 'gap-4'],
       componentID: boxSymbolId,
-      do_objectID: 'a',
+      id: 'a',
       children: [
         {
           name: 'Button',
-          _class: 'noyaPrimitiveElement',
+          type: 'noyaPrimitiveElement',
           classNames: [],
           componentID: buttonSymbolId,
-          do_objectID: uuid(),
+          id: uuid(),
           children: [
             {
-              _class: 'noyaString',
-              do_objectID: uuid(),
+              type: 'noyaString',
+              id: uuid(),
               value: 'Get Started',
             },
           ],
         },
         {
           name: 'Link',
-          _class: 'noyaPrimitiveElement',
+          type: 'noyaPrimitiveElement',
           classNames: [],
           componentID: linkSymbolId,
-          do_objectID: uuid(),
+          id: uuid(),
           children: [
             {
-              _class: 'noyaString',
-              do_objectID: uuid(),
+              type: 'noyaString',
+              id: uuid(),
               value: 'Learn More',
             },
           ],
@@ -106,14 +106,14 @@ export const components: NoyaComponent[] = [
   },
   {
     name: 'Hero with Image',
-    _class: 'noyaComponent',
-    do_objectID: uuid(),
+    type: 'noyaComponent',
+    id: uuid(),
     componentID: heroWithImageSymbolId,
     rootElement: {
       name: 'Hero (i)',
-      _class: 'noyaCompositeElement',
+      type: 'noyaCompositeElement',
       componentID: heroSymbolId,
-      do_objectID: uuid(),
+      id: uuid(),
     },
     diff: {
       operations: [
@@ -130,8 +130,8 @@ export const components: NoyaComponent[] = [
 // const CompositeElementHierarchy = withOptions<NoyaNode>({
 //   getChildren: (node) => {
 //     if (
-//       node._class === 'noyaString' ||
-//       node._class === 'noyaCompositeElement'
+//       node.type === 'noyaString' ||
+//       node.type === 'noyaCompositeElement'
 //     ) {
 //       return [];
 //     }
@@ -144,7 +144,7 @@ export const ResolvedElementHierarchy = withOptions<NoyaResolvedNode>({
   getChildren: (node) => {
     if (!node) return [];
 
-    if (node._class === 'noyaString') {
+    if (node.type === 'noyaString') {
       return [];
     }
 
@@ -154,7 +154,7 @@ export const ResolvedElementHierarchy = withOptions<NoyaResolvedNode>({
 
 export function getIdPath(resolved: NoyaResolvedNode, indexPath: number[]) {
   const idPath = ResolvedElementHierarchy.accessPath(resolved, indexPath)
-    .map((el) => el?.do_objectID ?? '-')
+    .map((el) => el?.id ?? '-')
     .join('/');
 
   return idPath;
@@ -164,9 +164,9 @@ export function resolveComponentHierarchy(
   getCompositeComponent: (id: string) => NoyaComponent | undefined,
   node: NoyaNode,
 ): NoyaResolvedNode {
-  if (node._class === 'noyaString') return node;
+  if (node.type === 'noyaString') return node;
 
-  if (node._class === 'noyaPrimitiveElement') {
+  if (node.type === 'noyaPrimitiveElement') {
     const children = node.children.map<NoyaResolvedNode>((child) =>
       resolveComponentHierarchy(getCompositeComponent, child),
     );
@@ -177,7 +177,7 @@ export function resolveComponentHierarchy(
     };
   }
 
-  if (node._class === 'noyaCompositeElement') {
+  if (node.type === 'noyaCompositeElement') {
     const component = getCompositeComponent(node.componentID);
 
     if (!component) {
@@ -198,7 +198,7 @@ export function resolveComponentHierarchy(
     return ResolvedElementHierarchy.map(
       cloneDeep(resolvedNode),
       (node, transformedChildren, indexPath) => {
-        if (node?._class !== 'noyaPrimitiveElement') return node;
+        if (node?.type !== 'noyaPrimitiveElement') return node;
 
         const idPath = getIdPath(resolvedNode, indexPath);
 

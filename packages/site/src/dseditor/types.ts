@@ -1,13 +1,13 @@
 export type NoyaString = {
-  do_objectID: string;
-  _class: 'noyaString';
+  id: string;
+  type: 'noyaString';
   name?: string;
   value: string;
 };
 
 export type NoyaPrimitiveElement = {
-  do_objectID: string;
-  _class: 'noyaPrimitiveElement';
+  id: string;
+  type: 'noyaPrimitiveElement';
   name?: string;
   componentID: string;
   classNames: string[];
@@ -15,8 +15,8 @@ export type NoyaPrimitiveElement = {
 };
 
 export type NoyaCompositeElement = {
-  do_objectID: string;
-  _class: 'noyaCompositeElement';
+  id: string;
+  type: 'noyaCompositeElement';
   name?: string;
   componentID: string;
 };
@@ -41,8 +41,8 @@ export type NoyaComponentDiff = {
 };
 
 export type NoyaComponent = {
-  do_objectID: string;
-  _class: 'noyaComponent';
+  id: string;
+  type: 'noyaComponent';
   name: string;
   rootElement: NoyaElement;
   componentID: string;
