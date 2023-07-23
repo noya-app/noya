@@ -111,7 +111,11 @@ export function DSRenderer({
   return (
     <Stack.V flex="1" position="relative">
       {/* Ensure html5 doctype for proper styling */}
-      <Frame ref={ref} title="Design System Preview" srcDoc="<!DOCTYPE html>" />
+      <Frame
+        ref={ref}
+        title="Design System Preview"
+        srcDoc="<!DOCTYPE html><head><style>html, body { height: 100% }</style></head>"
+      />
       {!system && <Loading>Loading design system...</Loading>}
     </Stack.V>
   );

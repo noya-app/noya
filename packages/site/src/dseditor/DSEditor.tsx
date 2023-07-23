@@ -95,7 +95,7 @@ export function DSEditor({
           }),
         );
 
-        return ResolvedElementHierarchy.map<ReactNode>(
+        const content = ResolvedElementHierarchy.map<ReactNode>(
           resolved,
           (element, transformedChildren, indexPath) => {
             if (!element) return null;
@@ -117,6 +117,18 @@ export function DSEditor({
               </PrimitiveComponent>
             );
           },
+        );
+
+        return (
+          <div
+            style={{
+              padding: '20px',
+              background: theme.colors.canvas.background,
+              minHeight: '100%',
+            }}
+          >
+            {content}
+          </div>
         );
       }
 
