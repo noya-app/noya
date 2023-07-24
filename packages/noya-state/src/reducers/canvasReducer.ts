@@ -357,24 +357,25 @@ export function canvasReducer(
                 state.lastEditedTextStyle,
               )
             : (() => {
-                // const rect = Selectors.getDrawnLayerRect(
-                //   draft.interactionState.origin,
-                //   draft.interactionState.current,
-                //   draft.interactionState.options,
-                // );
+                const rect = Selectors.getDrawnLayerRect(
+                  draft.interactionState.origin,
+                  draft.interactionState.current,
+                  draft.interactionState.options,
+                );
 
-                return SketchModel.rectangle();
+                const symbol = getSymbolMaster(state, shapeType.symbolId);
 
-                // const layer = SketchModel.noyaComponent({
-                //   name: 'Component',
-                //   frame: SketchModel.rect(rect),
-                //   rootElement: SketchModel.noyaElement({
-                //     type: 'primitive',
-                //     componentID: 'div',
-                //   }),
-                // });
+                if (!symbol) return SketchModel.rectangle();
 
-                // return layer;
+                const layer = SketchModel.symbolInstance({
+                  name: symbol.name,
+                  symbolID: symbol.symbolID,
+                  frame: SketchModel.rect(rect),
+                  blockParameters:
+                    symbol.blockDefinition?.placeholderParameters?.slice(),
+                });
+
+                return layer;
               })();
 
         if (shapeType === 'text') {

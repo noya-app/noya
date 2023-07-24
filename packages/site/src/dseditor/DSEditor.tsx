@@ -8,6 +8,7 @@ import {
 import { loadDesignSystem } from 'noya-module-loader';
 import React, { ReactNode, useEffect } from 'react';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
+import { DSLayerInspector } from './DSLayerInspector';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
@@ -142,26 +143,26 @@ export function DSEditor({
   );
 
   return (
-    <Stack.H flex="1">
+    <Stack.H flex="1" separator={<DividerVertical />}>
       {viewType !== 'preview' && (
-        <>
-          <DSProjectInspector
-            name={fileName}
-            onChangeName={onChangeName}
-            system={system}
-            ds={ds}
-            setDS={setDS}
-            selectedComponentId={selectedComponentId}
-            setSelectedComponentId={setSelectedComponentId}
-          />
-          <DividerVertical />
-        </>
+        <DSProjectInspector
+          name={fileName}
+          onChangeName={onChangeName}
+          system={system}
+          ds={ds}
+          setDS={setDS}
+          selectedComponentId={selectedComponentId}
+          setSelectedComponentId={setSelectedComponentId}
+        />
       )}
       <DSRenderer
         sourceName={sourceName}
         primary={primary}
         renderContent={handleRenderContent}
       />
+      {viewType !== 'preview' && selectedComponentId && (
+        <DSLayerInspector selectedComponentId={selectedComponentId} />
+      )}
     </Stack.H>
   );
 }

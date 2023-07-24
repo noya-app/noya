@@ -110,8 +110,10 @@ export function getIdPath(resolved: NoyaResolvedNode, indexPath: number[]) {
   return idPath;
 }
 
+export type GetCompositeComponent = (id: string) => NoyaComponent | undefined;
+
 export function resolveComponentHierarchy(
-  getCompositeComponent: (id: string) => NoyaComponent | undefined,
+  getCompositeComponent: GetCompositeComponent,
   node: NoyaNode,
 ): NoyaResolvedNode {
   if (node.type === 'noyaString') return node;
@@ -171,4 +173,66 @@ export function resolveComponentHierarchy(
   }
 
   return null;
+}
+
+export type EditableTreeItem = NoyaComponent | NoyaNode;
+
+// export const EditableTreeHierarchy = withOptions<EditableTreeItem>({
+//   getChildren(item: NoyaComponent | NoyaNode): EditableTreeItem[] {
+//     switch (item.type) {
+//       case 'noyaComponent':
+//         return [item.rootElement];
+//       case 'noyaCompositeElement': {
+//         return [];
+//       }
+//       case 'noyaPrimitiveElement':
+//         return item.children;
+//       case 'noyaString':
+//         return [];
+//     }
+//   },
+// });
+
+export function createEditableTree(
+  getCompositeComponent: GetCompositeComponent,
+) {
+  // function resolveCompositeElement(
+  //   node: NoyaCompositeElement,
+  // ): NoyaResolvedElement | NoyaString {
+  //   const component = getCompositeComponent(node.componentID);
+
+  //   if (!component) {
+  //     throw new Error(
+  //       `Failed to resolve composite element ${node.name} with Component ID ${node.componentID}`,
+  //     );
+  //   }
+
+  //   const resolvedNode = resolveCompositeElement(component.rootElement);
+
+  // }
+
+  return withOptions<EditableTreeItem>({
+    getChildren(item: NoyaComponent | NoyaNode): EditableTreeItem[] {
+      switch (item.type) {
+        case 'noyaComponent': {
+          const root = item.rootElement;
+
+          if (root.type === 'noyaCompositeElement') {
+            const component = getCompositeComponent(root.componentID);
+
+            return component ? [component] : [];
+          }
+
+          return [item.rootElement];
+        }
+        case 'noyaCompositeElement': {
+          return [getCompositeComponent(item.componentID)!];
+        }
+        case 'noyaPrimitiveElement':
+          return item.children;
+        case 'noyaString':
+          return [];
+      }
+    },
+  });
 }
