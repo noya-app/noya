@@ -9,6 +9,7 @@ export type NoyaPrimitiveElement = {
   id: string;
   type: 'noyaPrimitiveElement';
   name?: string;
+  props?: Record<string, any>;
   componentID: string;
   classNames: string[];
   children: NoyaNode[];

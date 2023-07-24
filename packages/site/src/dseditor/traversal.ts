@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
+import { uuid } from 'noya-utils';
 import { withOptions } from 'tree-visit';
 import {
-  avatarSymbolId,
   boxSymbolId,
   buttonSymbolId,
   heroSymbolId,
@@ -13,34 +13,56 @@ import {
 import { Model } from './builders';
 import {
   NoyaComponent,
-  NoyaElement,
   NoyaNode,
   NoyaResolvedElement,
   NoyaResolvedNode,
 } from './types';
 
-export const elements: NoyaElement[] = [
-  Model.primitiveElement({
-    name: 'Avatar',
-    componentID: avatarSymbolId,
-    children: [Model.string('Devin Abbott')],
-  }),
-  Model.primitiveElement({
-    name: 'Button',
-    componentID: buttonSymbolId,
-    children: [Model.string('Submit')],
-  }),
-  Model.compositeElement({
-    name: 'Hero',
-    componentID: heroSymbolId,
-  }),
-  Model.compositeElement({
-    name: 'Hero with Image',
-    componentID: heroWithImageSymbolId,
-  }),
-];
+export const PRIMITIVE_ELEMENT_NAMES = {
+  [boxSymbolId]: 'Box',
+  [buttonSymbolId]: 'Button',
+  [linkSymbolId]: 'Link',
+  [textSymbolId]: 'Text',
+  [tagSymbolId]: 'Tag',
+};
+
+const sidebarItemSymbolId = uuid();
 
 export const initialComponents: NoyaComponent[] = [
+  Model.component({
+    name: 'Sidebar Item',
+    componentID: sidebarItemSymbolId,
+    rootElement: Model.primitiveElement({
+      componentID: buttonSymbolId,
+      children: [Model.string('Home')],
+      classNames: ['text-left', 'justify-start'],
+      props: {
+        variant: 'text',
+      },
+    }),
+  }),
+  Model.component({
+    name: 'Sidebar',
+    componentID: uuid(),
+    rootElement: Model.primitiveElement({
+      componentID: boxSymbolId,
+      classNames: ['flex-1', 'flex', 'flex-col', 'gap-4'],
+      children: [
+        Model.compositeElement({
+          componentID: sidebarItemSymbolId,
+        }),
+        Model.compositeElement({
+          componentID: sidebarItemSymbolId,
+        }),
+        Model.compositeElement({
+          componentID: sidebarItemSymbolId,
+        }),
+        Model.compositeElement({
+          componentID: sidebarItemSymbolId,
+        }),
+      ],
+    }),
+  }),
   Model.component({
     name: 'Hero',
     componentID: heroSymbolId,
@@ -51,7 +73,6 @@ export const initialComponents: NoyaComponent[] = [
       componentID: boxSymbolId,
       children: [
         Model.primitiveElement({
-          name: 'Tag',
           componentID: tagSymbolId,
           children: [Model.string('New')],
         }),
@@ -68,12 +89,10 @@ export const initialComponents: NoyaComponent[] = [
           componentID: boxSymbolId,
           children: [
             Model.primitiveElement({
-              name: 'Button',
               componentID: buttonSymbolId,
               children: [Model.string('Get Started')],
             }),
             Model.primitiveElement({
-              name: 'Link',
               componentID: linkSymbolId,
               children: [Model.string('Learn More')],
             }),
@@ -85,21 +104,32 @@ export const initialComponents: NoyaComponent[] = [
   Model.component({
     name: 'Hero with Image',
     componentID: heroWithImageSymbolId,
-    rootElement: Model.compositeElement(heroSymbolId),
+    rootElement: Model.primitiveElement({
+      id: 'root',
+      name: 'Root',
+      componentID: boxSymbolId,
+      children: [
+        Model.primitiveElement({
+          name: 'Image',
+          componentID: boxSymbolId,
+        }),
+        Model.compositeElement(heroSymbolId),
+      ],
+    }),
     diff: {
       operations: [
         {
-          path: ['box'],
+          path: ['root', 'box'],
           type: 'removeParameters',
           value: ['items-start'],
         },
         {
-          path: ['box', 'a'],
+          path: ['root', 'box', 'a'],
           type: 'addParameters',
           value: ['flex-col'],
         },
         {
-          path: ['box', 'a'],
+          path: ['root', 'box', 'a'],
           type: 'removeParameters',
           value: ['items-center'],
         },
@@ -247,7 +277,7 @@ export function createEditableTree(
   // }
 
   return withOptions<EditableTreeItem>({
-    getChildren(item: NoyaComponent | NoyaNode): EditableTreeItem[] {
+    getChildren(item: EditableTreeItem): EditableTreeItem[] {
       switch (item.type) {
         case 'noyaComponent': {
           const root = item.rootElement;
@@ -263,8 +293,17 @@ export function createEditableTree(
         case 'noyaCompositeElement': {
           return [getCompositeComponent(item.componentID)!];
         }
-        case 'noyaPrimitiveElement':
-          return item.children;
+        case 'noyaPrimitiveElement': {
+          return item.children.flatMap((child): EditableTreeItem[] => {
+            if (child.type === 'noyaCompositeElement') {
+              const component = getCompositeComponent(child.componentID);
+
+              return component ? [component] : [];
+            }
+
+            return [child];
+          });
+        }
         case 'noyaString':
           return [];
       }

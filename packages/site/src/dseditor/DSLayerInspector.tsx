@@ -3,6 +3,7 @@ import {
   InputField,
   ScrollArea,
   Stack,
+  Text,
   TreeView,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -11,6 +12,7 @@ import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuB
 import { InspectorSection } from '../components/InspectorSection';
 import {
   EditableTreeItem,
+  PRIMITIVE_ELEMENT_NAMES,
   createEditableTree,
   initialComponents,
 } from './traversal';
@@ -63,7 +65,7 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
     (item, indexPath): LayerTreeItem[] => {
       const depth = indexPath.length;
 
-      if (depth === 0) return [];
+      // if (depth === 0) return [];
 
       const diffOps = EditableTreeHierarchy.accessPath(
         component,
@@ -96,6 +98,10 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
     },
   );
 
+  const [hoveredItemId, setHoveredItemId] = React.useState<
+    string | undefined
+  >();
+
   return (
     <Stack.V width="400px" background="white">
       <ScrollArea>
@@ -123,6 +129,8 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                 const name =
                   item.type === 'noyaString'
                     ? JSON.stringify(item.value)
+                    : item.type === 'noyaPrimitiveElement'
+                    ? item.name ?? PRIMITIVE_ELEMENT_NAMES[item.componentID]
                     : item.name ?? item.id; //  + `(${item.id})`
 
                 let classNames: {
@@ -164,8 +172,13 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                     key={key}
                     id={key}
                     depth={depth - 1}
+                    onHoverChange={(hovered) =>
+                      setHoveredItemId(hovered ? key : undefined)
+                    }
                     icon={
-                      <DraggableMenuButton items={[]} onSelect={() => {}} />
+                      depth !== 0 && (
+                        <DraggableMenuButton items={[]} onSelect={() => {}} />
+                      )
                     }
                   >
                     <Stack.V
@@ -174,7 +187,16 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                       overflow="hidden"
                       borderRadius="4px"
                       margin="2px 0"
-                      border={`1px solid ${theme.colors.divider}`}
+                      border={
+                        item.type !== 'noyaComponent'
+                          ? `1px solid ${theme.colors.divider}`
+                          : undefined
+                      }
+                      background={
+                        item.type === 'noyaComponent'
+                          ? 'rgb(238, 229, 255)'
+                          : undefined
+                      }
                       color={
                         item.type === 'noyaString'
                           ? 'dodgerblue'
@@ -183,8 +205,14 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                           : 'inherit'
                       }
                     >
-                      <Stack.H padding="4px 8px">
+                      <Stack.H padding="4px 8px" alignItems="center">
                         <TreeView.RowTitle>{name}</TreeView.RowTitle>
+                        {hoveredItemId === key &&
+                          item.type === 'noyaPrimitiveElement' && (
+                            <Text variant="code" fontSize="9px">
+                              {PRIMITIVE_ELEMENT_NAMES[item.componentID]}
+                            </Text>
+                          )}
                       </Stack.H>
                       {item.type === 'noyaPrimitiveElement' && (
                         <Stack.H flexWrap="wrap" gap="2px">

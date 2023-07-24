@@ -114,7 +114,7 @@ export function DSEditor({
             const style = parametersToTailwindStyle(element.classNames);
 
             return (
-              <PrimitiveComponent style={style} key={idPath}>
+              <PrimitiveComponent style={style} key={idPath} {...element.props}>
                 {transformedChildren}
               </PrimitiveComponent>
             );
@@ -127,6 +127,7 @@ export function DSEditor({
               padding: '20px',
               background: theme.colors.canvas.background,
               minHeight: '100%',
+              display: 'flex',
             }}
           >
             {content}
