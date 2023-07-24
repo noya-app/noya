@@ -19,7 +19,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
-import { elements } from './traversal';
+import { initialComponents } from './traversal';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -47,8 +47,8 @@ interface Props {
   system?: DesignSystemDefinition;
   ds: DS;
   setDS: React.Dispatch<React.SetStateAction<DS>>;
-  selectedElementId?: string;
-  setSelectedElementId: (id: string | undefined) => void;
+  selectedComponentId?: string;
+  setSelectedComponentId: (id: string | undefined) => void;
 }
 
 export function DSProjectInspector({
@@ -57,8 +57,8 @@ export function DSProjectInspector({
   system,
   ds,
   setDS,
-  selectedElementId,
-  setSelectedElementId,
+  selectedComponentId,
+  setSelectedComponentId,
 }: Props) {
   const theme = useDesignSystemTheme();
 
@@ -158,14 +158,14 @@ export function DSProjectInspector({
               <InspectorPrimitives.Title>Components</InspectorPrimitives.Title>
             </InspectorPrimitives.SectionHeader>
             <ListView.Root>
-              {elements.map((element) => (
+              {initialComponents.map((component) => (
                 <ListView.Row
-                  key={element.componentID}
-                  selected={element.componentID === selectedElementId}
-                  onPress={() => setSelectedElementId(element.componentID)}
+                  key={component.componentID}
+                  selected={component.componentID === selectedComponentId}
+                  onPress={() => setSelectedComponentId(component.componentID)}
                 >
                   <Text variant="code" flex="1">
-                    {element.name}
+                    {component.name}
                   </Text>
                 </ListView.Row>
               ))}

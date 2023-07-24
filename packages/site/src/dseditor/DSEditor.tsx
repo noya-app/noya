@@ -10,10 +10,10 @@ import React, { ReactNode, useEffect } from 'react';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, DSRenderer } from './DSRenderer';
+import { Model } from './builders';
 import { renderDSOverview } from './renderDSOverview';
 import {
   ResolvedElementHierarchy,
-  elements,
   getIdPath,
   initialComponents,
   resolveComponentHierarchy,
@@ -65,23 +65,24 @@ export function DSEditor({
     fetchLibrary();
   }, [sourceName]);
 
-  const [selectedElementId, setSelectedElementId] = React.useState<
+  const [selectedComponentId, setSelectedComponentId] = React.useState<
     string | undefined
   >();
 
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
-      if (selectedElementId) {
-        const element = elements.find(
-          (element) => element.componentID === selectedElementId,
-        );
-
-        if (!element) return null;
-
+      if (selectedComponentId) {
         const findComponent = (id: string) =>
           initialComponents.find((component) => component.componentID === id);
 
-        const resolved = resolveComponentHierarchy(findComponent, element);
+        const rootComponent = findComponent(selectedComponentId);
+
+        if (!rootComponent) return null;
+
+        const resolved = resolveComponentHierarchy(
+          findComponent,
+          Model.compositeElement(rootComponent.componentID),
+        );
 
         console.info(
           ResolvedElementHierarchy.diagram(resolved, (node, indexPath) => {
@@ -137,7 +138,7 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [selectedElementId, theme.colors.canvas.background],
+    [selectedComponentId, theme.colors.canvas.background],
   );
 
   return (
@@ -150,8 +151,8 @@ export function DSEditor({
             system={system}
             ds={ds}
             setDS={setDS}
-            selectedElementId={selectedElementId}
-            setSelectedElementId={setSelectedElementId}
+            selectedComponentId={selectedComponentId}
+            setSelectedComponentId={setSelectedComponentId}
           />
           <DividerVertical />
         </>
