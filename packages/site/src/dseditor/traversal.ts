@@ -7,6 +7,8 @@ import {
   heroSymbolId,
   heroWithImageSymbolId,
   linkSymbolId,
+  tagSymbolId,
+  textSymbolId,
 } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
 import {
@@ -43,20 +45,39 @@ export const initialComponents: NoyaComponent[] = [
     name: 'Hero',
     componentID: heroSymbolId,
     rootElement: Model.primitiveElement({
-      id: 'a',
-      name: 'Box',
-      classNames: ['flex', 'items-center', 'gap-4'],
+      id: 'box',
+      name: 'Content',
+      classNames: ['flex', 'flex-col', 'items-center', 'gap-4'],
       componentID: boxSymbolId,
       children: [
         Model.primitiveElement({
-          name: 'Button',
-          componentID: buttonSymbolId,
-          children: [Model.string('Get Started')],
+          name: 'Tag',
+          componentID: tagSymbolId,
+          children: [Model.string('New')],
         }),
         Model.primitiveElement({
-          name: 'Link',
-          componentID: linkSymbolId,
-          children: [Model.string('Learn More')],
+          name: 'Title',
+          componentID: textSymbolId,
+          children: [Model.string('Create, iterate, inspire.')],
+          classNames: ['text-4xl', 'font-bold'],
+        }),
+        Model.primitiveElement({
+          id: 'a',
+          name: 'Actions Row',
+          classNames: ['flex', 'items-center', 'gap-4'],
+          componentID: boxSymbolId,
+          children: [
+            Model.primitiveElement({
+              name: 'Button',
+              componentID: buttonSymbolId,
+              children: [Model.string('Get Started')],
+            }),
+            Model.primitiveElement({
+              name: 'Link',
+              componentID: linkSymbolId,
+              children: [Model.string('Learn More')],
+            }),
+          ],
         }),
       ],
     }),
@@ -68,9 +89,19 @@ export const initialComponents: NoyaComponent[] = [
     diff: {
       operations: [
         {
-          path: ['a'],
-          type: 'setParameters',
-          value: ['flex', 'flex-col'],
+          path: ['box'],
+          type: 'removeParameters',
+          value: ['items-start'],
+        },
+        {
+          path: ['box', 'a'],
+          type: 'addParameters',
+          value: ['flex-col'],
+        },
+        {
+          path: ['box', 'a'],
+          type: 'removeParameters',
+          value: ['items-center'],
         },
       ],
     },
@@ -162,8 +193,12 @@ export function resolveComponentHierarchy(
         diff.operations
           .filter((op) => op.path.join('/') === idPath)
           .forEach((operation) => {
-            if (operation.type === 'setParameters') {
-              newNode.classNames = operation.value;
+            if (operation.type === 'addParameters') {
+              newNode.classNames = [...newNode.classNames, ...operation.value];
+            } else if (operation.type === 'removeParameters') {
+              newNode.classNames = newNode.classNames.filter(
+                (className) => !operation.value.includes(className),
+              );
             }
           });
 

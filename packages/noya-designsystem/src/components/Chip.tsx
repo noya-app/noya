@@ -1,4 +1,4 @@
-import { Cross1Icon } from 'noya-icons';
+import { Cross1Icon, PlusIcon } from 'noya-icons';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { useHover } from '../hooks/useHover';
@@ -65,11 +65,35 @@ const DeleteElement = styled(Cross1Icon)<{
   },
 }));
 
+const AddElement = styled(PlusIcon)<{
+  size: ChipSize;
+}>(({ size }) => ({
+  position: 'relative',
+  marginRight: '-2px',
+  cursor: 'pointer',
+  opacity: 0.5,
+
+  ...(size === 'medium'
+    ? {
+        marginLeft: '2px',
+        top: '-1px',
+        transform: 'scale(0.75)',
+      }
+    : {
+        transform: 'scale(0.6)',
+      }),
+
+  '&:hover': {
+    opacity: 0.85,
+  },
+}));
+
 export interface ChipProps {
   variant?: ChipVariant;
   size?: ChipSize;
   children?: React.ReactNode;
   deletable?: boolean;
+  addable?: boolean;
   monospace?: boolean;
   onDelete?: () => void;
   onClick?: () => void;
@@ -81,6 +105,7 @@ export const Chip = memo(function Chip({
   variant,
   children,
   deletable,
+  addable,
   style,
   size = 'medium',
   monospace = false,
@@ -108,6 +133,7 @@ export const Chip = memo(function Chip({
           onClick={onDelete}
         />
       )}
+      {addable && <AddElement size={size} />}
     </ChipElement>
   );
 });

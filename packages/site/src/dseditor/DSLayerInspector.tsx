@@ -63,6 +63,8 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
     (item, indexPath): LayerTreeItem[] => {
       const depth = indexPath.length;
 
+      if (depth === 0) return [];
+
       const diffOps = EditableTreeHierarchy.accessPath(
         component,
         indexPath,
@@ -123,7 +125,10 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                     ? JSON.stringify(item.value)
                     : item.name ?? item.id; //  + `(${item.id})`
 
-                let classNames: { name: string; status?: 'added' }[] = [];
+                let classNames: {
+                  name: string;
+                  status?: 'added' | 'deleted';
+                }[] = [];
 
                 if (item.type === 'noyaPrimitiveElement') {
                   classNames = item.classNames.map((className) => ({
@@ -135,10 +140,20 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                   ops
                     .filter((op) => op.path.join('/') === path)
                     .forEach((op) => {
-                      if (op.type === 'setParameters') {
-                        classNames = op.value.map((className) => ({
-                          name: className,
-                          status: 'added',
+                      if (op.type === 'addParameters') {
+                        classNames = [
+                          ...classNames,
+                          ...op.value.map((className) => ({
+                            name: className,
+                            status: 'added' as const,
+                          })),
+                        ];
+                      } else if (op.type === 'removeParameters') {
+                        classNames = classNames.map((className) => ({
+                          ...className,
+                          status: op.value.includes(className.name)
+                            ? ('deleted' as const)
+                            : className.status,
                         }));
                       }
                     });
@@ -148,7 +163,7 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                   <TreeView.Row
                     key={key}
                     id={key}
-                    depth={depth}
+                    depth={depth - 1}
                     icon={
                       <DraggableMenuButton items={[]} onSelect={() => {}} />
                     }
@@ -177,11 +192,15 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                             <Chip
                               key={name}
                               size={'small'}
-                              deletable
+                              deletable={status !== 'deleted'}
+                              addable={status === 'deleted'}
                               monospace
                               variant={
                                 status === 'added' ? 'secondary' : undefined
                               }
+                              style={{
+                                opacity: status === 'deleted' ? 0.5 : 1,
+                              }}
                             >
                               {name}
                             </Chip>
