@@ -33,22 +33,22 @@ export const initialComponents: NoyaComponent[] = [
     name: 'Sidebar Item',
     componentID: sidebarItemSymbolId,
     rootElement: Model.primitiveElement({
+      id: 'b',
       componentID: buttonSymbolId,
       children: [Model.string('Home')],
-      classNames: ['text-left', 'justify-start'],
-      props: {
-        variant: 'text',
-      },
+      classNames: ['text-left', 'justify-start', 'variant-text'],
     }),
   }),
   Model.component({
     name: 'Sidebar',
     componentID: uuid(),
     rootElement: Model.primitiveElement({
+      id: 'sidebar',
       componentID: boxSymbolId,
-      classNames: ['flex-1', 'flex', 'flex-col', 'gap-4'],
+      classNames: ['flex-1', 'flex', 'flex-col', 'gap-4', 'bg-white', 'p-4'],
       children: [
         Model.compositeElement({
+          id: '1',
           componentID: sidebarItemSymbolId,
         }),
         Model.compositeElement({
@@ -62,6 +62,15 @@ export const initialComponents: NoyaComponent[] = [
         }),
       ],
     }),
+    diff: {
+      operations: [
+        {
+          path: ['sidebar', '1', 'b'],
+          type: 'removeParameters',
+          value: ['variant-text'],
+        },
+      ],
+    },
   }),
   Model.component({
     name: 'Hero',
@@ -108,12 +117,14 @@ export const initialComponents: NoyaComponent[] = [
       id: 'root',
       name: 'Root',
       componentID: boxSymbolId,
+      classNames: ['flex-1', 'grid', 'grid-flow-col', 'auto-cols-fr'],
       children: [
+        Model.compositeElement(heroSymbolId),
         Model.primitiveElement({
           name: 'Image',
           componentID: boxSymbolId,
+          classNames: ['w-96', 'h-96', 'bg-gray-200'],
         }),
-        Model.compositeElement(heroSymbolId),
       ],
     }),
     diff: {

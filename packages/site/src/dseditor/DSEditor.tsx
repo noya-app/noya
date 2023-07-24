@@ -6,6 +6,7 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
+import { findLast } from 'noya-utils';
 import React, { ReactNode, useEffect } from 'react';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSLayerInspector } from './DSLayerInspector';
@@ -113,8 +114,19 @@ export function DSEditor({
 
             const style = parametersToTailwindStyle(element.classNames);
 
+            const variantClassName = findLast(element.classNames, (className) =>
+              className.startsWith('variant-'),
+            );
+            const variant = variantClassName
+              ? variantClassName.split('-')[1]
+              : undefined;
+
             return (
-              <PrimitiveComponent style={style} key={idPath} {...element.props}>
+              <PrimitiveComponent
+                style={style}
+                key={idPath}
+                {...(variant && { variant })}
+              >
                 {transformedChildren}
               </PrimitiveComponent>
             );

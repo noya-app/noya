@@ -214,6 +214,11 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
                             </Text>
                           )}
                       </Stack.H>
+                      {hoveredItemId === key && (
+                        <Text variant="code" fontSize="9px">
+                          {path}
+                        </Text>
+                      )}
                       {item.type === 'noyaPrimitiveElement' && (
                         <Stack.H flexWrap="wrap" gap="2px">
                           {classNames.map(({ name, status }) => (
