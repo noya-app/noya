@@ -38,6 +38,15 @@ export const initialComponents: NoyaComponent[] = [
       children: [Model.string('Home')],
       classNames: ['text-left', 'justify-start', 'variant-text'],
     }),
+    diff: {
+      operations: [
+        {
+          path: ['b'],
+          type: 'addParameters',
+          value: ['bg-red-500'],
+        },
+      ],
+    },
   }),
   Model.component({
     name: 'Sidebar',
@@ -65,7 +74,7 @@ export const initialComponents: NoyaComponent[] = [
     diff: {
       operations: [
         {
-          path: ['sidebar', '1', 'b'],
+          path: ['sidebar', 'b'],
           type: 'removeParameters',
           value: ['variant-text'],
         },
