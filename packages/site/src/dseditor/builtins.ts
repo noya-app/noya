@@ -83,6 +83,28 @@ export const initialComponents: NoyaComponent[] = [
         }),
       ],
     }),
+    variants: [
+      Model.variant({
+        name: 'With Title',
+        diff: {
+          items: [
+            {
+              path: ['sidebar'],
+              children: {
+                add: [
+                  Model.primitiveElement({
+                    id: 'title',
+                    componentID: textSymbolId,
+                    children: [Model.string('Title')],
+                    classNames: ['variant-h4'],
+                  }),
+                ],
+              },
+            },
+          ],
+        },
+      }),
+    ],
   }),
   Model.component({
     name: 'Hero',

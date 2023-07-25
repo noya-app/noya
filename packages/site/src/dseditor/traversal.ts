@@ -41,7 +41,11 @@ export function getIdPath(resolved: NoyaResolvedNode, indexPath: number[]) {
   return idPath;
 }
 
-function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaDiff) {
+function applyDiff(
+  getCompositeComponent: GetCompositeComponent,
+  resolvedNode: NoyaResolvedNode,
+  diff: NoyaDiff,
+) {
   return ResolvedElementHierarchy.map<NoyaResolvedNode>(
     cloneDeep(resolvedNode),
     (node, transformedChildren, indexPath) => {
@@ -57,6 +61,21 @@ function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaDiff) {
       diff.items
         .filter((op) => op.path.join('/') === idPath)
         .forEach((item) => {
+          if (item.children?.remove) {
+            newNode.children = newNode.children.filter(
+              (child) => child && !item.children?.remove?.includes(child.id),
+            );
+          }
+
+          if (item.children?.add) {
+            newNode.children = [
+              ...newNode.children,
+              ...cloneDeep(item.children.add).map((child) =>
+                resolveComponentHierarchy(getCompositeComponent, child),
+              ),
+            ].filter((child) => child);
+          }
+
           if (item.classNames?.remove) {
             newNode.classNames = newNode.classNames.filter(
               (className) => !item.classNames?.remove?.includes(className),
@@ -121,12 +140,16 @@ export function resolveComponentHierarchy(
       }
 
       if (variant) {
-        resolvedNode = applyDiff(resolvedNode, variant.diff);
+        resolvedNode = applyDiff(
+          getCompositeComponent,
+          resolvedNode,
+          variant.diff,
+        );
       }
     }
 
     if (node.diff) {
-      resolvedNode = applyDiff(resolvedNode, node.diff);
+      resolvedNode = applyDiff(getCompositeComponent, resolvedNode, node.diff);
     }
 
     return resolvedNode;

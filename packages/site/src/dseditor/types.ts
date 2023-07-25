@@ -50,6 +50,10 @@ export type NoyaDiffItem = {
     add?: string[];
     remove?: string[];
   };
+  children?: {
+    add?: NoyaNode[];
+    remove?: string[];
+  };
 };
 
 export type NoyaDiff = {
