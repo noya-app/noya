@@ -63,6 +63,15 @@ export const initialComponents: NoyaComponent[] = [
         }),
         Model.compositeElement({
           componentID: sidebarItemSymbolId,
+          diff: {
+            operations: [
+              {
+                path: ['b'],
+                type: 'classNames',
+                add: ['bg-primary-900', 'text-white'],
+              },
+            ],
+          },
         }),
         Model.compositeElement({
           componentID: sidebarItemSymbolId,
