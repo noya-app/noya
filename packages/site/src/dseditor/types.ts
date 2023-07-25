@@ -44,17 +44,12 @@ export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
 
 export type NoyaResolvedNode = NoyaResolvedElement | NoyaString | null;
 
-export type NoyaComponentOperation =
-  | {
-      type: 'addParameters';
-      path: string[];
-      value: string[];
-    }
-  | {
-      type: 'removeParameters';
-      path: string[];
-      value: string[];
-    };
+export type NoyaComponentOperation = {
+  type: 'classNames';
+  path: string[];
+  add?: string[];
+  remove?: string[];
+};
 
 export type NoyaComponentDiff = {
   operations: NoyaComponentOperation[];

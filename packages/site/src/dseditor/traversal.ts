@@ -57,12 +57,17 @@ function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaComponentDiff) {
       diff.operations
         .filter((op) => op.path.join('/') === idPath)
         .forEach((operation) => {
-          if (operation.type === 'addParameters') {
-            newNode.classNames = [...newNode.classNames, ...operation.value];
-          } else if (operation.type === 'removeParameters') {
-            newNode.classNames = newNode.classNames.filter(
-              (className) => !operation.value.includes(className),
-            );
+          switch (operation.type) {
+            case 'classNames': {
+              newNode.classNames = newNode.classNames.filter(
+                (className) => !operation.remove?.includes(className),
+              );
+
+              newNode.classNames = [
+                ...newNode.classNames,
+                ...(operation.add ?? []),
+              ];
+            }
           }
         });
 

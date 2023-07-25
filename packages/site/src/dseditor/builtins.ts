@@ -40,8 +40,8 @@ export const initialComponents: NoyaComponent[] = [
           operations: [
             {
               path: ['b'],
-              type: 'addParameters',
-              value: ['bg-primary-500', 'text-white'],
+              type: 'classNames',
+              add: ['bg-primary-500', 'text-white'],
             },
           ],
         },
@@ -139,23 +139,15 @@ export const initialComponents: NoyaComponent[] = [
             operations: [
               {
                 path: ['box'],
-                type: 'removeParameters',
-                value: ['items-center'],
-              },
-              {
-                path: ['box'],
-                type: 'addParameters',
-                value: ['items-start'],
+                type: 'classNames',
+                remove: ['items-center'],
+                add: ['items-start'],
               },
               {
                 path: ['box', 'a'],
-                type: 'addParameters',
-                value: ['flex-col'],
-              },
-              {
-                path: ['box', 'a'],
-                type: 'removeParameters',
-                value: ['items-center'],
+                type: 'classNames',
+                remove: ['items-center'],
+                add: ['flex-col'],
               },
             ],
           },

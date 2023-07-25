@@ -187,21 +187,23 @@ export function DSLayerInspector({
                   ops
                     .filter((op) => op.path.join('/') === path)
                     .forEach((op) => {
-                      if (op.type === 'addParameters') {
-                        classNames = [
-                          ...classNames,
-                          ...op.value.map((className) => ({
-                            name: className,
-                            status: 'added' as const,
-                          })),
-                        ];
-                      } else if (op.type === 'removeParameters') {
-                        classNames = classNames.map((className) => ({
-                          ...className,
-                          status: op.value.includes(className.name)
-                            ? ('deleted' as const)
-                            : className.status,
-                        }));
+                      switch (op.type) {
+                        case 'classNames': {
+                          classNames = classNames.map((className) => ({
+                            ...className,
+                            status: op.remove?.includes(className.name)
+                              ? ('deleted' as const)
+                              : className.status,
+                          }));
+
+                          classNames = [
+                            ...classNames,
+                            ...(op.add ?? []).map((className) => ({
+                              name: className,
+                              status: 'added' as const,
+                            })),
+                          ];
+                        }
                       }
                     });
                 }
