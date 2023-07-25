@@ -11,6 +11,10 @@ type NoyaElementBase = {
   name?: string;
 };
 
+/**
+ * Corresponds to a React host element like 'div'. In our case these elements
+ * come from the design system, e.g. a Chakra UI Button.
+ */
 export type NoyaPrimitiveElement = NoyaElementBase & {
   type: 'noyaPrimitiveElement';
   // Props
@@ -18,6 +22,11 @@ export type NoyaPrimitiveElement = NoyaElementBase & {
   children: NoyaNode[];
 };
 
+/**
+ * Corresponds to a React composite element (i.e. a component instance).
+ * Unlike React components which must expose props, the entire component hierarchy
+ * can be configured.
+ */
 export type NoyaCompositeElement = NoyaElementBase & {
   type: 'noyaCompositeElement';
   // Props

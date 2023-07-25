@@ -140,6 +140,11 @@ export const initialComponents: NoyaComponent[] = [
               {
                 path: ['box'],
                 type: 'removeParameters',
+                value: ['items-center'],
+              },
+              {
+                path: ['box'],
+                type: 'addParameters',
                 value: ['items-start'],
               },
               {
