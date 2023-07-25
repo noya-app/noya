@@ -2,6 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { withOptions } from 'tree-visit';
 import {
   NoyaComponent,
+  NoyaComponentDiff,
   NoyaNode,
   NoyaResolvedElement,
   NoyaResolvedNode,
@@ -40,6 +41,36 @@ export function getIdPath(resolved: NoyaResolvedNode, indexPath: number[]) {
   return idPath;
 }
 
+function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaComponentDiff) {
+  return ResolvedElementHierarchy.map<NoyaResolvedNode>(
+    cloneDeep(resolvedNode),
+    (node, transformedChildren, indexPath) => {
+      if (node?.type !== 'noyaPrimitiveElement') return node;
+
+      const idPath = getIdPath(resolvedNode, indexPath);
+
+      const newNode: NoyaResolvedElement = {
+        ...node,
+        children: transformedChildren,
+      };
+
+      diff.operations
+        .filter((op) => op.path.join('/') === idPath)
+        .forEach((operation) => {
+          if (operation.type === 'addParameters') {
+            newNode.classNames = [...newNode.classNames, ...operation.value];
+          } else if (operation.type === 'removeParameters') {
+            newNode.classNames = newNode.classNames.filter(
+              (className) => !operation.value.includes(className),
+            );
+          }
+        });
+
+      return newNode;
+    },
+  );
+}
+
 export type GetCompositeComponent = (id: string) => NoyaComponent | undefined;
 
 export function resolveComponentHierarchy(
@@ -68,42 +99,32 @@ export function resolveComponentHierarchy(
       );
     }
 
-    const resolvedNode = resolveComponentHierarchy(
+    let resolvedNode = resolveComponentHierarchy(
       getCompositeComponent,
       component.rootElement,
     );
 
-    const diff = node.diff;
+    if (node.variantID) {
+      const variant = component.variants?.find(
+        (variant) => variant.id === node.variantID,
+      );
 
-    if (!diff) return resolvedNode;
+      if (!variant) {
+        console.info(
+          `Failed to resolve variant ${node.variantID} for component ${component.name}`,
+        );
+      }
 
-    return ResolvedElementHierarchy.map(
-      cloneDeep(resolvedNode),
-      (node, transformedChildren, indexPath) => {
-        if (node?.type !== 'noyaPrimitiveElement') return node;
+      if (variant) {
+        resolvedNode = applyDiff(resolvedNode, variant.diff);
+      }
+    }
 
-        const idPath = getIdPath(resolvedNode, indexPath);
+    if (node.diff) {
+      resolvedNode = applyDiff(resolvedNode, node.diff);
+    }
 
-        const newNode: NoyaResolvedElement = {
-          ...node,
-          children: transformedChildren,
-        };
-
-        diff.operations
-          .filter((op) => op.path.join('/') === idPath)
-          .forEach((operation) => {
-            if (operation.type === 'addParameters') {
-              newNode.classNames = [...newNode.classNames, ...operation.value];
-            } else if (operation.type === 'removeParameters') {
-              newNode.classNames = newNode.classNames.filter(
-                (className) => !operation.value.includes(className),
-              );
-            }
-          });
-
-        return newNode;
-      },
-    );
+    return resolvedNode;
   }
 
   return null;

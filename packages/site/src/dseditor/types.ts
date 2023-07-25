@@ -22,6 +22,7 @@ export type NoyaCompositeElement = NoyaElementBase & {
   type: 'noyaCompositeElement';
   // Props
   diff?: NoyaComponentDiff;
+  variantID?: string;
 };
 
 export type NoyaElement = NoyaPrimitiveElement | NoyaCompositeElement;
@@ -50,10 +51,17 @@ export type NoyaComponentDiff = {
   operations: NoyaComponentOperation[];
 };
 
+export type NoyaVariant = {
+  id: string;
+  name?: string;
+  diff: NoyaComponentDiff;
+};
+
 export type NoyaComponent = {
   id: string;
   type: 'noyaComponent';
   name: string;
-  rootElement: NoyaElement;
   componentID: string;
+  rootElement: NoyaElement;
+  variants?: NoyaVariant[];
 };

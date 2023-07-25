@@ -4,6 +4,7 @@ import {
   NoyaCompositeElement,
   NoyaPrimitiveElement,
   NoyaString,
+  NoyaVariant,
 } from './types';
 
 type ModelOptions<T> = Partial<Omit<T, 'type'>>;
@@ -68,9 +69,18 @@ function noyaComponent(
   };
 }
 
+function noyaVariant(options: ModelOptions<NoyaVariant>) {
+  return {
+    diff: { operations: [] },
+    ...options,
+    id: options.id ?? uuid(),
+  };
+}
+
 export namespace Model {
   export const string = noyaString;
   export const primitiveElement = noyaPrimitiveElement;
   export const compositeElement = noyaCompositeElement;
   export const component = noyaComponent;
+  export const variant = noyaVariant;
 }
