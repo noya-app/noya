@@ -2,23 +2,33 @@ import {
   Chip,
   InputField,
   ScrollArea,
+  Select,
   Stack,
   Text,
   TreeView,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { InspectorPrimitives } from 'noya-inspector';
 import React, { useCallback, useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { InspectorSection } from '../components/InspectorSection';
 import { PRIMITIVE_ELEMENT_NAMES, initialComponents } from './builtins';
 import { EditableTreeItem, createEditableTree } from './traversal';
-import { NoyaComponentOperation } from './types';
+import {
+  NoyaComponentOperation,
+  NoyaVariant,
+  SelectedComponent,
+} from './types';
 
 interface Props {
-  selectedComponentId: string;
+  selectedComponent: SelectedComponent;
+  setSelectedComponent: (component: SelectedComponent | undefined) => void;
 }
 
-export function DSLayerInspector({ selectedComponentId }: Props) {
+export function DSLayerInspector({
+  selectedComponent,
+  setSelectedComponent,
+}: Props) {
   const theme = useDesignSystemTheme();
 
   const getCompositeComponent = useCallback(
@@ -27,7 +37,7 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
     [],
   );
 
-  const component = getCompositeComponent(selectedComponentId)!;
+  const component = getCompositeComponent(selectedComponent.componentID)!;
 
   // const resolved = useMemo(() => {
   //   const rootComponent = getCompositeComponent(selectedComponentId);
@@ -100,15 +110,46 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
     string | undefined
   >();
 
+  const variantsWithDefault = useMemo(
+    (): (NoyaVariant | undefined)[] => [
+      undefined,
+      ...(component.variants ?? []),
+    ],
+    [component.variants],
+  );
+
   return (
     <Stack.V width="400px" background="white">
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
           <InspectorSection title="Component" titleTextStyle="heading3">
-            <InputField.Root>
-              <InputField.Label>Name</InputField.Label>
-              <InputField.Input value={component.name} onChange={() => {}} />
-            </InputField.Root>
+            <InspectorPrimitives.LabeledRow label="Name">
+              <InputField.Root>
+                <InputField.Label>Name</InputField.Label>
+                <InputField.Input value={component.name} onChange={() => {}} />
+              </InputField.Root>
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Variant">
+              <Select
+                value={selectedComponent.variantID ?? 'default'}
+                id="variant-input"
+                options={variantsWithDefault.map(
+                  (variant) => variant?.id ?? 'default',
+                )}
+                getTitle={(id) => {
+                  const variant = component.variants?.find(
+                    (variant) => variant.id === id,
+                  );
+                  return variant?.name ?? 'Default';
+                }}
+                onChange={(id) => {
+                  setSelectedComponent({
+                    componentID: component.componentID,
+                    variantID: id,
+                  });
+                }}
+              />
+            </InspectorPrimitives.LabeledRow>
           </InspectorSection>
           <InspectorSection title="Elements" titleTextStyle="heading4">
             <TreeView.Root

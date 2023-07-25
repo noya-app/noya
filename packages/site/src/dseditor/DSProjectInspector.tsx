@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
 import { initialComponents } from './builtins';
+import { SelectedComponent } from './types';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -47,8 +48,8 @@ interface Props {
   system?: DesignSystemDefinition;
   ds: DS;
   setDS: React.Dispatch<React.SetStateAction<DS>>;
-  selectedComponentId?: string;
-  setSelectedComponentId: (id: string | undefined) => void;
+  selectedComponent?: SelectedComponent;
+  setSelectedComponent: (component: SelectedComponent | undefined) => void;
 }
 
 export function DSProjectInspector({
@@ -57,8 +58,8 @@ export function DSProjectInspector({
   system,
   ds,
   setDS,
-  selectedComponentId,
-  setSelectedComponentId,
+  selectedComponent,
+  setSelectedComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
 
@@ -161,8 +162,12 @@ export function DSProjectInspector({
               {initialComponents.map((component) => (
                 <ListView.Row
                   key={component.componentID}
-                  selected={component.componentID === selectedComponentId}
-                  onPress={() => setSelectedComponentId(component.componentID)}
+                  selected={
+                    component.componentID === selectedComponent?.componentID
+                  }
+                  onPress={() =>
+                    setSelectedComponent({ componentID: component.componentID })
+                  }
                 >
                   <Text variant="code" flex="1">
                     {component.name}

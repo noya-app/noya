@@ -20,6 +20,7 @@ import {
   getIdPath,
   resolveComponentHierarchy,
 } from './traversal';
+import { SelectedComponent } from './types';
 
 const noop = () => {};
 
@@ -67,23 +68,22 @@ export function DSEditor({
     fetchLibrary();
   }, [sourceName]);
 
-  const [selectedComponentId, setSelectedComponentId] = React.useState<
-    string | undefined
+  const [selectedComponent, setSelectedComponent] = React.useState<
+    SelectedComponent | undefined
   >();
 
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
-      if (selectedComponentId) {
+      if (selectedComponent) {
         const findComponent = (id: string) =>
           initialComponents.find((component) => component.componentID === id);
 
-        const rootComponent = findComponent(selectedComponentId);
-
-        if (!rootComponent) return null;
-
         const resolved = resolveComponentHierarchy(
           findComponent,
-          Model.compositeElement(rootComponent.componentID),
+          Model.compositeElement({
+            componentID: selectedComponent.componentID,
+            variantID: selectedComponent.variantID,
+          }),
         );
 
         console.info(
@@ -166,7 +166,7 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [primary, selectedComponentId, theme.colors.canvas.background],
+    [primary, selectedComponent, theme.colors.canvas.background],
   );
 
   return (
@@ -178,8 +178,8 @@ export function DSEditor({
           system={system}
           ds={ds}
           setDS={setDS}
-          selectedComponentId={selectedComponentId}
-          setSelectedComponentId={setSelectedComponentId}
+          selectedComponent={selectedComponent}
+          setSelectedComponent={setSelectedComponent}
         />
       )}
       <DSRenderer
@@ -187,8 +187,11 @@ export function DSEditor({
         primary={primary}
         renderContent={handleRenderContent}
       />
-      {viewType !== 'preview' && selectedComponentId && (
-        <DSLayerInspector selectedComponentId={selectedComponentId} />
+      {viewType !== 'preview' && selectedComponent && (
+        <DSLayerInspector
+          selectedComponent={selectedComponent}
+          setSelectedComponent={setSelectedComponent}
+        />
       )}
     </Stack.H>
   );

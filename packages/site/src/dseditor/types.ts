@@ -65,3 +65,8 @@ export type NoyaComponent = {
   rootElement: NoyaElement;
   variants?: NoyaVariant[];
 };
+
+export type SelectedComponent = {
+  componentID: string;
+  variantID?: string;
+};
