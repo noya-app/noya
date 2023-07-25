@@ -14,11 +14,7 @@ import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuB
 import { InspectorSection } from '../components/InspectorSection';
 import { PRIMITIVE_ELEMENT_NAMES, initialComponents } from './builtins';
 import { EditableTreeItem, createEditableTree } from './traversal';
-import {
-  NoyaComponentOperation,
-  NoyaVariant,
-  SelectedComponent,
-} from './types';
+import { NoyaDiffItem, NoyaVariant, SelectedComponent } from './types';
 
 interface Props {
   selectedComponent: SelectedComponent;
@@ -58,7 +54,7 @@ export function DSLayerInspector({
     key: string;
     item: EditableTreeItem;
     path: string;
-    ops: NoyaComponentOperation[];
+    ops: NoyaDiffItem[];
   };
 
   const EditableTreeHierarchy = useMemo(
@@ -78,7 +74,7 @@ export function DSLayerInspector({
         indexPath,
       ).flatMap((item) =>
         item.type === 'noyaCompositeElement' && item.diff
-          ? item.diff.operations
+          ? item.diff.items
           : [],
       );
 
@@ -185,25 +181,27 @@ export function DSLayerInspector({
 
                 if (ops) {
                   ops
-                    .filter((op) => op.path.join('/') === path)
-                    .forEach((op) => {
-                      switch (op.type) {
-                        case 'classNames': {
-                          classNames = classNames.map((className) => ({
-                            ...className,
-                            status: op.remove?.includes(className.name)
-                              ? ('deleted' as const)
-                              : className.status,
-                          }));
+                    .filter((item) => item.path.join('/') === path)
+                    .forEach((item) => {
+                      if (item.classNames?.remove) {
+                        classNames = classNames.map((className) => ({
+                          ...className,
+                          status: item.classNames?.remove?.includes(
+                            className.name,
+                          )
+                            ? ('deleted' as const)
+                            : className.status,
+                        }));
+                      }
 
-                          classNames = [
-                            ...classNames,
-                            ...(op.add ?? []).map((className) => ({
-                              name: className,
-                              status: 'added' as const,
-                            })),
-                          ];
-                        }
+                      if (item.classNames?.add) {
+                        classNames = [
+                          ...classNames,
+                          ...item.classNames.add.map((className) => ({
+                            name: className,
+                            status: 'added' as const,
+                          })),
+                        ];
                       }
                     });
                 }

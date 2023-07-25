@@ -30,7 +30,7 @@ export type NoyaPrimitiveElement = NoyaElementBase & {
 export type NoyaCompositeElement = NoyaElementBase & {
   type: 'noyaCompositeElement';
   // Props
-  diff?: NoyaComponentDiff;
+  diff?: NoyaDiff;
   variantID?: string;
 };
 
@@ -44,21 +44,22 @@ export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
 
 export type NoyaResolvedNode = NoyaResolvedElement | NoyaString | null;
 
-export type NoyaComponentOperation = {
-  type: 'classNames';
+export type NoyaDiffItem = {
   path: string[];
-  add?: string[];
-  remove?: string[];
+  classNames?: {
+    add?: string[];
+    remove?: string[];
+  };
 };
 
-export type NoyaComponentDiff = {
-  operations: NoyaComponentOperation[];
+export type NoyaDiff = {
+  items: NoyaDiffItem[];
 };
 
 export type NoyaVariant = {
   id: string;
   name?: string;
-  diff: NoyaComponentDiff;
+  diff: NoyaDiff;
 };
 
 export type NoyaComponent = {

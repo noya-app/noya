@@ -69,9 +69,9 @@ function noyaComponent(
   };
 }
 
-function noyaVariant(options: ModelOptions<NoyaVariant>) {
+function noyaVariant(options: ModelOptions<NoyaVariant>): NoyaVariant {
   return {
-    diff: { operations: [] },
+    diff: { items: [] },
     ...options,
     id: options.id ?? uuid(),
   };

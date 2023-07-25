@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { withOptions } from 'tree-visit';
 import {
   NoyaComponent,
-  NoyaComponentDiff,
+  NoyaDiff,
   NoyaNode,
   NoyaResolvedElement,
   NoyaResolvedNode,
@@ -41,7 +41,7 @@ export function getIdPath(resolved: NoyaResolvedNode, indexPath: number[]) {
   return idPath;
 }
 
-function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaComponentDiff) {
+function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaDiff) {
   return ResolvedElementHierarchy.map<NoyaResolvedNode>(
     cloneDeep(resolvedNode),
     (node, transformedChildren, indexPath) => {
@@ -54,20 +54,20 @@ function applyDiff(resolvedNode: NoyaResolvedNode, diff: NoyaComponentDiff) {
         children: transformedChildren,
       };
 
-      diff.operations
+      diff.items
         .filter((op) => op.path.join('/') === idPath)
-        .forEach((operation) => {
-          switch (operation.type) {
-            case 'classNames': {
-              newNode.classNames = newNode.classNames.filter(
-                (className) => !operation.remove?.includes(className),
-              );
+        .forEach((item) => {
+          if (item.classNames?.remove) {
+            newNode.classNames = newNode.classNames.filter(
+              (className) => !item.classNames?.remove?.includes(className),
+            );
+          }
 
-              newNode.classNames = [
-                ...newNode.classNames,
-                ...(operation.add ?? []),
-              ];
-            }
+          if (item.classNames?.add) {
+            newNode.classNames = [
+              ...newNode.classNames,
+              ...item.classNames.add,
+            ];
           }
         });
 

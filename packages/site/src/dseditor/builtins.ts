@@ -37,11 +37,12 @@ export const initialComponents: NoyaComponent[] = [
         id: sidebarItemActiveVariantId,
         name: 'Active',
         diff: {
-          operations: [
+          items: [
             {
               path: ['b'],
-              type: 'classNames',
-              add: ['bg-primary-500', 'text-white'],
+              classNames: {
+                add: ['bg-primary-500', 'text-white'],
+              },
             },
           ],
         },
@@ -64,11 +65,12 @@ export const initialComponents: NoyaComponent[] = [
         Model.compositeElement({
           componentID: sidebarItemSymbolId,
           diff: {
-            operations: [
+            items: [
               {
                 path: ['b'],
-                type: 'classNames',
-                add: ['bg-primary-900', 'text-white'],
+                classNames: {
+                  add: ['bg-primary-900', 'text-white'],
+                },
               },
             ],
           },
@@ -145,18 +147,20 @@ export const initialComponents: NoyaComponent[] = [
         Model.compositeElement({
           componentID: heroSymbolId,
           diff: {
-            operations: [
+            items: [
               {
                 path: ['box'],
-                type: 'classNames',
-                remove: ['items-center'],
-                add: ['items-start'],
+                classNames: {
+                  remove: ['items-center'],
+                  add: ['items-start'],
+                },
               },
               {
                 path: ['box', 'a'],
-                type: 'classNames',
-                remove: ['items-center'],
-                add: ['flex-col'],
+                classNames: {
+                  remove: ['items-center'],
+                  add: ['flex-col'],
+                },
               },
             ],
           },
