@@ -41,7 +41,7 @@ export const initialComponents: NoyaComponent[] = [
             {
               path: ['b'],
               type: 'addParameters',
-              value: ['bg-blue-500', 'text-white'],
+              value: ['bg-primary-500', 'text-white'],
             },
           ],
         },
@@ -79,7 +79,14 @@ export const initialComponents: NoyaComponent[] = [
     rootElement: Model.primitiveElement({
       id: 'box',
       name: 'Content',
-      classNames: ['flex', 'flex-col', 'items-center', 'gap-4'],
+      classNames: [
+        'flex',
+        'flex-col',
+        'items-center',
+        'justify-center',
+        'p-10',
+        'flex-1',
+      ],
       componentID: boxSymbolId,
       children: [
         Model.primitiveElement({
@@ -90,12 +97,18 @@ export const initialComponents: NoyaComponent[] = [
           name: 'Title',
           componentID: textSymbolId,
           children: [Model.string('Create, iterate, inspire.')],
-          classNames: ['text-4xl', 'font-bold'],
+          classNames: ['variant-h1', 'text-center'],
+        }),
+        Model.primitiveElement({
+          name: 'Subtitle',
+          componentID: textSymbolId,
+          children: [Model.string('Turn great ideas into new possibilities.')],
+          classNames: ['variant-h4', 'text-center'],
         }),
         Model.primitiveElement({
           id: 'a',
           name: 'Actions Row',
-          classNames: ['flex', 'items-center', 'gap-4'],
+          classNames: ['flex', 'items-center', 'gap-4', 'mt-6'],
           componentID: boxSymbolId,
           children: [
             Model.primitiveElement({
@@ -145,7 +158,7 @@ export const initialComponents: NoyaComponent[] = [
         Model.primitiveElement({
           name: 'Image',
           componentID: boxSymbolId,
-          classNames: ['w-96', 'h-96', 'bg-gray-200'],
+          classNames: ['w-full', 'h-full', 'bg-gray-200'],
         }),
       ],
     }),

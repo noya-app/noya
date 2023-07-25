@@ -58,6 +58,7 @@ export const classGroups = {
     /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
   background: /^bg/,
   backdropFilter: /^backdrop-blur/,
+  textAlign: /^(text-left|text-center|text-right)/,
   // From https://github.com/tailwindlabs/tailwindcss/blob/86f9c6f09270a9da6fee77909863444b52e2f9b6/stubs/config.full.js
   textColor:
     /^text-(inherit|current|transparent|black|white|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)/,
@@ -432,6 +433,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = getValue(className);
       return {
         lineHeight: (config.theme as any).lineHeight[value || 'DEFAULT'],
+      };
+    }
+    case 'textAlign': {
+      const value = className.replace('text-', '');
+      return {
+        textAlign: value as any,
       };
     }
   }

@@ -30,6 +30,7 @@ const Frame = styled.iframe({
 export type DSRenderProps = {
   system: DesignSystemDefinition;
   theme: any;
+  primary: string;
 };
 
 export function DSRenderer({
@@ -97,7 +98,7 @@ export function DSRenderer({
     const Provider: React.FC<ProviderProps> =
       system.components[component.id.Provider];
 
-    const content = renderContent({ system, theme: theme });
+    const content = renderContent({ system, theme, primary });
 
     const withProvider = Provider ? (
       <Provider theme={theme}>{content}</Provider>
@@ -106,7 +107,7 @@ export function DSRenderer({
     );
 
     root.render(withProvider);
-  }, [theme, renderContent, root, system]);
+  }, [theme, renderContent, root, system, primary]);
 
   return (
     <Stack.V flex="1" position="relative">

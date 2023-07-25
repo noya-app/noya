@@ -112,7 +112,11 @@ export function DSEditor({
 
             if (!PrimitiveComponent) return null;
 
-            const style = parametersToTailwindStyle(element.classNames);
+            const style = parametersToTailwindStyle(
+              element.classNames.map((className) => {
+                return className.replace(/-primary-/, `-${primary}-`);
+              }),
+            );
 
             const variantClassName = findLast(element.classNames, (className) =>
               className.startsWith('variant-'),
@@ -136,13 +140,23 @@ export function DSEditor({
         return (
           <div
             style={{
-              padding: '20px',
-              background: theme.colors.canvas.background,
+              backgroundImage: `radial-gradient(circle at 0px 0px, rgba(0,0,0,0.25) 1px, ${theme.colors.canvas.background} 0px)`,
+              backgroundSize: '10px 10px',
               minHeight: '100%',
               display: 'flex',
+              alignItems: 'stretch',
+              flexDirection: 'column',
+              padding: '20px',
             }}
           >
-            {content}
+            <div
+              style={{
+                display: 'flex',
+                background: 'white',
+              }}
+            >
+              {content}
+            </div>
           </div>
         );
       }
@@ -152,7 +166,7 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [selectedComponentId, theme.colors.canvas.background],
+    [primary, selectedComponentId, theme.colors.canvas.background],
   );
 
   return (
