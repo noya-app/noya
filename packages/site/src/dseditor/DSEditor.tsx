@@ -13,11 +13,11 @@ import { DSLayerInspector } from './DSLayerInspector';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
+import { initialComponents } from './builtins';
 import { renderDSOverview } from './renderDSOverview';
 import {
   ResolvedElementHierarchy,
   getIdPath,
-  initialComponents,
   resolveComponentHierarchy,
 } from './traversal';
 

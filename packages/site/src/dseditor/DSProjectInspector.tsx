@@ -19,7 +19,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
-import { initialComponents } from './traversal';
+import { initialComponents } from './builtins';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',

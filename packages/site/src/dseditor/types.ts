@@ -8,8 +8,8 @@ export type NoyaString = {
 export type NoyaPrimitiveElement = {
   id: string;
   type: 'noyaPrimitiveElement';
-  name?: string;
   componentID: string;
+  name?: string;
   classNames: string[];
   children: NoyaNode[];
 };
@@ -17,8 +17,9 @@ export type NoyaPrimitiveElement = {
 export type NoyaCompositeElement = {
   id: string;
   type: 'noyaCompositeElement';
-  name?: string;
   componentID: string;
+  name?: string;
+  diff?: NoyaComponentDiff;
 };
 
 export type NoyaElement = NoyaPrimitiveElement | NoyaCompositeElement;
@@ -53,5 +54,4 @@ export type NoyaComponent = {
   name: string;
   rootElement: NoyaElement;
   componentID: string;
-  diff?: NoyaComponentDiff;
 };

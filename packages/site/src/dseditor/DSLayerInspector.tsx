@@ -10,12 +10,8 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { InspectorSection } from '../components/InspectorSection';
-import {
-  EditableTreeItem,
-  PRIMITIVE_ELEMENT_NAMES,
-  createEditableTree,
-  initialComponents,
-} from './traversal';
+import { PRIMITIVE_ELEMENT_NAMES, initialComponents } from './builtins';
+import { EditableTreeItem, createEditableTree } from './traversal';
 import { NoyaComponentOperation } from './types';
 
 interface Props {
@@ -71,7 +67,9 @@ export function DSLayerInspector({ selectedComponentId }: Props) {
         component,
         indexPath,
       ).flatMap((item) =>
-        item.type === 'noyaComponent' && item.diff ? item.diff.operations : [],
+        item.type === 'noyaCompositeElement' && item.diff
+          ? item.diff.operations
+          : [],
       );
 
       const idPathElements = EditableTreeHierarchy.accessPath(
