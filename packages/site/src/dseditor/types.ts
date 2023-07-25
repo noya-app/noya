@@ -5,20 +5,22 @@ export type NoyaString = {
   value: string;
 };
 
-export type NoyaPrimitiveElement = {
+type NoyaElementBase = {
   id: string;
-  type: 'noyaPrimitiveElement';
   componentID: string;
   name?: string;
+};
+
+export type NoyaPrimitiveElement = NoyaElementBase & {
+  type: 'noyaPrimitiveElement';
+  // Props
   classNames: string[];
   children: NoyaNode[];
 };
 
-export type NoyaCompositeElement = {
-  id: string;
+export type NoyaCompositeElement = NoyaElementBase & {
   type: 'noyaCompositeElement';
-  componentID: string;
-  name?: string;
+  // Props
   diff?: NoyaComponentDiff;
 };
 
