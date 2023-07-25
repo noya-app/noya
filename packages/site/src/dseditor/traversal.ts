@@ -33,33 +33,30 @@ export const ResolvedElementHierarchy = withOptions<NoyaResolvedNode>({
   },
 });
 
-export function getIdPath(resolved: NoyaResolvedNode, indexPath: number[]) {
-  const idPath = ResolvedElementHierarchy.accessPath(resolved, indexPath)
-    .map((el) => el?.id ?? '-')
-    .join('/');
-
-  return idPath;
-}
-
 function applyDiff(
   getCompositeComponent: GetCompositeComponent,
   resolvedNode: NoyaResolvedNode,
   diff: NoyaDiff,
+  path: string[],
 ) {
   return ResolvedElementHierarchy.map<NoyaResolvedNode>(
     cloneDeep(resolvedNode),
     (node, transformedChildren, indexPath) => {
       if (node?.type !== 'noyaPrimitiveElement') return node;
 
-      const idPath = getIdPath(resolvedNode, indexPath);
-
       const newNode: NoyaResolvedElement = {
         ...node,
         children: transformedChildren,
       };
 
+      const nodeKey = newNode.path.join('/');
+
       diff.items
-        .filter((op) => op.path.join('/') === idPath)
+        .filter((item) => {
+          const itemKey = [...path, ...item.path].join('/');
+
+          return itemKey === nodeKey;
+        })
         .forEach((item) => {
           if (item.children?.remove) {
             newNode.children = newNode.children.filter(
@@ -71,7 +68,7 @@ function applyDiff(
             newNode.children = [
               ...newNode.children,
               ...cloneDeep(item.children.add).map((child) =>
-                resolveComponentHierarchy(getCompositeComponent, child),
+                resolveComponentHierarchy(getCompositeComponent, child, []),
               ),
             ].filter((child) => child);
           }
@@ -100,17 +97,21 @@ export type GetCompositeComponent = (id: string) => NoyaComponent | undefined;
 export function resolveComponentHierarchy(
   getCompositeComponent: GetCompositeComponent,
   node: NoyaNode,
+  parentPath: string[],
 ): NoyaResolvedNode {
   if (node.type === 'noyaString') return node;
 
+  const path = [...parentPath, node.id];
+
   if (node.type === 'noyaPrimitiveElement') {
     const children = node.children.map<NoyaResolvedNode>((child) =>
-      resolveComponentHierarchy(getCompositeComponent, child),
+      resolveComponentHierarchy(getCompositeComponent, child, path),
     );
 
     return {
       ...node,
       children,
+      path,
     };
   }
 
@@ -126,6 +127,7 @@ export function resolveComponentHierarchy(
     let resolvedNode = resolveComponentHierarchy(
       getCompositeComponent,
       component.rootElement,
+      path,
     );
 
     if (node.variantID) {
@@ -144,12 +146,18 @@ export function resolveComponentHierarchy(
           getCompositeComponent,
           resolvedNode,
           variant.diff,
+          path,
         );
       }
     }
 
     if (node.diff) {
-      resolvedNode = applyDiff(getCompositeComponent, resolvedNode, node.diff);
+      resolvedNode = applyDiff(
+        getCompositeComponent,
+        resolvedNode,
+        node.diff,
+        path,
+      );
     }
 
     return resolvedNode;

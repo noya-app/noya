@@ -63,6 +63,7 @@ export const initialComponents: NoyaComponent[] = [
           variantID: sidebarItemActiveVariantId,
         }),
         Model.compositeElement({
+          id: '2',
           componentID: sidebarItemSymbolId,
           diff: {
             items: [
@@ -76,9 +77,11 @@ export const initialComponents: NoyaComponent[] = [
           },
         }),
         Model.compositeElement({
+          id: '3',
           componentID: sidebarItemSymbolId,
         }),
         Model.compositeElement({
+          id: '4',
           componentID: sidebarItemSymbolId,
         }),
       ],
@@ -99,6 +102,12 @@ export const initialComponents: NoyaComponent[] = [
                     classNames: ['variant-h4'],
                   }),
                 ],
+              },
+            },
+            {
+              path: ['sidebar', '1', 'b'],
+              classNames: {
+                add: ['bg-blue-500'],
               },
             },
           ],

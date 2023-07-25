@@ -40,6 +40,7 @@ export type NoyaNode = NoyaElement | NoyaString;
 
 export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
   children: NoyaResolvedNode[];
+  path: string[];
 };
 
 export type NoyaResolvedNode = NoyaResolvedElement | NoyaString | null;

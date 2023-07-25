@@ -141,7 +141,7 @@ export function DSLayerInspector({
                 onChange={(id) => {
                   setSelectedComponent({
                     componentID: component.componentID,
-                    variantID: id,
+                    ...(id !== 'default' && { variantID: id }),
                   });
                 }}
               />

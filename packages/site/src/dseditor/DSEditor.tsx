@@ -17,7 +17,6 @@ import { initialComponents } from './builtins';
 import { renderDSOverview } from './renderDSOverview';
 import {
   ResolvedElementHierarchy,
-  getIdPath,
   resolveComponentHierarchy,
 } from './traversal';
 import { SelectedComponent } from './types';
@@ -81,9 +80,11 @@ export function DSEditor({
         const resolved = resolveComponentHierarchy(
           findComponent,
           Model.compositeElement({
+            id: 'root',
             componentID: selectedComponent.componentID,
             variantID: selectedComponent.variantID,
           }),
+          [],
         );
 
         console.info(
@@ -92,7 +93,7 @@ export function DSEditor({
 
             if (node.type === 'noyaString') return `"${node.value}"`;
 
-            return [node.name, `(${getIdPath(resolved, indexPath)})`]
+            return [node.name, `(${node.path.join('/')})`]
               .filter(Boolean)
               .join(' ');
           }),
@@ -104,8 +105,6 @@ export function DSEditor({
             if (!element) return null;
 
             if (element.type === 'noyaString') return element.value;
-
-            const idPath = getIdPath(resolved, indexPath);
 
             const PrimitiveComponent: React.FC<any> =
               props.system.components[element.componentID];
@@ -128,7 +127,7 @@ export function DSEditor({
             return (
               <PrimitiveComponent
                 style={style}
-                key={idPath}
+                key={element.path.join('/')}
                 {...(variant && { variant })}
               >
                 {transformedChildren}
