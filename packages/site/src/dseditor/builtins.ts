@@ -21,6 +21,7 @@ export const PRIMITIVE_ELEMENT_NAMES = {
 
 const sidebarItemSymbolId = uuid();
 const sidebarItemActiveVariantId = uuid();
+const sidebarItemStringId = uuid();
 
 export const initialComponents: NoyaComponent[] = [
   Model.component({
@@ -29,7 +30,12 @@ export const initialComponents: NoyaComponent[] = [
     rootElement: Model.primitiveElement({
       id: 'b',
       componentID: buttonSymbolId,
-      children: [Model.string('Home')],
+      children: [
+        Model.string({
+          id: sidebarItemStringId,
+          value: 'Home',
+        }),
+      ],
       classNames: ['text-left', 'justify-start', 'variant-text'],
     }),
     variants: [
@@ -71,6 +77,10 @@ export const initialComponents: NoyaComponent[] = [
                 path: ['b'],
                 classNames: {
                   add: ['bg-primary-900', 'text-white'],
+                },
+                children: {
+                  remove: [sidebarItemStringId],
+                  add: [Model.string('Dashboard')],
                 },
               },
             ],
