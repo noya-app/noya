@@ -67,7 +67,7 @@ export function DSLayerInspector({
     (item, indexPath): LayerTreeItem[] => {
       const depth = indexPath.length;
 
-      // if (depth === 0) return [];
+      if (depth === 0) return [];
 
       const diffOps = EditableTreeHierarchy.accessPath(
         component,
