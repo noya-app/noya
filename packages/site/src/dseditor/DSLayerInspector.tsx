@@ -15,13 +15,13 @@ import { InspectorSection } from '../components/InspectorSection';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import {
-  EditableHierarchy,
-  GetCompositeComponent,
-  createEditableNode,
+  FindComponent,
+  ResolvedHierarchy,
+  createResolvedNode,
 } from './traversal';
 import {
   NoyaDiffItem,
-  NoyaEditableNode,
+  NoyaResolvedNode,
   NoyaVariant,
   SelectedComponent,
 } from './types';
@@ -29,7 +29,7 @@ import {
 interface Props {
   selectedComponent: SelectedComponent;
   setSelectedComponent: (component: SelectedComponent | undefined) => void;
-  findComponent: GetCompositeComponent;
+  findComponent: FindComponent;
 }
 
 export function DSLayerInspector({
@@ -45,12 +45,12 @@ export function DSLayerInspector({
     depth: number;
     indexPath: number[];
     key: string;
-    item: NoyaEditableNode;
+    item: NoyaResolvedNode;
     path: string;
     ops: NoyaDiffItem[];
   };
 
-  const editableNode = createEditableNode(
+  const editableNode = createResolvedNode(
     findComponent,
     Model.compositeElement({
       id: 'root',
@@ -60,7 +60,7 @@ export function DSLayerInspector({
     [],
   );
 
-  const flattened = EditableHierarchy.flatMap(
+  const flattened = ResolvedHierarchy.flatMap(
     editableNode,
     (item, indexPath): LayerTreeItem[] => {
       const depth = indexPath.length;
