@@ -26,10 +26,35 @@ import {
   SelectedComponent,
 } from './types';
 
+type LayerTreeItem = {
+  depth: number;
+  indexPath: number[];
+  key: string;
+  node: NoyaResolvedNode;
+  path: string;
+  ops: NoyaDiffItem[];
+};
+
 interface Props {
   selectedComponent: SelectedComponent;
   setSelectedComponent: (component: SelectedComponent | undefined) => void;
   findComponent: FindComponent;
+}
+
+function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
+  switch (node.type) {
+    case 'noyaString':
+      return JSON.stringify(node.value);
+    case 'noyaPrimitiveElement':
+      return node.name ?? PRIMITIVE_ELEMENT_NAMES[node.componentID];
+    case 'noyaCompositeElement': {
+      const component = findComponent(node.componentID);
+
+      if (!component) return '<Component Not Found>';
+
+      return node.name ?? component.name ?? '<No Name>';
+    }
+  }
 }
 
 export function DSLayerInspector({
@@ -40,15 +65,6 @@ export function DSLayerInspector({
   const theme = useDesignSystemTheme();
 
   const component = findComponent(selectedComponent.componentID)!;
-
-  type LayerTreeItem = {
-    depth: number;
-    indexPath: number[];
-    key: string;
-    item: NoyaResolvedNode;
-    path: string;
-    ops: NoyaDiffItem[];
-  };
 
   const editableNode = createResolvedNode(
     findComponent,
@@ -69,7 +85,7 @@ export function DSLayerInspector({
 
       return [
         {
-          item,
+          node: item,
           depth,
           indexPath: indexPath.slice(),
           key: component.type + ':' + indexPath.join('/'),
@@ -135,24 +151,19 @@ export function DSLayerInspector({
               sortable
               pressEventName="onPointerDown"
               renderItem={(
-                { depth, key, indexPath, item, ops, path },
+                { depth, key, indexPath, node, ops, path },
                 index,
                 { isDragging },
               ) => {
-                const name =
-                  item.type === 'noyaString'
-                    ? JSON.stringify(item.value)
-                    : item.type === 'noyaPrimitiveElement'
-                    ? item.name ?? PRIMITIVE_ELEMENT_NAMES[item.componentID]
-                    : item.name ?? item.id; //  + `(${item.id})`
+                const name = getName(node, findComponent);
 
                 let classNames: {
                   name: string;
                   status?: 'added' | 'deleted';
                 }[] = [];
 
-                if (item.type === 'noyaPrimitiveElement') {
-                  classNames = item.classNames.map((className) => ({
+                if (node.type === 'noyaPrimitiveElement') {
+                  classNames = node.classNames.map((className) => ({
                     name: className,
                   }));
                 }
@@ -205,19 +216,19 @@ export function DSLayerInspector({
                       borderRadius="4px"
                       margin="2px 0"
                       border={
-                        item.type !== 'noyaCompositeElement'
+                        node.type !== 'noyaCompositeElement'
                           ? `1px solid ${theme.colors.divider}`
                           : undefined
                       }
                       background={
-                        item.type === 'noyaCompositeElement'
+                        node.type === 'noyaCompositeElement'
                           ? 'rgb(238, 229, 255)'
                           : undefined
                       }
                       color={
-                        item.type === 'noyaString'
+                        node.type === 'noyaString'
                           ? 'dodgerblue'
-                          : item.type === 'noyaCompositeElement'
+                          : node.type === 'noyaCompositeElement'
                           ? theme.colors.primary
                           : 'inherit'
                       }
@@ -225,18 +236,13 @@ export function DSLayerInspector({
                       <Stack.H padding="4px 8px" alignItems="center">
                         <TreeView.RowTitle>{name}</TreeView.RowTitle>
                         {hoveredItemId === key &&
-                          item.type === 'noyaPrimitiveElement' && (
+                          node.type === 'noyaPrimitiveElement' && (
                             <Text variant="code" fontSize="9px">
-                              {PRIMITIVE_ELEMENT_NAMES[item.componentID]}
+                              {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
                             </Text>
                           )}
                       </Stack.H>
-                      {hoveredItemId === key && (
-                        <Text variant="code" fontSize="9px">
-                          {path}
-                        </Text>
-                      )}
-                      {item.type === 'noyaPrimitiveElement' && (
+                      {node.type === 'noyaPrimitiveElement' && (
                         <Stack.H flexWrap="wrap" gap="2px">
                           {classNames.map(({ name, status }) => (
                             <Chip

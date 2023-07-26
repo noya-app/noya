@@ -52,16 +52,15 @@ export const ResolvedHierarchy = withOptions<NoyaResolvedNode>({
     switch (node.type) {
       case 'noyaString':
         return [];
-      case 'noyaCompositeElement': {
+      case 'noyaCompositeElement':
         return [node.rootElement];
-      }
       case 'noyaPrimitiveElement':
         return node.children;
     }
   },
 });
 
-function applyEditableDiff(
+function applyDiff(
   findComponent: FindComponent,
   rootNode: NoyaResolvedNode,
   diff: NoyaDiff,
@@ -70,7 +69,7 @@ function applyEditableDiff(
   return ResolvedHierarchy.map<NoyaResolvedNode>(
     cloneDeep(rootNode),
     (node, transformedChildren) => {
-      if (node?.type !== 'noyaPrimitiveElement') return node;
+      if (node.type !== 'noyaPrimitiveElement') return node;
 
       const newNode: NoyaResolvedPrimitiveElement = {
         ...node,
@@ -111,75 +110,69 @@ export function createResolvedNode(
   node: NoyaNode,
   parentPath: string[],
 ): NoyaResolvedNode {
-  if (node.type === 'noyaString') return node;
-
   const path = [...parentPath, node.id];
 
-  if (node.type === 'noyaPrimitiveElement') {
-    const children = node.children.map<NoyaResolvedNode>((child) =>
-      createResolvedNode(findComponent, child, path),
-    );
-
-    const result: NoyaResolvedPrimitiveElement = {
-      ...node,
-      children,
-      path,
-    };
-
-    return result;
-  }
-
-  if (node.type === 'noyaCompositeElement') {
-    const component = findComponent(node.componentID);
-
-    if (!component) {
-      throw new Error(
-        `Failed to resolve composite element ${node.name} with Component ID ${node.componentID}`,
+  switch (node.type) {
+    case 'noyaString':
+      return { ...node, path };
+    case 'noyaPrimitiveElement': {
+      const children = node.children.map<NoyaResolvedNode>((child) =>
+        createResolvedNode(findComponent, child, path),
       );
+
+      const result: NoyaResolvedPrimitiveElement = {
+        ...node,
+        children,
+        path,
+      };
+
+      return result;
     }
+    case 'noyaCompositeElement': {
+      const component = findComponent(node.componentID);
 
-    let resolvedNode = createResolvedNode(
-      findComponent,
-      component.rootElement,
-      path,
-    );
-
-    if (node.variantID) {
-      const variant = component.variants?.find(
-        (variant) => variant.id === node.variantID,
-      );
-
-      if (!variant) {
-        console.info(
-          `Failed to resolve variant ${node.variantID} for component ${component.name}`,
+      if (!component) {
+        throw new Error(
+          `Failed to resolve composite element ${node.name} with Component ID ${node.componentID}`,
         );
       }
 
-      if (variant) {
-        resolvedNode = applyEditableDiff(
-          findComponent,
-          resolvedNode,
-          variant.diff,
-          path,
-        );
-      }
-    }
-
-    if (node.diff) {
-      resolvedNode = applyEditableDiff(
+      let resolvedNode = createResolvedNode(
         findComponent,
-        resolvedNode,
-        node.diff,
+        component.rootElement,
         path,
       );
+
+      if (node.variantID) {
+        const variant = component.variants?.find(
+          (variant) => variant.id === node.variantID,
+        );
+
+        if (!variant) {
+          console.info(
+            `Failed to resolve variant ${node.variantID} for component ${component.name}`,
+          );
+        }
+
+        if (variant) {
+          resolvedNode = applyDiff(
+            findComponent,
+            resolvedNode,
+            variant.diff,
+            path,
+          );
+        }
+      }
+
+      if (node.diff) {
+        resolvedNode = applyDiff(findComponent, resolvedNode, node.diff, path);
+      }
+
+      return {
+        ...node,
+        rootElement: resolvedNode,
+        path,
+      };
     }
-
-    return {
-      ...node,
-      rootElement: resolvedNode,
-      path,
-    };
   }
-
-  throw new Error(`Unknown node type ${JSON.stringify(node)}`);
 }

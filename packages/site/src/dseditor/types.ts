@@ -38,12 +38,12 @@ export type NoyaNode = NoyaElement | NoyaString;
 export type NoyaElement = NoyaPrimitiveElement | NoyaCompositeElement;
 
 /**
- * When editing the tree, we want to show the tree with diffs applied.
+ * When editing or rendering the tree, we want to use the tree with diffs applied.
  */
 export type NoyaResolvedNode =
   | NoyaResolvedPrimitiveElement
   | NoyaResolvedCompositeElement
-  | NoyaString;
+  | NoyaResolvedString;
 export type NoyaResolvedCompositeElement = NoyaCompositeElement & {
   rootElement: NoyaResolvedNode;
   path: string[];
@@ -53,6 +53,9 @@ export type NoyaResolvedPrimitiveElement = Omit<
   'children'
 > & {
   children: NoyaResolvedNode[];
+  path: string[];
+};
+export type NoyaResolvedString = NoyaString & {
   path: string[];
 };
 
