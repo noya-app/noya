@@ -47,16 +47,24 @@ export type NoyaResolvedNode =
 export type NoyaResolvedCompositeElement = NoyaCompositeElement & {
   rootElement: NoyaResolvedNode;
   path: string[];
+  status?: 'added' | 'removed';
 };
 export type NoyaResolvedPrimitiveElement = Omit<
   NoyaPrimitiveElement,
-  'children'
+  'children' | 'classNames'
 > & {
   children: NoyaResolvedNode[];
   path: string[];
+  classNames: NoyaResolvedClassName[];
+  status?: 'added' | 'removed';
 };
 export type NoyaResolvedString = NoyaString & {
   path: string[];
+  status?: 'added' | 'removed';
+};
+export type NoyaResolvedClassName = {
+  value: string;
+  status?: 'added' | 'removed';
 };
 
 export type NoyaDiffItem = {

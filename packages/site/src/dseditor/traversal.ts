@@ -5,40 +5,64 @@ import {
   NoyaDiff,
   NoyaDiffItem,
   NoyaNode,
+  NoyaResolvedClassName,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
 } from './types';
 
 function applyClassNamesDiff(
-  classNames: string[],
+  level: number,
+  classNames: NoyaResolvedClassName[],
   { add, remove }: NonNullable<NoyaDiffItem['classNames']>,
 ) {
   if (remove) {
-    classNames = classNames.filter((className) => !remove.includes(className));
+    const removeKeys = new Set(remove);
+    classNames = classNames.flatMap((className) =>
+      removeKeys.has(className.value)
+        ? level > 0
+          ? [{ ...className, status: 'removed' as const }]
+          : []
+        : [className],
+    );
   }
 
   if (add) {
-    classNames = [...classNames, ...add];
+    classNames = [
+      ...classNames,
+      ...add.map((className) => ({
+        value: className,
+        ...(level > 0 && { status: 'added' as const }),
+      })),
+    ];
   }
 
   return classNames;
 }
 
 function applyChildrenDiff(
+  level: number,
   findComponent: FindComponent,
   children: NoyaResolvedNode[],
   { add, remove }: NonNullable<NoyaDiffItem['children']>,
 ) {
   if (remove) {
-    children = children.filter((child) => child && !remove?.includes(child.id));
+    const removeKeys = new Set(remove);
+    children = children.flatMap((child) =>
+      removeKeys.has(child.id)
+        ? level > 0
+          ? [{ ...child, status: 'removed' as const }]
+          : []
+        : [child],
+    );
   }
 
   if (add) {
     children = [
       ...children,
-      ...cloneDeep(add).map((child) =>
-        createResolvedNode(findComponent, child, []),
-      ),
+      ...cloneDeep(add).map((child) => ({
+        ...createResolvedNode(findComponent, child, [], level),
+        status: 'added' as const,
+      })),
     ];
   }
 
@@ -65,6 +89,7 @@ function applyDiff(
   rootNode: NoyaResolvedNode,
   diff: NoyaDiff,
   path: string[],
+  level: number,
 ) {
   return ResolvedHierarchy.map<NoyaResolvedNode>(
     cloneDeep(rootNode),
@@ -86,6 +111,7 @@ function applyDiff(
         .forEach((item) => {
           if (item.children) {
             newNode.children = applyChildrenDiff(
+              level,
               findComponent,
               newNode.children,
               item.children,
@@ -94,6 +120,7 @@ function applyDiff(
 
           if (item.classNames) {
             newNode.classNames = applyClassNamesDiff(
+              level,
               newNode.classNames,
               item.classNames,
             );
@@ -108,7 +135,8 @@ function applyDiff(
 export function createResolvedNode(
   findComponent: FindComponent,
   node: NoyaNode,
-  parentPath: string[],
+  parentPath: string[] = [],
+  level: number = 2,
 ): NoyaResolvedNode {
   const path = [...parentPath, node.id];
 
@@ -117,13 +145,14 @@ export function createResolvedNode(
       return { ...node, path };
     case 'noyaPrimitiveElement': {
       const children = node.children.map<NoyaResolvedNode>((child) =>
-        createResolvedNode(findComponent, child, path),
+        createResolvedNode(findComponent, child, path, level),
       );
 
       const result: NoyaResolvedPrimitiveElement = {
         ...node,
         children,
         path,
+        classNames: node.classNames.map((className) => ({ value: className })),
       };
 
       return result;
@@ -141,6 +170,7 @@ export function createResolvedNode(
         findComponent,
         component.rootElement,
         path,
+        level - 1,
       );
 
       if (node.variantID) {
@@ -160,12 +190,19 @@ export function createResolvedNode(
             resolvedNode,
             variant.diff,
             path,
+            level - 1,
           );
         }
       }
 
       if (node.diff) {
-        resolvedNode = applyDiff(findComponent, resolvedNode, node.diff, path);
+        resolvedNode = applyDiff(
+          findComponent,
+          resolvedNode,
+          node.diff,
+          path,
+          level,
+        );
       }
 
       return {

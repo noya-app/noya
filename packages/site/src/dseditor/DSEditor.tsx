@@ -84,7 +84,6 @@ export function DSEditor({
             componentID: selectedComponent.componentID,
             variantID: selectedComponent.variantID,
           }),
-          [],
         );
 
         console.info(
@@ -102,6 +101,8 @@ export function DSEditor({
         const content = ResolvedHierarchy.map<ReactNode>(
           resolved,
           (element, transformedChildren) => {
+            if (element.status === 'removed') return null;
+
             if (element.type === 'noyaString') return element.value;
 
             if (element.type === 'noyaCompositeElement')
@@ -112,13 +113,15 @@ export function DSEditor({
 
             if (!PrimitiveComponent) return null;
 
-            const style = parametersToTailwindStyle(
-              element.classNames.map((className) => {
-                return className.replace(/-primary-/, `-${primary}-`);
-              }),
-            );
+            const classNames = element.classNames
+              .filter((className) => className.status !== 'removed')
+              .map((className) => {
+                return className.value.replace(/-primary-/, `-${primary}-`);
+              });
 
-            const variantClassName = findLast(element.classNames, (className) =>
+            const style = parametersToTailwindStyle(classNames);
+
+            const variantClassName = findLast(classNames, (className) =>
               className.startsWith('variant-'),
             );
             const variant = variantClassName

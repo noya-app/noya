@@ -73,7 +73,6 @@ export function DSLayerInspector({
       componentID: selectedComponent.componentID,
       variantID: selectedComponent.variantID,
     }),
-    [],
   );
 
   const flattened = ResolvedHierarchy.flatMap(
@@ -156,56 +155,21 @@ export function DSLayerInspector({
                 { isDragging },
               ) => {
                 const name = getName(node, findComponent);
-
-                let classNames: {
-                  name: string;
-                  status?: 'added' | 'deleted';
-                }[] = [];
-
-                if (node.type === 'noyaPrimitiveElement') {
-                  classNames = node.classNames.map((className) => ({
-                    name: className,
-                  }));
-                }
-
-                if (ops) {
-                  ops
-                    .filter((item) => item.path.join('/') === path)
-                    .forEach((item) => {
-                      if (item.classNames?.remove) {
-                        classNames = classNames.map((className) => ({
-                          ...className,
-                          status: item.classNames?.remove?.includes(
-                            className.name,
-                          )
-                            ? ('deleted' as const)
-                            : className.status,
-                        }));
-                      }
-
-                      if (item.classNames?.add) {
-                        classNames = [
-                          ...classNames,
-                          ...item.classNames.add.map((className) => ({
-                            name: className,
-                            status: 'added' as const,
-                          })),
-                        ];
-                      }
-                    });
-                }
+                const menu = [{ title: 'Duplicate' }, { title: 'Delete' }];
 
                 return (
                   <TreeView.Row
                     key={key}
                     id={key}
                     depth={depth - 1}
+                    menuItems={menu}
+                    onSelectMenuItem={() => {}}
                     onHoverChange={(hovered) =>
                       setHoveredItemId(hovered ? key : undefined)
                     }
                     icon={
                       depth !== 0 && (
-                        <DraggableMenuButton items={[]} onSelect={() => {}} />
+                        <DraggableMenuButton items={menu} onSelect={() => {}} />
                       )
                     }
                   >
@@ -216,13 +180,20 @@ export function DSLayerInspector({
                       borderRadius="4px"
                       margin="2px 0"
                       border={
-                        node.type !== 'noyaCompositeElement'
-                          ? `1px solid ${theme.colors.divider}`
-                          : undefined
+                        node.type === 'noyaCompositeElement'
+                          ? undefined
+                          : `1px solid ${theme.colors.divider}`
                       }
                       background={
                         node.type === 'noyaCompositeElement'
                           ? 'rgb(238, 229, 255)'
+                          : undefined
+                      }
+                      borderRight={
+                        node.status === 'added'
+                          ? `8px solid rgb(205, 238, 231)`
+                          : node.status === 'removed'
+                          ? `8px solid rgb(255, 229, 229)`
                           : undefined
                       }
                       color={
@@ -236,29 +207,36 @@ export function DSLayerInspector({
                       <Stack.H padding="4px 8px" alignItems="center">
                         <TreeView.RowTitle>{name}</TreeView.RowTitle>
                         {hoveredItemId === key &&
-                          node.type === 'noyaPrimitiveElement' && (
-                            <Text variant="code" fontSize="9px">
-                              {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
-                            </Text>
-                          )}
+                        node.type === 'noyaPrimitiveElement' ? (
+                          <Text variant="code" fontSize="9px">
+                            {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
+                          </Text>
+                        ) : node.type === 'noyaCompositeElement' &&
+                          node.variantID ? (
+                          <Text variant="code" fontSize="9px">
+                            {findComponent(node.componentID)?.variants?.find(
+                              (variant) => variant.id === node.variantID,
+                            )?.name ?? 'Default'}
+                          </Text>
+                        ) : null}
                       </Stack.H>
                       {node.type === 'noyaPrimitiveElement' && (
                         <Stack.H flexWrap="wrap" gap="2px">
-                          {classNames.map(({ name, status }) => (
+                          {node.classNames.map(({ value, status }) => (
                             <Chip
-                              key={name}
+                              key={value}
                               size={'small'}
-                              deletable={status !== 'deleted'}
-                              addable={status === 'deleted'}
+                              deletable={status !== 'removed'}
+                              addable={status === 'removed'}
                               monospace
                               variant={
                                 status === 'added' ? 'secondary' : undefined
                               }
                               style={{
-                                opacity: status === 'deleted' ? 0.5 : 1,
+                                opacity: status === 'removed' ? 0.5 : 1,
                               }}
                             >
-                              {name}
+                              {value}
                             </Chip>
                           ))}
                         </Stack.H>

@@ -200,13 +200,13 @@ export const initialComponents: NoyaComponent[] = [
                   add: ['items-start'],
                 },
               },
-              {
-                path: ['box', 'a'],
-                classNames: {
-                  remove: ['items-center'],
-                  add: ['flex-col'],
-                },
-              },
+              // {
+              //   path: ['box', 'a'],
+              //   classNames: {
+              //     remove: ['items-center'],
+              //     add: ['flex-col'],
+              //   },
+              // },
             ],
           },
         }),
