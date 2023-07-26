@@ -111,6 +111,10 @@ export const initialComponents: NoyaComponent[] = [
                     children: [Model.string('Title')],
                     classNames: ['variant-h4'],
                   }),
+                  Model.compositeElement({
+                    id: 'extra',
+                    componentID: sidebarItemSymbolId,
+                  }),
                 ],
               },
             },

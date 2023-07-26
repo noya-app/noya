@@ -34,16 +34,33 @@ export type NoyaCompositeElement = NoyaElementBase & {
   variantID?: string;
 };
 
+export type NoyaNode = NoyaElement | NoyaString;
 export type NoyaElement = NoyaPrimitiveElement | NoyaCompositeElement;
 
-export type NoyaNode = NoyaElement | NoyaString;
-
-export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
-  children: NoyaResolvedNode[];
+/**
+ * When editing the tree, we want to show the tree with diffs applied.
+ */
+export type NoyaEditableNode =
+  | NoyaEditablePrimitiveElement
+  | NoyaEditableCompositeElement
+  | NoyaString;
+export type NoyaEditableCompositeElement = NoyaCompositeElement & {
+  rootElement: NoyaEditableNode;
+  path: string[];
+};
+export type NoyaEditablePrimitiveElement = Omit<
+  NoyaPrimitiveElement,
+  'children'
+> & {
+  children: NoyaEditableNode[];
   path: string[];
 };
 
 export type NoyaResolvedNode = NoyaResolvedElement | NoyaString | null;
+export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
+  children: NoyaResolvedNode[];
+  path: string[];
+};
 
 export type NoyaDiffItem = {
   path: string[];

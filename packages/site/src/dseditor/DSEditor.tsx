@@ -7,7 +7,7 @@ import {
 } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
 import { findLast } from 'noya-utils';
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect } from 'react';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSLayerInspector } from './DSLayerInspector';
 import { DSProjectInspector } from './DSProjectInspector';
@@ -71,12 +71,15 @@ export function DSEditor({
     SelectedComponent | undefined
   >();
 
+  const findComponent = useCallback(
+    (id: string) =>
+      initialComponents.find((component) => component.componentID === id),
+    [],
+  );
+
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
       if (selectedComponent) {
-        const findComponent = (id: string) =>
-          initialComponents.find((component) => component.componentID === id);
-
         const resolved = resolveComponentHierarchy(
           findComponent,
           Model.compositeElement({
@@ -165,7 +168,7 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [primary, selectedComponent, theme.colors.canvas.background],
+    [findComponent, primary, selectedComponent, theme.colors.canvas.background],
   );
 
   return (
@@ -190,6 +193,7 @@ export function DSEditor({
         <DSLayerInspector
           selectedComponent={selectedComponent}
           setSelectedComponent={setSelectedComponent}
+          findComponent={findComponent}
         />
       )}
     </Stack.H>

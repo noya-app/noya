@@ -9,85 +9,63 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { InspectorSection } from '../components/InspectorSection';
-import { PRIMITIVE_ELEMENT_NAMES, initialComponents } from './builtins';
-import { EditableTreeItem, createEditableTree } from './traversal';
-import { NoyaDiffItem, NoyaVariant, SelectedComponent } from './types';
+import { Model } from './builders';
+import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
+import {
+  EditableHierarchy,
+  GetCompositeComponent,
+  createEditableNode,
+} from './traversal';
+import {
+  NoyaDiffItem,
+  NoyaEditableNode,
+  NoyaVariant,
+  SelectedComponent,
+} from './types';
 
 interface Props {
   selectedComponent: SelectedComponent;
   setSelectedComponent: (component: SelectedComponent | undefined) => void;
+  findComponent: GetCompositeComponent;
 }
 
 export function DSLayerInspector({
   selectedComponent,
   setSelectedComponent,
+  findComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
 
-  const getCompositeComponent = useCallback(
-    (id: string) =>
-      initialComponents.find((component) => component.componentID === id),
-    [],
-  );
-
-  const component = getCompositeComponent(selectedComponent.componentID)!;
-
-  // const resolved = useMemo(() => {
-  //   const rootComponent = getCompositeComponent(selectedComponentId);
-
-  //   if (!rootComponent) return null;
-
-  //   const resolved = resolveComponentHierarchy(
-  //     getCompositeComponent,
-  //     Model.compositeElement(rootComponent.componentID),
-  //   );
-
-  //   return resolved;
-  // }, [getCompositeComponent, selectedComponentId]);
+  const component = findComponent(selectedComponent.componentID)!;
 
   type LayerTreeItem = {
     depth: number;
     indexPath: number[];
     key: string;
-    item: EditableTreeItem;
+    item: NoyaEditableNode;
     path: string;
     ops: NoyaDiffItem[];
   };
 
-  const EditableTreeHierarchy = useMemo(
-    () => createEditableTree(getCompositeComponent),
-    [getCompositeComponent],
+  const editableNode = createEditableNode(
+    findComponent,
+    Model.compositeElement({
+      id: 'root',
+      componentID: selectedComponent.componentID,
+      variantID: selectedComponent.variantID,
+    }),
+    [],
   );
 
-  const flattened = EditableTreeHierarchy.flatMap(
-    component,
+  const flattened = EditableHierarchy.flatMap(
+    editableNode,
     (item, indexPath): LayerTreeItem[] => {
       const depth = indexPath.length;
 
       if (depth === 0) return [];
-
-      const diffOps = EditableTreeHierarchy.accessPath(
-        component,
-        indexPath,
-      ).flatMap((item) =>
-        item.type === 'noyaCompositeElement' && item.diff
-          ? item.diff.items
-          : [],
-      );
-
-      const idPathElements = EditableTreeHierarchy.accessPath(
-        component,
-        indexPath,
-      ).flatMap((item) =>
-        item.type === 'noyaPrimitiveElement' ? [item.id] : [],
-      );
-
-      // console.log(diffOps, idPathElements);
-
-      const path = idPathElements.join('/');
 
       return [
         {
@@ -95,8 +73,8 @@ export function DSLayerInspector({
           depth,
           indexPath: indexPath.slice(),
           key: component.type + ':' + indexPath.join('/'),
-          path,
-          ops: diffOps,
+          path: item.type === 'noyaString' ? '' : item.path.join('/'),
+          ops: [],
         },
       ];
     },
@@ -227,19 +205,19 @@ export function DSLayerInspector({
                       borderRadius="4px"
                       margin="2px 0"
                       border={
-                        item.type !== 'noyaComponent'
+                        item.type !== 'noyaCompositeElement'
                           ? `1px solid ${theme.colors.divider}`
                           : undefined
                       }
                       background={
-                        item.type === 'noyaComponent'
+                        item.type === 'noyaCompositeElement'
                           ? 'rgb(238, 229, 255)'
                           : undefined
                       }
                       color={
                         item.type === 'noyaString'
                           ? 'dodgerblue'
-                          : item.type === 'noyaComponent'
+                          : item.type === 'noyaCompositeElement'
                           ? theme.colors.primary
                           : 'inherit'
                       }
