@@ -3,6 +3,7 @@ import { produce } from 'immer';
 import { DS } from 'noya-api';
 import {
   Button,
+  IconButton,
   InputField,
   ListView,
   ScrollArea,
@@ -19,8 +20,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
-import { initialComponents } from './builtins';
-import { SelectedComponent } from './types';
+import { NoyaComponent, SelectedComponent } from './types';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -50,6 +50,9 @@ interface Props {
   setDS: React.Dispatch<React.SetStateAction<DS>>;
   selectedComponent?: SelectedComponent;
   setSelectedComponent: (component: SelectedComponent | undefined) => void;
+  components: NoyaComponent[];
+  onNewComponent: () => void;
+  onDeleteComponent: (componentID: string) => void;
 }
 
 export function DSProjectInspector({
@@ -60,6 +63,9 @@ export function DSProjectInspector({
   setDS,
   selectedComponent,
   setSelectedComponent,
+  components,
+  onNewComponent,
+  onDeleteComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
 
@@ -157,9 +163,11 @@ export function DSProjectInspector({
           <InspectorSection title="Components" titleTextStyle="heading4">
             <InspectorPrimitives.SectionHeader>
               <InspectorPrimitives.Title>Components</InspectorPrimitives.Title>
+              <Spacer.Horizontal />
+              <IconButton iconName="PlusIcon" onClick={onNewComponent} />
             </InspectorPrimitives.SectionHeader>
             <ListView.Root>
-              {initialComponents.map((component) => (
+              {components.map((component) => (
                 <ListView.Row
                   key={component.componentID}
                   selected={
@@ -168,9 +176,17 @@ export function DSProjectInspector({
                   onPress={() =>
                     setSelectedComponent({ componentID: component.componentID })
                   }
+                  menuItems={[{ value: 'delete', title: 'Delete' }]}
+                  onSelectMenuItem={(value) => {
+                    switch (value) {
+                      case 'delete':
+                        onDeleteComponent(component.componentID);
+                        break;
+                    }
+                  }}
                 >
                   <Text variant="code" flex="1">
-                    {component.name}
+                    {component.name || 'Unnamed'}
                   </Text>
                 </ListView.Row>
               ))}

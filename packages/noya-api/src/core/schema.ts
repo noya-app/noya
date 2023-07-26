@@ -57,6 +57,7 @@ export type DSConfig = {
 export type DS = {
   source: DSSource;
   config: DSConfig;
+  components?: unknown[];
 };
 
 export const dsDataSchema = z.object({

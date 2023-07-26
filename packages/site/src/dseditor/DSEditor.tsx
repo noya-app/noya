@@ -6,8 +6,9 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
-import { findLast } from 'noya-utils';
+import { findLast, uuid } from 'noya-utils';
 import React, { ReactNode, useCallback, useEffect } from 'react';
+import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSLayerInspector } from './DSLayerInspector';
 import { DSProjectInspector } from './DSProjectInspector';
@@ -16,7 +17,7 @@ import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { renderDSOverview } from './renderDSOverview';
 import { ResolvedHierarchy, createResolvedNode } from './traversal';
-import { SelectedComponent } from './types';
+import { NoyaComponent, SelectedComponent } from './types';
 
 const noop = () => {};
 
@@ -43,7 +44,17 @@ export function DSEditor({
     config: {
       colors: { primary },
     },
-  } = ds;
+    components = initialComponents,
+  } = ds as DS & {
+    components: NoyaComponent[];
+  };
+
+  const setComponents = useCallback((components: NoyaComponent[]) => {
+    setDS((ds) => ({
+      ...ds,
+      components,
+    }));
+  }, []);
 
   useEffect(() => {
     onChangeDocument(ds);
@@ -70,8 +81,26 @@ export function DSEditor({
 
   const findComponent = useCallback(
     (id: string) =>
-      initialComponents.find((component) => component.componentID === id),
-    [],
+      components.find((component) => component.componentID === id),
+    [components],
+  );
+
+  const handleNewComponent = useCallback(() => {
+    const newComponent = Model.component({
+      componentID: uuid(),
+      rootElement: Model.primitiveElement({
+        componentID: boxSymbolId,
+      }),
+    });
+
+    setComponents([...components, newComponent]);
+  }, [components, setComponents]);
+
+  const handleDeleteComponent = useCallback(
+    (componentID: string) => {
+      setComponents(components.filter((c) => c.componentID !== componentID));
+    },
+    [components, setComponents],
   );
 
   const handleRenderContent = React.useCallback(
@@ -183,6 +212,9 @@ export function DSEditor({
           setDS={setDS}
           selectedComponent={selectedComponent}
           setSelectedComponent={setSelectedComponent}
+          components={components}
+          onNewComponent={handleNewComponent}
+          onDeleteComponent={handleDeleteComponent}
         />
       )}
       <DSRenderer
