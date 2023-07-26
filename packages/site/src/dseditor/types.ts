@@ -56,12 +56,6 @@ export type NoyaEditablePrimitiveElement = Omit<
   path: string[];
 };
 
-export type NoyaResolvedNode = NoyaResolvedElement | NoyaString | null;
-export type NoyaResolvedElement = Omit<NoyaPrimitiveElement, 'children'> & {
-  children: NoyaResolvedNode[];
-  path: string[];
-};
-
 export type NoyaDiffItem = {
   path: string[];
   classNames?: {

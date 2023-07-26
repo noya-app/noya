@@ -15,10 +15,7 @@ import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { renderDSOverview } from './renderDSOverview';
-import {
-  ResolvedElementHierarchy,
-  resolveComponentHierarchy,
-} from './traversal';
+import { EditableHierarchy, createEditableNode } from './traversal';
 import { SelectedComponent } from './types';
 
 const noop = () => {};
@@ -80,7 +77,7 @@ export function DSEditor({
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
       if (selectedComponent) {
-        const resolved = resolveComponentHierarchy(
+        const resolved = createEditableNode(
           findComponent,
           Model.compositeElement({
             id: 'root',
@@ -91,7 +88,7 @@ export function DSEditor({
         );
 
         console.info(
-          ResolvedElementHierarchy.diagram(resolved, (node, indexPath) => {
+          EditableHierarchy.diagram(resolved, (node, indexPath) => {
             if (!node) return '()';
 
             if (node.type === 'noyaString') return `"${node.value}"`;
@@ -102,12 +99,13 @@ export function DSEditor({
           }),
         );
 
-        const content = ResolvedElementHierarchy.map<ReactNode>(
+        const content = EditableHierarchy.map<ReactNode>(
           resolved,
-          (element, transformedChildren, indexPath) => {
-            if (!element) return null;
-
+          (element, transformedChildren) => {
             if (element.type === 'noyaString') return element.value;
+
+            if (element.type === 'noyaCompositeElement')
+              return transformedChildren;
 
             const PrimitiveComponent: React.FC<any> =
               props.system.components[element.componentID];
