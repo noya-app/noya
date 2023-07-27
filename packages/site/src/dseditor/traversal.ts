@@ -2,14 +2,17 @@ import cloneDeep from 'lodash/cloneDeep';
 import { withOptions } from 'tree-visit';
 import {
   NoyaComponent,
+  NoyaCompositeElement,
   NoyaDiff,
   NoyaDiffItem,
   NoyaNode,
+  NoyaPrimitiveElement,
   NoyaResolvedClassName,
   NoyaResolvedCompositeElement,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
   NoyaResolvedString,
+  NoyaString,
 } from './types';
 
 // Doesn't traverse into nested components
@@ -110,7 +113,7 @@ export const ResolvedHierarchy = withOptions<NoyaResolvedNode>({
   },
 });
 
-function applyDiff(
+function applyResolvedDiff(
   findComponent: FindComponent,
   rootNode: NoyaResolvedNode,
   diff: NoyaDiff,
@@ -240,7 +243,7 @@ export function createResolvedNode(
         }
 
         if (variant) {
-          resolvedNode = applyDiff(
+          resolvedNode = applyResolvedDiff(
             findComponent,
             resolvedNode,
             variant.diff,
@@ -251,7 +254,7 @@ export function createResolvedNode(
       }
 
       if (node.diff) {
-        resolvedNode = applyDiff(
+        resolvedNode = applyResolvedDiff(
           findComponent,
           resolvedNode,
           node.diff,
@@ -267,4 +270,67 @@ export function createResolvedNode(
       };
     }
   }
+}
+
+// Apply the top level diff onto the underlying composite elements
+export function applyTopLevelDiff(component: NoyaComponent, diff: NoyaDiff) {
+  return ElementHierarchy.map<NoyaNode>(
+    component.rootElement,
+    (node, transformedChildren, indexPath) => {
+      const path = ElementHierarchy.accessPath(
+        component.rootElement,
+        indexPath,
+      ).map((node) => node.id);
+
+      switch (node.type) {
+        case 'noyaString': {
+          const items = diff.items.filter(
+            (item) => item.path.join('/') === path.join('/'),
+          );
+
+          if (!items) return node;
+
+          const newNode: NoyaString = { ...node };
+
+          items.forEach((item) => {
+            if (item.textValue) {
+              newNode.value = item.textValue;
+            }
+          });
+
+          return newNode;
+        }
+        case 'noyaPrimitiveElement': {
+          const newNode: NoyaPrimitiveElement = {
+            ...node,
+            children: transformedChildren,
+          };
+
+          return newNode;
+        }
+        case 'noyaCompositeElement': {
+          const items = diff.items.filter((item) =>
+            item.path.join('/').startsWith(path.join('/')),
+          );
+
+          if (!items) return node;
+
+          const newNode: NoyaCompositeElement = {
+            ...node,
+            diff: {
+              items: [
+                ...(node.diff?.items ?? []),
+                ...items.map((item) => ({
+                  ...item,
+                  path: item.path.slice(path.length),
+                })),
+              ],
+            },
+          };
+
+          return newNode;
+        }
+      }
+    },
+  );
 }

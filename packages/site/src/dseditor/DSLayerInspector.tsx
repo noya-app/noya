@@ -18,7 +18,11 @@ import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuB
 import { InspectorSection } from '../components/InspectorSection';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
-import { FindComponent, ResolvedHierarchy } from './traversal';
+import {
+  FindComponent,
+  ResolvedHierarchy,
+  applyTopLevelDiff,
+} from './traversal';
 import {
   NoyaComponent,
   NoyaCompositeElement,
@@ -215,7 +219,37 @@ export function DSLayerInspector({
               value={component.description || ''}
             />
           </InspectorSection>
-          <InspectorSection title="Elements" titleTextStyle="heading4">
+          <InspectorSection
+            title="Elements"
+            titleTextStyle="heading4"
+            right={
+              selectedComponent.diff && (
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    if (!selectedComponent.diff) return;
+
+                    const newRootElement = applyTopLevelDiff(
+                      component,
+                      selectedComponent.diff,
+                    );
+
+                    onChangeComponent({
+                      ...component,
+                      rootElement: newRootElement,
+                    });
+
+                    setSelectedComponent({
+                      ...selectedComponent,
+                      diff: undefined,
+                    });
+                  }}
+                >
+                  Save Edits
+                </Button>
+              )
+            }
+          >
             <TreeView.Root
               keyExtractor={(obj, index) => obj.key}
               data={flattened}
