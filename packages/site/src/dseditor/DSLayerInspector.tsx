@@ -16,20 +16,16 @@ import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { InspectorSection } from '../components/InspectorSection';
-import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
-import {
-  FindComponent,
-  ResolvedHierarchy,
-  createResolvedNode,
-} from './traversal';
+import { FindComponent, ResolvedHierarchy } from './traversal';
 import {
   NoyaComponent,
+  NoyaCompositeElement,
+  NoyaDiff,
   NoyaDiffItem,
   NoyaResolvedNode,
   NoyaVariant,
-  SelectedComponent,
 } from './types';
 
 type LayerTreeItem = {
@@ -37,21 +33,22 @@ type LayerTreeItem = {
   indexPath: number[];
   key: string;
   node: NoyaResolvedNode;
-  path: string;
+  path: string[];
   ops: NoyaDiffItem[];
 };
 
 interface Props {
-  selectedComponent: SelectedComponent;
-  setSelectedComponent: (component: SelectedComponent | undefined) => void;
+  selectedComponent: NoyaCompositeElement;
+  setSelectedComponent: (component: NoyaCompositeElement | undefined) => void;
   findComponent: FindComponent;
   onChangeComponent: (component: NoyaComponent) => void;
+  resolvedNode: NoyaResolvedNode;
 }
 
 function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
   switch (node.type) {
     case 'noyaString':
-      return JSON.stringify(node.value);
+      return node.value;
     case 'noyaPrimitiveElement':
       return node.name ?? PRIMITIVE_ELEMENT_NAMES[node.componentID];
     case 'noyaCompositeElement': {
@@ -69,35 +66,26 @@ export function DSLayerInspector({
   setSelectedComponent,
   findComponent,
   onChangeComponent,
+  resolvedNode,
 }: Props) {
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
-
   const component = findComponent(selectedComponent.componentID)!;
 
-  const editableNode = createResolvedNode(
-    findComponent,
-    Model.compositeElement({
-      id: 'root',
-      componentID: selectedComponent.componentID,
-      variantID: selectedComponent.variantID,
-    }),
-  );
-
   const flattened = ResolvedHierarchy.flatMap(
-    editableNode,
-    (item, indexPath): LayerTreeItem[] => {
+    resolvedNode,
+    (node, indexPath): LayerTreeItem[] => {
       const depth = indexPath.length;
 
       if (depth === 0) return [];
 
       return [
         {
-          node: item,
+          node,
           depth,
           indexPath: indexPath.slice(),
           key: component.type + ':' + indexPath.join('/'),
-          path: item.type === 'noyaString' ? '' : item.path.join('/'),
+          path: node.path,
           ops: [],
         },
       ];
@@ -150,8 +138,8 @@ export function DSLayerInspector({
                 }}
                 onChange={(id) => {
                   setSelectedComponent({
-                    componentID: component.componentID,
-                    ...(id !== 'default' && { variantID: id }),
+                    ...selectedComponent,
+                    variantID: id === 'default' ? undefined : id,
                   });
                 }}
               />
@@ -244,6 +232,12 @@ export function DSLayerInspector({
                 const name = getName(node, findComponent);
                 const menu = [{ title: 'Duplicate' }, { title: 'Delete' }];
 
+                // console.log(path.join('/'), node);
+
+                // if (node.type === 'noyaString') {
+                //   console.log('->', node.value);
+                // }
+
                 return (
                   <TreeView.Row
                     key={key}
@@ -251,9 +245,12 @@ export function DSLayerInspector({
                     depth={depth - 1}
                     menuItems={menu}
                     onSelectMenuItem={() => {}}
-                    onHoverChange={(hovered) =>
-                      setHoveredItemId(hovered ? key : undefined)
-                    }
+                    onHoverChange={(hovered) => {
+                      if (hovered) {
+                        setHoveredItemId(key);
+                      }
+                      // setHoveredItemId(hovered ? key : undefined);
+                    }}
                     icon={
                       depth !== 0 && (
                         <DraggableMenuButton items={menu} onSelect={() => {}} />
@@ -291,22 +288,57 @@ export function DSLayerInspector({
                           : 'inherit'
                       }
                     >
-                      <Stack.H padding="4px 8px" alignItems="center">
-                        <TreeView.RowTitle>{name}</TreeView.RowTitle>
-                        {hoveredItemId === key &&
-                        node.type === 'noyaPrimitiveElement' ? (
-                          <Text variant="code" fontSize="9px">
-                            {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
-                          </Text>
-                        ) : node.type === 'noyaCompositeElement' &&
-                          node.variantID ? (
-                          <Text variant="code" fontSize="9px">
-                            {findComponent(node.componentID)?.variants?.find(
-                              (variant) => variant.id === node.variantID,
-                            )?.name ?? 'Default'}
-                          </Text>
-                        ) : null}
-                      </Stack.H>
+                      {node.type === 'noyaString' ? (
+                        <InputField.Root>
+                          <InputField.Input
+                            value={node.value}
+                            onChange={(value) => {
+                              const pathWithoutRoot = path.slice(1);
+
+                              const newDiff: NoyaDiff = {
+                                ...selectedComponent.diff,
+                                items: [
+                                  ...(
+                                    selectedComponent.diff?.items ?? []
+                                  ).filter(
+                                    (item) =>
+                                      item.path.join('/') !==
+                                      pathWithoutRoot.join('/'),
+                                  ),
+                                  {
+                                    path: pathWithoutRoot,
+                                    textValue: value,
+                                  },
+                                ],
+                              };
+
+                              const newSelection: NoyaCompositeElement = {
+                                ...selectedComponent,
+                                diff: newDiff,
+                              };
+
+                              setSelectedComponent(newSelection);
+                            }}
+                          />
+                        </InputField.Root>
+                      ) : (
+                        <Stack.H padding="4px 8px" alignItems="center">
+                          <TreeView.RowTitle>{name}</TreeView.RowTitle>
+                          {hoveredItemId === key &&
+                          node.type === 'noyaPrimitiveElement' ? (
+                            <Text variant="code" fontSize="9px">
+                              {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
+                            </Text>
+                          ) : node.type === 'noyaCompositeElement' &&
+                            node.variantID ? (
+                            <Text variant="code" fontSize="9px">
+                              {findComponent(node.componentID)?.variants?.find(
+                                (variant) => variant.id === node.variantID,
+                              )?.name ?? 'Default'}
+                            </Text>
+                          ) : null}
+                        </Stack.H>
+                      )}
                       {node.type === 'noyaPrimitiveElement' && (
                         <Stack.H flexWrap="wrap" gap="2px">
                           {node.classNames.map(({ value, status }) => (

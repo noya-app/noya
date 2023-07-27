@@ -20,7 +20,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
-import { NoyaComponent, SelectedComponent } from './types';
+import { Model } from './builders';
+import { NoyaComponent, NoyaCompositeElement } from './types';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -48,8 +49,8 @@ interface Props {
   system?: DesignSystemDefinition;
   ds: DS;
   setDS: React.Dispatch<React.SetStateAction<DS>>;
-  selectedComponent?: SelectedComponent;
-  setSelectedComponent: (component: SelectedComponent | undefined) => void;
+  selectedComponent?: NoyaCompositeElement;
+  setSelectedComponent: (component: NoyaCompositeElement | undefined) => void;
   components: NoyaComponent[];
   onNewComponent: () => void;
   onDeleteComponent: (componentID: string) => void;
@@ -174,7 +175,12 @@ export function DSProjectInspector({
                     component.componentID === selectedComponent?.componentID
                   }
                   onPress={() =>
-                    setSelectedComponent({ componentID: component.componentID })
+                    setSelectedComponent(
+                      Model.compositeElement({
+                        componentID: component.componentID,
+                        id: 'root',
+                      }),
+                    )
                   }
                   menuItems={[{ value: 'delete', title: 'Delete' }]}
                   onSelectMenuItem={(value) => {

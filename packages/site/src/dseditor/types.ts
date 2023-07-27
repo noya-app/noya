@@ -77,6 +77,7 @@ export type NoyaDiffItem = {
     add?: NoyaNode[];
     remove?: string[];
   };
+  textValue?: string;
 };
 
 export type NoyaDiff = {
@@ -95,7 +96,7 @@ export type NoyaComponent = {
   name: string;
   description?: string;
   componentID: string;
-  rootElement: NoyaElement;
+  rootElement: NoyaNode;
   variants?: NoyaVariant[];
 };
 

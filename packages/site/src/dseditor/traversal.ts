@@ -6,9 +6,35 @@ import {
   NoyaDiffItem,
   NoyaNode,
   NoyaResolvedClassName,
+  NoyaResolvedCompositeElement,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
+  NoyaResolvedString,
 } from './types';
+
+// Doesn't traverse into nested components
+export const ElementHierarchy = withOptions<NoyaNode>({
+  getChildren: (node) => {
+    switch (node.type) {
+      case 'noyaString':
+        return [];
+      case 'noyaCompositeElement':
+        return [];
+      case 'noyaPrimitiveElement':
+        return node.children;
+    }
+  },
+  create: (node: NoyaNode, children: NoyaNode[], ip: number[]) => {
+    switch (node.type) {
+      case 'noyaString':
+        return node;
+      case 'noyaCompositeElement':
+        return node;
+      case 'noyaPrimitiveElement':
+        return { ...node, children };
+    }
+  },
+});
 
 function applyClassNamesDiff(
   level: number,
@@ -94,40 +120,69 @@ function applyDiff(
   return ResolvedHierarchy.map<NoyaResolvedNode>(
     cloneDeep(rootNode),
     (node, transformedChildren) => {
-      if (node.type !== 'noyaPrimitiveElement') return node;
+      const nodeKey = node.path.join('/');
 
-      const newNode: NoyaResolvedPrimitiveElement = {
-        ...node,
-        children: transformedChildren,
-      };
+      switch (node.type) {
+        case 'noyaCompositeElement': {
+          const newNode: NoyaResolvedCompositeElement = {
+            ...node,
+            rootElement: transformedChildren[0],
+          };
 
-      const nodeKey = newNode.path.join('/');
+          return newNode;
+        }
+        case 'noyaString': {
+          const newNode: NoyaResolvedString = {
+            ...node,
+          };
 
-      diff.items
-        .filter((item) => {
-          const itemKey = [...path, ...item.path].join('/');
-          return itemKey === nodeKey;
-        })
-        .forEach((item) => {
-          if (item.children) {
-            newNode.children = applyChildrenDiff(
-              level,
-              findComponent,
-              newNode.children,
-              item.children,
-            );
-          }
+          diff.items
+            .filter((item) => {
+              const itemKey = [...path, ...item.path].join('/');
 
-          if (item.classNames) {
-            newNode.classNames = applyClassNamesDiff(
-              level,
-              newNode.classNames,
-              item.classNames,
-            );
-          }
-        });
+              return itemKey === nodeKey;
+            })
+            .forEach((item) => {
+              if (item.textValue) {
+                newNode.value = item.textValue;
+              }
+            });
 
-      return newNode;
+          return newNode;
+        }
+        case 'noyaPrimitiveElement': {
+          const newNode: NoyaResolvedPrimitiveElement = {
+            ...node,
+            children: transformedChildren,
+          };
+
+          diff.items
+            .filter((item) => {
+              const itemKey = [...path, ...item.path].join('/');
+              return itemKey === nodeKey;
+            })
+            .forEach((item) => {
+              if (item.children) {
+                newNode.children = applyChildrenDiff(
+                  level,
+                  findComponent,
+                  newNode.children,
+                  item.children,
+                );
+              }
+
+              if (item.classNames) {
+                newNode.classNames = applyClassNamesDiff(
+                  level,
+                  newNode.classNames,
+                  item.classNames,
+                );
+              }
+            });
+
+          return newNode;
+        }
+      }
     },
   );
 }

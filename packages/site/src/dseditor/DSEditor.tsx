@@ -7,7 +7,7 @@ import {
 } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
 import { findLast, uuid } from 'noya-utils';
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSLayerInspector } from './DSLayerInspector';
@@ -17,7 +17,7 @@ import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { renderDSOverview } from './renderDSOverview';
 import { ResolvedHierarchy, createResolvedNode } from './traversal';
-import { NoyaComponent, SelectedComponent } from './types';
+import { NoyaComponent, NoyaCompositeElement } from './types';
 
 const noop = () => {};
 
@@ -76,7 +76,7 @@ export function DSEditor({
   }, [sourceName]);
 
   const [selectedComponent, setSelectedComponent] = React.useState<
-    SelectedComponent | undefined
+    NoyaCompositeElement | undefined
   >();
 
   const findComponent = useCallback(
@@ -114,20 +114,17 @@ export function DSEditor({
     [components, setComponents],
   );
 
+  const resolvedNode = useMemo(() => {
+    if (!selectedComponent) return undefined;
+
+    return createResolvedNode(findComponent, selectedComponent);
+  }, [findComponent, selectedComponent]);
+
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
-      if (selectedComponent) {
-        const resolved = createResolvedNode(
-          findComponent,
-          Model.compositeElement({
-            id: 'root',
-            componentID: selectedComponent.componentID,
-            variantID: selectedComponent.variantID,
-          }),
-        );
-
+      if (selectedComponent && resolvedNode) {
         console.info(
-          ResolvedHierarchy.diagram(resolved, (node, indexPath) => {
+          ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
             if (!node) return '()';
 
             if (node.type === 'noyaString') return `"${node.value}"`;
@@ -139,7 +136,7 @@ export function DSEditor({
         );
 
         const content = ResolvedHierarchy.map<ReactNode>(
-          resolved,
+          resolvedNode,
           (element, transformedChildren) => {
             if (element.status === 'removed') return null;
 
@@ -173,6 +170,13 @@ export function DSEditor({
                 style={style}
                 key={element.path.join('/')}
                 {...(variant && { variant })}
+                // _passthrough={{
+                //   contentEditable:
+                //     element.componentID === buttonSymbolId ||
+                //     element.componentID === tagSymbolId ||
+                //     element.componentID === linkSymbolId ||
+                //     element.componentID === textSymbolId,
+                // }}
               >
                 {transformedChildren}
               </PrimitiveComponent>
@@ -182,6 +186,9 @@ export function DSEditor({
 
         return (
           <div
+            // onInput={(e) => {
+            //   console.log('input', e.nativeEvent.target);
+            // }}
             style={{
               backgroundImage: `radial-gradient(circle at 0px 0px, rgba(0,0,0,0.25) 1px, ${theme.colors.canvas.background} 0px)`,
               backgroundSize: '10px 10px',
@@ -209,7 +216,7 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [findComponent, primary, selectedComponent, theme.colors.canvas.background],
+    [primary, resolvedNode, selectedComponent, theme.colors.canvas.background],
   );
 
   return (
@@ -233,12 +240,13 @@ export function DSEditor({
         primary={primary}
         renderContent={handleRenderContent}
       />
-      {viewType !== 'preview' && selectedComponent && (
+      {viewType !== 'preview' && selectedComponent && resolvedNode && (
         <DSLayerInspector
           selectedComponent={selectedComponent}
           setSelectedComponent={setSelectedComponent}
           findComponent={findComponent}
           onChangeComponent={handleChangeComponent}
+          resolvedNode={resolvedNode}
         />
       )}
     </Stack.H>

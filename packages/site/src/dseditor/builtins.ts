@@ -22,6 +22,7 @@ export const PRIMITIVE_ELEMENT_NAMES = {
 const sidebarItemSymbolId = uuid();
 const sidebarItemActiveVariantId = uuid();
 const sidebarItemStringId = uuid();
+const sidebarSymbolId = uuid();
 
 export const initialComponents: NoyaComponent[] = [
   Model.component({
@@ -57,7 +58,7 @@ export const initialComponents: NoyaComponent[] = [
   }),
   Model.component({
     name: 'Sidebar',
-    componentID: uuid(),
+    componentID: sidebarSymbolId,
     rootElement: Model.primitiveElement({
       id: 'sidebar',
       componentID: boxSymbolId,
@@ -78,10 +79,10 @@ export const initialComponents: NoyaComponent[] = [
                 classNames: {
                   add: ['bg-primary-900', 'text-white'],
                 },
-                children: {
-                  remove: [sidebarItemStringId],
-                  add: [Model.string('Dashboard')],
-                },
+              },
+              {
+                path: ['b', sidebarItemStringId],
+                textValue: 'Dashboard',
               },
             ],
           },
@@ -128,6 +129,32 @@ export const initialComponents: NoyaComponent[] = [
         },
       }),
     ],
+  }),
+  Model.component({
+    name: 'Super Sidebar',
+    componentID: uuid(),
+    rootElement: Model.primitiveElement({
+      componentID: boxSymbolId,
+      children: [
+        Model.compositeElement({
+          componentID: sidebarSymbolId,
+          diff: {
+            items: [
+              {
+                path: ['sidebar', '3', 'b', sidebarItemStringId],
+                textValue: 'yoo',
+              },
+              {
+                path: ['sidebar', '3', 'b'],
+                classNames: {
+                  add: ['bg-orange-500'],
+                },
+              },
+            ],
+          },
+        }),
+      ],
+    }),
   }),
   Model.component({
     name: 'Hero',
