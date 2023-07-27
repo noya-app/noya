@@ -146,7 +146,7 @@ function applyResolvedDiff(
               return itemKey === nodeKey;
             })
             .forEach((item) => {
-              if (item.textValue) {
+              if (item.textValue !== undefined) {
                 newNode.value = item.textValue;
               }
             });
@@ -273,14 +273,13 @@ export function createResolvedNode(
 }
 
 // Apply the top level diff onto the underlying composite elements
-export function applyTopLevelDiff(component: NoyaComponent, diff: NoyaDiff) {
+export function applyRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
   return ElementHierarchy.map<NoyaNode>(
-    component.rootElement,
+    rootElement,
     (node, transformedChildren, indexPath) => {
-      const path = ElementHierarchy.accessPath(
-        component.rootElement,
-        indexPath,
-      ).map((node) => node.id);
+      const path = ElementHierarchy.accessPath(rootElement, indexPath).map(
+        (node) => node.id,
+      );
 
       switch (node.type) {
         case 'noyaString': {
@@ -293,7 +292,7 @@ export function applyTopLevelDiff(component: NoyaComponent, diff: NoyaDiff) {
           const newNode: NoyaString = { ...node };
 
           items.forEach((item) => {
-            if (item.textValue) {
+            if (item.textValue !== undefined) {
               newNode.value = item.textValue;
             }
           });

@@ -12,6 +12,7 @@ import {
   TreeView,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
@@ -21,7 +22,7 @@ import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
 import {
   FindComponent,
   ResolvedHierarchy,
-  applyTopLevelDiff,
+  applyRootLevelDiff,
 } from './traversal';
 import {
   NoyaComponent,
@@ -224,29 +225,52 @@ export function DSLayerInspector({
             titleTextStyle="heading4"
             right={
               selectedComponent.diff && (
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    if (!selectedComponent.diff) return;
+                <>
+                  <Button
+                    onClick={() => {
+                      setSelectedComponent({
+                        ...selectedComponent,
+                        diff: undefined,
+                      });
+                    }}
+                  >
+                    Reset
+                    <Spacer.Horizontal size={4} inline />
+                    <CrossCircledIcon />
+                  </Button>
+                  <Spacer.Horizontal size={8} />
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      if (!selectedComponent.diff) return;
 
-                    const newRootElement = applyTopLevelDiff(
-                      component,
-                      selectedComponent.diff,
-                    );
+                      if (selectedComponent.variantID) {
+                        // TODO: Merge variant and diff
+                        alert('Not implemented');
+                        return;
+                      }
 
-                    onChangeComponent({
-                      ...component,
-                      rootElement: newRootElement,
-                    });
+                      const newRootElement = applyRootLevelDiff(
+                        component.rootElement,
+                        selectedComponent.diff,
+                      );
 
-                    setSelectedComponent({
-                      ...selectedComponent,
-                      diff: undefined,
-                    });
-                  }}
-                >
-                  Save Edits
-                </Button>
+                      onChangeComponent({
+                        ...component,
+                        rootElement: newRootElement,
+                      });
+
+                      setSelectedComponent({
+                        ...selectedComponent,
+                        diff: undefined,
+                      });
+                    }}
+                  >
+                    Save{selectedComponent.variantID ? ' Variant' : ''}
+                    <Spacer.Horizontal size={4} inline />
+                    <CheckCircledIcon />
+                  </Button>
+                </>
               )
             }
           >
