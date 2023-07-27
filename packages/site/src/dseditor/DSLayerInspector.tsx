@@ -1,8 +1,12 @@
+import { useNoyaClient } from 'noya-api';
+import { parseComponentLayout } from 'noya-compiler';
 import {
+  Button,
   Chip,
   InputField,
   ScrollArea,
   Select,
+  Spacer,
   Stack,
   Text,
   TreeView,
@@ -14,12 +18,14 @@ import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuB
 import { InspectorSection } from '../components/InspectorSection';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
+import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
 import {
   FindComponent,
   ResolvedHierarchy,
   createResolvedNode,
 } from './traversal';
 import {
+  NoyaComponent,
   NoyaDiffItem,
   NoyaResolvedNode,
   NoyaVariant,
@@ -39,6 +45,7 @@ interface Props {
   selectedComponent: SelectedComponent;
   setSelectedComponent: (component: SelectedComponent | undefined) => void;
   findComponent: FindComponent;
+  onChangeComponent: (component: NoyaComponent) => void;
 }
 
 function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
@@ -61,7 +68,9 @@ export function DSLayerInspector({
   selectedComponent,
   setSelectedComponent,
   findComponent,
+  onChangeComponent,
 }: Props) {
+  const client = useNoyaClient();
   const theme = useDesignSystemTheme();
 
   const component = findComponent(selectedComponent.componentID)!;
@@ -115,7 +124,15 @@ export function DSLayerInspector({
             <InspectorPrimitives.LabeledRow label="Name">
               <InputField.Root>
                 <InputField.Label>Name</InputField.Label>
-                <InputField.Input value={component.name} onChange={() => {}} />
+                <InputField.Input
+                  value={component.name}
+                  onChange={(value) => {
+                    onChangeComponent({
+                      ...component,
+                      name: value,
+                    });
+                  }}
+                />
               </InputField.Root>
             </InspectorPrimitives.LabeledRow>
             <InspectorPrimitives.LabeledRow label="Variant">
@@ -139,6 +156,76 @@ export function DSLayerInspector({
                 }}
               />
             </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="AI">
+              <Button
+                variant="secondary"
+                flex="1"
+                onClick={async () => {
+                  const newDescription =
+                    await client.networkClient.generate.componentDescriptionFromName(
+                      component.name ?? 'Untitled',
+                    );
+
+                  onChangeComponent({
+                    ...component,
+                    description: newDescription,
+                  });
+                }}
+              >
+                Generate Description
+              </Button>
+              <Spacer.Horizontal size={8} />
+              <Button
+                variant="secondary"
+                flex="1"
+                onClick={async () => {
+                  const layouts =
+                    await client.networkClient.generate.componentLayoutsFromDescription(
+                      component.description ?? '',
+                    );
+
+                  const parsed = layouts.map((layout) =>
+                    parseComponentLayout(layout.code),
+                  );
+
+                  if (parsed.length === 0) return;
+
+                  console.info(
+                    LayoutHierarchy.diagram(parsed[0], (node, indexPath) => {
+                      if (typeof node === 'string') return node;
+
+                      const attributesString = Object.entries(node.attributes)
+                        .map(([key, value]) => `${key}="${value}"`)
+                        .join(' ');
+
+                      return `<${[node.tag, attributesString]
+                        .filter(Boolean)
+                        .join(' ')}>`;
+                    }),
+                  );
+
+                  onChangeComponent({
+                    ...component,
+                    rootElement: convertLayoutToComponent(parsed[0]),
+                  });
+                }}
+              >
+                Generate Layouts
+              </Button>
+            </InspectorPrimitives.LabeledRow>
+            <textarea
+              onChange={(event) => {
+                onChangeComponent({
+                  ...component,
+                  description: event.target.value,
+                });
+              }}
+              style={{
+                minHeight: '100px',
+                background: theme.colors.inputBackground,
+              }}
+              value={component.description || ''}
+            />
           </InspectorSection>
           <InspectorSection title="Elements" titleTextStyle="heading4">
             <TreeView.Root

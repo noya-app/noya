@@ -103,6 +103,17 @@ export function DSEditor({
     [components, setComponents],
   );
 
+  const handleChangeComponent = useCallback(
+    (component: NoyaComponent) => {
+      setComponents(
+        components.map((c) =>
+          c.componentID === component.componentID ? component : c,
+        ),
+      );
+    },
+    [components, setComponents],
+  );
+
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
       if (selectedComponent) {
@@ -227,6 +238,7 @@ export function DSEditor({
           selectedComponent={selectedComponent}
           setSelectedComponent={setSelectedComponent}
           findComponent={findComponent}
+          onChangeComponent={handleChangeComponent}
         />
       )}
     </Stack.H>

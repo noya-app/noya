@@ -36,6 +36,7 @@ export interface INoyaNetworkClient {
   emailLists: NoyaNetworkClient['emailLists'];
   userData: NoyaNetworkClient['userData'];
   metadata: NoyaNetworkClient['metadata'];
+  generate: NoyaNetworkClient['generate'];
 }
 
 export class NoyaNetworkClient {
@@ -112,6 +113,27 @@ export class NoyaNetworkClient {
       list: this.#listShares,
     };
   }
+
+  get generate() {
+    return {
+      componentDescriptionFromName: this.#generateComponentDescriptionFromName,
+      componentLayoutsFromDescription:
+        this.#generateComponentLayoutsFromDescription,
+    };
+  }
+
+  #generateComponentDescriptionFromName = async (name: string) => {
+    return 'A box that contains stuff';
+  };
+
+  #generateComponentLayoutsFromDescription = async (description: string) => {
+    return [
+      {
+        name: 'Example',
+        code: `<Box class="bg-red-500"><Text class="text-white">Hello</Text></Box>`,
+      },
+    ];
+  };
 
   request = async (
     ...[input, init]: Parameters<typeof fetch>

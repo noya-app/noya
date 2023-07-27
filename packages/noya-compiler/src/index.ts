@@ -591,3 +591,4 @@ export function clean(text: string) {
 }
 
 export * from './codesandbox';
+export * from './parseComponentLayout';
