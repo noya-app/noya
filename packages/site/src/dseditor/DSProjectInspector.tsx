@@ -49,8 +49,8 @@ interface Props {
   system?: DesignSystemDefinition;
   ds: DS;
   setDS: React.Dispatch<React.SetStateAction<DS>>;
-  selectedComponent?: NoyaCompositeElement;
-  setSelectedComponent: (component: NoyaCompositeElement | undefined) => void;
+  selection?: NoyaCompositeElement;
+  setSelection: (component: NoyaCompositeElement | undefined) => void;
   components: NoyaComponent[];
   onNewComponent: () => void;
   onDeleteComponent: (componentID: string) => void;
@@ -62,8 +62,8 @@ export function DSProjectInspector({
   system,
   ds,
   setDS,
-  selectedComponent,
-  setSelectedComponent,
+  selection,
+  setSelection,
   components,
   onNewComponent,
   onDeleteComponent,
@@ -171,11 +171,9 @@ export function DSProjectInspector({
               {components.map((component) => (
                 <ListView.Row
                   key={component.componentID}
-                  selected={
-                    component.componentID === selectedComponent?.componentID
-                  }
+                  selected={component.componentID === selection?.componentID}
                   onPress={() =>
-                    setSelectedComponent(
+                    setSelection(
                       Model.compositeElement({
                         componentID: component.componentID,
                         id: 'root',

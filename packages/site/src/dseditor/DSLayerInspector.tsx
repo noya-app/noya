@@ -43,8 +43,8 @@ type LayerTreeItem = {
 };
 
 interface Props {
-  selectedComponent: NoyaCompositeElement;
-  setSelectedComponent: (component: NoyaCompositeElement | undefined) => void;
+  selection: NoyaCompositeElement;
+  setSelection: (component: NoyaCompositeElement | undefined) => void;
   findComponent: FindComponent;
   onChangeComponent: (component: NoyaComponent) => void;
   resolvedNode: NoyaResolvedNode;
@@ -67,15 +67,15 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
 }
 
 export function DSLayerInspector({
-  selectedComponent,
-  setSelectedComponent,
+  selection,
+  setSelection,
   findComponent,
   onChangeComponent,
   resolvedNode,
 }: Props) {
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
-  const component = findComponent(selectedComponent.componentID)!;
+  const component = findComponent(selection.componentID)!;
 
   const flattened = ResolvedHierarchy.flatMap(
     resolvedNode,
@@ -130,7 +130,7 @@ export function DSLayerInspector({
             </InspectorPrimitives.LabeledRow>
             <InspectorPrimitives.LabeledRow label="Variant">
               <Select
-                value={selectedComponent.variantID ?? 'default'}
+                value={selection.variantID ?? 'default'}
                 id="variant-input"
                 options={variantsWithDefault.map(
                   (variant) => variant?.id ?? 'default',
@@ -142,8 +142,8 @@ export function DSLayerInspector({
                   return variant?.name ?? 'Default';
                 }}
                 onChange={(id) => {
-                  setSelectedComponent({
-                    ...selectedComponent,
+                  setSelection({
+                    ...selection,
                     variantID: id === 'default' ? undefined : id,
                   });
                 }}
@@ -224,12 +224,12 @@ export function DSLayerInspector({
             title="Elements"
             titleTextStyle="heading4"
             right={
-              selectedComponent.diff && (
+              selection.diff && (
                 <>
                   <Button
                     onClick={() => {
-                      setSelectedComponent({
-                        ...selectedComponent,
+                      setSelection({
+                        ...selection,
                         diff: undefined,
                       });
                     }}
@@ -242,9 +242,9 @@ export function DSLayerInspector({
                   <Button
                     variant="primary"
                     onClick={() => {
-                      if (!selectedComponent.diff) return;
+                      if (!selection.diff) return;
 
-                      if (selectedComponent.variantID) {
+                      if (selection.variantID) {
                         // TODO: Merge variant and diff
                         alert('Not implemented');
                         return;
@@ -252,7 +252,7 @@ export function DSLayerInspector({
 
                       const newRootElement = applyRootLevelDiff(
                         component.rootElement,
-                        selectedComponent.diff,
+                        selection.diff,
                       );
 
                       onChangeComponent({
@@ -260,13 +260,13 @@ export function DSLayerInspector({
                         rootElement: newRootElement,
                       });
 
-                      setSelectedComponent({
-                        ...selectedComponent,
+                      setSelection({
+                        ...selection,
                         diff: undefined,
                       });
                     }}
                   >
-                    Save{selectedComponent.variantID ? ' Variant' : ''}
+                    Save{selection.variantID ? ' Variant' : ''}
                     <Spacer.Horizontal size={4} inline />
                     <CheckCircledIcon />
                   </Button>
@@ -354,11 +354,9 @@ export function DSLayerInspector({
                               const pathWithoutRoot = path.slice(1);
 
                               const newDiff: NoyaDiff = {
-                                ...selectedComponent.diff,
+                                ...selection.diff,
                                 items: [
-                                  ...(
-                                    selectedComponent.diff?.items ?? []
-                                  ).filter(
+                                  ...(selection.diff?.items ?? []).filter(
                                     (item) =>
                                       item.path.join('/') !==
                                       pathWithoutRoot.join('/'),
@@ -371,11 +369,11 @@ export function DSLayerInspector({
                               };
 
                               const newSelection: NoyaCompositeElement = {
-                                ...selectedComponent,
+                                ...selection,
                                 diff: newDiff,
                               };
 
-                              setSelectedComponent(newSelection);
+                              setSelection(newSelection);
                             }}
                           />
                         </InputField.Root>

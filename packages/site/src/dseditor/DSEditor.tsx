@@ -75,7 +75,7 @@ export function DSEditor({
     fetchLibrary();
   }, [sourceName]);
 
-  const [selectedComponent, setSelectedComponent] = React.useState<
+  const [selection, setSelection] = React.useState<
     NoyaCompositeElement | undefined
   >();
 
@@ -115,14 +115,14 @@ export function DSEditor({
   );
 
   const resolvedNode = useMemo(() => {
-    if (!selectedComponent) return undefined;
+    if (!selection) return undefined;
 
-    return createResolvedNode(findComponent, selectedComponent);
-  }, [findComponent, selectedComponent]);
+    return createResolvedNode(findComponent, selection);
+  }, [findComponent, selection]);
 
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
-      if (selectedComponent && resolvedNode) {
+      if (selection && resolvedNode) {
         console.info(
           ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
             if (!node) return '()';
@@ -216,7 +216,7 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [primary, resolvedNode, selectedComponent, theme.colors.canvas.background],
+    [primary, resolvedNode, selection, theme.colors.canvas.background],
   );
 
   return (
@@ -228,8 +228,8 @@ export function DSEditor({
           system={system}
           ds={ds}
           setDS={setDS}
-          selectedComponent={selectedComponent}
-          setSelectedComponent={setSelectedComponent}
+          selection={selection}
+          setSelection={setSelection}
           components={components}
           onNewComponent={handleNewComponent}
           onDeleteComponent={handleDeleteComponent}
@@ -240,10 +240,10 @@ export function DSEditor({
         primary={primary}
         renderContent={handleRenderContent}
       />
-      {viewType !== 'preview' && selectedComponent && resolvedNode && (
+      {viewType !== 'preview' && selection && resolvedNode && (
         <DSLayerInspector
-          selectedComponent={selectedComponent}
-          setSelectedComponent={setSelectedComponent}
+          selection={selection}
+          setSelection={setSelection}
           findComponent={findComponent}
           onChangeComponent={handleChangeComponent}
           resolvedNode={resolvedNode}
