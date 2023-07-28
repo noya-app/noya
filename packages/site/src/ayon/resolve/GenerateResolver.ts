@@ -32,7 +32,7 @@ export class GenerateResolver {
     if (cacheKey in this.cache) return this.cache[cacheKey];
 
     const response = await fetch(
-      `${NOYA_HOST}/api/generate?prompt=${encodeURIComponent(prompt)}`,
+      `${NOYA_HOST}/api/generate/text?prompt=${encodeURIComponent(prompt)}`,
       { credentials: 'include' },
     );
     const resolved = response.json();
