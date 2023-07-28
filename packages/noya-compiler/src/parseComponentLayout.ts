@@ -1,4 +1,4 @@
-// https://chat.openai.com/share/bcbbd44b-1839-4a57-a915-621f6cc526ac
+// https://chat.openai.com/share/8f531826-979b-4c23-b3f6-768715b152a4
 import ts from 'typescript';
 
 export interface LayoutNode {
@@ -10,11 +10,12 @@ export interface LayoutNode {
 function convertJsxElementToLayoutNode(
   node: ts.Node,
 ): LayoutNode | string | null {
-  if (ts.isJsxElement(node)) {
-    // This node represents a JSX element. Convert it to a LayoutNode.
-    const tag = node.openingElement.tagName.getText();
+  if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+    // This node represents a JSX element or a self-closing JSX element. Convert it to a LayoutNode.
+    const openingElement = ts.isJsxElement(node) ? node.openingElement : node;
+    const tag = openingElement.tagName.getText();
     const attributes: { [name: string]: string } = {};
-    node.openingElement.attributes.forEachChild((attribute) => {
+    openingElement.attributes.forEachChild((attribute) => {
       if (
         ts.isJsxAttribute(attribute) &&
         attribute.initializer &&
@@ -24,12 +25,14 @@ function convertJsxElementToLayoutNode(
       }
     });
     const children: (LayoutNode | string)[] = [];
-    ts.forEachChild(node, (child) => {
-      const childNode = convertJsxElementToLayoutNode(child);
-      if (childNode) {
-        children.push(childNode);
-      }
-    });
+    if (ts.isJsxElement(node)) {
+      ts.forEachChild(node, (child) => {
+        const childNode = convertJsxElementToLayoutNode(child);
+        if (childNode) {
+          children.push(childNode);
+        }
+      });
+    }
     return { tag, attributes, children };
   } else if (ts.isJsxText(node)) {
     // This node represents text inside a JSX element. Convert it to a string.
@@ -39,11 +42,13 @@ function convertJsxElementToLayoutNode(
   return null;
 }
 
-function findFirstJsxElement(node: ts.Node): ts.JsxElement | null {
-  let result: ts.JsxElement | null = null;
+function findFirstJsxElement(
+  node: ts.Node,
+): ts.JsxElement | ts.JsxSelfClosingElement | null {
+  let result: ts.JsxElement | ts.JsxSelfClosingElement | null = null;
   ts.forEachChild(node, (child) => {
     if (result === null) {
-      if (ts.isJsxElement(child)) {
+      if (ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child)) {
         result = child;
       } else {
         result = findFirstJsxElement(child);
