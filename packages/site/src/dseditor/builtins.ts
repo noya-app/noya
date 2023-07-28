@@ -1,22 +1,40 @@
 import { uuid } from 'noya-utils';
 import {
+  avatarSymbolId,
   boxSymbolId,
   buttonSymbolId,
+  checkboxSymbolId,
   heroSymbolId,
   heroWithImageSymbolId,
+  imageSymbolId,
+  inputSymbolId,
   linkSymbolId,
+  radioSymbolId,
+  selectSymbolId,
+  switchSymbolId,
+  tableSymbolId,
   tagSymbolId,
   textSymbolId,
+  textareaSymbolId,
 } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
 import { NoyaComponent } from './types';
 
 export const PRIMITIVE_ELEMENT_NAMES = {
+  [avatarSymbolId]: 'Avatar',
   [boxSymbolId]: 'Box',
   [buttonSymbolId]: 'Button',
+  [checkboxSymbolId]: 'Checkbox',
+  [imageSymbolId]: 'Image',
+  [inputSymbolId]: 'Input',
   [linkSymbolId]: 'Link',
-  [textSymbolId]: 'Text',
+  [radioSymbolId]: 'Radio',
+  [selectSymbolId]: 'Select',
+  [switchSymbolId]: 'Switch',
+  [tableSymbolId]: 'Table',
   [tagSymbolId]: 'Tag',
+  [textSymbolId]: 'Text',
+  [textareaSymbolId]: 'TextArea',
 };
 
 const sidebarItemSymbolId = uuid();
