@@ -176,6 +176,7 @@ export function DSLayerInspector({
                 onClick={async () => {
                   const layouts =
                     await client.networkClient.generate.componentLayoutsFromDescription(
+                      component.name ?? 'Untitled',
                       component.description ?? '',
                     );
 
