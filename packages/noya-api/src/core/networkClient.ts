@@ -123,14 +123,41 @@ export class NoyaNetworkClient {
   }
 
   #generateComponentDescriptionFromName = async (name: string) => {
-    return 'A box that contains stuff';
+    const response = await this.request(
+      `${this.baseURI}/generate/component/description?name=${encodeURIComponent(
+        name,
+      )}`,
+      {
+        credentials: 'include',
+      },
+    );
+
+    this.handleHTTPErrors(response);
+
+    const text = await response.text();
+    return text;
   };
 
-  #generateComponentLayoutsFromDescription = async (description: string) => {
+  #generateComponentLayoutsFromDescription = async (
+    name: string,
+    description: string,
+  ) => {
+    const response = await this.request(
+      `${this.baseURI}/generate/component/layout?t=1&name=${encodeURIComponent(
+        name,
+      )}&description=${encodeURIComponent(description)}`,
+      {
+        credentials: 'include',
+      },
+    );
+
+    this.handleHTTPErrors(response);
+
+    const text = await response.text();
     return [
       {
-        name: 'Example',
-        code: `<Box class="bg-red-500"><Text class="text-white">Hello</Text></Box>`,
+        name: 'layout1',
+        code: text,
       },
     ];
   };
