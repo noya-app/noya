@@ -54,6 +54,26 @@ export const initialComponents: NoyaComponent[] = [
           ],
         },
       }),
+      Model.variant({
+        name: 'With Icon',
+        diff: {
+          items: [
+            {
+              path: ['b'],
+              children: {
+                add: [
+                  Model.primitiveElement({
+                    id: 'icon',
+                    componentID: buttonSymbolId,
+                    classNames: ['w-4', 'h-4', 'bg-primary-500'],
+                    children: [Model.string('+')],
+                  }),
+                ],
+              },
+            },
+          ],
+        },
+      }),
     ],
   }),
   Model.component({

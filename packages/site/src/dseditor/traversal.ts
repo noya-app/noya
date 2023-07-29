@@ -70,6 +70,7 @@ function applyClassNamesDiff(
 
 function applyChildrenDiff(
   level: number,
+  path: string[],
   findComponent: FindComponent,
   children: NoyaResolvedNode[],
   { add, remove }: NonNullable<NoyaDiffItem['children']>,
@@ -89,7 +90,7 @@ function applyChildrenDiff(
     children = [
       ...children,
       ...cloneDeep(add).map((child) => ({
-        ...createResolvedNode(findComponent, child, [], level),
+        ...createResolvedNode(findComponent, child, path, level),
         status: 'added' as const,
       })),
     ];
@@ -168,6 +169,7 @@ function applyResolvedDiff(
               if (item.children) {
                 newNode.children = applyChildrenDiff(
                   level,
+                  [...path, ...item.path],
                   findComponent,
                   newNode.children,
                   item.children,

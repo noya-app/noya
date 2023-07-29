@@ -28,7 +28,6 @@ import {
 import {
   NoyaComponent,
   NoyaCompositeElement,
-  NoyaDiffItem,
   NoyaResolvedNode,
   NoyaVariant,
 } from './types';
@@ -39,7 +38,6 @@ type LayerTreeItem = {
   key: string;
   node: NoyaResolvedNode;
   path: string[];
-  ops: NoyaDiffItem[];
 };
 
 interface Props {
@@ -95,7 +93,6 @@ export function DSLayerInspector({
           indexPath: indexPath.slice(),
           key: component.type + ':' + indexPath.join('/'),
           path: node.path,
-          ops: [],
         },
       ];
     },
@@ -282,11 +279,7 @@ export function DSLayerInspector({
               indentation={24}
               sortable
               pressEventName="onPointerDown"
-              renderItem={(
-                { depth, key, indexPath, node, ops, path },
-                index,
-                { isDragging },
-              ) => {
+              renderItem={({ depth, key, indexPath, node, path }) => {
                 const name = getName(node, findComponent);
                 const menu = [{ title: 'Duplicate' }, { title: 'Delete' }];
                 const hovered = highlightedPath?.join('/') === path.join('/');
