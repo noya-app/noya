@@ -73,24 +73,31 @@ export function replaceTextInRange(
   const spans = toTextSpansWithPositions(attributedString);
 
   const updated = spans
-    .map((span, i) => {
-      const start = range[0] - span.location;
-      const end = range[1] - span.location;
-
-      const shouldInsert =
-        start >= 0 && (start < span.length || i === spans.length - 1);
-
-      return {
-        attributes: span.attributes,
-        string:
-          span.string.slice(0, Math.max(start, 0)) +
-          (shouldInsert ? text : '') +
-          span.string.slice(Math.max(end, 0)),
-      };
-    })
+    .map((span, i) => updateTextSpan(span, range, text, i === spans.length - 1))
     .filter((span) => span.string !== '');
 
   return fromTextSpans(updated);
+}
+
+export function updateTextSpan<
+  T extends {
+    string: string;
+    location: number;
+    length: number;
+  },
+>(span: T, range: [number, number], insertText: string, isLast: boolean): T {
+  const start = range[0] - span.location;
+  const end = range[1] - span.location;
+
+  const shouldInsert = start >= 0 && (start < span.length || isLast);
+
+  return {
+    ...span,
+    string:
+      span.string.slice(0, Math.max(start, 0)) +
+      (shouldInsert ? insertText : '') +
+      span.string.slice(Math.max(end, 0)),
+  };
 }
 
 export function setAttributesInRange(

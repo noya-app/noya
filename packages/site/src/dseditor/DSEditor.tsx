@@ -6,17 +6,21 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
-import { findLast, uuid } from 'noya-utils';
-import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { useDeepState } from 'noya-react-utils';
+import { uuid } from 'noya-utils';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
-import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSLayerInspector } from './DSLayerInspector';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
+import { contentReducer } from './contentReducer';
+import { diffReducer } from './diffReducer';
+import { SerializedSelection } from './dom';
 import { renderDSOverview } from './renderDSOverview';
-import { ResolvedHierarchy, createResolvedNode } from './traversal';
+import { findStringElementPath, renderDSPreview } from './renderDSPreview';
+import { createResolvedNode } from './traversal';
 import { NoyaComponent, NoyaCompositeElement } from './types';
 
 const noop = () => {};
@@ -28,7 +32,6 @@ interface Props {
   onChangeName?: (name: string) => void;
   viewType?: 'preview';
 }
-
 export function DSEditor({
   initialDocument,
   onChangeDocument = noop,
@@ -79,6 +82,14 @@ export function DSEditor({
     NoyaCompositeElement | undefined
   >();
 
+  const [highlightedPath, setHighlightedPath] = React.useState<
+    string[] | undefined
+  >();
+
+  const [serializedSelection, setSerializedSelection] = useDeepState<
+    SerializedSelection | undefined
+  >();
+
   const findComponent = useCallback(
     (id: string) =>
       components.find((component) => component.componentID === id),
@@ -114,6 +125,23 @@ export function DSEditor({
     [components, setComponents],
   );
 
+  const handleSetTextAtPath = useCallback(
+    ({ path, value }: { path: string[]; value: string }) => {
+      setSelection((selection) =>
+        selection
+          ? {
+              ...selection,
+              diff: diffReducer(selection.diff, [
+                'updateTextValue',
+                { path: path.slice(1), value },
+              ]),
+            }
+          : undefined,
+      );
+    },
+    [],
+  );
+
   const resolvedNode = useMemo(() => {
     if (!selection) return undefined;
 
@@ -123,92 +151,18 @@ export function DSEditor({
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
       if (selection && resolvedNode) {
-        console.info(
-          ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
-            if (!node) return '()';
-
-            if (node.type === 'noyaString') return `"${node.value}"`;
-
-            return [node.name, `(${node.path.join('/')})`]
-              .filter(Boolean)
-              .join(' ');
-          }),
-        );
-
-        const content = ResolvedHierarchy.map<ReactNode>(
+        return renderDSPreview({
+          renderProps: props,
+          handleSetTextAtPath,
+          highlightedPath,
+          primary,
           resolvedNode,
-          (element, transformedChildren) => {
-            if (element.status === 'removed') return null;
-
-            if (element.type === 'noyaString') return element.value;
-
-            if (element.type === 'noyaCompositeElement')
-              return transformedChildren;
-
-            const PrimitiveComponent: React.FC<any> =
-              props.system.components[element.componentID];
-
-            if (!PrimitiveComponent) return null;
-
-            const classNames = element.classNames
-              .filter((className) => className.status !== 'removed')
-              .map((className) => {
-                return className.value.replace(/-primary-/, `-${primary}-`);
-              });
-
-            const style = parametersToTailwindStyle(classNames);
-
-            const variantClassName = findLast(classNames, (className) =>
-              className.startsWith('variant-'),
-            );
-            const variant = variantClassName
-              ? variantClassName.split('-')[1]
-              : undefined;
-
-            return (
-              <PrimitiveComponent
-                style={style}
-                key={element.path.join('/')}
-                {...(variant && { variant })}
-                // _passthrough={{
-                //   contentEditable:
-                //     element.componentID === buttonSymbolId ||
-                //     element.componentID === tagSymbolId ||
-                //     element.componentID === linkSymbolId ||
-                //     element.componentID === textSymbolId,
-                // }}
-              >
-                {transformedChildren}
-              </PrimitiveComponent>
-            );
-          },
-        );
-
-        return (
-          <div
-            // onInput={(e) => {
-            //   console.log('input', e.nativeEvent.target);
-            // }}
-            style={{
-              backgroundImage: `radial-gradient(circle at 0px 0px, rgba(0,0,0,0.25) 1px, ${theme.colors.canvas.background} 0px)`,
-              backgroundSize: '10px 10px',
-              minHeight: '100%',
-              display: 'flex',
-              alignItems: 'stretch',
-              flexDirection: 'column',
-              padding: '20px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                background: 'white',
-              }}
-            >
-              {content}
-            </div>
-          </div>
-        );
+          serializedSelection,
+          canvasBackgroundColor: theme.colors.canvas.background,
+          selectionOutlineColor: theme.colors.primary,
+          setHighlightedPath,
+          setSerializedSelection,
+        });
       }
 
       return renderDSOverview({
@@ -216,7 +170,50 @@ export function DSEditor({
         backgroundColor: theme.colors.canvas.background,
       });
     },
-    [primary, resolvedNode, selection, theme.colors.canvas.background],
+    [
+      handleSetTextAtPath,
+      highlightedPath,
+      primary,
+      resolvedNode,
+      selection,
+      serializedSelection,
+      setSerializedSelection,
+      theme.colors.canvas.background,
+      theme.colors.primary,
+    ],
+  );
+
+  const handleBeforeInput = useCallback(
+    (event: InputEvent) => {
+      event.preventDefault();
+
+      const ranges = event.getTargetRanges();
+      const range = ranges[0];
+
+      if (!range || !range.startContainer.isSameNode(range.endContainer)) {
+        return;
+      }
+
+      const path = findStringElementPath(range.startContainer.parentElement);
+
+      if (!path) return;
+
+      const content = contentReducer(range.startContainer.textContent, {
+        insertText: event.data,
+        range: [range.startOffset, range.endOffset],
+      });
+
+      handleSetTextAtPath({ path, value: content.string });
+
+      if (serializedSelection) {
+        setSerializedSelection({
+          ...serializedSelection,
+          anchorOffset: content.range[0],
+          focusOffset: content.range[1],
+        });
+      }
+    },
+    [handleSetTextAtPath, serializedSelection, setSerializedSelection],
   );
 
   return (
@@ -239,6 +236,9 @@ export function DSEditor({
         sourceName={sourceName}
         primary={primary}
         renderContent={handleRenderContent}
+        serializedSelection={serializedSelection}
+        onBeforeInput={handleBeforeInput}
+        setSerializedSelection={setSerializedSelection}
       />
       {viewType !== 'preview' && selection && resolvedNode && (
         <DSLayerInspector
@@ -247,6 +247,8 @@ export function DSEditor({
           findComponent={findComponent}
           onChangeComponent={handleChangeComponent}
           resolvedNode={resolvedNode}
+          highlightedPath={highlightedPath}
+          setHighlightedPath={setHighlightedPath}
         />
       )}
     </Stack.H>

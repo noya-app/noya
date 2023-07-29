@@ -1,6 +1,7 @@
 export * from './components/AutoSizer';
 export * from './components/FileDropTarget';
 export * from './hooks/useDeepArray';
+export * from './hooks/useDeepState';
 export * from './hooks/useFetch';
 export * from './hooks/useFileDropTarget';
 export * from './hooks/useIsMounted';
@@ -12,6 +13,6 @@ export * from './hooks/useShallowArray';
 export * from './hooks/useSize';
 export * from './hooks/useSystemColorScheme';
 export * from './hooks/useUrlHashParameters';
-export * from './utils/fetchData';
 export * from './utils/PromiseState';
 export * from './utils/SuspendedValue';
+export * from './utils/fetchData';

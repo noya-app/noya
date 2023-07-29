@@ -8,9 +8,21 @@ import {
 } from '@noya-design-system/protocol';
 import { Stack } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
+import { ControlledFrame } from './ControlledFrame';
+import {
+  SerializedSelection,
+  serializeSelection,
+  setDOMSelection,
+} from './dom';
 
 const Loading = styled.div({
   position: 'absolute',
@@ -22,33 +34,54 @@ const Loading = styled.div({
   pointerEvents: 'none',
 });
 
-const Frame = styled.iframe({
-  width: '100%',
-  height: '100%',
-});
-
 export type DSRenderProps = {
   system: DesignSystemDefinition;
   theme: any;
   primary: string;
+  iframe: HTMLIFrameElement;
 };
 
-export function DSRenderer({
+export type DSRenderContext = {
+  iframe: HTMLIFrameElement;
+};
+
+export interface IDSRenderer {
+  getIframe: () => HTMLIFrameElement;
+  isRendering: () => boolean;
+}
+
+export const DSRenderer = function DSRenderer({
   sourceName,
   primary,
   renderContent,
+  serializedSelection,
+  setSerializedSelection,
+  onBeforeInput,
+  onReady,
 }: {
   sourceName: string;
   primary: string;
   renderContent: (options: DSRenderProps) => React.ReactNode;
+  serializedSelection?: SerializedSelection;
+  setSerializedSelection?: (value: SerializedSelection | undefined) => void;
+  onBeforeInput?: (event: InputEvent) => void;
+  onReady?: () => void;
 }) {
+  const [ready, setReady] = React.useState(false);
   const ref = useRef<HTMLIFrameElement>(null);
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
   const [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
   >();
 
+  const handleReady = useCallback(() => {
+    setReady(true);
+    onReady?.();
+  }, [onReady]);
+
   useEffect(() => {
+    if (!ready) return;
+
     async function fetchLibrary() {
       const system = await loadDesignSystem(sourceName, {
         Function: ref.current!.contentWindow!['Function' as any] as any,
@@ -60,7 +93,7 @@ export function DSRenderer({
 
     setSystem(undefined);
     fetchLibrary();
-  }, [sourceName]);
+  }, [ready, sourceName]);
 
   useEffect(() => {
     if (!system) {
@@ -92,13 +125,22 @@ export function DSRenderer({
     return themeValue;
   }, [primary, system]);
 
+  const lock = useRef(false);
+
   useLayoutEffect(() => {
-    if (!root || !system) return;
+    const iframe = ref.current;
+
+    if (!root || !system || !iframe || !ready) return;
 
     const Provider: React.FC<ProviderProps> =
       system.components[component.id.Provider];
 
-    const content = renderContent({ system, theme, primary });
+    const content = renderContent({
+      system,
+      theme,
+      primary,
+      iframe,
+    });
 
     const withProvider = Provider ? (
       <Provider theme={theme}>{content}</Provider>
@@ -106,18 +148,55 @@ export function DSRenderer({
       content
     );
 
-    root.render(withProvider);
-  }, [theme, renderContent, root, system, primary]);
+    lock.current = true;
+
+    // Render sync since we update the selection right after
+    root.render(withProvider, { sync: true });
+
+    setDOMSelection(
+      iframe.contentWindow!,
+      iframe.contentDocument!,
+      serializedSelection,
+    );
+
+    lock.current = false;
+  }, [theme, renderContent, root, system, primary, serializedSelection, ready]);
+
+  useEffect(() => {
+    if (!ready || !ref.current) return;
+
+    const document = ref.current.contentDocument;
+    const window = ref.current.contentWindow;
+
+    if (!document || !window) return;
+
+    const handleSelectionChange = () => {
+      if (lock.current) return;
+
+      setSerializedSelection?.(serializeSelection(window, document));
+    };
+
+    const handleBeforeInput = (event: InputEvent) => {
+      onBeforeInput?.(event);
+    };
+
+    window.addEventListener('beforeinput', handleBeforeInput);
+    document.addEventListener('selectionchange', handleSelectionChange);
+
+    return () => {
+      window.removeEventListener('beforeinput', handleBeforeInput);
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, [ready, setSerializedSelection, onBeforeInput]);
 
   return (
     <Stack.V flex="1" position="relative">
-      {/* Ensure html5 doctype for proper styling */}
-      <Frame
+      <ControlledFrame
         ref={ref}
         title="Design System Preview"
-        srcDoc="<!DOCTYPE html><head><style>html, body { height: 100% }</style></head>"
+        onReady={handleReady}
       />
       {!system && <Loading>Loading design system...</Loading>}
     </Stack.V>
   );
-}
+};

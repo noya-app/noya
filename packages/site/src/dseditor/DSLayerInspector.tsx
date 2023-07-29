@@ -19,6 +19,7 @@ import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuB
 import { InspectorSection } from '../components/InspectorSection';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
+import { diffReducer } from './diffReducer';
 import {
   FindComponent,
   ResolvedHierarchy,
@@ -27,7 +28,6 @@ import {
 import {
   NoyaComponent,
   NoyaCompositeElement,
-  NoyaDiff,
   NoyaDiffItem,
   NoyaResolvedNode,
   NoyaVariant,
@@ -48,6 +48,8 @@ interface Props {
   findComponent: FindComponent;
   onChangeComponent: (component: NoyaComponent) => void;
   resolvedNode: NoyaResolvedNode;
+  highlightedPath?: string[];
+  setHighlightedPath: (path: string[] | undefined) => void;
 }
 
 function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
@@ -72,6 +74,8 @@ export function DSLayerInspector({
   findComponent,
   onChangeComponent,
   resolvedNode,
+  highlightedPath,
+  setHighlightedPath,
 }: Props) {
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
@@ -96,10 +100,6 @@ export function DSLayerInspector({
       ];
     },
   );
-
-  const [hoveredItemId, setHoveredItemId] = React.useState<
-    string | undefined
-  >();
 
   const variantsWithDefault = useMemo(
     (): (NoyaVariant | undefined)[] => [
@@ -289,12 +289,7 @@ export function DSLayerInspector({
               ) => {
                 const name = getName(node, findComponent);
                 const menu = [{ title: 'Duplicate' }, { title: 'Delete' }];
-
-                // console.log(path.join('/'), node);
-
-                // if (node.type === 'noyaString') {
-                //   console.log('->', node.value);
-                // }
+                const hovered = highlightedPath?.join('/') === path.join('/');
 
                 return (
                   <TreeView.Row
@@ -303,11 +298,9 @@ export function DSLayerInspector({
                     depth={depth - 1}
                     menuItems={menu}
                     onSelectMenuItem={() => {}}
+                    hovered={hovered}
                     onHoverChange={(hovered) => {
-                      if (hovered) {
-                        setHoveredItemId(key);
-                      }
-                      // setHoveredItemId(hovered ? key : undefined);
+                      setHighlightedPath(hovered ? path : undefined);
                     }}
                     icon={
                       depth !== 0 && (
@@ -349,28 +342,18 @@ export function DSLayerInspector({
                       {node.type === 'noyaString' ? (
                         <InputField.Root>
                           <InputField.Input
+                            style={{
+                              background: 'transparent',
+                              color: 'dodgerblue',
+                            }}
                             value={node.value}
                             onChange={(value) => {
-                              const pathWithoutRoot = path.slice(1);
-
-                              const newDiff: NoyaDiff = {
-                                ...selection.diff,
-                                items: [
-                                  ...(selection.diff?.items ?? []).filter(
-                                    (item) =>
-                                      item.path.join('/') !==
-                                      pathWithoutRoot.join('/'),
-                                  ),
-                                  {
-                                    path: pathWithoutRoot,
-                                    textValue: value,
-                                  },
-                                ],
-                              };
-
                               const newSelection: NoyaCompositeElement = {
                                 ...selection,
-                                diff: newDiff,
+                                diff: diffReducer(selection.diff, [
+                                  'updateTextValue',
+                                  { path: path.slice(1), value },
+                                ]),
                               };
 
                               setSelection(newSelection);
@@ -380,8 +363,7 @@ export function DSLayerInspector({
                       ) : (
                         <Stack.H padding="4px 8px" alignItems="center">
                           <TreeView.RowTitle>{name}</TreeView.RowTitle>
-                          {hoveredItemId === key &&
-                          node.type === 'noyaPrimitiveElement' ? (
+                          {hovered && node.type === 'noyaPrimitiveElement' ? (
                             <Text variant="code" fontSize="9px">
                               {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
                             </Text>
