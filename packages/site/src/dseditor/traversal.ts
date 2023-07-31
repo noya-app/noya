@@ -313,22 +313,34 @@ export function embedRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
         case 'noyaPrimitiveElement': {
           // We don't attempt to exit earlier, since we still need to return a
           // new node with the updated children
-          const items = diff.items.filter((item) =>
-            equalPaths(item.path, path),
-          );
+          const item = diff.items.find((item) => equalPaths(item.path, path));
+
+          let children = [...transformedChildren];
+
+          if (item?.children) {
+            const { add, remove } = item.children;
+
+            if (remove) {
+              const removeKeys = new Set(remove);
+
+              children = children.filter((child) => !removeKeys.has(child.id));
+            }
+
+            if (add) {
+              add.forEach(({ node, index }) => {
+                children.splice(index, 0, node);
+              });
+            }
+          }
 
           const newNode: NoyaPrimitiveElement = {
             ...node,
-            classNames: items.reduce((result: string[], item: NoyaDiffItem) => {
-              if (!item.classNames) return result;
-
-              return applyClassNamesDiff(
-                0,
-                result.map((className) => ({ value: className })),
-                item.classNames,
-              ).map((className) => className.value);
-            }, node.classNames),
-            children: transformedChildren,
+            classNames: applyClassNamesDiff(
+              0,
+              node.classNames.map((className) => ({ value: className })),
+              item?.classNames || {},
+            ).map((className) => className.value),
+            children,
           };
 
           return newNode;

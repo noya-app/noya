@@ -89,6 +89,8 @@ export function DSLayerInspector({
 
       if (depth === 0) return [];
 
+      if (node.type === 'noyaString') return [];
+
       return [
         {
           node,
