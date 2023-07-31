@@ -1,5 +1,5 @@
 import { Model } from '../builders';
-import { mergeDiffs, resetRemovedClassName } from '../diffReducer';
+import { mergeDiffs, resetRemovedClassName } from '../diff';
 
 it('merges add class names', () => {
   const a = Model.diff([

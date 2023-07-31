@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { withOptions } from 'tree-visit';
 import { Model } from './builders';
-import { equalPaths, mergeDiffs } from './diffReducer';
+import { equalPaths, mergeDiffs } from './diff';
 import {
   NoyaComponent,
   NoyaCompositeElement,

@@ -16,7 +16,7 @@ import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { contentReducer } from './contentReducer';
-import { mergeDiffs } from './diffReducer';
+import { mergeDiffs } from './diff';
 import { SerializedSelection } from './dom';
 import { renderDSOverview } from './renderDSOverview';
 import { findStringElementPath, renderDSPreview } from './renderDSPreview';

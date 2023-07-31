@@ -2,27 +2,20 @@ import { useNoyaClient } from 'noya-api';
 import { parseComponentLayout } from 'noya-compiler';
 import {
   Button,
-  Chip,
   InputField,
   ScrollArea,
   Select,
   Spacer,
   Stack,
-  Text,
   TreeView,
-  createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
-import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
-import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { InspectorSection } from '../components/InspectorSection';
-import { Model } from './builders';
-import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
+import { DSLayerRow } from './DSLayerRow';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
-import { mergeDiffs, resetRemovedClassName } from './diffReducer';
 import {
   FindComponent,
   ResolvedHierarchy,
@@ -53,22 +46,6 @@ interface Props {
   setHighlightedPath: (path: string[] | undefined) => void;
 }
 
-function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
-  switch (node.type) {
-    case 'noyaString':
-      return node.value;
-    case 'noyaPrimitiveElement':
-      return node.name ?? PRIMITIVE_ELEMENT_NAMES[node.componentID];
-    case 'noyaCompositeElement': {
-      const component = findComponent(node.componentID);
-
-      if (!component) return '<Component Not Found>';
-
-      return node.name ?? component.name ?? '<No Name>';
-    }
-  }
-}
-
 export function DSLayerInspector({
   selection,
   setSelection,
@@ -82,25 +59,29 @@ export function DSLayerInspector({
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
 
-  const flattened = ResolvedHierarchy.flatMap(
-    resolvedNode,
-    (node, indexPath): LayerTreeItem[] => {
-      const depth = indexPath.length;
+  const flattened = useMemo(
+    () =>
+      ResolvedHierarchy.flatMap(
+        resolvedNode,
+        (node, indexPath): LayerTreeItem[] => {
+          const depth = indexPath.length;
 
-      if (depth === 0) return [];
+          if (depth === 0) return [];
 
-      if (node.type === 'noyaString') return [];
+          if (node.type === 'noyaString') return [];
 
-      return [
-        {
-          node,
-          depth,
-          indexPath: indexPath.slice(),
-          key: component.type + ':' + indexPath.join('/'),
-          path: node.path,
+          return [
+            {
+              node,
+              depth,
+              indexPath: indexPath.slice(),
+              key: node.path.join('/'),
+              path: node.path,
+            },
+          ];
         },
-      ];
-    },
+      ),
+    [resolvedNode],
   );
 
   const variantsWithDefault = useMemo(
@@ -289,233 +270,23 @@ export function DSLayerInspector({
                 { depth, key, indexPath, node, path },
                 index,
                 { isDragging },
-              ) => {
-                const parent = ResolvedHierarchy.access(
-                  resolvedNode,
-                  indexPath.slice(0, -1),
-                );
-                const name = getName(node, findComponent);
-                const menu = createSectionedMenu(
-                  node.type !== 'noyaString' && [
-                    node.type === 'noyaPrimitiveElement' && {
-                      title: 'Add Child',
-                      value: 'addChild',
-                    },
-                    depth !== 1 && { title: 'Duplicate', value: 'duplicate' },
-                    depth !== 1 &&
-                      parent.type !== 'noyaCompositeElement' && {
-                        title: 'Delete',
-                        value: 'delete',
-                      },
-                  ],
-                );
-                type MenuItemType = Exclude<
-                  Extract<typeof menu[number], object>['value'],
-                  undefined
-                >;
-                const hovered = highlightedPath?.join('/') === path.join('/');
-
-                const onSelectMenuItem = (value: MenuItemType) => {
-                  switch (value) {
-                    case 'duplicate':
-                      break;
-                    case 'delete': {
-                      const newSelection: NoyaCompositeElement = {
-                        ...selection,
-                        diff: mergeDiffs(
-                          selection.diff,
-                          Model.diff([
-                            {
-                              path: path.slice(1, -1),
-                              children: { remove: [node.id] },
-                            },
-                          ]),
-                        ),
-                      };
-
-                      setSelection(newSelection);
-                      break;
-                    }
-                    case 'addChild': {
-                      if (node.type !== 'noyaPrimitiveElement') break;
-
-                      const newSelection: NoyaCompositeElement = {
-                        ...selection,
-                        diff: mergeDiffs(
-                          selection.diff,
-                          Model.diff([
-                            {
-                              path: path.slice(1),
-                              children: {
-                                add: [
-                                  {
-                                    node: Model.primitiveElement({
-                                      componentID: boxSymbolId,
-                                    }),
-                                    index: node.children.length,
-                                  },
-                                ],
-                              },
-                            },
-                          ]),
-                        ),
-                      };
-
-                      setSelection(newSelection);
-                      break;
-                    }
-                  }
-                };
-
-                return (
-                  <TreeView.Row
-                    key={key}
-                    id={key}
-                    depth={depth - 1}
-                    menuItems={menu}
-                    onSelectMenuItem={onSelectMenuItem}
-                    hovered={hovered && !isDragging}
-                    onHoverChange={(hovered) => {
-                      setHighlightedPath(hovered ? path : undefined);
-                    }}
-                    icon={
-                      depth !== 0 && (
-                        <DraggableMenuButton
-                          items={menu}
-                          onSelect={onSelectMenuItem}
-                        />
-                      )
-                    }
-                  >
-                    <Stack.V
-                      flex="1 1 0%"
-                      padding="1px"
-                      overflow="hidden"
-                      borderRadius="4px"
-                      margin="2px 0"
-                      border={
-                        node.type === 'noyaCompositeElement'
-                          ? undefined
-                          : `1px solid ${theme.colors.divider}`
-                      }
-                      background={
-                        node.status === 'removed'
-                          ? 'rgb(255, 229, 229)'
-                          : node.type === 'noyaCompositeElement'
-                          ? 'rgb(238, 229, 255)'
-                          : undefined
-                      }
-                      borderRight={
-                        node.status === 'added'
-                          ? `8px solid rgb(205, 238, 231)`
-                          : node.status === 'removed'
-                          ? `8px solid rgb(255, 229, 229)`
-                          : undefined
-                      }
-                      color={
-                        node.type === 'noyaString'
-                          ? 'dodgerblue'
-                          : node.type === 'noyaCompositeElement'
-                          ? theme.colors.primary
-                          : 'inherit'
-                      }
-                    >
-                      {node.type === 'noyaString' ? (
-                        <InputField.Root>
-                          <InputField.Input
-                            style={{
-                              background: 'transparent',
-                              color: 'dodgerblue',
-                            }}
-                            value={node.value}
-                            onChange={(value) => {
-                              const newSelection: NoyaCompositeElement = {
-                                ...selection,
-                                diff: mergeDiffs(
-                                  selection.diff,
-                                  Model.diff([
-                                    Model.diffItem({
-                                      path: path.slice(1),
-                                      textValue: value,
-                                    }),
-                                  ]),
-                                ),
-                              };
-
-                              setSelection(newSelection);
-                            }}
-                          />
-                        </InputField.Root>
-                      ) : (
-                        <Stack.H padding="4px 8px" alignItems="center">
-                          <TreeView.RowTitle>{name}</TreeView.RowTitle>
-                          {hovered && node.type === 'noyaPrimitiveElement' ? (
-                            <Text variant="code" fontSize="9px">
-                              {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
-                            </Text>
-                          ) : node.type === 'noyaCompositeElement' &&
-                            node.variantID ? (
-                            <Text variant="code" fontSize="9px">
-                              {findComponent(node.componentID)?.variants?.find(
-                                (variant) => variant.id === node.variantID,
-                              )?.name ?? 'Default'}
-                            </Text>
-                          ) : null}
-                        </Stack.H>
-                      )}
-                      {node.type === 'noyaPrimitiveElement' && (
-                        <Stack.H flexWrap="wrap" gap="2px">
-                          {node.classNames.map(({ value, status }) => (
-                            <Chip
-                              key={value}
-                              size={'small'}
-                              deletable={status !== 'removed'}
-                              addable={status === 'removed'}
-                              monospace
-                              variant={
-                                status === 'added' ? 'secondary' : undefined
-                              }
-                              style={{
-                                opacity: status === 'removed' ? 0.5 : 1,
-                              }}
-                              onDelete={() => {
-                                const newSelection: NoyaCompositeElement = {
-                                  ...selection,
-                                  diff: mergeDiffs(
-                                    selection.diff,
-                                    Model.diff([
-                                      {
-                                        path: path.slice(1),
-                                        classNames: { remove: [value] },
-                                      },
-                                    ]),
-                                  ),
-                                };
-
-                                setSelection(newSelection);
-                              }}
-                              onAdd={() => {
-                                const newSelection: NoyaCompositeElement = {
-                                  ...selection,
-                                  diff: resetRemovedClassName(
-                                    selection.diff,
-                                    path.slice(1),
-                                    value,
-                                  ),
-                                };
-
-                                setSelection(newSelection);
-                              }}
-                            >
-                              {value}
-                            </Chip>
-                          ))}
-                        </Stack.H>
-                      )}
-                    </Stack.V>
-                  </TreeView.Row>
-                );
-              }}
+              ) => (
+                <DSLayerRow
+                  id={key}
+                  key={key}
+                  selection={selection}
+                  setSelection={setSelection}
+                  resolvedNode={resolvedNode}
+                  findComponent={findComponent}
+                  highlightedPath={highlightedPath}
+                  setHighlightedPath={setHighlightedPath}
+                  depth={depth}
+                  indexPath={indexPath}
+                  node={node}
+                  path={path}
+                  isDragging={isDragging}
+                />
+              )}
             />
           </InspectorSection>
         </Stack.V>
