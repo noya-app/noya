@@ -10,20 +10,23 @@ import {
   Stack,
   Text,
   TreeView,
+  createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
+import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { InspectorSection } from '../components/InspectorSection';
+import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
-import { diffReducer } from './diffReducer';
+import { diffReducer, mergeDiffs } from './diffReducer';
 import {
   FindComponent,
   ResolvedHierarchy,
-  applyRootLevelDiff,
+  embedRootLevelDiff,
 } from './traversal';
 import {
   NoyaComponent,
@@ -247,7 +250,7 @@ export function DSLayerInspector({
                         return;
                       }
 
-                      const newRootElement = applyRootLevelDiff(
+                      const newRootElement = embedRootLevelDiff(
                         component.rootElement,
                         selection.diff,
                       );
@@ -279,10 +282,87 @@ export function DSLayerInspector({
               indentation={24}
               sortable
               pressEventName="onPointerDown"
-              renderItem={({ depth, key, indexPath, node, path }) => {
+              renderItem={(
+                { depth, key, indexPath, node, path },
+                index,
+                { isDragging },
+              ) => {
+                const parent = ResolvedHierarchy.access(
+                  resolvedNode,
+                  indexPath.slice(0, -1),
+                );
                 const name = getName(node, findComponent);
-                const menu = [{ title: 'Duplicate' }, { title: 'Delete' }];
+                const menu = createSectionedMenu(
+                  node.type !== 'noyaString' && [
+                    node.type === 'noyaPrimitiveElement' && {
+                      title: 'Add Child',
+                      value: 'addChild',
+                    },
+                    depth !== 1 && { title: 'Duplicate', value: 'duplicate' },
+                    depth !== 1 &&
+                      parent.type !== 'noyaCompositeElement' && {
+                        title: 'Delete',
+                        value: 'delete',
+                      },
+                  ],
+                );
+                type MenuItemType = Exclude<
+                  Extract<typeof menu[number], object>['value'],
+                  undefined
+                >;
                 const hovered = highlightedPath?.join('/') === path.join('/');
+
+                const onSelectMenuItem = (value: MenuItemType) => {
+                  switch (value) {
+                    case 'duplicate':
+                      break;
+                    case 'delete': {
+                      const newSelection: NoyaCompositeElement = {
+                        ...selection,
+                        diff: mergeDiffs(
+                          selection.diff,
+                          Model.diff([
+                            {
+                              path: path.slice(1, -1),
+                              children: { remove: [node.id] },
+                            },
+                          ]),
+                        ),
+                      };
+
+                      setSelection(newSelection);
+                      break;
+                    }
+                    case 'addChild': {
+                      if (node.type !== 'noyaPrimitiveElement') break;
+
+                      const newSelection: NoyaCompositeElement = {
+                        ...selection,
+                        diff: mergeDiffs(
+                          selection.diff,
+                          Model.diff([
+                            {
+                              path: path.slice(1),
+                              children: {
+                                add: [
+                                  {
+                                    node: Model.primitiveElement({
+                                      componentID: boxSymbolId,
+                                    }),
+                                    index: node.children.length,
+                                  },
+                                ],
+                              },
+                            },
+                          ]),
+                        ),
+                      };
+
+                      setSelection(newSelection);
+                      break;
+                    }
+                  }
+                };
 
                 return (
                   <TreeView.Row
@@ -290,14 +370,17 @@ export function DSLayerInspector({
                     id={key}
                     depth={depth - 1}
                     menuItems={menu}
-                    onSelectMenuItem={() => {}}
-                    hovered={hovered}
+                    onSelectMenuItem={onSelectMenuItem}
+                    hovered={hovered && !isDragging}
                     onHoverChange={(hovered) => {
                       setHighlightedPath(hovered ? path : undefined);
                     }}
                     icon={
                       depth !== 0 && (
-                        <DraggableMenuButton items={menu} onSelect={() => {}} />
+                        <DraggableMenuButton
+                          items={menu}
+                          onSelect={onSelectMenuItem}
+                        />
                       )
                     }
                   >
@@ -313,7 +396,9 @@ export function DSLayerInspector({
                           : `1px solid ${theme.colors.divider}`
                       }
                       background={
-                        node.type === 'noyaCompositeElement'
+                        node.status === 'removed'
+                          ? 'rgb(255, 229, 229)'
+                          : node.type === 'noyaCompositeElement'
                           ? 'rgb(238, 229, 255)'
                           : undefined
                       }
@@ -343,10 +428,15 @@ export function DSLayerInspector({
                             onChange={(value) => {
                               const newSelection: NoyaCompositeElement = {
                                 ...selection,
-                                diff: diffReducer(selection.diff, [
-                                  'updateTextValue',
-                                  { path: path.slice(1), value },
-                                ]),
+                                diff: mergeDiffs(
+                                  selection.diff,
+                                  Model.diff([
+                                    Model.diffItem({
+                                      path: path.slice(1),
+                                      textValue: value,
+                                    }),
+                                  ]),
+                                ),
                               };
 
                               setSelection(newSelection);
@@ -384,6 +474,33 @@ export function DSLayerInspector({
                               }
                               style={{
                                 opacity: status === 'removed' ? 0.5 : 1,
+                              }}
+                              onDelete={() => {
+                                const newSelection: NoyaCompositeElement = {
+                                  ...selection,
+                                  diff: mergeDiffs(
+                                    selection.diff,
+                                    Model.diff([
+                                      {
+                                        path: path.slice(1),
+                                        classNames: { remove: [value] },
+                                      },
+                                    ]),
+                                  ),
+                                };
+
+                                setSelection(newSelection);
+                              }}
+                              onAdd={() => {
+                                const newSelection: NoyaCompositeElement = {
+                                  ...selection,
+                                  diff: diffReducer(selection.diff, [
+                                    'resetRemovedClassName',
+                                    { path: path.slice(1), className: value },
+                                  ]),
+                                };
+
+                                setSelection(newSelection);
                               }}
                             >
                               {value}

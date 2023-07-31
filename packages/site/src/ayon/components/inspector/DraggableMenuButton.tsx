@@ -1,6 +1,10 @@
-import { DropdownMenu, useDesignSystemTheme } from 'noya-designsystem';
+import {
+  DropdownMenu,
+  MenuItem,
+  useDesignSystemTheme,
+} from 'noya-designsystem';
 import { DragHandleDots2Icon } from 'noya-icons';
-import React, { ComponentProps, memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 const DotButtonElement = styled.div(({ theme }) => ({
@@ -26,10 +30,9 @@ const TriggerElement = styled.div({
 /**
  * A button that opens a menu when clicked, but also allows dragging the
  */
-export const DraggableMenuButton = memo(function DraggableMenuButton({
-  items,
-  onSelect,
-}: Pick<ComponentProps<typeof DropdownMenu>, 'items' | 'onSelect'>) {
+export const DraggableMenuButton = memo(function DraggableMenuButton<
+  T extends string,
+>({ items, onSelect }: { items: MenuItem<T>[]; onSelect: (value: T) => void }) {
   const color = useDesignSystemTheme().colors.icon;
   const [open, setOpen] = useState(false);
   const [downPosition, setDownPosition] = React.useState<{

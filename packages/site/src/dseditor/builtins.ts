@@ -62,12 +62,15 @@ export const initialComponents: NoyaComponent[] = [
               path: ['b'],
               children: {
                 add: [
-                  Model.primitiveElement({
-                    id: 'icon',
-                    componentID: buttonSymbolId,
-                    classNames: ['w-4', 'h-4', 'bg-primary-500'],
-                    children: [Model.string('+')],
-                  }),
+                  {
+                    node: Model.primitiveElement({
+                      id: 'icon',
+                      componentID: buttonSymbolId,
+                      classNames: ['w-4', 'h-4', 'bg-primary-500'],
+                      children: [Model.string('+')],
+                    }),
+                    index: 1,
+                  },
                 ],
               },
             },
@@ -126,16 +129,22 @@ export const initialComponents: NoyaComponent[] = [
               path: ['sidebar'],
               children: {
                 add: [
-                  Model.primitiveElement({
-                    id: 'title',
-                    componentID: textSymbolId,
-                    children: [Model.string('Title')],
-                    classNames: ['variant-h4'],
-                  }),
-                  Model.compositeElement({
-                    id: 'extra',
-                    componentID: sidebarItemSymbolId,
-                  }),
+                  {
+                    node: Model.primitiveElement({
+                      id: 'title',
+                      componentID: textSymbolId,
+                      children: [Model.string('Title')],
+                      classNames: ['variant-h4'],
+                    }),
+                    index: 0,
+                  },
+                  {
+                    node: Model.compositeElement({
+                      id: 'extra',
+                      componentID: sidebarItemSymbolId,
+                    }),
+                    index: 1,
+                  },
                 ],
               },
             },

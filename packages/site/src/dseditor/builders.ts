@@ -2,6 +2,8 @@ import { uuid } from 'noya-utils';
 import {
   NoyaComponent,
   NoyaCompositeElement,
+  NoyaDiff,
+  NoyaDiffItem,
   NoyaPrimitiveElement,
   NoyaString,
   NoyaVariant,
@@ -77,10 +79,32 @@ function noyaVariant(options: ModelOptions<NoyaVariant>): NoyaVariant {
   };
 }
 
+function noyaDiffItem(
+  options: ModelOptions<NoyaDiffItem> & Pick<NoyaDiffItem, 'path'>,
+) {
+  return {
+    ...options,
+    path: options.path,
+  };
+}
+
+function noyaDiff(options: ModelOptions<NoyaDiff> | NoyaDiff['items'] = {}) {
+  if (Array.isArray(options)) {
+    options = { items: options };
+  }
+
+  return {
+    ...options,
+    items: options.items ?? [],
+  };
+}
+
 export namespace Model {
   export const string = noyaString;
   export const primitiveElement = noyaPrimitiveElement;
   export const compositeElement = noyaCompositeElement;
   export const component = noyaComponent;
   export const variant = noyaVariant;
+  export const diffItem = noyaDiffItem;
+  export const diff = noyaDiff;
 }

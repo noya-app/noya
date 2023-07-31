@@ -109,6 +109,7 @@ export function DSEditor({
 
   const handleDeleteComponent = useCallback(
     (componentID: string) => {
+      setSelection(undefined);
       setComponents(components.filter((c) => c.componentID !== componentID));
     },
     [components, setComponents],

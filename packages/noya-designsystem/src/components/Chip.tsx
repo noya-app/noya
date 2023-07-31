@@ -96,6 +96,7 @@ export interface ChipProps {
   addable?: boolean;
   monospace?: boolean;
   onDelete?: () => void;
+  onAdd?: () => void;
   onClick?: () => void;
   onHoverDeleteChange?: (hovering: boolean) => void;
   style?: React.CSSProperties;
@@ -111,6 +112,7 @@ export const Chip = memo(function Chip({
   monospace = false,
   onDelete,
   onClick,
+  onAdd,
   onHoverDeleteChange,
 }: ChipProps) {
   const { hoverProps: hoverDeleteProps } = useHover({
@@ -133,7 +135,7 @@ export const Chip = memo(function Chip({
           onClick={onDelete}
         />
       )}
-      {addable && <AddElement size={size} />}
+      {addable && <AddElement size={size} onClick={onAdd} />}
     </ChipElement>
   );
 });

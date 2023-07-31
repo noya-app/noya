@@ -74,7 +74,7 @@ export type NoyaDiffItem = {
     remove?: string[];
   };
   children?: {
-    add?: NoyaNode[];
+    add?: { node: NoyaNode; index: number }[];
     remove?: string[];
   };
   textValue?: string;

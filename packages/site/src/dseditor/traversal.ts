@@ -1,5 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { withOptions } from 'tree-visit';
+import { Model } from './builders';
+import { equalPaths, mergeDiffs } from './diffReducer';
 import {
   NoyaComponent,
   NoyaCompositeElement,
@@ -77,6 +79,7 @@ function applyChildrenDiff(
 ) {
   if (remove) {
     const removeKeys = new Set(remove);
+
     children = children.flatMap((child) =>
       removeKeys.has(child.id)
         ? level > 0
@@ -87,13 +90,16 @@ function applyChildrenDiff(
   }
 
   if (add) {
-    children = [
-      ...children,
-      ...cloneDeep(add).map((child) => ({
-        ...createResolvedNode(findComponent, child, path, level),
+    const clone = children.slice();
+
+    add.forEach(({ node, index }) => {
+      clone.splice(index, 0, {
+        ...createResolvedNode(findComponent, node, path, level),
         status: 'added' as const,
-      })),
-    ];
+      });
+    });
+
+    children = clone;
   }
 
   return children;
@@ -274,8 +280,8 @@ export function createResolvedNode(
   }
 }
 
-// Apply the top level diff onto the underlying composite elements
-export function applyRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
+// Embed the top level diff onto the underlying composite elements
+export function embedRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
   return ElementHierarchy.map<NoyaNode>(
     rootElement,
     (node, transformedChildren, indexPath) => {
@@ -285,25 +291,43 @@ export function applyRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
 
       switch (node.type) {
         case 'noyaString': {
-          const items = diff.items.filter(
-            (item) => item.path.join('/') === path.join('/'),
+          const items = diff.items.filter((item) =>
+            equalPaths(item.path, path),
           );
 
-          if (!items) return node;
+          if (items.length === 0) return node;
 
-          const newNode: NoyaString = { ...node };
-
-          items.forEach((item) => {
-            if (item.textValue !== undefined) {
-              newNode.value = item.textValue;
-            }
-          });
+          const newNode: NoyaString = {
+            ...node,
+            value: items.reduce((result, item) => {
+              if (item.textValue !== undefined) {
+                return item.textValue;
+              } else {
+                return result;
+              }
+            }, node.value),
+          };
 
           return newNode;
         }
         case 'noyaPrimitiveElement': {
+          // We don't attempt to exit earlier, since we still need to return a
+          // new node with the updated children
+          const items = diff.items.filter((item) =>
+            equalPaths(item.path, path),
+          );
+
           const newNode: NoyaPrimitiveElement = {
             ...node,
+            classNames: items.reduce((result: string[], item: NoyaDiffItem) => {
+              if (!item.classNames) return result;
+
+              return applyClassNamesDiff(
+                0,
+                result.map((className) => ({ value: className })),
+                item.classNames,
+              ).map((className) => className.value);
+            }, node.classNames),
             children: transformedChildren,
           };
 
@@ -318,15 +342,15 @@ export function applyRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
 
           const newNode: NoyaCompositeElement = {
             ...node,
-            diff: {
-              items: [
-                ...(node.diff?.items ?? []),
-                ...items.map((item) => ({
+            diff: mergeDiffs(
+              node.diff,
+              Model.diff(
+                items.map((item) => ({
                   ...item,
                   path: item.path.slice(path.length),
                 })),
-              ],
-            },
+              ),
+            ),
           };
 
           return newNode;
