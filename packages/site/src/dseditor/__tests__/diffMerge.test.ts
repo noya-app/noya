@@ -1,5 +1,5 @@
 import { Model } from '../builders';
-import { mergeDiffs } from '../diffReducer';
+import { mergeDiffs, resetRemovedClassName } from '../diffReducer';
 
 it('merges add class names', () => {
   const a = Model.diff([
@@ -210,4 +210,23 @@ it('dedupes items by path within the same diff', () => {
       textValue: 'a',
     },
   ]);
+});
+
+it('resets removed class name', () => {
+  const a = Model.diff([
+    Model.diffItem({
+      path: ['1', '2', '3'],
+      classNames: {
+        remove: ['a', 'b'],
+      },
+    }),
+  ]);
+
+  const withoutA = resetRemovedClassName(a, ['1', '2', '3'], 'a');
+
+  expect(withoutA.items[0].classNames?.remove).toEqual(['b']);
+
+  const withoutB = resetRemovedClassName(withoutA, ['1', '2', '3'], 'b');
+
+  expect(withoutB.items).toEqual([]);
 });

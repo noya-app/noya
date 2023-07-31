@@ -16,7 +16,7 @@ import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { contentReducer } from './contentReducer';
-import { diffReducer } from './diffReducer';
+import { mergeDiffs } from './diffReducer';
 import { SerializedSelection } from './dom';
 import { renderDSOverview } from './renderDSOverview';
 import { findStringElementPath, renderDSPreview } from './renderDSPreview';
@@ -132,10 +132,15 @@ export function DSEditor({
         selection
           ? {
               ...selection,
-              diff: diffReducer(selection.diff, [
-                'updateTextValue',
-                { path: path.slice(1), value },
-              ]),
+              diff: mergeDiffs(
+                selection.diff,
+                Model.diff([
+                  Model.diffItem({
+                    path: path.slice(1),
+                    textValue: value,
+                  }),
+                ]),
+              ),
             }
           : undefined,
       );

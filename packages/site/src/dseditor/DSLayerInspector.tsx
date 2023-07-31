@@ -22,7 +22,7 @@ import { InspectorSection } from '../components/InspectorSection';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
-import { diffReducer, mergeDiffs } from './diffReducer';
+import { mergeDiffs, resetRemovedClassName } from './diffReducer';
 import {
   FindComponent,
   ResolvedHierarchy,
@@ -494,10 +494,11 @@ export function DSLayerInspector({
                               onAdd={() => {
                                 const newSelection: NoyaCompositeElement = {
                                   ...selection,
-                                  diff: diffReducer(selection.diff, [
-                                    'resetRemovedClassName',
-                                    { path: path.slice(1), className: value },
-                                  ]),
+                                  diff: resetRemovedClassName(
+                                    selection.diff,
+                                    path.slice(1),
+                                    value,
+                                  ),
                                 };
 
                                 setSelection(newSelection);

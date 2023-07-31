@@ -3,129 +3,37 @@ import { unique } from 'noya-utils';
 import { Model } from './builders';
 import { NoyaDiff, NoyaDiffItem } from './types';
 
-function classNameReducer(
-  classNames: NoyaDiffItem['classNames'],
-  action: Action,
-): NoyaDiffItem['classNames'] {
-  const { add = [], remove = [] } = classNames || {};
-
-  switch (action[0]) {
-    case 'removeClassName': {
-      const [, { className }] = action;
-
-      return {
-        add: add.filter((name) => name !== className),
-        remove: [...remove, className],
-      };
-    }
-    case 'resetRemovedClassName': {
-      const [, { className }] = action;
-
-      return {
-        add,
-        remove: remove.filter((name) => name !== className),
-      };
-    }
-  }
-
-  return classNames;
-}
-
-type Action =
-  | [type: 'updateTextValue', options: { path: string[]; value: string }]
-  | [type: 'removeClassName', options: { path: string[]; className: string }]
-  | [
-      type: 'resetRemovedClassName',
-      options: { path: string[]; className: string },
-    ];
-
-const emptyDiff: NoyaDiff = {
-  items: [],
-};
-
-export function diffReducer(
-  diff: NoyaDiff = emptyDiff,
-  action: Action,
-): NoyaDiff {
-  switch (action[0]) {
-    case 'updateTextValue': {
-      const [, { path, value }] = action;
-
-      const existingItem = cloneDeep(
-        getItem(diff, path) ?? Model.diffItem({ path }),
-      );
-
-      const newDiff: NoyaDiff = {
-        ...diff,
-        items: replaceOrAdd(
-          diff.items,
-          Model.diffItem({ ...existingItem, textValue: value }),
-        ),
-      };
-
-      return newDiff;
-    }
-    case 'removeClassName': {
-      const [, { path }] = action;
-
-      const existingItem = cloneDeep(
-        getItem(diff, path) ?? Model.diffItem({ path }),
-      );
-
-      const newDiff: NoyaDiff = {
-        ...diff,
-        items: replaceOrAdd(
-          diff.items,
-          Model.diffItem({
-            ...existingItem,
-            classNames: classNameReducer(existingItem.classNames, action),
-          }),
-        ),
-      };
-
-      return newDiff;
-    }
-    case 'resetRemovedClassName': {
-      const [, { path }] = action;
-
-      const existingItem = cloneDeep(
-        getItem(diff, path) ?? Model.diffItem({ path }),
-      );
-
-      const newDiff: NoyaDiff = {
-        ...diff,
-        items: replaceOrAdd(
-          diff.items,
-          Model.diffItem({
-            ...existingItem,
-            classNames: classNameReducer(existingItem.classNames, action),
-          }),
-        ),
-      };
-
-      return newDiff;
-    }
-  }
-}
-
-function getItem(diff: NoyaDiff, path: string[]): NoyaDiffItem | undefined {
-  return diff.items.find((item) => item.path.join('/') === path.join('/'));
-}
-
 export function equalPaths(a: string[], b: string[]) {
   return a.join('/') === b.join('/');
 }
 
-function replaceOrAdd(array: NoyaDiffItem[], newItem: NoyaDiffItem) {
-  const index = array.findIndex((item) => equalPaths(item.path, newItem.path));
+/**
+ * Remove a class name from the `remove` list of a diff item. This can't be
+ * done with `mergeClassNames` because there's nothing we can put in the diff
+ * to represent the removal without also adding the class name to the `add`
+ */
+export function resetRemovedClassName(
+  diff: NoyaDiff = Model.diff(),
+  path: string[],
+  className: string,
+) {
+  return Model.diff(
+    diff.items
+      .map((item) => {
+        if (!equalPaths(item.path, path)) return item;
 
-  const newArray =
-    index === -1
-      ? [...array, newItem]
-      : array.map((item, i) => (i === index ? newItem : item));
-
-  return newArray.sort((a, b) =>
-    a.path.join('/').localeCompare(b.path.join('/')),
+        return {
+          ...item,
+          classNames: mergeClassNames(
+            {
+              ...item.classNames,
+              remove: item.classNames?.remove?.filter((c) => c !== className),
+            },
+            undefined,
+          ),
+        };
+      })
+      .filter((item) => !isEmptyDiffItem(item)),
   );
 }
 
@@ -212,12 +120,29 @@ export function mergeDiffs(
     const key = item.path.join('/');
     const existingItem = itemsByPath[key];
 
-    if (existingItem) {
-      itemsByPath[key] = mergeDiffItems(existingItem, item, path);
-    } else {
-      itemsByPath[key] = item;
-    }
+    const newItem = existingItem
+      ? mergeDiffItems(existingItem, item, path)
+      : item;
+
+    if (isEmptyDiffItem(newItem)) return;
+
+    itemsByPath[key] = newItem;
   });
 
   return Model.diff(Object.values(itemsByPath));
+}
+
+function isEmptyClassNamesDiff(
+  classNames: NoyaDiffItem['classNames'],
+): boolean {
+  const { add = [], remove = [] } = classNames || {};
+  return add.length === 0 && remove.length === 0;
+}
+
+function isEmptyDiffItem(item: NoyaDiffItem) {
+  return (
+    item.textValue === undefined &&
+    isEmptyClassNamesDiff(item.classNames) &&
+    !item.children
+  );
 }
