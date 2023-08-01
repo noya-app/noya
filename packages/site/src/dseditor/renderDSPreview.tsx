@@ -3,9 +3,14 @@ import { findLast } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
   buttonSymbolId,
+  imageSymbolId,
+  inputSymbolId,
   linkSymbolId,
+  selectSymbolId,
+  tableSymbolId,
   tagSymbolId,
   textSymbolId,
+  textareaSymbolId,
 } from '../ayon/symbols/symbolIds';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSRenderProps } from './DSRenderer';
@@ -98,11 +103,21 @@ export function renderDSPreview({
         ? variantClassName.split('-')[1]
         : undefined;
 
+      if (element.componentID === tableSymbolId) return null;
+
       return (
         <PrimitiveComponent
           style={style}
           key={element.path.join('/')}
           {...(variant && { variant })}
+          {...(element.componentID !== imageSymbolId &&
+            element.componentID !== inputSymbolId &&
+            element.componentID !== selectSymbolId && {
+              children: transformedChildren,
+            })}
+          {...(element.componentID === textareaSymbolId && {
+            value: element.children[0],
+          })}
           _passthrough={{
             'data-path': element.path.join('/'),
             contentEditable:
@@ -114,9 +129,7 @@ export function renderDSPreview({
               'data-stringpath': element.children[0].path.join('/'),
             }),
           }}
-        >
-          {transformedChildren}
-        </PrimitiveComponent>
+        />
       );
     },
   );
