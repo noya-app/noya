@@ -172,7 +172,7 @@ export class NoyaNetworkClient {
 
     const controller = new AbortController();
 
-    const id = setTimeout(() => controller.abort(), 15000);
+    const id = setTimeout(() => controller.abort(), 60000);
 
     let response: Response;
 
