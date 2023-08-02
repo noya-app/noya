@@ -128,22 +128,19 @@ export function DSEditor({
 
   const handleSetTextAtPath = useCallback(
     ({ path, value }: { path: string[]; value: string }) => {
-      setSelection((selection) =>
-        selection
-          ? {
-              ...selection,
-              diff: mergeDiffs(
-                selection.diff,
-                Model.diff([
-                  Model.diffItem({
-                    path: path.slice(1),
-                    textValue: value,
-                  }),
-                ]),
-              ),
-            }
-          : undefined,
-      );
+      setSelection((selection) => {
+        const merged = mergeDiffs(
+          selection?.diff,
+          Model.diff([
+            Model.diffItem({
+              path: path.slice(1),
+              textValue: value,
+            }),
+          ]),
+        );
+
+        return selection ? { ...selection, diff: merged } : undefined;
+      });
     },
     [],
   );

@@ -7,13 +7,14 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { uuid } from 'noya-utils';
 import React, { memo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { mergeDiffs, resetRemovedClassName } from './diff';
-import { FindComponent, ResolvedHierarchy } from './traversal';
+import { FindComponent, ResolvedHierarchy, findSourceNode } from './traversal';
 import { NoyaCompositeElement, NoyaResolvedNode } from './types';
 
 function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
@@ -63,20 +64,22 @@ export const DSLayerRow = memo(function DSLayerRow({
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
   const name = getName(node, findComponent);
-  const menu = createSectionedMenu(
-    node.type !== 'noyaString' && [
-      node.type === 'noyaPrimitiveElement' && {
-        title: 'Add Child',
-        value: 'addChild',
+  const menu = createSectionedMenu([
+    node.type === 'noyaPrimitiveElement' && {
+      title: 'Add Child',
+      value: 'addChild',
+    },
+    depth !== 1 &&
+      parent.type === 'noyaPrimitiveElement' && {
+        title: 'Duplicate',
+        value: 'duplicate',
       },
-      depth !== 1 && { title: 'Duplicate', value: 'duplicate' },
-      depth !== 1 &&
-        parent.type !== 'noyaCompositeElement' && {
-          title: 'Delete',
-          value: 'delete',
-        },
-    ],
-  );
+    depth !== 1 &&
+      parent.type === 'noyaPrimitiveElement' && {
+        title: 'Delete',
+        value: 'delete',
+      },
+  ]);
   type MenuItemType = Exclude<
     Extract<typeof menu[number], object>['value'],
     undefined
@@ -85,18 +88,48 @@ export const DSLayerRow = memo(function DSLayerRow({
 
   const onSelectMenuItem = (value: MenuItemType) => {
     switch (value) {
-      case 'duplicate':
+      case 'duplicate': {
+        const root = findComponent(selection.componentID);
+
+        if (!root) return;
+
+        const sourceNode = findSourceNode(findComponent, selection, path);
+
+        if (!sourceNode) return;
+
+        const newSelection: NoyaCompositeElement = {
+          ...selection,
+          diff: mergeDiffs(
+            selection.diff,
+            Model.diff([
+              Model.diffItem({
+                path: path.slice(1, -1),
+                children: {
+                  add: [
+                    {
+                      node: { ...sourceNode, id: uuid() },
+                      index: indexPath[indexPath.length - 1] + 1,
+                    },
+                  ],
+                },
+              }),
+            ]),
+          ),
+        };
+
+        setSelection(newSelection);
         break;
+      }
       case 'delete': {
         const newSelection: NoyaCompositeElement = {
           ...selection,
           diff: mergeDiffs(
             selection.diff,
             Model.diff([
-              {
+              Model.diffItem({
                 path: path.slice(1, -1),
                 children: { remove: [node.id] },
-              },
+              }),
             ]),
           ),
         };
@@ -112,7 +145,7 @@ export const DSLayerRow = memo(function DSLayerRow({
           diff: mergeDiffs(
             selection.diff,
             Model.diff([
-              {
+              Model.diffItem({
                 path: path.slice(1),
                 children: {
                   add: [
@@ -124,7 +157,7 @@ export const DSLayerRow = memo(function DSLayerRow({
                     },
                   ],
                 },
-              },
+              }),
             ]),
           ),
         };

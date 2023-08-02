@@ -281,7 +281,10 @@ export function createResolvedNode(
 }
 
 // Embed the top level diff onto the underlying composite elements
-export function embedRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
+export function embedRootLevelDiff(
+  rootElement: NoyaNode,
+  diff: NoyaDiff = Model.diff(),
+) {
   return ElementHierarchy.map<NoyaNode>(
     rootElement,
     (node, transformedChildren, indexPath) => {
@@ -370,4 +373,52 @@ export function embedRootLevelDiff(rootElement: NoyaNode, diff: NoyaDiff) {
       }
     },
   );
+}
+
+export function findSourceNode(
+  findComponent: FindComponent,
+  node: NoyaNode,
+  path: string[],
+): NoyaNode | undefined {
+  if (node.id === path[0]) {
+    if (path.length === 1) return node;
+
+    switch (node.type) {
+      case 'noyaString': {
+        return;
+      }
+      case 'noyaPrimitiveElement': {
+        for (const child of node.children) {
+          const result = findSourceNode(findComponent, child, path.slice(1));
+
+          if (result) return result;
+        }
+
+        return;
+      }
+      case 'noyaCompositeElement': {
+        if (node.diff) {
+          const diffItem = node.diff.items.find(
+            (item) =>
+              equalPaths(item.path, path.slice(1, -1)) &&
+              item.children?.add?.some(({ node }) => node.id === path.at(-1)),
+          );
+
+          if (diffItem) {
+            return diffItem.children?.add?.find(
+              ({ node }) => node.id === path.at(-1),
+            )?.node;
+          }
+        }
+
+        const rootElement = findComponent(node.componentID)?.rootElement;
+
+        if (!rootElement) return;
+
+        return findSourceNode(findComponent, rootElement, path.slice(1));
+      }
+    }
+  }
+
+  return undefined;
 }

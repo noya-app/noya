@@ -1,5 +1,9 @@
 import { Model } from '../builders';
-import { createResolvedNode, embedRootLevelDiff } from '../traversal';
+import {
+  createResolvedNode,
+  embedRootLevelDiff,
+  findSourceNode,
+} from '../traversal';
 import {
   NoyaCompositeElement,
   NoyaPrimitiveElement,
@@ -338,5 +342,125 @@ describe('diffing', () => {
       expect(resolvedChildWithStatus.children[0].status).toEqual('removed');
       expect(resolvedChildWithStatus.children[1].status).toEqual(undefined);
     });
+  });
+});
+
+describe('find source node', () => {
+  it('standard', () => {
+    const component = Model.component({
+      componentID: 'c1',
+      rootElement: Model.primitiveElement({
+        id: 'b',
+        componentID: 'c2',
+        children: [
+          Model.primitiveElement({
+            id: 'c',
+            componentID: 'c3',
+          }),
+        ],
+      }),
+    });
+
+    const components = {
+      [component.componentID]: component,
+    };
+
+    const element = Model.compositeElement({
+      id: 'a',
+      componentID: component.componentID,
+    });
+
+    const found = findSourceNode(
+      (componentID) => components[componentID],
+      element,
+      ['a', 'b', 'c'],
+    );
+
+    expect(found?.id).toEqual('c');
+  });
+
+  it('nested', () => {
+    const component = Model.component({
+      componentID: 'c1',
+      rootElement: Model.primitiveElement({
+        id: 'b',
+        componentID: 'c2',
+        children: [
+          Model.primitiveElement({
+            id: 'c',
+            componentID: 'c3',
+            children: [
+              Model.primitiveElement({
+                id: 'd',
+                componentID: 'c4',
+              }),
+            ],
+          }),
+        ],
+      }),
+    });
+
+    const components = {
+      [component.componentID]: component,
+    };
+
+    const element = Model.compositeElement({
+      id: 'a',
+      componentID: component.componentID,
+    });
+
+    const found = findSourceNode(
+      (componentID) => components[componentID],
+      element,
+      ['a', 'b', 'c', 'd'],
+    );
+
+    expect(found?.id).toEqual('d');
+  });
+
+  it('inserted', () => {
+    const component = Model.component({
+      componentID: 'c1',
+      rootElement: Model.primitiveElement({
+        id: 'b',
+        componentID: 'c2',
+        children: [
+          Model.primitiveElement({
+            id: 'c',
+            componentID: 'c3',
+          }),
+        ],
+      }),
+    });
+
+    const components = {
+      [component.componentID]: component,
+    };
+
+    const element = Model.compositeElement({
+      id: 'a',
+      componentID: component.componentID,
+      diff: Model.diff([
+        Model.diffItem({
+          path: ['b'],
+          children: {
+            add: [
+              {
+                node: Model.string({ value: 'd', id: 'd' }),
+                index: 1,
+              },
+            ],
+          },
+        }),
+      ]),
+    });
+
+    const found = findSourceNode(
+      (componentID) => components[componentID],
+      element,
+      ['a', 'b', 'd'],
+    );
+
+    expect(found?.id).toEqual('d');
   });
 });
