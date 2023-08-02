@@ -135,7 +135,7 @@ export const hasInspectableShadow = (layer: Sketch.AnyLayer): boolean => {
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
-    case 'noyaComponentLayer':
+    case 'customLayer':
       return false;
   }
 };
@@ -159,7 +159,7 @@ export const hasInspectableInnerShadow = (layer: Sketch.AnyLayer): boolean => {
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
-    case 'noyaComponentLayer':
+    case 'customLayer':
       return false;
   }
 };
@@ -175,7 +175,7 @@ export const hasInspectableBorder = (layer: Sketch.AnyLayer): boolean => {
     case 'star':
     case 'triangle':
     case 'text':
-    case 'noyaComponentLayer':
+    case 'customLayer':
       return true;
     case 'group':
     case 'symbolInstance':
@@ -207,7 +207,7 @@ export const hasInspectableFill = (layer: Sketch.AnyLayer): boolean => {
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
-    case 'noyaComponentLayer':
+    case 'customLayer':
       return false;
   }
 };
@@ -231,7 +231,7 @@ export const hasInspectableBlur = (layer: Sketch.AnyLayer): boolean => {
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
-    case 'noyaComponentLayer':
+    case 'customLayer':
       return false;
   }
 };

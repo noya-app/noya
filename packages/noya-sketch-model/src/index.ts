@@ -800,14 +800,15 @@ function noyaComponent(
   };
 }
 
-function noyaComponentLayer(
-  options?: ModelOptions<Sketch.NoyaComponentLayer>,
-): Sketch.NoyaComponentLayer {
+function customLayer<T>(
+  options: ModelOptions<Sketch.CustomLayer<T>> &
+    Pick<Sketch.CustomLayer<T>, 'data'>,
+): Sketch.CustomLayer<T> {
   return {
     ...newLayerBase(options),
-    name: 'Component',
+    name: 'Custom',
     ...options,
-    _class: Sketch.ClassValue.NoyaComponentLayer,
+    _class: Sketch.ClassValue.CustomLayer,
   };
 }
 
@@ -864,7 +865,7 @@ export const SketchModel = {
   text,
   textStyle,
   user,
-  noyaComponentLayer,
+  customLayer,
   noyaComponent,
   noyaElement,
 };

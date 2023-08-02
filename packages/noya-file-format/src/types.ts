@@ -534,7 +534,7 @@ export type SymbolMaster = {
     | Slice
     | Hotspot
     | Bitmap
-    | NoyaComponentLayer
+    | CustomLayer
   )[];
   blockDefinition?: BlockDefinition;
 };
@@ -765,7 +765,7 @@ export type Group = {
     | Slice
     | Hotspot
     | Bitmap
-    | NoyaComponentLayer
+    | CustomLayer
   )[];
   _class: 'group';
 };
@@ -791,11 +791,12 @@ export type NoyaComponent = {
   componentID: Uuid;
 };
 
-export type NoyaComponentLayer = Omit<
+export type CustomLayer<T = unknown> = Omit<
   Group,
   '_class' | 'layers' | 'hasClickThrough'
 > & {
-  _class: 'noyaComponentLayer';
+  _class: 'customLayer';
+  data: T;
 };
 
 /**
@@ -1078,7 +1079,7 @@ export type ShapeGroup = {
     | Slice
     | Hotspot
     | Bitmap
-    | NoyaComponentLayer
+    | CustomLayer
   )[];
   _class: 'shapeGroup';
   windingRule: WindingRule;
@@ -1487,7 +1488,7 @@ export type Page = {
     | Slice
     | Hotspot
     | Bitmap
-    | NoyaComponentLayer
+    | CustomLayer
   )[];
 };
 /**
@@ -1544,7 +1545,7 @@ export type Artboard = {
     | Slice
     | Hotspot
     | Bitmap
-    | NoyaComponentLayer
+    | CustomLayer
   )[];
 };
 /**
@@ -1718,7 +1719,7 @@ export type AnyLayer =
   | Bitmap
   | Page
   | Artboard
-  | NoyaComponentLayer;
+  | CustomLayer;
 /**
  * Union of all group layers
  */
@@ -1792,7 +1793,7 @@ export type AnyObject =
   | PatchInfo
   | Page
   | Artboard
-  | NoyaComponentLayer
+  | CustomLayer
   | NoyaElement;
 /**
  * Enum of all possible _class property values
@@ -1863,7 +1864,7 @@ export enum ClassValue {
   Text = 'text',
   TextStyle = 'textStyle',
   Triangle = 'triangle',
-  NoyaComponentLayer = 'noyaComponentLayer',
+  CustomLayer = 'customLayer',
   NoyaComponent = 'noyaComponent',
   NoyaElement = 'noyaElement',
 }
@@ -1936,7 +1937,7 @@ export type ClassMap = {
   MSImmutableForeignLayerStyle: ForeignLayerStyle;
   MSImmutableFlowConnection: FlowConnection;
   MSImmutableColorAsset: ColorAsset;
-  noyaComponentLayer: NoyaComponentLayer;
+  customLayer: CustomLayer;
   noyaComponent: NoyaComponent;
   noyaElement: NoyaElement;
 };
