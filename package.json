@@ -78,7 +78,7 @@
     "modular-template-package": "^1.1.0",
     "modular-template-view": "^1.1.0",
     "nock": "^13.1.1",
-    "prettier": "^2.2.1",
+    "prettier": "2.x",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "typescript": "^4.9.4",

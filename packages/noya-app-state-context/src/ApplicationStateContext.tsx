@@ -13,7 +13,9 @@ import React, {
 
 export type Dispatcher = (action: WorkspaceAction) => void;
 
-export type FlatDispatcher = (...args: WorkspaceAction) => void;
+export type FlatDispatcher<T = never> = (
+  ...args: WorkspaceAction | Extract<T, any[]>
+) => void;
 
 const StateContext = createContext<WorkspaceState | undefined>(undefined);
 
@@ -66,14 +68,14 @@ export const useWorkspaceDispatch = (): Dispatcher => {
  * Components should use this to update the application's state. The dispatch
  * function is referentially stable, so won't cause unnecessary re-renders.
  */
-export const useDispatch = (): FlatDispatcher => {
+export const useDispatch = <T = never,>(): FlatDispatcher<T> => {
   const dispatch = useContext(DispatchContext);
 
   const blurTrigger = useGlobalInputBlurTrigger();
 
   // Simplify the dispatch function by flattening our action tuple
   return useCallback(
-    (...args: WorkspaceAction) => {
+    (...args: WorkspaceAction | Extract<T, any[]>) => {
       // When changing selection, trigger any pending updates in input fields
       if (
         args[0] === 'selectLayer' ||
@@ -83,7 +85,7 @@ export const useDispatch = (): FlatDispatcher => {
         blurTrigger();
       }
 
-      dispatch(args);
+      dispatch(args as WorkspaceAction);
     },
     [dispatch, blurTrigger],
   );
@@ -95,9 +97,12 @@ export const useDispatch = (): FlatDispatcher => {
  * Only "container" components should use this, while "presentational" components
  * should instead be passed their data via props.
  */
-export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
+export const useApplicationState = <T = never,>(): [
+  ApplicationState,
+  FlatDispatcher<T>,
+] => {
   const state = useWorkspaceState();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<T>();
 
   return useMemo(
     () => [state.history.present, dispatch],

@@ -9,5 +9,6 @@ export type InferredBlockTypeResult = {
 export type ViewType = 'combined' | 'previewOnly';
 
 export type CustomLayerData = {
+  description?: string;
   node: NoyaNode;
 };

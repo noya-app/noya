@@ -1,17 +1,37 @@
-import { useApplicationState } from 'noya-app-state-context';
 import { Stack, useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useCallback } from 'react';
+import styled from 'styled-components';
 import { InspectorSection } from '../../../components/InspectorSection';
+import { useAyonState } from '../../state/ayonState';
+import { CustomLayerData } from '../../types';
 import { ComponentNameInspector } from './ComponentNameInspector';
+
+const DescriptionTextArea = styled.textarea(({ theme }) => ({
+  ...theme.textStyles.small,
+  color: theme.colors.text,
+  background: theme.colors.inputBackground,
+  width: '0px', // Reset intrinsic width
+  flex: '1 1 0px',
+  padding: '4px 6px',
+  border: 'none',
+  outline: 'none',
+  height: 100,
+  borderRadius: '4px',
+  // resize: 'none',
+  whiteSpace: 'pre',
+  '&:focus': {
+    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+  },
+}));
 
 export function CustomLayerInspector({
   selectedLayer,
 }: {
-  selectedLayer: Sketch.CustomLayer;
+  selectedLayer: Sketch.CustomLayer<CustomLayerData>;
 }) {
-  const [, dispatch] = useApplicationState();
+  const [, dispatch] = useAyonState();
   const theme = useDesignSystemTheme();
 
   const handleChangeName = useCallback(
@@ -33,6 +53,14 @@ export function CustomLayerInspector({
             name={selectedLayer.name}
             frame={selectedLayer.frame}
             onChangeName={handleChangeName}
+          />
+        </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.LabeledRow label="Description">
+          <DescriptionTextArea
+            value={selectedLayer.data.description || ''}
+            onChange={(event) => {
+              dispatch('setLayerDescription', event.target.value);
+            }}
           />
         </InspectorPrimitives.LabeledRow>
       </InspectorSection>

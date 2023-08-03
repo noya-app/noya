@@ -3,6 +3,7 @@ import { ScrollArea, Stack, useDesignSystemTheme } from 'noya-designsystem';
 import { useShallowArray } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
 import React from 'react';
+import { CustomLayerData } from '../../types';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
 
@@ -19,7 +20,9 @@ export function AyonInspector({
   const [state] = useApplicationState();
 
   const selectedLayers = useShallowArray(
-    Selectors.getSelectedLayers(state).filter(Layers.isCustomLayer),
+    Selectors.getSelectedLayers(state).filter(
+      Layers.isCustomLayer<CustomLayerData>,
+    ),
   );
 
   return (

@@ -110,9 +110,9 @@ export const isSymbolInstance = (
   return layer._class === 'symbolInstance';
 };
 
-export const isCustomLayer = (
+export const isCustomLayer = <T = unknown>(
   layer: Sketch.AnyLayer,
-): layer is Sketch.CustomLayer => {
+): layer is Sketch.CustomLayer<T> => {
   return layer._class === 'customLayer';
 };
 

@@ -114,19 +114,19 @@ export type ApplicationReducerContext = {
   fontManager: IFontManager;
 };
 
-export type CustomReducer = (
+export type CustomReducer<T = never> = (
   state: ApplicationState,
-  action: Action,
+  action: Action | T,
   CanvasKit: CanvasKit,
   context: ApplicationReducerContext,
 ) => ApplicationState | undefined;
 
-export function applicationReducer(
+export function applicationReducer<T = never>(
   state: ApplicationState,
   action: Action,
   CanvasKit: CanvasKit,
   context: ApplicationReducerContext,
-  customReducer?: CustomReducer,
+  customReducer?: CustomReducer<T>,
 ): ApplicationState {
   const newState = customReducer?.(state, action, CanvasKit, context);
 

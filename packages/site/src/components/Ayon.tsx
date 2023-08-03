@@ -61,8 +61,8 @@ import React, {
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
-import { ayonReducer } from '../ayon/ayonReducer';
 import { Content } from '../ayon/components/Content';
+import { ayonReducer } from '../ayon/state/ayonReducer';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
 import { librarySymbols } from '../ayon/symbols/symbols';
 import { ViewType } from '../ayon/types';
