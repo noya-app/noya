@@ -1,5 +1,6 @@
 import { useSelector } from '@legendapp/state/react';
 import { NoyaAPI } from 'noya-api';
+import { useMemo } from 'react';
 import { useNoyaClient, useOptionalNoyaClient } from './context';
 
 export function useNoyaFiles() {
@@ -37,4 +38,14 @@ export function useMetadata<T extends NoyaAPI.Json>(key: string) {
   const metadata = userData?.metadata || [];
   const metadataItem = metadata.find((item) => item.key === key);
   return metadataItem?.value as T | undefined;
+}
+
+export function useGeneratedComponentNames(name: string) {
+  const names = useSelector(
+    useNoyaClient().generatedComponentNames$.names[name],
+  ) as { name: string }[] | undefined;
+  const loading = useSelector(
+    useNoyaClient().generatedComponentNames$.loadingNames[name],
+  );
+  return useMemo(() => ({ names: names ?? [], loading }), [loading, names]);
 }

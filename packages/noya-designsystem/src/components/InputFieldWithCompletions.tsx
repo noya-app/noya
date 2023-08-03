@@ -128,6 +128,7 @@ export const InputFieldWithCompletions = memo(
     const defaultRef = useRef<HTMLInputElement>(null);
     const ref = forwardedRef || defaultRef;
 
+    const [isFocused, setIsFocused] = useState(false);
     const [state, _setState] = useState({
       filter: initialValue,
       selectedIndex: 0,
@@ -215,12 +216,14 @@ export const InputFieldWithCompletions = memo(
     );
 
     const handleBlur = useCallback(() => {
+      setIsFocused(false);
       updateState({ selectedIndex: 0, filter: initialValue }, 'resetHover');
       onBlur?.();
     }, [initialValue, onBlur, updateState]);
 
     const handleFocus = useCallback(
       (event) => {
+        setIsFocused(true);
         updateState({ selectedIndex: 0, filter: initialValue });
         onFocus?.(event);
       },
@@ -306,7 +309,7 @@ export const InputFieldWithCompletions = memo(
           style={style}
         />
         {children}
-        {loading && (
+        {loading && isFocused && (
           <InputField.Label>
             <ActivityIndicator />
           </InputField.Label>

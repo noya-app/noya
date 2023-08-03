@@ -1,5 +1,6 @@
 import { observable } from '@legendapp/state';
 import produce from 'immer';
+import { Rect } from 'noya-geometry';
 import { memoizedGetter } from 'noya-utils';
 import { fileReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
@@ -49,6 +50,13 @@ export class NoyaClient {
     userData: undefined,
     loading: true,
   });
+  generatedComponentNames$ = observable<{
+    names: Record<string, { name: string }[]>;
+    loadingNames: Record<string, boolean>;
+  }>({
+    names: {},
+    loadingNames: {},
+  });
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -69,6 +77,29 @@ export class NoyaClient {
 
     this.#fetchFiles();
   }
+
+  get generate() {
+    return memoizedGetter(this, 'generate', {
+      componentNames: this.#generateComponentNames,
+    });
+  }
+
+  #generateComponentNames = async (options: { name: string; rect: Rect }) => {
+    const { name } = options;
+
+    const existing = this.generatedComponentNames$.names[name].get();
+
+    if (Array.isArray(existing)) {
+      return existing;
+    }
+
+    this.generatedComponentNames$.loadingNames[name].set(true);
+
+    const result = await this.networkClient.generate.componentNames(options);
+
+    this.generatedComponentNames$.names[name].set(result);
+    this.generatedComponentNames$.loadingNames[name].set(false);
+  };
 
   #fetchSession = async () => {
     const session = await this.networkClient.auth.session();
