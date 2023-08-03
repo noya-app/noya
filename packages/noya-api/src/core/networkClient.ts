@@ -4,7 +4,9 @@ import { NoyaAPIError } from './error';
 import {
   NoyaExportFormat,
   NoyaFileData,
+  NoyaGeneratedName,
   NoyaJson,
+  generatedNameSchema,
   noyaAssetSchema,
   noyaBillingSchema,
   noyaEmailListSchema,
@@ -126,7 +128,7 @@ export class NoyaNetworkClient {
   #generateComponentNames = async (options: {
     name: string;
     rect: Rect;
-  }): Promise<{ name: string }[]> => {
+  }): Promise<NoyaGeneratedName[]> => {
     const response = await this.request(
       `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
         options.name,
@@ -140,7 +142,7 @@ export class NoyaNetworkClient {
 
     const json = await response.json();
 
-    const schema = z.array(z.object({ name: z.string() }));
+    const schema = z.array(generatedNameSchema);
     const parsed = schema.safeParse(json);
     return parsed.success ? parsed.data : [];
   };

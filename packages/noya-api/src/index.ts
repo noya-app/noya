@@ -11,6 +11,7 @@ import {
   NoyaFile,
   NoyaFileData,
   NoyaFileList,
+  NoyaGeneratedName,
   NoyaJson,
   NoyaPrice,
   NoyaProduct,
@@ -54,6 +55,7 @@ export namespace NoyaAPI {
   export type SubscriptionItem = NoyaSubscriptionItem;
   export type Share = NoyaShare;
   export type SharedFile = NoyaSharedFile;
+  export type GeneratedName = NoyaGeneratedName;
 }
 
 export type { DS, DSConfig, DSSource };

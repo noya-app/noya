@@ -9,6 +9,7 @@ import {
   NoyaEmailList,
   NoyaFile,
   NoyaFileData,
+  NoyaGeneratedName,
   NoyaJson,
   NoyaMetadataItem,
   NoyaSession,
@@ -51,7 +52,7 @@ export class NoyaClient {
     loading: true,
   });
   generatedComponentNames$ = observable<{
-    names: Record<string, { name: string }[]>;
+    names: Record<string, NoyaGeneratedName[]>;
     loadingNames: Record<string, boolean>;
   }>({
     names: {},
@@ -85,20 +86,22 @@ export class NoyaClient {
   }
 
   #generateComponentNames = async (options: { name: string; rect: Rect }) => {
-    const { name } = options;
+    const name = options.name.trim();
+    const key = name.toLowerCase();
 
-    const existing = this.generatedComponentNames$.names[name].get();
+    const existing = this.generatedComponentNames$.names[key].get();
 
-    if (Array.isArray(existing)) {
-      return existing;
-    }
+    if (Array.isArray(existing)) return existing;
 
-    this.generatedComponentNames$.loadingNames[name].set(true);
+    this.generatedComponentNames$.loadingNames[key].set(true);
 
-    const result = await this.networkClient.generate.componentNames(options);
+    const result = await this.networkClient.generate.componentNames({
+      ...options,
+      name,
+    });
 
-    this.generatedComponentNames$.names[name].set(result);
-    this.generatedComponentNames$.loadingNames[name].set(false);
+    this.generatedComponentNames$.names[key].set(result);
+    this.generatedComponentNames$.loadingNames[key].set(false);
   };
 
   #fetchSession = async () => {
