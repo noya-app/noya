@@ -1,6 +1,20 @@
 import { ReactNode } from 'react';
 import { IScoredItem } from './fuzzyScorer';
 
-export type CompletionItem = { id: string; name: string; icon?: ReactNode };
+export type CompletionItem = {
+  type?: undefined;
+  id: string;
+  name: string;
+  icon?: ReactNode;
+  alwaysInclude?: boolean;
+};
 
-export type CompletionListItem = CompletionItem & IScoredItem;
+export type CompletionSectionHeader = {
+  type: 'sectionHeader';
+  id: string;
+  name: string;
+};
+
+export type CompletionListItem =
+  | (CompletionItem & IScoredItem)
+  | CompletionSectionHeader;

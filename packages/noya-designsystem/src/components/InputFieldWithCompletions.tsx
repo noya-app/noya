@@ -1,4 +1,5 @@
 import { Size } from 'noya-geometry';
+import { chunkBy, partition } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -11,7 +12,11 @@ import React, {
   useState,
 } from 'react';
 import styled from 'styled-components';
-import { CompletionItem, CompletionListItem } from '../utils/completions';
+import {
+  CompletionItem,
+  CompletionListItem,
+  CompletionSectionHeader,
+} from '../utils/completions';
 import { IToken, fuzzyFilter, fuzzyTokenize } from '../utils/fuzzyScorer';
 import { ActivityIndicator } from './ActivityIndicator';
 import { InputField, InputFieldSize } from './InputField';
@@ -19,6 +24,39 @@ import { ListView } from './ListView';
 import { Spacer } from './Spacer';
 import { Stack } from './Stack';
 import { Small } from './Text';
+
+function filterWithGroupedSections(
+  items: (CompletionItem | CompletionSectionHeader)[],
+  query: string,
+): CompletionListItem[] {
+  const sections = chunkBy(items, (a, b) => b.type !== 'sectionHeader');
+
+  return sections.flatMap((section) => {
+    const [headers, regular] = partition(
+      section,
+      (item): item is CompletionSectionHeader => item.type === 'sectionHeader',
+    );
+
+    const scoredItems = fuzzyFilter({
+      items: regular.map((item) => item.name),
+      query,
+    });
+
+    const usedIndexes = new Set(scoredItems.map((item) => item.index));
+    const extraItems = regular.flatMap((item, index): CompletionListItem[] =>
+      item.alwaysInclude && !usedIndexes.has(index)
+        ? [{ ...item, index, score: 0 }]
+        : [],
+    );
+    const newItems = scoredItems
+      .map((item): CompletionListItem => ({ ...item, ...regular[item.index] }))
+      .concat(extraItems);
+
+    if (newItems.length === 0) return [];
+
+    return [...headers, ...newItems];
+  });
+}
 
 export const CompletionToken = styled.span<{ type: IToken['type'] }>(
   ({ type }) => ({
@@ -54,7 +92,16 @@ export const CompletionMenu = memo(
         data={items}
         virtualized={listSize}
         pressEventName="onPointerDown"
+        sectionHeaderVariant="label"
         renderItem={(item, i) => {
+          if (item.type === 'sectionHeader') {
+            return (
+              <ListView.Row key={item.id} isSectionHeader>
+                {item.name}
+              </ListView.Row>
+            );
+          }
+
           const tokens = fuzzyTokenize({
             item: item.name,
             itemScore: item,
@@ -94,8 +141,7 @@ interface Props {
   loading?: boolean;
   initialValue?: string;
   placeholder?: string;
-  items: CompletionItem[];
-  scoreThreshold?: number;
+  items: (CompletionItem | CompletionSectionHeader)[];
   onChange?: (value: string) => void;
   onHoverItem?: (item: CompletionItem | undefined) => void;
   onSelectItem?: (item: CompletionItem) => void;
@@ -113,7 +159,6 @@ export const InputFieldWithCompletions = memo(
       initialValue = '',
       placeholder,
       items,
-      scoreThreshold,
       size,
       onChange,
       onSelectItem,
@@ -144,15 +189,14 @@ export const InputFieldWithCompletions = memo(
         if (hoverItem === 'resetHover') {
           onHoverItem?.(undefined);
         } else {
-          const nextItems = fuzzyFilter({
-            items: items.map((item) => item.name),
-            query: nextState.filter,
-            scoreThreshold,
-          }).map(
-            (item): CompletionListItem => ({ ...item, ...items[item.index] }),
-          );
+          const nextItems = filterWithGroupedSections(items, nextState.filter);
+          const nextItem = nextItems[nextState.selectedIndex];
 
-          onHoverItem?.(nextItems[nextState.selectedIndex]);
+          if (nextItem && nextItem.type !== 'sectionHeader') {
+            onHoverItem?.(nextItem);
+          } else {
+            onHoverItem?.(undefined);
+          }
         }
 
         _setState(nextState);
@@ -160,7 +204,7 @@ export const InputFieldWithCompletions = memo(
           onChange?.(newState.filter);
         }
       },
-      [items, onChange, onHoverItem, scoreThreshold, state],
+      [items, onChange, onHoverItem, state],
     );
 
     const initialValueRef = useRef(initialValue);
@@ -176,20 +220,22 @@ export const InputFieldWithCompletions = memo(
     const listRef = React.useRef<ListView.VirtualizedList>(null);
 
     const filteredItems = useMemo(
-      () =>
-        fuzzyFilter({
-          items: items.map((item) => item.name),
-          query: filter,
-          scoreThreshold,
-        }).map(
-          (item): CompletionListItem => ({ ...item, ...items[item.index] }),
-        ),
-      [items, filter, scoreThreshold],
+      () => filterWithGroupedSections(items, filter),
+      [items, filter],
+    );
+
+    const [normalItems, sectionHeaderItems] = partition(
+      filteredItems,
+      (item) => item.type !== 'sectionHeader',
     );
 
     const height = Math.min(
-      filteredItems.length * ListView.rowHeight,
-      ListView.rowHeight * 6.5,
+      ListView.calculateHeight(
+        normalItems.length,
+        sectionHeaderItems.length,
+        'label',
+      ),
+      ListView.rowHeight * 8.5,
     );
 
     useEffect(() => {
@@ -200,6 +246,8 @@ export const InputFieldWithCompletions = memo(
 
     const selectItem = useCallback(
       (item: CompletionListItem) => {
+        if (item.type === 'sectionHeader') return;
+
         onSelectItem?.(item);
         onHoverItem?.(undefined);
 
@@ -238,17 +286,26 @@ export const InputFieldWithCompletions = memo(
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'ArrowDown') {
-          const nextIndex = Math.min(
-            selectedIndex + 1,
-            filteredItems.length - 1,
+          handleIndexChange(
+            getNextIndex(
+              filteredItems,
+              selectedIndex,
+              'next',
+              (item) => item.type === 'sectionHeader',
+            ),
           );
-          handleIndexChange(nextIndex);
 
           event.preventDefault();
           event.stopPropagation();
         } else if (event.key === 'ArrowUp') {
-          const nextIndex = Math.max(selectedIndex - 1, 0);
-          handleIndexChange(nextIndex);
+          handleIndexChange(
+            getNextIndex(
+              filteredItems,
+              selectedIndex,
+              'previous',
+              (item) => item.type === 'sectionHeader',
+            ),
+          );
 
           event.preventDefault();
           event.stopPropagation();
@@ -318,3 +375,37 @@ export const InputFieldWithCompletions = memo(
     );
   }),
 );
+
+function getNextIndex<T>(
+  items: T[],
+  currentIndex: number,
+  direction: 'next' | 'previous',
+  isDisabled: (item: T) => boolean,
+): number {
+  // Make sure the current index is within bounds
+  currentIndex =
+    currentIndex < 0
+      ? 0
+      : currentIndex >= items.length
+      ? items.length - 1
+      : currentIndex;
+
+  // If there are no valid items in the array, return -1
+  if (items.every(isDisabled)) return -1;
+
+  let nextIndex = currentIndex;
+
+  do {
+    // Move to the next or previous index, wrapping around if necessary
+    if (direction === 'next') {
+      nextIndex = (nextIndex + 1) % items.length;
+    } else {
+      nextIndex = (nextIndex - 1 + items.length) % items.length;
+    }
+
+    // If we've looped all the way around without finding a valid item, return the current index
+    if (nextIndex === currentIndex) return currentIndex;
+  } while (isDisabled(items[nextIndex]));
+
+  return nextIndex;
+}

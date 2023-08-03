@@ -35,6 +35,9 @@ import { Spacer } from './Spacer';
 export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
+const ROW_HEIGHT = 31;
+const SECTION_HEADER_LABEL_HEIGHT = 27;
+
 type PressEventName = 'onClick' | 'onPointerDown';
 
 type ListRowContextValue = {
@@ -44,8 +47,10 @@ type ListRowContextValue = {
   expandable: boolean;
   divider: boolean;
   variant: ListViewVariant;
+  sectionHeaderVariant: ListViewSectionHeaderVariant;
   indentation: number;
   pressEventName: PressEventName;
+  isSectionHeader: boolean;
 };
 
 const ListRowContext = createContext<ListRowContextValue>({
@@ -55,8 +60,10 @@ const ListRowContext = createContext<ListRowContextValue>({
   expandable: true,
   divider: true,
   variant: 'normal',
+  sectionHeaderVariant: 'normal',
   indentation: 12,
   pressEventName: 'onClick',
+  isSectionHeader: false,
 });
 
 /* ----------------------------------------------------------------------------
@@ -136,6 +143,7 @@ const RowContainer = styled.div<{
   divider: boolean;
   isSectionHeader: boolean;
   showsActiveState: boolean;
+  sectionHeaderVariant: ListViewSectionHeaderVariant;
 }>(
   ({
     theme,
@@ -148,12 +156,17 @@ const RowContainer = styled.div<{
     divider,
     isSectionHeader,
     showsActiveState,
+    sectionHeaderVariant,
   }) => {
     const margin = getPositionMargin(marginType);
 
     return {
-      ...theme.textStyles.small,
-      ...(isSectionHeader && { fontWeight: 500 }),
+      ...(isSectionHeader && sectionHeaderVariant === 'label'
+        ? theme.textStyles.label
+        : theme.textStyles.small),
+      ...(isSectionHeader && {
+        fontWeight: sectionHeaderVariant === 'label' ? 700 : 500,
+      }),
       flex: '0 0 auto',
       userSelect: 'none',
       cursor: 'default',
@@ -292,6 +305,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     indentation,
     pressEventName,
     variant,
+    sectionHeaderVariant,
     divider,
   } = useContext(ListRowContext);
   const { hoverProps } = useHover({
@@ -343,6 +357,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         hovered={hovered}
         selected={selected}
         variant={variant}
+        sectionHeaderVariant={sectionHeaderVariant}
         selectedPosition={selectedPosition}
         showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
@@ -493,7 +508,7 @@ const VirtualizedListInner = forwardRef(function VirtualizedListInner<T>(
                 height={size.height}
                 itemCount={items.length}
                 itemSize={getItemHeight}
-                estimatedItemSize={31}
+                estimatedItemSize={ROW_HEIGHT}
               >
                 {VirtualizedListRow}
               </VariableSizeList>
@@ -552,6 +567,8 @@ type RenderProps<T> = {
 
 type ListViewVariant = 'normal' | 'padded' | 'bare';
 
+type ListViewSectionHeaderVariant = 'normal' | 'label';
+
 type ListViewRootProps = {
   onPress?: () => void;
   scrollable?: boolean;
@@ -565,6 +582,7 @@ type ListViewRootProps = {
   acceptsDrop?: DropValidator;
   pressEventName?: PressEventName;
   variant?: ListViewVariant;
+  sectionHeaderVariant?: ListViewSectionHeaderVariant;
   divider?: boolean;
 };
 
@@ -583,6 +601,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     keyExtractor,
     virtualized,
     variant = 'normal',
+    sectionHeaderVariant = 'normal',
     pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
@@ -674,6 +693,8 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
         indentation,
         pressEventName,
         variant,
+        sectionHeaderVariant,
+        isSectionHeader: current.props.isSectionHeader,
       };
     },
     [
@@ -685,6 +706,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       indentation,
       pressEventName,
       variant,
+      sectionHeaderVariant,
     ],
   );
 
@@ -731,7 +753,10 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
         ? getPositionMargin(child.marginType)
         : { top: 0, bottom: 0 };
       const height =
-        31 + (variant === 'padded' ? margin.top + margin.bottom : 0);
+        (child?.isSectionHeader && child.sectionHeaderVariant === 'label'
+          ? SECTION_HEADER_LABEL_HEIGHT
+          : ROW_HEIGHT) +
+        (variant === 'padded' ? margin.top + margin.bottom : 0);
       return height;
     },
     [getItemContextValue, variant],
@@ -829,5 +854,17 @@ export namespace ListView {
     ListViewRowProps<MenuItemType>;
   export type VirtualizedList = IVirtualizedList;
   export const DragIndicator = ListViewDragIndicatorElement;
-  export const rowHeight = 31;
+  export const rowHeight = ROW_HEIGHT;
+  export const sectionHeaderLabelHeight = SECTION_HEADER_LABEL_HEIGHT;
+  export const calculateHeight = (
+    items: number,
+    headerCount: number,
+    headerVariant: ListViewSectionHeaderVariant,
+  ) => {
+    return (
+      items * rowHeight +
+      headerCount *
+        (headerVariant === 'label' ? sectionHeaderLabelHeight : rowHeight)
+    );
+  };
 }

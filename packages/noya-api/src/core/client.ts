@@ -91,7 +91,7 @@ export class NoyaClient {
 
     const existing = this.generatedComponentNames$.names[key].get();
 
-    if (Array.isArray(existing)) return existing;
+    if (Array.isArray(existing) && existing.length > 0) return existing;
 
     this.generatedComponentNames$.loadingNames[key].set(true);
 
