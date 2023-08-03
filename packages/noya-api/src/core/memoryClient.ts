@@ -88,6 +88,7 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
   };
 
   generate = {
+    componentNames: async () => [{ name: 'My Component' }],
     componentDescriptionFromName: async (name: string) => 'My Component',
     componentLayoutsFromDescription: async (
       name: string,

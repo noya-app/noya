@@ -5,12 +5,15 @@ import React, {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import styled from 'styled-components';
 import { CompletionItem, CompletionListItem } from '../utils/completions';
 import { IToken, fuzzyFilter, fuzzyTokenize } from '../utils/fuzzyScorer';
+import { ActivityIndicator } from './ActivityIndicator';
 import { InputField, InputFieldSize } from './InputField';
 import { ListView } from './ListView';
 import { Spacer } from './Spacer';
@@ -88,10 +91,14 @@ export const CompletionMenu = memo(
 );
 
 interface Props {
-  placeholder: string;
+  loading?: boolean;
+  initialValue?: string;
+  placeholder?: string;
   items: CompletionItem[];
+  onChange?: (value: string) => void;
   onHoverItem?: (item: CompletionItem | undefined) => void;
   onSelectItem?: (item: CompletionItem) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: () => void;
   size?: InputFieldSize;
   style?: React.CSSProperties;
@@ -101,19 +108,26 @@ interface Props {
 export const InputFieldWithCompletions = memo(
   forwardRef(function InputFieldWithCompletions(
     {
+      loading,
+      initialValue = '',
       placeholder,
       items,
       size,
+      onChange,
       onSelectItem,
       onHoverItem,
+      onFocus,
       onBlur,
       style,
       children,
     }: Props,
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
+    const defaultRef = useRef<HTMLInputElement>(null);
+    const ref = forwardedRef || defaultRef;
+
     const [state, _setState] = useState({
-      filter: '',
+      filter: initialValue,
       selectedIndex: 0,
     });
 
@@ -138,9 +152,20 @@ export const InputFieldWithCompletions = memo(
         }
 
         _setState(nextState);
+        if (newState.filter !== undefined) {
+          onChange?.(newState.filter);
+        }
       },
-      [items, onHoverItem, state],
+      [items, onChange, onHoverItem, state],
     );
+
+    const initialValueRef = useRef(initialValue);
+
+    useLayoutEffect(() => {
+      if (initialValueRef.current === initialValue) return;
+      initialValueRef.current = initialValue;
+      updateState({ filter: initialValue });
+    }, [initialValue, updateState]);
 
     const { filter, selectedIndex } = state;
 
@@ -173,11 +198,11 @@ export const InputFieldWithCompletions = memo(
         onSelectItem?.(item);
         onHoverItem?.(undefined);
 
-        if (forwardedRef && typeof forwardedRef === 'object') {
-          forwardedRef.current?.blur();
+        if (ref && typeof ref === 'object') {
+          ref.current?.blur();
         }
       },
-      [onSelectItem, onHoverItem, forwardedRef],
+      [onSelectItem, onHoverItem, ref],
     );
 
     const handleChange = useCallback(
@@ -186,13 +211,16 @@ export const InputFieldWithCompletions = memo(
     );
 
     const handleBlur = useCallback(() => {
-      updateState({ selectedIndex: 0, filter: '' }, 'resetHover');
+      updateState({ selectedIndex: 0, filter: initialValue }, 'resetHover');
       onBlur?.();
-    }, [onBlur, updateState]);
+    }, [initialValue, onBlur, updateState]);
 
     const handleFocus = useCallback(
-      () => updateState({ selectedIndex: 0, filter: '' }),
-      [updateState],
+      (event) => {
+        updateState({ selectedIndex: 0, filter: initialValue });
+        onFocus?.(event);
+      },
+      [initialValue, onFocus, updateState],
     );
 
     const handleIndexChange = useCallback(
@@ -221,23 +249,18 @@ export const InputFieldWithCompletions = memo(
           const item = filteredItems[selectedIndex];
           selectItem(item);
         } else if (event.key === 'Escape') {
-          if (forwardedRef && typeof forwardedRef === 'object') {
-            forwardedRef.current?.blur();
+          if (ref && typeof ref === 'object') {
+            ref.current?.blur();
           }
         }
       },
-      [
-        filteredItems,
-        forwardedRef,
-        handleIndexChange,
-        selectItem,
-        selectedIndex,
-      ],
+      [filteredItems, ref, handleIndexChange, selectItem, selectedIndex],
     );
 
     return (
       <InputField.Root
         size={size}
+        labelSize={16}
         renderPopoverContent={({ width }) => {
           const listSize = { width, height };
 
@@ -259,7 +282,9 @@ export const InputFieldWithCompletions = memo(
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Small color="textDisabled">No results</Small>
+                  <Small color="textDisabled">
+                    {loading ? 'Loading' : 'No results'}
+                  </Small>
                 </Stack.V>
               )}
             </Stack.V>
@@ -267,7 +292,7 @@ export const InputFieldWithCompletions = memo(
         }}
       >
         <InputField.Input
-          ref={forwardedRef}
+          ref={ref}
           value={filter}
           placeholder={placeholder}
           onChange={handleChange}
@@ -277,6 +302,11 @@ export const InputFieldWithCompletions = memo(
           style={style}
         />
         {children}
+        {loading && (
+          <InputField.Label>
+            <ActivityIndicator />
+          </InputField.Label>
+        )}
       </InputField.Root>
     );
   }),

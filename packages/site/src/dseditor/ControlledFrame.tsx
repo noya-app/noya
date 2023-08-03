@@ -1,3 +1,4 @@
+import { assignRef } from 'noya-react-utils';
 import React, {
   HTMLProps,
   forwardRef,
@@ -45,7 +46,7 @@ export const ControlledFrame = memo(
     const handleRef = useCallback(
       (value: HTMLIFrameElement | null) => {
         ref.current = value;
-        assignForwardedRef(forwardedRef, value);
+        assignRef(forwardedRef, value);
       },
       [forwardedRef],
     );
@@ -86,14 +87,3 @@ export const ControlledFrame = memo(
     );
   }),
 );
-
-function assignForwardedRef<T>(
-  ref: React.ForwardedRef<T> | undefined,
-  value: T | null,
-): void {
-  if (typeof ref === 'function') {
-    ref(value);
-  } else if (ref) {
-    ref.current = value;
-  }
-}

@@ -15,4 +15,5 @@ export * from './hooks/useSystemColorScheme';
 export * from './hooks/useUrlHashParameters';
 export * from './utils/PromiseState';
 export * from './utils/SuspendedValue';
+export * from './utils/assignRef';
 export * from './utils/fetchData';

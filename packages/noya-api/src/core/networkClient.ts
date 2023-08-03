@@ -1,18 +1,18 @@
-import { Size } from 'noya-geometry';
+import { Rect, Size } from 'noya-geometry';
 import { z } from 'zod';
 import { NoyaAPIError } from './error';
 import {
+  NoyaExportFormat,
+  NoyaFileData,
+  NoyaJson,
   noyaAssetSchema,
   noyaBillingSchema,
   noyaEmailListSchema,
-  NoyaExportFormat,
-  NoyaFileData,
   noyaFileListSchema,
   noyaFileSchema,
-  NoyaJson,
   noyaSessionSchema,
-  noyaSharedFileSchema,
   noyaShareSchema,
+  noyaSharedFileSchema,
   noyaUserDataSchema,
 } from './schema';
 
@@ -116,11 +116,16 @@ export class NoyaNetworkClient {
 
   get generate() {
     return {
+      componentNames: this.#generateComponentNames,
       componentDescriptionFromName: this.#generateComponentDescriptionFromName,
       componentLayoutsFromDescription:
         this.#generateComponentLayoutsFromDescription,
     };
   }
+
+  #generateComponentNames = async (options: { name: string; rect: Rect }) => {
+    return [{ name: 'Avatar' }, { name: 'Button' }];
+  };
 
   #generateComponentDescriptionFromName = async (name: string) => {
     const response = await this.request(

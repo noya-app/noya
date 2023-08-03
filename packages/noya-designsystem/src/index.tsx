@@ -14,6 +14,7 @@ declare module 'react' {
 
 // Theme
 // Components
+export * from './components/ActivityIndicator';
 export * from './components/Avatar';
 export * from './components/Button';
 export * from './components/Chip';

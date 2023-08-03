@@ -5,6 +5,7 @@ import { Layers, Selectors } from 'noya-state';
 import React, { ComponentProps } from 'react';
 import { AyonLayerInspector } from './AyonLayerInspector';
 import { AyonProjectInspector } from './AyonProjectInspector';
+import { CustomLayerInspector } from './CustomLayerInspector';
 
 export function AyonInspector({
   name,
@@ -28,10 +29,7 @@ export function AyonInspector({
     >
       <ScrollArea>
         {selectedLayers.length === 1 ? (
-          <AyonLayerInspector
-            setOverriddenBlock={setOverriddenBlock}
-            selectedLayer={selectedLayers[0]}
-          />
+          <CustomLayerInspector selectedLayer={selectedLayers[0]} />
         ) : selectedLayers.length === 0 ? (
           <AyonProjectInspector
             name={name}
