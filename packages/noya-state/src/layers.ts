@@ -110,6 +110,12 @@ export const isSymbolInstance = (
   return layer._class === 'symbolInstance';
 };
 
+export const isCustomLayer = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.CustomLayer => {
+  return layer._class === 'customLayer';
+};
+
 export const hasTextStyle = (
   layer: Sketch.Text,
 ): layer is Sketch.Text & { style: { textStyle: Sketch.TextStyle } } => {

@@ -320,11 +320,7 @@ export function canvasReducer(
     }
     case 'addDrawnLayer': {
       const pageIndex = getCurrentPageIndex(state);
-      const page = getCurrentPage(state);
-      const meta: EncodedPageMetadata = state.sketch.user[page.do_objectID] ?? {
-        zoomValue: 1,
-        scrollOrigin: '{0,0}',
-      };
+      const meta = getCurrentPageMetadata(state);
 
       const minimumSize = 2 / meta.zoomValue;
 

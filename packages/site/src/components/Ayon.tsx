@@ -61,6 +61,7 @@ import React, {
   useReducer,
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
+import { ayonReducer } from '../ayon/ayonReducer';
 import { Content } from '../ayon/components/Content';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
 import { librarySymbols } from '../ayon/symbols/symbols';
@@ -485,7 +486,13 @@ const AyonControlledState = memo(function AyonWithState({
     (state: WorkspaceState, action: WorkspaceAction) => {
       if (window.noyaPageWillReload) return state;
 
-      return workspaceReducer(state, action, CanvasKit, fontManager);
+      return workspaceReducer(
+        state,
+        action,
+        CanvasKit,
+        fontManager,
+        ayonReducer,
+      );
     },
     [CanvasKit, fontManager],
   );

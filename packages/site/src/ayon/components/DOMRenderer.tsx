@@ -1,33 +1,15 @@
-import {
-  DesignSystemDefinition,
-  RenderableRoot,
-  Theme,
-  transform,
-} from '@noya-design-system/protocol';
-import produce from 'immer';
 import { DS } from 'noya-api';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
-import { DesignSystemCache, loadDesignSystem } from 'noya-module-loader';
 import { useSize } from 'noya-react-utils';
-import {
-  InteractionState,
-  Layers,
-  OverriddenBlockContent,
-  Selectors,
-} from 'noya-state';
-import React, {
-  ComponentProps,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from 'react';
-import { tailwindColors } from '../tailwind/tailwind.config';
-import { recreateElement } from '../utils/recreateElement';
-import { renderDynamicContent } from '../utils/renderDynamicContent';
+import { Layers, OverriddenBlockContent, Selectors } from 'noya-state';
+import React, { ComponentProps, useCallback, useRef } from 'react';
+import { DSRenderer } from '../../dseditor/DSRenderer';
+import { initialComponents } from '../../dseditor/builtins';
+import { renderResolvedNode } from '../../dseditor/renderDSPreview';
+import { createResolvedNode } from '../../dseditor/traversal';
+import { CustomLayerData } from '../types';
 
 class ErrorBoundary extends React.Component<any> {
   constructor(props: { children: React.ReactNode }) {
@@ -45,143 +27,6 @@ class ErrorBoundary extends React.Component<any> {
   render() {
     return this.props.children;
   }
-}
-
-function DynamicRenderer({
-  artboard,
-  ds,
-  drawing,
-  sync,
-}: {
-  artboard: Sketch.Artboard;
-  ds: DS;
-  drawing: Extract<InteractionState, { type: 'drawing' }> | undefined;
-  sync: boolean;
-}) {
-  const [state] = useApplicationState();
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [system, setSystem] = React.useState<
-    DesignSystemDefinition | undefined
-  >(DesignSystemCache.get(ds.source.name));
-  const [root, setRoot] = React.useState<RenderableRoot | undefined>();
-
-  const isInitialRender = useRef(true);
-
-  const getSymbolMaster = useCallback(
-    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
-    [state],
-  );
-
-  useEffect(() => {
-    async function fetchLibrary() {
-      const system = await loadDesignSystem(ds.source.name);
-      setSystem(system);
-    }
-
-    if (isInitialRender.current && DesignSystemCache.has(ds.source.name)) {
-      isInitialRender.current = false;
-      return;
-    }
-
-    isInitialRender.current = false;
-    setSystem(undefined);
-    fetchLibrary();
-  }, [ds]);
-
-  useEffect(() => {
-    if (system && !root) {
-      setRoot(system.createRoot(ref.current!));
-    } else if (!system && root) {
-      root.unmount();
-      setRoot(undefined);
-    }
-  }, [root, system]);
-
-  const theme = useMemo(() => {
-    if (!system || !system.themeTransformer) return undefined;
-
-    const t: Theme = {
-      colors: {
-        primary: (tailwindColors as any)[ds.config.colors.primary as any],
-        neutral: tailwindColors.slate,
-      },
-    };
-
-    const themeValue = transform({ theme: t }, system.themeTransformer);
-
-    return themeValue;
-  }, [ds.config.colors.primary, system]);
-
-  useLayoutEffect(() => {
-    if (!root || !system) return;
-
-    const content = renderDynamicContent(
-      system,
-      artboard,
-      getSymbolMaster,
-      drawing,
-      theme,
-      'absolute-layout',
-    );
-
-    root.render(recreateElement(system, content), { sync });
-  }, [artboard, ds, drawing, getSymbolMaster, root, sync, system, theme]);
-
-  return (
-    <>
-      <div
-        ref={ref}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-        }}
-      />
-      {!system && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            padding: '4px 8px',
-            color: '#aaa',
-            pointerEvents: 'none',
-          }}
-        >
-          Loading design system...
-        </div>
-      )}
-    </>
-  );
-}
-
-function overrideBlockContent<T extends Sketch.AnyLayer>(
-  layer: T,
-  overriddenBlock: OverriddenBlockContent,
-) {
-  return produce(layer, (draft) => {
-    const indexPath = Layers.findIndexPath(
-      draft,
-      (layer) => layer.do_objectID === overriddenBlock.layerId,
-    );
-
-    if (indexPath) {
-      const layer = Layers.access(draft, indexPath);
-
-      if (Layers.isSymbolInstance(layer)) {
-        layer.symbolID =
-          overriddenBlock.blockContent.symbolId ?? layer.symbolID;
-        layer.blockText =
-          overriddenBlock.blockContent.blockText ?? layer.blockText;
-        layer.blockParameters =
-          overriddenBlock.blockContent.blockParameters ?? layer.blockParameters;
-        layer.overrideValues =
-          overriddenBlock.blockContent.overrides ?? layer.overrideValues;
-      }
-    }
-  });
 }
 
 function DOMRendererContent({
@@ -216,9 +61,11 @@ function DOMRendererContent({
 
   const paddedRect = transformRect(rect, transform);
 
-  const overriddenArtboard = overriddenBlock
-    ? overrideBlockContent(artboard, overriddenBlock)
-    : artboard;
+  const findComponent = useCallback(
+    (id: string) =>
+      initialComponents.find((component) => component.componentID === id),
+    [],
+  );
 
   return (
     <>
@@ -241,18 +88,49 @@ function DOMRendererContent({
           width: rect.width,
           height: rect.height,
           overflow: 'hidden',
+          display: 'flex',
         }}
       >
         <ErrorBoundary>
-          <DynamicRenderer
-            sync={sync}
-            artboard={overriddenArtboard}
-            ds={ds}
-            drawing={
-              state.interactionState.type === 'drawing'
-                ? state.interactionState
-                : undefined
-            }
+          <DSRenderer
+            sourceName="@noya-design-system/chakra"
+            primary="blue"
+            renderContent={(props) => {
+              const layers = artboard.layers.filter(
+                Layers.isCustomLayer,
+              ) as Sketch.CustomLayer<CustomLayerData>[];
+
+              return layers.map((layer) => {
+                const resolvedNode = createResolvedNode(
+                  findComponent,
+                  layer.data.node,
+                );
+
+                const content = renderResolvedNode({
+                  resolvedNode,
+                  primary: props.primary,
+                  system: props.system,
+                  highlightedPath: undefined,
+                  selectionOutlineColor: 'blue',
+                });
+
+                return (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: layer.frame.y,
+                      left: layer.frame.x,
+                      width: layer.frame.width,
+                      height: layer.frame.height,
+                      overflow: 'hidden',
+                      display: 'flex',
+                    }}
+                  >
+                    {content}
+                  </div>
+                );
+              });
+            }}
           />
         </ErrorBoundary>
       </div>

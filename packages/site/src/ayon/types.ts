@@ -1,4 +1,5 @@
 import { DrawableLayerType } from 'noya-state';
+import { NoyaNode } from '../dseditor/types';
 
 export type InferredBlockTypeResult = {
   type: DrawableLayerType;
@@ -6,3 +7,7 @@ export type InferredBlockTypeResult = {
 };
 
 export type ViewType = 'combined' | 'previewOnly';
+
+export type CustomLayerData = {
+  node: NoyaNode;
+};

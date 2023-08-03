@@ -1,12 +1,13 @@
-import { SketchFile } from 'noya-sketch-file';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { SketchFile } from 'noya-sketch-file';
 import {
-  ApplicationState,
   Action,
+  ApplicationReducerContext,
+  ApplicationState,
+  CustomReducer,
   applicationReducer,
   createInitialState,
-  ApplicationReducerContext,
 } from './applicationReducer';
 import { createInitialInteractionState } from './interactionReducer';
 
@@ -31,6 +32,7 @@ export function historyReducer(
   action: HistoryAction,
   CanvasKit: CanvasKit,
   context: ApplicationReducerContext,
+  customReducer?: CustomReducer,
 ) {
   const currentState = state.present;
   switch (action[0]) {
@@ -76,6 +78,7 @@ export function historyReducer(
         action,
         CanvasKit,
         context,
+        customReducer,
       );
       const mergableEntry = getMergableHistoryEntry(state, action[0]);
       const sketchFileChanged = currentState.sketch !== nextState.sketch;

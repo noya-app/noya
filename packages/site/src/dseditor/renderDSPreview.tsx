@@ -1,3 +1,4 @@
+import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { normalizeRange } from 'noya-state';
 import { findLast } from 'noya-utils';
 import React, { ReactNode } from 'react';
@@ -19,44 +20,20 @@ import { SerializedSelection, ZERO_WIDTH_SPACE, closest } from './dom';
 import { ResolvedHierarchy } from './traversal';
 import { NoyaResolvedNode, NoyaResolvedString } from './types';
 
-export function renderDSPreview({
-  renderProps: props,
-  handleSetTextAtPath,
-  highlightedPath,
-  primary,
+export function renderResolvedNode({
   resolvedNode,
-  serializedSelection,
-  canvasBackgroundColor,
+  primary,
   selectionOutlineColor,
-  setHighlightedPath,
-  setSerializedSelection,
+  highlightedPath,
+  system,
 }: {
-  renderProps: DSRenderProps;
-  handleSetTextAtPath: ({
-    path,
-    value,
-  }: {
-    path: string[];
-    value: string;
-  }) => void;
-  highlightedPath: string[] | undefined;
-  primary: string;
   resolvedNode: NoyaResolvedNode;
-  serializedSelection: SerializedSelection | undefined;
-  canvasBackgroundColor: string;
+  primary: string;
   selectionOutlineColor: string;
-  setHighlightedPath: (path: string[] | undefined) => void;
-  setSerializedSelection: (selection: SerializedSelection) => void;
+  highlightedPath: string[] | undefined;
+  system: DesignSystemDefinition;
 }) {
-  // console.info(
-  //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
-  //     if (!node) return '()';
-  //     if (node.type === 'noyaString') return `"${node.value}"`;
-  //     return [node.name, `(${node.path.join('/')})`].filter(Boolean).join(' ');
-  //   }),
-  // );
-
-  const content = ResolvedHierarchy.map<ReactNode>(
+  return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
     (element, transformedChildren) => {
       if (element.status === 'removed') return null;
@@ -78,7 +55,7 @@ export function renderDSPreview({
         element.path.join() === highlightedPath?.join() || isChildHighlighted;
 
       const PrimitiveComponent: React.FC<any> =
-        props.system.components[element.componentID];
+        system.components[element.componentID];
 
       if (!PrimitiveComponent) return null;
 
@@ -133,6 +110,52 @@ export function renderDSPreview({
       );
     },
   );
+}
+
+export function renderDSPreview({
+  renderProps: props,
+  handleSetTextAtPath,
+  highlightedPath,
+  primary,
+  resolvedNode,
+  serializedSelection,
+  canvasBackgroundColor,
+  selectionOutlineColor,
+  setHighlightedPath,
+  setSerializedSelection,
+}: {
+  renderProps: DSRenderProps;
+  handleSetTextAtPath: ({
+    path,
+    value,
+  }: {
+    path: string[];
+    value: string;
+  }) => void;
+  highlightedPath: string[] | undefined;
+  primary: string;
+  resolvedNode: NoyaResolvedNode;
+  serializedSelection: SerializedSelection | undefined;
+  canvasBackgroundColor: string;
+  selectionOutlineColor: string;
+  setHighlightedPath: (path: string[] | undefined) => void;
+  setSerializedSelection: (selection: SerializedSelection) => void;
+}) {
+  // console.info(
+  //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
+  //     if (!node) return '()';
+  //     if (node.type === 'noyaString') return `"${node.value}"`;
+  //     return [node.name, `(${node.path.join('/')})`].filter(Boolean).join(' ');
+  //   }),
+  // );
+
+  const content = renderResolvedNode({
+    resolvedNode,
+    primary,
+    selectionOutlineColor,
+    highlightedPath,
+    system: props.system,
+  });
 
   const iframe = props.iframe;
 

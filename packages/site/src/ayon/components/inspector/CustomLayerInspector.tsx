@@ -9,7 +9,7 @@ import { ComponentNameInspector } from './ComponentNameInspector';
 export function CustomLayerInspector({
   selectedLayer,
 }: {
-  selectedLayer: Sketch.SymbolInstance;
+  selectedLayer: Sketch.CustomLayer;
 }) {
   const [, dispatch] = useApplicationState();
   const theme = useDesignSystemTheme();

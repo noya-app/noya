@@ -5,10 +5,10 @@ import { useStroke } from 'noya-react-canvaskit';
 import { Layers, Selectors } from 'noya-state';
 import React, { ReactNode, useMemo } from 'react';
 import { Group, Path, Rect } from '../ComponentsContext';
+import { useZoom } from '../ZoomContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
-import { useZoom } from '../ZoomContext';
 
 interface HoverOutlinePathProps {
   layer: Layers.PointsLayer | Sketch.ShapeGroup;
@@ -76,7 +76,10 @@ export default function HoverOutline({ layer, transform }: Props) {
       break;
     }
     default:
-      console.info(layer._class, 'not handled');
+      if (layer._class !== 'customLayer') {
+        console.info(layer._class, 'not handled');
+      }
+
       element = null;
       break;
   }

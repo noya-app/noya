@@ -64,7 +64,7 @@ export const ControlledFrame = memo(
         srcDoc={`<!DOCTYPE html>
 <head>
 <style>
-  html, body { height: 100% }
+  html, body { height: 100%; overflow: hidden; }
  
   *::selection {
     background-color: rgb(179,215,254);

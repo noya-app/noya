@@ -70,7 +70,10 @@ export default memo(function SketchLayer({ layer }: Props) {
       element = <SketchSlice layer={layer} />;
       break;
     default:
-      console.info(layer._class, 'not handled');
+      if (layer._class !== 'customLayer') {
+        console.info(layer._class, 'not handled');
+      }
+
       element = <></>;
   }
 

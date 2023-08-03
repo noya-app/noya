@@ -114,12 +114,24 @@ export type ApplicationReducerContext = {
   fontManager: IFontManager;
 };
 
+export type CustomReducer = (
+  state: ApplicationState,
+  action: Action,
+  CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
+) => ApplicationState | undefined;
+
 export function applicationReducer(
   state: ApplicationState,
   action: Action,
   CanvasKit: CanvasKit,
   context: ApplicationReducerContext,
+  customReducer?: CustomReducer,
 ): ApplicationState {
+  const newState = customReducer?.(state, action, CanvasKit, context);
+
+  if (newState) return newState;
+
   switch (action[0]) {
     case 'batch':
       return action[1].reduce(

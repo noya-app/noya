@@ -5,6 +5,7 @@ import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
+import { CustomReducer } from './applicationReducer';
 import {
   HistoryAction,
   HistoryState,
@@ -72,6 +73,7 @@ export function workspaceReducer(
   action: WorkspaceAction,
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
+  customReducer?: CustomReducer,
 ): WorkspaceState {
   switch (action[0]) {
     case 'setDesignSystem': {
@@ -214,11 +216,17 @@ export function workspaceReducer(
     }
     default: {
       return produce(state, (draft) => {
-        draft.history = historyReducer(state.history, action, CanvasKit, {
-          canvasInsets: state.canvasInsets,
-          canvasSize: state.canvasSize,
-          fontManager,
-        });
+        draft.history = historyReducer(
+          state.history,
+          action,
+          CanvasKit,
+          {
+            canvasInsets: state.canvasInsets,
+            canvasSize: state.canvasSize,
+            fontManager,
+          },
+          customReducer,
+        );
       });
     }
   }

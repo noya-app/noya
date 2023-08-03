@@ -370,7 +370,6 @@ export const Content = memo(function Content({
           <>
             {!isPlayground && (
               <AyonInspector
-                setOverriddenBlock={setOverriddenBlock}
                 name={name}
                 onChangeName={onChangeName}
                 onDuplicate={onDuplicate}
