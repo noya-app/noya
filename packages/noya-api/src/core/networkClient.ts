@@ -124,7 +124,19 @@ export class NoyaNetworkClient {
   }
 
   #generateComponentNames = async (options: { name: string; rect: Rect }) => {
-    return [{ name: 'Avatar' }, { name: 'Button' }];
+    const response = await this.request(
+      `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
+        options.name,
+      )}`,
+      {
+        credentials: 'include',
+      },
+    );
+
+    this.handleHTTPErrors(response);
+
+    const json = await response.json();
+    return json as { name: string }[];
   };
 
   #generateComponentDescriptionFromName = async (name: string) => {
