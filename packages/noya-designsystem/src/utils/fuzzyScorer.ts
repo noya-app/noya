@@ -11,9 +11,11 @@ export type IScoredItem = IItemScore & {
 export function fuzzyFilter({
   items,
   query,
+  scoreThreshold = 0,
 }: {
   items: string[];
   query: string;
+  scoreThreshold?: number;
 }) {
   const scoredItems = items.map(
     (text, index): IScoredItem => ({
@@ -25,7 +27,7 @@ export function fuzzyFilter({
   if (!query) return scoredItems;
 
   return scoredItems
-    .filter(({ score }) => score > 0)
+    .filter(({ score }) => score > scoreThreshold)
     .sort((a, b) => b.score - a.score);
 }
 

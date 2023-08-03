@@ -95,6 +95,7 @@ interface Props {
   initialValue?: string;
   placeholder?: string;
   items: CompletionItem[];
+  scoreThreshold?: number;
   onChange?: (value: string) => void;
   onHoverItem?: (item: CompletionItem | undefined) => void;
   onSelectItem?: (item: CompletionItem) => void;
@@ -112,6 +113,7 @@ export const InputFieldWithCompletions = memo(
       initialValue = '',
       placeholder,
       items,
+      scoreThreshold,
       size,
       onChange,
       onSelectItem,
@@ -144,6 +146,7 @@ export const InputFieldWithCompletions = memo(
           const nextItems = fuzzyFilter({
             items: items.map((item) => item.name),
             query: nextState.filter,
+            scoreThreshold,
           }).map(
             (item): CompletionListItem => ({ ...item, ...items[item.index] }),
           );
@@ -156,7 +159,7 @@ export const InputFieldWithCompletions = memo(
           onChange?.(newState.filter);
         }
       },
-      [items, onChange, onHoverItem, state],
+      [items, onChange, onHoverItem, scoreThreshold, state],
     );
 
     const initialValueRef = useRef(initialValue);
@@ -176,10 +179,11 @@ export const InputFieldWithCompletions = memo(
         fuzzyFilter({
           items: items.map((item) => item.name),
           query: filter,
+          scoreThreshold,
         }).map(
           (item): CompletionListItem => ({ ...item, ...items[item.index] }),
         ),
-      [items, filter],
+      [items, filter, scoreThreshold],
     );
 
     const height = Math.min(

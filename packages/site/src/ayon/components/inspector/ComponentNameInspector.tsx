@@ -56,6 +56,7 @@ export function ComponentNameInspector({
       initialValue={name}
       loading={loading}
       items={completionItems}
+      scoreThreshold={-Infinity}
       onFocus={async () => updateSuggestions(name)}
       onBlur={() => setSuggestedNames([])}
       onChange={(value) => updateSuggestions(value)}

@@ -123,7 +123,10 @@ export class NoyaNetworkClient {
     };
   }
 
-  #generateComponentNames = async (options: { name: string; rect: Rect }) => {
+  #generateComponentNames = async (options: {
+    name: string;
+    rect: Rect;
+  }): Promise<{ name: string }[]> => {
     const response = await this.request(
       `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
         options.name,
@@ -136,7 +139,10 @@ export class NoyaNetworkClient {
     this.handleHTTPErrors(response);
 
     const json = await response.json();
-    return json as { name: string }[];
+
+    const schema = z.array(z.object({ name: z.string() }));
+    const parsed = schema.safeParse(json);
+    return parsed.success ? parsed.data : [];
   };
 
   #generateComponentDescriptionFromName = async (name: string) => {
