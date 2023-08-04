@@ -67,7 +67,8 @@ export const classGroups = {
   items: /^items/,
   width: /^w-/,
   height: /^h-/,
-  gap: /^gap-/,
+  // Only handle gap for now. Space-x and space-y are converted to gap.
+  gap: /^(gap-|space-y|space-x)/,
   padding: /^p-/,
   paddingX: /^px-/,
   paddingY: /^py-/,
