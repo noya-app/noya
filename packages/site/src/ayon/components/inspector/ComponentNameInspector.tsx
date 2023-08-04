@@ -4,19 +4,23 @@ import {
   CompletionSectionHeader,
   InputFieldWithCompletions,
 } from 'noya-designsystem';
-import { Rect } from 'noya-geometry';
+import Sketch from 'noya-file-format';
+import { InspectorPrimitives } from 'noya-inspector';
 import { debounce } from 'noya-utils';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useAyonState } from '../../state/ayonState';
+import { CustomLayerData } from '../../types';
 
-export function ComponentNameInspector({
-  name,
-  frame,
-  onChangeName,
-}: {
-  name: string;
-  frame: Rect;
-  onChangeName: (name: string) => void;
-}) {
+type Props = {
+  selectedLayer: Sketch.CustomLayer<CustomLayerData>;
+};
+
+export const ComponentNameInspector = memo(function ComponentNameInspector({
+  selectedLayer,
+}: Props) {
+  const [, dispatch] = useAyonState();
+
+  const name = selectedLayer.name;
   const client = useNoyaClient();
   const [customName, setCustomName] = useState(name);
   const { loading, names } = useGeneratedComponentNames(customName);
@@ -41,27 +45,39 @@ export function ComponentNameInspector({
   const generateDebounced = useMemo(
     () =>
       debounce(
-        (value: string) =>
-          client.generate.componentNames({ name: value, rect: frame }),
+        (value: string) => client.generate.componentNames({ name: value }),
         250,
       ),
-    [client, frame],
+    [client],
   );
 
   useEffect(() => {
     generateDebounced(customName);
   }, [customName, generateDebounced]);
 
-  return (
-    <InputFieldWithCompletions
-      initialValue={name}
-      loading={loading}
-      items={completionItems}
-      onFocus={async () => setCustomName(name)}
-      onChange={(value) => setCustomName(value)}
-      onSelectItem={(item) => {
-        onChangeName(item.id === 'custom' ? customName : item.name);
-      }}
-    />
+  const handleChangeName = useCallback(
+    (value: string) => {
+      dispatch('batch', [
+        ['setLayerName', selectedLayer.do_objectID, value],
+        ['setLayerDescription', undefined],
+        ['setLayerNode', undefined],
+      ]);
+    },
+    [dispatch, selectedLayer.do_objectID],
   );
-}
+
+  return (
+    <InspectorPrimitives.LabeledRow label="Name">
+      <InputFieldWithCompletions
+        initialValue={name}
+        loading={loading}
+        items={completionItems}
+        onFocus={async () => setCustomName(name)}
+        onChange={(value) => setCustomName(value)}
+        onSelectItem={(item) => {
+          handleChangeName(item.id === 'custom' ? customName : item.name);
+        }}
+      />
+    </InspectorPrimitives.LabeledRow>
+  );
+});

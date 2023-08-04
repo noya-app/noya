@@ -21,7 +21,14 @@ export const IconButton = memo(
     const Icon = Icons[iconName];
 
     return (
-      <Button ref={forwardedRef} {...props} variant="none">
+      <Button
+        ref={forwardedRef}
+        {...props}
+        variant="none"
+        {...(size && {
+          contentStyle: { minHeight: size },
+        })}
+      >
         <Icon
           color={color ?? (selected ? iconSelectedColor : iconColor)}
           {...(size && { width: size, height: size })}

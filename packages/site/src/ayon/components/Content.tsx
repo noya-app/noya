@@ -258,71 +258,76 @@ export const Content = memo(function Content({
             widgets={
               viewType !== 'previewOnly' && (
                 <>
-                  {layers.map((layer) => (
-                    <Widget
-                      key={layer.do_objectID}
-                      layer={layer}
-                      showToolbar={!isPlayground}
-                      setOverriddenBlock={(blockContent) => {
-                        if (blockContent) {
-                          setOverriddenBlock({
-                            layerId: layer.do_objectID,
-                            blockContent,
+                  {layers
+                    .filter(
+                      // TODO: put this back
+                      (layer) => false,
+                    )
+                    .map((layer) => (
+                      <Widget
+                        key={layer.do_objectID}
+                        layer={layer}
+                        showToolbar={!isPlayground}
+                        setOverriddenBlock={(blockContent) => {
+                          if (blockContent) {
+                            setOverriddenBlock({
+                              layerId: layer.do_objectID,
+                              blockContent,
+                            });
+                          } else {
+                            setOverriddenBlock(undefined);
+                          }
+                        }}
+                        onChangeBlockType={(type: DrawableLayerType) => {
+                          if (typeof type === 'string') return;
+
+                          if (onboardingStep === 'insertedBlock') {
+                            setOnboardingStep?.('configuredBlockType');
+                          }
+
+                          amplitude.logEvent('Project - Block - Changed Type', {
+                            'Old Block Type': layer.symbolID,
+                            'New Block Type': type.symbolId,
+                            X: layer.frame.x,
+                            Y: layer.frame.y,
+                            Width: layer.frame.width,
+                            Height: layer.frame.height,
                           });
-                        } else {
-                          setOverriddenBlock(undefined);
-                        }
-                      }}
-                      onChangeBlockType={(type: DrawableLayerType) => {
-                        if (typeof type === 'string') return;
 
-                        if (onboardingStep === 'insertedBlock') {
-                          setOnboardingStep?.('configuredBlockType');
-                        }
-
-                        amplitude.logEvent('Project - Block - Changed Type', {
-                          'Old Block Type': layer.symbolID,
-                          'New Block Type': type.symbolId,
-                          X: layer.frame.x,
-                          Y: layer.frame.y,
-                          Width: layer.frame.width,
-                          Height: layer.frame.height,
-                        });
-
-                        dispatch(
-                          'setSymbolInstanceSource',
-                          type.symbolId,
-                          'preserveCurrent',
-                        );
-                      }}
-                      onChangeBlockContent={(content: BlockContent) => {
-                        // const nextBlock =
-                        //   Blocks[content.symbolId ?? layer.symbolID];
-                        // const contentWithNormalizedText: BlockContent = {
-                        //   ...content,
-                        //   normalizedText:
-                        //     content.blockText ?? nextBlock.placeholderText,
-                        // };
-                        // dispatch('batch', [
-                        //   [
-                        //     'setBlockContent',
-                        //     layer.do_objectID,
-                        //     contentWithNormalizedText,
-                        //   ],
-                        //   ...(contentWithNormalizedText.blockText !== ''
-                        //     ? [
-                        //         [
-                        //           'setSymbolIdIsFixed',
-                        //           layer.do_objectID,
-                        //           true,
-                        //         ] as Action,
-                        //       ]
-                        //     : []),
-                        // ]);
-                      }}
-                      uploadAsset={uploadAsset}
-                    />
-                  ))}
+                          dispatch(
+                            'setSymbolInstanceSource',
+                            type.symbolId,
+                            'preserveCurrent',
+                          );
+                        }}
+                        onChangeBlockContent={(content: BlockContent) => {
+                          // const nextBlock =
+                          //   Blocks[content.symbolId ?? layer.symbolID];
+                          // const contentWithNormalizedText: BlockContent = {
+                          //   ...content,
+                          //   normalizedText:
+                          //     content.blockText ?? nextBlock.placeholderText,
+                          // };
+                          // dispatch('batch', [
+                          //   [
+                          //     'setBlockContent',
+                          //     layer.do_objectID,
+                          //     contentWithNormalizedText,
+                          //   ],
+                          //   ...(contentWithNormalizedText.blockText !== ''
+                          //     ? [
+                          //         [
+                          //           'setSymbolIdIsFixed',
+                          //           layer.do_objectID,
+                          //           true,
+                          //         ] as Action,
+                          //       ]
+                          //     : []),
+                          // ]);
+                        }}
+                        uploadAsset={uploadAsset}
+                      />
+                    ))}
                   {state.interactionState.type === 'drawing' && (
                     <DrawingWidget />
                   )}

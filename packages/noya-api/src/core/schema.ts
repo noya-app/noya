@@ -187,4 +187,6 @@ export type NoyaExperiments = z.infer<typeof noyaExperimentsSchema>;
 export type NoyaMetadataItem = z.infer<typeof noyaMetadataItemSchema>;
 export type NoyaGeneratedName = z.infer<typeof generatedNameSchema>;
 
+export type NoyaGeneratedLayout = { name: string; code: string };
+
 export type NoyaExportFormat = 'png' | 'pdf' | 'svg';

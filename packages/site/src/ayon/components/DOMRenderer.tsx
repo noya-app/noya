@@ -6,9 +6,11 @@ import { useSize } from 'noya-react-utils';
 import { Layers, OverriddenBlockContent, Selectors } from 'noya-state';
 import React, { ComponentProps, useCallback, useRef } from 'react';
 import { DSRenderer } from '../../dseditor/DSRenderer';
+import { Model } from '../../dseditor/builders';
 import { initialComponents } from '../../dseditor/builtins';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
 import { createResolvedNode } from '../../dseditor/traversal';
+import { boxSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData } from '../types';
 
 class ErrorBoundary extends React.Component<any> {
@@ -103,7 +105,10 @@ function DOMRendererContent({
               return layers.map((layer) => {
                 const resolvedNode = createResolvedNode(
                   findComponent,
-                  layer.data.node,
+                  layer.data.node ??
+                    Model.primitiveElement({
+                      componentID: boxSymbolId,
+                    }),
                 );
 
                 const content = renderResolvedNode({

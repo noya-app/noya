@@ -52,7 +52,7 @@ export type WorkspaceState = {
   };
 };
 
-export type WorkspaceAction =
+export type WorkspaceAction<T = never> =
   | [type: 'newFile']
   | [type: 'setFile', value: SketchFile, fileHandle?: FileSystemFileHandle]
   | [type: 'setFileHandle', value?: FileSystemFileHandle]
@@ -66,7 +66,7 @@ export type WorkspaceAction =
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setIsContextMenuOpen', value: boolean]
   | [type: 'setDesignSystem', type: 'standard' | 'custom', id: string]
-  | HistoryAction;
+  | HistoryAction<T>;
 
 export function workspaceReducer(
   state: WorkspaceState,

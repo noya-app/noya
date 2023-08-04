@@ -4,6 +4,7 @@ import { NoyaAPIError } from './error';
 import {
   NoyaExportFormat,
   NoyaFileData,
+  NoyaGeneratedLayout,
   NoyaGeneratedName,
   NoyaJson,
   generatedNameSchema,
@@ -127,7 +128,7 @@ export class NoyaNetworkClient {
 
   #generateComponentNames = async (options: {
     name: string;
-    rect: Rect;
+    rect?: Rect;
   }): Promise<NoyaGeneratedName[]> => {
     const response = await this.request(
       `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
@@ -166,7 +167,7 @@ export class NoyaNetworkClient {
   #generateComponentLayoutsFromDescription = async (
     name: string,
     description: string,
-  ) => {
+  ): Promise<NoyaGeneratedLayout[]> => {
     const response = await this.request(
       `${this.baseURI}/generate/component/layout?t=1&name=${encodeURIComponent(
         name,
@@ -179,12 +180,8 @@ export class NoyaNetworkClient {
     this.handleHTTPErrors(response);
 
     const text = await response.text();
-    return [
-      {
-        name: 'layout1',
-        code: text,
-      },
-    ];
+
+    return [{ name: 'Layout', code: text }];
   };
 
   request = async (

@@ -7,14 +7,30 @@ import {
   accessPageLayers,
   interactionReducer,
 } from 'noya-state';
-import { Model } from '../../dseditor/builders';
-import { buttonSymbolId } from '../symbols/symbolIds';
+import { NoyaNode } from '../../dseditor/types';
 import { CustomLayerData } from '../types';
 
-export type AyonAction = [type: 'setLayerDescription', description: string];
+export type AyonAction =
+  | [type: 'setLayerDescription', description: string | undefined]
+  | [type: 'setLayerNode', node: NoyaNode | undefined];
 
 export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
   switch (action[0]) {
+    case 'setLayerNode': {
+      const [, node] = action;
+
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const layerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+          (draftLayer) => {
+            if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
+            draftLayer.data.node = node;
+          },
+        );
+      });
+    }
     case 'setLayerDescription': {
       const [, description] = action;
 
@@ -43,14 +59,9 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
         );
 
         const layer = SketchModel.customLayer<CustomLayerData>({
-          name: 'Button',
+          name: '',
           frame: SketchModel.rect(rect),
-          data: {
-            node: Model.primitiveElement({
-              componentID: buttonSymbolId,
-              children: [Model.string('Submit')],
-            }),
-          },
+          data: {},
         });
 
         Selectors.addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);

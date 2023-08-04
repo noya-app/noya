@@ -9,6 +9,7 @@ import {
   NoyaEmailList,
   NoyaFile,
   NoyaFileData,
+  NoyaGeneratedLayout,
   NoyaGeneratedName,
   NoyaJson,
   NoyaMetadataItem,
@@ -58,6 +59,20 @@ export class NoyaClient {
     names: {},
     loadingNames: {},
   });
+  generatedComponentDescriptions$ = observable<{
+    descriptions: Record<string, string>;
+    loadingDescriptions: Record<string, boolean>;
+  }>({
+    descriptions: {},
+    loadingDescriptions: {},
+  });
+  generatedComponentLayouts$ = observable<{
+    layouts: Record<string, NoyaGeneratedLayout[]>;
+    loadingLayouts: Record<string, boolean>;
+  }>({
+    layouts: {},
+    loadingLayouts: {},
+  });
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -82,10 +97,17 @@ export class NoyaClient {
   get generate() {
     return memoizedGetter(this, 'generate', {
       componentNames: this.#generateComponentNames,
+      componentDescription: this.#generateComponentDescription,
+      componentLayouts: this.#generateComponentLayouts,
+      resetComponentDescription: this.#resetGenerateComponentDescription,
+      resetComponentLayouts: this.#resetGenerateComponentLayouts,
     });
   }
 
-  #generateComponentNames = async (options: { name: string; rect: Rect }) => {
+  #generateComponentNames = async (options: {
+    name: string;
+    rect?: Rect;
+  }): Promise<NoyaGeneratedName[]> => {
     const name = options.name.trim();
     const key = name.toLowerCase();
 
@@ -102,6 +124,71 @@ export class NoyaClient {
 
     this.generatedComponentNames$.names[key].set(result);
     this.generatedComponentNames$.loadingNames[key].set(false);
+
+    return result;
+  };
+
+  #generateComponentDescription = async (options: { name: string }) => {
+    const name = options.name.trim();
+    const key = name.toLowerCase();
+
+    const existing =
+      this.generatedComponentDescriptions$.descriptions[key].get();
+
+    if (typeof existing === 'string') return existing;
+
+    this.generatedComponentDescriptions$.loadingDescriptions[key].set(true);
+
+    const result =
+      await this.networkClient.generate.componentDescriptionFromName(name);
+
+    this.generatedComponentDescriptions$.descriptions[key].set(result);
+    this.generatedComponentDescriptions$.loadingDescriptions[key].set(false);
+
+    return result;
+  };
+
+  componentLayoutCacheKey = (name: string, description: string) =>
+    `${name.trim().toLowerCase()}:${description.trim().toLowerCase()}`;
+
+  #generateComponentLayouts = async (options: {
+    name: string;
+    description: string;
+  }): Promise<NoyaGeneratedLayout[]> => {
+    const name = options.name.trim();
+    const description = options.description.trim();
+    const key = this.componentLayoutCacheKey(name, description);
+
+    const existing = this.generatedComponentLayouts$.layouts[key].get();
+
+    if (Array.isArray(existing) && existing.length > 0) return existing;
+
+    this.generatedComponentLayouts$.loadingLayouts[key].set(true);
+
+    const result =
+      await this.networkClient.generate.componentLayoutsFromDescription(
+        name,
+        description,
+      );
+
+    this.generatedComponentLayouts$.layouts[key].set(result);
+    this.generatedComponentLayouts$.loadingLayouts[key].set(false);
+
+    return result;
+  };
+
+  #resetGenerateComponentDescription = (name: string) => {
+    const key = name.trim().toLowerCase();
+
+    this.generatedComponentDescriptions$.descriptions[key].delete();
+    this.generatedComponentDescriptions$.loadingDescriptions[key].delete();
+  };
+
+  #resetGenerateComponentLayouts = (name: string, description: string) => {
+    const key = this.componentLayoutCacheKey(name, description);
+
+    this.generatedComponentLayouts$.layouts[key].delete();
+    this.generatedComponentLayouts$.loadingLayouts[key].delete();
   };
 
   #fetchSession = async () => {

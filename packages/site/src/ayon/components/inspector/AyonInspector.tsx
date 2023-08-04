@@ -2,20 +2,22 @@ import { useApplicationState } from 'noya-app-state-context';
 import { ScrollArea, Stack, useDesignSystemTheme } from 'noya-designsystem';
 import { useShallowArray } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
-import React from 'react';
+import React, { memo } from 'react';
 import { CustomLayerData } from '../../types';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
 
-export function AyonInspector({
-  name,
-  onChangeName,
-  onDuplicate,
-}: {
+type Props = {
   name: string;
   onChangeName?: (name: string) => void;
   onDuplicate?: () => void;
-}) {
+};
+
+export const AyonInspector = memo(function AyonInspector({
+  name,
+  onChangeName,
+  onDuplicate,
+}: Props) {
   const theme = useDesignSystemTheme();
   const [state] = useApplicationState();
 
@@ -44,4 +46,4 @@ export function AyonInspector({
       </ScrollArea>
     </Stack.V>
   );
-}
+});

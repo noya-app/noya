@@ -71,7 +71,7 @@ const RowLabel = styled.span<{
   textStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
 }>(({ theme, textStyle }) => ({
   marginBottom: '6px',
-
+  display: 'flex',
   ...(textStyle
     ? {
         ...theme.textStyles[textStyle],
@@ -87,15 +87,21 @@ export const LabeledRow = memo(function LabeledRow({
   children,
   label,
   labelTextStyle,
+  right,
 }: {
   children: ReactNode;
   label: string;
   labelTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
+  right?: ReactNode;
 }) {
   return (
     <Row>
       <Column>
-        <RowLabel textStyle={labelTextStyle}>{label}</RowLabel>
+        <RowLabel textStyle={labelTextStyle}>
+          {label}
+          {right && <Spacer.Horizontal />}
+          {right}
+        </RowLabel>
         <Row>{children}</Row>
       </Column>
     </Row>

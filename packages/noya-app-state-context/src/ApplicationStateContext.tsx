@@ -14,7 +14,7 @@ import React, {
 export type Dispatcher = (action: WorkspaceAction) => void;
 
 export type FlatDispatcher<T = never> = (
-  ...args: WorkspaceAction | Extract<T, any[]>
+  ...args: WorkspaceAction<Extract<T, any[]>> | Extract<T, any[]>
 ) => void;
 
 const StateContext = createContext<WorkspaceState | undefined>(undefined);
@@ -75,7 +75,7 @@ export const useDispatch = <T = never,>(): FlatDispatcher<T> => {
 
   // Simplify the dispatch function by flattening our action tuple
   return useCallback(
-    (...args: WorkspaceAction | Extract<T, any[]>) => {
+    (...args: WorkspaceAction<Extract<T, any[]>> | Extract<T, any[]>) => {
       // When changing selection, trigger any pending updates in input fields
       if (
         args[0] === 'selectLayer' ||

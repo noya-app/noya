@@ -87,8 +87,8 @@ export type ApplicationState = {
   sketch: SketchFile;
 };
 
-export type Action =
-  | [type: 'batch', actions: Action[]]
+export type Action<T = never> =
+  | [type: 'batch', actions: (Action | T)[]]
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
@@ -136,7 +136,7 @@ export function applicationReducer<T = never>(
     case 'batch':
       return action[1].reduce(
         (state, action) =>
-          applicationReducer(state, action, CanvasKit, context),
+          applicationReducer(state, action, CanvasKit, context, customReducer),
         state,
       );
     case 'setKeyModifier':

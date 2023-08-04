@@ -138,6 +138,7 @@ export interface ButtonRootProps {
   tooltip?: ReactNode;
   onClick?: (event: React.MouseEvent) => void;
   onPointerDown?: (event: React.PointerEvent) => void;
+  contentStyle?: CSSProperties;
 }
 
 export const Button = forwardRef(function Button(
@@ -149,6 +150,7 @@ export const Button = forwardRef(function Button(
     active = false,
     disabled = false,
     variant = 'normal',
+    contentStyle,
     onClick,
     children,
     ...rest // Propagate any other props so this component works as a Slot
@@ -171,7 +173,7 @@ export const Button = forwardRef(function Button(
       }, [])}
       {...rest}
     >
-      <ButtonContent>{children}</ButtonContent>
+      <ButtonContent style={contentStyle}>{children}</ButtonContent>
     </ButtonElement>
   );
 

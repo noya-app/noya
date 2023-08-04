@@ -23,7 +23,10 @@ export type HistoryState = {
   future: HistoryEntry[];
 };
 
-export type HistoryAction = [type: 'undo'] | [type: 'redo'] | Action;
+export type HistoryAction<T = never> =
+  | [type: 'undo']
+  | [type: 'redo']
+  | Action<T>;
 
 const FILE_CHANGED_TIMEOUT = 300;
 
