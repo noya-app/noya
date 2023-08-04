@@ -164,9 +164,7 @@ const RowContainer = styled.div<{
       ...(isSectionHeader && sectionHeaderVariant === 'label'
         ? theme.textStyles.label
         : theme.textStyles.small),
-      ...(isSectionHeader && {
-        fontWeight: sectionHeaderVariant === 'label' ? 700 : 500,
-      }),
+      ...(isSectionHeader && { fontWeight: 500 }),
       flex: '0 0 auto',
       userSelect: 'none',
       cursor: 'default',
@@ -186,6 +184,9 @@ const RowContainer = styled.div<{
       color: theme.colors.textMuted,
       ...(isSectionHeader && {
         backgroundColor: theme.colors.listView.raisedBackground,
+        ...(sectionHeaderVariant === 'label' && {
+          color: theme.colors.textDisabled,
+        }),
       }),
       ...(disabled && {
         color: theme.colors.textDisabled,

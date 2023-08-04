@@ -12,8 +12,8 @@ import React, { memo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
-import { PRIMITIVE_ELEMENT_NAMES } from './builtins';
 import { mergeDiffs, resetRemovedClassName } from './diff';
+import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import { FindComponent, ResolvedHierarchy, findSourceNode } from './traversal';
 import { NoyaCompositeElement, NoyaResolvedNode } from './types';
 
@@ -81,7 +81,7 @@ export const DSLayerRow = memo(function DSLayerRow({
       },
   ]);
   type MenuItemType = Exclude<
-    Extract<typeof menu[number], object>['value'],
+    Extract<(typeof menu)[number], object>['value'],
     undefined
   >;
   const hovered = highlightedPath?.join('/') === path.join('/');

@@ -13,6 +13,7 @@ export type CompletionSectionHeader = {
   type: 'sectionHeader';
   id: string;
   name: string;
+  maxVisibleItems?: number;
 };
 
 export type CompletionListItem =

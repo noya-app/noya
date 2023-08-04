@@ -8,6 +8,8 @@ import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Model } from '../../../dseditor/builders';
+import { primitiveElements } from '../../../dseditor/primitiveElements';
 import { useAyonState } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
@@ -27,9 +29,17 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
 
   const completionItems = useMemo(
     (): (CompletionItem | CompletionSectionHeader)[] => [
-      { type: 'sectionHeader', id: 'design-system', name: 'Design System' },
-      // { id: 'avatar', name: 'Avatar' },
-      // { id: 'button', name: 'Button' },
+      {
+        type: 'sectionHeader',
+        id: 'design-system',
+        name: 'Design System',
+        maxVisibleItems: 3,
+      },
+      ...primitiveElements.map((p) => ({
+        id: p.id,
+        name: p.name,
+        icon: p.icon,
+      })),
       { type: 'sectionHeader', id: 'generated', name: 'AI Generated' },
       ...names.map(
         ({ name }): CompletionItem => ({ id: name, name, alwaysInclude: true }),
@@ -55,15 +65,36 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
     generateDebounced(customName);
   }, [customName, generateDebounced]);
 
-  const handleChangeName = useCallback(
-    (value: string) => {
-      dispatch('batch', [
-        ['setLayerName', selectedLayer.do_objectID, value],
-        ['setLayerDescription', undefined],
-        ['setLayerNode', undefined],
-      ]);
+  const handleSelectItem = useCallback(
+    (item: CompletionItem) => {
+      const primitive = primitiveElements.find((p) => p.id === item.id);
+
+      if (primitive) {
+        const node =
+          primitive.initialValue?.() ??
+          Model.primitiveElement({
+            name: primitive.name,
+            componentID: primitive.id,
+          });
+
+        dispatch('batch', [
+          ['setLayerName', selectedLayer.do_objectID, primitive.name],
+          ['setLayerDescription', ''],
+          ['setLayerNode', node],
+        ]);
+      } else {
+        dispatch('batch', [
+          [
+            'setLayerName',
+            selectedLayer.do_objectID,
+            item.id === 'custom' ? customName : item.name,
+          ],
+          ['setLayerDescription', undefined],
+          ['setLayerNode', undefined],
+        ]);
+      }
     },
-    [dispatch, selectedLayer.do_objectID],
+    [customName, dispatch, selectedLayer.do_objectID],
   );
 
   return (
@@ -72,11 +103,9 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         initialValue={name}
         loading={loading}
         items={completionItems}
-        onFocus={async () => setCustomName(name)}
+        onFocus={() => setCustomName(name)}
         onChange={(value) => setCustomName(value)}
-        onSelectItem={(item) => {
-          handleChangeName(item.id === 'custom' ? customName : item.name);
-        }}
+        onSelectItem={handleSelectItem}
       />
     </InspectorPrimitives.LabeledRow>
   );

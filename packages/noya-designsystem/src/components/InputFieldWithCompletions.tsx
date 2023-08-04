@@ -36,6 +36,8 @@ function filterWithGroupedSections(
       section,
       (item): item is CompletionSectionHeader => item.type === 'sectionHeader',
     );
+    const maxVisibleItems =
+      headers.length > 0 ? headers[0].maxVisibleItems : undefined;
 
     const scoredItems = fuzzyFilter({
       items: regular.map((item) => item.name),
@@ -48,9 +50,13 @@ function filterWithGroupedSections(
         ? [{ ...item, index, score: 0 }]
         : [],
     );
-    const newItems = scoredItems
+    let newItems = scoredItems
       .map((item): CompletionListItem => ({ ...item, ...regular[item.index] }))
       .concat(extraItems);
+
+    if (maxVisibleItems !== undefined) {
+      newItems = newItems.slice(0, maxVisibleItems);
+    }
 
     if (newItems.length === 0) return [];
 
@@ -235,7 +241,7 @@ export const InputFieldWithCompletions = memo(
         sectionHeaderItems.length,
         'label',
       ),
-      ListView.rowHeight * 8.5,
+      ListView.rowHeight * 10.5,
     );
 
     useEffect(() => {

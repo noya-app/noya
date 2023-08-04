@@ -7,7 +7,9 @@ import {
   accessPageLayers,
   interactionReducer,
 } from 'noya-state';
+import { primitiveElements } from '../../dseditor/primitiveElements';
 import { NoyaNode } from '../../dseditor/types';
+import { boxSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData } from '../types';
 
 export type AyonAction =
@@ -59,9 +61,14 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
         );
 
         const layer = SketchModel.customLayer<CustomLayerData>({
-          name: '',
+          name: 'Box',
           frame: SketchModel.rect(rect),
-          data: {},
+          data: {
+            description: '',
+            node: primitiveElements
+              .find((p) => p.id === boxSymbolId)
+              ?.initialValue?.(),
+          },
         });
 
         Selectors.addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
