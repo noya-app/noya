@@ -95,6 +95,9 @@ export function renderResolvedNode({
           {...(element.componentID === textareaSymbolId && {
             value: element.children[0],
           })}
+          {...(element.componentID === imageSymbolId && {
+            src: 'https://picsum.photos/300/300',
+          })}
           _passthrough={{
             'data-path': element.path.join('/'),
             contentEditable:
