@@ -46,7 +46,7 @@ interface Props {
   setHighlightedPath: (path: string[] | undefined) => void;
 }
 
-export function DSLayerInspector({
+export function DSComponentInspector({
   selection,
   setSelection,
   findComponent,

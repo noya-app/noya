@@ -2,9 +2,11 @@ import { useGeneratedComponentLayouts, useNoyaClient } from 'noya-api';
 import { parseComponentLayout } from 'noya-compiler';
 import { ActivityIndicator, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect } from 'react';
+import { InspectorSection } from '../../../components/InspectorSection';
+import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
 import { convertLayoutToComponent } from '../../../dseditor/componentLayout';
+import { NoyaComponent } from '../../../dseditor/types';
 import { useAyonState } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
@@ -75,9 +77,16 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.name,
   ]);
 
+  const node = selectedLayer.data.node;
+
+  const findComponent = useCallback((id: string): NoyaComponent | undefined => {
+    return undefined;
+  }, []);
+
   return (
-    <InspectorPrimitives.LabeledRow
-      label="Layout"
+    <InspectorSection
+      title="Layout"
+      titleTextStyle="heading4"
       right={
         generatedLayouts.loading ? (
           <ActivityIndicator size={13} />
@@ -86,11 +95,19 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
             iconName="ShuffleIcon"
             onClick={handleShuffle}
             size={13}
+            disabled={!selectedLayer.data.description}
           />
         )
       }
     >
-      {null}
-    </InspectorPrimitives.LabeledRow>
+      {node && node.type !== 'noyaString' ? (
+        <DSLayoutTree
+          selection={node}
+          setSelection={() => {}}
+          findComponent={findComponent}
+          setHighlightedPath={() => {}}
+        />
+      ) : null}
+    </InspectorSection>
   );
 });

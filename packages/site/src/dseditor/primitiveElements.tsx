@@ -36,6 +36,7 @@ import { NoyaPrimitiveElement } from './types';
 export type PrimitiveElementMetadata = {
   id: string;
   name: string;
+  aliases?: string[];
   icon?: ReactNode;
   initialValue?: () => NoyaPrimitiveElement;
 };
@@ -61,18 +62,34 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Button',
         componentID: buttonSymbolId,
+        classNames: ['flex-1'],
         children: [Model.string('Submit')],
       }),
   },
   { id: checkboxSymbolId, name: 'Checkbox', icon: <CheckboxIcon /> },
-  { id: imageSymbolId, name: 'Image', icon: <ImageIcon /> },
+  {
+    id: imageSymbolId,
+    name: 'Image',
+    icon: <ImageIcon />,
+    aliases: ['Photo', 'Picture'],
+  },
   { id: inputSymbolId, name: 'Input', icon: <InputIcon /> },
   { id: linkSymbolId, name: 'Link', icon: <Link1Icon /> },
   { id: radioSymbolId, name: 'Radio', icon: <RadiobuttonIcon /> },
-  { id: selectSymbolId, name: 'Select', icon: <DropdownMenuIcon /> },
-  { id: switchSymbolId, name: 'Switch', icon: <SwitchIcon /> },
+  {
+    id: selectSymbolId,
+    name: 'Select',
+    icon: <DropdownMenuIcon />,
+    aliases: ['Dropdown'],
+  },
+  {
+    id: switchSymbolId,
+    name: 'Switch',
+    icon: <SwitchIcon />,
+    aliases: ['Toggle'],
+  },
   { id: tableSymbolId, name: 'Table', icon: <TableIcon /> },
-  { id: tagSymbolId, name: 'Tag', icon: <BadgeIcon /> },
+  { id: tagSymbolId, name: 'Tag', icon: <BadgeIcon />, aliases: ['Chip'] },
   { id: textSymbolId, name: 'Text', icon: <TextIcon /> },
   { id: textareaSymbolId, name: 'Textarea', icon: <InputIcon /> },
 ];

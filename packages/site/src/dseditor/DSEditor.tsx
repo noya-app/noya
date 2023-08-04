@@ -10,7 +10,7 @@ import { useDeepState } from 'noya-react-utils';
 import { uuid } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
-import { DSLayerInspector } from './DSLayerInspector';
+import { DSComponentInspector } from './DSComponentInspector';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, DSRenderer } from './DSRenderer';
 import { Model } from './builders';
@@ -244,7 +244,7 @@ export function DSEditor({
         setSerializedSelection={setSerializedSelection}
       />
       {viewType !== 'preview' && selection && resolvedNode && (
-        <DSLayerInspector
+        <DSComponentInspector
           selection={selection}
           setSelection={setSelection}
           findComponent={findComponent}

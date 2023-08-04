@@ -35,11 +35,18 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         name: 'Design System',
         maxVisibleItems: 3,
       },
-      ...primitiveElements.map((p) => ({
-        id: p.id,
-        name: p.name,
-        icon: p.icon,
-      })),
+      ...primitiveElements.flatMap((p): CompletionItem[] => [
+        {
+          id: p.id,
+          name: p.name,
+          icon: p.icon,
+        },
+        ...(p.aliases ?? []).map((alias) => ({
+          id: p.id,
+          name: alias,
+          icon: p.icon,
+        })),
+      ]),
       { type: 'sectionHeader', id: 'generated', name: 'AI Generated' },
       ...names.map(
         ({ name }): CompletionItem => ({ id: name, name, alwaysInclude: true }),
@@ -73,12 +80,13 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         const node =
           primitive.initialValue?.() ??
           Model.primitiveElement({
-            name: primitive.name,
+            name: item.name,
             componentID: primitive.id,
+            classNames: ['flex-1'],
           });
 
         dispatch('batch', [
-          ['setLayerName', selectedLayer.do_objectID, primitive.name],
+          ['setLayerName', selectedLayer.do_objectID, item.name],
           ['setLayerDescription', ''],
           ['setLayerNode', node],
         ]);

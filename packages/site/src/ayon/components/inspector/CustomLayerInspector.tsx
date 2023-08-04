@@ -25,8 +25,8 @@ export const CustomLayerInspector = memo(function CustomLayerInspector({
       <InspectorSection title="Component" titleTextStyle="heading3">
         <ComponentNameInspector selectedLayer={selectedLayer} />
         <ComponentDescriptionInspector selectedLayer={selectedLayer} />
-        <ComponentLayoutInspector selectedLayer={selectedLayer} />
       </InspectorSection>
+      <ComponentLayoutInspector selectedLayer={selectedLayer} />
     </Stack.V>
   );
 });
