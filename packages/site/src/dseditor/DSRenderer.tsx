@@ -20,6 +20,7 @@ import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { ControlledFrame } from './ControlledFrame';
 import {
   SerializedSelection,
+  createSelectionHandlers,
   serializeSelection,
   setDOMSelection,
 } from './dom';
@@ -189,6 +190,16 @@ export const DSRenderer = function DSRenderer({
     };
   }, [ready, setSerializedSelection, onBeforeInput]);
 
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const eventHandlers = useMemo(
+    () =>
+      ready && ref.current
+        ? createSelectionHandlers({ iframe: ref.current })
+        : undefined,
+    [ready],
+  );
+
   return (
     <Stack.V flex="1" position="relative">
       <ControlledFrame
@@ -197,6 +208,17 @@ export const DSRenderer = function DSRenderer({
         onReady={handleReady}
       />
       {!system && <Loading>Loading design system...</Loading>}
+      <div
+        ref={overlayRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          cursor: 'text',
+        }}
+        onMouseDown={(event) => eventHandlers?.onMouseDown(event.nativeEvent)}
+        onMouseMove={(event) => eventHandlers?.onMouseMove(event.nativeEvent)}
+        onMouseUp={(event) => eventHandlers?.onMouseUp(event.nativeEvent)}
+      />
     </Stack.V>
   );
 };
