@@ -187,6 +187,18 @@ describe('resolves styles', () => {
       gridAutoColumns: 'max-content',
     });
   });
+
+  it('position', () => {
+    expect(resolveTailwindClass('absolute')).toEqual({
+      position: 'absolute',
+    });
+  });
+
+  it('top', () => {
+    expect(resolveTailwindClass('top-4')).toEqual({
+      top: '1rem',
+    });
+  });
 });
 
 describe('parameters', () => {

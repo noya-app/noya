@@ -67,6 +67,10 @@ export const classGroups = {
   items: /^items/,
   width: /^w-/,
   height: /^h-/,
+  top: /^top-/,
+  right: /^right-/,
+  bottom: /^bottom-/,
+  left: /^left-/,
   // Only handle gap for now. Space-x and space-y are converted to gap.
   gap: /^(gap-|space-y|space-x)/,
   padding: /^p-/,
@@ -102,6 +106,7 @@ export const classGroups = {
   autoRows: /^auto-rows/,
   gridFlow: /^grid-flow/,
   lineHeight: /^leading-/,
+  position: /^(absolute|relative|fixed|sticky)/,
   display:
     /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
   // Must be last!
@@ -418,10 +423,26 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         display: className,
       };
     }
+    case 'position': {
+      return {
+        position: className as any,
+      };
+    }
     case 'width': {
       const value = getValue(className);
       return {
         width: (config.theme as any).width(themeParameter)[value || 'auto'],
+      };
+    }
+    case 'top':
+    case 'right':
+    case 'bottom':
+    case 'left': {
+      const value = getValue(className);
+      return {
+        [classGroup]: (config.theme as any).inset(themeParameter)[
+          value || 'auto'
+        ],
       };
     }
     case 'height': {
