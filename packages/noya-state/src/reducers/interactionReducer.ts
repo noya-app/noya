@@ -13,8 +13,8 @@ import { CSSProperties, ReactNode, createElement } from 'react';
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
 
-export type CardinalDirection = typeof cardinalDirections[number];
-export type OrdinalDirection = typeof ordinalDirections[number];
+export type CardinalDirection = (typeof cardinalDirections)[number];
+export type OrdinalDirection = (typeof ordinalDirections)[number];
 export type CompassDirection = CardinalDirection | OrdinalDirection;
 
 export const compassDirections: CompassDirection[] = [
@@ -600,6 +600,7 @@ export function interactionReducer(
       return {
         type: 'editingBlock',
         layerId,
+        cursor: 'text',
       };
     }
     case 'maybeSelectText': {

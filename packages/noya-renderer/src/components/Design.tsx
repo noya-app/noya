@@ -5,25 +5,25 @@ import { createRect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import {
-  createDrawingLayer,
   DecodedCurvePoint,
+  Layers,
+  Selectors,
+  createDrawingLayer,
   defaultBorderColor,
   encodeCurvePoint,
   getClippedLayerMap,
   getScalingOptions,
-  Layers,
-  Selectors,
 } from 'noya-state';
-import React, { memo, ReactNode, useMemo } from 'react';
+import React, { ReactNode, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { useRenderingMode } from '../RenderingModeContext';
+import { ZoomProvider } from '../ZoomContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useCanvasRect } from '../hooks/useCanvasRect';
 import { useRootScaleTransform } from '../hooks/useRootScaleTransform';
-import { useRenderingMode } from '../RenderingModeContext';
-import { ZoomProvider } from '../ZoomContext';
 import { BoundingRect } from './BoundingRect';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
@@ -32,8 +32,6 @@ import GradientEditor from './GradientEditor';
 import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
 import { InsertPointOverlay } from './InsertPointOverlay';
-import { SketchArtboardContent } from './layers/SketchArtboard';
-import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
 import { PixelGrid } from './PixelGrid';
 import PseudoPathLine from './PseudoPathLine';
@@ -41,6 +39,8 @@ import PseudoPoint from './PseudoPoint';
 import { RotatedBoundingRect } from './RotatedBoundingRect';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
+import { SketchArtboardContent } from './layers/SketchArtboard';
+import SketchLayer from './layers/SketchLayer';
 
 const DesignBackground = memo(function DesignBackground() {
   const backgroundColor = useTheme().colors.canvas.background;
@@ -596,6 +596,7 @@ const DesignDragHandles = memo(function DesignDragHandles() {
     interactionState.type === 'drawing' ||
     interactionState.type === 'insert' ||
     isEditingText ||
+    interactionState.type === 'editingBlock' ||
     !boundingRect
   ) {
     return <></>;

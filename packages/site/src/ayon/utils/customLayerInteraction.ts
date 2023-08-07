@@ -1,7 +1,12 @@
 import { InteractionAPI } from 'noya-canvas';
 import { ReactEventHandlers } from 'noya-designsystem';
 import { handleActionType, InteractionState } from 'noya-state';
+import { CSSProperties } from 'react';
 import { ProxyEventHandler } from '../../dseditor/dom';
+
+interface CustomActions {
+  setCursor: (cursor: CSSProperties['cursor'] | undefined) => void;
+}
 
 interface Props {
   onPointerDown?: ProxyEventHandler;
@@ -9,12 +14,12 @@ interface Props {
   onPointerUp?: ProxyEventHandler;
 }
 
-export function customLayerInteraction({
+export function createCustomLayerInteraction({
   onPointerDown,
   onPointerMove,
   onPointerUp,
 }: Props) {
-  return () =>
+  return (actions: CustomActions) =>
     handleActionType<InteractionState, [InteractionAPI], ReactEventHandlers>({
       editingBlock: (interactionState, api) => ({
         onPointerDown: (event) => {
@@ -28,13 +33,9 @@ export function customLayerInteraction({
             },
           );
 
-          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
-
-          onPointerDown?.({ point: canvasPoint });
-
           if (interactionState.layerId === layerId) {
+            onPointerDown?.({ point: api.getCanvasPoint(event.nativeEvent) });
             event.preventDefault();
-            return;
           }
         },
         onPointerMove: (event) => {
@@ -48,11 +49,10 @@ export function customLayerInteraction({
             },
           );
 
-          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
-
-          onPointerMove?.({ point: canvasPoint });
+          onPointerMove?.({ point: api.getCanvasPoint(event.nativeEvent) });
 
           if (interactionState.layerId === layerId) {
+            actions.setCursor('text');
             event.preventDefault();
             return;
           }
@@ -68,9 +68,7 @@ export function customLayerInteraction({
             },
           );
 
-          const canvasPoint = api.getCanvasPoint(event.nativeEvent);
-
-          onPointerUp?.({ point: canvasPoint });
+          onPointerUp?.({ point: api.getCanvasPoint(event.nativeEvent) });
 
           if (interactionState.layerId === layerId) {
             event.preventDefault();

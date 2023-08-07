@@ -38,7 +38,7 @@ import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
 import { Stacking } from '../stacking';
 import { ViewType } from '../types';
-import { customLayerInteraction } from '../utils/customLayerInteraction';
+import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
@@ -209,7 +209,7 @@ export const Content = memo(function Content({
 
   const rendererRef = useRef<IDSRenderer>(null);
 
-  const custom = customLayerInteraction({
+  const custom = createCustomLayerInteraction({
     onPointerDown: (event) => rendererRef.current?.mouseDown(event),
     onPointerMove: (event) => rendererRef.current?.mouseMove(event),
     onPointerUp: (event) => rendererRef.current?.mouseUp(event),
