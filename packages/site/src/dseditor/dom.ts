@@ -214,25 +214,20 @@ export function isTextNode(node: Node): node is Text {
   return node && node.nodeType === Node.TEXT_NODE;
 }
 
-export function createSelectionHandlers({
-  iframe,
-}: {
-  iframe: HTMLIFrameElement;
-}) {
-  const document = iframe.contentDocument;
+export type ProxyEvent = {
+  point: Point;
+};
 
+export type ProxyEventHandler = (event: ProxyEvent) => void;
+
+export function createSelectionHandlers(document: Document) {
   let range: Range | null = null;
   let clickCount = 0;
   let clickTimer: number | null = null;
   let initialPosition: Point | null = null;
 
-  const handleMouseDown = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!document) return;
-
-    initialPosition = { x: e.clientX, y: e.clientY };
+  const handleMouseDown: ProxyEventHandler = ({ point }) => {
+    initialPosition = { ...point };
 
     clickCount++;
 
@@ -248,9 +243,7 @@ export function createSelectionHandlers({
 
     range = document.createRange();
 
-    let x = e.clientX - iframe.getBoundingClientRect().left;
-    let y = e.clientY - iframe.getBoundingClientRect().top;
-    let startElement = document.elementFromPoint(x, y);
+    let startElement = document.elementFromPoint(point.x, point.y);
 
     if (!startElement) return;
 
@@ -260,14 +253,19 @@ export function createSelectionHandlers({
       switch (clickCount) {
         case 1: {
           // Single click: set offset based on character
-          const offset = getCharacterOffset(document, textNode, x, y);
+          const offset = getCharacterOffset(
+            document,
+            textNode,
+            point.x,
+            point.y,
+          );
           range.setStart(textNode, offset);
           range.setEnd(textNode, offset);
           break;
         }
         case 2: {
           // Double click: select the word at the click location
-          const wordRange = getWordRange(document, textNode, x, y);
+          const wordRange = getWordRange(document, textNode, point.x, point.y);
           if (wordRange) {
             range = wordRange;
           }
@@ -305,30 +303,25 @@ export function createSelectionHandlers({
     );
   }
 
-  const handleMouseMove = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!document) return;
-
-    if (
-      !initialPosition ||
-      !isMoving({ x: e.clientX, y: e.clientY }, initialPosition)
-    ) {
+  const handleMouseMove: ProxyEventHandler = ({ point }) => {
+    if (!initialPosition || !isMoving(point, initialPosition)) {
       return;
     }
 
     if (!range) return;
 
-    const x = e.clientX - iframe.getBoundingClientRect().left;
-    const y = e.clientY - iframe.getBoundingClientRect().top;
-    const endElement = document.elementFromPoint(x, y);
+    const endElement = document.elementFromPoint(point.x, point.y);
 
     if (!endElement) return;
 
     const textNode = endElement.childNodes[0];
     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-      const offset = getCharacterOffset(document, textNode as Text, x, y);
+      const offset = getCharacterOffset(
+        document,
+        textNode as Text,
+        point.x,
+        point.y,
+      );
       range.setEnd(textNode, offset);
     } else {
       try {
@@ -343,10 +336,7 @@ export function createSelectionHandlers({
     selection?.addRange(range);
   };
 
-  const handleMouseUp = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const handleMouseUp: ProxyEventHandler = () => {
     initialPosition = null;
   };
 

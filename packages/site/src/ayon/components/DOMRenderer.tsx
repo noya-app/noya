@@ -4,8 +4,8 @@ import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { Layers, OverriddenBlockContent, Selectors } from 'noya-state';
-import React, { ComponentProps, useCallback, useRef } from 'react';
-import { DSRenderer } from '../../dseditor/DSRenderer';
+import React, { ComponentProps, forwardRef, useCallback, useRef } from 'react';
+import { DSRenderer, IDSRenderer } from '../../dseditor/DSRenderer';
 import { Model } from '../../dseditor/builders';
 import { initialComponents } from '../../dseditor/builtins';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
@@ -31,21 +31,24 @@ class ErrorBoundary extends React.Component<any> {
   }
 }
 
-function DOMRendererContent({
-  size,
-  resizeBehavior,
-  padding = 0,
-  ds,
-  overriddenBlock,
-  sync,
-}: {
-  size: Size;
-  resizeBehavior: ResizeBehavior;
-  padding?: number;
-  ds: DS;
-  overriddenBlock?: OverriddenBlockContent;
-  sync: boolean;
-}): JSX.Element {
+const DOMRendererContent = forwardRef(function DOMRendererContent(
+  {
+    size,
+    resizeBehavior,
+    padding = 0,
+    ds,
+    overriddenBlock,
+    sync,
+  }: {
+    size: Size;
+    resizeBehavior: ResizeBehavior;
+    padding?: number;
+    ds: DS;
+    overriddenBlock?: OverriddenBlockContent;
+    sync: boolean;
+  },
+  forwardedRef: React.ForwardedRef<IDSRenderer>,
+): JSX.Element {
   const [state] = useApplicationState();
   const { canvasInsets } = useWorkspace();
   const page = Selectors.getCurrentPage(state);
@@ -95,6 +98,7 @@ function DOMRendererContent({
       >
         <ErrorBoundary>
           <DSRenderer
+            ref={forwardedRef}
             sourceName="@noya-design-system/chakra"
             primary="blue"
             renderContent={(props) => {
@@ -141,12 +145,13 @@ function DOMRendererContent({
       </div>
     </>
   );
-}
+});
 
 type ResizeBehavior = 'match-canvas' | 'fit-container';
 
-export function DOMRenderer(
+export const DOMRenderer = forwardRef(function DOMRenderer(
   props: Omit<ComponentProps<typeof DOMRendererContent>, 'size'>,
+  forwardedRef: React.ForwardedRef<IDSRenderer>,
 ): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const size = useSize(containerRef);
@@ -154,8 +159,10 @@ export function DOMRenderer(
   return (
     <div style={{ display: 'flex', flex: 1 }}>
       <div ref={containerRef} style={{ flex: 1, position: 'relative' }}>
-        {size && <DOMRendererContent size={size} {...props} />}
+        {size && (
+          <DOMRendererContent ref={forwardedRef} size={size} {...props} />
+        )}
       </div>
     </div>
   );
-}
+});

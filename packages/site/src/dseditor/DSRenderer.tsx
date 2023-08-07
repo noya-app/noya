@@ -9,8 +9,10 @@ import {
 import { Stack } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
 import React, {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -19,6 +21,8 @@ import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { ControlledFrame } from './ControlledFrame';
 import {
+  ProxyEvent,
+  ProxyEventHandler,
   SerializedSelection,
   createSelectionHandlers,
   serializeSelection,
@@ -47,27 +51,31 @@ export type DSRenderContext = {
 };
 
 export interface IDSRenderer {
-  getIframe: () => HTMLIFrameElement;
-  isRendering: () => boolean;
+  mouseDown: ProxyEventHandler;
+  mouseMove: ProxyEventHandler;
+  mouseUp: ProxyEventHandler;
 }
 
-export const DSRenderer = function DSRenderer({
-  sourceName,
-  primary,
-  renderContent,
-  serializedSelection,
-  setSerializedSelection,
-  onBeforeInput,
-  onReady,
-}: {
-  sourceName: string;
-  primary: string;
-  renderContent: (options: DSRenderProps) => React.ReactNode;
-  serializedSelection?: SerializedSelection;
-  setSerializedSelection?: (value: SerializedSelection | undefined) => void;
-  onBeforeInput?: (event: InputEvent) => void;
-  onReady?: () => void;
-}) {
+export const DSRenderer = forwardRef(function DSRenderer(
+  {
+    sourceName,
+    primary,
+    renderContent,
+    serializedSelection,
+    setSerializedSelection,
+    onBeforeInput,
+    onReady,
+  }: {
+    sourceName: string;
+    primary: string;
+    renderContent: (options: DSRenderProps) => React.ReactNode;
+    serializedSelection?: SerializedSelection;
+    setSerializedSelection?: (value: SerializedSelection | undefined) => void;
+    onBeforeInput?: (event: InputEvent) => void;
+    onReady?: () => void;
+  },
+  forwardedRef: React.ForwardedRef<IDSRenderer>,
+) {
   const [ready, setReady] = React.useState(false);
   const ref = useRef<HTMLIFrameElement>(null);
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
@@ -190,14 +198,22 @@ export const DSRenderer = function DSRenderer({
     };
   }, [ready, setSerializedSelection, onBeforeInput]);
 
-  const overlayRef = useRef<HTMLDivElement>(null);
-
   const eventHandlers = useMemo(
     () =>
-      ready && ref.current
-        ? createSelectionHandlers({ iframe: ref.current })
+      ready && ref.current && ref.current.contentDocument
+        ? createSelectionHandlers(ref.current.contentDocument)
         : undefined,
     [ready],
+  );
+
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      mouseDown: (event: ProxyEvent) => eventHandlers?.onMouseDown(event),
+      mouseMove: (event: ProxyEvent) => eventHandlers?.onMouseMove(event),
+      mouseUp: (event: ProxyEvent) => eventHandlers?.onMouseUp(event),
+    }),
+    [eventHandlers],
   );
 
   return (
@@ -208,17 +224,6 @@ export const DSRenderer = function DSRenderer({
         onReady={handleReady}
       />
       {!system && <Loading>Loading design system...</Loading>}
-      <div
-        ref={overlayRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          cursor: 'text',
-        }}
-        onMouseDown={(event) => eventHandlers?.onMouseDown(event.nativeEvent)}
-        onMouseMove={(event) => eventHandlers?.onMouseMove(event.nativeEvent)}
-        onMouseUp={(event) => eventHandlers?.onMouseUp(event.nativeEvent)}
-      />
     </Stack.V>
   );
-};
+});

@@ -21,15 +21,24 @@ import {
 } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce, isDeepEqual } from 'noya-utils';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
+import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
 import { Stacking } from '../stacking';
 import { ViewType } from '../types';
+import { customLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
@@ -198,6 +207,14 @@ export const Content = memo(function Content({
   const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
+  const rendererRef = useRef<IDSRenderer>(null);
+
+  const custom = customLayerInteraction({
+    onPointerDown: (event) => rendererRef.current?.mouseDown(event),
+    onPointerMove: (event) => rendererRef.current?.mouseMove(event),
+    onPointerUp: (event) => rendererRef.current?.mouseUp(event),
+  });
+
   return (
     <>
       {toastData && (
@@ -231,6 +248,7 @@ export const Content = memo(function Content({
                     Interactions.marquee,
                   ]
                 : [
+                    custom,
                     Interactions.selectionMode,
                     Interactions.duplicate,
                     Interactions.reorder,
@@ -365,6 +383,7 @@ export const Content = memo(function Content({
           }
         >
           <DOMRenderer
+            ref={rendererRef}
             overriddenBlock={overriddenBlock}
             resizeBehavior="match-canvas"
             ds={ds}

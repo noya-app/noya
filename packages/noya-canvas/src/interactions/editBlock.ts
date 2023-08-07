@@ -54,7 +54,7 @@ export const createEditBlockInteraction = ({
           if (
             api.getClickCount() > 1 &&
             layerId &&
-            api.getLayerTypeById(layerId) === 'symbolInstance'
+            api.getLayerTypeById(layerId) === 'customLayer'
           ) {
             startEditingBlock(layerId);
             event.preventDefault();
@@ -67,7 +67,7 @@ export const createEditBlockInteraction = ({
             if (selectedLayerIds.length > 0) {
               const layerId = selectedLayerIds[0];
 
-              if (api.getLayerTypeById(layerId) === 'symbolInstance') {
+              if (api.getLayerTypeById(layerId) === 'customLayer') {
                 startEditingBlock(layerId);
               }
             }

@@ -7,4 +7,5 @@ export * from './hooks/useLayerMenu';
 export * from './hooks/useMultipleClickCount';
 export * from './hooks/usePasteHandler';
 export * from './interactions';
+export * from './interactions/types';
 export * from './utils/convertPoint';

@@ -12,7 +12,8 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { DSComponentInspector } from './DSComponentInspector';
 import { DSProjectInspector } from './DSProjectInspector';
-import { DSRenderProps, DSRenderer } from './DSRenderer';
+import { DSRenderProps, DSRenderer, IDSRenderer } from './DSRenderer';
+import { DSRendererOverlay } from './DSRendererOverlay';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { contentReducer } from './contentReducer';
@@ -219,6 +220,8 @@ export function DSEditor({
     [handleSetTextAtPath, serializedSelection, setSerializedSelection],
   );
 
+  const rendererRef = React.useRef<IDSRenderer>(null);
+
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
       {viewType !== 'preview' && (
@@ -235,14 +238,18 @@ export function DSEditor({
           onDeleteComponent={handleDeleteComponent}
         />
       )}
-      <DSRenderer
-        sourceName={sourceName}
-        primary={primary}
-        renderContent={handleRenderContent}
-        serializedSelection={serializedSelection}
-        onBeforeInput={handleBeforeInput}
-        setSerializedSelection={setSerializedSelection}
-      />
+      <Stack.V flex="1" overflow="hidden" position="relative">
+        <DSRenderer
+          ref={rendererRef}
+          sourceName={sourceName}
+          primary={primary}
+          renderContent={handleRenderContent}
+          serializedSelection={serializedSelection}
+          onBeforeInput={handleBeforeInput}
+          setSerializedSelection={setSerializedSelection}
+        />
+        <DSRendererOverlay rendererRef={rendererRef} />
+      </Stack.V>
       {viewType !== 'preview' && selection && resolvedNode && (
         <DSComponentInspector
           selection={selection}
