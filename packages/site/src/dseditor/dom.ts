@@ -230,8 +230,17 @@ export function createSelectionHandlers(
   let clickCount = 0;
   let clickTimer: number | null = null;
   let initialPosition: Point | null = null;
+  let firstClickPosition: Point | null = null;
 
   const handleMouseDown: ProxyEventHandler = ({ point }) => {
+    // Reset click count if the user has moved the mouse.
+    // We don't want to accidentally trigger a selection just because a user clicks fast.
+    if (!firstClickPosition || clickCount === 0) {
+      firstClickPosition = { ...point };
+    } else if (isMoving(point, firstClickPosition)) {
+      clickCount = 0;
+    }
+
     initialPosition = { ...point };
 
     clickCount++;
@@ -326,22 +335,28 @@ export function createSelectionHandlers(
         point.y,
       );
 
-      // Create serialized seleciton directly to handle reversed ranges
+      // Only allow selection within a single node for now
+      if (textNode !== range.startContainer) {
+        return;
+      }
+
+      // Create serialized selection directly to handle reversed ranges
       setSerializedSelection({
         anchorNode: getXPath(document, range.startContainer)!,
         anchorOffset: range.startOffset,
         focusNode: getXPath(document, textNode)!,
         focusOffset: offset,
       });
-    } else {
-      try {
-        range.setEnd(endElement, endElement.childNodes.length);
-      } catch (error) {
-        // Handle cases where the endElement is not a valid end point for the range
-      }
-
-      setSerializedSelection(rangeToSerializedSelection(document, range));
     }
+    // else {
+    //   try {
+    //     range.setEnd(endElement, endElement.childNodes.length);
+    //   } catch (error) {
+    //     // Handle cases where the endElement is not a valid end point for the range
+    //   }
+
+    //   setSerializedSelection(rangeToSerializedSelection(document, range));
+    // }
   };
 
   const handleMouseUp: ProxyEventHandler = () => {
