@@ -209,6 +209,10 @@ export const Content = memo(function Content({
 
   const rendererRef = useRef<IDSRenderer>(null);
 
+  const [highlightedPath, setHighlightedPath] = useState<
+    string[] | undefined
+  >();
+
   const custom = createCustomLayerInteraction({
     onPointerDown: (event) => rendererRef.current?.mouseDown(event),
     onPointerMove: (event) => rendererRef.current?.mouseMove(event),
@@ -388,6 +392,8 @@ export const Content = memo(function Content({
             resizeBehavior="match-canvas"
             ds={ds}
             sync={!isPlayground}
+            highlightedPath={highlightedPath}
+            setHighlightedPath={setHighlightedPath}
           />
         </Overlay>
         {viewType === 'combined' && (
@@ -397,6 +403,8 @@ export const Content = memo(function Content({
                 name={name}
                 onChangeName={onChangeName}
                 onDuplicate={onDuplicate}
+                highlightedPath={highlightedPath}
+                setHighlightedPath={setHighlightedPath}
               />
             )}
             <Overlay>

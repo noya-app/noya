@@ -13,10 +13,14 @@ import { CustomLayerData } from '../../types';
 
 type Props = {
   selectedLayer: Sketch.CustomLayer<CustomLayerData>;
+  highlightedPath?: string[];
+  setHighlightedPath: (path: string[] | undefined) => void;
 };
 
 export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
   selectedLayer,
+  highlightedPath,
+  setHighlightedPath,
 }: Props) {
   const [, dispatch] = useAyonState();
   const client = useNoyaClient();
@@ -115,7 +119,8 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
           rootNode={node}
           setDiff={handleSetDiff}
           findComponent={findComponent}
-          setHighlightedPath={() => {}}
+          highlightedPath={highlightedPath}
+          setHighlightedPath={setHighlightedPath}
         />
       ) : null}
     </InspectorSection>

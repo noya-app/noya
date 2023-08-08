@@ -9,10 +9,14 @@ import { ComponentNameInspector } from './ComponentNameInspector';
 
 type Props = {
   selectedLayer: Sketch.CustomLayer<CustomLayerData>;
+  highlightedPath?: string[];
+  setHighlightedPath: (path: string[] | undefined) => void;
 };
 
 export const CustomLayerInspector = memo(function CustomLayerInspector({
   selectedLayer,
+  highlightedPath,
+  setHighlightedPath,
 }: Props) {
   const theme = useDesignSystemTheme();
 
@@ -26,7 +30,11 @@ export const CustomLayerInspector = memo(function CustomLayerInspector({
         <ComponentNameInspector selectedLayer={selectedLayer} />
         <ComponentDescriptionInspector selectedLayer={selectedLayer} />
       </InspectorSection>
-      <ComponentLayoutInspector selectedLayer={selectedLayer} />
+      <ComponentLayoutInspector
+        selectedLayer={selectedLayer}
+        highlightedPath={highlightedPath}
+        setHighlightedPath={setHighlightedPath}
+      />
     </Stack.V>
   );
 });

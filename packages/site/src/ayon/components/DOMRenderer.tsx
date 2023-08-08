@@ -46,6 +46,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
     ds,
     overriddenBlock,
     sync,
+    highlightedPath,
+    setHighlightedPath,
   }: {
     size: Size;
     resizeBehavior: ResizeBehavior;
@@ -53,6 +55,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
     ds: DS;
     overriddenBlock?: OverriddenBlockContent;
     sync: boolean;
+    highlightedPath?: string[];
+    setHighlightedPath?: (path: string[] | undefined) => void;
   },
   forwardedRef: React.ForwardedRef<IDSRenderer>,
 ): JSX.Element {
@@ -65,6 +69,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
     state.interactionState.type === 'editingBlock'
       ? state.interactionState.layerId
       : undefined;
+  const selectedLayerId =
+    state.selectedLayerIds.length === 1 ? state.selectedLayerIds[0] : undefined;
 
   const containerTransform = createResizeTransform(artboard.frame, size, {
     scalingMode: 'down',
@@ -168,7 +174,10 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                   resolvedNode,
                   primary: props.primary,
                   system: props.system,
-                  highlightedPath: undefined,
+                  highlightedPath:
+                    layer.do_objectID === selectedLayerId
+                      ? highlightedPath
+                      : undefined,
                   selectionOutlineColor: 'blue',
                 });
 

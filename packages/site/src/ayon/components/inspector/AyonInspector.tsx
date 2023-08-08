@@ -11,12 +11,16 @@ type Props = {
   name: string;
   onChangeName?: (name: string) => void;
   onDuplicate?: () => void;
+  highlightedPath?: string[];
+  setHighlightedPath: (path: string[] | undefined) => void;
 };
 
 export const AyonInspector = memo(function AyonInspector({
   name,
   onChangeName,
   onDuplicate,
+  highlightedPath,
+  setHighlightedPath,
 }: Props) {
   const theme = useDesignSystemTheme();
   const [state] = useApplicationState();
@@ -35,7 +39,11 @@ export const AyonInspector = memo(function AyonInspector({
     >
       <ScrollArea>
         {selectedLayers.length === 1 ? (
-          <CustomLayerInspector selectedLayer={selectedLayers[0]} />
+          <CustomLayerInspector
+            selectedLayer={selectedLayers[0]}
+            highlightedPath={highlightedPath}
+            setHighlightedPath={setHighlightedPath}
+          />
         ) : selectedLayers.length === 0 ? (
           <AyonProjectInspector
             name={name}
