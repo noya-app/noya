@@ -1,5 +1,4 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import { normalizeRange } from 'noya-state';
 import { findLast } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
@@ -15,10 +14,9 @@ import {
 } from '../ayon/symbols/symbolIds';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSRenderProps } from './DSRenderer';
-import { contentReducer } from './contentReducer';
-import { SerializedSelection, ZERO_WIDTH_SPACE, closest } from './dom';
+import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { ResolvedHierarchy } from './traversal';
-import { NoyaResolvedNode, NoyaResolvedString } from './types';
+import { NoyaResolvedNode } from './types';
 
 export function renderResolvedNode({
   resolvedNode,
@@ -117,32 +115,18 @@ export function renderResolvedNode({
 
 export function renderDSPreview({
   renderProps: props,
-  handleSetTextAtPath,
   highlightedPath,
   primary,
   resolvedNode,
-  serializedSelection,
   canvasBackgroundColor,
   selectionOutlineColor,
-  setHighlightedPath,
-  setSerializedSelection,
 }: {
   renderProps: DSRenderProps;
-  handleSetTextAtPath: ({
-    path,
-    value,
-  }: {
-    path: string[];
-    value: string;
-  }) => void;
   highlightedPath: string[] | undefined;
   primary: string;
   resolvedNode: NoyaResolvedNode;
-  serializedSelection: SerializedSelection | undefined;
   canvasBackgroundColor: string;
   selectionOutlineColor: string;
-  setHighlightedPath: (path: string[] | undefined) => void;
-  setSerializedSelection: (selection: SerializedSelection) => void;
 }) {
   // console.info(
   //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
@@ -160,91 +144,17 @@ export function renderDSPreview({
     system: props.system,
   });
 
-  const iframe = props.iframe;
-
   return (
     <div
       style={{
         backgroundImage: `radial-gradient(circle at 0px 0px, rgba(0,0,0,0.25) 1px, ${canvasBackgroundColor} 0px)`,
         backgroundSize: '10px 10px',
-        minHeight: '100%',
+        flex: 1,
         display: 'flex',
         alignItems: 'stretch',
         flexDirection: 'column',
         padding: '20px',
         position: 'relative',
-      }}
-      onMouseMove={(event) => {
-        const window = iframe.contentWindow;
-        const document = iframe.contentDocument;
-
-        if (!document || !window) return;
-
-        if (document) {
-          const elements = document.elementsFromPoint(
-            event.clientX,
-            event.clientY,
-          );
-
-          const element = elements.find(
-            (element): element is HTMLElement =>
-              element instanceof
-                (window as unknown as typeof globalThis).HTMLElement &&
-              !!element.dataset.path,
-          );
-
-          // console.log(elements);
-          if (element) {
-            if (element.dataset.path !== highlightedPath?.join('/')) {
-              setHighlightedPath(element.dataset.path?.split('/'));
-            }
-          } else {
-            if (highlightedPath) {
-              setHighlightedPath(undefined);
-            }
-          }
-        }
-      }}
-      onKeyDownCapture={(event) => {
-        const target = event.target as HTMLElement;
-
-        // Handle space manually
-        if (event.key === ' ') {
-          // Prevent ' ' from getting inserted automatically and triggering beforeinput.
-          // Also prevent triggering buttons.
-          event.preventDefault();
-
-          const path = findStringElementPath(target);
-
-          if (!path) return;
-
-          const stringNode = ResolvedHierarchy.find<NoyaResolvedString>(
-            resolvedNode,
-            (node): node is NoyaResolvedString =>
-              node.type === 'noyaString' &&
-              node.path.join('/') === path.join('/'),
-          );
-
-          if (!stringNode) return;
-
-          const content = contentReducer(stringNode.value, {
-            insertText: ' ',
-            range: normalizeRange([
-              serializedSelection?.anchorOffset ?? 0,
-              serializedSelection?.focusOffset ?? 0,
-            ]),
-          });
-
-          handleSetTextAtPath({ path, value: content.string });
-
-          if (serializedSelection) {
-            setSerializedSelection({
-              ...serializedSelection,
-              anchorOffset: content.range[0],
-              focusOffset: content.range[1],
-            });
-          }
-        }
       }}
     >
       <div

@@ -56,6 +56,16 @@ export interface IDSRenderer {
   mouseUp: ProxyEventHandler;
 }
 
+type Props = {
+  sourceName: string;
+  primary: string;
+  renderContent: (options: DSRenderProps) => React.ReactNode;
+  serializedSelection?: SerializedSelection;
+  setSerializedSelection?: (value: SerializedSelection | undefined) => void;
+  onBeforeInput?: (event: InputEvent) => void;
+  onReady?: () => void;
+};
+
 export const DSRenderer = forwardRef(function DSRenderer(
   {
     sourceName,
@@ -65,15 +75,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     setSerializedSelection,
     onBeforeInput,
     onReady,
-  }: {
-    sourceName: string;
-    primary: string;
-    renderContent: (options: DSRenderProps) => React.ReactNode;
-    serializedSelection?: SerializedSelection;
-    setSerializedSelection?: (value: SerializedSelection | undefined) => void;
-    onBeforeInput?: (event: InputEvent) => void;
-    onReady?: () => void;
-  },
+  }: Props,
   forwardedRef: React.ForwardedRef<IDSRenderer>,
 ) {
   const [ready, setReady] = React.useState(false);

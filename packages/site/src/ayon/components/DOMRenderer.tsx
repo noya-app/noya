@@ -1,15 +1,22 @@
 import { DS } from 'noya-api';
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { Layers, OverriddenBlockContent, Selectors } from 'noya-state';
 import React, { ComponentProps, forwardRef, useCallback, useRef } from 'react';
-import { DSRenderer, IDSRenderer } from '../../dseditor/DSRenderer';
+import { DSControlledRenderer } from '../../dseditor/DSControlledRenderer';
+import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { Model } from '../../dseditor/builders';
 import { initialComponents } from '../../dseditor/builtins';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
-import { createResolvedNode } from '../../dseditor/traversal';
+import {
+  ResolvedHierarchy,
+  createResolvedNode,
+  embedRootLevelDiff,
+} from '../../dseditor/traversal';
+import { NoyaResolvedString } from '../../dseditor/types';
+import { useAyonState } from '../state/ayonState';
 import { boxSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData } from '../types';
 
@@ -49,11 +56,15 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
   },
   forwardedRef: React.ForwardedRef<IDSRenderer>,
 ): JSX.Element {
-  const [state] = useApplicationState();
+  const [state, dispatch] = useAyonState();
   const { canvasInsets } = useWorkspace();
   const page = Selectors.getCurrentPage(state);
   const artboard = page.layers[0] as Sketch.Artboard;
   const rect = Selectors.getBoundingRect(page, [artboard.do_objectID])!;
+  const editingLayerId =
+    state.interactionState.type === 'editingBlock'
+      ? state.interactionState.layerId
+      : undefined;
 
   const containerTransform = createResizeTransform(artboard.frame, size, {
     scalingMode: 'down',
@@ -97,14 +108,52 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
         }}
       >
         <ErrorBoundary>
-          <DSRenderer
+          <DSControlledRenderer
             ref={forwardedRef}
             sourceName="@noya-design-system/chakra"
             primary="blue"
+            onChangeTextAtPath={({ path, value }) => {
+              const layer = artboard.layers
+                .filter(Layers.isCustomLayer<CustomLayerData>)
+                .find((layer) => layer.do_objectID === editingLayerId);
+
+              if (!layer || !layer.data.node) return undefined;
+
+              const newNode = embedRootLevelDiff(
+                layer.data.node,
+                Model.diff([Model.diffItem({ path, textValue: value })]),
+              );
+
+              dispatch('setLayerNode', newNode);
+            }}
+            getStringValueAtPath={(path) => {
+              const layer = artboard.layers
+                .filter(Layers.isCustomLayer<CustomLayerData>)
+                .find((layer) => layer.do_objectID === editingLayerId);
+
+              if (!layer) return undefined;
+
+              const resolvedNode = createResolvedNode(
+                findComponent,
+                layer.data.node ??
+                  Model.primitiveElement({
+                    componentID: boxSymbolId,
+                  }),
+              );
+
+              if (!resolvedNode) return undefined;
+
+              return ResolvedHierarchy.find<NoyaResolvedString>(
+                resolvedNode,
+                (node): node is NoyaResolvedString =>
+                  node.type === 'noyaString' &&
+                  node.path.join('/') === path.join('/'),
+              )?.value;
+            }}
             renderContent={(props) => {
               const layers = artboard.layers.filter(
-                Layers.isCustomLayer,
-              ) as Sketch.CustomLayer<CustomLayerData>[];
+                Layers.isCustomLayer<CustomLayerData>,
+              );
 
               return layers.map((layer) => {
                 const resolvedNode = createResolvedNode(

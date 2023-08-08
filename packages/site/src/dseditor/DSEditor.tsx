@@ -6,23 +6,21 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
-import { useDeepState } from 'noya-react-utils';
 import { uuid } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { DSComponentInspector } from './DSComponentInspector';
+import { DSControlledRenderer } from './DSControlledRenderer';
 import { DSProjectInspector } from './DSProjectInspector';
-import { DSRenderProps, DSRenderer, IDSRenderer } from './DSRenderer';
+import { DSRenderProps, IDSRenderer } from './DSRenderer';
 import { DSRendererOverlay } from './DSRendererOverlay';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
-import { contentReducer } from './contentReducer';
 import { mergeDiffs } from './diff';
-import { SerializedSelection } from './dom';
 import { renderDSOverview } from './renderDSOverview';
-import { findStringElementPath, renderDSPreview } from './renderDSPreview';
+import { renderDSPreview } from './renderDSPreview';
 import { ResolvedHierarchy, createResolvedNode } from './traversal';
-import { NoyaComponent, SelectedComponent } from './types';
+import { NoyaComponent, NoyaResolvedString, SelectedComponent } from './types';
 
 const noop = () => {};
 
@@ -85,10 +83,6 @@ export function DSEditor({
 
   const [highlightedPath, setHighlightedPath] = React.useState<
     string[] | undefined
-  >();
-
-  const [serializedSelection, setSerializedSelection] = useDeepState<
-    SerializedSelection | undefined
   >();
 
   const findComponent = useCallback(
@@ -168,15 +162,11 @@ export function DSEditor({
       if (selection && resolvedNode) {
         return renderDSPreview({
           renderProps: props,
-          handleSetTextAtPath,
           highlightedPath,
           primary,
           resolvedNode,
-          serializedSelection,
           canvasBackgroundColor: theme.colors.canvas.background,
           selectionOutlineColor: theme.colors.primary,
-          setHighlightedPath,
-          setSerializedSelection,
         });
       }
 
@@ -186,49 +176,13 @@ export function DSEditor({
       });
     },
     [
-      handleSetTextAtPath,
       highlightedPath,
       primary,
       resolvedNode,
       selection,
-      serializedSelection,
-      setSerializedSelection,
       theme.colors.canvas.background,
       theme.colors.primary,
     ],
-  );
-
-  const handleBeforeInput = useCallback(
-    (event: InputEvent) => {
-      event.preventDefault();
-
-      const ranges = event.getTargetRanges();
-      const range = ranges[0];
-
-      if (!range || !range.startContainer.isSameNode(range.endContainer)) {
-        return;
-      }
-
-      const path = findStringElementPath(range.startContainer.parentElement);
-
-      if (!path) return;
-
-      const content = contentReducer(range.startContainer.textContent, {
-        insertText: event.data,
-        range: [range.startOffset, range.endOffset],
-      });
-
-      handleSetTextAtPath({ path, value: content.string });
-
-      if (serializedSelection) {
-        setSerializedSelection({
-          ...serializedSelection,
-          anchorOffset: content.range[0],
-          focusOffset: content.range[1],
-        });
-      }
-    },
-    [handleSetTextAtPath, serializedSelection, setSerializedSelection],
   );
 
   const rendererRef = React.useRef<IDSRenderer>(null);
@@ -257,14 +211,22 @@ export function DSEditor({
         />
       )}
       <Stack.V flex="1" overflow="hidden" position="relative">
-        <DSRenderer
+        <DSControlledRenderer
           ref={rendererRef}
           sourceName={sourceName}
           primary={primary}
           renderContent={handleRenderContent}
-          serializedSelection={serializedSelection}
-          onBeforeInput={handleBeforeInput}
-          setSerializedSelection={setSerializedSelection}
+          getStringValueAtPath={(path) => {
+            if (!resolvedNode) return undefined;
+
+            return ResolvedHierarchy.find<NoyaResolvedString>(
+              resolvedNode,
+              (node): node is NoyaResolvedString =>
+                node.type === 'noyaString' &&
+                node.path.join('/') === path.join('/'),
+            )?.value;
+          }}
+          onChangeTextAtPath={handleSetTextAtPath}
         />
         <DSRendererOverlay rendererRef={rendererRef} />
       </Stack.V>
