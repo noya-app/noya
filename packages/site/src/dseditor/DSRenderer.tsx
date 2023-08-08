@@ -29,6 +29,8 @@ import {
   setDOMSelection,
 } from './dom';
 
+const noop = () => {};
+
 const Loading = styled.div({
   position: 'absolute',
   top: '50%',
@@ -200,12 +202,28 @@ export const DSRenderer = forwardRef(function DSRenderer(
     };
   }, [ready, setSerializedSelection, onBeforeInput]);
 
+  const setSerializedSelectionRef = useRef(setSerializedSelection || noop);
+
+  useEffect(() => {
+    setSerializedSelectionRef.current = setSerializedSelection || noop;
+  }, [setSerializedSelection]);
+
+  // Add indirection so we don't recreate the handlers (which have an internal timer)
+  const _setSerializedSelection = useCallback(
+    (value: SerializedSelection | undefined) =>
+      setSerializedSelectionRef.current?.(value),
+    [],
+  );
+
   const eventHandlers = useMemo(
     () =>
       ready && ref.current && ref.current.contentDocument
-        ? createSelectionHandlers(ref.current.contentDocument)
+        ? createSelectionHandlers(
+            ref.current.contentDocument,
+            _setSerializedSelection,
+          )
         : undefined,
-    [ready],
+    [_setSerializedSelection, ready],
   );
 
   useImperativeHandle(

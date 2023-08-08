@@ -220,7 +220,12 @@ export type ProxyEvent = {
 
 export type ProxyEventHandler = (event: ProxyEvent) => void;
 
-export function createSelectionHandlers(document: Document) {
+export function createSelectionHandlers(
+  document: Document,
+  setSerializedSelection: (
+    serializedSelection: SerializedSelection | undefined,
+  ) => void,
+) {
   let range: Range | null = null;
   let clickCount = 0;
   let clickTimer: number | null = null;
@@ -289,9 +294,7 @@ export function createSelectionHandlers(document: Document) {
       startElement.focus();
     }
 
-    const selection = document.getSelection();
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+    setSerializedSelection(rangeToSerializedSelection(document, range));
   };
 
   function isMoving(point: Point, origin: Point): boolean {
@@ -322,18 +325,23 @@ export function createSelectionHandlers(document: Document) {
         point.x,
         point.y,
       );
-      range.setEnd(textNode, offset);
+
+      // Create serialized seleciton directly to handle reversed ranges
+      setSerializedSelection({
+        anchorNode: getXPath(document, range.startContainer)!,
+        anchorOffset: range.startOffset,
+        focusNode: getXPath(document, textNode)!,
+        focusOffset: offset,
+      });
     } else {
       try {
         range.setEnd(endElement, endElement.childNodes.length);
       } catch (error) {
         // Handle cases where the endElement is not a valid end point for the range
       }
-    }
 
-    const selection = document.getSelection();
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+      setSerializedSelection(rangeToSerializedSelection(document, range));
+    }
   };
 
   const handleMouseUp: ProxyEventHandler = () => {
@@ -344,5 +352,17 @@ export function createSelectionHandlers(document: Document) {
     onMouseDown: handleMouseDown,
     onMouseMove: handleMouseMove,
     onMouseUp: handleMouseUp,
+  };
+}
+
+function rangeToSerializedSelection(
+  document: Document,
+  range: Range,
+): SerializedSelection {
+  return {
+    anchorNode: getXPath(document, range.startContainer)!,
+    anchorOffset: range.startOffset,
+    focusNode: getXPath(document, range.endContainer)!,
+    focusOffset: range.endOffset,
   };
 }
