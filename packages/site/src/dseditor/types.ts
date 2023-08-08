@@ -103,4 +103,5 @@ export type NoyaComponent = {
 export type SelectedComponent = {
   componentID: string;
   variantID?: string;
+  diff?: NoyaDiff;
 };

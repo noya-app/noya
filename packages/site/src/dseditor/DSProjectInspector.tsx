@@ -20,8 +20,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
-import { Model } from './builders';
-import { NoyaComponent, NoyaCompositeElement } from './types';
+import { NoyaComponent } from './types';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -49,11 +48,11 @@ interface Props {
   system?: DesignSystemDefinition;
   ds: DS;
   setDS: React.Dispatch<React.SetStateAction<DS>>;
-  selection?: NoyaCompositeElement;
-  setSelection: (component: NoyaCompositeElement | undefined) => void;
+  selectedComponentID?: string;
   components: NoyaComponent[];
   onNewComponent: () => void;
   onDeleteComponent: (componentID: string) => void;
+  onSelectComponent: (componentID: string) => void;
 }
 
 export function DSProjectInspector({
@@ -62,11 +61,11 @@ export function DSProjectInspector({
   system,
   ds,
   setDS,
-  selection,
-  setSelection,
+  selectedComponentID,
   components,
   onNewComponent,
   onDeleteComponent,
+  onSelectComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
 
@@ -171,15 +170,8 @@ export function DSProjectInspector({
               {components.map((component) => (
                 <ListView.Row
                   key={component.componentID}
-                  selected={component.componentID === selection?.componentID}
-                  onPress={() =>
-                    setSelection(
-                      Model.compositeElement({
-                        componentID: component.componentID,
-                        id: 'root',
-                      }),
-                    )
-                  }
+                  selected={component.componentID === selectedComponentID}
+                  onPress={() => onSelectComponent(component.componentID)}
                   menuItems={[{ value: 'delete', title: 'Delete' }]}
                   onSelectMenuItem={(value) => {
                     switch (value) {

@@ -21,8 +21,8 @@ import { mergeDiffs } from './diff';
 import { SerializedSelection } from './dom';
 import { renderDSOverview } from './renderDSOverview';
 import { findStringElementPath, renderDSPreview } from './renderDSPreview';
-import { createResolvedNode } from './traversal';
-import { NoyaComponent, NoyaCompositeElement } from './types';
+import { ResolvedHierarchy, createResolvedNode } from './traversal';
+import { NoyaComponent, SelectedComponent } from './types';
 
 const noop = () => {};
 
@@ -80,7 +80,7 @@ export function DSEditor({
   }, [sourceName]);
 
   const [selection, setSelection] = React.useState<
-    NoyaCompositeElement | undefined
+    SelectedComponent | undefined
   >();
 
   const [highlightedPath, setHighlightedPath] = React.useState<
@@ -132,12 +132,7 @@ export function DSEditor({
       setSelection((selection) => {
         const merged = mergeDiffs(
           selection?.diff,
-          Model.diff([
-            Model.diffItem({
-              path: path.slice(1),
-              textValue: value,
-            }),
-          ]),
+          Model.diff([Model.diffItem({ path, textValue: value })]),
         );
 
         return selection ? { ...selection, diff: merged } : undefined;
@@ -149,7 +144,23 @@ export function DSEditor({
   const resolvedNode = useMemo(() => {
     if (!selection) return undefined;
 
-    return createResolvedNode(findComponent, selection);
+    const instance = Model.compositeElement({
+      id: 'root',
+      componentID: selection.componentID,
+      variantID: selection.variantID,
+      diff: selection.diff,
+    });
+
+    let resolvedNode = createResolvedNode(findComponent, instance);
+
+    ResolvedHierarchy.visit(resolvedNode, (node) => {
+      // Remove the root prefix
+      node.path = node.path.slice(1);
+    });
+
+    if (resolvedNode.type !== 'noyaCompositeElement') return undefined;
+
+    return resolvedNode.rootElement;
   }, [findComponent, selection]);
 
   const handleRenderContent = React.useCallback(
@@ -222,6 +233,13 @@ export function DSEditor({
 
   const rendererRef = React.useRef<IDSRenderer>(null);
 
+  const handleSelectComponent = useCallback(
+    (componentId: string) => {
+      setSelection({ componentID: componentId });
+    },
+    [setSelection],
+  );
+
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
       {viewType !== 'preview' && (
@@ -231,8 +249,8 @@ export function DSEditor({
           system={system}
           ds={ds}
           setDS={setDS}
-          selection={selection}
-          setSelection={setSelection}
+          selectedComponentID={selection?.componentID}
+          onSelectComponent={handleSelectComponent}
           components={components}
           onNewComponent={handleNewComponent}
           onDeleteComponent={handleDeleteComponent}

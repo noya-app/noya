@@ -7,38 +7,26 @@ import {
   Select,
   Spacer,
   Stack,
-  TreeView,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
 import { InspectorSection } from '../components/InspectorSection';
-import { DSLayerRow } from './DSLayerRow';
+import { DSLayoutTree } from './DSLayoutTree';
 import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
-import {
-  FindComponent,
-  ResolvedHierarchy,
-  embedRootLevelDiff,
-} from './traversal';
+import { mergeDiffs } from './diff';
+import { FindComponent, embedRootLevelDiff } from './traversal';
 import {
   NoyaComponent,
-  NoyaCompositeElement,
   NoyaResolvedNode,
   NoyaVariant,
+  SelectedComponent,
 } from './types';
 
-type LayerTreeItem = {
-  depth: number;
-  indexPath: number[];
-  key: string;
-  node: NoyaResolvedNode;
-  path: string[];
-};
-
 interface Props {
-  selection: NoyaCompositeElement;
-  setSelection: (component: NoyaCompositeElement | undefined) => void;
+  selection: SelectedComponent;
+  setSelection: (selection: SelectedComponent) => void;
   findComponent: FindComponent;
   onChangeComponent: (component: NoyaComponent) => void;
   resolvedNode: NoyaResolvedNode;
@@ -58,31 +46,6 @@ export function DSComponentInspector({
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
-
-  const flattened = useMemo(
-    () =>
-      ResolvedHierarchy.flatMap(
-        resolvedNode,
-        (node, indexPath): LayerTreeItem[] => {
-          const depth = indexPath.length;
-
-          if (depth === 0) return [];
-
-          if (node.type === 'noyaString') return [];
-
-          return [
-            {
-              node,
-              depth,
-              indexPath: indexPath.slice(),
-              key: node.path.join('/'),
-              path: node.path,
-            },
-          ];
-        },
-      ),
-    [resolvedNode],
-  );
 
   const variantsWithDefault = useMemo(
     (): (NoyaVariant | undefined)[] => [
@@ -258,35 +221,18 @@ export function DSComponentInspector({
               )
             }
           >
-            <TreeView.Root
-              keyExtractor={(obj, index) => obj.key}
-              data={flattened}
-              expandable={false}
-              variant="bare"
-              indentation={24}
-              sortable
-              pressEventName="onPointerDown"
-              renderItem={(
-                { depth, key, indexPath, node, path },
-                index,
-                { isDragging },
-              ) => (
-                <DSLayerRow
-                  id={key}
-                  key={key}
-                  selection={selection}
-                  setSelection={setSelection}
-                  resolvedNode={resolvedNode}
-                  findComponent={findComponent}
-                  highlightedPath={highlightedPath}
-                  setHighlightedPath={setHighlightedPath}
-                  depth={depth}
-                  indexPath={indexPath}
-                  node={node}
-                  path={path}
-                  isDragging={isDragging}
-                />
-              )}
+            <DSLayoutTree
+              rootNode={component.rootElement}
+              setDiff={(diff) =>
+                setSelection({
+                  ...selection,
+                  diff: mergeDiffs(selection.diff, diff),
+                })
+              }
+              findComponent={findComponent}
+              setHighlightedPath={setHighlightedPath}
+              highlightedPath={highlightedPath}
+              resolvedNode={resolvedNode}
             />
           </InspectorSection>
         </Stack.V>

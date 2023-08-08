@@ -6,7 +6,8 @@ import React, { memo, useCallback, useEffect } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
 import { convertLayoutToComponent } from '../../../dseditor/componentLayout';
-import { NoyaComponent } from '../../../dseditor/types';
+import { embedRootLevelDiff } from '../../../dseditor/traversal';
+import { NoyaComponent, NoyaDiff } from '../../../dseditor/types';
 import { useAyonState } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
@@ -83,6 +84,15 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     return undefined;
   }, []);
 
+  const handleSetDiff = useCallback(
+    (diff: NoyaDiff) => {
+      if (!node) return;
+      const newNode = embedRootLevelDiff(node, diff);
+      dispatch('setLayerNode', newNode);
+    },
+    [dispatch, node],
+  );
+
   return (
     <InspectorSection
       title="Layout"
@@ -102,8 +112,8 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     >
       {node && node.type !== 'noyaString' ? (
         <DSLayoutTree
-          selection={node}
-          setSelection={() => {}}
+          rootNode={node}
+          setDiff={handleSetDiff}
           findComponent={findComponent}
           setHighlightedPath={() => {}}
         />

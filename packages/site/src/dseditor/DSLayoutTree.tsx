@@ -12,7 +12,6 @@ import React, { memo, useMemo } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
-import { mergeDiffs, resetRemovedClassName } from './diff';
 import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import {
   FindComponent,
@@ -20,7 +19,7 @@ import {
   createResolvedNode,
   findSourceNode,
 } from './traversal';
-import { NoyaCompositeElement, NoyaElement, NoyaResolvedNode } from './types';
+import { NoyaDiff, NoyaNode, NoyaResolvedNode } from './types';
 
 type LayoutTreeItem = {
   depth: number;
@@ -35,8 +34,6 @@ function flattenResolvedNode(resolvedNode: NoyaResolvedNode): LayoutTreeItem[] {
     resolvedNode,
     (node, indexPath): LayoutTreeItem[] => {
       const depth = indexPath.length;
-
-      if (depth === 0 && node.type === 'noyaCompositeElement') return [];
 
       if (node.type === 'noyaString') return [];
 
@@ -54,25 +51,28 @@ function flattenResolvedNode(resolvedNode: NoyaResolvedNode): LayoutTreeItem[] {
 }
 
 interface Props {
-  selection: NoyaElement;
-  setSelection: (selection: NoyaElement | undefined) => void;
+  rootNode: NoyaNode;
+  setDiff: (diff: NoyaDiff) => void;
   findComponent: FindComponent;
   resolvedNode?: NoyaResolvedNode;
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
 }
 
+/**
+ * The resolved node already has the diff applied, so we don't need to pass the diff separately.
+ */
 export const DSLayoutTree = memo(function DSLayoutTree({
-  selection,
-  setSelection,
+  rootNode,
+  setDiff,
   findComponent,
   resolvedNode: _resolvedNode,
   highlightedPath,
   setHighlightedPath,
 }: Props) {
   const resolvedNode = useMemo(
-    () => _resolvedNode ?? createResolvedNode(findComponent, selection),
-    [_resolvedNode, findComponent, selection],
+    () => _resolvedNode ?? createResolvedNode(findComponent, rootNode),
+    [_resolvedNode, findComponent, rootNode],
   );
 
   const flattened = useMemo(
@@ -97,8 +97,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
         <DSLayoutRow
           id={key}
           key={key}
-          selection={selection}
-          setSelection={setSelection}
+          rootNode={rootNode}
+          setDiff={setDiff}
           resolvedNode={resolvedNode}
           findComponent={findComponent}
           highlightedPath={highlightedPath}
@@ -132,8 +132,8 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
 
 export const DSLayoutRow = memo(function DSLayerRow({
   id,
-  selection,
-  setSelection,
+  rootNode,
+  setDiff,
   resolvedNode,
   findComponent,
   highlightedPath,
@@ -145,8 +145,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isDragging,
 }: {
   id: string;
-  selection: NoyaElement;
-  setSelection: (selection: NoyaElement | undefined) => void;
+  rootNode: NoyaNode;
+  setDiff: (diff: NoyaDiff) => void;
   resolvedNode: NoyaResolvedNode;
   findComponent: FindComponent;
   highlightedPath?: string[];
@@ -166,12 +166,12 @@ export const DSLayoutRow = memo(function DSLayerRow({
       title: 'Add Child',
       value: 'addChild',
     },
-    depth !== 1 &&
+    depth !== 0 &&
       parent.type === 'noyaPrimitiveElement' && {
         title: 'Duplicate',
         value: 'duplicate',
       },
-    depth !== 1 &&
+    depth !== 0 &&
       parent.type === 'noyaPrimitiveElement' && {
         title: 'Delete',
         value: 'delete',
@@ -186,86 +186,66 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const onSelectMenuItem = (value: MenuItemType) => {
     switch (value) {
       case 'duplicate': {
-        const root = findComponent(selection.componentID);
+        if (rootNode.type === 'noyaString') return;
+
+        const root = findComponent(rootNode.componentID);
 
         if (!root) return;
 
-        const sourceNode = findSourceNode(findComponent, selection, path);
+        const sourceNode = findSourceNode(findComponent, rootNode, path);
 
         if (!sourceNode) return;
 
-        if (selection.type !== 'noyaCompositeElement') return;
+        if (rootNode.type !== 'noyaCompositeElement') return;
 
-        const newSelection: NoyaCompositeElement = {
-          ...selection,
-          diff: mergeDiffs(
-            selection.diff,
-            Model.diff([
-              Model.diffItem({
-                path: path.slice(1, -1),
-                children: {
-                  add: [
-                    {
-                      node: { ...sourceNode, id: uuid() },
-                      index: indexPath[indexPath.length - 1] + 1,
-                    },
-                  ],
-                },
-              }),
-            ]),
-          ),
-        };
-
-        setSelection(newSelection);
+        setDiff(
+          Model.diff([
+            Model.diffItem({
+              path: path.slice(0, -1),
+              children: {
+                add: [
+                  {
+                    node: { ...sourceNode, id: uuid() },
+                    index: indexPath[indexPath.length - 1] + 1,
+                  },
+                ],
+              },
+            }),
+          ]),
+        );
         break;
       }
       case 'delete': {
-        if (selection.type !== 'noyaCompositeElement') return;
-
-        const newSelection: NoyaCompositeElement = {
-          ...selection,
-          diff: mergeDiffs(
-            selection.diff,
-            Model.diff([
-              Model.diffItem({
-                path: path.slice(1, -1),
-                children: { remove: [node.id] },
-              }),
-            ]),
-          ),
-        };
-
-        setSelection(newSelection);
+        setDiff(
+          Model.diff([
+            Model.diffItem({
+              path: path.slice(0, -1),
+              children: { remove: [node.id] },
+            }),
+          ]),
+        );
         break;
       }
       case 'addChild': {
         if (node.type !== 'noyaPrimitiveElement') break;
 
-        if (selection.type !== 'noyaCompositeElement') return;
-
-        const newSelection: NoyaCompositeElement = {
-          ...selection,
-          diff: mergeDiffs(
-            selection.diff,
-            Model.diff([
-              Model.diffItem({
-                path: path.slice(1),
-                children: {
-                  add: [
-                    {
-                      node: Model.primitiveElement({
-                        componentID: boxSymbolId,
-                      }),
-                      index: node.children.length,
-                    },
-                  ],
-                },
-              }),
-            ]),
-          ),
-        };
-
-        setSelection(newSelection);
+        setDiff(
+          Model.diff([
+            Model.diffItem({
+              path,
+              children: {
+                add: [
+                  {
+                    node: Model.primitiveElement({
+                      componentID: boxSymbolId,
+                    }),
+                    index: node.children.length,
+                  },
+                ],
+              },
+            }),
+          ]),
+        );
         break;
       }
     }
@@ -273,7 +253,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
 
   return (
     <TreeView.Row
-      id={id}
+      id={`n-${id}`}
       depth={depth - 1}
       menuItems={menu}
       onSelectMenuItem={onSelectMenuItem}
@@ -329,22 +309,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
               }}
               value={node.value}
               onChange={(value) => {
-                if (selection.type !== 'noyaCompositeElement') return;
-
-                const newSelection: NoyaCompositeElement = {
-                  ...selection,
-                  diff: mergeDiffs(
-                    selection.diff,
-                    Model.diff([
-                      Model.diffItem({
-                        path: path.slice(1),
-                        textValue: value,
-                      }),
-                    ]),
-                  ),
-                };
-
-                setSelection(newSelection);
+                setDiff(
+                  Model.diff([Model.diffItem({ path, textValue: value })]),
+                );
               }}
             />
           </InputField.Root>
@@ -378,37 +345,24 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   opacity: status === 'removed' ? 0.5 : 1,
                 }}
                 onDelete={() => {
-                  if (selection.type !== 'noyaCompositeElement') return;
-
-                  const newSelection: NoyaCompositeElement = {
-                    ...selection,
-                    diff: mergeDiffs(
-                      selection.diff,
-                      Model.diff([
-                        {
-                          path: path.slice(1),
-                          classNames: { remove: [value] },
-                        },
-                      ]),
-                    ),
-                  };
-
-                  setSelection(newSelection);
+                  setDiff(
+                    Model.diff([{ path, classNames: { remove: [value] } }]),
+                  );
                 }}
-                onAdd={() => {
-                  if (selection.type !== 'noyaCompositeElement') return;
+                // onAdd={() => {
+                //   if (rootNode.type !== 'noyaCompositeElement') return;
 
-                  const newSelection: NoyaCompositeElement = {
-                    ...selection,
-                    diff: resetRemovedClassName(
-                      selection.diff,
-                      path.slice(1),
-                      value,
-                    ),
-                  };
+                //   const newSelection: NoyaCompositeElement = {
+                //     ...rootNode,
+                //     diff: resetRemovedClassName(
+                //       rootNode.diff,
+                //       path.slice(1),
+                //       value,
+                //     ),
+                //   };
 
-                  setSelection(newSelection);
-                }}
+                //   setDiff(newSelection);
+                // }}
               >
                 {value}
               </Chip>
