@@ -5,12 +5,19 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(top-|right-|bottom-|left-|absolute|relative|shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self|underline|line-through|overline|no-underline|backdrop).*/,
+        /^(inset-|object-|top-|right-|bottom-|left-|absolute|relative|shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self|underline|line-through|overline|no-underline|backdrop).*/,
     },
   ],
   plugins: [
     require('tailwind-safelist-generator')({
       patterns: [
+        'inset-{inset}',
+        'object-contain',
+        'object-cover',
+        'object-fill',
+        'object-none',
+        'object-scale-down',
+        'object-{objectPosition}',
         'absolute',
         'relative',
         'w-{width}',

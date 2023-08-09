@@ -318,7 +318,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
         ) : (
           <Stack.H padding="4px 8px" alignItems="center">
             <TreeView.RowTitle>{name}</TreeView.RowTitle>
-            {hovered && node.type === 'noyaPrimitiveElement' ? (
+            {node.type === 'noyaPrimitiveElement' ? (
               <Text variant="code" fontSize="9px">
                 {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
               </Text>

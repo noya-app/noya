@@ -47,14 +47,14 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
           icon: p.icon,
         })),
       ]),
-      { type: 'sectionHeader', id: 'generated', name: 'AI Generated' },
-      ...names.map(
-        ({ name }): CompletionItem => ({ id: name, name, alwaysInclude: true }),
-      ),
       { type: 'sectionHeader', id: 'create-new', name: 'Create New' },
       ...(customName && customName !== name
         ? [{ id: 'custom', name: customName, alwaysInclude: true }]
         : []),
+      { type: 'sectionHeader', id: 'generated', name: 'AI Generated' },
+      ...names.map(
+        ({ name }): CompletionItem => ({ id: name, name, alwaysInclude: true }),
+      ),
     ],
     [customName, name, names],
   );

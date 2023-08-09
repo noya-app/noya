@@ -107,6 +107,10 @@ export const classGroups = {
   gridFlow: /^grid-flow/,
   lineHeight: /^leading-/,
   position: /^(absolute|relative|fixed|sticky)/,
+  inset: /^inset-/,
+  objectFit:
+    /^(object-contain|object-cover|object-fill|object-none|object-scale-down)/,
+  objectPosition: /^object-/,
   display:
     /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
   // Must be last!
@@ -464,6 +468,23 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = className.replace('text-', '');
       return {
         textAlign: value as any,
+      };
+    }
+    case 'inset': {
+      const value = getValue(className);
+      return {
+        inset: (config.theme as any).inset(themeParameter)[value || 'auto'],
+      };
+    }
+    case 'objectFit': {
+      const value = className.replace('object-', '');
+      return {
+        objectFit: value as any,
+      };
+    }
+    case 'objectPosition': {
+      return {
+        objectPosition: className.replace('object-', ''),
       };
     }
   }
