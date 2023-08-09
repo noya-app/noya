@@ -1292,6 +1292,7 @@ items-stretch
 justify-start
 justify-center
 justify-end
+justify-between
 p-0
 p-1
 p-2
