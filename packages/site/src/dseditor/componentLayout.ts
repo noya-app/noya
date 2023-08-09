@@ -1,7 +1,10 @@
 import { LayoutNode } from 'noya-compiler';
 import { withOptions } from 'tree-visit';
 import { Model } from './builders';
-import { PRIMITIVE_TAG_MAP } from './primitiveElements';
+import {
+  PRIMITIVE_ELEMENT_NAMES,
+  PRIMITIVE_TAG_MAP,
+} from './primitiveElements';
 import { NoyaElement, NoyaNode } from './types';
 
 export const LayoutHierarchy = withOptions<LayoutNode | string>({
@@ -27,6 +30,7 @@ export function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
 
       const result: NoyaNode = Model.primitiveElement({
         componentID: PRIMITIVE_TAG_MAP[node.tag],
+        name: node.attributes.name || PRIMITIVE_ELEMENT_NAMES[node.tag],
         children: transformedChildren,
         classNames: node.attributes.class
           ?.split(' ')
