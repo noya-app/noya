@@ -59,20 +59,10 @@ export class NoyaClient {
     names: {},
     loadingNames: {},
   });
-  generatedComponentDescriptions$ = observable<{
-    descriptions: Record<string, string>;
-    loadingDescriptions: Record<string, boolean>;
-  }>({
-    descriptions: {},
-    loadingDescriptions: {},
-  });
-  generatedComponentLayouts$ = observable<{
-    layouts: Record<string, NoyaGeneratedLayout[]>;
-    loadingLayouts: Record<string, boolean>;
-  }>({
-    layouts: {},
-    loadingLayouts: {},
-  });
+  generatedDescriptions$ = observable<Record<string, string>>({});
+  loadingDescriptions$ = observable<Record<string, boolean>>({});
+  generatedLayouts$ = observable<Record<string, NoyaGeneratedLayout[]>>({});
+  loadingLayouts$ = observable<Record<string, boolean>>({});
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -128,22 +118,26 @@ export class NoyaClient {
     return result;
   };
 
+  componentDescriptionCacheKey = (name: string) => name.trim().toLowerCase();
+
   #generateComponentDescription = async (options: { name: string }) => {
     const name = options.name.trim();
-    const key = name.toLowerCase();
+    const key = this.componentDescriptionCacheKey(options.name);
 
-    const existing =
-      this.generatedComponentDescriptions$.descriptions[key].get();
+    const existing = this.generatedDescriptions$[key].get();
 
     if (typeof existing === 'string') return existing;
 
-    this.generatedComponentDescriptions$.loadingDescriptions[key].set(true);
+    // If loading, return nothing (TODO: await fetched value)
+    if (this.loadingDescriptions$[key].get()) return undefined;
+
+    this.loadingDescriptions$.set((prev) => ({ ...prev, [key]: true }));
 
     const result =
       await this.networkClient.generate.componentDescriptionFromName(name);
 
-    this.generatedComponentDescriptions$.descriptions[key].set(result);
-    this.generatedComponentDescriptions$.loadingDescriptions[key].set(false);
+    this.generatedDescriptions$.set((prev) => ({ ...prev, [key]: result }));
+    this.loadingDescriptions$.set((prev) => ({ ...prev, [key]: false }));
 
     return result;
   };
@@ -159,11 +153,11 @@ export class NoyaClient {
     const description = options.description.trim();
     const key = this.componentLayoutCacheKey(name, description);
 
-    const existing = this.generatedComponentLayouts$.layouts[key].get();
+    const existing = this.generatedLayouts$[key].get();
 
     if (Array.isArray(existing) && existing.length > 0) return existing;
 
-    this.generatedComponentLayouts$.loadingLayouts[key].set(true);
+    this.loadingLayouts$.set((prev) => ({ ...prev, [key]: true }));
 
     const result =
       await this.networkClient.generate.componentLayoutsFromDescription(
@@ -171,8 +165,8 @@ export class NoyaClient {
         description,
       );
 
-    this.generatedComponentLayouts$.layouts[key].set(result);
-    this.generatedComponentLayouts$.loadingLayouts[key].set(false);
+    this.generatedLayouts$.set((prev) => ({ ...prev, [key]: result }));
+    this.loadingLayouts$.set((prev) => ({ ...prev, [key]: false }));
 
     return result;
   };
@@ -180,15 +174,15 @@ export class NoyaClient {
   #resetGenerateComponentDescription = (name: string) => {
     const key = name.trim().toLowerCase();
 
-    this.generatedComponentDescriptions$.descriptions[key].delete();
-    this.generatedComponentDescriptions$.loadingDescriptions[key].delete();
+    this.generatedDescriptions$[key].delete();
+    this.loadingDescriptions$[key].delete();
   };
 
   #resetGenerateComponentLayouts = (name: string, description: string) => {
     const key = this.componentLayoutCacheKey(name, description);
 
-    this.generatedComponentLayouts$.layouts[key].delete();
-    this.generatedComponentLayouts$.loadingLayouts[key].delete();
+    this.generatedLayouts$[key].delete();
+    this.loadingLayouts$[key].delete();
   };
 
   #fetchSession = async () => {

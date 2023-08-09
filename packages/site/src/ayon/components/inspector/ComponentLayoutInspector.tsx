@@ -1,14 +1,12 @@
-import { useGeneratedComponentLayouts, useNoyaClient } from 'noya-api';
-import { parseComponentLayout } from 'noya-compiler';
+import { useGeneratedComponentLayout, useNoyaClient } from 'noya-api';
 import { ActivityIndicator, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import React, { memo, useCallback, useEffect } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
-import { convertLayoutToComponent } from '../../../dseditor/componentLayout';
 import { embedRootLevelDiff } from '../../../dseditor/traversal';
 import { NoyaComponent, NoyaDiff } from '../../../dseditor/types';
-import { useAyonState } from '../../state/ayonState';
+import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
 type Props = {
@@ -22,9 +20,9 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
   highlightedPath,
   setHighlightedPath,
 }: Props) {
-  const [, dispatch] = useAyonState();
+  const dispatch = useAyonDispatch();
   const client = useNoyaClient();
-  const generatedLayouts = useGeneratedComponentLayouts(
+  const generatedLayouts = useGeneratedComponentLayout(
     selectedLayer.name ?? '',
     selectedLayer.data.description ?? '',
   );
@@ -50,27 +48,8 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.name,
   ]);
 
-  // eslint-disable-next-line @shopify/prefer-early-return
-  useEffect(() => {
-    if (
-      selectedLayer.data.node === undefined &&
-      generatedLayouts.layouts &&
-      !generatedLayouts.loading
-    ) {
-      const parsed = generatedLayouts.layouts.map((layout) =>
-        parseComponentLayout(layout.code),
-      );
-
-      if (parsed.length === 0) return;
-
-      const node = convertLayoutToComponent(parsed[0]);
-
-      dispatch('setLayerNode', node);
-    }
-  }, [dispatch, generatedLayouts, selectedLayer.data.node]);
-
   const handleShuffle = useCallback(() => {
-    dispatch('setLayerNode', undefined);
+    dispatch('setLayerNode', selectedLayer.do_objectID, undefined);
     client.generate.resetComponentLayouts(
       selectedLayer.name,
       selectedLayer.data.description ?? '',
@@ -79,6 +58,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     client.generate,
     dispatch,
     selectedLayer.data.description,
+    selectedLayer.do_objectID,
     selectedLayer.name,
   ]);
 
@@ -92,9 +72,9 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     (diff: NoyaDiff) => {
       if (!node) return;
       const newNode = embedRootLevelDiff(node, diff);
-      dispatch('setLayerNode', newNode);
+      dispatch('setLayerNode', selectedLayer.do_objectID, newNode);
     },
-    [dispatch, node],
+    [dispatch, node, selectedLayer.do_objectID],
   );
 
   return (

@@ -10,7 +10,7 @@ import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Model } from '../../../dseditor/builders';
 import { primitiveElements } from '../../../dseditor/primitiveElements';
-import { useAyonState } from '../../state/ayonState';
+import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
 type Props = {
@@ -20,10 +20,10 @@ type Props = {
 export const ComponentNameInspector = memo(function ComponentNameInspector({
   selectedLayer,
 }: Props) {
-  const [, dispatch] = useAyonState();
+  const dispatch = useAyonDispatch();
+  const client = useNoyaClient();
 
   const name = selectedLayer.name;
-  const client = useNoyaClient();
   const [customName, setCustomName] = useState(name);
   const { loading, names } = useGeneratedComponentNames(customName);
 
@@ -87,8 +87,8 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
 
         dispatch('batch', [
           ['setLayerName', selectedLayer.do_objectID, item.name],
-          ['setLayerDescription', ''],
-          ['setLayerNode', node],
+          ['setLayerDescription', selectedLayer.do_objectID, ''],
+          ['setLayerNode', selectedLayer.do_objectID, node],
         ]);
       } else {
         dispatch('batch', [
@@ -97,8 +97,8 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
             selectedLayer.do_objectID,
             item.id === 'custom' ? customName : item.name,
           ],
-          ['setLayerDescription', undefined],
-          ['setLayerNode', undefined],
+          ['setLayerDescription', selectedLayer.do_objectID, undefined],
+          ['setLayerNode', selectedLayer.do_objectID, undefined],
         ]);
       }
     },

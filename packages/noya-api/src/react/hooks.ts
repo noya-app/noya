@@ -52,27 +52,37 @@ export function useGeneratedComponentNames(name: string) {
   return useMemo(() => ({ names: result ?? [], loading }), [loading, result]);
 }
 
-export function useGeneratedComponentDescriptions(description: string) {
-  const key = description.trim().toLowerCase();
-  const result = useSelector(
-    useNoyaClient().generatedComponentDescriptions$.descriptions[key],
-  ) as string | undefined;
-  const loading = useSelector(
-    useNoyaClient().generatedComponentDescriptions$.loadingDescriptions[key],
-  );
-  return useMemo(() => ({ description: result, loading }), [loading, result]);
+export function useGeneratedComponentDescriptions() {
+  const { generatedDescriptions$, loadingDescriptions$ } = useNoyaClient();
+  const descriptions = useSelector(generatedDescriptions$);
+  const loading = useSelector(loadingDescriptions$);
+  return useMemo(() => ({ descriptions, loading }), [loading, descriptions]);
 }
 
-export function useGeneratedComponentLayouts(
-  name: string,
-  description: string,
-) {
-  const key = useNoyaClient().componentLayoutCacheKey(name, description);
-  const result = useSelector(
-    useNoyaClient().generatedComponentLayouts$.layouts[key],
-  ) as NoyaGeneratedLayout[] | undefined;
-  const loading = useSelector(
-    useNoyaClient().generatedComponentLayouts$.loadingLayouts[key],
+export function useGeneratedComponentDescription(name: string) {
+  const key = name.trim().toLowerCase();
+  const { generatedDescriptions$, loadingDescriptions$ } = useNoyaClient();
+  const description = useSelector(
+    () => generatedDescriptions$[key].get() as string | undefined,
   );
-  return useMemo(() => ({ layouts: result, loading }), [loading, result]);
+  const loading = useSelector(() => loadingDescriptions$[key].get());
+  return useMemo(() => ({ description, loading }), [loading, description]);
+}
+
+export function useGeneratedComponentLayouts() {
+  const { generatedLayouts$, loadingLayouts$ } = useNoyaClient();
+  const layouts = useSelector(generatedLayouts$);
+  const loading = useSelector(loadingLayouts$);
+  return useMemo(() => ({ layouts, loading }), [loading, layouts]);
+}
+
+export function useGeneratedComponentLayout(name: string, description: string) {
+  const { componentLayoutCacheKey, generatedLayouts$, loadingLayouts$ } =
+    useNoyaClient();
+  const key = componentLayoutCacheKey(name, description);
+  const layouts = useSelector(
+    () => generatedLayouts$[key].get() as NoyaGeneratedLayout[] | undefined,
+  );
+  const loading = useSelector(() => loadingLayouts$[key].get() ?? false);
+  return useMemo(() => ({ layouts, loading }), [loading, layouts]);
 }

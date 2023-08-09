@@ -1,15 +1,21 @@
-import { DS } from 'noya-api';
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import {
+  DS,
+  useGeneratedComponentDescriptions,
+  useGeneratedComponentLayouts,
+  useNoyaClient,
+} from 'noya-api';
+import { useWorkspace } from 'noya-app-state-context';
 import {
   CanvasKitRenderer,
   Interactions,
   SimpleCanvas,
   convertPoint,
 } from 'noya-canvas';
+import { parseComponentLayout } from 'noya-compiler';
 import { Stack, Toast } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
-import { FileDropTarget, OffsetPoint } from 'noya-react-utils';
+import { FileDropTarget, OffsetPoint, useDeepMemo } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import {
@@ -32,12 +38,14 @@ import React, {
 import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
+import { convertLayoutToComponent } from '../../dseditor/componentLayout';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
 import { Stacking } from '../stacking';
-import { ViewType } from '../types';
+import { useAyonState } from '../state/ayonState';
+import { CustomLayerData, ViewType } from '../types';
 import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
@@ -74,6 +82,7 @@ export const Content = memo(function Content({
   name: string;
   onChangeName?: (name: string) => void;
 }) {
+  const client = useNoyaClient();
   const [toastData, setToastData] = useState<
     { attribution: Attribution; key: string } | undefined
   >();
@@ -81,7 +90,7 @@ export const Content = memo(function Content({
   const setToastDataDebounced = useMemo(() => debounce(setToastData, 300), []);
 
   const { canvasSize, isContextMenuOpen } = useWorkspace();
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useAyonState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
   );
@@ -161,6 +170,72 @@ export const Content = memo(function Content({
 
     dispatch('addLayer', layers, { point });
   };
+
+  const customLayers = useDeepMemo(
+    Layers.flat(Selectors.getCurrentPage(state)).filter(
+      Layers.isCustomLayer<CustomLayerData>,
+    ),
+  );
+
+  const { descriptions, loading: loadingDescriptions } =
+    useGeneratedComponentDescriptions();
+  const { layouts, loading: loadingLayouts } = useGeneratedComponentLayouts();
+
+  useEffect(() => {
+    // Resolve descriptions. If a custom layer has a name but no description,
+    // we trigger the generation of a description.
+    customLayers.forEach((layer) => {
+      if (!layer.name || layer.data.description !== undefined) return;
+
+      const key = client.componentDescriptionCacheKey(layer.name);
+
+      if (loadingDescriptions[key]) return;
+
+      if (descriptions[key]) {
+        dispatch('setLayerDescription', layer.do_objectID, descriptions[key]);
+      } else {
+        client.generate.componentDescription({ name: layer.name });
+      }
+    });
+  }, [client, customLayers, descriptions, dispatch, loadingDescriptions]);
+
+  useEffect(() => {
+    // Resolve layouts. If a custom layer has a name and description but no node,
+    // we trigger the generation of a layout.
+    customLayers.forEach((layer) => {
+      if (
+        !layer.name ||
+        layer.data.description === undefined ||
+        layer.data.node !== undefined
+      ) {
+        return;
+      }
+
+      const key = client.componentLayoutCacheKey(
+        layer.name,
+        layer.data.description,
+      );
+
+      if (loadingLayouts[key]) return;
+
+      if (layouts[key]) {
+        const parsed = layouts[key].map((layout) =>
+          parseComponentLayout(layout.code),
+        );
+
+        if (parsed.length === 0) return;
+
+        const node = convertLayoutToComponent(parsed[0]);
+
+        dispatch('setLayerNode', layer.do_objectID, node);
+      } else {
+        client.generate.componentLayouts({
+          name: layer.name,
+          description: layer.data.description,
+        });
+      }
+    });
+  }, [client, customLayers, dispatch, layouts, loadingLayouts]);
 
   useEffect(() => {
     if (isPlayground) return;

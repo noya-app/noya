@@ -1,10 +1,10 @@
-import { useGeneratedComponentDescriptions, useNoyaClient } from 'noya-api';
+import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
 import { ActivityIndicator, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
-import { useAyonState } from '../../state/ayonState';
+import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
 const DescriptionTextArea = styled.textarea(({ theme }) => ({
@@ -29,40 +29,16 @@ type Props = {
 
 export const ComponentDescriptionInspector = memo(
   function ComponentDescriptionInspector({ selectedLayer }: Props) {
-    const [, dispatch] = useAyonState();
+    const dispatch = useAyonDispatch();
     const client = useNoyaClient();
-    const generatedDescription = useGeneratedComponentDescriptions(
+    const generatedDescription = useGeneratedComponentDescription(
       selectedLayer.name ?? '',
     );
 
-    useEffect(() => {
-      if (selectedLayer.data.description !== undefined || !selectedLayer.name) {
-        return;
-      }
-
-      client.generate.componentDescription({ name: selectedLayer.name });
-    }, [client, dispatch, selectedLayer.data.description, selectedLayer.name]);
-
-    useEffect(() => {
-      if (
-        selectedLayer.data.description === undefined &&
-        generatedDescription.description !== undefined &&
-        generatedDescription.loading
-      ) {
-        dispatch('setLayerDescription', generatedDescription.description);
-      }
-    }, [
-      dispatch,
-      generatedDescription,
-      generatedDescription.description,
-      generatedDescription.loading,
-      selectedLayer.data.description,
-    ]);
-
     const handleShuffle = useCallback(() => {
-      dispatch('setLayerDescription', undefined);
+      dispatch('setLayerDescription', selectedLayer.do_objectID, undefined);
       client.generate.resetComponentDescription(selectedLayer.name);
-    }, [client, dispatch, selectedLayer.name]);
+    }, [client, dispatch, selectedLayer.do_objectID, selectedLayer.name]);
 
     return (
       <InspectorPrimitives.LabeledRow
@@ -82,7 +58,11 @@ export const ComponentDescriptionInspector = memo(
         <DescriptionTextArea
           value={selectedLayer.data.description || ''}
           onChange={(event) => {
-            dispatch('setLayerDescription', event.target.value);
+            dispatch(
+              'setLayerDescription',
+              selectedLayer.do_objectID,
+              event.target.value,
+            );
           }}
         />
       </InspectorPrimitives.LabeledRow>

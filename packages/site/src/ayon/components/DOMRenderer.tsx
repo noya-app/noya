@@ -17,7 +17,7 @@ import {
 } from '../../dseditor/traversal';
 import { NoyaResolvedString } from '../../dseditor/types';
 import { useAyonState } from '../state/ayonState';
-import { boxSymbolId } from '../symbols/symbolIds';
+import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData } from '../types';
 
 class ErrorBoundary extends React.Component<any> {
@@ -130,7 +130,7 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                 Model.diff([Model.diffItem({ path, textValue: value })]),
               );
 
-              dispatch('setLayerNode', newNode);
+              dispatch('setLayerNode', layer.do_objectID, newNode);
             }}
             getStringValueAtPath={(path) => {
               const layer = artboard.layers
@@ -165,9 +165,21 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                 const resolvedNode = createResolvedNode(
                   findComponent,
                   layer.data.node ??
-                    Model.primitiveElement({
-                      componentID: boxSymbolId,
-                    }),
+                    (layer.data.description === undefined
+                      ? Model.primitiveElement({
+                          componentID: textSymbolId,
+                          children: [
+                            Model.string(
+                              `Generating ${layer.name} description...`,
+                            ),
+                          ],
+                        })
+                      : Model.primitiveElement({
+                          componentID: textSymbolId,
+                          children: [
+                            Model.string(`Generating ${layer.name} layout...`),
+                          ],
+                        })),
                 );
 
                 const content = renderResolvedNode({

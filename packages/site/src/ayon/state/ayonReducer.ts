@@ -4,7 +4,6 @@ import {
   CustomReducer,
   Layers,
   Selectors,
-  accessPageLayers,
   interactionReducer,
 } from 'noya-state';
 import { primitiveElements } from '../../dseditor/primitiveElements';
@@ -13,39 +12,53 @@ import { boxSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData } from '../types';
 
 export type AyonAction =
-  | [type: 'setLayerDescription', description: string | undefined]
-  | [type: 'setLayerNode', node: NoyaNode | undefined];
+  | [
+      type: 'setLayerDescription',
+      layerId: string,
+      description: string | undefined,
+    ]
+  | [type: 'setLayerNode', layerId: string, node: NoyaNode | undefined];
 
 export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
   switch (action[0]) {
     case 'setLayerNode': {
-      const [, node] = action;
+      const [, id, node] = action;
 
-      const pageIndex = Selectors.getCurrentPageIndex(state);
-      const layerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
+      const layerIndexPaths = Selectors.getLayerIndexPath(state, id);
+
+      if (!layerIndexPaths) return state;
+
+      const { pageIndex, indexPath } = layerIndexPaths;
 
       return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-          (draftLayer) => {
-            if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
-            draftLayer.data.node = node;
-          },
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
         );
+
+        if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
+
+        draftLayer.data.node = node;
       });
     }
     case 'setLayerDescription': {
-      const [, description] = action;
+      const [, id, description] = action;
 
-      const pageIndex = Selectors.getCurrentPageIndex(state);
-      const layerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
+      const layerIndexPaths = Selectors.getLayerIndexPath(state, id);
+
+      if (!layerIndexPaths) return state;
+
+      const { pageIndex, indexPath } = layerIndexPaths;
 
       return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-          (draftLayer) => {
-            if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
-            draftLayer.data.description = description;
-          },
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
         );
+
+        if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
+
+        draftLayer.data.description = description;
       });
     }
     case 'addDrawnLayer': {
