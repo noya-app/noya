@@ -133,13 +133,19 @@ export class NoyaClient {
 
     this.loadingDescriptions$.set((prev) => ({ ...prev, [key]: true }));
 
-    const result =
+    const iterator =
       await this.networkClient.generate.componentDescriptionFromName(name);
 
-    this.generatedDescriptions$.set((prev) => ({ ...prev, [key]: result }));
+    let text = '';
+    for await (const chunk of iterator) {
+      text += chunk;
+      let nextText = text;
+      this.generatedDescriptions$.set((prev) => ({ ...prev, [key]: nextText }));
+    }
+
     this.loadingDescriptions$.set((prev) => ({ ...prev, [key]: false }));
 
-    return result;
+    return iterator;
   };
 
   componentLayoutCacheKey = (name: string, description: string) =>

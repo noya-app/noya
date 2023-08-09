@@ -100,10 +100,15 @@ export function DSComponentInspector({
                 variant="secondary"
                 flex="1"
                 onClick={async () => {
-                  const newDescription =
+                  const iterable =
                     await client.networkClient.generate.componentDescriptionFromName(
                       component.name ?? 'Untitled',
                     );
+
+                  let newDescription = '';
+                  for await (const chunk of iterable) {
+                    newDescription += chunk;
+                  }
 
                   onChangeComponent({
                     ...component,

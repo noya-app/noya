@@ -2,7 +2,7 @@ import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
 import { ActivityIndicator, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
@@ -21,6 +21,11 @@ const DescriptionTextArea = styled.textarea(({ theme }) => ({
   '&:focus': {
     boxShadow: `0 0 0 2px ${theme.colors.primary}`,
   },
+  // readonly
+  '&:read-only': {
+    color: theme.colors.textDisabled,
+  },
+  resize: 'none',
 }));
 
 type Props = {
@@ -40,6 +45,12 @@ export const ComponentDescriptionInspector = memo(
       client.generate.resetComponentDescription(selectedLayer.name);
     }, [client, dispatch, selectedLayer.do_objectID, selectedLayer.name]);
 
+    const value =
+      (generatedDescription.loading && generatedDescription.description
+        ? generatedDescription.description
+        : selectedLayer.data.description) ?? '';
+    const textareaRef = useAutoResize(value);
+
     return (
       <InspectorPrimitives.LabeledRow
         label="Description"
@@ -56,7 +67,9 @@ export const ComponentDescriptionInspector = memo(
         }
       >
         <DescriptionTextArea
-          value={selectedLayer.data.description || ''}
+          ref={textareaRef}
+          value={value}
+          readOnly={generatedDescription.loading}
           onChange={(event) => {
             dispatch(
               'setLayerDescription',
@@ -69,3 +82,16 @@ export const ComponentDescriptionInspector = memo(
     );
   },
 );
+
+const useAutoResize = (value: string) => {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+
+    textareaRef.current.style.height = 'auto'; // Reset the height
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  }, [value]);
+
+  return textareaRef;
+};

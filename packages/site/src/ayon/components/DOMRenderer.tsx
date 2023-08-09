@@ -165,21 +165,35 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                 const resolvedNode = createResolvedNode(
                   findComponent,
                   layer.data.node ??
-                    (layer.data.description === undefined
-                      ? Model.primitiveElement({
-                          componentID: textSymbolId,
-                          children: [
-                            Model.string(
-                              `Generating ${layer.name} description...`,
-                            ),
-                          ],
-                        })
-                      : Model.primitiveElement({
-                          componentID: textSymbolId,
-                          children: [
-                            Model.string(`Generating ${layer.name} layout...`),
-                          ],
-                        })),
+                    Model.primitiveElement({
+                      componentID: boxSymbolId,
+                      classNames: [
+                        'flex-1',
+                        'flex',
+                        'items-center',
+                        'justify-center',
+                        'bg-slate-50',
+                      ],
+                      children: [
+                        layer.data.description === undefined
+                          ? Model.primitiveElement({
+                              componentID: textSymbolId,
+                              children: [
+                                Model.string(
+                                  `Generating ${layer.name} description...`,
+                                ),
+                              ],
+                            })
+                          : Model.primitiveElement({
+                              componentID: textSymbolId,
+                              children: [
+                                Model.string(
+                                  `Generating ${layer.name} layout...`,
+                                ),
+                              ],
+                            }),
+                      ],
+                    }),
                 );
 
                 const content = renderResolvedNode({
