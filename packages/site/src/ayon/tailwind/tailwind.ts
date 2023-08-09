@@ -214,7 +214,10 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       };
     case 'justify':
       return {
-        justifyContent: className.replace('justify-', ''),
+        justifyContent:
+          className === 'justify-between'
+            ? 'space-between'
+            : className.replace('justify-', ''),
       };
     case 'items':
       return {

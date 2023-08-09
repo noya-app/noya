@@ -48,6 +48,7 @@ module.exports = {
         'justify-start',
         'justify-center',
         'justify-end',
+        'justify-between',
         'p-{spacing}',
         'px-{spacing}',
         'py-{spacing}',
