@@ -95,7 +95,7 @@ export const ButtonElement = styled.button<{
     color: theme.colors.text,
     boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
     fontSize: '12px',
-    padding: '2px 6px',
+    padding: '0px 4px',
   }),
   display: 'flex',
   alignItems: 'center',

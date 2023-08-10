@@ -1,6 +1,8 @@
 import {
+  Button,
   Chip,
   InputField,
+  InputFieldWithCompletions,
   RelativeDropPosition,
   Stack,
   Text,
@@ -9,9 +11,11 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { isDeepEqual, uuid } from 'noya-utils';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
+import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
+import { allClassNames } from '../ayon/tailwind/tailwind';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import {
@@ -185,6 +189,12 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
   }
 }
 
+const styleItems = allClassNames.map((item) => ({
+  name: item,
+  id: 'style:' + item,
+  icon: <HashtagIcon item={item} />,
+}));
+
 export const DSLayoutRow = memo(function DSLayerRow({
   id,
   rootNode,
@@ -308,13 +318,22 @@ export const DSLayoutRow = memo(function DSLayerRow({
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const [isSearching, setIsSearching] = React.useState(false);
+
+  useEffect(() => {
+    if (isSearching) {
+      searchInputRef.current?.focus();
+    }
+  }, [isSearching]);
+
   return (
     <TreeView.Row
       id={id}
       depth={depth - 1}
       menuItems={menu}
       onSelectMenuItem={onSelectMenuItem}
-      hovered={hovered && !isDragging}
+      hovered={(hovered || isMenuOpen) && !isDragging && !isSearching}
       sortable
       onMenuOpenChange={setIsMenuOpen}
       onHoverChange={(hovered) => {
@@ -333,7 +352,6 @@ export const DSLayoutRow = memo(function DSLayerRow({
       <Stack.V
         flex="1 1 0%"
         padding="1px"
-        overflow="hidden"
         borderRadius="4px"
         margin="2px 0"
         border={
@@ -365,7 +383,36 @@ export const DSLayoutRow = memo(function DSLayerRow({
             : 'inherit'
         }
       >
-        {node.type === 'noyaString' ? (
+        {isSearching ? (
+          <InputFieldWithCompletions
+            ref={searchInputRef}
+            placeholder={'Find style'}
+            items={styleItems}
+            onBlur={() => {
+              setIsSearching(false);
+            }}
+            onSelectItem={(item) => {
+              setIsSearching(false);
+
+              if (item.id.startsWith('style:')) {
+                setDiff(
+                  Model.diff([
+                    Model.diffItem({
+                      path,
+                      classNames: {
+                        add: [item.name],
+                      },
+                    }),
+                  ]),
+                );
+              }
+            }}
+            style={{
+              zIndex: 1, // Focus outline should appear above chips
+              background: 'transparent',
+            }}
+          />
+        ) : node.type === 'noyaString' ? (
           <InputField.Root>
             <InputField.Input
               style={{
@@ -381,9 +428,18 @@ export const DSLayoutRow = memo(function DSLayerRow({
             />
           </InputField.Root>
         ) : (
-          <Stack.H padding="4px 8px" alignItems="center">
+          <Stack.H padding="4px 6px" alignItems="center">
             <TreeView.RowTitle>{name}</TreeView.RowTitle>
-            {node.type === 'noyaPrimitiveElement' ? (
+            {hovered ? (
+              <Button
+                variant="floating"
+                onClick={() => {
+                  setIsSearching(true);
+                }}
+              >
+                Add Style
+              </Button>
+            ) : node.type === 'noyaPrimitiveElement' ? (
               <Text variant="code" fontSize="9px">
                 {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
               </Text>

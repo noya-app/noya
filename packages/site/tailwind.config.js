@@ -105,7 +105,6 @@ module.exports = {
         'grid',
         'grid-flow-col',
         'grid-flow-row',
-        'leading-{lineHeight}',
       ],
     }),
   ],

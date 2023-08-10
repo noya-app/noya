@@ -89,7 +89,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     aliases: ['Toggle'],
   },
   { id: tableSymbolId, name: 'Table', icon: <TableIcon /> },
-  { id: tagSymbolId, name: 'Tag', icon: <BadgeIcon />, aliases: ['Chip'] },
+  {
+    id: tagSymbolId,
+    name: 'Tag',
+    icon: <BadgeIcon />,
+    aliases: ['Badge', 'Chip'],
+  },
   { id: textSymbolId, name: 'Text', icon: <TextIcon /> },
   { id: textareaSymbolId, name: 'Textarea', icon: <InputIcon /> },
 ];
