@@ -1979,3 +1979,7 @@ auto-rows-auto
 grid
 grid-flow-col
 grid-flow-row
+grow
+grow-0
+shrink
+shrink-0

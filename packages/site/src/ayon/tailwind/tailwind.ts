@@ -90,6 +90,8 @@ export const classGroups = {
   flexDirection: /^(flex-row|flex-col)/,
   flex: /^(flex-1|flex-auto|flex-none)/,
   flexBasis: /^basis-/,
+  grow: /^grow/,
+  shrink: /^shrink/,
   alignSelf: /^self/,
   borderRadius: /^rounded/,
   borderWidth: /^border(-\d+)?$/,
@@ -485,6 +487,18 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'objectPosition': {
       return {
         objectPosition: className.replace('object-', ''),
+      };
+    }
+    case 'grow': {
+      const value = getValue(className);
+      return {
+        flexGrow: (config.theme as any).flexGrow[value || 'DEFAULT'],
+      };
+    }
+    case 'shrink': {
+      const value = getValue(className);
+      return {
+        flexShrink: (config.theme as any).flexShrink[value || 'DEFAULT'],
       };
     }
   }

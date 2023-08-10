@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(inset-|object-|top-|right-|bottom-|left-|absolute|relative|shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self|underline|line-through|overline|no-underline|backdrop).*/,
+        /^(grow|shrink|inset-|object-|top-|right-|bottom-|left-|absolute|relative|shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self|underline|line-through|overline|no-underline|backdrop).*/,
     },
   ],
   plugins: [
@@ -105,6 +105,10 @@ module.exports = {
         'grid',
         'grid-flow-col',
         'grid-flow-row',
+        'grow',
+        'grow-0',
+        'shrink',
+        'shrink-0',
       ],
     }),
   ],
