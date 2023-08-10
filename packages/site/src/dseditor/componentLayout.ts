@@ -1,8 +1,5 @@
 import { memoize } from 'noya-utils';
-import { parseFragment } from 'parse5';
-import type { ChildNode, TextNode } from 'parse5/dist/tree-adapters/default';
 import { withOptions } from 'tree-visit';
-import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
 import {
   PRIMITIVE_ELEMENT_NAMES,
@@ -10,45 +7,12 @@ import {
 } from './primitiveElements';
 import { NoyaElement, NoyaNode } from './types';
 
-const HTMLHierarchy = withOptions<ChildNode>({
-  getChildren: (node) => {
-    if (node === undefined) {
-      debugger;
-    }
-    return 'childNodes' in node ? node.childNodes : [];
-  },
-  create: (node: ChildNode, children: ChildNode[]): ChildNode =>
-    'childNodes' in node ? { ...node, childNodes: children } : { ...node },
+import { LayoutNode, parseComponentLayout } from 'noya-compiler';
+import { boxSymbolId } from '../ayon/symbols/symbolIds';
+
+const LayoutHierarchy = withOptions<LayoutNode | string>({
+  getChildren: (node) => (typeof node === 'string' ? [] : node.children),
 });
-
-export function parseHTMLFragment(html: string): ChildNode | undefined {
-  // If the html ends with < or </, these are partial closing tags which will
-  // be interpreted as text nodes. To avoid this, we remove the last character(s).
-  html = html.replace(/<\/?$/, '');
-
-  const result = parseFragment(html);
-
-  let root = result.childNodes[0];
-
-  if (!root) return;
-
-  // Remove empty text nodes and comments
-  root = HTMLHierarchy.remove(root, {
-    indexPaths: HTMLHierarchy.findAllIndexPaths(root, (node, indexPath) => {
-      if (indexPath.length === 0) return false;
-
-      if (node.nodeName === '#text') {
-        return (node as TextNode).value.trim() === '';
-      }
-
-      if (node.nodeName.startsWith('#')) return true;
-
-      return false;
-    }),
-  });
-
-  return root;
-}
 
 const tailwindClassMapping: Record<string, string> = {
   'text-5xl': 'variant-h1',
@@ -59,32 +23,19 @@ const tailwindClassMapping: Record<string, string> = {
   'text-lg': 'variant-h6',
 };
 
-export function convertLayoutToElement(
-  layout: ChildNode | undefined,
-): NoyaElement {
-  if (!layout) {
-    return Model.primitiveElement({ componentID: boxSymbolId });
-  }
-
-  const result = HTMLHierarchy.map<NoyaNode>(
+function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
+  const result = LayoutHierarchy.map<NoyaNode>(
     layout,
     (node, transformedChildren, indexPath) => {
-      if (node.nodeName === '#text') {
-        return Model.string({ value: (node as TextNode).value });
+      if (typeof node === 'string') {
+        return Model.string({ value: node });
       }
 
-      if (!('childNodes' in node)) {
-        return Model.string({ value: '?' });
-      }
-
-      const name = node.attrs.find((attr) => attr.name === 'name')?.value;
-      const classes = node.attrs.find((attr) => attr.name === 'class')?.value;
-
-      const result = Model.primitiveElement({
-        componentID: PRIMITIVE_TAG_MAP[node.tagName],
-        name: name || PRIMITIVE_ELEMENT_NAMES[node.tagName],
+      const result: NoyaNode = Model.primitiveElement({
+        componentID: PRIMITIVE_TAG_MAP[node.tag],
+        name: node.attributes.name || PRIMITIVE_ELEMENT_NAMES[node.tag],
         children: transformedChildren,
-        classNames: classes
+        classNames: node.attributes.class
           ?.split(' ')
           .map((className) => tailwindClassMapping[className] || className),
       });
@@ -111,6 +62,6 @@ export function convertLayoutToElement(
 }
 
 export const parseLayout = memoize(function parseLayout(html: string) {
-  const layout = parseHTMLFragment(html);
-  return convertLayoutToElement(layout);
+  const layout = parseComponentLayout(html);
+  return convertLayoutToComponent(layout);
 });

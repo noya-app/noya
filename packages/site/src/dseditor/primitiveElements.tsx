@@ -106,6 +106,5 @@ export const PRIMITIVE_ELEMENT_NAMES: Record<string, string> =
 
 // Lowercase tag name => primitive element ID
 export const PRIMITIVE_TAG_MAP: Record<string, string> = Object.fromEntries(
-  primitiveElements.map((element) => [element.name.toLowerCase(), element.id]),
+  primitiveElements.map((element) => [element.name, element.id]),
 );
-PRIMITIVE_TAG_MAP['img'] = imageSymbolId;
