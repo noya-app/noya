@@ -110,6 +110,7 @@ export const classGroups = {
   lineHeight: /^leading-/,
   position: /^(absolute|relative|fixed|sticky)/,
   inset: /^inset-/,
+  opacity: /^opacity-/,
   objectFit:
     /^(object-contain|object-cover|object-fill|object-none|object-scale-down)/,
   objectPosition: /^object-/,
@@ -499,6 +500,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = getValue(className);
       return {
         flexShrink: (config.theme as any).flexShrink[value || 'DEFAULT'],
+      };
+    }
+    case 'opacity': {
+      const value = getValue(className);
+      return {
+        opacity: (config.theme as any).opacity[value || 'DEFAULT'],
       };
     }
   }
