@@ -1,6 +1,7 @@
 import {
   Button,
   Chip,
+  CompletionItem,
   InputField,
   InputFieldWithCompletions,
   RelativeDropPosition,
@@ -17,7 +18,10 @@ import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { allClassNames } from '../ayon/tailwind/tailwind';
 import { Model } from './builders';
-import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
+import {
+  PRIMITIVE_ELEMENT_NAMES,
+  primitiveElements,
+} from './primitiveElements';
 import {
   FindComponent,
   ResolvedHierarchy,
@@ -189,11 +193,26 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
   }
 }
 
-const styleItems = allClassNames.map((item) => ({
-  name: item,
-  id: 'style:' + item,
-  icon: <HashtagIcon item={item} />,
-}));
+const styleItems = allClassNames.map(
+  (item): CompletionItem => ({
+    name: item,
+    id: item,
+    icon: <HashtagIcon item={item} />,
+  }),
+);
+
+const typeItems = primitiveElements.flatMap((p): CompletionItem[] => [
+  {
+    id: p.id,
+    name: p.name,
+    icon: p.icon,
+  },
+  // ...(p.aliases ?? []).map((alias) => ({
+  //   id: p.id,
+  //   name: alias,
+  //   icon: p.icon,
+  // })),
+]);
 
 export const DSLayoutRow = memo(function DSLayerRow({
   id,
@@ -226,22 +245,55 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
   const name = getName(node, findComponent);
-  const menu = createSectionedMenu([
-    node.type === 'noyaPrimitiveElement' && {
-      title: 'Add Child',
-      value: 'addChild',
-    },
-    depth !== 0 &&
-      parent.type === 'noyaPrimitiveElement' && {
-        title: 'Duplicate',
-        value: 'duplicate',
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const [isSearchingStyles, setIsSearchingStyles] = React.useState(false);
+
+  useEffect(() => {
+    if (isSearchingStyles) {
+      styleSearchInputRef.current?.focus();
+    }
+  }, [isSearchingStyles]);
+
+  const typeSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const [isSearchingTypes, setIsSearchingTypes] = React.useState(false);
+
+  useEffect(() => {
+    if (isSearchingTypes) {
+      typeSearchInputRef.current?.focus();
+    }
+  }, [isSearchingTypes]);
+
+  const menu = createSectionedMenu(
+    [
+      node.type === 'noyaPrimitiveElement' && {
+        title: 'Add Child',
+        value: 'addChild',
       },
-    depth !== 0 &&
-      parent.type === 'noyaPrimitiveElement' && {
-        title: 'Delete',
-        value: 'delete',
+      depth !== 0 &&
+        parent.type === 'noyaPrimitiveElement' && {
+          title: 'Duplicate',
+          value: 'duplicate',
+        },
+      depth !== 0 &&
+        parent.type === 'noyaPrimitiveElement' && {
+          title: 'Delete',
+          value: 'delete',
+        },
+    ],
+    [
+      node.type === 'noyaPrimitiveElement' && {
+        title: 'Add Style',
+        value: 'addStyle',
       },
-  ]);
+      node.type === 'noyaPrimitiveElement' && {
+        title: 'Set Element Type',
+        value: 'addType',
+      },
+    ],
+  );
   type MenuItemType = Exclude<
     Extract<(typeof menu)[number], object>['value'],
     undefined
@@ -250,6 +302,20 @@ export const DSLayoutRow = memo(function DSLayerRow({
 
   const onSelectMenuItem = (value: MenuItemType) => {
     switch (value) {
+      case 'addStyle': {
+        // Wait for menu to close
+        setTimeout(() => {
+          setIsSearchingStyles(true);
+        }, 0);
+        break;
+      }
+      case 'addType': {
+        // Wait for menu to close
+        setTimeout(() => {
+          setIsSearchingTypes(true);
+        }, 0);
+        break;
+      }
       case 'duplicate': {
         if (rootNode.type === 'noyaString') return;
 
@@ -316,24 +382,18 @@ export const DSLayoutRow = memo(function DSLayerRow({
     }
   };
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
-  const [isSearching, setIsSearching] = React.useState(false);
-
-  useEffect(() => {
-    if (isSearching) {
-      searchInputRef.current?.focus();
-    }
-  }, [isSearching]);
-
   return (
     <TreeView.Row
       id={id}
       depth={depth - 1}
       menuItems={menu}
       onSelectMenuItem={onSelectMenuItem}
-      hovered={(hovered || isMenuOpen) && !isDragging && !isSearching}
+      hovered={
+        (hovered || isMenuOpen) &&
+        !isDragging &&
+        !isSearchingStyles &&
+        !isSearchingTypes
+      }
       sortable
       onMenuOpenChange={setIsMenuOpen}
       onHoverChange={(hovered) => {
@@ -383,29 +443,74 @@ export const DSLayoutRow = memo(function DSLayerRow({
             : 'inherit'
         }
       >
-        {isSearching ? (
+        {isSearchingTypes ? (
           <InputFieldWithCompletions
-            ref={searchInputRef}
+            ref={typeSearchInputRef}
+            placeholder={'Find component'}
+            items={typeItems}
+            onBlur={() => {
+              setIsSearchingTypes(false);
+            }}
+            onSelectItem={(item) => {
+              setIsSearchingTypes(false);
+
+              const sourceNode = findSourceNode(findComponent, rootNode, path);
+
+              setDiff(
+                Model.diff([
+                  Model.diffItem({
+                    path: path.slice(0, -1),
+                    children: {
+                      remove: [node.id],
+                      add: [
+                        {
+                          index: indexPath[indexPath.length - 1],
+                          node: Model.primitiveElement({
+                            name: name,
+                            componentID: item.id,
+                            // TODO: Using children directly could cause id conflicts
+                            children:
+                              sourceNode && 'children' in sourceNode
+                                ? sourceNode.children
+                                : undefined,
+                            classNames:
+                              sourceNode && 'classNames' in sourceNode
+                                ? sourceNode.classNames
+                                : undefined,
+                          }),
+                        },
+                      ],
+                    },
+                  }),
+                ]),
+              );
+            }}
+            style={{
+              zIndex: 1, // Focus outline should appear above chips
+              background: 'transparent',
+            }}
+          />
+        ) : isSearchingStyles ? (
+          <InputFieldWithCompletions
+            ref={styleSearchInputRef}
             placeholder={'Find style'}
             items={styleItems}
             onBlur={() => {
-              setIsSearching(false);
+              setIsSearchingStyles(false);
             }}
             onSelectItem={(item) => {
-              setIsSearching(false);
+              setIsSearchingStyles(false);
 
-              if (item.id.startsWith('style:')) {
-                setDiff(
-                  Model.diff([
-                    Model.diffItem({
-                      path,
-                      classNames: {
-                        add: [item.name],
-                      },
-                    }),
-                  ]),
-                );
-              }
+              setDiff(
+                Model.diff([
+                  Model.diffItem({
+                    path,
+                    classNames: {
+                      add: [item.name],
+                    },
+                  }),
+                ]),
+              );
             }}
             style={{
               zIndex: 1, // Focus outline should appear above chips
@@ -430,18 +535,23 @@ export const DSLayoutRow = memo(function DSLayerRow({
         ) : (
           <Stack.H padding="4px 6px" alignItems="center">
             <TreeView.RowTitle>{name}</TreeView.RowTitle>
-            {hovered ? (
-              <Button
-                variant="floating"
-                onClick={() => {
-                  setIsSearching(true);
-                }}
-              >
-                Add Style
-              </Button>
-            ) : node.type === 'noyaPrimitiveElement' ? (
+            {node.type === 'noyaPrimitiveElement' ? (
               <Text variant="code" fontSize="9px">
-                {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
+                <Button
+                  variant="none"
+                  // variant="floating"
+                  onClick={() => {
+                    setIsSearchingTypes(true);
+                  }}
+                  contentStyle={{
+                    ...theme.textStyles.code,
+                    fontSize: '9px',
+                    minHeight: '15px',
+                    padding: '0 2px',
+                  }}
+                >
+                  {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
+                </Button>
               </Text>
             ) : node.type === 'noyaCompositeElement' && node.variantID ? (
               <Text variant="code" fontSize="9px">
@@ -488,6 +598,18 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 {value}
               </Chip>
             ))}
+            <Chip
+              size={'small'}
+              addable
+              monospace
+              onAdd={() => {
+                if (isSearchingStyles) {
+                  setIsSearchingStyles(false);
+                } else {
+                  setIsSearchingStyles(true);
+                }
+              }}
+            />
           </Stack.H>
         )}
       </Stack.V>

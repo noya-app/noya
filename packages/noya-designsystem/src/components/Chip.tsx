@@ -67,7 +67,8 @@ const DeleteElement = styled(Cross1Icon)<{
 
 const AddElement = styled(PlusIcon)<{
   size: ChipSize;
-}>(({ size }) => ({
+  isOnlyChild: boolean;
+}>(({ size, isOnlyChild }) => ({
   position: 'relative',
   marginRight: '-2px',
   cursor: 'pointer',
@@ -81,6 +82,7 @@ const AddElement = styled(PlusIcon)<{
       }
     : {
         transform: 'scale(0.6)',
+        ...(isOnlyChild && { marginLeft: '-2px' }),
       }),
 
   '&:hover': {
@@ -119,11 +121,13 @@ export const Chip = memo(function Chip({
     onHoverChange: onHoverDeleteChange,
   });
 
+  const handleClick = !children && !deletable && addable ? onAdd : onClick;
+
   return (
     <ChipElement
       variant={variant}
       style={style}
-      onClick={onClick}
+      onClick={handleClick}
       size={size}
       monospace={monospace}
     >
@@ -135,7 +139,13 @@ export const Chip = memo(function Chip({
           onClick={onDelete}
         />
       )}
-      {addable && <AddElement size={size} onClick={onAdd} />}
+      {addable && (
+        <AddElement
+          size={size}
+          isOnlyChild={!children && !deletable}
+          onClick={onAdd}
+        />
+      )}
     </ChipElement>
   );
 });
