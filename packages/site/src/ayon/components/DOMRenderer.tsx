@@ -1,4 +1,4 @@
-import { DS } from 'noya-api';
+import { DS, useGeneratedLayouts, useNoyaClient } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
@@ -9,6 +9,7 @@ import { DSControlledRenderer } from '../../dseditor/DSControlledRenderer';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { Model } from '../../dseditor/builders';
 import { initialComponents } from '../../dseditor/builtins';
+import { parseLayout } from '../../dseditor/componentLayout';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
 import {
   ResolvedHierarchy,
@@ -60,6 +61,7 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
   },
   forwardedRef: React.ForwardedRef<IDSRenderer>,
 ): JSX.Element {
+  const client = useNoyaClient();
   const [state, dispatch] = useAyonState();
   const { canvasInsets } = useWorkspace();
   const page = Selectors.getCurrentPage(state);
@@ -88,6 +90,7 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
       initialComponents.find((component) => component.componentID === id),
     [],
   );
+  const generatedLayouts = useGeneratedLayouts();
 
   return (
     <>
@@ -162,9 +165,25 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
               );
 
               return layers.map((layer) => {
+                function createLoadingNode() {
+                  if (!layer.data.description) return;
+
+                  const key = client.componentLayoutCacheKey(
+                    layer.name,
+                    layer.data.description,
+                  );
+
+                  const layout = generatedLayouts.layouts[key];
+
+                  if (!layout) return undefined;
+
+                  return parseLayout(layout);
+                }
+
                 const resolvedNode = createResolvedNode(
                   findComponent,
                   layer.data.node ??
+                    createLoadingNode() ??
                     Model.primitiveElement({
                       componentID: boxSymbolId,
                       classNames: [

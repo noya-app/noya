@@ -1,5 +1,4 @@
 import { useNoyaClient } from 'noya-api';
-import { parseComponentLayout } from 'noya-compiler';
 import {
   Button,
   InputField,
@@ -14,7 +13,7 @@ import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSLayoutTree } from './DSLayoutTree';
-import { LayoutHierarchy, convertLayoutToComponent } from './componentLayout';
+import { parseLayout } from './componentLayout';
 import { mergeDiffs } from './diff';
 import { FindComponent, embedRootLevelDiff } from './traversal';
 import {
@@ -123,35 +122,20 @@ export function DSComponentInspector({
                 variant="secondary"
                 flex="1"
                 onClick={async () => {
-                  const layouts =
+                  const iterable =
                     await client.networkClient.generate.componentLayoutsFromDescription(
                       component.name ?? 'Untitled',
                       component.description ?? '',
                     );
 
-                  const parsed = layouts.map((layout) =>
-                    parseComponentLayout(layout.code),
-                  );
-
-                  if (parsed.length === 0) return;
-
-                  console.info(
-                    LayoutHierarchy.diagram(parsed[0], (node, indexPath) => {
-                      if (typeof node === 'string') return node;
-
-                      const attributesString = Object.entries(node.attributes)
-                        .map(([key, value]) => `${key}="${value}"`)
-                        .join(' ');
-
-                      return `<${[node.tag, attributesString]
-                        .filter(Boolean)
-                        .join(' ')}>`;
-                    }),
-                  );
+                  let layout = '';
+                  for await (const chunk of iterable) {
+                    layout += chunk;
+                  }
 
                   onChangeComponent({
                     ...component,
-                    rootElement: convertLayoutToComponent(parsed[0]),
+                    rootElement: parseLayout(layout),
                   });
                 }}
               >

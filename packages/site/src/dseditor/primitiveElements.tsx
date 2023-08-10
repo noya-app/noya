@@ -99,6 +99,7 @@ export const PRIMITIVE_ELEMENT_NAMES: Record<string, string> =
     primitiveElements.map((element) => [element.id, element.name]),
   );
 
+// Lowercase tag name => primitive element ID
 export const PRIMITIVE_TAG_MAP: Record<string, string> = Object.fromEntries(
-  primitiveElements.map((element) => [element.name, element.id]),
+  primitiveElements.map((element) => [element.name.toLowerCase(), element.id]),
 );

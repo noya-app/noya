@@ -1,9 +1,10 @@
-import { useGeneratedComponentLayout, useNoyaClient } from 'noya-api';
+import { useGeneratedLayout, useNoyaClient } from 'noya-api';
 import { ActivityIndicator, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
+import { parseLayout } from '../../../dseditor/componentLayout';
 import { embedRootLevelDiff } from '../../../dseditor/traversal';
 import { NoyaComponent, NoyaDiff } from '../../../dseditor/types';
 import { useAyonDispatch } from '../../state/ayonState';
@@ -22,31 +23,10 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
 }: Props) {
   const dispatch = useAyonDispatch();
   const client = useNoyaClient();
-  const generatedLayouts = useGeneratedComponentLayout(
+  const generatedLayout = useGeneratedLayout(
     selectedLayer.name ?? '',
     selectedLayer.data.description ?? '',
   );
-
-  useEffect(() => {
-    if (
-      !selectedLayer.name ||
-      !selectedLayer.data.description ||
-      selectedLayer.data.node !== undefined
-    ) {
-      return;
-    }
-
-    client.generate.componentLayouts({
-      name: selectedLayer.name,
-      description: selectedLayer.data.description,
-    });
-  }, [
-    client,
-    dispatch,
-    selectedLayer.data.description,
-    selectedLayer.data.node,
-    selectedLayer.name,
-  ]);
 
   const handleShuffle = useCallback(() => {
     dispatch('setLayerNode', selectedLayer.do_objectID, undefined);
@@ -62,7 +42,13 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.name,
   ]);
 
-  const node = selectedLayer.data.node;
+  const node = useMemo(() => {
+    if (selectedLayer.data.node) return selectedLayer.data.node;
+
+    if (generatedLayout.layout) {
+      return parseLayout(generatedLayout.layout);
+    }
+  }, [generatedLayout.layout, selectedLayer.data.node]);
 
   const findComponent = useCallback((id: string): NoyaComponent | undefined => {
     return undefined;
@@ -82,7 +68,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       title="Layout"
       titleTextStyle="heading4"
       right={
-        generatedLayouts.loading ? (
+        generatedLayout.loading ? (
           <ActivityIndicator size={13} />
         ) : (
           <IconButton

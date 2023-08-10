@@ -25,6 +25,7 @@
     "logrocket": "^3.0.1",
     "logrocket-react": "^5.0.1",
     "next": "^12",
+    "parse5": "^7.1.2",
     "react-guidebook": "^0.13.0",
     "react-resizable-panels": "^0.0.33",
     "vscode-fuzzy-scorer": "^0.0.4"

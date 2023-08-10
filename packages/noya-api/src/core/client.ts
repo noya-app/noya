@@ -9,7 +9,6 @@ import {
   NoyaEmailList,
   NoyaFile,
   NoyaFileData,
-  NoyaGeneratedLayout,
   NoyaGeneratedName,
   NoyaJson,
   NoyaMetadataItem,
@@ -61,7 +60,7 @@ export class NoyaClient {
   });
   generatedDescriptions$ = observable<Record<string, string>>({});
   loadingDescriptions$ = observable<Record<string, boolean>>({});
-  generatedLayouts$ = observable<Record<string, NoyaGeneratedLayout[]>>({});
+  generatedLayouts$ = observable<Record<string, string>>({});
   loadingLayouts$ = observable<Record<string, boolean>>({});
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -154,27 +153,33 @@ export class NoyaClient {
   #generateComponentLayouts = async (options: {
     name: string;
     description: string;
-  }): Promise<NoyaGeneratedLayout[]> => {
+  }) => {
     const name = options.name.trim();
     const description = options.description.trim();
     const key = this.componentLayoutCacheKey(name, description);
 
     const existing = this.generatedLayouts$[key].get();
 
-    if (Array.isArray(existing) && existing.length > 0) return existing;
+    if (typeof existing === 'string') return existing;
 
     this.loadingLayouts$.set((prev) => ({ ...prev, [key]: true }));
 
-    const result =
+    const iterable =
       await this.networkClient.generate.componentLayoutsFromDescription(
         name,
         description,
       );
 
-    this.generatedLayouts$.set((prev) => ({ ...prev, [key]: result }));
+    let text = '';
+    for await (const chunk of iterable) {
+      text += chunk;
+      let nextText = text;
+      this.generatedLayouts$.set((prev) => ({ ...prev, [key]: nextText }));
+    }
+
     this.loadingLayouts$.set((prev) => ({ ...prev, [key]: false }));
 
-    return result;
+    return iterable;
   };
 
   #resetGenerateComponentDescription = (name: string) => {

@@ -1,7 +1,7 @@
 import { useSelector } from '@legendapp/state/react';
 import { NoyaAPI } from 'noya-api';
 import { useMemo } from 'react';
-import { NoyaGeneratedLayout, NoyaGeneratedName } from '../core/schema';
+import { NoyaGeneratedName } from '../core/schema';
 import { useNoyaClient, useOptionalNoyaClient } from './context';
 
 export function useNoyaFiles() {
@@ -69,20 +69,20 @@ export function useGeneratedComponentDescription(name: string) {
   return useMemo(() => ({ description, loading }), [loading, description]);
 }
 
-export function useGeneratedComponentLayouts() {
+export function useGeneratedLayouts() {
   const { generatedLayouts$, loadingLayouts$ } = useNoyaClient();
   const layouts = useSelector(generatedLayouts$);
   const loading = useSelector(loadingLayouts$);
   return useMemo(() => ({ layouts, loading }), [loading, layouts]);
 }
 
-export function useGeneratedComponentLayout(name: string, description: string) {
+export function useGeneratedLayout(name: string, description: string) {
   const { componentLayoutCacheKey, generatedLayouts$, loadingLayouts$ } =
     useNoyaClient();
   const key = componentLayoutCacheKey(name, description);
-  const layouts = useSelector(
-    () => generatedLayouts$[key].get() as NoyaGeneratedLayout[] | undefined,
+  const layout = useSelector(
+    () => generatedLayouts$[key].get() as string | undefined,
   );
   const loading = useSelector(() => loadingLayouts$[key].get() ?? false);
-  return useMemo(() => ({ layouts, loading }), [loading, layouts]);
+  return useMemo(() => ({ layout, loading }), [loading, layout]);
 }

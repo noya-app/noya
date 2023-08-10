@@ -89,7 +89,7 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
 
   generate = {
     componentNames: async () => [{ name: 'My Component' }],
-    componentDescriptionFromName: async () => {
+    componentDescriptionFromName: async (name: string) => {
       async function* generator() {
         yield 'My Component';
       }
@@ -99,12 +99,13 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     componentLayoutsFromDescription: async (
       name: string,
       description: string,
-    ) => [
-      {
-        name: 'My Component',
-        code: `<Box class="bg-red-500"><Text class="white">Hello</Text></Box>`,
-      },
-    ],
+    ) => {
+      async function* generator() {
+        yield `<Box class="bg-red-500"><Text class="white">Hello</Text></Box>`;
+      }
+
+      return generator();
+    },
   };
 
   billing: INoyaNetworkClient['billing'] = {

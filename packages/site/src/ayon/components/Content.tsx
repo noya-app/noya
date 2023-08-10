@@ -1,7 +1,7 @@
 import {
   DS,
   useGeneratedComponentDescriptions,
-  useGeneratedComponentLayouts,
+  useGeneratedLayouts,
   useNoyaClient,
 } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
@@ -11,7 +11,6 @@ import {
   SimpleCanvas,
   convertPoint,
 } from 'noya-canvas';
-import { parseComponentLayout } from 'noya-compiler';
 import { Stack, Toast } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
@@ -38,7 +37,7 @@ import React, {
 import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
-import { convertLayoutToComponent } from '../../dseditor/componentLayout';
+import { parseLayout } from '../../dseditor/componentLayout';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
@@ -179,7 +178,7 @@ export const Content = memo(function Content({
 
   const { descriptions, loading: loadingDescriptions } =
     useGeneratedComponentDescriptions();
-  const { layouts, loading: loadingLayouts } = useGeneratedComponentLayouts();
+  const { layouts, loading: loadingLayouts } = useGeneratedLayouts();
 
   useEffect(() => {
     // Resolve descriptions. If a custom layer has a name but no description,
@@ -219,13 +218,7 @@ export const Content = memo(function Content({
       if (loadingLayouts[key]) return;
 
       if (layouts[key]) {
-        const parsed = layouts[key].map((layout) =>
-          parseComponentLayout(layout.code),
-        );
-
-        if (parsed.length === 0) return;
-
-        const node = convertLayoutToComponent(parsed[0]);
+        const node = parseLayout(layouts[key]);
 
         dispatch('setLayerNode', layer.do_objectID, node);
       } else {
