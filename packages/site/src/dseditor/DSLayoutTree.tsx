@@ -1,14 +1,15 @@
 import {
   Chip,
   InputField,
+  RelativeDropPosition,
   Stack,
   Text,
   TreeView,
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { uuid } from 'noya-utils';
-import React, { memo, useMemo } from 'react';
+import { isDeepEqual, uuid } from 'noya-utils';
+import React, { memo, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
@@ -37,12 +38,14 @@ function flattenResolvedNode(resolvedNode: NoyaResolvedNode): LayoutTreeItem[] {
 
       if (node.type === 'noyaString') return [];
 
+      const key = node.path.join('/');
+
       return [
         {
           node,
           depth,
           indexPath: indexPath.slice(),
-          key: node.path.join('/'),
+          key,
           path: node.path,
         },
       ];
@@ -89,6 +92,58 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       indentation={24}
       sortable
       pressEventName="onPointerDown"
+      acceptsDrop={(
+        sourceId: string,
+        destinationId: string,
+        relationDropPosition: RelativeDropPosition,
+      ) => {
+        const sourceItem = flattened.find((item) => sourceId === item.key);
+        const destinationItem = flattened.find(
+          (item) => destinationId === item.key,
+        );
+
+        if (!sourceItem || !destinationItem) return false;
+
+        if (destinationItem.node.type !== 'noyaPrimitiveElement') return false;
+
+        const sourcePath = ResolvedHierarchy.findIndexPath(
+          resolvedNode,
+          (node) => node.path.join('/') === sourceItem.path.join('/'),
+        );
+        const destinationPath = ResolvedHierarchy.findIndexPath(
+          resolvedNode,
+          (node) => node.path.join('/') === destinationItem.path.join('/'),
+        );
+
+        if (!sourcePath || !destinationPath) return false;
+
+        // Don't allow dragging the root
+        if (sourcePath.length === 0) {
+          return false;
+        }
+
+        // Don't allow dragging above or below the root
+        if (destinationPath.length === 0 && relationDropPosition !== 'inside') {
+          return false;
+        }
+
+        const sourceParent = ResolvedHierarchy.access(
+          resolvedNode,
+          sourcePath.slice(0, -1),
+        );
+
+        // Don't allow dragging into a non-primitive element
+        if (sourceParent.type !== 'noyaPrimitiveElement') return false;
+
+        // Don't allow dragging into a descendant
+        if (
+          isDeepEqual(sourcePath, destinationPath.slice(0, sourcePath.length))
+        ) {
+          return false;
+        }
+
+        return true;
+      }}
       renderItem={(
         { depth, key, indexPath, node, path },
         index,
@@ -251,19 +306,27 @@ export const DSLayoutRow = memo(function DSLayerRow({
     }
   };
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <TreeView.Row
-      id={`n-${id}`}
+      id={id}
       depth={depth - 1}
       menuItems={menu}
       onSelectMenuItem={onSelectMenuItem}
       hovered={hovered && !isDragging}
+      sortable
+      onMenuOpenChange={setIsMenuOpen}
       onHoverChange={(hovered) => {
         setHighlightedPath(hovered ? path : undefined);
       }}
       icon={
         depth !== 0 && (
-          <DraggableMenuButton items={menu} onSelect={onSelectMenuItem} />
+          <DraggableMenuButton
+            isVisible={hovered || isMenuOpen || isDragging}
+            items={menu}
+            onSelect={onSelectMenuItem}
+          />
         )
       }
     >
@@ -281,6 +344,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
         background={
           node.status === 'removed'
             ? 'rgb(255, 229, 229)'
+            : node.status === 'added'
+            ? 'rgb(205, 238, 231)'
             : node.type === 'noyaCompositeElement'
             ? 'rgb(238, 229, 255)'
             : undefined

@@ -32,7 +32,15 @@ const TriggerElement = styled.div({
  */
 export const DraggableMenuButton = memo(function DraggableMenuButton<
   T extends string,
->({ items, onSelect }: { items: MenuItem<T>[]; onSelect: (value: T) => void }) {
+>({
+  items,
+  onSelect,
+  isVisible = true,
+}: {
+  items: MenuItem<T>[];
+  onSelect: (value: T) => void;
+  isVisible?: boolean;
+}) {
   const color = useDesignSystemTheme().colors.icon;
   const [open, setOpen] = useState(false);
   const [downPosition, setDownPosition] = React.useState<{
@@ -96,7 +104,9 @@ export const DraggableMenuButton = memo(function DraggableMenuButton<
         shouldBindKeyboardShortcuts={false}
       >
         <TriggerElement>
-          <DragHandleDots2Icon color={color} />
+          <DragHandleDots2Icon
+            color={isVisible || open ? color : 'transparent'}
+          />
         </TriggerElement>
       </DropdownMenu>
     </DotButtonElement>

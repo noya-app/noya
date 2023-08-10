@@ -137,7 +137,7 @@ function SortableItem<T extends HTMLElement>({
     ...attributes,
     ...listeners,
     relativeDropPosition:
-      index === overIndex && !isDragging && active && over
+      index >= 0 && index === overIndex && !isDragging && active && over
         ? validateDropIndicator(
             acceptsDrop,
             active.id,
