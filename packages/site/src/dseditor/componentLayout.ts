@@ -1,10 +1,6 @@
 import { memoize } from 'noya-utils';
 import { parseFragment } from 'parse5';
-import type {
-  ChildNode,
-  Element,
-  TextNode,
-} from 'parse5/dist/tree-adapters/default';
+import type { ChildNode, TextNode } from 'parse5/dist/tree-adapters/default';
 import { withOptions } from 'tree-visit';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
@@ -26,6 +22,10 @@ const HTMLHierarchy = withOptions<ChildNode>({
 });
 
 export function parseHTMLFragment(html: string): ChildNode | undefined {
+  // If the html ends with < or </, these are partial closing tags which will
+  // be interpreted as text nodes. To avoid this, we remove the last character(s).
+  html = html.replace(/<\/?$/, '');
+
   const result = parseFragment(html);
 
   let root = result.childNodes[0];
@@ -73,16 +73,14 @@ export function convertLayoutToElement(
         return Model.string({ value: (node as TextNode).value });
       }
 
-      if (!('tagName' in node) || node.nodeName === '#template') {
-        return Model.string({ value: 'comment' });
+      if (!('childNodes' in node)) {
+        return Model.string({ value: '?' });
       }
-
-      node = node as Element;
 
       const name = node.attrs.find((attr) => attr.name === 'name')?.value;
       const classes = node.attrs.find((attr) => attr.name === 'class')?.value;
 
-      const result: NoyaNode = Model.primitiveElement({
+      const result = Model.primitiveElement({
         componentID: PRIMITIVE_TAG_MAP[node.tagName],
         name: name || PRIMITIVE_ELEMENT_NAMES[node.tagName],
         children: transformedChildren,
@@ -91,8 +89,14 @@ export function convertLayoutToElement(
           .map((className) => tailwindClassMapping[className] || className),
       });
 
-      if (indexPath.length === 0 && !result.classNames.includes('flex-1')) {
-        result.classNames?.push('flex-1');
+      // Adjust the root
+      if (indexPath.length === 0) {
+        if (!result.classNames.includes('flex-1')) {
+          result.classNames.push('flex-1');
+        }
+        if (!result.classNames.includes('relative')) {
+          result.classNames.push('relative');
+        }
       }
 
       return result;

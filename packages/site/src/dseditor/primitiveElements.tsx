@@ -103,3 +103,4 @@ export const PRIMITIVE_ELEMENT_NAMES: Record<string, string> =
 export const PRIMITIVE_TAG_MAP: Record<string, string> = Object.fromEntries(
   primitiveElements.map((element) => [element.name.toLowerCase(), element.id]),
 );
+PRIMITIVE_TAG_MAP['img'] = imageSymbolId;
