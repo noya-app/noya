@@ -228,6 +228,7 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
 
                 return (
                   <div
+                    key={layer.do_objectID}
                     style={{
                       position: 'absolute',
                       top: layer.frame.y,

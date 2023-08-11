@@ -100,7 +100,11 @@ const DeleteElement = styled(Cross1Icon)<{
   },
 }));
 
-const AddElement = styled(PlusIcon)<{
+const ignoredProps = new Set(['size', 'isOnlyChild']);
+
+const AddElement = styled(PlusIcon).withConfig({
+  shouldForwardProp: (prop) => !ignoredProps.has(prop),
+})<{
   size: ChipSize;
   isOnlyChild: boolean;
 }>(({ size, isOnlyChild }) => ({
