@@ -119,8 +119,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
         <ErrorBoundary>
           <DSControlledRenderer
             ref={forwardedRef}
-            sourceName="@noya-design-system/chakra"
-            primary="blue"
+            sourceName={ds.source.name}
+            primary={ds.config.colors.primary}
             onChangeTextAtPath={({ path, value }) => {
               const layer = artboard.layers
                 .filter(Layers.isCustomLayer<CustomLayerData>)
