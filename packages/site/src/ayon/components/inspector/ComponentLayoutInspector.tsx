@@ -76,6 +76,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
             onClick={handleShuffle}
             size={13}
             disabled={!selectedLayer.data.description}
+            tooltip="Generate new layout"
           />
         )
       }

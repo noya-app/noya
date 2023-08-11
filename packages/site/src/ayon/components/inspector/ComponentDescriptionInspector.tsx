@@ -62,6 +62,7 @@ export const ComponentDescriptionInspector = memo(
               iconName="ShuffleIcon"
               onClick={handleShuffle}
               size={13}
+              tooltip="Generate new description"
             />
           )
         }
