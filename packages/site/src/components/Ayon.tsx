@@ -202,7 +202,7 @@ function Workspace({
                       <Small>Click and drag to draw a block.</Small>
                       <Small>
                         Hold{' '}
-                        <Chip variant="secondary">
+                        <Chip colorScheme="secondary">
                           {getCurrentPlatform(navigator) === 'mac'
                             ? 'Cmd ⌘'
                             : 'Ctrl'}
@@ -232,7 +232,7 @@ function Workspace({
               </Small>
               <Small>
                 You can activate this tool at any time by holding{' '}
-                <Chip variant="secondary">
+                <Chip colorScheme="secondary">
                   {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
                 </Chip>
               </Small>
@@ -246,7 +246,7 @@ function Workspace({
                 <Small fontWeight={600}>Region Tool</Small>
                 <Small>Click and drag to draw a region.</Small>
                 <Small>
-                  Hold <Chip variant="secondary">Shift</Chip> to activate.
+                  Hold <Chip colorScheme="secondary">Shift</Chip> to activate.
                 </Small>
               </Stack.V>
             }

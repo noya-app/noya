@@ -145,12 +145,12 @@ function Content({
       <Toolbar>
         <Small>{initialFile.data.name}</Small>
         <Spacer.Horizontal size={8} inline />
-        <Chip variant="secondary">VIEWING</Chip>
+        <Chip colorScheme="secondary">VIEWING</Chip>
         {fileId && (
           <>
             <Spacer.Horizontal size={8} inline />
             <Chip
-              variant="primary"
+              colorScheme="primary"
               onClick={() => {
                 router.push(`/projects/${fileId}`);
               }}
@@ -173,7 +173,7 @@ function Content({
           <>
             <Spacer.Horizontal size={8} inline />
             <Chip
-              variant="primary"
+              colorScheme="primary"
               onClick={() => {
                 amplitude.logEvent('Share - Started Duplication');
 

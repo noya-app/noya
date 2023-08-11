@@ -163,7 +163,7 @@ function BlockTypeOnboardingPopover({
         <Small>You can change the block type by clicking this dropdown.</Small>
         <Small>
           You can also type slash{' '}
-          <Chip style={{ fontSize: '13px' }} variant="secondary">
+          <Chip style={{ fontSize: '13px' }} colorScheme="secondary">
             /
           </Chip>{' '}
           within the block to search block types.

@@ -3,44 +3,79 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { useHover } from '../hooks/useHover';
 
-type ChipVariant = 'primary' | 'secondary';
+type ChipColorScheme = 'primary' | 'secondary';
 type ChipSize = 'small' | 'medium';
+type ChipVariant = 'solid' | 'outlined' | 'ghost';
 
 const ChipElement = styled.span<{
-  variant?: ChipVariant;
+  colorScheme?: ChipColorScheme;
   size: ChipSize;
   monospace: boolean;
-}>(({ theme, variant, size, monospace }) => ({
-  textTransform: 'initial',
-  borderRadius: 4,
-  userSelect: 'none',
-  display: 'inline-flex',
-  alignItems: 'center',
-  ...(size === 'medium'
-    ? {
-        fontSize: '11px',
-        padding: '4px 8px',
-      }
-    : {
-        fontSize: '9px',
-        padding: '0px 4px',
+  variant: ChipVariant;
+  isInteractive: boolean;
+}>(({ theme, colorScheme, size, variant, monospace, isInteractive }) => {
+  const color =
+    colorScheme === 'primary'
+      ? theme.colors.primary
+      : colorScheme === 'secondary'
+      ? theme.colors.secondary
+      : theme.colors.text;
+
+  const backgroundColor =
+    colorScheme === 'primary'
+      ? 'rgb(238, 229, 255)'
+      : colorScheme === 'secondary'
+      ? 'rgb(205, 238, 231)'
+      : theme.colors.inputBackground;
+
+  const subtleColor =
+    colorScheme === 'primary'
+      ? 'rgba(238, 229, 255, 0.2)'
+      : colorScheme === 'secondary'
+      ? 'rgba(205, 238, 231, 0.2)'
+      : 'rgba(0, 0, 0, 0.1)';
+
+  return {
+    textTransform: 'initial',
+    borderRadius: 4,
+    userSelect: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...(size === 'medium'
+      ? {
+          fontSize: '11px',
+          padding: '4px 8px',
+        }
+      : {
+          fontSize: '9px',
+          padding: '0px 4px',
+        }),
+    ...(monospace && {
+      fontFamily: theme.fonts.monospace,
+    }),
+    ...(variant === 'solid'
+      ? {
+          color: theme.colors.text,
+          backgroundColor,
+        }
+      : variant === 'outlined'
+      ? {
+          color,
+          backgroundColor: 'transparent',
+          boxShadow: `0 0 0 1px ${subtleColor} inset`,
+        }
+      : {}),
+    '&:hover': {
+      ...(variant === 'outlined' && {
+        backgroundColor: subtleColor,
+        boxShadow: 'none',
       }),
-  ...(monospace && {
-    fontFamily: theme.fonts.monospace,
-  }),
-  ...(variant === 'primary' && {
-    color: theme.colors.primary,
-    background: 'rgb(238, 229, 255)',
-  }),
-  ...(variant === 'secondary' && {
-    color: theme.colors.secondary,
-    background: 'rgb(205, 238, 231)',
-  }),
-  ...(variant === undefined && {
-    color: theme.colors.text,
-    background: theme.colors.inputBackground,
-  }),
-}));
+    },
+    ...(isInteractive && {
+      cursor: 'pointer',
+    }),
+  };
+});
 
 const DeleteElement = styled(Cross1Icon)<{
   size: ChipSize;
@@ -91,6 +126,7 @@ const AddElement = styled(PlusIcon)<{
 }));
 
 export interface ChipProps {
+  colorScheme?: ChipColorScheme;
   variant?: ChipVariant;
   size?: ChipSize;
   children?: React.ReactNode;
@@ -105,12 +141,13 @@ export interface ChipProps {
 }
 
 export const Chip = memo(function Chip({
-  variant,
+  colorScheme,
   children,
   deletable,
   addable,
   style,
   size = 'medium',
+  variant = 'solid',
   monospace = false,
   onDelete,
   onClick,
@@ -126,10 +163,12 @@ export const Chip = memo(function Chip({
   return (
     <ChipElement
       variant={variant}
+      colorScheme={colorScheme}
       style={style}
       onClick={handleClick}
       size={size}
       monospace={monospace}
+      isInteractive={!!handleClick}
     >
       {children}
       {deletable && (

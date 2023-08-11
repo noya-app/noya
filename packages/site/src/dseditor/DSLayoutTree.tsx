@@ -1,5 +1,4 @@
 import {
-  Button,
   Chip,
   CompletionItem,
   InputField,
@@ -536,23 +535,16 @@ export const DSLayoutRow = memo(function DSLayerRow({
           <Stack.H padding="4px 6px" alignItems="center">
             <TreeView.RowTitle>{name}</TreeView.RowTitle>
             {node.type === 'noyaPrimitiveElement' ? (
-              <Text variant="code" fontSize="9px">
-                <Button
-                  variant="none"
-                  // variant="floating"
-                  onClick={() => {
-                    setIsSearchingTypes(true);
-                  }}
-                  contentStyle={{
-                    ...theme.textStyles.code,
-                    fontSize: '9px',
-                    minHeight: '15px',
-                    padding: '0 2px',
-                  }}
-                >
-                  {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
-                </Button>
-              </Text>
+              <Chip
+                size="small"
+                variant={hovered ? 'outlined' : 'ghost'}
+                monospace
+                onClick={() => {
+                  setIsSearchingTypes(true);
+                }}
+              >
+                {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
+              </Chip>
             ) : node.type === 'noyaCompositeElement' && node.variantID ? (
               <Text variant="code" fontSize="9px">
                 {findComponent(node.componentID)?.variants?.find(
@@ -571,7 +563,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 deletable={status !== 'removed'}
                 addable={status === 'removed'}
                 monospace
-                variant={status === 'added' ? 'secondary' : undefined}
+                colorScheme={status === 'added' ? 'secondary' : undefined}
                 style={{
                   opacity: status === 'removed' ? 0.5 : 1,
                 }}
