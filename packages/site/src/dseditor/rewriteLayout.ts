@@ -1,4 +1,5 @@
 import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
+import { hasClassGroup } from '../ayon/tailwind/tailwind';
 
 /**
  * For each parent, if it has an image child, move all of the image's children
@@ -31,6 +32,10 @@ export function rewriteImagesWithChildren(layout: LayoutNode): LayoutNode {
   ) as LayoutNode;
 }
 
+function parseClasses(classes: string | undefined) {
+  return classes?.split(/\s+/) ?? [];
+}
+
 const tailwindClassMapping: Record<string, string> = {
   'text-5xl': 'variant-h1',
   'text-4xl': 'variant-h2',
@@ -55,7 +60,7 @@ function rewriteClasses(
   LayoutHierarchy.visit(layout, (node, indexPath) => {
     if (typeof node === 'string') return;
 
-    let classes = node.attributes.class?.split(/\s+/) || [];
+    let classes = parseClasses(node.attributes.class);
 
     classes = f(node, indexPath, classes) ?? classes;
 
@@ -121,7 +126,8 @@ export function rewritePositionedParent(layout: LayoutNode) {
           child.attributes.class?.includes('absolute'),
       );
 
-      const isRelative = node.attributes.class?.includes('relative');
+      const classes = parseClasses(node.attributes.class);
+      const hasPositionClass = hasClassGroup('position', classes);
 
       return {
         ...node,
@@ -129,7 +135,7 @@ export function rewritePositionedParent(layout: LayoutNode) {
         attributes: {
           ...node.attributes,
           ...(hasAbsoluteChild &&
-            !isRelative && {
+            !hasPositionClass && {
               class: [node.attributes.class, 'relative']
                 .filter(Boolean)
                 .join(' '),

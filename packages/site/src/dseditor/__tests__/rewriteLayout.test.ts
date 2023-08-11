@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import path from 'path';
 import {
   rewriteImagesWithChildren,
   rewriteInferFlex,
@@ -5,6 +7,16 @@ import {
   rewriteRootClasses,
   rewriteTailwindClasses,
 } from '../rewriteLayout';
+
+// Jest doesn't know how to import a text file, so we mock it
+jest.mock('../../../safelist.txt', () => {
+  return {
+    default: readFileSync(
+      path.join(__dirname, '../../../safelist.txt'),
+      'utf8',
+    ),
+  };
+});
 
 it('replaces grow with flex-1', () => {
   expect(
@@ -77,6 +89,40 @@ it('adds position:relative if there is an absolute positioned child', () => {
     tag: 'Box',
     attributes: {
       class: 'relative',
+    },
+    children: [
+      {
+        tag: 'Image',
+        attributes: {
+          class: 'absolute',
+        },
+        children: [],
+      },
+    ],
+  });
+});
+
+it("doesn't add position:relative if the parent is positioned", () => {
+  expect(
+    rewritePositionedParent({
+      tag: 'Box',
+      attributes: {
+        class: 'absolute',
+      },
+      children: [
+        {
+          tag: 'Image',
+          attributes: {
+            class: 'absolute',
+          },
+          children: [],
+        },
+      ],
+    }),
+  ).toEqual({
+    tag: 'Box',
+    attributes: {
+      class: 'absolute',
     },
     children: [
       {
