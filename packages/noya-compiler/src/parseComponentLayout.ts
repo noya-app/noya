@@ -59,6 +59,9 @@ function findFirstJsxElement(
 }
 
 export function parseComponentLayout(source: string): LayoutNode {
+  // Replace html-style comments "<!-- ... -->" with an empty string.
+  source = source.replace(/<!--.*?-->/gs, '');
+
   const sourceFile = ts.createSourceFile(
     'temp.tsx',
     source,
