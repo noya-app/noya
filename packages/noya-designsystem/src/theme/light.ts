@@ -30,6 +30,7 @@ export const colors = {
   placeholderDots: 'rgba(0,0,0,0.3)',
   listView: {
     raisedBackground: 'rgba(0,0,0,0.03)',
+    editingBackground: '#fff',
   },
   canvas: {
     background: 'rgb(249,249,249)',

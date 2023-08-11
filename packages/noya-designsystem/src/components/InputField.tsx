@@ -274,7 +274,6 @@ export const InputElement = styled(TextInput).withConfig({
       marginRight: '-4px',
       marginBottom: '-4px',
       marginLeft: '-4px',
-      background: 'black',
     }),
 
     '&[type="search"]::-webkit-search-cancel-button': {

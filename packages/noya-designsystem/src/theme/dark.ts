@@ -21,6 +21,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.sidebar.background = 'rgba(34,33,39,0.95)';
   colors.popover.background = 'rgba(34,33,39,1)';
   colors.listView.raisedBackground = 'rgba(181,178,255,0.1)';
+  colors.listView.editingBackground = '#000';
   colors.slider.background = '#BBB';
   colors.mask = 'rgb(102,187,106)';
   colors.transparentChecker = 'rgba(255,255,255,0.3)';

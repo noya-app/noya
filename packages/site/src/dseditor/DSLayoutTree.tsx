@@ -90,6 +90,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
     [resolvedNode],
   );
 
+  const [editingId, setEditingId] = useState<string | undefined>();
+
   return (
     <TreeView.Root
       keyExtractor={(obj) => obj.key}
@@ -170,6 +172,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           node={node}
           path={path}
           isDragging={isDragging}
+          isEditing={editingId === key}
+          setEditingId={setEditingId}
         />
       )}
     />
@@ -226,6 +230,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
   node,
   path,
   isDragging,
+  isEditing,
+  setEditingId,
 }: {
   id: string;
   rootNode: NoyaNode;
@@ -240,6 +246,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
   node: NoyaResolvedNode;
   path: string[];
   isDragging: boolean;
+  isEditing: boolean;
+  setEditingId: (id: string | undefined) => void;
 }) {
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
@@ -283,12 +291,16 @@ export const DSLayoutRow = memo(function DSLayerRow({
         },
     ],
     [
+      {
+        title: 'Rename',
+        value: 'rename',
+      },
       node.type === 'noyaPrimitiveElement' && {
         title: 'Add Style',
         value: 'addStyle',
       },
       node.type === 'noyaPrimitiveElement' && {
-        title: 'Set Element Type',
+        title: 'Pick Component',
         value: 'addType',
       },
     ],
@@ -301,6 +313,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
 
   const onSelectMenuItem = (value: MenuItemType) => {
     switch (value) {
+      case 'rename': {
+        setEditingId(id);
+        break;
+      }
       case 'addStyle': {
         // Wait for menu to close
         setTimeout(() => {
@@ -407,6 +423,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
           />
         )
       }
+      onDoubleClick={() => {
+        setEditingId(id);
+      }}
     >
       <Stack.V
         flex="1 1 0%"
@@ -532,8 +551,31 @@ export const DSLayoutRow = memo(function DSLayerRow({
             />
           </InputField.Root>
         ) : (
-          <Stack.H padding="4px 6px" alignItems="center">
-            <TreeView.RowTitle>{name}</TreeView.RowTitle>
+          <Stack.H
+            padding="4px 6px"
+            alignItems="center"
+            zIndex={isEditing ? 1 : undefined}
+          >
+            {isEditing ? (
+              <TreeView.EditableRowTitle
+                value={name}
+                onSubmitEditing={(value) => {
+                  setEditingId(undefined);
+
+                  setDiff(
+                    Model.diff([
+                      Model.diffItem({
+                        path,
+                        name: value,
+                      }),
+                    ]),
+                  );
+                }}
+                autoFocus
+              />
+            ) : (
+              <TreeView.RowTitle>{name}</TreeView.RowTitle>
+            )}
             {node.type === 'noyaPrimitiveElement' ? (
               <Chip
                 size="small"

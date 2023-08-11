@@ -81,6 +81,12 @@ const ListViewRowTitle = styled.span(({ theme }) => ({
  * EditableRowTitle
  * ------------------------------------------------------------------------- */
 
+const ListViewEditableRowTitleElement = styled(InputField.Input)(
+  ({ theme }) => ({
+    background: theme.colors.listView.editingBackground,
+  }),
+) as typeof InputField.Input;
+
 interface EditableRowProps {
   value: string;
   onSubmitEditing: (value: string) => void;
@@ -111,7 +117,7 @@ function ListViewEditableRowTitle({
   }, [autoFocus]);
 
   return (
-    <InputField.Input
+    <ListViewEditableRowTitleElement
       ref={inputRef}
       variant="bare"
       value={value}

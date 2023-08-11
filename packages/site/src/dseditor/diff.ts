@@ -98,6 +98,10 @@ export function mergeDiffItems(
     mergedItem.textValue = b.textValue;
   }
 
+  if (a.name !== b.name) {
+    mergedItem.name = b.name;
+  }
+
   if (a.classNames) {
     mergedItem.classNames = mergeClassNames(a.classNames, b.classNames);
   }

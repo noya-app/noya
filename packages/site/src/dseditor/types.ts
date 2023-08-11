@@ -78,6 +78,7 @@ export type NoyaDiffItem = {
     remove?: string[];
   };
   textValue?: string;
+  name?: string;
 };
 
 export type NoyaDiff = {

@@ -172,6 +172,10 @@ function applyResolvedDiff(
               return itemKey === nodeKey;
             })
             .forEach((item) => {
+              if (item.name !== undefined) {
+                newNode.name = item.name;
+              }
+
               if (item.children) {
                 newNode.children = applyChildrenDiff(
                   level,
@@ -338,6 +342,7 @@ export function embedRootLevelDiff(
 
           const newNode: NoyaPrimitiveElement = {
             ...node,
+            name: item?.name ?? node.name,
             classNames: applyClassNamesDiff(
               0,
               node.classNames.map((className) => ({ value: className })),
