@@ -21,6 +21,7 @@ const tailwindClassMapping: Record<string, string> = {
   'text-2xl': 'variant-h4',
   'text-xl': 'variant-h5',
   'text-lg': 'variant-h6',
+  grow: 'flex-1',
 };
 
 function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
