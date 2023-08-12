@@ -86,7 +86,9 @@ function rewriteClasses(
 export function rewriteTailwindClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
     return classes
-      .filter((name) => !hallucinatedClasses.has(name) && !name.includes(':'))
+      .filter(
+        (name) => name && !hallucinatedClasses.has(name) && !name.includes(':'),
+      )
       .map(
         (name) =>
           tailwindClassMapping[name] ??
