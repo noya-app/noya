@@ -120,7 +120,7 @@ export const classGroups = {
   none: /.*/,
 };
 
-type ClassGroupKey = keyof typeof classGroups;
+export type ClassGroupKey = keyof typeof classGroups;
 
 export function hasClassGroup(group: ClassGroupKey, hashtags: string[]) {
   return hashtags.some((className) => classGroups[group].test(className));

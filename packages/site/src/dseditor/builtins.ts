@@ -190,6 +190,7 @@ export const initialComponents: NoyaComponent[] = [
         'justify-center',
         'p-10',
         'flex-1',
+        'gap-4',
       ],
       componentID: boxSymbolId,
       children: [
@@ -201,18 +202,18 @@ export const initialComponents: NoyaComponent[] = [
           name: 'Title',
           componentID: textSymbolId,
           children: [Model.string('Create, iterate, inspire.')],
-          classNames: ['variant-h1', 'text-center'],
+          classNames: ['variant-h1', 'leading-none', 'text-center'],
         }),
         Model.primitiveElement({
           name: 'Subtitle',
           componentID: textSymbolId,
           children: [Model.string('Turn great ideas into new possibilities.')],
-          classNames: ['variant-h4', 'text-center'],
+          classNames: ['variant-h4', 'leading-none', 'text-center'],
         }),
         Model.primitiveElement({
           id: 'a',
           name: 'Actions Row',
-          classNames: ['flex', 'items-center', 'gap-4', 'mt-6'],
+          classNames: ['flex', 'items-center', 'gap-4', 'mt-2'],
           componentID: boxSymbolId,
           children: [
             Model.primitiveElement({

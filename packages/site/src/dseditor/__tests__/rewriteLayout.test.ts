@@ -3,6 +3,8 @@ import { layoutNode } from 'noya-compiler';
 import path from 'path';
 import {
   rewriteAbsoluteFill,
+  rewriteFlex1ButtonInColumn,
+  rewriteForbiddenClassGroups,
   rewriteImagesWithChildren,
   rewriteInferFlex,
   rewritePositionedParent,
@@ -23,6 +25,12 @@ jest.mock('../../../safelist.txt', () => {
 it('replaces grow with flex-1', () => {
   expect(rewriteTailwindClasses(layoutNode('Box', { class: 'grow' }))).toEqual(
     layoutNode('Box', { class: 'flex-1' }),
+  );
+});
+
+it('removes hallucinated classes', () => {
+  expect(rewriteTailwindClasses(layoutNode('Box', { class: 'btn' }))).toEqual(
+    layoutNode('Box'),
   );
 });
 
@@ -93,5 +101,23 @@ it('moves absolute fill children and sets other children to position relative', 
       layoutNode('Box', { class: 'relative' }),
       layoutNode('Text', { class: 'absolute' }),
     ]),
+  );
+});
+
+it('removes forbidden classes', () => {
+  expect(
+    rewriteForbiddenClassGroups(layoutNode('Button', { class: 'p-4' })),
+  ).toEqual(layoutNode('Button'));
+});
+
+it('removes flex-1 from button in a flex-col', () => {
+  expect(
+    rewriteFlex1ButtonInColumn(
+      layoutNode('Box', { class: 'flex flex-col' }, [
+        layoutNode('Button', { class: 'flex-1' }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', { class: 'flex flex-col' }, [layoutNode('Button')]),
   );
 });

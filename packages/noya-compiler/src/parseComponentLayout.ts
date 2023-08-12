@@ -71,13 +71,15 @@ export function parseComponentLayout(source: string): LayoutNode {
   );
   const firstJsxElement = findFirstJsxElement(sourceFile);
   if (firstJsxElement === null) {
-    throw new Error('Source does not contain a JSX element');
+    // throw new Error('Source does not contain a JSX element');
+    return { tag: 'Box', attributes: {}, children: [] };
   }
   const layoutNode = convertJsxElementToLayoutNode(firstJsxElement);
   if (typeof layoutNode === 'string' || layoutNode === null) {
-    throw new Error(
-      'First JSX element in source does not contain any children',
-    );
+    // throw new Error(
+    //   'First JSX element in source does not contain any children',
+    // );
+    return { tag: 'Box', attributes: {}, children: [] };
   }
   return layoutNode;
 }

@@ -1,6 +1,10 @@
 import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
 import { partition } from 'noya-utils';
-import { hasClassGroup } from '../ayon/tailwind/tailwind';
+import {
+  ClassGroupKey,
+  getTailwindClassGroup,
+  hasClassGroup,
+} from '../ayon/tailwind/tailwind';
 
 /**
  * For each parent, if it has an image child, move all of the image's children
@@ -37,13 +41,17 @@ function parseClasses(classes: string | undefined) {
   return classes?.split(/\s+/) ?? [];
 }
 
+const hallucinatedClasses = new Set(['btn', 'btn-primary', 'lg', 'md', 'sm']);
+
 const tailwindClassMapping: Record<string, string> = {
+  'text-6xl': 'variant-h1',
   'text-5xl': 'variant-h1',
   'text-4xl': 'variant-h2',
   'text-3xl': 'variant-h3',
   'text-2xl': 'variant-h4',
   'text-xl': 'variant-h5',
   'text-lg': 'variant-h6',
+  'text-sm': '',
   grow: 'flex-1',
   'flex-column': 'flex-col',
   'flex-column-reverse': 'flex-col-reverse',
@@ -53,7 +61,7 @@ const tailwindClassMapping: Record<string, string> = {
 function rewriteClasses(
   layout: LayoutNode,
   f: (
-    node: LayoutNode | string,
+    node: LayoutNode,
     indexPath: number[],
     classes: string[],
   ) => string[] | void,
@@ -77,11 +85,13 @@ function rewriteClasses(
 
 export function rewriteTailwindClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
-    return classes.map(
-      (name) =>
-        tailwindClassMapping[name] ||
-        name.replace(/(?:space|gap)-(?:x|y)-(\d+)/, (_, n) => `gap-${n}`),
-    );
+    return classes
+      .filter((name) => !hallucinatedClasses.has(name) && !name.includes(':'))
+      .map(
+        (name) =>
+          tailwindClassMapping[name] ??
+          name.replace(/(?:space|gap)-(?:x|y)-(\d+)/, (_, n) => `gap-${n}`),
+      );
   });
 }
 
@@ -121,6 +131,57 @@ export function rewriteInferFlex(layout: LayoutNode) {
   });
 }
 
+const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
+  Button: [
+    'padding',
+    'paddingBottom',
+    'paddingLeft',
+    'paddingRight',
+    'paddingTop',
+    'paddingX',
+    'paddingY',
+    'borderRadius',
+    'fontWeight',
+    'fontSize',
+    // Consider adding this back in some form when we have color scheme support
+    'background',
+    'textColor',
+  ],
+};
+
+export function rewriteForbiddenClassGroups(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    const forbiddenGroups = forbiddenClassGroups[node.tag];
+
+    if (forbiddenGroups) {
+      classes = classes.filter((name) => {
+        return !forbiddenGroups.some(
+          (group) => getTailwindClassGroup(name) === group,
+        );
+      });
+    }
+
+    return classes;
+  });
+}
+
+export function rewriteFlex1ButtonInColumn(layout: LayoutNode) {
+  // eslint-disable-next-line @shopify/prefer-early-return
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    if (
+      node.tag === 'Button' &&
+      classes.includes('flex-1') &&
+      indexPath.length > 0
+    ) {
+      const parent = LayoutHierarchy.access(layout, indexPath.slice(0, -1));
+
+      if ((parent as LayoutNode).attributes.class?.includes('flex-col')) {
+        return classes.filter((name) => name !== 'flex-1');
+      }
+    }
+  });
+}
+
 export function rewritePositionedParent(layout: LayoutNode) {
   return LayoutHierarchy.map<LayoutNode | string>(
     layout,
@@ -153,12 +214,26 @@ export function rewritePositionedParent(layout: LayoutNode) {
   ) as LayoutNode;
 }
 
-function isAbsoluteFill(classes: string[]) {
-  const isFull =
+function isFill(classes: string[]) {
+  return (
     classes.includes('inset-0') ||
-    (classes.includes('w-full') && classes.includes('h-full'));
+    (classes.includes('w-full') && classes.includes('h-full'))
+  );
+}
 
-  return classes.includes('absolute') && isFull;
+function isAbsoluteFill(classes: string[]) {
+  return classes.includes('absolute') && isFill(classes);
+}
+
+/**
+ * If a node has 'w-full h-full' or 'inset-0', make sure it also has 'absolute'.
+ */
+export function rewriteAlmostAbsoluteFill(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    if (isFill(classes) && !hasClassGroup('position', classes)) {
+      classes.push('absolute');
+    }
+  });
 }
 
 /**
@@ -212,7 +287,10 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteImagesWithChildren(layout);
   layout = rewriteTailwindClasses(layout);
+  layout = rewriteForbiddenClassGroups(layout);
+  layout = rewriteFlex1ButtonInColumn(layout);
   layout = rewriteInferFlex(layout);
+  layout = rewriteAlmostAbsoluteFill(layout);
   layout = rewriteAbsoluteFill(layout);
   layout = rewritePositionedParent(layout);
   layout = rewriteRootClasses(layout);
