@@ -600,3 +600,11 @@ export const LayoutHierarchy = withOptions<LayoutNode | string>({
     return typeof node === 'string' ? node : { ...node, children };
   },
 });
+
+export function layoutNode(
+  tag: string,
+  attributes: Record<string, string> = {},
+  children: (LayoutNode | string)[] = [],
+): LayoutNode {
+  return { tag, attributes, children };
+}

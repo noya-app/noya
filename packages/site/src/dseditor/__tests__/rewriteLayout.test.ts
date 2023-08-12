@@ -1,6 +1,8 @@
 import { readFileSync } from 'fs';
+import { layoutNode } from 'noya-compiler';
 import path from 'path';
 import {
+  rewriteAbsoluteFill,
   rewriteImagesWithChildren,
   rewriteInferFlex,
   rewritePositionedParent,
@@ -19,150 +21,71 @@ jest.mock('../../../safelist.txt', () => {
 });
 
 it('replaces grow with flex-1', () => {
-  expect(
-    rewriteTailwindClasses({
-      tag: 'Box',
-      attributes: {
-        class: 'grow',
-      },
-      children: [],
-    }),
-  ).toEqual({
-    tag: 'Box',
-    attributes: {
-      class: 'flex-1',
-    },
-    children: [],
-  });
+  expect(rewriteTailwindClasses(layoutNode('Box', { class: 'grow' }))).toEqual(
+    layoutNode('Box', { class: 'flex-1' }),
+  );
 });
 
 it('adds flex-1 to root', () => {
-  expect(
-    rewriteRootClasses({
-      tag: 'Box',
-      attributes: {},
-      children: [],
-    }),
-  ).toEqual({
-    tag: 'Box',
-    attributes: {
-      class: 'flex-1',
-    },
-    children: [],
-  });
+  expect(rewriteRootClasses(layoutNode('Box'))).toEqual(
+    layoutNode('Box', { class: 'flex-1' }),
+  );
 });
 
 it('infers flex if items-center exists', () => {
   expect(
-    rewriteInferFlex({
-      tag: 'Box',
-      attributes: {
-        class: 'items-center',
-      },
-      children: [],
-    }),
-  ).toEqual({
-    tag: 'Box',
-    attributes: {
-      class: 'flex items-center',
-    },
-    children: [],
-  });
+    rewriteInferFlex(layoutNode('Box', { class: 'items-center' })),
+  ).toEqual(layoutNode('Box', { class: 'flex items-center' }));
 });
 
 it('adds position:relative if there is an absolute positioned child', () => {
   expect(
-    rewritePositionedParent({
-      tag: 'Box',
-      attributes: {},
-      children: [
-        {
-          tag: 'Image',
-          attributes: {
-            class: 'absolute',
-          },
-          children: [],
-        },
-      ],
-    }),
-  ).toEqual({
-    tag: 'Box',
-    attributes: {
-      class: 'relative',
-    },
-    children: [
-      {
-        tag: 'Image',
-        attributes: {
-          class: 'absolute',
-        },
-        children: [],
-      },
-    ],
-  });
+    rewritePositionedParent(
+      layoutNode('Box', {}, [layoutNode('Image', { class: 'absolute' })]),
+    ),
+  ).toEqual(
+    layoutNode('Box', { class: 'relative' }, [
+      layoutNode('Image', { class: 'absolute' }),
+    ]),
+  );
 });
 
 it("doesn't add position:relative if the parent is positioned", () => {
   expect(
-    rewritePositionedParent({
-      tag: 'Box',
-      attributes: {
-        class: 'absolute',
-      },
-      children: [
-        {
-          tag: 'Image',
-          attributes: {
-            class: 'absolute',
-          },
-          children: [],
-        },
-      ],
-    }),
-  ).toEqual({
-    tag: 'Box',
-    attributes: {
-      class: 'absolute',
-    },
-    children: [
-      {
-        tag: 'Image',
-        attributes: {
-          class: 'absolute',
-        },
-        children: [],
-      },
-    ],
-  });
+    rewritePositionedParent(
+      layoutNode('Box', { class: 'absolute' }, [
+        layoutNode('Image', { class: 'absolute' }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', { class: 'absolute' }, [
+      layoutNode('Image', { class: 'absolute' }),
+    ]),
+  );
 });
 
 it('moves children out of image', () => {
   expect(
-    rewriteImagesWithChildren({
-      tag: 'Box',
-      attributes: {},
-      children: [
-        '1',
-        {
-          tag: 'Image',
-          attributes: {},
-          children: ['2'],
-        },
-        '3',
-      ],
-    }),
-  ).toEqual({
-    tag: 'Box',
-    attributes: {},
-    children: [
-      '1',
-      {
-        tag: 'Image',
-        attributes: {},
-        children: [],
-      },
-      '2',
-      '3',
-    ],
-  });
+    rewriteImagesWithChildren(
+      layoutNode('Box', {}, ['1', layoutNode('Image', {}, ['2']), '3']),
+    ),
+  ).toEqual(layoutNode('Box', {}, ['1', layoutNode('Image'), '2', '3']));
+});
+
+it('moves absolute fill children and sets other children to position relative', () => {
+  expect(
+    rewriteAbsoluteFill(
+      layoutNode('Box', {}, [
+        layoutNode('Box'),
+        layoutNode('Image', { class: 'absolute w-full h-full' }),
+        layoutNode('Text', { class: 'absolute' }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', {}, [
+      layoutNode('Image', { class: 'absolute w-full h-full' }),
+      layoutNode('Box', { class: 'relative' }),
+      layoutNode('Text', { class: 'absolute' }),
+    ]),
+  );
 });
