@@ -26,6 +26,12 @@ it('replaces grow with flex-1', () => {
   );
 });
 
+it('replaces space-y-5 with gap-5', () => {
+  expect(
+    rewriteTailwindClasses(layoutNode('Box', { class: 'space-y-5' })),
+  ).toEqual(layoutNode('Box', { class: 'gap-5' }));
+});
+
 it('adds flex-1 to root', () => {
   expect(rewriteRootClasses(layoutNode('Box'))).toEqual(
     layoutNode('Box', { class: 'flex-1' }),

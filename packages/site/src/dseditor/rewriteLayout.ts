@@ -77,7 +77,11 @@ function rewriteClasses(
 
 export function rewriteTailwindClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
-    return classes.map((name) => tailwindClassMapping[name] || name);
+    return classes.map(
+      (name) =>
+        tailwindClassMapping[name] ||
+        name.replace(/(?:space|gap)-(?:x|y)-(\d+)/, (_, n) => `gap-${n}`),
+    );
   });
 }
 
