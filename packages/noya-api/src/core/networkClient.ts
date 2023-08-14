@@ -129,6 +129,8 @@ export class NoyaNetworkClient {
     name: string;
     rect?: Rect;
   }): Promise<NoyaGeneratedName[]> => {
+    if (!options.name) return [];
+
     const response = await this.request(
       `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
         options.name,

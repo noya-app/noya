@@ -191,11 +191,21 @@ export const InputFieldWithCompletions = memo(
         hoverItem?: 'resetHover',
       ) => {
         const nextState = { ...state, ...newState };
+        const nextItems = filterWithGroupedSections(items, nextState.filter);
+
+        // If we would be selecting a header, find the next valid index
+        if (nextItems[nextState.selectedIndex]?.type === 'sectionHeader') {
+          nextState.selectedIndex = getNextIndex(
+            nextItems,
+            nextState.selectedIndex,
+            'next',
+            (item) => item.type === 'sectionHeader',
+          );
+        }
 
         if (hoverItem === 'resetHover') {
           onHoverItem?.(undefined);
         } else {
-          const nextItems = filterWithGroupedSections(items, nextState.filter);
           const nextItem = nextItems[nextState.selectedIndex];
 
           if (nextItem && nextItem.type !== 'sectionHeader') {
