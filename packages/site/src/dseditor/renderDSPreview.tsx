@@ -2,11 +2,13 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { findLast } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
+  boxSymbolId,
   buttonSymbolId,
+  checkboxSymbolId,
   imageSymbolId,
   inputSymbolId,
   linkSymbolId,
-  selectSymbolId,
+  radioSymbolId,
   tableSymbolId,
   tagSymbolId,
   textSymbolId,
@@ -36,21 +38,51 @@ export function renderResolvedNode({
     (element, transformedChildren) => {
       if (element.status === 'removed') return null;
 
-      if (element.type === 'noyaString') {
-        return (element.value || ZERO_WIDTH_SPACE).replace(/ +/, '\u00A0');
-      }
-
       if (element.type === 'noyaCompositeElement') {
         return transformedChildren;
       }
 
-      const isChildHighlighted = element.children.some(
-        (child) =>
-          child.type === 'noyaString' &&
-          child.path.join() === highlightedPath?.join(),
-      );
-      const isHighlighted =
-        element.path.join() === highlightedPath?.join() || isChildHighlighted;
+      if (element.type === 'noyaString') {
+        const string = (element.value || ZERO_WIDTH_SPACE)
+          // Typing a space in contentEditable will insert a non-breaking space
+          // instead of a regular space. We want to replace it with a regular space.
+          // This will let the text wrap normally.
+          .replace('\u00A0', ' ')
+          // If the string ends with a space, we want to replace it with a
+          // non-breaking space so that it doesn't collapse.
+          .replace(/ +$/, '\u00A0');
+
+        const isEmpty = string === ZERO_WIDTH_SPACE;
+
+        return (
+          <span
+            contentEditable
+            key="editable-span"
+            data-path={element.path.slice(0, -1).join('/')}
+            data-stringpath={element.path.join('/')}
+            tabIndex={1}
+            style={{
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              fontWeight: 'inherit',
+              fontStyle: 'inherit',
+              color: 'inherit',
+              ...(isEmpty
+                ? {
+                    minWidth: '10px',
+                    minHeight: '10px',
+                    background: 'rgba(179,215,254, 0.3)',
+                    display: 'inline-block',
+                  }
+                : undefined),
+            }}
+          >
+            {string}
+          </span>
+        );
+      }
+
+      const isHighlighted = element.path.join() === highlightedPath?.join();
 
       const PrimitiveComponent: React.FC<any> =
         system.components[element.componentID];
@@ -85,28 +117,27 @@ export function renderResolvedNode({
           style={style}
           key={element.path.join('/')}
           {...(variant && { variant })}
-          {...(element.componentID !== imageSymbolId &&
-            element.componentID !== inputSymbolId &&
-            element.componentID !== selectSymbolId && {
-              children: transformedChildren,
+          {...((element.componentID === textareaSymbolId ||
+            element.componentID === inputSymbolId) &&
+            element.children[0]?.type === 'noyaString' && {
+              value: element.children[0].value,
             })}
-          {...(element.componentID === textareaSymbolId && {
-            value: element.children[0],
-          })}
           {...(element.componentID === imageSymbolId && {
             src: 'https://picsum.photos/300/300',
           })}
-          _passthrough={{
-            'data-path': element.path.join('/'),
-            contentEditable:
-              element.componentID === buttonSymbolId ||
-              element.componentID === tagSymbolId ||
-              element.componentID === linkSymbolId ||
-              element.componentID === textSymbolId,
-            ...(element.children[0]?.type === 'noyaString' && {
-              'data-stringpath': element.children[0].path.join('/'),
-            }),
-          }}
+          // Components with children
+          {...((element.componentID === boxSymbolId ||
+            element.componentID === buttonSymbolId ||
+            element.componentID === linkSymbolId ||
+            element.componentID === tagSymbolId ||
+            element.componentID === textSymbolId) && {
+            children: transformedChildren,
+          })}
+          // Components with labels
+          {...((element.componentID === checkboxSymbolId ||
+            element.componentID === radioSymbolId) && {
+            label: transformedChildren,
+          })}
         />
       );
     },

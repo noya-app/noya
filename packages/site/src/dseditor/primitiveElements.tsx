@@ -38,6 +38,7 @@ export type PrimitiveElementMetadata = {
   name: string;
   aliases?: string[];
   icon?: ReactNode;
+  // textEditing?: boolean;
   initialValue?: () => NoyaPrimitiveElement;
 };
 
@@ -58,6 +59,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: buttonSymbolId,
     name: 'Button',
     icon: <ButtonIcon />,
+    // textEditing: true,
     initialValue: () =>
       Model.primitiveElement({
         name: 'Button',
@@ -66,7 +68,19 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         children: [Model.string('Submit')],
       }),
   },
-  { id: checkboxSymbolId, name: 'Checkbox', icon: <CheckboxIcon /> },
+  {
+    id: checkboxSymbolId,
+    name: 'Checkbox',
+    icon: <CheckboxIcon />,
+    // textEditing: true,
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Checkbox',
+        componentID: checkboxSymbolId,
+        classNames: ['flex-1'],
+        children: [Model.string('Checkbox')],
+      }),
+  },
   {
     id: imageSymbolId,
     name: 'Image',
@@ -74,8 +88,32 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     aliases: ['Photo', 'Picture'],
   },
   { id: inputSymbolId, name: 'Input', icon: <InputIcon /> },
-  { id: linkSymbolId, name: 'Link', icon: <Link1Icon /> },
-  { id: radioSymbolId, name: 'Radio', icon: <RadiobuttonIcon /> },
+  {
+    id: linkSymbolId,
+    name: 'Link',
+    icon: <Link1Icon />,
+    // textEditing: true,
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Link',
+        componentID: linkSymbolId,
+        classNames: ['flex-1'],
+        children: [Model.string('Link')],
+      }),
+  },
+  {
+    id: radioSymbolId,
+    name: 'Radio',
+    icon: <RadiobuttonIcon />,
+
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Radio',
+        componentID: radioSymbolId,
+        classNames: ['flex-1'],
+        children: [Model.string('Radio')],
+      }),
+  },
   {
     id: selectSymbolId,
     name: 'Select',
@@ -94,6 +132,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Tag',
     icon: <BadgeIcon />,
     aliases: ['Badge', 'Chip'],
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Tag',
+        componentID: tagSymbolId,
+        classNames: ['self-start'],
+        children: [Model.string('Tag')],
+      }),
   },
   { id: textSymbolId, name: 'Text', icon: <TextIcon /> },
   { id: textareaSymbolId, name: 'Textarea', icon: <InputIcon /> },

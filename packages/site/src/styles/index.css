@@ -30,12 +30,6 @@ body {
   overscroll-behavior-x: none;
 }
 
-#root {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-}
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -47,7 +41,6 @@ html {
 }
 
 body,
-#root,
 #__next {
   flex: 1;
   width: 100%;
