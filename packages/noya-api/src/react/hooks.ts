@@ -80,7 +80,7 @@ export function useGeneratedLayout(name: string, description: string) {
     useNoyaClient();
   const key = componentLayoutCacheKey(name, description);
   const layout = useSelector(
-    () => generatedLayouts$[key].get() as string | undefined,
+    () => generatedLayouts$[key].get() as string[] | undefined,
   );
   const loading = useSelector(() => loadingLayouts$[key].get() ?? false);
   return useMemo(() => ({ layout, loading }), [loading, layout]);

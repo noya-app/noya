@@ -218,9 +218,8 @@ export function AyonLayerInspector({
         </InspectorPrimitives.SectionHeader>
         <InspectorCarousel
           key={selectedLayer.symbolID}
-          items={relatedBlocks}
+          items={[]}
           selectedIndex={0}
-          getSymbolMaster={getSymbolMaster}
           onSelectItem={(index) => {
             dispatch(
               'setSymbolInstanceSource',
@@ -238,8 +237,7 @@ export function AyonLayerInspector({
               <InspectorPrimitives.Title>Presets</InspectorPrimitives.Title>
             </InspectorPrimitives.SectionHeader>
             <InspectorCarousel
-              getSymbolMaster={getSymbolMaster}
-              items={presetStyles}
+              items={[]}
               selectedIndex={presetStyles.findIndex((style) =>
                 isDeepEqual(style.blockParameters, parameters),
               )}

@@ -20,6 +20,21 @@ import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { ResolvedHierarchy } from './traversal';
 import { NoyaResolvedNode } from './types';
 
+// const pixel = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkMAYAADkANVKH3ScAAAAASUVORK5CYII=`;
+// const placeholderImage = `data:image/png;base64,${pixel}`;
+
+const svg = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <linearGradient id="greenToBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
+    </linearGradient>
+</defs>
+<rect x="0" y="0" width="200" height="200" fill="url(#greenToBlueGradient)" />
+</svg>`;
+
+let placeholderImage = 'data:image/svg+xml,' + encodeURIComponent(svg);
+
 export function renderResolvedNode({
   resolvedNode,
   primary,
@@ -123,7 +138,9 @@ export function renderResolvedNode({
               value: element.children[0].value,
             })}
           {...(element.componentID === imageSymbolId && {
-            src: 'https://picsum.photos/300/300',
+            // src: 'https://placehold.it/300x300',
+            // src: 'https://picsum.photos/300/300',
+            src: placeholderImage,
           })}
           // Components with children
           {...((element.componentID === boxSymbolId ||

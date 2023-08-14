@@ -3,7 +3,7 @@ import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
-import { Layers, OverriddenBlockContent, Selectors } from 'noya-state';
+import { Layers, Selectors } from 'noya-state';
 import React, { ComponentProps, forwardRef, useCallback, useRef } from 'react';
 import { DSControlledRenderer } from '../../dseditor/DSControlledRenderer';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
@@ -16,7 +16,7 @@ import {
   createResolvedNode,
   embedRootLevelDiff,
 } from '../../dseditor/traversal';
-import { NoyaResolvedString } from '../../dseditor/types';
+import { NoyaNode, NoyaResolvedString } from '../../dseditor/types';
 import { useAyonState } from '../state/ayonState';
 import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData } from '../types';
@@ -54,7 +54,7 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
     resizeBehavior: ResizeBehavior;
     padding?: number;
     ds: DS;
-    overriddenBlock?: OverriddenBlockContent;
+    overriddenBlock?: NoyaNode;
     sync: boolean;
     highlightedPath?: string[];
     setHighlightedPath?: (path: string[] | undefined) => void;
@@ -173,47 +173,53 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                     layer.data.description,
                   );
 
-                  const layout = generatedLayouts.layouts[key];
+                  const layouts = generatedLayouts.layouts[key];
 
-                  if (!layout) return undefined;
+                  if (!layouts || !layouts[0]) return undefined;
 
-                  return parseLayout(layout);
+                  return parseLayout(layouts[0]);
+                }
+
+                function createPlaceholderNode() {
+                  return Model.primitiveElement({
+                    componentID: boxSymbolId,
+                    classNames: [
+                      'flex-1',
+                      'flex',
+                      'items-center',
+                      'justify-center',
+                      'text-center',
+                      'p-4',
+                    ],
+                    children: [
+                      layer.data.description === undefined
+                        ? Model.primitiveElement({
+                            componentID: textSymbolId,
+                            children: [
+                              Model.string(
+                                `Generating ${layer.name} description...`,
+                              ),
+                            ],
+                          })
+                        : Model.primitiveElement({
+                            componentID: textSymbolId,
+                            children: [
+                              Model.string(
+                                `Generating ${layer.name} layout...`,
+                              ),
+                            ],
+                          }),
+                    ],
+                  });
                 }
 
                 const resolvedNode = createResolvedNode(
                   findComponent,
-                  layer.data.node ??
-                    createLoadingNode() ??
-                    Model.primitiveElement({
-                      componentID: boxSymbolId,
-                      classNames: [
-                        'flex-1',
-                        'flex',
-                        'items-center',
-                        'justify-center',
-                        'text-center',
-                        'p-4',
-                      ],
-                      children: [
-                        layer.data.description === undefined
-                          ? Model.primitiveElement({
-                              componentID: textSymbolId,
-                              children: [
-                                Model.string(
-                                  `Generating ${layer.name} description...`,
-                                ),
-                              ],
-                            })
-                          : Model.primitiveElement({
-                              componentID: textSymbolId,
-                              children: [
-                                Model.string(
-                                  `Generating ${layer.name} layout...`,
-                                ),
-                              ],
-                            }),
-                      ],
-                    }),
+                  layer.do_objectID === selectedLayerId && overriddenBlock
+                    ? overriddenBlock
+                    : layer.data.node ??
+                        createLoadingNode() ??
+                        createPlaceholderNode(),
                 );
 
                 const content = renderResolvedNode({

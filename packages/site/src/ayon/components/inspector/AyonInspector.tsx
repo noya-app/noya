@@ -3,6 +3,7 @@ import { ScrollArea, Stack, useDesignSystemTheme } from 'noya-designsystem';
 import { useShallowArray } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
 import React, { memo } from 'react';
+import { NoyaNode } from '../../../dseditor/types';
 import { CustomLayerData } from '../../types';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
@@ -13,6 +14,7 @@ type Props = {
   onDuplicate?: () => void;
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
+  setPreviewNode: (node: NoyaNode | undefined) => void;
 };
 
 export const AyonInspector = memo(function AyonInspector({
@@ -21,6 +23,7 @@ export const AyonInspector = memo(function AyonInspector({
   onDuplicate,
   highlightedPath,
   setHighlightedPath,
+  setPreviewNode,
 }: Props) {
   const theme = useDesignSystemTheme();
   const [state] = useApplicationState();
@@ -43,6 +46,7 @@ export const AyonInspector = memo(function AyonInspector({
             selectedLayer={selectedLayers[0]}
             highlightedPath={highlightedPath}
             setHighlightedPath={setHighlightedPath}
+            setPreviewNode={setPreviewNode}
           />
         ) : selectedLayers.length === 0 ? (
           <AyonProjectInspector

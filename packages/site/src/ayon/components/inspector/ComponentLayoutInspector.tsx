@@ -1,25 +1,30 @@
 import { useGeneratedLayout, useNoyaClient } from 'noya-api';
 import { ActivityIndicator, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { InspectorPrimitives } from 'noya-inspector';
+import { isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
 import { parseLayout } from '../../../dseditor/componentLayout';
 import { embedRootLevelDiff } from '../../../dseditor/traversal';
-import { NoyaComponent, NoyaDiff } from '../../../dseditor/types';
+import { NoyaComponent, NoyaDiff, NoyaNode } from '../../../dseditor/types';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
+import { InspectorCarousel, InspectorCarouselItem } from './InspectorCarousel';
 
 type Props = {
   selectedLayer: Sketch.CustomLayer<CustomLayerData>;
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
+  setPreviewNode: (node: NoyaNode | undefined) => void;
 };
 
 export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
   selectedLayer,
   highlightedPath,
   setHighlightedPath,
+  setPreviewNode,
 }: Props) {
   const dispatch = useAyonDispatch();
   const client = useNoyaClient();
@@ -42,13 +47,19 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.name,
   ]);
 
+  const layout0 = useMemo(() => {
+    if (!generatedLayout.layout || !generatedLayout.layout[0]) return;
+
+    return generatedLayout.layout[0];
+  }, [generatedLayout.layout]);
+
   const node = useMemo(() => {
     if (selectedLayer.data.node) return selectedLayer.data.node;
 
-    if (generatedLayout.layout) {
-      return parseLayout(generatedLayout.layout);
+    if (layout0) {
+      return parseLayout(layout0);
     }
-  }, [generatedLayout.layout, selectedLayer.data.node]);
+  }, [layout0, selectedLayer.data.node]);
 
   const findComponent = useCallback((id: string): NoyaComponent | undefined => {
     return undefined;
@@ -62,6 +73,33 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     },
     [dispatch, node, selectedLayer.do_objectID],
   );
+
+  const carouselItems: InspectorCarouselItem[] = useMemo(() => {
+    if (!generatedLayout.layout) return [];
+
+    return generatedLayout.layout.map((layout, index) => {
+      const node = parseLayout(layout);
+
+      return {
+        id: index.toString(),
+        size: selectedLayer.frame,
+        data: {
+          description: selectedLayer.data.description,
+          node,
+        },
+      };
+    });
+  }, [
+    generatedLayout.layout,
+    selectedLayer.data.description,
+    selectedLayer.frame,
+  ]);
+
+  const selectedIndex = useMemo(() => {
+    if (!node) return;
+
+    return carouselItems.findIndex((item) => isDeepEqual(item.data.node, node));
+  }, [carouselItems, node]);
 
   return (
     <InspectorSection
@@ -81,6 +119,38 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
         )
       }
     >
+      {node && selectedLayer.data.description && (
+        <>
+          <InspectorPrimitives.SectionHeader>
+            <InspectorPrimitives.Title>
+              Suggested Layouts
+            </InspectorPrimitives.Title>
+          </InspectorPrimitives.SectionHeader>
+          <InspectorCarousel
+            items={carouselItems}
+            selectedIndex={selectedIndex}
+            onSelectItem={(index) => {
+              const item = carouselItems[index];
+              dispatch(
+                'setLayerNode',
+                selectedLayer.do_objectID,
+                item.data.node,
+              );
+            }}
+            onHoverItemChange={(index, isHovering) => {
+              if (isHovering) {
+                const item = carouselItems[index];
+                setPreviewNode(item.data.node);
+              } else {
+                setPreviewNode(undefined);
+              }
+            }}
+          />
+        </>
+      )}
+      <InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.Title>Current Layout</InspectorPrimitives.Title>
+      </InspectorPrimitives.SectionHeader>
       {node && node.type !== 'noyaString' ? (
         <DSLayoutTree
           rootNode={node}

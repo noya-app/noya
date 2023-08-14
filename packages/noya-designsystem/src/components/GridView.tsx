@@ -27,11 +27,17 @@ const Grid = styled.div<{
     color: theme.colors.text,
     display: 'grid',
     gridTemplateColumns: `repeat(auto-fill, minmax(
-      ${size === 'large' ? '280px' : size === 'small' ? '160px' : '116px'}
+      ${size === 'large' ? '280px' : size === 'small' ? '160px' : '87px'}
     , 1fr))`,
     gridAutoRows:
-      size === 'large' ? '280px' : size === 'small' ? '170px' : '116px',
-    gap: size === 'large' || size === 'small' ? `20px` : `12px`,
+      size === 'large' ? '280px' : size === 'small' ? '170px' : '87px',
+    gap: size === 'large' || size === 'small' ? `20px` : `9px`,
+    // gridTemplateColumns: `repeat(auto-fill, minmax(
+    //   ${size === 'large' ? '280px' : size === 'small' ? '160px' : '116px'}
+    // , 1fr))`,
+    // gridAutoRows:
+    //   size === 'large' ? '280px' : size === 'small' ? '170px' : '116px',
+    // gap: size === 'large' || size === 'small' ? `20px` : `12px`,
     padding,
   };
 });

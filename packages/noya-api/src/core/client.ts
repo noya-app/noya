@@ -1,7 +1,7 @@
 import { observable } from '@legendapp/state';
 import produce from 'immer';
 import { Rect } from 'noya-geometry';
-import { memoizedGetter } from 'noya-utils';
+import { memoizedGetter, range } from 'noya-utils';
 import { fileReducer } from './collection';
 import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
 import {
@@ -55,7 +55,7 @@ export class NoyaClient {
   loadingNames$ = observable<Record<string, boolean>>({});
   generatedDescriptions$ = observable<Record<string, string>>({});
   loadingDescriptions$ = observable<Record<string, boolean>>({});
-  generatedLayouts$ = observable<Record<string, string>>({});
+  generatedLayouts$ = observable<Record<string, string[]>>({});
   loadingLayouts$ = observable<Record<string, boolean>>({});
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -155,26 +155,38 @@ export class NoyaClient {
 
     const existing = this.generatedLayouts$[key].get();
 
-    if (typeof existing === 'string') return existing;
+    if (Array.isArray(existing)) return existing;
 
+    this.generatedLayouts$.set((prev) => ({ ...prev, [key]: [] }));
     this.loadingLayouts$.set((prev) => ({ ...prev, [key]: true }));
 
-    const iterable =
-      await this.networkClient.generate.componentLayoutsFromDescription(
-        name,
-        description,
-      );
+    const promises = range(0, 4).map(async (index) => {
+      const iterable =
+        await this.networkClient.generate.componentLayoutsFromDescription(
+          name,
+          description,
+        );
 
-    let text = '';
-    for await (const chunk of iterable) {
-      text += chunk;
-      let nextText = text;
-      this.generatedLayouts$.set((prev) => ({ ...prev, [key]: nextText }));
-    }
+      let text = '';
+      for await (const chunk of iterable) {
+        text += chunk;
+        let nextText = text;
+        this.generatedLayouts$.set((prev) => ({
+          ...prev,
+          [key]: [
+            ...prev[key].slice(0, index),
+            nextText,
+            ...prev[key].slice(index + 1),
+          ],
+        }));
+      }
+    });
+
+    await Promise.all(promises);
 
     this.loadingLayouts$.set((prev) => ({ ...prev, [key]: false }));
 
-    return iterable;
+    return;
   };
 
   #resetGenerateComponentDescription = (name: string) => {

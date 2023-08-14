@@ -17,13 +17,7 @@ import { amplitude } from 'noya-log';
 import { FileDropTarget, OffsetPoint, useDeepMemo } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import {
-  BlockContent,
-  DrawableLayerType,
-  Layers,
-  OverriddenBlockContent,
-  Selectors,
-} from 'noya-state';
+import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce, isDeepEqual } from 'noya-utils';
 import React, {
@@ -38,6 +32,7 @@ import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { parseLayout } from '../../dseditor/componentLayout';
+import { NoyaNode } from '../../dseditor/types';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
@@ -103,34 +98,19 @@ export const Content = memo(function Content({
   );
 
   const [overriddenBlock, _setOverriddenBlock] = React.useState<
-    OverriddenBlockContent | undefined
+    NoyaNode | undefined
   >();
 
   // Prevent infinite loop by only updating the overridden block when the value actually changes
   const setOverriddenBlock = useCallback(
-    (value: OverriddenBlockContent | undefined) => {
-      if (
-        value?.layerId === overriddenBlock?.layerId &&
-        value?.blockContent.symbolId ===
-          overriddenBlock?.blockContent.symbolId &&
-        value?.blockContent.blockText ===
-          overriddenBlock?.blockContent.blockText &&
-        isDeepEqual(
-          value?.blockContent.blockParameters,
-          overriddenBlock?.blockContent.blockParameters,
-        )
-      ) {
+    (value: NoyaNode | undefined) => {
+      if (isDeepEqual(value, overriddenBlock)) {
         return;
       }
 
       _setOverriddenBlock(value);
     },
-    [
-      overriddenBlock?.blockContent.blockText,
-      overriddenBlock?.blockContent.symbolId,
-      overriddenBlock?.blockContent.blockParameters,
-      overriddenBlock?.layerId,
-    ],
+    [overriddenBlock],
   );
 
   const addImageFiles = async (files: File[], offsetPoint: OffsetPoint) => {
@@ -217,8 +197,8 @@ export const Content = memo(function Content({
 
       if (loadingLayouts[key]) return;
 
-      if (layouts[key]) {
-        const node = parseLayout(layouts[key]);
+      if (layouts[key] && layouts[key][0]) {
+        const node = parseLayout(layouts[key][0]);
 
         dispatch('setLayerNode', layer.do_objectID, node);
       } else {
@@ -360,10 +340,10 @@ export const Content = memo(function Content({
                         showToolbar={!isPlayground}
                         setOverriddenBlock={(blockContent) => {
                           if (blockContent) {
-                            setOverriddenBlock({
-                              layerId: layer.do_objectID,
-                              blockContent,
-                            });
+                            // setOverriddenBlock({
+                            //   layerId: layer.do_objectID,
+                            //   blockContent,
+                            // });
                           } else {
                             setOverriddenBlock(undefined);
                           }
@@ -473,6 +453,7 @@ export const Content = memo(function Content({
                 onDuplicate={onDuplicate}
                 highlightedPath={highlightedPath}
                 setHighlightedPath={setHighlightedPath}
+                setPreviewNode={setOverriddenBlock}
               />
             )}
             <Overlay>
