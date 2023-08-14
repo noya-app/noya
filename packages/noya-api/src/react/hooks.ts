@@ -43,12 +43,11 @@ export function useMetadata<T extends NoyaAPI.Json>(key: string) {
 
 export function useGeneratedComponentNames(name: string) {
   const key = name.trim().toLowerCase();
+  const { generatedNames$, loadingNames$ } = useNoyaClient();
   const result = useSelector(
-    useNoyaClient().generatedComponentNames$.names[key],
-  ) as NoyaGeneratedName[] | undefined;
-  const loading = useSelector(
-    useNoyaClient().generatedComponentNames$.loadingNames[key],
+    () => generatedNames$[key].get() as NoyaGeneratedName[] | undefined,
   );
+  const loading = useSelector(() => loadingNames$[key].get());
   return useMemo(() => ({ names: result ?? [], loading }), [loading, result]);
 }
 

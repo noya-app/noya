@@ -51,13 +51,8 @@ export class NoyaClient {
     userData: undefined,
     loading: true,
   });
-  generatedComponentNames$ = observable<{
-    names: Record<string, NoyaGeneratedName[]>;
-    loadingNames: Record<string, boolean>;
-  }>({
-    names: {},
-    loadingNames: {},
-  });
+  generatedNames$ = observable<Record<string, NoyaGeneratedName[]>>({});
+  loadingNames$ = observable<Record<string, boolean>>({});
   generatedDescriptions$ = observable<Record<string, string>>({});
   loadingDescriptions$ = observable<Record<string, boolean>>({});
   generatedLayouts$ = observable<Record<string, string>>({});
@@ -100,19 +95,19 @@ export class NoyaClient {
     const name = options.name.trim();
     const key = name.toLowerCase();
 
-    const existing = this.generatedComponentNames$.names[key].get();
+    const existing = this.generatedNames$[key].get();
 
     if (Array.isArray(existing) && existing.length > 0) return existing;
 
-    this.generatedComponentNames$.loadingNames[key].set(true);
+    this.loadingNames$.set((prev) => ({ ...prev, [key]: true }));
 
     const result = await this.networkClient.generate.componentNames({
       ...options,
       name,
     });
 
-    this.generatedComponentNames$.names[key].set(result);
-    this.generatedComponentNames$.loadingNames[key].set(false);
+    this.generatedNames$.set((prev) => ({ ...prev, [key]: result }));
+    this.loadingNames$.set((prev) => ({ ...prev, [key]: false }));
 
     return result;
   };
