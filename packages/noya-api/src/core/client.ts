@@ -160,7 +160,7 @@ export class NoyaClient {
     this.generatedLayouts$.set((prev) => ({ ...prev, [key]: [] }));
     this.loadingLayouts$.set((prev) => ({ ...prev, [key]: true }));
 
-    const promises = range(0, 4).map(async (index) => {
+    const promises = range(0, 8).map(async (index) => {
       const iterable =
         await this.networkClient.generate.componentLayoutsFromDescription(
           name,
