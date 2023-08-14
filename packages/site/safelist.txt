@@ -1346,10 +1346,14 @@ items-start
 items-center
 items-end
 items-stretch
+justify-normal
 justify-start
 justify-center
 justify-end
 justify-between
+justify-around
+justify-evenly
+justify-stretch
 p-0
 p-1
 p-2
