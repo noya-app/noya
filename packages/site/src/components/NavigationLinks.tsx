@@ -10,6 +10,7 @@ const StyledAnchor = styled.a<{ active?: boolean }>(({ theme, active }) => ({
   backgroundColor: active ? theme.colors.inputBackground : 'transparent',
   padding: '4px 8px',
   borderRadius: 4,
+  textDecoration: 'none',
   '&:hover': {
     opacity: 0.8,
   },
