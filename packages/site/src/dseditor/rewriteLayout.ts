@@ -56,6 +56,8 @@ const tailwindClassMapping: Record<string, string> = {
   'flex-column': 'flex-col',
   'flex-column-reverse': 'flex-col-reverse',
   gap: 'gap-2',
+  transition: '',
+  'duration-500': '',
 };
 
 function rewriteClasses(
@@ -94,6 +96,42 @@ export function rewriteTailwindClasses(layout: LayoutNode) {
           tailwindClassMapping[name] ??
           name.replace(/(?:space|gap)-(?:x|y)-(\d+)/, (_, n) => `gap-${n}`),
       );
+  });
+}
+
+const spacingClassGroups = new Set<ClassGroupKey>([
+  'padding',
+  'paddingBottom',
+  'paddingLeft',
+  'paddingRight',
+  'paddingTop',
+  'paddingX',
+  'paddingY',
+  'margin',
+  'marginBottom',
+  'marginLeft',
+  'marginRight',
+  'marginTop',
+  'marginX',
+  'marginY',
+  'gap',
+]);
+
+/**
+ * Replace all spacing values (p-4, mt-8, gap-3, etc) with a value of "4"
+ */
+export function rewriteConsistentSpacing(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    return classes.map((name) => {
+      const group = getTailwindClassGroup(name);
+
+      if (spacingClassGroups.has(group)) {
+        // Replace numeric value
+        return name.replace(/(\d+)/, '4');
+      }
+
+      return name;
+    });
   });
 }
 
@@ -291,6 +329,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);
+  layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);
   layout = rewriteAbsoluteFill(layout);

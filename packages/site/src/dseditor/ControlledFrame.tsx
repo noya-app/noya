@@ -69,6 +69,21 @@ export const ControlledFrame = memo(
   *::selection {
     background-color: rgb(179,215,254);
   }
+
+  @keyframes noya-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .noya-skeleton-shimmer {
+    animation: noya-shimmer 6s infinite linear;
+    background: linear-gradient(90deg, #ffffff00, #e2e8f0dd, #ffffff00);
+    background-size: 200% 100%;
+  }
 </style>
 <script>
   const callback = () => {

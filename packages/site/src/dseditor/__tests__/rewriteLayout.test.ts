@@ -3,6 +3,7 @@ import { layoutNode } from 'noya-compiler';
 import path from 'path';
 import {
   rewriteAbsoluteFill,
+  rewriteConsistentSpacing,
   rewriteFlex1ButtonInColumn,
   rewriteForbiddenClassGroups,
   rewriteImagesWithChildren,
@@ -120,4 +121,10 @@ it('removes flex-1 from button in a flex-col', () => {
   ).toEqual(
     layoutNode('Box', { class: 'flex flex-col' }, [layoutNode('Button')]),
   );
+});
+
+it('normalizes spacing to 4 units', () => {
+  expect(
+    rewriteConsistentSpacing(layoutNode('Box', { class: 'p-3 gap-7' })),
+  ).toEqual(layoutNode('Box', { class: 'p-4 gap-4' }));
 });

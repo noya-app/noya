@@ -191,7 +191,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                         'flex',
                         'items-center',
                         'justify-center',
-                        'bg-slate-50',
+                        'text-center',
+                        'p-4',
                       ],
                       children: [
                         layer.data.description === undefined
@@ -229,6 +230,9 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                 return (
                   <div
                     key={layer.do_objectID}
+                    className={
+                      !layer.data.node ? 'noya-skeleton-shimmer' : undefined
+                    }
                     style={{
                       position: 'absolute',
                       top: layer.frame.y,
