@@ -1,5 +1,5 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import { findLast } from 'noya-utils';
+import { findLast, unique } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
   boxSymbolId,
@@ -9,6 +9,8 @@ import {
   inputSymbolId,
   linkSymbolId,
   radioSymbolId,
+  selectOptionSymbolId,
+  selectSymbolId,
   tableSymbolId,
   tagSymbolId,
   textSymbolId,
@@ -23,14 +25,14 @@ import { NoyaResolvedNode } from './types';
 // const pixel = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkMAYAADkANVKH3ScAAAAASUVORK5CYII=`;
 // const placeholderImage = `data:image/png;base64,${pixel}`;
 
-const svg = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 <defs>
     <linearGradient id="greenToBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
         <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
     </linearGradient>
 </defs>
-<rect x="0" y="0" width="200" height="200" fill="url(#greenToBlueGradient)" />
+<rect x="0" y="0" width="100" height="100" fill="url(#greenToBlueGradient)" />
 </svg>`;
 
 let placeholderImage = 'data:image/svg+xml,' + encodeURIComponent(svg);
@@ -97,6 +99,10 @@ export function renderResolvedNode({
         );
       }
 
+      if (element.componentID === selectOptionSymbolId) {
+        return element.name ?? '';
+      }
+
       const isHighlighted = element.path.join() === highlightedPath?.join();
 
       const PrimitiveComponent: React.FC<any> =
@@ -141,6 +147,9 @@ export function renderResolvedNode({
             // src: 'https://placehold.it/300x300',
             // src: 'https://picsum.photos/300/300',
             src: placeholderImage,
+          })}
+          {...(element.componentID === selectSymbolId && {
+            options: unique(transformedChildren),
           })}
           // Components with children
           {...((element.componentID === boxSymbolId ||

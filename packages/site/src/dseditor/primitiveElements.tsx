@@ -23,6 +23,7 @@ import {
   inputSymbolId,
   linkSymbolId,
   radioSymbolId,
+  selectOptionSymbolId,
   selectSymbolId,
   switchSymbolId,
   tableSymbolId,
@@ -119,6 +120,25 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Select',
     icon: <DropdownMenuIcon />,
     aliases: ['Dropdown'],
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Select',
+        componentID: selectSymbolId,
+        classNames: ['flex-1'],
+        children: [
+          Model.primitiveElement({
+            name: 'Option',
+            componentID: selectOptionSymbolId,
+            classNames: ['flex-1'],
+          }),
+        ],
+      }),
+  },
+  {
+    id: selectOptionSymbolId,
+    name: 'Option',
+    icon: <DropdownMenuIcon />,
+    aliases: ['Select Option', 'Dropdown Option'],
   },
   {
     id: switchSymbolId,
@@ -140,7 +160,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         children: [Model.string('Tag')],
       }),
   },
-  { id: textSymbolId, name: 'Text', icon: <TextIcon /> },
+  { id: textSymbolId, name: 'Text', icon: <TextIcon />, aliases: ['Label'] },
   { id: textareaSymbolId, name: 'Textarea', icon: <InputIcon /> },
 ];
 
@@ -149,7 +169,11 @@ export const PRIMITIVE_ELEMENT_NAMES: Record<string, string> =
     primitiveElements.map((element) => [element.id, element.name]),
   );
 
-// Lowercase tag name => primitive element ID
-export const PRIMITIVE_TAG_MAP: Record<string, string> = Object.fromEntries(
-  primitiveElements.map((element) => [element.name, element.id]),
-);
+// Lowercase tag name => primitive element
+export const PRIMITIVE_TAG_MAP: Record<string, PrimitiveElementMetadata> =
+  Object.fromEntries(
+    primitiveElements.flatMap((element) => [
+      [element.name.toLowerCase(), element],
+      ...(element.aliases || []).map((alias) => [alias.toLowerCase(), element]),
+    ]),
+  );

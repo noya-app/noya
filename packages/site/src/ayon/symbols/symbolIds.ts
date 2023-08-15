@@ -37,3 +37,4 @@ export const linkSymbolId = component.id.Link;
 export const featureItemSymbolId = 'bb9acbb5-dea6-48ac-a525-124cf9ff6054';
 export const featureRowSymbolId = '128c943f-acfc-4618-98b7-ce4150273913';
 export const featureSectionSymbolId = '165dc64a-569c-4dbc-a008-11944ca143d0';
+export const selectOptionSymbolId = 'a4009f44-db30-4658-9bcb-7531434150bb';

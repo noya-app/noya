@@ -51,7 +51,9 @@ const tailwindClassMapping: Record<string, string> = {
   'text-2xl': 'variant-h4',
   'text-xl': 'variant-h5',
   'text-lg': 'variant-h6',
+  'text-md': '',
   'text-sm': '',
+  'text-base': '',
   grow: 'flex-1',
   'flex-column': 'flex-col',
   'flex-column-reverse': 'flex-col-reverse',
@@ -186,6 +188,15 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     // Consider adding this back in some form when we have color scheme support
     'background',
     'textColor',
+  ],
+  Select: [
+    'padding',
+    'paddingBottom',
+    'paddingLeft',
+    'paddingRight',
+    'paddingTop',
+    'paddingX',
+    'paddingY',
   ],
 };
 

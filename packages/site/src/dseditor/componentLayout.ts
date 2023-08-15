@@ -1,9 +1,6 @@
 import { memoize } from 'noya-utils';
 import { Model } from './builders';
-import {
-  PRIMITIVE_ELEMENT_NAMES,
-  PRIMITIVE_TAG_MAP,
-} from './primitiveElements';
+import { PRIMITIVE_TAG_MAP } from './primitiveElements';
 import { NoyaElement, NoyaNode } from './types';
 
 import {
@@ -22,9 +19,12 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
         return Model.string({ value: node });
       }
 
+      const primitive =
+        PRIMITIVE_TAG_MAP[node.tag.toLowerCase()] ?? PRIMITIVE_TAG_MAP['box'];
+
       return Model.primitiveElement({
-        componentID: PRIMITIVE_TAG_MAP[node.tag],
-        name: node.attributes.name || PRIMITIVE_ELEMENT_NAMES[node.tag],
+        componentID: primitive.id,
+        name: node.attributes.name || primitive.name,
         children: transformedChildren,
         classNames: node.attributes.class?.split(' '),
       });
