@@ -142,6 +142,10 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('w-full')).toEqual({
       width: '100%',
     });
+
+    expect(resolveTailwindClass('w-1/2')).toEqual({
+      width: '50%',
+    });
   });
 
   it('height', () => {

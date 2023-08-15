@@ -156,7 +156,9 @@ export const getTailwindClassesByGroup = memoize((group: ClassGroupKey) => {
 });
 
 function getValue(className: string): string | undefined {
-  return /-((\d+)|(sm|md|lg|xl|2xl|3xl|full|none))$/.exec(className)?.[1];
+  return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none))$/.exec(
+    className,
+  )?.[1];
 }
 
 function getSpacingValue(className: string): string | undefined {
