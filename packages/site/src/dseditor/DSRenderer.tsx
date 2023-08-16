@@ -8,6 +8,7 @@ import {
 } from '@noya-design-system/protocol';
 import { Stack } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
+import { useStableCallback } from 'noya-react-utils';
 import React, {
   forwardRef,
   useCallback,
@@ -28,8 +29,6 @@ import {
   serializeSelection,
   setDOMSelection,
 } from './dom';
-
-const noop = () => {};
 
 const Loading = styled.div({
   position: 'absolute',
@@ -64,6 +63,7 @@ type Props = {
   renderContent: (options: DSRenderProps) => React.ReactNode;
   serializedSelection?: SerializedSelection;
   setSerializedSelection?: (value: SerializedSelection | undefined) => void;
+  setHighlightedPath?: (path: string[] | undefined) => void;
   onBeforeInput?: (event: InputEvent) => void;
   onReady?: () => void;
 };
@@ -75,6 +75,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     renderContent,
     serializedSelection,
     setSerializedSelection,
+    setHighlightedPath,
     onBeforeInput,
     onReady,
   }: Props,
@@ -202,18 +203,9 @@ export const DSRenderer = forwardRef(function DSRenderer(
     };
   }, [ready, setSerializedSelection, onBeforeInput]);
 
-  const setSerializedSelectionRef = useRef(setSerializedSelection || noop);
-
-  useEffect(() => {
-    setSerializedSelectionRef.current = setSerializedSelection || noop;
-  }, [setSerializedSelection]);
-
   // Add indirection so we don't recreate the handlers (which have an internal timer)
-  const _setSerializedSelection = useCallback(
-    (value: SerializedSelection | undefined) =>
-      setSerializedSelectionRef.current?.(value),
-    [],
-  );
+  const _setSerializedSelection = useStableCallback(setSerializedSelection);
+  const _setHighlightedPath = useStableCallback(setHighlightedPath);
 
   const eventHandlers = useMemo(
     () =>
@@ -221,9 +213,10 @@ export const DSRenderer = forwardRef(function DSRenderer(
         ? createSelectionHandlers(
             ref.current.contentDocument,
             _setSerializedSelection,
+            _setHighlightedPath,
           )
         : undefined,
-    [_setSerializedSelection, ready],
+    [_setHighlightedPath, _setSerializedSelection, ready],
   );
 
   useImperativeHandle(

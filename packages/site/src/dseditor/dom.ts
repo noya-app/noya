@@ -225,6 +225,7 @@ export function createSelectionHandlers(
   setSerializedSelection: (
     serializedSelection: SerializedSelection | undefined,
   ) => void,
+  setHighlightedPath: (highlightedPath: string[] | undefined) => void,
 ) {
   let range: Range | null = null;
   let clickCount = 0;
@@ -315,8 +316,22 @@ export function createSelectionHandlers(
     );
   }
 
+  function handleHighlightPath(point: Point) {
+    const elements = document.elementsFromPoint(point.x, point.y);
+
+    const element = elements.find(
+      (element): element is HTMLElement =>
+        'dataset' in element && !!(element as HTMLElement).dataset.path,
+    );
+
+    setHighlightedPath?.(
+      element ? element.dataset.path?.split('/') : undefined,
+    );
+  }
+
   const handleMouseMove: ProxyEventHandler = ({ point }) => {
     if (!initialPosition || !isMoving(point, initialPosition)) {
+      handleHighlightPath(point);
       return;
     }
 

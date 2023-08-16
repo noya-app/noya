@@ -137,6 +137,9 @@ export function renderResolvedNode({
         <PrimitiveComponent
           style={style}
           key={element.path.join('/')}
+          _passthrough={{
+            'data-path': element.path.join('/'),
+          }}
           {...(variant && { variant })}
           {...((element.componentID === textareaSymbolId ||
             element.componentID === inputSymbolId) &&

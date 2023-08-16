@@ -14,12 +14,17 @@ import {
 import { Stack, Toast } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
-import { FileDropTarget, OffsetPoint, useDeepMemo } from 'noya-react-utils';
+import {
+  FileDropTarget,
+  OffsetPoint,
+  useDeepMemo,
+  useDeepState,
+} from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import { debounce, isDeepEqual } from 'noya-utils';
+import { debounce } from 'noya-utils';
 import React, {
   memo,
   useCallback,
@@ -39,7 +44,7 @@ import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
 import { Stacking } from '../stacking';
 import { useAyonState } from '../state/ayonState';
-import { CustomLayerData, ViewType } from '../types';
+import { CustomLayerData, NodePath, ViewType } from '../types';
 import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
@@ -97,21 +102,12 @@ export const Content = memo(function Content({
     [state],
   );
 
-  const [overriddenBlock, _setOverriddenBlock] = React.useState<
+  const [overriddenBlock, setOverriddenBlock] = useDeepState<
     NoyaNode | undefined
   >();
-
-  // Prevent infinite loop by only updating the overridden block when the value actually changes
-  const setOverriddenBlock = useCallback(
-    (value: NoyaNode | undefined) => {
-      if (isDeepEqual(value, overriddenBlock)) {
-        return;
-      }
-
-      _setOverriddenBlock(value);
-    },
-    [overriddenBlock],
-  );
+  const [highlightedNodePath, setHighlightedNodePath] = useDeepState<
+    NodePath | undefined
+  >();
 
   const addImageFiles = async (files: File[], offsetPoint: OffsetPoint) => {
     const images = await Promise.all(
@@ -256,10 +252,6 @@ export const Content = memo(function Content({
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
   const rendererRef = useRef<IDSRenderer>(null);
-
-  const [highlightedPath, setHighlightedPath] = useState<
-    string[] | undefined
-  >();
 
   const custom = createCustomLayerInteraction({
     onPointerDown: (event) => rendererRef.current?.mouseDown(event),
@@ -440,8 +432,8 @@ export const Content = memo(function Content({
             resizeBehavior="match-canvas"
             ds={ds}
             sync={!isPlayground}
-            highlightedPath={highlightedPath}
-            setHighlightedPath={setHighlightedPath}
+            highlightedNodePath={highlightedNodePath}
+            setHighlightedNodePath={setHighlightedNodePath}
           />
         </Overlay>
         {viewType === 'combined' && (
@@ -451,8 +443,8 @@ export const Content = memo(function Content({
                 name={name}
                 onChangeName={onChangeName}
                 onDuplicate={onDuplicate}
-                highlightedPath={highlightedPath}
-                setHighlightedPath={setHighlightedPath}
+                highlightedNodePath={highlightedNodePath}
+                setHighlightedNodePath={setHighlightedNodePath}
                 setPreviewNode={setOverriddenBlock}
               />
             )}

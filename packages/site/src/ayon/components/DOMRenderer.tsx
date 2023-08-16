@@ -19,7 +19,7 @@ import {
 import { NoyaNode, NoyaResolvedString } from '../../dseditor/types';
 import { useAyonState } from '../state/ayonState';
 import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
-import { CustomLayerData } from '../types';
+import { CustomLayerData, NodePath } from '../types';
 
 class ErrorBoundary extends React.Component<any> {
   constructor(props: { children: React.ReactNode }) {
@@ -47,8 +47,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
     ds,
     overriddenBlock,
     sync,
-    highlightedPath,
-    setHighlightedPath,
+    highlightedNodePath,
+    setHighlightedNodePath,
   }: {
     size: Size;
     resizeBehavior: ResizeBehavior;
@@ -56,8 +56,8 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
     ds: DS;
     overriddenBlock?: NoyaNode;
     sync: boolean;
-    highlightedPath?: string[];
-    setHighlightedPath?: (path: string[] | undefined) => void;
+    highlightedNodePath?: NodePath;
+    setHighlightedNodePath?: (path: NodePath | undefined) => void;
   },
   forwardedRef: React.ForwardedRef<IDSRenderer>,
 ): JSX.Element {
@@ -121,6 +121,13 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
             ref={forwardedRef}
             sourceName={ds.source.name}
             primary={ds.config.colors.primary}
+            setHighlightedPath={(path) => {
+              if (!selectedLayerId) return;
+
+              setHighlightedNodePath?.(
+                path ? { layerId: selectedLayerId, path } : undefined,
+              );
+            }}
             onChangeTextAtPath={({ path, value }) => {
               const layer = artboard.layers
                 .filter(Layers.isCustomLayer<CustomLayerData>)
@@ -227,8 +234,9 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                   primary: props.primary,
                   system: props.system,
                   highlightedPath:
-                    layer.do_objectID === selectedLayerId
-                      ? highlightedPath
+                    highlightedNodePath &&
+                    layer.do_objectID === highlightedNodePath.layerId
+                      ? highlightedNodePath.path
                       : undefined,
                   selectionOutlineColor: 'blue',
                 });

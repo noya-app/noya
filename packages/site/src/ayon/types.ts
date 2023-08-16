@@ -12,3 +12,5 @@ export type CustomLayerData = {
   description?: string;
   node?: NoyaNode;
 };
+
+export type NodePath = { path: string[]; layerId: string };

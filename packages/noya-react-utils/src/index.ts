@@ -11,6 +11,7 @@ export * from './hooks/usePixelRatio';
 export * from './hooks/useResource';
 export * from './hooks/useShallowArray';
 export * from './hooks/useSize';
+export * from './hooks/useStableCallback';
 export * from './hooks/useSystemColorScheme';
 export * from './hooks/useUrlHashParameters';
 export * from './utils/PromiseState';

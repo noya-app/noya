@@ -7,20 +7,17 @@ import { SerializedSelection, closest } from './dom';
 
 type Props = Pick<
   ComponentProps<typeof DSRenderer>,
-  'primary' | 'sourceName' | 'renderContent'
+  'primary' | 'sourceName' | 'renderContent' | 'setHighlightedPath'
 > & {
   onChangeTextAtPath?: (args: { path: string[]; value: string }) => void;
-  highlightedPath?: string[];
-  setHighlightedPath?: (path: string[] | undefined) => void;
   getStringValueAtPath: (path: string[]) => string | undefined;
 };
 
 export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
   {
-    onChangeTextAtPath,
     renderContent,
-    highlightedPath,
     setHighlightedPath,
+    onChangeTextAtPath,
     getStringValueAtPath,
     ...rest
   }: Props,
@@ -66,7 +63,6 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
   const handleRenderContent = useCallback(
     (props: DSRenderProps) => {
       const content = renderContent(props);
-      // const { iframe } = props;
 
       return (
         <div
@@ -77,37 +73,6 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
             alignItems: 'stretch',
             flexDirection: 'column',
           }}
-          // onMouseMove={(event) => {
-          //   const window = iframe.contentWindow;
-          //   const document = iframe.contentDocument;
-
-          //   if (!document || !window) return;
-
-          //   if (document) {
-          //     const elements = document.elementsFromPoint(
-          //       event.clientX,
-          //       event.clientY,
-          //     );
-
-          //     const element = elements.find(
-          //       (element): element is HTMLElement =>
-          //         element instanceof
-          //           (window as unknown as typeof globalThis).HTMLElement &&
-          //         !!element.dataset.path,
-          //     );
-
-          //     // console.log(elements);
-          //     if (element) {
-          //       if (element.dataset.path !== highlightedPath?.join('/')) {
-          //         setHighlightedPath?.(element.dataset.path?.split('/'));
-          //       }
-          //     } else {
-          //       if (highlightedPath) {
-          //         setHighlightedPath?.(undefined);
-          //       }
-          //     }
-          //   }
-          // }}
           onKeyDownCapture={(event) => {
             const target = event.target as HTMLElement;
 
@@ -163,6 +128,7 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
       ref={forwardedRef}
       serializedSelection={serializedSelection}
       setSerializedSelection={setSerializedSelection}
+      setHighlightedPath={setHighlightedPath}
       onBeforeInput={onBeforeInput}
       renderContent={handleRenderContent}
       {...rest}
