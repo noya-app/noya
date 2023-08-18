@@ -19,7 +19,7 @@ import {
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
-import { ResolvedHierarchy } from './traversal';
+import { ResolvedHierarchy } from './resolvedHierarchy';
 import { NoyaResolvedNode } from './types';
 
 // const pixel = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkMAYAADkANVKH3ScAAAAASUVORK5CYII=`;
@@ -53,8 +53,6 @@ export function renderResolvedNode({
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
     (element, transformedChildren) => {
-      if (element.status === 'removed') return null;
-
       if (element.type === 'noyaCompositeElement') {
         return transformedChildren;
       }
@@ -110,11 +108,9 @@ export function renderResolvedNode({
 
       if (!PrimitiveComponent) return null;
 
-      const classNames = element.classNames
-        .filter((className) => className.status !== 'removed')
-        .map((className) => {
-          return className.value.replace(/-primary-/, `-${primary}-`);
-        });
+      const classNames = element.classNames.map((className) => {
+        return className.value.replace(/-primary-/, `-${primary}-`);
+      });
 
       const style = parametersToTailwindStyle(classNames);
 

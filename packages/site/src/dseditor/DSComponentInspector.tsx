@@ -14,8 +14,12 @@ import React, { useMemo } from 'react';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSLayoutTree } from './DSLayoutTree';
 import { parseLayout } from './componentLayout';
-import { mergeDiffs } from './diff';
-import { FindComponent, embedRootLevelDiff } from './traversal';
+import {
+  FindComponent,
+  diffResolvedTrees,
+  instantiateResolvedComponent,
+  unresolve,
+} from './traversal';
 import {
   NoyaComponent,
   NoyaResolvedNode,
@@ -186,10 +190,16 @@ export function DSComponentInspector({
                         return;
                       }
 
-                      const newRootElement = embedRootLevelDiff(
-                        component.rootElement,
-                        selection.diff,
+                      const instance = instantiateResolvedComponent(
+                        findComponent,
+                        {
+                          componentID: selection.componentID,
+                          variantID: selection.variantID,
+                          diff: selection.diff,
+                        },
                       );
+
+                      const newRootElement = unresolve(instance);
 
                       onChangeComponent({
                         ...component,
@@ -211,13 +221,14 @@ export function DSComponentInspector({
             }
           >
             <DSLayoutTree
-              rootNode={component.rootElement}
-              setDiff={(diff) =>
-                setSelection({
-                  ...selection,
-                  diff: mergeDiffs(selection.diff, diff),
-                })
-              }
+              onChange={(newResolvedNode) => {
+                const instance = instantiateResolvedComponent(findComponent, {
+                  componentID: selection.componentID,
+                  variantID: selection.variantID,
+                });
+                const diff = diffResolvedTrees(instance, newResolvedNode);
+                setSelection({ ...selection, diff });
+              }}
               findComponent={findComponent}
               setHighlightedPath={setHighlightedPath}
               highlightedPath={highlightedPath}

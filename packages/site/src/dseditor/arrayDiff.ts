@@ -48,7 +48,7 @@ export function computeArrayDiff<T>(
   b: T[],
   identity: (item: T) => unknown = (item) => item,
 ): ArrayDiffItem<T>[] {
-  const diffs: ArrayDiffItem<T>[] = [];
+  const items: ArrayDiffItem<T>[] = [];
   const aMap = new Map(a.map((item, index) => [identity(item), index]));
   const bMap = new Map(b.map((item, index) => [identity(item), index]));
 
@@ -57,7 +57,7 @@ export function computeArrayDiff<T>(
   for (let i = 0; i < a.length; i++) {
     const item = a[i];
     if (!bMap.has(identity(item))) {
-      diffs.push(removed(i - removalOffset));
+      items.push(removed(i - removalOffset));
       removalOffset++;
     }
   }
@@ -66,19 +66,19 @@ export function computeArrayDiff<T>(
   for (let i = 0; i < b.length; i++) {
     const item = b[i];
     if (!aMap.has(identity(item))) {
-      diffs.push(added(item, i));
+      items.push(added(item, i));
     }
   }
 
-  let result = applyArrayDiff(a, diffs);
+  let result = applyArrayDiff(a, items);
   let firstMove = computeFirstArrayMove(0, result, b, identity);
   while (firstMove) {
-    diffs.push(firstMove[1]);
+    items.push(firstMove[1]);
     result = applyArrayDiff(result, [firstMove[1]]);
     firstMove = computeFirstArrayMove(firstMove[0], result, b, identity);
   }
 
-  return diffs;
+  return items;
 }
 
 export function applyArrayDiff<T>(a: T[], items: ArrayDiffItem<T>[]): T[] {
@@ -100,4 +100,22 @@ export function applyArrayDiff<T>(a: T[], items: ArrayDiffItem<T>[]): T[] {
   }
 
   return result;
+}
+
+export function mapArrayDiff<T, K>(
+  items: ArrayDiffItem<T>[],
+  map: (item: T) => K,
+): ArrayDiffItem<K>[] {
+  return items.map((item) => {
+    switch (item[0]) {
+      case 'a':
+        return added(map(item[1]), item[2]);
+      case 'r':
+        return removed(item[1]);
+      case 'm':
+        return moved(item[1], item[2]);
+      default:
+        throw new Error(`Invalid diff item type: ${item[0]}`);
+    }
+  });
 }

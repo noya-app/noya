@@ -26,7 +26,9 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
         componentID: primitive.id,
         name: node.attributes.name || primitive.name,
         children: transformedChildren,
-        classNames: node.attributes.class?.split(' '),
+        classNames: node.attributes.class
+          ?.split(' ')
+          .map((value) => Model.className(value)),
       });
     },
   );

@@ -53,7 +53,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Box',
         componentID: boxSymbolId,
-        classNames: ['flex-1', 'bg-primary-50'],
+        classNames: Model.classNames(['flex-1', 'bg-primary-50']),
       }),
   },
   {
@@ -65,7 +65,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Button',
         componentID: buttonSymbolId,
-        classNames: ['flex-1'],
+        classNames: Model.classNames(['flex-1']),
         children: [Model.string('Submit')],
       }),
   },
@@ -78,7 +78,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Checkbox',
         componentID: checkboxSymbolId,
-        classNames: ['flex-1'],
+        classNames: Model.classNames(['flex-1']),
         children: [Model.string('Checkbox')],
       }),
   },
@@ -98,7 +98,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Link',
         componentID: linkSymbolId,
-        classNames: ['flex-1'],
+        classNames: Model.classNames(['flex-1']),
         children: [Model.string('Link')],
       }),
   },
@@ -111,7 +111,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Radio',
         componentID: radioSymbolId,
-        classNames: ['flex-1'],
+        classNames: Model.classNames(['flex-1']),
         children: [Model.string('Radio')],
       }),
   },
@@ -124,12 +124,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Select',
         componentID: selectSymbolId,
-        classNames: ['flex-1'],
+        classNames: Model.classNames(['flex-1']),
         children: [
           Model.primitiveElement({
             name: 'Option',
             componentID: selectOptionSymbolId,
-            classNames: ['flex-1'],
+            classNames: Model.classNames(['flex-1']),
           }),
         ],
       }),
@@ -156,7 +156,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       Model.primitiveElement({
         name: 'Tag',
         componentID: tagSymbolId,
-        classNames: ['self-start'],
+        classNames: Model.classNames(['self-start']),
         children: [Model.string('Tag')],
       }),
   },

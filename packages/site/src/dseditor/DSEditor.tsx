@@ -16,10 +16,10 @@ import { DSRenderProps, IDSRenderer } from './DSRenderer';
 import { DSRendererOverlay } from './DSRendererOverlay';
 import { Model } from './builders';
 import { initialComponents } from './builtins';
-import { mergeDiffs } from './diff';
 import { renderDSOverview } from './renderDSOverview';
 import { renderDSPreview } from './renderDSPreview';
-import { ResolvedHierarchy, createResolvedNode } from './traversal';
+import { ResolvedHierarchy } from './resolvedHierarchy';
+import { diffResolvedTrees, instantiateResolvedComponent } from './traversal';
 import { NoyaComponent, NoyaResolvedString, SelectedComponent } from './types';
 
 const noop = () => {};
@@ -124,37 +124,47 @@ export function DSEditor({
   const handleSetTextAtPath = useCallback(
     ({ path, value }: { path: string[]; value: string }) => {
       setSelection((selection) => {
-        const merged = mergeDiffs(
-          selection?.diff,
-          Model.diff([Model.diffItem({ path, textValue: value })]),
+        if (!selection) return selection;
+
+        const instance = instantiateResolvedComponent(findComponent, {
+          componentID: selection.componentID,
+          variantID: selection.variantID,
+          diff: selection.diff,
+        });
+
+        const indexPath = ResolvedHierarchy.findIndexPath(
+          instance,
+          (node) => node.path.join('/') === path.join('/'),
         );
 
-        return selection ? { ...selection, diff: merged } : undefined;
+        if (!indexPath) return selection;
+
+        const originalNode = ResolvedHierarchy.access(
+          instance,
+          indexPath,
+        ) as NoyaResolvedString;
+
+        const newResolvedNode = ResolvedHierarchy.replace(instance, {
+          at: indexPath,
+          node: { ...originalNode, value },
+        });
+
+        const initialInstance = instantiateResolvedComponent(findComponent, {
+          componentID: selection.componentID,
+          variantID: selection.variantID,
+        });
+
+        const diff = diffResolvedTrees(initialInstance, newResolvedNode);
+
+        return { ...selection, diff };
       });
     },
-    [],
+    [findComponent],
   );
 
   const resolvedNode = useMemo(() => {
     if (!selection) return undefined;
-
-    const instance = Model.compositeElement({
-      id: 'root',
-      componentID: selection.componentID,
-      variantID: selection.variantID,
-      diff: selection.diff,
-    });
-
-    let resolvedNode = createResolvedNode(findComponent, instance);
-
-    ResolvedHierarchy.visit(resolvedNode, (node) => {
-      // Remove the root prefix
-      node.path = node.path.slice(1);
-    });
-
-    if (resolvedNode.type !== 'noyaCompositeElement') return undefined;
-
-    return resolvedNode.rootElement;
+    return instantiateResolvedComponent(findComponent, selection);
   }, [findComponent, selection]);
 
   const handleRenderContent = React.useCallback(

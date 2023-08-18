@@ -1,3 +1,5 @@
+import { ArrayDiffItem } from './arrayDiff';
+
 export type NoyaString = {
   id: string;
   type: 'noyaString';
@@ -18,7 +20,7 @@ type NoyaElementBase = {
 export type NoyaPrimitiveElement = NoyaElementBase & {
   type: 'noyaPrimitiveElement';
   // Props
-  classNames: string[];
+  classNames: NoyaClassName[];
   children: NoyaNode[];
 };
 
@@ -47,7 +49,6 @@ export type NoyaResolvedNode =
 export type NoyaResolvedCompositeElement = NoyaCompositeElement & {
   rootElement: NoyaResolvedNode;
   path: string[];
-  status?: 'added' | 'removed';
 };
 export type NoyaResolvedPrimitiveElement = Omit<
   NoyaPrimitiveElement,
@@ -55,28 +56,19 @@ export type NoyaResolvedPrimitiveElement = Omit<
 > & {
   children: NoyaResolvedNode[];
   path: string[];
-  classNames: NoyaResolvedClassName[];
-  status?: 'added' | 'removed';
+  classNames: NoyaClassName[];
 };
 export type NoyaResolvedString = NoyaString & {
   path: string[];
-  status?: 'added' | 'removed';
 };
-export type NoyaResolvedClassName = {
+export type NoyaClassName = {
   value: string;
-  status?: 'added' | 'removed';
 };
 
 export type NoyaDiffItem = {
   path: string[];
-  classNames?: {
-    add?: string[];
-    remove?: string[];
-  };
-  children?: {
-    add?: { node: NoyaNode; index: number }[];
-    remove?: string[];
-  };
+  classNames?: ArrayDiffItem<NoyaClassName>[];
+  children?: ArrayDiffItem<NoyaNode>[];
   textValue?: string;
   name?: string;
 };

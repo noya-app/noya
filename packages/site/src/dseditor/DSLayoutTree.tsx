@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import {
   Chip,
   CompletionItem,
@@ -21,13 +22,9 @@ import {
   PRIMITIVE_ELEMENT_NAMES,
   primitiveElements,
 } from './primitiveElements';
-import {
-  FindComponent,
-  ResolvedHierarchy,
-  createResolvedNode,
-  findSourceNode,
-} from './traversal';
-import { NoyaDiff, NoyaNode, NoyaResolvedNode } from './types';
+import { ResolvedHierarchy } from './resolvedHierarchy';
+import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
+import { NoyaResolvedNode } from './types';
 
 type LayoutTreeItem = {
   depth: number;
@@ -61,10 +58,9 @@ function flattenResolvedNode(resolvedNode: NoyaResolvedNode): LayoutTreeItem[] {
 }
 
 interface Props {
-  rootNode: NoyaNode;
-  setDiff: (diff: NoyaDiff) => void;
+  onChange: (resolvedNode: NoyaResolvedNode) => void;
   findComponent: FindComponent;
-  resolvedNode?: NoyaResolvedNode;
+  resolvedNode: NoyaResolvedNode;
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
 }
@@ -73,18 +69,12 @@ interface Props {
  * The resolved node already has the diff applied, so we don't need to pass the diff separately.
  */
 export const DSLayoutTree = memo(function DSLayoutTree({
-  rootNode,
-  setDiff,
+  onChange,
   findComponent,
-  resolvedNode: _resolvedNode,
+  resolvedNode,
   highlightedPath,
   setHighlightedPath,
 }: Props) {
-  const resolvedNode = useMemo(
-    () => _resolvedNode ?? createResolvedNode(findComponent, rootNode),
-    [_resolvedNode, findComponent, rootNode],
-  );
-
   const flattened = useMemo(
     () => flattenResolvedNode(resolvedNode),
     [resolvedNode],
@@ -153,6 +143,23 @@ export const DSLayoutTree = memo(function DSLayoutTree({
 
         return true;
       }}
+      onMoveItem={(
+        sourceIndex: number,
+        destinationIndex: number,
+        position: RelativeDropPosition,
+      ) => {
+        const sourceItem = flattened[sourceIndex];
+        const destinationItem = flattened[destinationIndex];
+
+        const updated = handleMoveItem(
+          resolvedNode,
+          position,
+          sourceItem.indexPath,
+          destinationItem.indexPath,
+        );
+
+        onChange(updated);
+      }}
       renderItem={(
         { depth, key, indexPath, node, path },
         index,
@@ -161,8 +168,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
         <DSLayoutRow
           id={key}
           key={key}
-          rootNode={rootNode}
-          setDiff={setDiff}
+          onChange={onChange}
           resolvedNode={resolvedNode}
           findComponent={findComponent}
           highlightedPath={highlightedPath}
@@ -219,8 +225,7 @@ const typeItems = primitiveElements.flatMap((p): CompletionItem[] => [
 
 export const DSLayoutRow = memo(function DSLayerRow({
   id,
-  rootNode,
-  setDiff,
+  onChange,
   resolvedNode,
   findComponent,
   highlightedPath,
@@ -234,8 +239,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   setEditingId,
 }: {
   id: string;
-  rootNode: NoyaNode;
-  setDiff: (diff: NoyaDiff) => void;
+  onChange: (resolvedNode: NoyaResolvedNode) => void;
   resolvedNode: NoyaResolvedNode;
   findComponent: FindComponent;
   highlightedPath?: string[];
@@ -332,65 +336,36 @@ export const DSLayoutRow = memo(function DSLayerRow({
         break;
       }
       case 'duplicate': {
-        if (rootNode.type === 'noyaString') return;
-
-        const root = findComponent(rootNode.componentID);
-
-        if (!root) return;
-
-        const sourceNode = findSourceNode(findComponent, rootNode, path);
-
-        if (!sourceNode) return;
-
-        if (rootNode.type !== 'noyaCompositeElement') return;
-
-        setDiff(
-          Model.diff([
-            Model.diffItem({
-              path: path.slice(0, -1),
-              children: {
-                add: [
-                  {
-                    node: { ...sourceNode, id: uuid() },
-                    index: indexPath[indexPath.length - 1] + 1,
-                  },
-                ],
-              },
-            }),
-          ]),
+        onChange(
+          ResolvedHierarchy.insert(resolvedNode, {
+            at: [...indexPath.slice(0, -1), indexPath.at(-1)! + 1],
+            nodes: [ResolvedHierarchy.clone(node)],
+          }),
         );
+
         break;
       }
       case 'delete': {
-        setDiff(
-          Model.diff([
-            Model.diffItem({
-              path: path.slice(0, -1),
-              children: { remove: [node.id] },
-            }),
-          ]),
+        onChange(
+          ResolvedHierarchy.remove(resolvedNode, {
+            indexPaths: [indexPath],
+          }),
         );
         break;
       }
       case 'addChild': {
         if (node.type !== 'noyaPrimitiveElement') break;
 
-        setDiff(
-          Model.diff([
-            Model.diffItem({
-              path,
-              children: {
-                add: [
-                  {
-                    node: Model.primitiveElement({
-                      componentID: boxSymbolId,
-                    }),
-                    index: node.children.length,
-                  },
-                ],
-              },
-            }),
-          ]),
+        const child = createResolvedNode(
+          findComponent,
+          Model.primitiveElement(boxSymbolId),
+        );
+
+        onChange(
+          ResolvedHierarchy.insert(resolvedNode, {
+            at: [...indexPath, node.children.length],
+            nodes: [child],
+          }),
         );
         break;
       }
@@ -438,19 +413,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
             : `1px solid ${theme.colors.divider}`
         }
         background={
-          node.status === 'removed'
-            ? 'rgb(255, 229, 229)'
-            : node.status === 'added'
-            ? 'rgb(205, 238, 231)'
-            : node.type === 'noyaCompositeElement'
+          node.type === 'noyaCompositeElement'
             ? 'rgb(238, 229, 255)'
-            : undefined
-        }
-        borderRight={
-          node.status === 'added'
-            ? `8px solid rgb(205, 238, 231)`
-            : node.status === 'removed'
-            ? `8px solid rgb(255, 229, 229)`
             : undefined
         }
         color={
@@ -472,35 +436,17 @@ export const DSLayoutRow = memo(function DSLayerRow({
             onSelectItem={(item) => {
               setIsSearchingTypes(false);
 
-              const sourceNode = findSourceNode(findComponent, rootNode, path);
+              if (node.type !== 'noyaPrimitiveElement') return;
 
-              setDiff(
-                Model.diff([
-                  Model.diffItem({
-                    path: path.slice(0, -1),
-                    children: {
-                      remove: [node.id],
-                      add: [
-                        {
-                          index: indexPath[indexPath.length - 1],
-                          node: Model.primitiveElement({
-                            name: name,
-                            componentID: item.id,
-                            // TODO: Using children directly could cause id conflicts
-                            children:
-                              sourceNode && 'children' in sourceNode
-                                ? sourceNode.children
-                                : undefined,
-                            classNames:
-                              sourceNode && 'classNames' in sourceNode
-                                ? sourceNode.classNames
-                                : undefined,
-                          }),
-                        },
-                      ],
-                    },
-                  }),
-                ]),
+              onChange(
+                ResolvedHierarchy.replace(resolvedNode, {
+                  at: indexPath,
+                  node: {
+                    ...cloneDeep(node),
+                    componentID: item.id,
+                    id: uuid(), // New id to flag as add/remove change
+                  },
+                }),
               );
             }}
             style={{
@@ -519,15 +465,19 @@ export const DSLayoutRow = memo(function DSLayerRow({
             onSelectItem={(item) => {
               setIsSearchingStyles(false);
 
-              setDiff(
-                Model.diff([
-                  Model.diffItem({
-                    path,
-                    classNames: {
-                      add: [item.name],
-                    },
-                  }),
-                ]),
+              if (node.type !== 'noyaPrimitiveElement') return;
+
+              onChange(
+                ResolvedHierarchy.replace(resolvedNode, {
+                  at: indexPath,
+                  node: {
+                    ...cloneDeep(node),
+                    classNames: [
+                      ...node.classNames,
+                      Model.className(item.name),
+                    ],
+                  },
+                }),
               );
             }}
             style={{
@@ -543,11 +493,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 color: 'dodgerblue',
               }}
               value={node.value}
-              onChange={(value) => {
-                setDiff(
-                  Model.diff([Model.diffItem({ path, textValue: value })]),
-                );
-              }}
+              onChange={(value) => {}}
             />
           </InputField.Root>
         ) : (
@@ -562,13 +508,11 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 onSubmitEditing={(value) => {
                   setEditingId(undefined);
 
-                  setDiff(
-                    Model.diff([
-                      Model.diffItem({
-                        path,
-                        name: value,
-                      }),
-                    ]),
+                  onChange(
+                    ResolvedHierarchy.replace(resolvedNode, {
+                      at: indexPath,
+                      node: { ...cloneDeep(node), name: value },
+                    }),
                   );
                 }}
                 autoFocus
@@ -598,40 +542,52 @@ export const DSLayoutRow = memo(function DSLayerRow({
         )}
         {node.type === 'noyaPrimitiveElement' && (
           <Stack.H flexWrap="wrap" gap="2px">
-            {node.classNames.map(({ value, status }) => (
-              <Chip
-                key={value}
-                size={'small'}
-                deletable={status !== 'removed'}
-                addable={status === 'removed'}
-                monospace
-                colorScheme={status === 'added' ? 'secondary' : undefined}
-                style={{
-                  opacity: status === 'removed' ? 0.5 : 1,
-                }}
-                onDelete={() => {
-                  setDiff(
-                    Model.diff([{ path, classNames: { remove: [value] } }]),
-                  );
-                }}
-                // onAdd={() => {
-                //   if (rootNode.type !== 'noyaCompositeElement') return;
+            {node.classNames.map(({ value }) => {
+              const status = undefined;
 
-                //   const newSelection: NoyaCompositeElement = {
-                //     ...rootNode,
-                //     diff: resetRemovedClassName(
-                //       rootNode.diff,
-                //       path.slice(1),
-                //       value,
-                //     ),
-                //   };
+              return (
+                <Chip
+                  key={value}
+                  size={'small'}
+                  deletable={status !== 'removed'}
+                  addable={status === 'removed'}
+                  monospace
+                  colorScheme={status === 'added' ? 'secondary' : undefined}
+                  style={{
+                    opacity: status === 'removed' ? 0.5 : 1,
+                  }}
+                  onDelete={() => {
+                    onChange(
+                      ResolvedHierarchy.replace(resolvedNode, {
+                        at: indexPath,
+                        node: {
+                          ...node,
+                          classNames: node.classNames.filter(
+                            (className) => className.value !== value,
+                          ),
+                        },
+                      }),
+                    );
+                  }}
+                  // onAdd={() => {
+                  //   if (rootNode.type !== 'noyaCompositeElement') return;
 
-                //   setDiff(newSelection);
-                // }}
-              >
-                {value}
-              </Chip>
-            ))}
+                  //   const newSelection: NoyaCompositeElement = {
+                  //     ...rootNode,
+                  //     diff: resetRemovedClassName(
+                  //       rootNode.diff,
+                  //       path.slice(1),
+                  //       value,
+                  //     ),
+                  //   };
+
+                  //   setDiff(newSelection);
+                  // }}
+                >
+                  {value}
+                </Chip>
+              );
+            })}
             <Chip
               size={'small'}
               addable

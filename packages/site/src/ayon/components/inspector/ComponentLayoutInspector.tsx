@@ -7,8 +7,12 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
 import { parseLayout } from '../../../dseditor/componentLayout';
-import { embedRootLevelDiff } from '../../../dseditor/traversal';
-import { NoyaComponent, NoyaDiff, NoyaNode } from '../../../dseditor/types';
+import { createResolvedNode, unresolve } from '../../../dseditor/traversal';
+import {
+  NoyaComponent,
+  NoyaNode,
+  NoyaResolvedNode,
+} from '../../../dseditor/types';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 import { InspectorCarousel, InspectorCarouselItem } from './InspectorCarousel';
@@ -65,15 +69,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     return undefined;
   }, []);
 
-  const handleSetDiff = useCallback(
-    (diff: NoyaDiff) => {
-      if (!node) return;
-      const newNode = embedRootLevelDiff(node, diff);
-      dispatch('setLayerNode', selectedLayer.do_objectID, newNode);
-    },
-    [dispatch, node, selectedLayer.do_objectID],
-  );
-
   const carouselItems: InspectorCarouselItem[] = useMemo(() => {
     if (!generatedLayout.layout) return [];
 
@@ -100,6 +95,23 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
 
     return carouselItems.findIndex((item) => isDeepEqual(item.data.node, node));
   }, [carouselItems, node]);
+
+  const resolvedNode = useMemo(() => {
+    if (!node) return;
+
+    return createResolvedNode(findComponent, node);
+  }, [findComponent, node]);
+
+  const handleChange = useCallback(
+    (newResolvedNode: NoyaResolvedNode) => {
+      if (!node) return;
+
+      const newNode = unresolve(newResolvedNode);
+
+      dispatch('setLayerNode', selectedLayer.do_objectID, newNode);
+    },
+    [dispatch, node, selectedLayer.do_objectID],
+  );
 
   return (
     <InspectorSection
@@ -151,10 +163,10 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Current Layout</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      {node && node.type !== 'noyaString' ? (
+      {resolvedNode && resolvedNode.type !== 'noyaString' ? (
         <DSLayoutTree
-          rootNode={node}
-          setDiff={handleSetDiff}
+          resolvedNode={resolvedNode}
+          onChange={handleChange}
           findComponent={findComponent}
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}

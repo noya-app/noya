@@ -1,5 +1,6 @@
 import { uuid } from 'noya-utils';
 import {
+  NoyaClassName,
   NoyaComponent,
   NoyaCompositeElement,
   NoyaDiff,
@@ -27,9 +28,15 @@ function noyaString(
 }
 
 function noyaPrimitiveElement(
-  options: ModelOptions<NoyaPrimitiveElement> &
-    Pick<NoyaPrimitiveElement, 'componentID'>,
+  options:
+    | string
+    | (ModelOptions<NoyaPrimitiveElement> &
+        Pick<NoyaPrimitiveElement, 'componentID'>),
 ): NoyaPrimitiveElement {
+  if (typeof options === 'string') {
+    options = { componentID: options };
+  }
+
   return {
     ...options,
     id: options.id ?? uuid(),
@@ -99,6 +106,27 @@ function noyaDiff(options: ModelOptions<NoyaDiff> | NoyaDiff['items'] = {}) {
   };
 }
 
+function noyaClassName(
+  options:
+    | (ModelOptions<NoyaClassName> & Pick<NoyaClassName, 'value'>)
+    | string,
+): NoyaClassName {
+  if (typeof options === 'string') {
+    options = { value: options };
+  }
+
+  return {
+    ...options,
+    value: options.value,
+  };
+}
+
+function noyaClassNames(
+  options: Parameters<typeof noyaClassName>[0][],
+): NoyaClassName[] {
+  return options.map(noyaClassName);
+}
+
 export namespace Model {
   export const string = noyaString;
   export const primitiveElement = noyaPrimitiveElement;
@@ -107,4 +135,6 @@ export namespace Model {
   export const variant = noyaVariant;
   export const diffItem = noyaDiffItem;
   export const diff = noyaDiff;
+  export const className = noyaClassName;
+  export const classNames = noyaClassNames;
 }

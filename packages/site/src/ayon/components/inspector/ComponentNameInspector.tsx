@@ -82,7 +82,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
           Model.primitiveElement({
             name: item.name,
             componentID: primitive.id,
-            classNames: ['flex-1'],
+            classNames: Model.classNames(['flex-1']),
           });
 
         dispatch('batch', [

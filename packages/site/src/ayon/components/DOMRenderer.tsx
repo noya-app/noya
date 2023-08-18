@@ -11,11 +11,8 @@ import { Model } from '../../dseditor/builders';
 import { initialComponents } from '../../dseditor/builtins';
 import { parseLayout } from '../../dseditor/componentLayout';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
-import {
-  ResolvedHierarchy,
-  createResolvedNode,
-  embedRootLevelDiff,
-} from '../../dseditor/traversal';
+import { ResolvedHierarchy } from '../../dseditor/resolvedHierarchy';
+import { createResolvedNode, unresolve } from '../../dseditor/traversal';
 import { NoyaNode, NoyaResolvedString } from '../../dseditor/types';
 import { useAyonState } from '../state/ayonState';
 import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
@@ -135,10 +132,29 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
 
               if (!layer || !layer.data.node) return undefined;
 
-              const newNode = embedRootLevelDiff(
+              const resolvedNode = createResolvedNode(
+                findComponent,
                 layer.data.node,
-                Model.diff([Model.diffItem({ path, textValue: value })]),
               );
+
+              const indexPath = ResolvedHierarchy.findIndexPath(
+                resolvedNode,
+                (node) => node.path.join('/') === path.join('/'),
+              );
+
+              if (!indexPath) return;
+
+              const originalNode = ResolvedHierarchy.access(
+                resolvedNode,
+                indexPath,
+              ) as NoyaResolvedString;
+
+              const newResolvedNode = ResolvedHierarchy.replace(resolvedNode, {
+                at: indexPath,
+                node: { ...originalNode, value },
+              });
+
+              const newNode = unresolve(newResolvedNode);
 
               dispatch('setLayerNode', layer.do_objectID, newNode);
             }}
@@ -191,12 +207,12 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                   return Model.primitiveElement({
                     componentID: boxSymbolId,
                     classNames: [
-                      'flex-1',
-                      'flex',
-                      'items-center',
-                      'justify-center',
-                      'text-center',
-                      'p-4',
+                      Model.className('flex-1'),
+                      Model.className('flex'),
+                      Model.className('items-center'),
+                      Model.className('justify-center'),
+                      Model.className('text-center'),
+                      Model.className('p-4'),
                     ],
                     children: [
                       layer.data.description === undefined
