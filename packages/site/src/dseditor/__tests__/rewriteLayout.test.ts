@@ -2,15 +2,18 @@ import { readFileSync } from 'fs';
 import { layoutNode } from 'noya-compiler';
 import path from 'path';
 import {
+  replaceHTMLEntities,
   rewriteAbsoluteFill,
   rewriteConsistentSpacing,
   rewriteFlex1ButtonInColumn,
   rewriteForbiddenClassGroups,
+  rewriteHTMLEntities,
   rewriteImagesWithChildren,
   rewriteInferFlex,
   rewritePositionedParent,
   rewriteRootClasses,
   rewriteTailwindClasses,
+  unescapeHTML,
 } from '../rewriteLayout';
 
 // Jest doesn't know how to import a text file, so we mock it
@@ -127,4 +130,17 @@ it('normalizes spacing to 4 units', () => {
   expect(
     rewriteConsistentSpacing(layoutNode('Box', { class: 'p-3 gap-7' })),
   ).toEqual(layoutNode('Box', { class: 'p-4 gap-4' }));
+});
+
+it('unescapes html entities', () => {
+  expect(unescapeHTML('&amp;')).toEqual('&');
+  expect(unescapeHTML('  hello&lt;world  ')).toEqual('hello<world  ');
+
+  expect(replaceHTMLEntities('  hello&lt;world  &amp;  ')).toEqual(
+    '  hello<world  &  ',
+  );
+
+  expect(
+    rewriteHTMLEntities(layoutNode('Text', {}, ['  hello&lt;world  '])),
+  ).toEqual(layoutNode('Text', {}, ['  hello<world  ']));
 });

@@ -1,10 +1,52 @@
 import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
-import { partition } from 'noya-utils';
+import { memoize, partition } from 'noya-utils';
 import {
   ClassGroupKey,
   getTailwindClassGroup,
   hasClassGroup,
 } from '../ayon/tailwind/tailwind';
+
+let domParser: DOMParser | undefined;
+
+/**
+ * Unescape HTML entities in a string. There are some unexpected behaviors when
+ * converting a full string (e.g. collapsing whitespace) so we only convert
+ * individual entities using this function.
+ */
+export const unescapeHTML = memoize(function unescapeHtml(html: string) {
+  if (!domParser) domParser = new DOMParser();
+
+  return (
+    domParser.parseFromString(html, 'text/html').documentElement.textContent ??
+    ''
+  );
+});
+
+const entityRE = /(&[a-zA-Z]+;)|(&#\d+;)|(&#x[a-fA-F0-9]+;)/g;
+
+export const replaceHTMLEntities = memoize(function replaceHTMLEntities(
+  html: string,
+) {
+  return html.replace(entityRE, (match) => {
+    return unescapeHTML(match);
+  });
+});
+
+export function rewriteHTMLEntities(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') {
+        return replaceHTMLEntities(node);
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
 
 /**
  * For each parent, if it has an image child, move all of the image's children
@@ -336,6 +378,7 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
 }
 
 export function rewriteLayout(layout: LayoutNode) {
+  layout = rewriteHTMLEntities(layout);
   layout = rewriteImagesWithChildren(layout);
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
