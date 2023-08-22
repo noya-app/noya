@@ -17,6 +17,7 @@ import {
   noyaSharedFileSchema,
   noyaUserDataSchema,
 } from './schema';
+import { streamResponse, streamString } from './streaming';
 
 /**
 
@@ -30,6 +31,12 @@ unless otherwise specified, returns 200 on success or 4xx/5xx error
 
 */
 
+type NoyaNetworkClientOptions = {
+  baseURI: string;
+  onError?: (error: NoyaAPIError) => boolean;
+  isPreview?: boolean;
+};
+
 export interface INoyaNetworkClient {
   auth: NoyaNetworkClient['auth'];
   files: NoyaNetworkClient['files'];
@@ -42,15 +49,16 @@ export interface INoyaNetworkClient {
 }
 
 export class NoyaNetworkClient {
-  baseURI: string;
-  onError?: (error: NoyaAPIError) => boolean;
+  constructor(public options: NoyaNetworkClientOptions) {}
 
-  constructor(options: {
-    baseURI: string;
-    onError?: (error: NoyaAPIError) => boolean;
-  }) {
-    this.baseURI = options.baseURI;
-    this.onError = options.onError;
+  get baseURI() {
+    return this.options.baseURI;
+  }
+  get onError() {
+    return this.options.onError;
+  }
+  get isPreview() {
+    return this.options.isPreview ?? false;
   }
 
   get userData() {
@@ -129,6 +137,8 @@ export class NoyaNetworkClient {
     name: string;
     rect?: Rect;
   }): Promise<NoyaGeneratedName[]> => {
+    if (this.isPreview) return [];
+
     if (!options.name) return [];
 
     const response = await this.request(
@@ -152,7 +162,9 @@ export class NoyaNetworkClient {
   #generateComponentDescriptionFromName = async (
     name: string,
     index: number,
-  ) => {
+  ): Promise<AsyncIterable<string>> => {
+    if (this.isPreview) return streamString(name);
+
     const response = await this.request(
       `${this.baseURI}/generate/component/description?name=${encodeURIComponent(
         name,
@@ -171,9 +183,14 @@ export class NoyaNetworkClient {
     name: string,
     description: string,
     index: number,
-  ) => {
+  ): Promise<AsyncIterable<string>> => {
+    if (this.isPreview)
+      return streamString(
+        `<Box class="bg-slate-50 flex-1"><Text>[Placeholder '${name}' component]</Text></Box>`,
+      );
+
     const response = await this.request(
-      `${this.baseURI}/generate/component/layout?t=1&name=${encodeURIComponent(
+      `${this.baseURI}/generate/component/layout?name=${encodeURIComponent(
         name,
       )}&description=${encodeURIComponent(description)}&index=${index}`,
       {
@@ -464,26 +481,4 @@ export class NoyaNetworkClient {
       this.handleError(new NoyaAPIError('unknown', response.statusText));
     }
   };
-}
-
-async function* streamResponse(response: Response): AsyncIterable<string> {
-  if (!response.body) {
-    // throw new Error('ReadableStream not available in this browser');
-    yield await response.text();
-    return;
-  }
-
-  // Create a TextDecoderStream
-  const textDecoderStream = new TextDecoderStream();
-  const readableStream = response.body.pipeThrough(textDecoderStream);
-
-  // Set up a reader for the readableStream
-  const reader = readableStream.getReader();
-
-  // Read the stream and yield values as they become available
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    yield value;
-  }
 }

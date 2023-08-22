@@ -8,6 +8,7 @@ import {
   NoyaShare,
   NoyaSharedFile,
 } from './schema';
+import { streamString } from './streaming';
 
 export type NoyaMemoryClientData = {
   files: NoyaFile[];
@@ -90,21 +91,15 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
   generate = {
     componentNames: async () => [{ name: 'My Component' }],
     componentDescriptionFromName: async (name: string) => {
-      async function* generator() {
-        yield 'My Component';
-      }
-
-      return generator();
+      return streamString('My Component');
     },
     componentLayoutsFromDescription: async (
       name: string,
       description: string,
     ) => {
-      async function* generator() {
-        yield `<Box class="bg-red-500"><Text class="white">Hello</Text></Box>`;
-      }
-
-      return generator();
+      return streamString(
+        `<Box class="bg-red-500"><Text class="white">Hello</Text></Box>`,
+      );
     },
   };
 
