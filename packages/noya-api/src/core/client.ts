@@ -55,8 +55,10 @@ export class NoyaClient {
   loadingNames$ = observable<Record<string, boolean>>({});
   generatedDescriptions$ = observable<Record<string, string>>({});
   loadingDescriptions$ = observable<Record<string, boolean>>({});
+  generatedDescriptionIndex: Record<string, number> = {};
   generatedLayouts$ = observable<Record<string, string[]>>({});
   loadingLayouts$ = observable<Record<string, boolean>>({});
+  generatedLayoutIndex: Record<string, number> = {};
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -126,9 +128,14 @@ export class NoyaClient {
     if (this.loadingDescriptions$[key].get()) return undefined;
 
     this.loadingDescriptions$.set((prev) => ({ ...prev, [key]: true }));
+    this.generatedDescriptionIndex[key] =
+      this.generatedDescriptionIndex[key] ?? 0;
 
     const iterator =
-      await this.networkClient.generate.componentDescriptionFromName(name);
+      await this.networkClient.generate.componentDescriptionFromName(
+        name,
+        this.generatedDescriptionIndex[key],
+      );
 
     let text = '';
     for await (const chunk of iterator) {
@@ -159,12 +166,15 @@ export class NoyaClient {
 
     this.generatedLayouts$.set((prev) => ({ ...prev, [key]: [] }));
     this.loadingLayouts$.set((prev) => ({ ...prev, [key]: true }));
+    this.generatedLayoutIndex[key] = this.generatedLayoutIndex[key] ?? 0;
+    const baseIndex = this.generatedLayoutIndex[key];
 
     const promises = range(0, 8).map(async (index) => {
       const iterable =
         await this.networkClient.generate.componentLayoutsFromDescription(
           name,
           description,
+          baseIndex + index,
         );
 
       let text = '';
@@ -194,6 +204,8 @@ export class NoyaClient {
 
     this.generatedDescriptions$[key].delete();
     this.loadingDescriptions$[key].delete();
+    this.generatedDescriptionIndex[key] =
+      (this.generatedDescriptionIndex[key] ?? 0) + 1;
   };
 
   #resetGenerateComponentLayouts = (name: string, description: string) => {
@@ -201,6 +213,7 @@ export class NoyaClient {
 
     this.generatedLayouts$[key].delete();
     this.loadingLayouts$[key].delete();
+    this.generatedLayoutIndex[key] = (this.generatedLayoutIndex[key] ?? 0) + 8;
   };
 
   #fetchSession = async () => {

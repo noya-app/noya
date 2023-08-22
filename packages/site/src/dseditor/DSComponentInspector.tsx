@@ -106,6 +106,7 @@ export function DSComponentInspector({
                   const iterable =
                     await client.networkClient.generate.componentDescriptionFromName(
                       component.name ?? 'Untitled',
+                      0,
                     );
 
                   let newDescription = '';
@@ -130,6 +131,7 @@ export function DSComponentInspector({
                     await client.networkClient.generate.componentLayoutsFromDescription(
                       component.name ?? 'Untitled',
                       component.description ?? '',
+                      0,
                     );
 
                   let layout = '';

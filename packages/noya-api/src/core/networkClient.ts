@@ -149,11 +149,14 @@ export class NoyaNetworkClient {
     return parsed.success ? parsed.data : [];
   };
 
-  #generateComponentDescriptionFromName = async (name: string) => {
+  #generateComponentDescriptionFromName = async (
+    name: string,
+    index: number,
+  ) => {
     const response = await this.request(
       `${this.baseURI}/generate/component/description?name=${encodeURIComponent(
         name,
-      )}`,
+      )}&index=${index}`,
       {
         credentials: 'include',
       },
@@ -167,11 +170,12 @@ export class NoyaNetworkClient {
   #generateComponentLayoutsFromDescription = async (
     name: string,
     description: string,
+    index: number,
   ) => {
     const response = await this.request(
       `${this.baseURI}/generate/component/layout?t=1&name=${encodeURIComponent(
         name,
-      )}&description=${encodeURIComponent(description)}`,
+      )}&description=${encodeURIComponent(description)}&index=${index}`,
       {
         credentials: 'include',
       },
