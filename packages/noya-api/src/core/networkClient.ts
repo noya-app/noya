@@ -150,8 +150,6 @@ export class NoyaNetworkClient {
       },
     );
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
 
     const schema = z.array(generatedNameSchema);
@@ -173,8 +171,6 @@ export class NoyaNetworkClient {
         credentials: 'include',
       },
     );
-
-    this.handleHTTPErrors(response);
 
     return streamResponse(response);
   };
@@ -198,30 +194,48 @@ export class NoyaNetworkClient {
       },
     );
 
-    this.handleHTTPErrors(response);
-
     return streamResponse(response);
   };
 
-  request = async (
+  fetchWithBackoff = async (
     ...[input, init]: Parameters<typeof fetch>
+  ): Promise<Response> => {
+    let response: Response;
+    let sleepTime = 2000;
+    while (true) {
+      const controller = new AbortController();
+
+      const id = setTimeout(() => controller.abort(), 60000);
+
+      response = await fetch(input, {
+        signal: controller.signal,
+        ...init,
+      });
+
+      clearTimeout(id);
+
+      if (response.status !== 429) {
+        break;
+      }
+      const currentSleepTime = sleepTime + Math.random() * 1000;
+      await new Promise((resolve) => setTimeout(resolve, currentSleepTime));
+      sleepTime *= 1.5;
+    }
+    return response;
+  };
+
+  request = async (
+    ...parameters: Parameters<typeof fetch>
   ): Promise<Response> => {
     // If the page needs to reload, don't make any more requests
     if (typeof window !== 'undefined' && window.noyaPageWillReload) {
       return new Promise(() => {}) as any;
     }
 
-    const controller = new AbortController();
-
-    const id = setTimeout(() => controller.abort(), 60000);
-
     let response: Response;
 
     try {
-      response = await fetch(input, {
-        signal: controller.signal,
-        ...init,
-      });
+      response = await this.fetchWithBackoff(...parameters);
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         // There's no way to recover here, so we'll always throw.
@@ -232,8 +246,7 @@ export class NoyaNetworkClient {
       throw error;
     }
 
-    clearTimeout(id);
-
+    this.handleHTTPErrors(response);
     return response;
   };
 
@@ -241,8 +254,6 @@ export class NoyaNetworkClient {
     const response = await this.request(`${this.baseURI}/user`, {
       credentials: 'include',
     });
-
-    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaUserDataSchema.parse(json);
@@ -253,8 +264,6 @@ export class NoyaNetworkClient {
     const response = await this.request(`${this.baseURI}/user/email-lists`, {
       credentials: 'include',
     });
-
-    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = z.array(noyaEmailListSchema).parse(json);
@@ -274,8 +283,6 @@ export class NoyaNetworkClient {
       },
     );
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = noyaEmailListSchema.parse(json);
     return parsed;
@@ -289,8 +296,6 @@ export class NoyaNetworkClient {
       },
     );
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = z.array(noyaShareSchema).parse(json);
     return parsed;
@@ -301,8 +306,6 @@ export class NoyaNetworkClient {
       credentials: 'include',
     });
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = noyaSharedFileSchema.parse(json);
     return parsed;
@@ -312,8 +315,6 @@ export class NoyaNetworkClient {
     const response = await this.request(`${this.baseURI}/billing`, {
       credentials: 'include',
     });
-
-    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaBillingSchema.parse(json);
@@ -335,8 +336,6 @@ export class NoyaNetworkClient {
       },
     );
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = noyaAssetSchema.parse(json);
     return parsed.id;
@@ -346,8 +345,6 @@ export class NoyaNetworkClient {
     const response = await this.request(`${this.baseURI}/auth/session`, {
       credentials: 'include',
     });
-
-    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaSessionSchema.parse(json);
@@ -359,29 +356,23 @@ export class NoyaNetworkClient {
       credentials: 'include',
     });
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = noyaFileSchema.parse(json);
     return parsed;
   };
 
   #updateFile = async (id: string, data: NoyaFileData, version: number) => {
-    const response = await this.request(`${this.baseURI}/files/${id}`, {
+    await this.request(`${this.baseURI}/files/${id}`, {
       method: 'PUT',
       credentials: 'include',
       body: JSON.stringify({ data, version }),
     });
-
-    this.handleHTTPErrors(response);
   };
 
   #listFiles = async () => {
     const response = await this.request(`${this.baseURI}/files`, {
       credentials: 'include',
     });
-
-    this.handleHTTPErrors(response);
 
     const json = await response.json();
     const parsed = noyaFileListSchema.parse(json);
@@ -397,20 +388,16 @@ export class NoyaNetworkClient {
       body: JSON.stringify(fields),
     });
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = noyaFileSchema.parse(json);
     return parsed;
   };
 
   #deleteFile = async (id: string) => {
-    const response = await this.request(`${this.baseURI}/files/${id}`, {
+    await this.request(`${this.baseURI}/files/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     });
-
-    this.handleHTTPErrors(response);
   };
 
   #createShare = async (
@@ -431,8 +418,6 @@ export class NoyaNetworkClient {
       },
     );
 
-    this.handleHTTPErrors(response);
-
     const json = await response.json();
     const parsed = noyaShareSchema.parse(json);
     return parsed;
@@ -441,7 +426,7 @@ export class NoyaNetworkClient {
   /* Metadata */
 
   #setMetadata = async (id: string, value: NoyaJson) => {
-    const response = await this.request(
+    await this.request(
       `${this.baseURI}/user/metadata/${encodeURIComponent(id)}`,
       {
         credentials: 'include',
@@ -452,8 +437,6 @@ export class NoyaNetworkClient {
         },
       },
     );
-
-    this.handleHTTPErrors(response);
   };
 
   /* Error Handling */
