@@ -16,8 +16,40 @@ import { ContextMenu } from './ContextMenu';
 import { MenuItem } from './internal/Menu';
 import { ScrollArea } from './ScrollArea';
 import { Spacer } from './Spacer';
+import { Stack } from './Stack';
+import { Tooltip } from './Tooltip';
 
-export type GridViewSize = 'xs' | 'small' | 'large';
+export type GridViewSize = 'xxs' | 'xs' | 'small' | 'large';
+
+const sizes: Record<
+  GridViewSize,
+  {
+    itemWidth: number;
+    itemHeight: number;
+    gap: number;
+  }
+> = {
+  xxs: {
+    itemWidth: 36,
+    itemHeight: 36,
+    gap: 5,
+  },
+  xs: {
+    itemWidth: 87,
+    itemHeight: 87,
+    gap: 9,
+  },
+  small: {
+    itemWidth: 160,
+    itemHeight: 170,
+    gap: 20,
+  },
+  large: {
+    itemWidth: 280,
+    itemHeight: 280,
+    gap: 20,
+  },
+};
 
 const Grid = styled.div<{
   size: GridViewSize;
@@ -26,12 +58,9 @@ const Grid = styled.div<{
   return {
     color: theme.colors.text,
     display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(
-      ${size === 'large' ? '280px' : size === 'small' ? '160px' : '87px'}
-    , 1fr))`,
-    gridAutoRows:
-      size === 'large' ? '280px' : size === 'small' ? '170px' : '87px',
-    gap: size === 'large' || size === 'small' ? `20px` : `9px`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(${sizes[size].itemWidth}px, 1fr))`,
+    gridAutoRows: `${sizes[size].itemHeight}px`,
+    gap: `${sizes[size].gap}px`,
     // gridTemplateColumns: `repeat(auto-fill, minmax(
     //   ${size === 'large' ? '280px' : size === 'small' ? '160px' : '116px'}
     // , 1fr))`,
@@ -193,7 +222,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     [onClick],
   );
 
-  const element = (
+  let element = (
     <GridContainer id={id} ref={forwardedRef} {...hoverProps}>
       <ItemContainer
         bordered={bordered}
@@ -221,10 +250,25 @@ const GridViewItem = forwardRef(function GridViewItem<
   );
 
   if (menuItems && onSelectMenuItem) {
-    return (
+    element = (
       <ContextMenu<MenuItemType> items={menuItems} onSelect={onSelectMenuItem}>
         {element}
       </ContextMenu>
+    );
+  }
+
+  if (textPosition === 'toolip') {
+    element = (
+      <Tooltip
+        content={
+          <Stack.V gap={2}>
+            <ItemTitle showBackground={false}>{title}</ItemTitle>
+            <ItemDescription>{subtitle}</ItemDescription>
+          </Stack.V>
+        }
+      >
+        {element}
+      </Tooltip>
     );
   }
 
@@ -233,7 +277,7 @@ const GridViewItem = forwardRef(function GridViewItem<
 
 type GridViewContextValue = {
   size: GridViewSize;
-  textPosition: 'overlay' | 'below';
+  textPosition: 'overlay' | 'below' | 'toolip';
   bordered: boolean;
 };
 

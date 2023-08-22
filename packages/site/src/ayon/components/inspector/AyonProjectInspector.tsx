@@ -3,19 +3,53 @@ import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
   DropdownMenu,
+  GridView,
   InputField,
   RegularMenuItem,
   Spacer,
   Stack,
   createSectionedMenu,
+  lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
+import {
+  ChevronDownIcon,
+  DesktopIcon,
+  LaptopIcon,
+  MobileIcon,
+} from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
+
+const sizeList = [
+  {
+    name: 'Desktop',
+    width: 1440,
+    height: 900,
+    icon: <DesktopIcon width={30} height={30} />,
+  },
+  {
+    name: 'Laptop',
+    width: 1280,
+    height: 720,
+    icon: <LaptopIcon width={30} height={30} />,
+  },
+  {
+    name: 'Tablet',
+    width: 1024,
+    height: 768,
+    icon: <MobileIcon width={30} height={30} transform="rotate(270)" />,
+  },
+  {
+    name: 'Mobile',
+    width: 390,
+    height: 844,
+    icon: <MobileIcon width={30} height={30} />,
+  },
+];
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -119,6 +153,54 @@ export function AyonProjectInspector({
             label="H"
           />
         </InspectorPrimitives.LabeledRow>
+        <Stack.V flex="1">
+          <GridView.Root
+            scrollable={false}
+            size="xs"
+            textPosition="toolip"
+            bordered
+          >
+            <GridView.Section padding={0}>
+              {sizeList.map(({ name, width, height, icon }, index) => {
+                return (
+                  <GridView.Item
+                    key={index}
+                    id={name}
+                    title={name}
+                    subtitle={`${width}×${height}`}
+                    onClick={() => {
+                      dispatch('batch', [
+                        ['setLayerWidth', artboard.do_objectID, width],
+                        ['setLayerHeight', artboard.do_objectID, height],
+                        [
+                          'zoomToFit*',
+                          { type: 'layer', value: artboard.do_objectID },
+                          { padding: 20, max: 1, position: 'top' },
+                        ],
+                      ]);
+                    }}
+                    selected={
+                      width === artboard.frame.width &&
+                      height === artboard.frame.height
+                    }
+                  >
+                    <Stack.V
+                      tabIndex={-1}
+                      background={'white'}
+                      width="100%"
+                      height="100%"
+                      color={lightTheme.colors.icon}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      {icon}
+                    </Stack.V>
+                  </GridView.Item>
+                );
+              })}
+            </GridView.Section>
+          </GridView.Root>
+        </Stack.V>
         <InspectorPrimitives.LabeledRow label="Design System">
           <DropdownMenu
             items={designSystemMenu}
