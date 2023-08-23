@@ -217,6 +217,8 @@ export function renderDSPreview({
         style={{
           display: 'flex',
           background: 'white',
+          overflow: 'hidden',
+          position: 'relative',
         }}
       >
         {content}
