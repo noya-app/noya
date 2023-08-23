@@ -542,12 +542,12 @@ export const DSLayoutRow = memo(function DSLayerRow({
         )}
         {node.type === 'noyaPrimitiveElement' && (
           <Stack.H flexWrap="wrap" gap="2px">
-            {node.classNames.map(({ value }) => {
+            {node.classNames.map(({ value, id }) => {
               const status = undefined;
 
               return (
                 <Chip
-                  key={value}
+                  key={id}
                   size={'small'}
                   deletable={status !== 'removed'}
                   addable={status === 'removed'}

@@ -117,6 +117,7 @@ function noyaClassName(
 
   return {
     ...options,
+    id: options.id ?? uuid(),
     value: options.value,
   };
 }

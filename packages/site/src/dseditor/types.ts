@@ -62,6 +62,7 @@ export type NoyaResolvedString = NoyaString & {
   path: string[];
 };
 export type NoyaClassName = {
+  id: string;
   value: string;
 };
 

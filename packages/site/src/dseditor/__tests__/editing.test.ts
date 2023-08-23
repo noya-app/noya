@@ -10,6 +10,10 @@ import {
 
 const PRIMITIVE_ID = 'p';
 
+const bgBlue = Model.className('bg-blue-500');
+const bgRed = Model.className('bg-red-500');
+const bgPink = Model.className('bg-pink-500');
+
 describe('resolving', () => {
   it('composite element', () => {
     const component = Model.component({
@@ -52,7 +56,7 @@ describe('diffing', () => {
     componentID: 'a',
     rootElement: Model.primitiveElement({
       componentID: PRIMITIVE_ID,
-      classNames: Model.classNames(['bg-red-500']),
+      classNames: [bgRed],
     }),
   });
 
@@ -63,7 +67,7 @@ describe('diffing', () => {
       diff: Model.diff([
         Model.diffItem({
           path: [redComponent.rootElement.id],
-          classNames: [added(Model.className('bg-pink-500'), 1)],
+          classNames: [added(bgPink, 1)],
         }),
       ]),
     }),
@@ -82,7 +86,7 @@ describe('diffing', () => {
       diff: Model.diff([
         Model.diffItem({
           path: [redComponent.rootElement.id],
-          classNames: [added(Model.className('bg-blue-500'), 1)],
+          classNames: [added(bgBlue, 1)],
         }),
       ]),
     });
@@ -95,9 +99,7 @@ describe('diffing', () => {
     const resolvedChild =
       resolvedNode.rootElement as NoyaResolvedPrimitiveElement;
 
-    expect(resolvedChild.classNames).toEqual(
-      Model.classNames(['bg-red-500', 'bg-blue-500']),
-    );
+    expect(resolvedChild.classNames).toEqual([bgRed, bgBlue]);
   });
 
   it('adds nested class names', () => {
@@ -106,7 +108,7 @@ describe('diffing', () => {
       diff: Model.diff([
         Model.diffItem({
           path: [wrapperComponent.rootElement.id, redComponent.rootElement.id],
-          classNames: [added(Model.className('bg-blue-500'), 2)],
+          classNames: [added(bgBlue, 2)],
         }),
       ]),
     });
@@ -122,11 +124,7 @@ describe('diffing', () => {
     const resolvedGrandchild =
       resolvedChild.rootElement as NoyaResolvedPrimitiveElement;
 
-    expect(resolvedGrandchild.classNames).toEqual([
-      { value: 'bg-red-500' },
-      { value: 'bg-pink-500' },
-      { value: 'bg-blue-500' },
-    ]);
+    expect(resolvedGrandchild.classNames).toEqual([bgRed, bgPink, bgBlue]);
 
     expect(resolvedGrandchild.path).toEqual([
       element.id,
