@@ -4,6 +4,7 @@ import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { PRIMITIVE_TAG_MAP } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 
@@ -45,6 +46,26 @@ export const ComponentDescriptionInspector = memo(
       client.generate.resetComponentDescription(selectedLayer.name);
     }, [client, dispatch, selectedLayer.do_objectID, selectedLayer.name]);
 
+    const handleSetDescription = useCallback(
+      (description: string) => {
+        // If we're actively generating layers, set the layout to a placeholder box.
+        // The user must manually shuffle to generate a new layout.
+        if (!selectedLayer.data.node) {
+          const node = PRIMITIVE_TAG_MAP.box.initialValue!();
+
+          dispatch('batch', [
+            ['setLayerDescription', selectedLayer.do_objectID, description],
+            ['setLayerNode', selectedLayer.do_objectID, node],
+          ]);
+
+          return;
+        }
+
+        dispatch('setLayerDescription', selectedLayer.do_objectID, description);
+      },
+      [dispatch, selectedLayer.data.node, selectedLayer.do_objectID],
+    );
+
     const value =
       (generatedDescription.loading && generatedDescription.description
         ? generatedDescription.description
@@ -71,13 +92,7 @@ export const ComponentDescriptionInspector = memo(
           ref={textareaRef}
           value={value}
           readOnly={generatedDescription.loading}
-          onChange={(event) => {
-            dispatch(
-              'setLayerDescription',
-              selectedLayer.do_objectID,
-              event.target.value,
-            );
-          }}
+          onChange={(event) => handleSetDescription(event.target.value)}
         />
       </InspectorPrimitives.LabeledRow>
     );

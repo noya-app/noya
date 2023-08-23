@@ -1,5 +1,5 @@
 import { useGeneratedLayout, useNoyaClient } from 'noya-api';
-import { ActivityIndicator, IconButton } from 'noya-designsystem';
+import { ActivityIndicator, Button, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { isDeepEqual } from 'noya-utils';
@@ -50,6 +50,17 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.do_objectID,
     selectedLayer.name,
   ]);
+
+  const handleGenerateSuggestions = useCallback(() => {
+    client.generate.resetComponentLayouts(
+      selectedLayer.name,
+      selectedLayer.data.description ?? '',
+    );
+    client.generate.componentLayouts({
+      name: selectedLayer.name,
+      description: selectedLayer.data.description ?? '',
+    });
+  }, [client.generate, selectedLayer.data.description, selectedLayer.name]);
 
   const layout0 = useMemo(() => {
     if (!generatedLayout.layout || !generatedLayout.layout[0]) return;
@@ -138,26 +149,32 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
               Suggested Layouts
             </InspectorPrimitives.Title>
           </InspectorPrimitives.SectionHeader>
-          <InspectorCarousel
-            items={carouselItems}
-            selectedIndex={selectedIndex}
-            onSelectItem={(index) => {
-              const item = carouselItems[index];
-              dispatch(
-                'setLayerNode',
-                selectedLayer.do_objectID,
-                item.data.node,
-              );
-            }}
-            onHoverItemChange={(index, isHovering) => {
-              if (isHovering) {
+          {carouselItems.length > 0 ? (
+            <InspectorCarousel
+              items={carouselItems}
+              selectedIndex={selectedIndex}
+              onSelectItem={(index) => {
                 const item = carouselItems[index];
-                setPreviewNode(item.data.node);
-              } else {
-                setPreviewNode(undefined);
-              }
-            }}
-          />
+                dispatch(
+                  'setLayerNode',
+                  selectedLayer.do_objectID,
+                  item.data.node,
+                );
+              }}
+              onHoverItemChange={(index, isHovering) => {
+                if (isHovering) {
+                  const item = carouselItems[index];
+                  setPreviewNode(item.data.node);
+                } else {
+                  setPreviewNode(undefined);
+                }
+              }}
+            />
+          ) : (
+            <Button onClick={handleGenerateSuggestions}>
+              Generate Suggestions
+            </Button>
+          )}
         </>
       )}
       <InspectorPrimitives.SectionHeader>
