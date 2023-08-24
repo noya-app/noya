@@ -169,6 +169,21 @@ export const noyaUserDataSchema = z.object({
 
 export const generatedNameSchema = z.object({ name: z.string() });
 
+export const randomImageResponseSchema = z.object({
+  url: z.string(),
+  metadata: z.object({
+    color: z.string(),
+  }),
+  user: z.object({
+    name: z.string(),
+    url: z.string(),
+  }),
+  source: z.object({
+    name: z.string(),
+    url: z.string(),
+  }),
+});
+
 export type NoyaUser = z.infer<typeof noyaUserSchema>;
 export type NoyaSession = z.infer<typeof noyaSessionSchema>;
 export type NoyaFileData = z.infer<typeof noyaFileDataSchema>;
@@ -186,7 +201,6 @@ export type NoyaUserData = z.infer<typeof noyaUserDataSchema>;
 export type NoyaExperiments = z.infer<typeof noyaExperimentsSchema>;
 export type NoyaMetadataItem = z.infer<typeof noyaMetadataItemSchema>;
 export type NoyaGeneratedName = z.infer<typeof generatedNameSchema>;
-
-export type NoyaGeneratedLayout = { name: string; code: string };
+export type NoyaRandomImageResponse = z.infer<typeof randomImageResponseSchema>;
 
 export type NoyaExportFormat = 'png' | 'pdf' | 'svg';

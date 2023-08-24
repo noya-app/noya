@@ -177,3 +177,15 @@ export const PRIMITIVE_TAG_MAP: Record<string, PrimitiveElementMetadata> =
       ...(element.aliases || []).map((alias) => [alias.toLowerCase(), element]),
     ]),
   );
+
+// In case the AI generates a tag name that doesn't match the primitive element name
+PRIMITIVE_TAG_MAP['img'] = PRIMITIVE_TAG_MAP['image'];
+PRIMITIVE_TAG_MAP['div'] = PRIMITIVE_TAG_MAP['box'];
+PRIMITIVE_TAG_MAP['span'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['p'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['h1'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['h2'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['h3'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['h4'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['h5'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['h6'] = PRIMITIVE_TAG_MAP['text'];

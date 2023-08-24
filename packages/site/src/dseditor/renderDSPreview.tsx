@@ -129,6 +129,8 @@ export function renderResolvedNode({
 
       if (element.componentID === tableSymbolId) return null;
 
+      const srcProp = element.props.find((prop) => prop.name === 'src');
+
       return (
         <PrimitiveComponent
           style={style}
@@ -145,7 +147,10 @@ export function renderResolvedNode({
           {...(element.componentID === imageSymbolId && {
             // src: 'https://placehold.it/300x300',
             // src: 'https://picsum.photos/300/300',
-            src: placeholderImage,
+            src:
+              srcProp && srcProp.type === 'generator' && srcProp.result
+                ? srcProp.result
+                : placeholderImage,
           })}
           {...(element.componentID === selectSymbolId && {
             options: unique(transformedChildren),

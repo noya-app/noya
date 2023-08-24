@@ -1,4 +1,5 @@
 import { Rect, Size } from 'noya-geometry';
+import { encodeQueryParameters } from 'noya-utils';
 import { z } from 'zod';
 import { NoyaAPIError } from './error';
 import {
@@ -6,6 +7,7 @@ import {
   NoyaFileData,
   NoyaGeneratedName,
   NoyaJson,
+  NoyaRandomImageResponse,
   generatedNameSchema,
   noyaAssetSchema,
   noyaBillingSchema,
@@ -16,6 +18,7 @@ import {
   noyaShareSchema,
   noyaSharedFileSchema,
   noyaUserDataSchema,
+  randomImageResponseSchema,
 } from './schema';
 import { streamResponse, streamString } from './streaming';
 
@@ -46,6 +49,7 @@ export interface INoyaNetworkClient {
   userData: NoyaNetworkClient['userData'];
   metadata: NoyaNetworkClient['metadata'];
   generate: NoyaNetworkClient['generate'];
+  random: NoyaNetworkClient['random'];
 }
 
 export class NoyaNetworkClient {
@@ -133,6 +137,31 @@ export class NoyaNetworkClient {
     };
   }
 
+  get random() {
+    return {
+      image: this.#randomImage,
+    };
+  }
+
+  #randomImage = async (options: {
+    query: string;
+    width: number;
+    height: number;
+  }): Promise<NoyaRandomImageResponse> => {
+    const response = await this.request(
+      `${this.baseURI}/images/random?${encodeQueryParameters({
+        width: options.width,
+        height: options.height,
+        query: options.query,
+      })}`,
+      { credentials: 'include' },
+    );
+
+    const json = await response.json();
+    const parsed = randomImageResponseSchema.parse(json);
+    return parsed;
+  };
+
   #generateComponentNames = async (options: {
     name: string;
     rect?: Rect;
@@ -145,9 +174,7 @@ export class NoyaNetworkClient {
       `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
         options.name,
       )}`,
-      {
-        credentials: 'include',
-      },
+      { credentials: 'include' },
     );
 
     const json = await response.json();
@@ -167,9 +194,7 @@ export class NoyaNetworkClient {
       `${this.baseURI}/generate/component/description?name=${encodeURIComponent(
         name,
       )}&index=${index}`,
-      {
-        credentials: 'include',
-      },
+      { credentials: 'include' },
     );
 
     return streamResponse(response);
@@ -189,9 +214,7 @@ export class NoyaNetworkClient {
       `${this.baseURI}/generate/component/layout?name=${encodeURIComponent(
         name,
       )}&description=${encodeURIComponent(description)}&index=${index}`,
-      {
-        credentials: 'include',
-      },
+      { credentials: 'include' },
     );
 
     return streamResponse(response);
@@ -291,9 +314,7 @@ export class NoyaNetworkClient {
   #listShares = async (fileId: string) => {
     const response = await this.request(
       `${this.baseURI}/files/${fileId}/shares`,
-      {
-        credentials: 'include',
-      },
+      { credentials: 'include' },
     );
 
     const json = await response.json();

@@ -12,6 +12,7 @@ import {
   NoyaGeneratedName,
   NoyaJson,
   NoyaMetadataItem,
+  NoyaRandomImageResponse,
   NoyaSession,
   NoyaUserData,
 } from './schema';
@@ -59,6 +60,8 @@ export class NoyaClient {
   generatedLayouts$ = observable<Record<string, string[]>>({});
   loadingLayouts$ = observable<Record<string, boolean>>({});
   generatedLayoutIndex: Record<string, number> = {};
+  randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
+  loadingRandomImages$ = observable<Record<string, boolean>>({});
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
@@ -79,6 +82,38 @@ export class NoyaClient {
 
     this.#fetchFiles();
   }
+
+  get random() {
+    return memoizedGetter(this, 'random', {
+      image: this.#fetchRandomImage,
+    });
+  }
+
+  randomImageCacheKey = (options: { id: string; query: string }) => {
+    const { id, query } = options;
+    return `${id}:${query.trim().toLowerCase()}`;
+  };
+
+  #fetchRandomImage = async (
+    options: { id: string } & Parameters<
+      INoyaNetworkClient['random']['image']
+    >[0],
+  ) => {
+    const key = this.randomImageCacheKey(options);
+
+    if (this.loadingRandomImages$[key].get()) return;
+
+    const existing = this.randomImages$[key].get();
+
+    if (existing) return existing;
+
+    this.loadingRandomImages$.set((prev) => ({ ...prev, [key]: true }));
+
+    const data = await this.networkClient.random.image(options);
+
+    this.randomImages$.set((prev) => ({ ...prev, [key]: data }));
+    this.loadingRandomImages$.set((prev) => ({ ...prev, [key]: false }));
+  };
 
   get generate() {
     return memoizedGetter(this, 'generate', {

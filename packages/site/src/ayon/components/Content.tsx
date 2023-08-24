@@ -3,6 +3,7 @@ import {
   useGeneratedComponentDescriptions,
   useGeneratedLayouts,
   useNoyaClient,
+  useRandomImages,
 } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import {
@@ -37,6 +38,7 @@ import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { parseLayout } from '../../dseditor/componentLayout';
+import { ElementHierarchy } from '../../dseditor/traversal';
 import { NoyaNode } from '../../dseditor/types';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
@@ -155,6 +157,56 @@ export const Content = memo(function Content({
   const { descriptions, loading: loadingDescriptions } =
     useGeneratedComponentDescriptions();
   const { layouts, loading: loadingLayouts } = useGeneratedLayouts();
+  const { images, loading: loadingImages } = useRandomImages();
+
+  useEffect(() => {
+    // Resolve images. Find any unresolved src props and trigger the generation
+    customLayers.forEach((layer) => {
+      if (!layer.data.node) return;
+
+      const layerNode = layer.data.node;
+
+      ElementHierarchy.visit(layerNode, (node, indexPath) => {
+        if (node.type !== 'noyaPrimitiveElement') return;
+
+        const src = node.props.find((prop) => prop.name === 'src');
+
+        if (!src || src.type !== 'generator' || src.result !== undefined) {
+          return;
+        }
+
+        const key = client.randomImageCacheKey({
+          id: src.id,
+          query: src.query,
+        });
+
+        if (loadingImages[key]) return;
+
+        if (images[key]) {
+          const newNode = ElementHierarchy.replace(layerNode, {
+            at: indexPath,
+            node: {
+              ...node,
+              props: node.props.map((prop) =>
+                prop.name === 'src'
+                  ? { ...prop, result: images[key].url }
+                  : prop,
+              ),
+            },
+          });
+
+          dispatch('setLayerNode', layer.do_objectID, newNode);
+        } else {
+          client.random.image({
+            id: src.id,
+            query: src.query,
+            height: layer.frame.width,
+            width: layer.frame.height,
+          });
+        }
+      });
+    });
+  }, [client, customLayers, dispatch, images, loadingImages]);
 
   useEffect(() => {
     // Resolve descriptions. If a custom layer has a name but no description,

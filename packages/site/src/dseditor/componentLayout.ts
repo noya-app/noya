@@ -11,6 +11,20 @@ import {
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { rewriteLayout } from './rewriteLayout';
 
+const IMAGE_ALT_REWRITE_MAP: Record<string, string> = {
+  related: '',
+  image: '',
+};
+
+function rewriteImageAlt(string: string) {
+  return string
+    .toLowerCase()
+    .split(' ')
+    .map((word) => IMAGE_ALT_REWRITE_MAP[word.toLowerCase()] ?? word)
+    .filter(Boolean)
+    .join(' ');
+}
+
 function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
   const result = LayoutHierarchy.map<NoyaNode>(
     layout,
@@ -21,6 +35,7 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
 
       const primitive =
         PRIMITIVE_TAG_MAP[node.tag.toLowerCase()] ?? PRIMITIVE_TAG_MAP['box'];
+      const elementName = primitive.name;
 
       return Model.primitiveElement({
         componentID: primitive.id,
@@ -29,6 +44,19 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
         classNames: node.attributes.class
           ?.split(' ')
           .map((value) => Model.className(value)),
+        props: [
+          ...(elementName === 'Image' && node.attributes.src
+            ? [Model.stringProp({ name: 'src', value: node.attributes.src })]
+            : elementName === 'Image' && node.attributes.alt
+            ? [
+                Model.generatorProp({
+                  name: 'src',
+                  generator: 'random-image',
+                  query: rewriteImageAlt(node.attributes.alt),
+                }),
+              ]
+            : []),
+        ],
       });
     },
   );

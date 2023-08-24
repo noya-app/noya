@@ -109,7 +109,7 @@ export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
       return node;
     }
     case 'noyaPrimitiveElement': {
-      const { id, name, classNames, children, componentID, type } =
+      const { id, name, classNames, props, children, componentID, type } =
         resolvedNode;
 
       const node: NoyaPrimitiveElement = {
@@ -117,6 +117,7 @@ export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
         name,
         type,
         componentID,
+        props,
         classNames,
         children: children.map((child) => unresolve(child)),
       };

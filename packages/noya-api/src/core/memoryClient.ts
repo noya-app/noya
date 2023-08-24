@@ -164,6 +164,17 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     },
   };
 
+  random: INoyaNetworkClient['random'] = {
+    image: () => {
+      return Promise.resolve({
+        url: '',
+        metadata: { color: '' },
+        user: { url: '', name: '' },
+        source: { url: '', name: '' },
+      });
+    },
+  };
+
   stringify() {
     return JSON.stringify({
       files: this.data.files.map((file) => ({

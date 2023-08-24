@@ -85,3 +85,10 @@ export function useGeneratedLayout(name: string, description: string) {
   const loading = useSelector(() => loadingLayouts$[key].get() ?? false);
   return useMemo(() => ({ layout, loading }), [loading, layout]);
 }
+
+export function useRandomImages() {
+  const { randomImages$, loadingRandomImages$ } = useNoyaClient();
+  const images = useSelector(randomImages$);
+  const loading = useSelector(loadingRandomImages$);
+  return useMemo(() => ({ images, loading }), [loading, images]);
+}

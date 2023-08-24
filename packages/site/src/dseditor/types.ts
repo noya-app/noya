@@ -21,6 +21,7 @@ export type NoyaPrimitiveElement = NoyaElementBase & {
   type: 'noyaPrimitiveElement';
   // Props
   classNames: NoyaClassName[];
+  props: NoyaProp[];
   children: NoyaNode[];
 };
 
@@ -52,11 +53,10 @@ export type NoyaResolvedCompositeElement = NoyaCompositeElement & {
 };
 export type NoyaResolvedPrimitiveElement = Omit<
   NoyaPrimitiveElement,
-  'children' | 'classNames'
+  'children'
 > & {
   children: NoyaResolvedNode[];
   path: string[];
-  classNames: NoyaClassName[];
 };
 export type NoyaResolvedString = NoyaString & {
   path: string[];
@@ -65,6 +65,21 @@ export type NoyaClassName = {
   id: string;
   value: string;
 };
+export type NoyaStringProp = {
+  type: 'string';
+  id: string;
+  name: string;
+  value: string;
+};
+export type NoyaGeneratorProp = {
+  type: 'generator';
+  id: string;
+  generator: 'random-image' | 'random-icon';
+  name: string;
+  query: string;
+  result?: string;
+};
+export type NoyaProp = NoyaStringProp | NoyaGeneratorProp;
 
 export type NoyaDiffItem = {
   path: string[];

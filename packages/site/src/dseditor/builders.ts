@@ -5,8 +5,11 @@ import {
   NoyaCompositeElement,
   NoyaDiff,
   NoyaDiffItem,
+  NoyaGeneratorProp,
   NoyaPrimitiveElement,
+  NoyaProp,
   NoyaString,
+  NoyaStringProp,
   NoyaVariant,
 } from './types';
 
@@ -42,6 +45,7 @@ function noyaPrimitiveElement(
     id: options.id ?? uuid(),
     componentID: options.componentID,
     classNames: options.classNames ?? [],
+    props: options.props ?? [],
     children: options.children ?? [],
     type: 'noyaPrimitiveElement',
   };
@@ -118,7 +122,6 @@ function noyaClassName(
   return {
     ...options,
     id: options.id ?? uuid(),
-    value: options.value,
   };
 }
 
@@ -126,6 +129,27 @@ function noyaClassNames(
   options: Parameters<typeof noyaClassName>[0][],
 ): NoyaClassName[] {
   return options.map(noyaClassName);
+}
+
+function noyaStringProp(
+  options: ModelOptions<NoyaProp> & Pick<NoyaStringProp, 'name' | 'value'>,
+): NoyaProp {
+  return {
+    ...options,
+    id: options.id ?? uuid(),
+    type: 'string',
+  };
+}
+
+function noyaGeneratorProp(
+  options: ModelOptions<NoyaProp> &
+    Pick<NoyaGeneratorProp, 'name' | 'query' | 'generator'>,
+): NoyaProp {
+  return {
+    ...options,
+    id: options.id ?? uuid(),
+    type: 'generator',
+  };
 }
 
 export namespace Model {
@@ -138,4 +162,6 @@ export namespace Model {
   export const diff = noyaDiff;
   export const className = noyaClassName;
   export const classNames = noyaClassNames;
+  export const stringProp = noyaStringProp;
+  export const generatorProp = noyaGeneratorProp;
 }
