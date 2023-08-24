@@ -82,7 +82,7 @@ export function useGeneratedLayout(name: string, description: string) {
   const layout = useSelector(
     () => generatedLayouts$[key].get() as string[] | undefined,
   );
-  const loading = useSelector(() => loadingLayouts$[key].get() ?? false);
+  const loading = useSelector(() => loadingLayouts$[key].get() ?? []);
   return useMemo(() => ({ layout, loading }), [loading, layout]);
 }
 

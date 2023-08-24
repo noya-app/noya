@@ -129,7 +129,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       title="Layout"
       titleTextStyle="heading4"
       right={
-        generatedLayout.loading ? (
+        generatedLayout.loading.includes(true) ? (
           <ActivityIndicator size={13} />
         ) : (
           <IconButton

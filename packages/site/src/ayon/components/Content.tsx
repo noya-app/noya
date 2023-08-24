@@ -243,7 +243,7 @@ export const Content = memo(function Content({
         layer.data.description,
       );
 
-      if (loadingLayouts[key]) return;
+      if (loadingLayouts[key] && loadingLayouts[key][0] === true) return;
 
       if (layouts[key] && layouts[key][0]) {
         const node = parseLayout(layouts[key][0]);

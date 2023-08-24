@@ -22,6 +22,8 @@ type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
 type NoyaFetchPolicy = 'no-cache' | 'cache-and-network' | 'network-only';
 
+const GENERATED_LAYOUT_COUNT = 8;
+
 export class NoyaClient {
   networkClient: INoyaNetworkClient;
   files$ = observable<{
@@ -58,7 +60,7 @@ export class NoyaClient {
   loadingDescriptions$ = observable<Record<string, boolean>>({});
   generatedDescriptionIndex: Record<string, number> = {};
   generatedLayouts$ = observable<Record<string, string[]>>({});
-  loadingLayouts$ = observable<Record<string, boolean>>({});
+  loadingLayouts$ = observable<Record<string, boolean[]>>({});
   generatedLayoutIndex: Record<string, number> = {};
   randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
   loadingRandomImages$ = observable<Record<string, boolean>>({});
@@ -199,12 +201,20 @@ export class NoyaClient {
 
     if (Array.isArray(existing)) return existing;
 
-    this.generatedLayouts$.set((prev) => ({ ...prev, [key]: [] }));
-    this.loadingLayouts$.set((prev) => ({ ...prev, [key]: true }));
+    const rangeArray = range(0, GENERATED_LAYOUT_COUNT);
+
+    this.generatedLayouts$.set((prev) => ({
+      ...prev,
+      [key]: rangeArray.map((_) => ''),
+    }));
+    this.loadingLayouts$.set((prev) => ({
+      ...prev,
+      [key]: rangeArray.map((_) => true),
+    }));
     this.generatedLayoutIndex[key] = this.generatedLayoutIndex[key] ?? 0;
     const baseIndex = this.generatedLayoutIndex[key];
 
-    const promises = range(0, 8).map(async (index) => {
+    const promises = rangeArray.map(async (index) => {
       const iterable =
         await this.networkClient.generate.componentLayoutsFromDescription(
           name,
@@ -216,20 +226,20 @@ export class NoyaClient {
       for await (const chunk of iterable) {
         text += chunk;
         let nextText = text;
+
         this.generatedLayouts$.set((prev) => ({
           ...prev,
-          [key]: [
-            ...prev[key].slice(0, index),
-            nextText,
-            ...prev[key].slice(index + 1),
-          ],
+          [key]: updateIndex(prev[key], index, nextText),
         }));
       }
+
+      this.loadingLayouts$.set((prev) => ({
+        ...prev,
+        [key]: updateIndex(prev[key], index, false),
+      }));
     });
 
     await Promise.all(promises);
-
-    this.loadingLayouts$.set((prev) => ({ ...prev, [key]: false }));
 
     return;
   };
@@ -248,7 +258,8 @@ export class NoyaClient {
 
     this.generatedLayouts$[key].delete();
     this.loadingLayouts$[key].delete();
-    this.generatedLayoutIndex[key] = (this.generatedLayoutIndex[key] ?? 0) + 8;
+    this.generatedLayoutIndex[key] =
+      (this.generatedLayoutIndex[key] ?? 0) + GENERATED_LAYOUT_COUNT;
   };
 
   #fetchSession = async () => {
@@ -441,4 +452,8 @@ export class NoyaClient {
     this.#fetchFiles();
     return result;
   };
+}
+
+function updateIndex<T>(array: T[], index: number, value: T) {
+  return [...array.slice(0, index), value, ...array.slice(index + 1)];
 }
