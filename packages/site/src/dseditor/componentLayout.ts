@@ -15,6 +15,7 @@ const IMAGE_ALT_REWRITE_MAP = new Set([
   'related',
   'image',
   'video',
+  'icon',
   'or',
   'of',
   'and',

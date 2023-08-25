@@ -88,6 +88,7 @@ export class NoyaClient {
   get random() {
     return memoizedGetter(this, 'random', {
       image: this.#fetchRandomImage,
+      resetImage: this.#resetRandomImage,
     });
   }
 
@@ -116,6 +117,13 @@ export class NoyaClient {
 
     this.randomImages$.set((prev) => ({ ...prev, [key]: data }));
     this.loadingRandomImages$.set((prev) => ({ ...prev, [key]: false }));
+  };
+
+  #resetRandomImage = (options: { id?: string; query: string }) => {
+    const key = this.randomImageCacheKey(options);
+
+    this.randomImages$[key].delete();
+    this.loadingRandomImages$[key].delete();
   };
 
   get generate() {

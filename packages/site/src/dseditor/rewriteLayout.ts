@@ -240,6 +240,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'paddingX',
     'paddingY',
   ],
+  Tag: ['flex'],
 };
 
 export function rewriteForbiddenClassGroups(layout: LayoutNode) {

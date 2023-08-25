@@ -191,7 +191,11 @@ export const Content = memo(function Content({
               ...node,
               props: node.props.map((prop) =>
                 prop.name === 'src'
-                  ? { ...prop, result: images[key].url }
+                  ? {
+                      ...prop,
+                      result: images[key].url,
+                      resolvedQuery: src.query,
+                    }
                   : prop,
               ),
             },

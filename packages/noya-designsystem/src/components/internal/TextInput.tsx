@@ -8,6 +8,7 @@ import React, {
   MouseEventHandler,
   PointerEventHandler,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -107,6 +108,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
 type SubmittableProps = Props & {
   onSubmit: (value: string) => void;
   allowSubmittingWithSameValue?: boolean;
+  submitAutomaticallyAfterDelay?: number;
 };
 
 const SubmittableTextInput = forwardRef(function SubmittableTextInput(
@@ -118,6 +120,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     onFocusChange,
     onFocusCapture,
     allowSubmittingWithSameValue = false,
+    submitAutomaticallyAfterDelay,
     ...rest
   }: SubmittableProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
@@ -203,6 +206,32 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     },
     [onFocusCapture, onFocusChange],
   );
+
+  const autoSubmitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const latestHandleSubmit = useRef(handleSubmit);
+  latestHandleSubmit.current = handleSubmit;
+
+  useEffect(() => {
+    if (submitAutomaticallyAfterDelay) {
+      if (autoSubmitTimeoutRef.current) {
+        clearTimeout(autoSubmitTimeoutRef.current);
+      }
+
+      autoSubmitTimeoutRef.current = setTimeout(() => {
+        latestHandleSubmit.current();
+      }, submitAutomaticallyAfterDelay);
+    }
+
+    // Clear the timeout when the component is unmounted or if the value changes
+    return () => {
+      if (autoSubmitTimeoutRef.current) {
+        clearTimeout(autoSubmitTimeoutRef.current);
+      }
+    };
+    // Track `internalValue` to explicitly reset the timer
+  }, [internalValue, submitAutomaticallyAfterDelay]);
 
   return (
     <input

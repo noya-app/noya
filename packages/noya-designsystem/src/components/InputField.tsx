@@ -59,7 +59,7 @@ const LabelContainer = styled.label<{
   labelPosition: LabelPosition;
   hasDropdown: boolean;
 }>(({ theme, labelPosition, hasDropdown, pointerEvents }) => ({
-  color: theme.colors.textMuted,
+  color: theme.colors.textDisabled,
   position: 'absolute',
   top: 0,
   right: labelPosition === 'end' ? 0 : undefined,
@@ -70,7 +70,6 @@ const LabelContainer = styled.label<{
   pointerEvents,
   fontWeight: 'bold',
   fontSize: '60%',
-  opacity: 0.5,
   userSelect: 'none',
   ...(labelPosition === 'start'
     ? { justifyContent: 'flex-start', paddingLeft: '6px' }
@@ -119,27 +118,30 @@ interface InputFieldDropdownProps<T extends string> {
   id?: string;
   items: MenuItem<T>[];
   onSelect: (value: T) => void;
+  children?: ReactNode;
 }
 
 const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
   T extends string,
->({ id, items, onSelect }: InputFieldDropdownProps<T>) {
+>({ id, items, onSelect, children }: InputFieldDropdownProps<T>) {
   const { size } = useContext(InputFieldContext);
+
+  const contentStyle = useMemo(
+    () => ({
+      margin: '-4px 0',
+      minHeight: size === 'small' ? '15px' : undefined,
+    }),
+    [size],
+  );
 
   return (
     <DropdownContainer>
       <DropdownMenu<T> items={items} onSelect={onSelect}>
-        <Button
-          id={id}
-          variant="thin"
-          flex="1"
-          contentStyle={{
-            margin: '-4px 0',
-            minHeight: size === 'small' ? '15px' : undefined,
-          }}
-        >
-          <CaretDownIcon />
-        </Button>
+        {children || (
+          <Button id={id} variant="thin" flex="1" contentStyle={contentStyle}>
+            <CaretDownIcon />
+          </Button>
+        )}
       </DropdownMenu>
     </DropdownContainer>
   );

@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
+import { useNoyaClient } from 'noya-api';
 import {
   Chip,
   CompletionItem,
@@ -11,6 +12,7 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { CaretDownIcon } from 'noya-icons';
 import { isDeepEqual, uuid } from 'noya-utils';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
@@ -253,6 +255,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isEditing: boolean;
   setEditingId: (id: string | undefined) => void;
 }) {
+  const client = useNoyaClient();
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
   const name = getName(node, findComponent);
@@ -617,11 +620,13 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 >
                   <InputField.Input
                     value={prop.query}
+                    allowSubmittingWithSameValue
+                    submitAutomaticallyAfterDelay={300}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
                     }}
-                    onChange={(value) => {
+                    onSubmit={(value) => {
                       onChange(
                         ResolvedHierarchy.replace(resolvedNode, {
                           at: indexPath,
@@ -639,14 +644,91 @@ export const DSLayoutRow = memo(function DSLayerRow({
                       );
                     }}
                   />
-                  <InputField.Label>{name} (random)</InputField.Label>
-                  {/* <InputField.DropdownMenu
-                    items={[
-                      { title: 'Custom Image' },
-                      { title: 'Random Image' },
-                    ]}
-                    onSelect={() => {}}
-                  /> */}
+                  <InputField.Label>{name} (random)&nbsp;</InputField.Label>
+                  <InputField.DropdownMenu
+                    items={[{ value: 'shuffle', title: 'Shuffle Image' }]}
+                    onSelect={(value) => {
+                      switch (value) {
+                        case 'shuffle': {
+                          client.random.resetImage({
+                            id: prop.id,
+                            query: prop.query,
+                          });
+                          onChange(
+                            ResolvedHierarchy.replace(resolvedNode, {
+                              at: indexPath,
+                              node: {
+                                ...node,
+                                props: node.props.map((p) =>
+                                  p.name === prop.name &&
+                                  p.type === 'generator' &&
+                                  p.generator === prop.generator
+                                    ? {
+                                        ...p,
+                                        result: undefined,
+                                        resolvedQuery: undefined,
+                                      }
+                                    : p,
+                                ),
+                              },
+                            }),
+                          );
+                          break;
+                        }
+                      }
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'relative',
+                        top: '1px',
+                        right: '1px',
+                        height: '15px',
+                        width: '15px',
+                        // aspectRatio: '1/1',
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                        borderRadius: '4px',
+                        marginLeft: '4px',
+                        // marginRight: '-6px',
+                        cursor: 'pointer',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <img
+                        src={prop.result}
+                        alt=""
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          height: '100%',
+                          width: '100%',
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                          borderRadius: '4px',
+                        }}
+                      />
+                      {hovered && (
+                        <>
+                          <div
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              height: '100%',
+                              width: '100%',
+                              backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                            }}
+                          />
+                          <CaretDownIcon
+                            color="white"
+                            style={{
+                              position: 'relative',
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </InputField.DropdownMenu>
                 </InputField.Root>
               );
             }
