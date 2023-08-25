@@ -1,4 +1,4 @@
-import { DS, useGeneratedLayouts, useNoyaClient } from 'noya-api';
+import { DS, useNoyaClient } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
@@ -9,7 +9,6 @@ import { DSControlledRenderer } from '../../dseditor/DSControlledRenderer';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { Model } from '../../dseditor/builders';
 import { initialComponents } from '../../dseditor/builtins';
-import { parseLayout } from '../../dseditor/componentLayout';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
 import { ResolvedHierarchy } from '../../dseditor/resolvedHierarchy';
 import { createResolvedNode, unresolve } from '../../dseditor/traversal';
@@ -17,6 +16,7 @@ import { NoyaNode, NoyaResolvedString } from '../../dseditor/types';
 import { useAyonState } from '../state/ayonState';
 import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData, NodePath } from '../types';
+import { useManagedLayouts } from './GeneratedLayoutContext';
 
 class ErrorBoundary extends React.Component<any> {
   constructor(props: { children: React.ReactNode }) {
@@ -87,7 +87,7 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
       initialComponents.find((component) => component.componentID === id),
     [],
   );
-  const generatedLayouts = useGeneratedLayouts();
+  const generatedLayouts = useManagedLayouts();
 
   return (
     <>
@@ -196,11 +196,11 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                     layer.data.description,
                   );
 
-                  const layouts = generatedLayouts.layouts[key];
+                  const layouts = generatedLayouts[key];
 
                   if (!layouts || !layouts[0]) return undefined;
 
-                  return parseLayout(layouts[0]);
+                  return layouts[0].node;
                 }
 
                 function createPlaceholderNode() {

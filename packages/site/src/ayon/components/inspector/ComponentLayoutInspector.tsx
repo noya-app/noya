@@ -1,4 +1,4 @@
-import { useGeneratedLayout, useNoyaClient } from 'noya-api';
+import { useNoyaClient } from 'noya-api';
 import { ActivityIndicator, Button, IconButton } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
@@ -6,7 +6,6 @@ import { isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
-import { parseLayout } from '../../../dseditor/componentLayout';
 import { createResolvedNode, unresolve } from '../../../dseditor/traversal';
 import {
   NoyaComponent,
@@ -15,6 +14,7 @@ import {
 } from '../../../dseditor/types';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
+import { useManagedLayout } from '../GeneratedLayoutContext';
 import { InspectorCarousel, InspectorCarouselItem } from './InspectorCarousel';
 
 type Props = {
@@ -32,7 +32,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
 }: Props) {
   const dispatch = useAyonDispatch();
   const client = useNoyaClient();
-  const generatedLayout = useGeneratedLayout(
+  const generatedLayout = useManagedLayout(
     selectedLayer.name ?? '',
     selectedLayer.data.description ?? '',
   );
@@ -62,44 +62,24 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     });
   }, [client.generate, selectedLayer.data.description, selectedLayer.name]);
 
-  const layout0 = useMemo(() => {
-    if (!generatedLayout.layout || !generatedLayout.layout[0]) return;
-
-    return generatedLayout.layout[0];
-  }, [generatedLayout.layout]);
-
-  const node = useMemo(() => {
-    if (selectedLayer.data.node) return selectedLayer.data.node;
-
-    if (layout0) {
-      return parseLayout(layout0);
-    }
-  }, [layout0, selectedLayer.data.node]);
+  const node = selectedLayer.data.node ?? generatedLayout[0]?.node;
 
   const findComponent = useCallback((id: string): NoyaComponent | undefined => {
     return undefined;
   }, []);
 
   const carouselItems: InspectorCarouselItem[] = useMemo(() => {
-    if (!generatedLayout.layout) return [];
-
-    return generatedLayout.layout.map((layout, index) => {
-      const node = parseLayout(layout);
-
+    return generatedLayout.map((layout, index) => {
       return {
         id: index.toString(),
         size: selectedLayer.frame,
         data: {
           description: selectedLayer.data.description,
-          node,
+          node: layout.node,
         },
       };
     });
-  }, [
-    generatedLayout.layout,
-    selectedLayer.data.description,
-    selectedLayer.frame,
-  ]);
+  }, [generatedLayout, selectedLayer.data.description, selectedLayer.frame]);
 
   const selectedIndex = useMemo(() => {
     if (!node) return;
@@ -129,7 +109,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       title="Layout"
       titleTextStyle="heading4"
       right={
-        generatedLayout.loading.includes(true) ? (
+        generatedLayout.some((layout) => layout.loading) ? (
           <ActivityIndicator size={13} />
         ) : (
           <IconButton

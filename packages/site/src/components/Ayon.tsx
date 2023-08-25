@@ -62,6 +62,7 @@ import React, {
 } from 'react';
 import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Content } from '../ayon/components/Content';
+import { GeneratedLayoutProvider } from '../ayon/components/GeneratedLayoutContext';
 import { ayonReducer } from '../ayon/state/ayonReducer';
 import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
 import { librarySymbols } from '../ayon/symbols/symbols';
@@ -558,24 +559,26 @@ export const Ayon = memo(function Ayon({
 
   return (
     <AyonProvider value={Ayon}>
-      <Suspense fallback={null}>
-        <ImageCacheProvider>
-          <CanvasKitProvider
-            library={
-              props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
-            }
-          >
-            <FontManagerProvider>
-              <AyonControlledState
-                initialDocument={initialDocument}
-                onChangeDocument={onChangeDocument}
-              >
-                <Workspace {...props} />
-              </AyonControlledState>
-            </FontManagerProvider>
-          </CanvasKitProvider>
-        </ImageCacheProvider>
-      </Suspense>
+      <GeneratedLayoutProvider>
+        <Suspense fallback={null}>
+          <ImageCacheProvider>
+            <CanvasKitProvider
+              library={
+                props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
+              }
+            >
+              <FontManagerProvider>
+                <AyonControlledState
+                  initialDocument={initialDocument}
+                  onChangeDocument={onChangeDocument}
+                >
+                  <Workspace {...props} />
+                </AyonControlledState>
+              </FontManagerProvider>
+            </CanvasKitProvider>
+          </ImageCacheProvider>
+        </Suspense>
+      </GeneratedLayoutProvider>
     </AyonProvider>
   );
 });

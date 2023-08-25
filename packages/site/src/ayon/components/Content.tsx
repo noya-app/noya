@@ -1,7 +1,6 @@
 import {
   DS,
   useGeneratedComponentDescriptions,
-  useGeneratedLayouts,
   useNoyaClient,
   useRandomImages,
 } from 'noya-api';
@@ -37,7 +36,6 @@ import React, {
 import styled from 'styled-components';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
-import { parseLayout } from '../../dseditor/componentLayout';
 import { ElementHierarchy } from '../../dseditor/traversal';
 import { NoyaNode } from '../../dseditor/types';
 import { measureImage } from '../../utils/measureImage';
@@ -50,6 +48,7 @@ import { CustomLayerData, NodePath, ViewType } from '../types';
 import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
+import { useManagedLayouts } from './GeneratedLayoutContext';
 import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 import { AyonInspector } from './inspector/AyonInspector';
 
@@ -156,7 +155,7 @@ export const Content = memo(function Content({
 
   const { descriptions, loading: loadingDescriptions } =
     useGeneratedComponentDescriptions();
-  const { layouts, loading: loadingLayouts } = useGeneratedLayouts();
+  const layouts = useManagedLayouts();
   const { images, loading: loadingImages } = useRandomImages();
 
   useEffect(() => {
@@ -243,12 +242,10 @@ export const Content = memo(function Content({
         layer.data.description,
       );
 
-      if (loadingLayouts[key] && loadingLayouts[key][0] === true) return;
+      if (layouts[key] && layouts[key][0].loading) return;
 
       if (layouts[key] && layouts[key][0]) {
-        const node = parseLayout(layouts[key][0]);
-
-        dispatch('setLayerNode', layer.do_objectID, node);
+        dispatch('setLayerNode', layer.do_objectID, layouts[key][0].node);
       } else {
         client.generate.componentLayouts({
           name: layer.name,
@@ -256,7 +253,7 @@ export const Content = memo(function Content({
         });
       }
     });
-  }, [client, customLayers, dispatch, layouts, loadingLayouts]);
+  }, [client, customLayers, dispatch, layouts]);
 
   useEffect(() => {
     if (isPlayground) return;

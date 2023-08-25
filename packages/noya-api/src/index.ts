@@ -15,6 +15,7 @@ import {
   NoyaJson,
   NoyaPrice,
   NoyaProduct,
+  NoyaRandomImageResponse,
   NoyaSession,
   NoyaShare,
   NoyaSharedFile,
@@ -56,6 +57,7 @@ export namespace NoyaAPI {
   export type Share = NoyaShare;
   export type SharedFile = NoyaSharedFile;
   export type GeneratedName = NoyaGeneratedName;
+  export type RandomImageResponse = NoyaRandomImageResponse;
 }
 
 export type { DS, DSConfig, DSSource };

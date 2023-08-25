@@ -52,7 +52,7 @@ export function renderResolvedNode({
 }) {
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
-    (element, transformedChildren) => {
+    (element, transformedChildren, indexPath) => {
       if (element.type === 'noyaCompositeElement') {
         return transformedChildren;
       }
@@ -134,7 +134,9 @@ export function renderResolvedNode({
       return (
         <PrimitiveComponent
           style={style}
-          key={element.path.join('/')}
+          // We use the indexPath as the key, since the element ids aren't stable while
+          // the layout is being generated.
+          key={indexPath.join('/')}
           _passthrough={{
             'data-path': element.path.join('/'),
           }}

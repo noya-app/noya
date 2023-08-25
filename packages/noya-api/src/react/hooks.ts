@@ -68,24 +68,6 @@ export function useGeneratedComponentDescription(name: string) {
   return useMemo(() => ({ description, loading }), [loading, description]);
 }
 
-export function useGeneratedLayouts() {
-  const { generatedLayouts$, loadingLayouts$ } = useNoyaClient();
-  const layouts = useSelector(generatedLayouts$);
-  const loading = useSelector(loadingLayouts$);
-  return useMemo(() => ({ layouts, loading }), [loading, layouts]);
-}
-
-export function useGeneratedLayout(name: string, description: string) {
-  const { componentLayoutCacheKey, generatedLayouts$, loadingLayouts$ } =
-    useNoyaClient();
-  const key = componentLayoutCacheKey(name, description);
-  const layout = useSelector(
-    () => generatedLayouts$[key].get() as string[] | undefined,
-  );
-  const loading = useSelector(() => loadingLayouts$[key].get() ?? []);
-  return useMemo(() => ({ layout, loading }), [loading, layout]);
-}
-
 export function useRandomImages() {
   const { randomImages$, loadingRandomImages$ } = useNoyaClient();
   const images = useSelector(randomImages$);

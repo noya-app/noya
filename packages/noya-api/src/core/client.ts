@@ -91,13 +91,14 @@ export class NoyaClient {
     });
   }
 
-  randomImageCacheKey = (options: { id: string; query: string }) => {
+  randomImageCacheKey = (options: { id?: string; query: string }) => {
     const { id, query } = options;
-    return `${id}:${query.trim().toLowerCase()}`;
+    const normalized = query.trim().toLowerCase();
+    return id ? `${id}:${normalized}` : normalized;
   };
 
   #fetchRandomImage = async (
-    options: { id: string } & Parameters<
+    options: { id?: string } & Parameters<
       INoyaNetworkClient['random']['image']
     >[0],
   ) => {
