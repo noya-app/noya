@@ -11,17 +11,20 @@ import {
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { rewriteLayout } from './rewriteLayout';
 
-const IMAGE_ALT_REWRITE_MAP: Record<string, string> = {
-  related: '',
-  image: '',
-};
+const IMAGE_ALT_REWRITE_MAP = new Set([
+  'related',
+  'image',
+  'video',
+  'or',
+  'of',
+  'and',
+]);
 
 function rewriteImageAlt(string: string) {
   return string
     .toLowerCase()
     .split(' ')
-    .map((word) => IMAGE_ALT_REWRITE_MAP[word.toLowerCase()] ?? word)
-    .filter(Boolean)
+    .filter((word) => !IMAGE_ALT_REWRITE_MAP.has(word.toLowerCase()))
     .join(' ');
 }
 

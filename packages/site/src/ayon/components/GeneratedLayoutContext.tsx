@@ -32,8 +32,13 @@ function replaceAllImages(
         prop.name === 'src' &&
         prop.type === 'generator' &&
         prop.generator === 'random-image' &&
-        !prop.result
-          ? { ...prop, result: images[prop.query]?.url }
+        !prop.result &&
+        images[prop.query]
+          ? {
+              ...prop,
+              result: images[prop.query].url,
+              resolvedQuery: prop.query,
+            }
           : prop,
       ),
     };

@@ -108,11 +108,15 @@ const InputFieldLabel = memo(function InputFieldLabel({
 
 const DropdownContainer = styled.span(({ theme }) => ({
   position: 'absolute',
+  top: 0,
   right: 0,
+  bottom: 0,
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 interface InputFieldDropdownProps<T extends string> {
-  id: string;
+  id?: string;
   items: MenuItem<T>[];
   onSelect: (value: T) => void;
 }
@@ -120,10 +124,20 @@ interface InputFieldDropdownProps<T extends string> {
 const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
   T extends string,
 >({ id, items, onSelect }: InputFieldDropdownProps<T>) {
+  const { size } = useContext(InputFieldContext);
+
   return (
     <DropdownContainer>
       <DropdownMenu<T> items={items} onSelect={onSelect}>
-        <Button id={id} variant="thin">
+        <Button
+          id={id}
+          variant="thin"
+          flex="1"
+          contentStyle={{
+            margin: '-4px 0',
+            minHeight: size === 'small' ? '15px' : undefined,
+          }}
+        >
           <CaretDownIcon />
         </Button>
       </DropdownMenu>
@@ -241,6 +255,9 @@ export const InputElement = styled(TextInput).withConfig({
       : disabled
       ? theme.colors.textDisabled
       : theme.colors.text,
+    ...(size === 'small' && {
+      fontSize: '11px',
+    }),
     width: '0px', // Reset intrinsic width
     flex: '1 1 0px',
     position: 'relative',
@@ -250,14 +267,15 @@ export const InputElement = styled(TextInput).withConfig({
     textAlign: textAlign ?? 'left',
     alignSelf: 'stretch',
     borderRadius: '4px',
-    paddingTop: size === 'large' ? '10px' : '4px',
-    paddingBottom: size === 'large' ? '10px' : '4px',
+    paddingTop: size === 'large' ? '10px' : size === 'medium' ? '4px' : '1px',
+    paddingBottom:
+      size === 'large' ? '10px' : size === 'medium' ? '4px' : '1px',
     paddingLeft:
-      (size === 'large' ? 10 : 6) +
+      (size === 'large' ? 10 : size === 'medium' ? 6 : 4) +
       (hasLabel && labelPosition === 'start' ? 6 + labelSize : 0) +
       'px',
     paddingRight:
-      (size === 'large' ? 10 : 6) +
+      (size === 'large' ? 10 : size === 'medium' ? 6 : 4) +
       (hasLabel && labelPosition === 'end' ? 6 + labelSize : 0) +
       (hasDropdown ? 11 : 0) +
       'px',

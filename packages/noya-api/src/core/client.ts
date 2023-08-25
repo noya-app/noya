@@ -250,8 +250,8 @@ export class NoyaClient {
 
     this.generatedDescriptions$[key].delete();
     this.loadingDescriptions$[key].delete();
-    this.generatedDescriptionIndex[key] =
-      (this.generatedDescriptionIndex[key] ?? 0) + 1;
+    const index = this.generatedDescriptionIndex[key];
+    this.generatedDescriptionIndex[key] = index !== undefined ? index + 1 : 0;
   };
 
   #resetGenerateComponentLayouts = (name: string, description: string) => {
@@ -259,8 +259,9 @@ export class NoyaClient {
 
     this.generatedLayouts$[key].delete();
     this.loadingLayouts$[key].delete();
+    const index = this.generatedLayoutIndex[key];
     this.generatedLayoutIndex[key] =
-      (this.generatedLayoutIndex[key] ?? 0) + GENERATED_LAYOUT_COUNT;
+      index !== undefined ? index + GENERATED_LAYOUT_COUNT : 0;
   };
 
   #fetchSession = async () => {

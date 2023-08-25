@@ -170,9 +170,12 @@ export const Content = memo(function Content({
 
         const src = node.props.find((prop) => prop.name === 'src');
 
-        if (!src || src.type !== 'generator' || src.result !== undefined) {
-          return;
-        }
+        if (!src || src.type !== 'generator') return;
+
+        const shouldGenerate =
+          src.result === undefined || src.query !== src.resolvedQuery;
+
+        if (!shouldGenerate) return;
 
         const key = client.randomImageCacheKey({
           id: src.id,
@@ -199,8 +202,8 @@ export const Content = memo(function Content({
           client.random.image({
             id: src.id,
             query: src.query,
-            height: layer.frame.width,
-            width: layer.frame.height,
+            height: layer.frame.height,
+            width: layer.frame.width,
           });
         }
       });

@@ -407,6 +407,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
         padding="1px"
         borderRadius="4px"
         margin="2px 0"
+        gap="2px"
         border={
           node.type === 'noyaCompositeElement'
             ? undefined
@@ -541,7 +542,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
           </Stack.H>
         )}
         {node.type === 'noyaPrimitiveElement' && (
-          <Stack.H flexWrap="wrap" gap="2px">
+          <Stack.H flexWrap="wrap" gap="2px" margin={'-2px 0 0 0'}>
             {node.classNames.map(({ value, id }) => {
               const status = undefined;
 
@@ -602,6 +603,56 @@ export const DSLayoutRow = memo(function DSLayerRow({
             />
           </Stack.H>
         )}
+        {node.type === 'noyaPrimitiveElement' &&
+          node.props.length > 0 &&
+          node.props.map((prop) => {
+            if (prop.type === 'generator') {
+              const name = prop.name === 'src' ? 'Source' : prop.name;
+
+              return (
+                <InputField.Root
+                  labelPosition="end"
+                  labelSize={60}
+                  size="small"
+                >
+                  <InputField.Input
+                    value={prop.query}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                    onChange={(value) => {
+                      onChange(
+                        ResolvedHierarchy.replace(resolvedNode, {
+                          at: indexPath,
+                          node: {
+                            ...node,
+                            props: node.props.map((p) =>
+                              p.name === prop.name &&
+                              p.type === 'generator' &&
+                              p.generator === prop.generator
+                                ? { ...p, query: value }
+                                : p,
+                            ),
+                          },
+                        }),
+                      );
+                    }}
+                  />
+                  <InputField.Label>{name} (random)</InputField.Label>
+                  {/* <InputField.DropdownMenu
+                    items={[
+                      { title: 'Custom Image' },
+                      { title: 'Random Image' },
+                    ]}
+                    onSelect={() => {}}
+                  /> */}
+                </InputField.Root>
+              );
+            }
+
+            return null;
+          })}
       </Stack.V>
     </TreeView.Row>
   );

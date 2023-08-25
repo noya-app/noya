@@ -24,6 +24,7 @@ type Props = {
   placeholder?: string;
   onKeyDown?: KeyboardEventHandler;
   onClick?: MouseEventHandler;
+  onDoubleClick?: MouseEventHandler;
   onPointerDown?: PointerEventHandler;
   onFocusCapture?: FocusEventHandler;
   onFocusChange?: (isFocused: boolean) => void;

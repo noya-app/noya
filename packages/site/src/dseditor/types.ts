@@ -78,6 +78,7 @@ export type NoyaGeneratorProp = {
   name: string;
   query: string;
   result?: string;
+  resolvedQuery?: string;
 };
 export type NoyaProp = NoyaStringProp | NoyaGeneratorProp;
 
