@@ -14,19 +14,52 @@ import { rewriteLayout } from './rewriteLayout';
 const IMAGE_ALT_REWRITE_MAP = new Set([
   'related',
   'image',
+  'images',
   'video',
+  'videos',
+  'photo',
+  'photos',
+  'picture',
+  'pictures',
   'icon',
+  'icons',
   'or',
   'of',
   'and',
+  'supporting',
+  'visual',
+  'like',
+  'element',
+  'etc.',
+  'etc',
+  'primary',
+  'secondary',
+  'description',
+  'first',
+  'second',
+  'third',
+  '1',
+  '2',
+  '3',
+  '1st',
+  '2nd',
+  '3rd',
+  'a',
+  'an',
+  'the',
+  'high-res',
+  'high-resolution',
+  'relevant',
 ]);
 
 function rewriteImageAlt(string: string) {
-  return string
-    .toLowerCase()
-    .split(' ')
-    .filter((word) => !IMAGE_ALT_REWRITE_MAP.has(word.toLowerCase()))
-    .join(' ');
+  return (
+    string
+      .toLowerCase()
+      .split(' ')
+      .filter((word) => !IMAGE_ALT_REWRITE_MAP.has(word.toLowerCase()))
+      .join(' ') || 'landscape'
+  );
 }
 
 function convertLayoutToComponent(layout: LayoutNode): NoyaElement {

@@ -1,17 +1,23 @@
+export type IsEqualOptions = {
+  shouldIgnoreKey?: (
+    key: string,
+    a: Record<string, unknown>,
+    b: Record<string, unknown>,
+  ) => boolean;
+};
+
 export function isEqualArray<T>(
   a: T[],
   b: T[],
   deep: boolean,
-  ignoreUndefinedKeys: boolean,
+  options?: IsEqualOptions,
 ) {
   if (a === b) return true;
 
   if (a.length !== b.length) return false;
 
   for (let i = 0; i < a.length; i++) {
-    if (
-      !(deep ? isEqual(a[i], b[i], deep, ignoreUndefinedKeys) : a[i] === b[i])
-    ) {
+    if (!(deep ? isEqual(a[i], b[i], deep, options) : a[i] === b[i])) {
       return false;
     }
   }
@@ -23,7 +29,7 @@ function isEqualObject<T extends Record<PropertyKey, any>>(
   a: T,
   b: T,
   deep: boolean,
-  ignoreUndefinedKeys: boolean,
+  options?: IsEqualOptions,
 ) {
   if (a === b) return true;
 
@@ -32,9 +38,13 @@ function isEqualObject<T extends Record<PropertyKey, any>>(
   let aKeys = Object.keys(a);
   let bKeys = Object.keys(b);
 
-  if (ignoreUndefinedKeys) {
-    aKeys = aKeys.filter((key) => a[key] !== undefined);
-    bKeys = bKeys.filter((key) => b[key] !== undefined);
+  if (options) {
+    const shouldIgnoreKey = options.shouldIgnoreKey;
+
+    if (shouldIgnoreKey) {
+      aKeys = aKeys.filter((key) => !shouldIgnoreKey(key, a, b));
+      bKeys = bKeys.filter((key) => !shouldIgnoreKey(key, a, b));
+    }
   }
 
   if (aKeys.length !== bKeys.length) return false;
@@ -43,9 +53,7 @@ function isEqualObject<T extends Record<PropertyKey, any>>(
     const key = aKeys[i];
 
     if (
-      !(deep
-        ? isEqual(a[key], b[key], deep, ignoreUndefinedKeys)
-        : a[key] === b[key]) ||
+      !(deep ? isEqual(a[key], b[key], deep, options) : a[key] === b[key]) ||
       !Object.prototype.hasOwnProperty.call(b, key)
     ) {
       return false;
@@ -59,7 +67,7 @@ export function isEqual<T>(
   a: T,
   b: T,
   deep: boolean,
-  ignoreUndefinedKeys: boolean,
+  options?: IsEqualOptions,
 ) {
   const aType = typeof a;
   const bType = typeof b;
@@ -70,8 +78,8 @@ export function isEqual<T>(
   if (aType !== 'object' || !a || !b) return a === b;
 
   if (a instanceof Array && b instanceof Array) {
-    return isEqualArray(a, b, deep, ignoreUndefinedKeys);
+    return isEqualArray(a, b, deep, options);
   }
 
-  return isEqualObject(a, b, deep, ignoreUndefinedKeys);
+  return isEqualObject(a, b, deep, options);
 }

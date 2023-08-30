@@ -11,6 +11,7 @@ export type ViewType = 'combined' | 'previewOnly';
 export type CustomLayerData = {
   description?: string;
   node?: NoyaNode;
+  activeGenerationIndex?: number;
 };
 
 export type NodePath = { path: string[]; layerId: string };

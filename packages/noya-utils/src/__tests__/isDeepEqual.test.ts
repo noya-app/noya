@@ -54,3 +54,23 @@ describe('deep', () => {
     });
   });
 });
+
+describe('ignore keys', () => {
+  test('ignore foo', () => {
+    expect(
+      isDeepEqual(
+        { foo: 123 },
+        { foo: 456 },
+        { shouldIgnoreKey: (key) => key === 'foo' },
+      ),
+    ).toEqual(true);
+
+    expect(
+      isDeepEqual(
+        { foo: 123, bar: 'a' },
+        { foo: 456, bar: 'b' },
+        { shouldIgnoreKey: (key) => key === 'foo' },
+      ),
+    ).toEqual(false);
+  });
+});

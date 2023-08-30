@@ -133,7 +133,11 @@ export function rewriteTailwindClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
     return classes
       .filter(
-        (name) => name && !hallucinatedClasses.has(name) && !name.includes(':'),
+        (name) =>
+          name &&
+          !hallucinatedClasses.has(name) &&
+          !name.includes(':') &&
+          tailwindClassMapping[name] !== '',
       )
       .map(
         (name) =>

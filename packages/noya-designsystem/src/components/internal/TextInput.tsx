@@ -130,6 +130,10 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   const latestValue = useRef(value);
   latestValue.current = value;
 
+  // Track whether the user has edited the input since the last submission.
+  // We use this to support automatically submitting the input after a delay.
+  const userDidEdit = useRef(false);
+
   const isSubmitTriggeredByEscapeKey = useRef(false);
 
   const [internalValue, setInternalValue] = useState('');
@@ -150,6 +154,8 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     if (submissionValue === value && !allowSubmittingWithSameValue) return;
 
     onSubmit(submissionValue);
+
+    userDidEdit.current = false;
 
     setInternalValue(latestValue.current);
   }, [allowSubmittingWithSameValue, value, internalValue, onSubmit]);
@@ -182,6 +188,8 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      userDidEdit.current = true;
+
       setInternalValue(event.target.value);
     },
     [],
@@ -220,6 +228,8 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       }
 
       autoSubmitTimeoutRef.current = setTimeout(() => {
+        if (userDidEdit.current === false) return;
+
         latestHandleSubmit.current();
       }, submitAutomaticallyAfterDelay);
     }

@@ -38,6 +38,14 @@ it('removes hallucinated classes', () => {
   );
 });
 
+it('replaces prohibited classes', () => {
+  expect(
+    rewriteTailwindClasses(
+      layoutNode('Box', { class: 'transition duration-500' }),
+    ),
+  ).toEqual(layoutNode('Box', {}));
+});
+
 it('replaces space-y-5 with gap-5', () => {
   expect(
     rewriteTailwindClasses(layoutNode('Box', { class: 'space-y-5' })),

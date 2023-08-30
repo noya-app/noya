@@ -79,32 +79,36 @@ const Container = styled.div<{ scrollable: boolean }>(
   }),
 );
 
-const ItemContainer = styled.div<{ selected?: boolean; bordered: boolean }>(
-  ({ theme, selected, bordered }) => ({
-    display: 'flex',
-    flex: '1',
-    backgroundColor: theme.colors.sidebar.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '2px',
-    border: `1px solid ${
-      selected
-        ? theme.colors.primary
-        : bordered
-        ? theme.colors.divider
-        : 'transparent'
-    }`,
-    overflow: 'hidden',
+const ItemContainer = styled.div<{
+  selected?: boolean;
+  hovered?: boolean;
+  bordered: boolean;
+}>(({ theme, selected, hovered, bordered }) => ({
+  display: 'flex',
+  flex: '1',
+  backgroundColor: theme.colors.sidebar.background,
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '2px',
+  border: `1px solid ${
+    selected
+      ? theme.colors.primary
+      : hovered
+      ? `rgb(132, 63, 255, 0.5)`
+      : bordered
+      ? theme.colors.divider
+      : 'transparent'
+  }`,
+  overflow: 'hidden',
 
-    cursor: 'pointer',
-    '&:hover': {
-      opacity: 0.85,
-    },
-    '&:active': {
-      opacity: 0.7,
-    },
-  }),
-);
+  cursor: 'pointer',
+  '&:hover': {
+    opacity: 0.85,
+  },
+  '&:active': {
+    opacity: 0.7,
+  },
+}));
 
 const GridContainer = styled.div(({ theme }) => ({
   display: 'flex',
@@ -227,6 +231,7 @@ const GridViewItem = forwardRef(function GridViewItem<
       <ItemContainer
         bordered={bordered}
         selected={selected}
+        hovered={hovered}
         onClick={handleClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}

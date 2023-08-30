@@ -197,10 +197,11 @@ const DOMRendererContent = forwardRef(function DOMRendererContent(
                   );
 
                   const layouts = generatedLayouts[key];
+                  const activeIndex = layer.data.activeGenerationIndex ?? 0;
 
-                  if (!layouts || !layouts[0]) return undefined;
+                  if (!layouts || !layouts[activeIndex]) return undefined;
 
-                  return layouts[0].node;
+                  return layouts[activeIndex].node;
                 }
 
                 function createPlaceholderNode() {

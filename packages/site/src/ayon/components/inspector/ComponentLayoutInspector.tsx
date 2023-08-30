@@ -1,5 +1,10 @@
 import { useNoyaClient } from 'noya-api';
-import { ActivityIndicator, Button, IconButton } from 'noya-designsystem';
+import {
+  ActivityIndicator,
+  Button,
+  IconButton,
+  Spacer,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { isDeepEqual } from 'noya-utils';
@@ -36,6 +41,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.name ?? '',
     selectedLayer.data.description ?? '',
   );
+  const activeIndex = selectedLayer.data.activeGenerationIndex ?? 0;
 
   const handleShuffle = useCallback(() => {
     dispatch('setLayerNode', selectedLayer.do_objectID, undefined);
@@ -62,7 +68,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     });
   }, [client.generate, selectedLayer.data.description, selectedLayer.name]);
 
-  const node = selectedLayer.data.node ?? generatedLayout[0]?.node;
+  const node = selectedLayer.data.node ?? generatedLayout[activeIndex]?.node;
 
   const findComponent = useCallback((id: string): NoyaComponent | undefined => {
     return undefined;
@@ -81,12 +87,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     });
   }, [generatedLayout, selectedLayer.data.description, selectedLayer.frame]);
 
-  const selectedIndex = useMemo(() => {
-    if (!node) return;
-
-    return carouselItems.findIndex((item) => isDeepEqual(item.data.node, node));
-  }, [carouselItems, node]);
-
   const resolvedNode = useMemo(() => {
     if (!node) return;
 
@@ -103,6 +103,27 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     },
     [dispatch, node, selectedLayer.do_objectID],
   );
+
+  const selectedIndex = useMemo(() => {
+    if (!selectedLayer.data.node) return activeIndex;
+
+    return carouselItems.findIndex((item) =>
+      isDeepEqual(item.data.node, selectedLayer.data.node, {
+        shouldIgnoreKey(key) {
+          return key === 'id';
+        },
+      }),
+    );
+  }, [activeIndex, carouselItems, selectedLayer.data.node]);
+
+  // if (selectedLayer.data.node) {
+  //   console.log(
+  //     activeIndex,
+  //     selectedIndex,
+  //     diff(carouselItems[activeIndex]?.data.node, selectedLayer.data.node),
+  //   );
+  // }
+  // console.log(diff(carouselItems[selectedIndex]?.data.node, selectedLayer.data.node));
 
   return (
     <InspectorSection
@@ -134,12 +155,30 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
               items={carouselItems}
               selectedIndex={selectedIndex}
               onSelectItem={(index) => {
-                const item = carouselItems[index];
-                dispatch(
-                  'setLayerNode',
-                  selectedLayer.do_objectID,
-                  item.data.node,
-                );
+                // If still loading, delete the node.
+                // This handles the case where the user clicks on a layout that's loaded and
+                // then clicks on a layout that's still loading.
+                if (generatedLayout[index]?.loading) {
+                  dispatch('batch', [
+                    ['setLayerNode', selectedLayer.do_objectID, undefined],
+                    [
+                      'setLayerActiveGenerationIndex',
+                      selectedLayer.do_objectID,
+                      index,
+                    ],
+                  ]);
+                } else {
+                  const item = carouselItems[index];
+
+                  dispatch('batch', [
+                    ['setLayerNode', selectedLayer.do_objectID, item.data.node],
+                    [
+                      'setLayerActiveGenerationIndex',
+                      selectedLayer.do_objectID,
+                      index,
+                    ],
+                  ]);
+                }
               }}
               onHoverItemChange={(index, isHovering) => {
                 if (isHovering) {
@@ -159,6 +198,10 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       )}
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Current Layout</InspectorPrimitives.Title>
+        <Spacer.Horizontal />
+        {!selectedLayer.data.node && generatedLayout[activeIndex]?.loading && (
+          <ActivityIndicator size={13} />
+        )}
       </InspectorPrimitives.SectionHeader>
       {resolvedNode && resolvedNode.type !== 'noyaString' ? (
         <DSLayoutTree

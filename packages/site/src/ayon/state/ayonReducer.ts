@@ -1,8 +1,10 @@
 import { produce } from 'immer';
+import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import {
   CustomReducer,
   Layers,
+  ParentLayer,
   Selectors,
   interactionReducer,
 } from 'noya-state';
@@ -17,32 +19,48 @@ export type AyonAction =
       layerId: string,
       description: string | undefined,
     ]
+  | [
+      type: 'setLayerActiveGenerationIndex',
+      layerId: string,
+      activeGenerationIndex: number | undefined,
+    ]
   | [type: 'setLayerNode', layerId: string, node: NoyaNode | undefined];
 
-export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
+const ayonLayerReducer = (
+  layer: Sketch.CustomLayer<CustomLayerData>,
+  action: AyonAction,
+) => {
   switch (action[0]) {
     case 'setLayerNode': {
-      const [, id, node] = action;
+      const [, , node] = action;
 
-      const layerIndexPaths = Selectors.getLayerIndexPath(state, id);
-
-      if (!layerIndexPaths) return state;
-
-      const { pageIndex, indexPath } = layerIndexPaths;
-
-      return produce(state, (draft) => {
-        const draftLayer = Layers.access(
-          draft.sketch.pages[pageIndex],
-          indexPath,
-        );
-
-        if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
-
-        draftLayer.data.node = node;
+      return produce(layer, (draft) => {
+        draft.data.node = node;
       });
     }
     case 'setLayerDescription': {
-      const [, id, description] = action;
+      const [, , description] = action;
+
+      return produce(layer, (draft) => {
+        draft.data.description = description;
+      });
+    }
+    case 'setLayerActiveGenerationIndex': {
+      const [, , activeGenerationIndex] = action;
+
+      return produce(layer, (draft) => {
+        draft.data.activeGenerationIndex = activeGenerationIndex;
+      });
+    }
+  }
+};
+
+export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
+  switch (action[0]) {
+    case 'setLayerNode':
+    case 'setLayerDescription':
+    case 'setLayerActiveGenerationIndex': {
+      const [, id] = action;
 
       const layerIndexPaths = Selectors.getLayerIndexPath(state, id);
 
@@ -51,14 +69,17 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
       const { pageIndex, indexPath } = layerIndexPaths;
 
       return produce(state, (draft) => {
-        const draftLayer = Layers.access(
+        const parentPath = indexPath.slice(0, -1);
+        const index = indexPath[indexPath.length - 1];
+        const parentLayer = Layers.access(
           draft.sketch.pages[pageIndex],
-          indexPath,
-        );
+          parentPath,
+        ) as ParentLayer;
+        const childLayer = parentLayer.layers[index];
 
-        if (!Layers.isCustomLayer<CustomLayerData>(draftLayer)) return;
+        if (!Layers.isCustomLayer<CustomLayerData>(childLayer)) return;
 
-        draftLayer.data.description = description;
+        parentLayer.layers[index] = ayonLayerReducer(childLayer, action);
       });
     }
     case 'addDrawnLayer': {

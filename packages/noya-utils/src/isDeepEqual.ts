@@ -1,5 +1,5 @@
-import { isEqual } from './internal/isEqual';
+import { IsEqualOptions, isEqual } from './internal/isEqual';
 
-export function isDeepEqual<T>(a: T, b: T): boolean {
-  return isEqual(a, b, true, false);
+export function isDeepEqual<T>(a: T, b: T, options?: IsEqualOptions): boolean {
+  return isEqual(a, b, true, options);
 }

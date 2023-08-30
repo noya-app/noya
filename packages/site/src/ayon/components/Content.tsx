@@ -156,6 +156,7 @@ export const Content = memo(function Content({
   const { descriptions, loading: loadingDescriptions } =
     useGeneratedComponentDescriptions();
   const layouts = useManagedLayouts();
+
   const { images, loading: loadingImages } = useRandomImages();
 
   useEffect(() => {
@@ -249,10 +250,12 @@ export const Content = memo(function Content({
         layer.data.description,
       );
 
-      if (layouts[key] && layouts[key][0].loading) return;
+      const index = layer.data.activeGenerationIndex ?? 0;
 
-      if (layouts[key] && layouts[key][0]) {
-        dispatch('setLayerNode', layer.do_objectID, layouts[key][0].node);
+      if (layouts[key] && layouts[key][index].loading) return;
+
+      if (layouts[key] && layouts[key][index]) {
+        dispatch('setLayerNode', layer.do_objectID, layouts[key][index].node);
       } else {
         client.generate.componentLayouts({
           name: layer.name,
