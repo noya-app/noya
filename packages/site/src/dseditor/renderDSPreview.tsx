@@ -129,7 +129,11 @@ export function renderResolvedNode({
 
       if (element.componentID === tableSymbolId) return null;
 
-      const srcProp = element.props.find((prop) => prop.name === 'src');
+      const namedProps = Object.fromEntries(
+        element.props.map((prop) => [prop.name, prop]),
+      );
+      const srcProp = namedProps['src'];
+      const placeholderProp = namedProps['placeholder'];
 
       return (
         <PrimitiveComponent
@@ -146,6 +150,13 @@ export function renderResolvedNode({
             element.children[0]?.type === 'noyaString' && {
               value: element.children[0].value,
             })}
+          {...((element.componentID === textareaSymbolId ||
+            element.componentID === inputSymbolId) && {
+            placeholder:
+              placeholderProp && placeholderProp.type === 'string'
+                ? placeholderProp.value
+                : undefined,
+          })}
           {...(element.componentID === imageSymbolId && {
             // src: 'https://placehold.it/300x300',
             // src: 'https://picsum.photos/300/300',

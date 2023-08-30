@@ -93,6 +93,14 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
                 }),
               ]
             : []),
+          ...(elementName === 'Input' && node.attributes.placeholder
+            ? [
+                Model.stringProp({
+                  name: 'placeholder',
+                  value: node.attributes.placeholder,
+                }),
+              ]
+            : []),
         ],
       });
     },

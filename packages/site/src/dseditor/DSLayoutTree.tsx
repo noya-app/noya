@@ -609,42 +609,56 @@ export const DSLayoutRow = memo(function DSLayerRow({
         {node.type === 'noyaPrimitiveElement' &&
           node.props.length > 0 &&
           node.props.map((prop) => {
-            if (prop.type === 'generator') {
-              const name = prop.name === 'src' ? 'Source' : prop.name;
+            const name = prop.name === 'src' ? 'source' : prop.name;
 
-              return (
-                <InputField.Root
-                  labelPosition="end"
-                  labelSize={60}
-                  size="small"
-                >
-                  <InputField.Input
-                    value={prop.query}
-                    allowSubmittingWithSameValue
-                    submitAutomaticallyAfterDelay={300}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    onSubmit={(value) => {
-                      onChange(
-                        ResolvedHierarchy.replace(resolvedNode, {
-                          at: indexPath,
-                          node: {
-                            ...node,
-                            props: node.props.map((p) =>
+            return (
+              <InputField.Root labelPosition="end" labelSize={60} size="small">
+                <InputField.Input
+                  value={prop.type === 'generator' ? prop.query : prop.value}
+                  allowSubmittingWithSameValue
+                  submitAutomaticallyAfterDelay={
+                    prop.type === 'generator' ? 300 : 100
+                  }
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  onSubmit={(value) => {
+                    onChange(
+                      ResolvedHierarchy.replace(resolvedNode, {
+                        at: indexPath,
+                        node: {
+                          ...node,
+                          props: node.props.map((p) => {
+                            if (
                               p.name === prop.name &&
                               p.type === 'generator' &&
+                              prop.type === 'generator' &&
                               p.generator === prop.generator
-                                ? { ...p, query: value }
-                                : p,
-                            ),
-                          },
-                        }),
-                      );
-                    }}
-                  />
-                  <InputField.Label>{name} (random)&nbsp;</InputField.Label>
+                            ) {
+                              return { ...p, query: value };
+                            }
+
+                            if (
+                              p.name === prop.name &&
+                              p.type === 'string' &&
+                              prop.type === 'string'
+                            ) {
+                              return { ...p, value };
+                            }
+
+                            return p;
+                          }),
+                        },
+                      }),
+                    );
+                  }}
+                />
+                <InputField.Label>
+                  {name}
+                  {prop.type === 'generator' ? ` (random)\u00A0` : ''}
+                </InputField.Label>
+                {prop.type === 'generator' && (
                   <InputField.DropdownMenu
                     items={[{ value: 'shuffle', title: 'Shuffle Image' }]}
                     onSelect={(value) => {
@@ -729,11 +743,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
                       )}
                     </div>
                   </InputField.DropdownMenu>
-                </InputField.Root>
-              );
-            }
-
-            return null;
+                )}
+              </InputField.Root>
+            );
           })}
       </Stack.V>
     </TreeView.Row>
