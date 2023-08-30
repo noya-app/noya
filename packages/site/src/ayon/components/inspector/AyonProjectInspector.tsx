@@ -170,8 +170,20 @@ export function AyonProjectInspector({
                     subtitle={`${width}×${height}`}
                     onClick={() => {
                       dispatch('batch', [
-                        ['setLayerWidth', artboard.do_objectID, width],
-                        ['setLayerHeight', artboard.do_objectID, height],
+                        [
+                          'setLayerWidth',
+                          artboard.do_objectID,
+                          width,
+                          'replace',
+                          'scale',
+                        ],
+                        [
+                          'setLayerHeight',
+                          artboard.do_objectID,
+                          height,
+                          'replace',
+                          'translate',
+                        ],
                         [
                           'zoomToFit*',
                           { type: 'layer', value: artboard.do_objectID },

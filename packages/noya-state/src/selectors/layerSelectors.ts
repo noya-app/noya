@@ -476,6 +476,9 @@ export function removeLayer(state: ApplicationState, id: string | string[]) {
 export function resizeLayerFrame<T extends Sketch.AnyLayer>(
   layer: T,
   rect: Rect,
+  options?: {
+    resizeArtboardBehavior: 'translate' | 'scale';
+  },
 ): T {
   const originalFrame = layer.frame;
   const newFrame = normalizeRect(rect);
@@ -487,7 +490,11 @@ export function resizeLayerFrame<T extends Sketch.AnyLayer>(
     };
 
     // When a group is resized, we scale its children
-    if (Layers.isGroup(draft)) {
+    if (
+      Layers.isGroup(draft) ||
+      (Layers.isSymbolMasterOrArtboard(draft) &&
+        options?.resizeArtboardBehavior === 'scale')
+    ) {
       const scaleTransform = AffineTransform.scale(
         newFrame.width / originalFrame.width,
         newFrame.height / originalFrame.height,
@@ -502,7 +509,10 @@ export function resizeLayerFrame<T extends Sketch.AnyLayer>(
     }
 
     // When an artboard is resized, we preserve the visual translation of its children
-    if (Layers.isSymbolMasterOrArtboard(draft)) {
+    if (
+      Layers.isSymbolMasterOrArtboard(draft) &&
+      options?.resizeArtboardBehavior !== 'scale'
+    ) {
       const translationTransform = AffineTransform.translate(
         originalFrame.x - newFrame.x,
         originalFrame.y - newFrame.y,

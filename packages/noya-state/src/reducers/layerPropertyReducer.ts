@@ -36,12 +36,14 @@ export type LayerPropertyAction =
       layerId: string | string[] | undefined,
       value: number,
       mode?: SetNumberMode,
+      resizeArtboardBehavior?: 'scale' | 'translate',
     ]
   | [
       type: 'setLayerHeight',
       layerId: string | string[] | undefined,
       value: number,
       mode?: SetNumberMode,
+      resizeArtboardBehavior?: 'scale' | 'translate',
     ]
   | [type: 'setLayerRotation', value: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
@@ -246,7 +248,13 @@ export function layerPropertyReducer(
     }
     case 'setLayerWidth':
     case 'setLayerHeight': {
-      const [type, id, amount, mode = 'replace'] = action;
+      const [
+        type,
+        id,
+        amount,
+        mode = 'replace',
+        resizeArtboardBehavior = 'translate',
+      ] = action;
       const { pageIndex, indexPaths } = getTargetIndexPaths(id);
 
       const property =
@@ -276,7 +284,9 @@ export function layerPropertyReducer(
             }),
           };
 
-          const newLayer = resizeLayerFrame(draftLayer, newFrame);
+          const newLayer = resizeLayerFrame(draftLayer, newFrame, {
+            resizeArtboardBehavior,
+          });
 
           Layers.assign(draftPage, indexPath, newLayer);
 
