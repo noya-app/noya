@@ -22,7 +22,7 @@ import {
 } from 'noya-react-utils';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
+import { Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { debounce } from 'noya-utils';
 import React, {
@@ -34,7 +34,6 @@ import React, {
   useState,
 } from 'react';
 import styled from 'styled-components';
-import { useOnboarding } from '../../contexts/OnboardingContext';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { ElementHierarchy } from '../../dseditor/traversal';
 import { NoyaNode } from '../../dseditor/types';
@@ -49,7 +48,6 @@ import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { useManagedLayouts } from './GeneratedLayoutContext';
-import { DrawingWidget, MultipleSelectionWidget, Widget } from './Widget';
 import { AyonInspector } from './inspector/AyonInspector';
 
 const Overlay = styled.div({
@@ -94,7 +92,7 @@ export const Content = memo(function Content({
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
   );
-  const { onboardingStep, setOnboardingStep } = useOnboarding();
+  // const { onboardingStep, setOnboardingStep } = useOnboarding();
   const CanvasKit = useCanvasKit();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
@@ -376,88 +374,88 @@ export const Content = memo(function Content({
                     Interactions.defaultCursor,
                   ]
             }
-            widgets={
-              viewType !== 'previewOnly' && (
-                <>
-                  {layers
-                    .filter(
-                      // TODO: put this back
-                      (layer) => false,
-                    )
-                    .map((layer) => (
-                      <Widget
-                        key={layer.do_objectID}
-                        layer={layer}
-                        showToolbar={!isPlayground}
-                        setOverriddenBlock={(blockContent) => {
-                          if (blockContent) {
-                            // setOverriddenBlock({
-                            //   layerId: layer.do_objectID,
-                            //   blockContent,
-                            // });
-                          } else {
-                            setOverriddenBlock(undefined);
-                          }
-                        }}
-                        onChangeBlockType={(type: DrawableLayerType) => {
-                          if (typeof type === 'string') return;
+            // widgets={
+            //   viewType !== 'previewOnly' && (
+            //     <>
+            //       {layers
+            //         .filter(
+            //           // TODO: put this back
+            //           (layer) => false,
+            //         )
+            //         .map((layer) => (
+            //           <Widget
+            //             key={layer.do_objectID}
+            //             layer={layer}
+            //             showToolbar={!isPlayground}
+            //             setOverriddenBlock={(blockContent) => {
+            //               if (blockContent) {
+            //                 // setOverriddenBlock({
+            //                 //   layerId: layer.do_objectID,
+            //                 //   blockContent,
+            //                 // });
+            //               } else {
+            //                 setOverriddenBlock(undefined);
+            //               }
+            //             }}
+            //             onChangeBlockType={(type: DrawableLayerType) => {
+            //               if (typeof type === 'string') return;
 
-                          if (onboardingStep === 'insertedBlock') {
-                            setOnboardingStep?.('configuredBlockType');
-                          }
+            //               if (onboardingStep === 'insertedBlock') {
+            //                 setOnboardingStep?.('configuredBlockType');
+            //               }
 
-                          amplitude.logEvent('Project - Block - Changed Type', {
-                            'Old Block Type': layer.symbolID,
-                            'New Block Type': type.symbolId,
-                            X: layer.frame.x,
-                            Y: layer.frame.y,
-                            Width: layer.frame.width,
-                            Height: layer.frame.height,
-                          });
+            //               amplitude.logEvent('Project - Block - Changed Type', {
+            //                 'Old Block Type': layer.symbolID,
+            //                 'New Block Type': type.symbolId,
+            //                 X: layer.frame.x,
+            //                 Y: layer.frame.y,
+            //                 Width: layer.frame.width,
+            //                 Height: layer.frame.height,
+            //               });
 
-                          dispatch(
-                            'setSymbolInstanceSource',
-                            type.symbolId,
-                            'preserveCurrent',
-                          );
-                        }}
-                        onChangeBlockContent={(content: BlockContent) => {
-                          // const nextBlock =
-                          //   Blocks[content.symbolId ?? layer.symbolID];
-                          // const contentWithNormalizedText: BlockContent = {
-                          //   ...content,
-                          //   normalizedText:
-                          //     content.blockText ?? nextBlock.placeholderText,
-                          // };
-                          // dispatch('batch', [
-                          //   [
-                          //     'setBlockContent',
-                          //     layer.do_objectID,
-                          //     contentWithNormalizedText,
-                          //   ],
-                          //   ...(contentWithNormalizedText.blockText !== ''
-                          //     ? [
-                          //         [
-                          //           'setSymbolIdIsFixed',
-                          //           layer.do_objectID,
-                          //           true,
-                          //         ] as Action,
-                          //       ]
-                          //     : []),
-                          // ]);
-                        }}
-                        uploadAsset={uploadAsset}
-                      />
-                    ))}
-                  {state.interactionState.type === 'drawing' && (
-                    <DrawingWidget />
-                  )}
-                  {state.selectedLayerIds.length >= 2 && (
-                    <MultipleSelectionWidget />
-                  )}
-                </>
-              )
-            }
+            //               dispatch(
+            //                 'setSymbolInstanceSource',
+            //                 type.symbolId,
+            //                 'preserveCurrent',
+            //               );
+            //             }}
+            //             onChangeBlockContent={(content: BlockContent) => {
+            //               // const nextBlock =
+            //               //   Blocks[content.symbolId ?? layer.symbolID];
+            //               // const contentWithNormalizedText: BlockContent = {
+            //               //   ...content,
+            //               //   normalizedText:
+            //               //     content.blockText ?? nextBlock.placeholderText,
+            //               // };
+            //               // dispatch('batch', [
+            //               //   [
+            //               //     'setBlockContent',
+            //               //     layer.do_objectID,
+            //               //     contentWithNormalizedText,
+            //               //   ],
+            //               //   ...(contentWithNormalizedText.blockText !== ''
+            //               //     ? [
+            //               //         [
+            //               //           'setSymbolIdIsFixed',
+            //               //           layer.do_objectID,
+            //               //           true,
+            //               //         ] as Action,
+            //               //       ]
+            //               //     : []),
+            //               // ]);
+            //             }}
+            //             uploadAsset={uploadAsset}
+            //           />
+            //         ))}
+            //       {state.interactionState.type === 'drawing' && (
+            //         <DrawingWidget />
+            //       )}
+            //       {state.selectedLayerIds.length >= 2 && (
+            //         <MultipleSelectionWidget />
+            //       )}
+            //     </>
+            //   )
+            // }
           >
             {({ size }) =>
               viewType !== 'previewOnly' && (

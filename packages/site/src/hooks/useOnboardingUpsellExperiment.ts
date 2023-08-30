@@ -9,6 +9,7 @@ import {
   findSubscribedProduct,
   isProfessionalPlan,
 } from '../components/Subscription';
+import { NOYA_HOST } from '../utils/noyaClient';
 
 export function useIsSubscribed() {
   const { subscriptions, availableProducts, loading } = useNoyaBilling();
@@ -30,7 +31,8 @@ export function useOnboardingUpsell({ onShow }: { onShow: () => void }) {
   const isSubscribed = useIsSubscribed();
 
   const didShowOnboardingUpsell =
-    useMetadata<boolean>('didShowOnboardingUpsell') === true;
+    useMetadata<boolean>('didShowOnboardingUpsell') === true ||
+    NOYA_HOST?.includes('localhost');
 
   useEffect(() => {
     if (!userData || isSubscribed || didShowOnboardingUpsell) {

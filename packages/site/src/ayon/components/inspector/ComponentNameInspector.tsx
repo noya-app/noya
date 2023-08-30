@@ -47,11 +47,11 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
           icon: p.icon,
         })),
       ]),
-      { type: 'sectionHeader', id: 'create-new', name: 'Create New' },
+      { type: 'sectionHeader', id: 'create-new', name: 'Create with AI' },
       ...(customName && customName !== name
         ? [{ id: 'custom', name: customName, alwaysInclude: true }]
         : []),
-      { type: 'sectionHeader', id: 'generated', name: 'AI Generated' },
+      { type: 'sectionHeader', id: 'generated', name: 'Other Suggestions' },
       ...names.map(
         ({ name }): CompletionItem => ({ id: name, name, alwaysInclude: true }),
       ),
