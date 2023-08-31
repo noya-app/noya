@@ -1,16 +1,12 @@
 import React from 'react';
-import { parametersToTailwindStyle } from '../../tailwind/tailwind';
+import { resolveTailwindClass } from '../../tailwind/tailwind';
 
 export function HashtagIcon({ item }: { item: string }) {
-  const resolvedStyle = parametersToTailwindStyle({
-    [item]: true,
-  });
+  let resolvedStyle = resolveTailwindClass(item.replace('fill', 'bg'));
 
   return (
     <div
       style={{
-        width: 19,
-        height: 19,
         borderWidth: /^border(?!-\d)/.test(item) ? 1 : undefined,
         background: /^rounded/.test(item)
           ? 'rgb(148 163 184)'
@@ -18,8 +14,11 @@ export function HashtagIcon({ item }: { item: string }) {
           ? 'black'
           : undefined,
         ...resolvedStyle,
+        padding: 0,
+        margin: 0,
+        width: 19,
+        height: 19,
       }}
-      className={/^(p\w?-|m\w?-)/.test(item) ? undefined : item}
     >
       {/^(text|font)/.test(item) ? 'Tt' : null}
     </div>
