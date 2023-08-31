@@ -245,7 +245,7 @@ const GridViewItem = forwardRef(function GridViewItem<
           <ItemDescription>{subtitle || ' '}</ItemDescription>
         </>
       )}
-      {textPosition === 'overlay' && hovered && (
+      {textPosition === 'overlay' && hovered && (title || subtitle) && (
         <TextOverlay>
           <ItemTitle showBackground={true}>{title}</ItemTitle>
           <ItemDescription>{subtitle}</ItemDescription>

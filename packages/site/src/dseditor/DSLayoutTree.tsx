@@ -505,6 +505,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
             padding="4px 6px"
             alignItems="center"
             zIndex={isEditing ? 1 : undefined}
+            gap="4px"
           >
             {isEditing ? (
               <TreeView.EditableRowTitle
@@ -522,7 +523,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 autoFocus
               />
             ) : (
-              <TreeView.RowTitle>{name}</TreeView.RowTitle>
+              <TreeView.RowTitle style={{ width: 0 }}>{name}</TreeView.RowTitle>
             )}
             {node.type === 'noyaPrimitiveElement' ? (
               <Chip
