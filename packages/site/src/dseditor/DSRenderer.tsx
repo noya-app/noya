@@ -66,6 +66,7 @@ type Props = {
   setHighlightedPath?: (path: string[] | undefined) => void;
   onBeforeInput?: (event: InputEvent) => void;
   onReady?: () => void;
+  sync?: boolean;
 };
 
 export const DSRenderer = forwardRef(function DSRenderer(
@@ -78,6 +79,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     setHighlightedPath,
     onBeforeInput,
     onReady,
+    sync = true,
   }: Props,
   forwardedRef: React.ForwardedRef<IDSRenderer>,
 ) {
@@ -165,7 +167,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     lock.current = true;
 
     // Render sync since we update the selection right after
-    root.render(withProvider, { sync: true });
+    root.render(withProvider, { sync });
 
     setDOMSelection(
       iframe.contentWindow!,
@@ -174,7 +176,16 @@ export const DSRenderer = forwardRef(function DSRenderer(
     );
 
     lock.current = false;
-  }, [theme, renderContent, root, system, primary, serializedSelection, ready]);
+  }, [
+    theme,
+    renderContent,
+    root,
+    system,
+    primary,
+    serializedSelection,
+    ready,
+    sync,
+  ]);
 
   useEffect(() => {
     if (!ready || !ref.current) return;

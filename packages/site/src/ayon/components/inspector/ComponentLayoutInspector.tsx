@@ -78,14 +78,22 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     return generatedLayout.map((layout, index) => {
       return {
         id: index.toString(),
-        size: selectedLayer.frame,
+        size: {
+          width: selectedLayer.frame.width,
+          height: selectedLayer.frame.height,
+        },
         data: {
           description: selectedLayer.data.description,
           node: layout.node,
         },
       };
     });
-  }, [generatedLayout, selectedLayer.data.description, selectedLayer.frame]);
+  }, [
+    generatedLayout,
+    selectedLayer.data.description,
+    selectedLayer.frame.width,
+    selectedLayer.frame.height,
+  ]);
 
   const resolvedNode = useMemo(() => {
     if (!node) return;
