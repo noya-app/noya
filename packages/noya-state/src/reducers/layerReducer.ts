@@ -71,7 +71,13 @@ export type LayerAction =
   | [type: 'createSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
-  | [type: 'duplicateLayer', ids: string[]]
+  | [
+      type: 'duplicateLayer',
+      ids: string[],
+      options?: {
+        incrementName?: boolean;
+      },
+    ]
   | [
       type: 'addLayer',
       data: Sketch.AnyLayer | Sketch.AnyLayer[],
@@ -486,7 +492,7 @@ export function layerReducer(
       });
     }
     case 'duplicateLayer': {
-      const [, id] = action;
+      const [, id, options] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
@@ -535,7 +541,7 @@ export function layerReducer(
 
           const copiedLayers = childIndexes
             .map((index) => originalParent.layers[index])
-            .map(copyLayer);
+            .map((l) => copyLayer(l, options));
 
           // Insert "above" the original in the layer list
           draftParent.layers.splice(lastIndex + 1, 0, ...copiedLayers);
@@ -717,9 +723,14 @@ export function layerReducer(
   }
 }
 
-function copyLayer(targetLayer: PageLayer) {
+function copyLayer(
+  targetLayer: PageLayer,
+  options?: { incrementName?: boolean },
+) {
   return produce(targetLayer, (draft) => {
-    draft.name = draft.name + ' Copy';
+    if (options?.incrementName !== false) {
+      draft.name = draft.name + ' Copy';
+    }
 
     Layers.visit(draft, (layer) => {
       layer.do_objectID = uuid();

@@ -4,9 +4,9 @@ import {
   useWorkspace,
 } from 'noya-app-state-context';
 import {
+  ReactEventHandlers,
   createSectionedMenu,
   mergeEventHandlers,
-  ReactEventHandlers,
   usePlatform,
   usePlatformModKey,
 } from 'noya-designsystem';
@@ -17,15 +17,15 @@ import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   CompassDirection,
-  getCurrentPage,
   InteractionState,
-  Layers,
   LayerTraversalOptions,
+  Layers,
   Selectors,
   SetNumberMode,
   TextEditorCursorDirection,
   TextEditorCursorUnit,
   TextSelectionRange,
+  getCurrentPage,
 } from 'noya-state';
 import { CSSProperties, useMemo } from 'react';
 import { ZERO_INSETS } from '../components/CanvasElement';
@@ -192,13 +192,16 @@ export function useInteractionHandlers({
         dispatch('interaction', ['enableSelectionMode', method]),
       bringToFront: (id: string[]) => dispatch('bringToFront', id),
       sendToBack: (id: string[]) => dispatch('sendToBack', id),
-      duplicateLayer: (id: string[]) => dispatch('duplicateLayer', id),
+      duplicateLayer: (id: string[]) =>
+        dispatch('duplicateLayer', id, {
+          incrementName: false,
+        }),
       moveLayersIntoParentAtPoint: (point) =>
         dispatch('moveLayersIntoParentAtPoint', point),
       setCursor: (cursor: CSSProperties['cursor'] | undefined) =>
         dispatch('interaction', ['setCursor', cursor]),
       duplicateAndUpdateMoving: (ids, point, inferBlockType) => {
-        dispatch('duplicateLayer', ids);
+        dispatch('duplicateLayer', ids, { incrementName: false });
         dispatch('interaction', ['reset']);
         dispatch('interaction', ['maybeMove', point]);
         dispatch('interaction', ['updateMoving', point, inferBlockType]);
