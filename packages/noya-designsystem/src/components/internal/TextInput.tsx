@@ -32,7 +32,7 @@ type Props = {
   onBlur?: FocusEventHandler;
 } & Pick<
   InputHTMLAttributes<HTMLInputElement>,
-  'autoComplete' | 'autoCapitalize' | 'autoCorrect' | 'spellCheck'
+  'autoComplete' | 'autoCapitalize' | 'autoCorrect' | 'spellCheck' | 'autoFocus'
 >;
 
 type ReadOnlyProps = Props & {

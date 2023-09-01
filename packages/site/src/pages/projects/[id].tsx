@@ -7,7 +7,6 @@ import {
   Divider,
   Spacer,
   Stack,
-  Text,
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -18,6 +17,7 @@ import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
 import React, {
   ReactNode,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -29,6 +29,7 @@ import {
   usageMeterThreshold,
 } from '../../components/Subscription';
 
+import { EditableText } from '../../components/EditableText';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { Toolbar } from '../../components/Toolbar';
 import { UpgradeDialog } from '../../components/UpgradeDialog';
@@ -49,9 +50,14 @@ const Ayon = dynamic(
   { ssr: false },
 );
 
-function FileTitle({ id }: { id: string }) {
+const FileTitle = memo(function FileTitle({ fileId }: { fileId: string }) {
+  const client = useNoyaClient();
   const { files } = useNoyaFiles();
-  const cachedFile = files.find((file) => file.id === id);
+  const cachedFile = files.find((file) => file.id === fileId);
+  const handleChange = useCallback(
+    (value: string) => client.files.updateFileName(fileId, value),
+    [client.files, fileId],
+  );
 
   if (!cachedFile) return null;
 
@@ -59,12 +65,16 @@ function FileTitle({ id }: { id: string }) {
     <Stack.H lineHeight="1" alignItems="center" justifyContent="center">
       <ProjectTypeIcon type={cachedFile.data.type} />
       <Spacer.Horizontal size={6} />
-      <Text position="relative" top="1px" variant="small">
-        {cachedFile.data.name || 'Untitled'}
-      </Text>
+      <Stack.H position="relative" top="1px">
+        <EditableText
+          value={cachedFile.data.name}
+          placeholder="Untitled"
+          onChange={handleChange}
+        />
+      </Stack.H>
     </Stack.H>
   );
-}
+});
 
 function FileEditor({ fileId }: { fileId: string }) {
   const router = useRouter();
@@ -239,7 +249,7 @@ function Content({ fileId }: { fileId: string }) {
               )
             }
           >
-            {centerToolbar || <FileTitle id={fileId} />}
+            {centerToolbar || <FileTitle fileId={fileId} />}
           </Toolbar>
           <Divider variant="strong" />
           <FileEditor fileId={fileId} />
