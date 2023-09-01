@@ -5,24 +5,29 @@ import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Path } from '../ComponentsContext';
-import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useZoom } from '../ZoomContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 
 export const RotatedBoundingRect = memo(function RotatedBoundingRect({
   layerId,
+  strokeColor: strokeColorProp,
+  strokeWidth: strokeWidthProp,
 }: {
   layerId: string;
+  strokeColor?: string;
+  strokeWidth?: number;
 }) {
   const CanvasKit = useCanvasKit();
   const [state] = useApplicationState();
   const {
     canvas: { selectionStroke },
   } = useTheme().colors;
+  const strokeColor = strokeColorProp || selectionStroke;
   const zoom = useZoom();
 
-  const strokeWidth = 2 / zoom;
+  const strokeWidth = (strokeWidthProp ?? 2) / zoom;
   const paint = useFill({
-    color: selectionStroke,
+    color: strokeColor,
     strokeWidth,
   });
 

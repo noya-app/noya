@@ -9,18 +9,20 @@ import { useZoom } from '../ZoomContext';
 
 export const BoundingRect = memo(function BoundingRect({
   rect,
+  strokeColor: strokeColorProp,
 }: {
   rect: Rect;
+  strokeColor?: string;
 }) {
   const {
     canvas: { selectionStroke },
   } = useTheme().colors;
   const zoom = useZoom();
-
+  const strokeColor = strokeColorProp || selectionStroke;
   const strokeWidth = 1 / zoom;
 
   const paint = useStroke({
-    color: selectionStroke,
+    color: strokeColor,
     strokeWidth,
   });
 

@@ -1,5 +1,6 @@
 import { DS, useNoyaClient } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
+import { lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Size, createResizeTransform, transformRect } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
@@ -268,7 +269,7 @@ const DOMRendererContent = memo(
                       layer.do_objectID === highlightedNodePath.layerId
                         ? highlightedNodePath.path
                         : undefined,
-                    selectionOutlineColor: 'blue',
+                    selectionOutlineColor: lightTheme.colors.primary,
                   });
 
                   return (

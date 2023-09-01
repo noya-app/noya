@@ -28,6 +28,7 @@ import { BoundingRect } from './BoundingRect';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
+import { FloatingBubbleLabel } from './FloatingBubbleLabel';
 import GradientEditor from './GradientEditor';
 import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
@@ -333,7 +334,9 @@ const DesignBoundingRect = memo(function DesignBoundingRect() {
   const interactionState = state.interactionState;
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
   const isEditingText = Selectors.getIsEditingText(interactionState.type);
+  const isEditingBlock = interactionState.type === 'editingBlock';
   const boundingRect = useBoundingRect();
+  const { secondary } = useTheme().colors;
 
   if (
     renderingMode !== 'interactive' ||
@@ -351,12 +354,26 @@ const DesignBoundingRect = memo(function DesignBoundingRect() {
     return <></>;
   }
 
+  const strokeColor = isEditingBlock ? secondary : undefined;
+
   return (
     <Group transform={canvasTransform}>
-      <BoundingRect rect={boundingRect} />
+      {isEditingBlock && boundingRect && (
+        <FloatingBubbleLabel
+          rect={boundingRect}
+          text="Editing Text"
+          color={strokeColor}
+        />
+      )}
+      <BoundingRect rect={boundingRect} strokeColor={strokeColor} />
       {!isEditingText &&
         state.selectedLayerIds.map((layerId) => (
-          <RotatedBoundingRect key={layerId} layerId={layerId} />
+          <RotatedBoundingRect
+            key={layerId}
+            layerId={layerId}
+            strokeColor={strokeColor}
+            strokeWidth={isEditingBlock ? 4 : undefined}
+          />
         ))}
     </Group>
   );
