@@ -8,6 +8,7 @@ import {
   Selectors,
   interactionReducer,
 } from 'noya-state';
+import { enforceSchema } from '../../dseditor/layoutSchema';
 import { primitiveElements } from '../../dseditor/primitiveElements';
 import { NoyaNode } from '../../dseditor/types';
 import { boxSymbolId } from '../symbols/symbolIds';
@@ -35,7 +36,7 @@ const ayonLayerReducer = (
       const [, , node] = action;
 
       return produce(layer, (draft) => {
-        draft.data.node = node;
+        draft.data.node = node ? enforceSchema(node) : undefined;
       });
     }
     case 'setLayerDescription': {

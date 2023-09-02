@@ -4,9 +4,9 @@ import { NoyaAPI, useNoyaClient } from 'noya-api';
 import React, { memo } from 'react';
 import { parseLayout } from '../../dseditor/componentLayout';
 import { ElementHierarchy } from '../../dseditor/traversal';
-import { NoyaElement, NoyaNode } from '../../dseditor/types';
+import { NoyaNode } from '../../dseditor/types';
 
-function findAllQueries(root: NoyaElement) {
+function findAllQueries(root: NoyaNode) {
   return ElementHierarchy.flatMap(root, (node) => {
     if (node.type !== 'noyaPrimitiveElement') return [];
 
@@ -19,7 +19,7 @@ function findAllQueries(root: NoyaElement) {
 }
 
 function replaceAllImages(
-  root: NoyaElement,
+  root: NoyaNode,
   images: Record<string, NoyaAPI.RandomImageResponse>,
 ) {
   return ElementHierarchy.map<NoyaNode>(root, (node, transformedChildren) => {
@@ -77,13 +77,13 @@ class GeneratedLayoutManager {
     return Object.fromEntries(
       Object.entries(layouts).map(([key, layouts]) => [
         key,
-        layouts.map((element, index) => {
-          const queries = findAllQueries(element);
+        layouts.map((node, index) => {
+          const queries = findAllQueries(node);
           const layoutLoading = layoutsLoading[key]?.[index];
           const imagesLoading = queries.some((query) => !images[query]);
 
           return {
-            node: replaceAllImages(element, images),
+            node: replaceAllImages(node, images),
             loading: layoutLoading || imagesLoading,
           };
         }),

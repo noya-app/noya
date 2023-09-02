@@ -1,7 +1,7 @@
 import { memoize } from 'noya-utils';
 import { Model } from './builders';
 import { PRIMITIVE_TAG_MAP } from './primitiveElements';
-import { NoyaElement, NoyaNode } from './types';
+import { NoyaNode } from './types';
 
 import {
   LayoutHierarchy,
@@ -9,6 +9,7 @@ import {
   parseComponentLayout,
 } from 'noya-compiler';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
+import { enforceSchema } from './layoutSchema';
 import { rewriteLayout } from './rewriteLayout';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([
@@ -62,7 +63,7 @@ function rewriteImageAlt(string: string) {
   );
 }
 
-function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
+function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
   const result = LayoutHierarchy.map<NoyaNode>(
     layout,
     (node, transformedChildren) => {
@@ -116,5 +117,5 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaElement {
 export const parseLayout = memoize(function parseLayout(html: string) {
   let layout = parseComponentLayout(html);
   layout = rewriteLayout(layout);
-  return convertLayoutToComponent(layout);
+  return enforceSchema(convertLayoutToComponent(layout));
 });

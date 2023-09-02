@@ -34,21 +34,31 @@ import {
 import { Model } from './builders';
 import { NoyaPrimitiveElement } from './types';
 
+export type PrimitiveElementSchema = {
+  children: 'none' | 'stringOrNodes' | 'nodes';
+};
+
 export type PrimitiveElementMetadata = {
   id: string;
   name: string;
   aliases?: string[];
   icon?: ReactNode;
-  // textEditing?: boolean;
+  schema: PrimitiveElementSchema;
   initialValue?: () => NoyaPrimitiveElement;
 };
 
 export const primitiveElements: PrimitiveElementMetadata[] = [
-  { id: avatarSymbolId, name: 'Avatar', icon: <AvatarIcon /> },
+  {
+    id: avatarSymbolId,
+    name: 'Avatar',
+    icon: <AvatarIcon />,
+    schema: { children: 'none' },
+  },
   {
     id: boxSymbolId,
     name: 'Box',
     icon: <BoxIcon />,
+    schema: { children: 'nodes' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Box',
@@ -60,7 +70,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: buttonSymbolId,
     name: 'Button',
     icon: <ButtonIcon />,
-    // textEditing: true,
+    schema: { children: 'stringOrNodes' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Button',
@@ -73,7 +83,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: checkboxSymbolId,
     name: 'Checkbox',
     icon: <CheckboxIcon />,
-    // textEditing: true,
+    schema: { children: 'stringOrNodes' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Checkbox',
@@ -86,14 +96,20 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: imageSymbolId,
     name: 'Image',
     icon: <ImageIcon />,
+    schema: { children: 'none' },
     aliases: ['Photo', 'Picture'],
   },
-  { id: inputSymbolId, name: 'Input', icon: <InputIcon /> },
+  {
+    id: inputSymbolId,
+    name: 'Input',
+    icon: <InputIcon />,
+    schema: { children: 'none' },
+  },
   {
     id: linkSymbolId,
     name: 'Link',
     icon: <Link1Icon />,
-    // textEditing: true,
+    schema: { children: 'stringOrNodes' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Link',
@@ -106,7 +122,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: radioSymbolId,
     name: 'Radio',
     icon: <RadiobuttonIcon />,
-
+    schema: { children: 'stringOrNodes' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Radio',
@@ -120,6 +136,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Select',
     icon: <DropdownMenuIcon />,
     aliases: ['Dropdown'],
+    schema: { children: 'none' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Select',
@@ -138,20 +155,28 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: selectOptionSymbolId,
     name: 'Option',
     icon: <DropdownMenuIcon />,
+    schema: { children: 'none' },
     aliases: ['Select Option', 'Dropdown Option'],
   },
   {
     id: switchSymbolId,
     name: 'Switch',
     icon: <SwitchIcon />,
+    schema: { children: 'none' },
     aliases: ['Toggle'],
   },
-  { id: tableSymbolId, name: 'Table', icon: <TableIcon /> },
+  {
+    id: tableSymbolId,
+    name: 'Table',
+    icon: <TableIcon />,
+    schema: { children: 'none' },
+  },
   {
     id: tagSymbolId,
     name: 'Tag',
     icon: <BadgeIcon />,
     aliases: ['Badge', 'Chip'],
+    schema: { children: 'stringOrNodes' },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Tag',
@@ -160,9 +185,23 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         children: [Model.string('Tag')],
       }),
   },
-  { id: textSymbolId, name: 'Text', icon: <TextIcon />, aliases: ['Label'] },
-  { id: textareaSymbolId, name: 'Textarea', icon: <InputIcon /> },
+  {
+    id: textSymbolId,
+    name: 'Text',
+    icon: <TextIcon />,
+    aliases: ['Label'],
+    schema: { children: 'stringOrNodes' },
+  },
+  {
+    id: textareaSymbolId,
+    name: 'Textarea',
+    icon: <InputIcon />,
+    schema: { children: 'none' },
+  },
 ];
+
+export const PRIMITIVE_ELEMENT_MAP: Record<string, PrimitiveElementMetadata> =
+  Object.fromEntries(primitiveElements.map((element) => [element.id, element]));
 
 export const PRIMITIVE_ELEMENT_NAMES: Record<string, string> =
   Object.fromEntries(
