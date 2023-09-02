@@ -8,7 +8,7 @@ import {
   withSeparatorElements,
 } from 'noya-designsystem';
 import { range } from 'noya-utils';
-import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import React, { ReactNode, memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -147,6 +147,7 @@ export const ArrayController = memo(function ArrayController<Item>({
                   {renderRow(index)}
                   {relativeDropPosition && (
                     <ListView.DragIndicator
+                      colorScheme="primary"
                       relativeDropPosition={relativeDropPosition}
                       offsetLeft={0}
                     />

@@ -55,6 +55,7 @@ export default function HoverOutline({ layer, transform }: Props) {
   let element: ReactNode;
 
   switch (layer._class) {
+    case 'customLayer':
     case 'artboard':
     case 'bitmap':
     case 'group':
@@ -76,10 +77,6 @@ export default function HoverOutline({ layer, transform }: Props) {
       break;
     }
     default:
-      if (layer._class !== 'customLayer') {
-        console.info(layer._class, 'not handled');
-      }
-
       element = null;
       break;
   }

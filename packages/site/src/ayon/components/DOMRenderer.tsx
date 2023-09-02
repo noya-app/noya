@@ -269,7 +269,7 @@ const DOMRendererContent = memo(
                       layer.do_objectID === highlightedNodePath.layerId
                         ? highlightedNodePath.path
                         : undefined,
-                    selectionOutlineColor: lightTheme.colors.primary,
+                    selectionOutlineColor: lightTheme.colors.secondary,
                   });
 
                   return (

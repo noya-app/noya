@@ -90,6 +90,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       data={flattened}
       expandable={false}
       variant="bare"
+      colorScheme="secondary"
       indentation={24}
       sortable
       pressEventName="onPointerDown"

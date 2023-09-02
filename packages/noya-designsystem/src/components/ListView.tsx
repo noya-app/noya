@@ -38,6 +38,8 @@ export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 const ROW_HEIGHT = 31;
 const SECTION_HEADER_LABEL_HEIGHT = 27;
 
+type ListColorScheme = 'primary' | 'secondary';
+
 type PressEventName = 'onClick' | 'onPointerDown';
 
 type ListRowContextValue = {
@@ -51,6 +53,7 @@ type ListRowContextValue = {
   indentation: number;
   pressEventName: PressEventName;
   isSectionHeader: boolean;
+  colorScheme: ListColorScheme;
 };
 
 const ListRowContext = createContext<ListRowContextValue>({
@@ -64,6 +67,7 @@ const ListRowContext = createContext<ListRowContextValue>({
   indentation: 12,
   pressEventName: 'onClick',
   isSectionHeader: false,
+  colorScheme: 'primary',
 });
 
 /* ----------------------------------------------------------------------------
@@ -150,6 +154,7 @@ const RowContainer = styled.div<{
   isSectionHeader: boolean;
   showsActiveState: boolean;
   sectionHeaderVariant: ListViewSectionHeaderVariant;
+  colorScheme: ListColorScheme;
 }>(
   ({
     theme,
@@ -163,6 +168,7 @@ const RowContainer = styled.div<{
     isSectionHeader,
     showsActiveState,
     sectionHeaderVariant,
+    colorScheme,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -199,7 +205,7 @@ const RowContainer = styled.div<{
       }),
       ...(selected && {
         color: 'white',
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors[colorScheme],
       }),
       display: 'flex',
       alignItems: 'center',
@@ -217,12 +223,14 @@ const RowContainer = styled.div<{
         }),
       position: 'relative',
       ...(hovered && {
-        boxShadow: `0 0 0 1px ${theme.colors.primary} inset`,
+        boxShadow: `0 0 0 1px ${theme.colors[colorScheme]} inset`,
       }),
       ...(showsActiveState && {
         '&:active': {
           backgroundColor: selected
-            ? theme.colors.primaryLight
+            ? colorScheme === 'secondary'
+              ? theme.colors.secondaryLight
+              : theme.colors.primaryLight
             : theme.colors.activeBackground,
         },
       }),
@@ -236,14 +244,19 @@ const RowContainer = styled.div<{
 const ListViewDragIndicatorElement = styled.div<{
   relativeDropPosition: RelativeDropPosition;
   offsetLeft: number;
-}>(({ theme, relativeDropPosition, offsetLeft }) => ({
+  colorScheme: ListColorScheme;
+}>(({ theme, relativeDropPosition, offsetLeft, colorScheme }) => ({
   zIndex: 1,
   position: 'absolute',
   borderRadius: '3px',
   ...(relativeDropPosition === 'inside'
     ? {
         inset: 2,
-        boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.dragOutline}`,
+        boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${
+          colorScheme === 'secondary'
+            ? theme.colors.secondary
+            : theme.colors.dragOutline
+        }`,
       }
     : {
         top: relativeDropPosition === 'above' ? -3 : undefined,
@@ -251,7 +264,7 @@ const ListViewDragIndicatorElement = styled.div<{
         left: offsetLeft,
         right: 0,
         height: 6,
-        background: theme.colors.primary,
+        background: theme.colors[colorScheme],
         border: `2px solid white`,
         boxShadow: '0 0 2px rgba(0,0,0,0.5)',
       }),
@@ -314,6 +327,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     variant,
     sectionHeaderVariant,
     divider,
+    colorScheme,
   } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
@@ -354,6 +368,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     const element = (
       <RowContainer
         ref={ref}
+        colorScheme={colorScheme}
         onContextMenu={onContextMenu}
         isSectionHeader={isSectionHeader}
         id={id}
@@ -378,6 +393,7 @@ const ListViewRow = forwardRef(function ListViewRow<
       >
         {relativeDropPosition && (
           <ListViewDragIndicatorElement
+            colorScheme={colorScheme}
             relativeDropPosition={relativeDropPosition}
             offsetLeft={33 + depth * indentation}
           />
@@ -591,6 +607,7 @@ type ListViewRootProps = {
   variant?: ListViewVariant;
   sectionHeaderVariant?: ListViewSectionHeaderVariant;
   divider?: boolean;
+  colorScheme?: ListColorScheme;
 };
 
 const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
@@ -610,6 +627,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     variant = 'normal',
     sectionHeaderVariant = 'normal',
     pressEventName = 'onClick',
+    colorScheme = 'primary',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
 ) {
@@ -692,6 +710,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       }
 
       return {
+        colorScheme,
         marginType,
         selectedPosition,
         sortable,
@@ -707,6 +726,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     [
       renderChild,
       data.length,
+      colorScheme,
       sortable,
       expandable,
       divider,
