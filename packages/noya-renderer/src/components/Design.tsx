@@ -1,12 +1,13 @@
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { createRect } from 'noya-geometry';
+import { createBounds, createRect, transformRect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import {
   DecodedCurvePoint,
   Layers,
+  Primitives,
   Selectors,
   createDrawingLayer,
   defaultBorderColor,
@@ -24,6 +25,7 @@ import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useCanvasRect } from '../hooks/useCanvasRect';
 import { useRootScaleTransform } from '../hooks/useRootScaleTransform';
+import { pixelAlignRect } from '../pixelAlignment';
 import { BoundingRect } from './BoundingRect';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
@@ -361,7 +363,7 @@ const DesignBoundingRect = memo(function DesignBoundingRect() {
       {isEditingBlock && boundingRect && (
         <FloatingBubbleLabel
           rect={boundingRect}
-          text="Editing Text"
+          text="Editing Content"
           color={strokeColor}
         />
       )}
@@ -375,6 +377,61 @@ const DesignBoundingRect = memo(function DesignBoundingRect() {
             strokeWidth={isEditingBlock ? 4 : undefined}
           />
         ))}
+    </Group>
+  );
+});
+
+/**
+ * When editing a custom layer, we draw a transparent overlay over the rest of the canvas.
+ * We draw this overlay in 4 black strips, contained within a transparent group.
+ */
+const DesignIsolateEditingLayer = memo(function DesignIsolateEditingLayer() {
+  const CanvasKit = useCanvasKit();
+  const { canvasSize, canvasInsets } = useWorkspace();
+  const [state] = useApplicationState();
+  const interactionState = state.interactionState;
+  const isEditingBlock = interactionState.type === 'editingBlock';
+  const boundingRect = useBoundingRect();
+  const blackFill = useColorFill('black');
+  const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
+
+  if (!isEditingBlock || !boundingRect) return <></>;
+
+  const bounds = createBounds(
+    pixelAlignRect(transformRect(boundingRect, canvasTransform), 1),
+  );
+
+  const canvasBounds = createBounds(canvasSize);
+
+  const topRect = createRect(
+    { x: canvasBounds.minX, y: canvasBounds.minY },
+    { x: canvasBounds.maxX, y: bounds.minY },
+  );
+
+  const bottomRect = createRect(
+    { x: canvasBounds.minX, y: bounds.maxY },
+    { x: canvasBounds.maxX, y: canvasBounds.maxY },
+  );
+
+  const leftRect = createRect(
+    { x: canvasBounds.minX, y: bounds.minY },
+    { x: bounds.minX, y: bounds.maxY },
+  );
+
+  const rightRect = createRect(
+    { x: bounds.maxX, y: bounds.minY },
+    { x: canvasBounds.maxX, y: bounds.maxY },
+  );
+
+  return (
+    <Group opacity={0.2}>
+      <RCKRect rect={Primitives.rect(CanvasKit, topRect)} paint={blackFill} />
+      <RCKRect
+        rect={Primitives.rect(CanvasKit, bottomRect)}
+        paint={blackFill}
+      />
+      <RCKRect rect={Primitives.rect(CanvasKit, leftRect)} paint={blackFill} />
+      <RCKRect rect={Primitives.rect(CanvasKit, rightRect)} paint={blackFill} />
     </Group>
   );
 });
@@ -672,6 +729,7 @@ export const Design = {
   MeasurementGuides: DesignMeasurementGuides,
   DragHandles: DesignDragHandles,
   Rulers: DesignRulers,
+  IsolateEditingLayer: DesignIsolateEditingLayer,
 };
 
 export const DesignFile = memo(function DesignFile() {

@@ -466,10 +466,6 @@ export const Content = memo(function Content({
                         <Design.Background />
                         <Design.Page />
                         <Design.PixelGrid />
-                        <Design.GradientEditor />
-                        <Design.InsertSymbol />
-                        <Design.DrawPath />
-                        <Design.EditPath />
                       </Design.Root>
                     </RenderingModeProvider>
                   </InteractiveRenderer>
@@ -509,6 +505,7 @@ export const Content = memo(function Content({
               <SVGRenderer size={canvasSize}>
                 <RenderingModeProvider value="interactive">
                   <Design.Root>
+                    <Design.IsolateEditingLayer />
                     <Design.BoundingRect />
                     <Design.LayerHighlight />
                   </Design.Root>

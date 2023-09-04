@@ -5,6 +5,7 @@ import {
   Orientation,
   Point,
   Rect,
+  Size,
 } from 'noya-geometry';
 import { round } from 'noya-utils';
 
@@ -31,7 +32,7 @@ export function pixelAlignPoints(
   ];
 }
 
-export function pixelAlignRect(rect: Rect, zoom: number) {
+export function pixelAlignRect(rect: Rect | Size, zoom: number) {
   const bounds = createBounds(rect);
 
   return createRectFromBounds({

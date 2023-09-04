@@ -3,7 +3,7 @@ import { isNumberEqual } from 'noya-utils';
 import { Bounds, Point, Rect, Size } from './types';
 
 export function transformRect(
-  rect: Rect,
+  rect: Rect | Size,
   transform: AffineTransform,
   normalized: boolean = true,
 ): Rect {

@@ -1,5 +1,5 @@
 import { createBounds, insetRect, Rect } from 'noya-geometry';
-import { usePaint } from 'noya-react-canvaskit';
+import { useFill, usePaint } from 'noya-react-canvaskit';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -27,13 +27,23 @@ export const FloatingBubbleLabel = memo(function FloatingBubbleLabel({
 }: Props) {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const { primary } = useTheme().colors;
+  const {
+    primary,
+    canvas: { background },
+  } = useTheme().colors;
   const color = colorProp ?? primary;
 
   const fill = usePaint({
     color,
     style: CanvasKit.PaintStyle.Fill,
     opacity: 0.2,
+  });
+
+  // Use a mostly opaque background so that the text is easier to read
+  // when the background is a similar color.
+  const backgroundPaint = useFill({
+    color: background,
+    opacity: 0.9,
   });
 
   const paragraph = Selectors.getArtboardLabelParagraph(
@@ -70,6 +80,11 @@ export const FloatingBubbleLabel = memo(function FloatingBubbleLabel({
     <>
       {!(onlyShowWhenEnoughSpace && backgroundRect.width > rect.width) && (
         <>
+          <RCKRect
+            rect={Primitives.rect(CanvasKit, backgroundRect)}
+            paint={backgroundPaint}
+            cornerRadius={backgroundRect.height / 2}
+          />
           <RCKRect
             rect={Primitives.rect(CanvasKit, backgroundRect)}
             paint={fill}
