@@ -67,6 +67,7 @@ export const classGroups = {
   items: /^items/,
   width: /^w-/,
   height: /^h-/,
+  aspectRatio: /^aspect-/,
   top: /^top-/,
   right: /^right-/,
   bottom: /^bottom-/,
@@ -512,6 +513,13 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = getValue(className);
       return {
         opacity: (config.theme as any).opacity[value || 'DEFAULT'],
+      };
+    }
+    case 'aspectRatio': {
+      return {
+        aspectRatio: (config.theme as any).aspectRatio[
+          className.replace('aspect-', '')
+        ],
       };
     }
   }
