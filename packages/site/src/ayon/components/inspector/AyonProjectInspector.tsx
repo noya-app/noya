@@ -4,7 +4,6 @@ import {
   Button,
   DropdownMenu,
   GridView,
-  InputField,
   RegularMenuItem,
   Spacer,
   Stack,
@@ -117,7 +116,7 @@ export function AyonProjectInspector({
       background={theme.colors.canvas.background}
     >
       <InspectorSection title="Project" titleTextStyle="heading3">
-        <InspectorPrimitives.LabeledRow label="Name">
+        {/* <InspectorPrimitives.LabeledRow label="Name">
           <InputField.Root>
             <InputField.Input
               placeholder="Untitled"
@@ -125,34 +124,10 @@ export function AyonProjectInspector({
               onChange={onChangeName}
             />
           </InputField.Root>
-        </InspectorPrimitives.LabeledRow>
-        <InspectorPrimitives.LabeledRow label="Canvas Size">
-          <DimensionInput
-            value={artboard.frame.width}
-            onSetValue={(value, mode) => {
-              dispatch('setLayerWidth', artboard.do_objectID, value, mode);
-              dispatch(
-                'zoomToFit*',
-                { type: 'layer', value: artboard.do_objectID },
-                { padding: 20, max: 1, position: 'top' },
-              );
-            }}
-            label="W"
-          />
-          <Spacer.Horizontal size={16} />
-          <DimensionInput
-            value={artboard.frame.height}
-            onSetValue={(value, mode) => {
-              dispatch('setLayerHeight', artboard.do_objectID, value, mode);
-              dispatch(
-                'zoomToFit*',
-                { type: 'layer', value: artboard.do_objectID },
-                { padding: 20, max: 1, position: 'top' },
-              );
-            }}
-            label="H"
-          />
-        </InspectorPrimitives.LabeledRow>
+        </InspectorPrimitives.LabeledRow> */}
+        <InspectorPrimitives.SectionHeader>
+          <InspectorPrimitives.Title>Canvas Size</InspectorPrimitives.Title>
+        </InspectorPrimitives.SectionHeader>
         <Stack.V flex="1">
           <GridView.Root
             scrollable={false}
@@ -213,6 +188,33 @@ export function AyonProjectInspector({
             </GridView.Section>
           </GridView.Root>
         </Stack.V>
+        <InspectorPrimitives.Row>
+          <DimensionInput
+            value={artboard.frame.width}
+            onSetValue={(value, mode) => {
+              dispatch('setLayerWidth', artboard.do_objectID, value, mode);
+              dispatch(
+                'zoomToFit*',
+                { type: 'layer', value: artboard.do_objectID },
+                { padding: 20, max: 1, position: 'top' },
+              );
+            }}
+            label="W"
+          />
+          <Spacer.Horizontal size={16} />
+          <DimensionInput
+            value={artboard.frame.height}
+            onSetValue={(value, mode) => {
+              dispatch('setLayerHeight', artboard.do_objectID, value, mode);
+              dispatch(
+                'zoomToFit*',
+                { type: 'layer', value: artboard.do_objectID },
+                { padding: 20, max: 1, position: 'top' },
+              );
+            }}
+            label="H"
+          />
+        </InspectorPrimitives.Row>
         <InspectorPrimitives.LabeledRow label="Design System">
           <DropdownMenu
             items={designSystemMenu}

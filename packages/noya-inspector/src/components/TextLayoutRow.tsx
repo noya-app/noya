@@ -50,6 +50,7 @@ export const TextLayoutRow = memo(function TextLayoutRow({
           renderLabel={() => <Label.Label>Auto Height</Label.Label>}
         >
           <RadioGroup.Root
+            colorScheme="primary"
             id="text-alignment"
             value={textLayout !== undefined ? textLayout.toString() : ''}
             onValueChange={(value: string) =>

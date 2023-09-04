@@ -1,3 +1,4 @@
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Button, RadioGroup, Spacer } from 'noya-designsystem';
 import {
   BlendingModeIcon,
@@ -7,10 +8,9 @@ import {
   PlusIcon,
   TrashIcon,
 } from 'noya-icons';
-import React, { useMemo, useCallback } from 'react';
-import styled, { useTheme } from 'styled-components';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Selectors, ThemeTab } from 'noya-state';
+import React, { useCallback, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
 
 const TabsContainer = styled.div(({ theme }) => ({
   minWidth: `${54 * 4}px`,
@@ -90,6 +90,7 @@ export default function SwatchesToolbar() {
         <Spacer.Horizontal />
         <TabsContainer>
           <RadioGroup.Root
+            colorScheme="primary"
             id={'components'}
             value={componentsTab}
             onValueChange={handleChangeTab}

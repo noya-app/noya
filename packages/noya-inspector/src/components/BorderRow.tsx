@@ -6,7 +6,7 @@ import {
   BorderOutsideIcon,
 } from 'noya-icons';
 import { SetNumberMode } from 'noya-state';
-import React, { memo, ReactNode, useCallback } from 'react';
+import React, { ReactNode, memo, useCallback } from 'react';
 import { DimensionInput, DimensionValue } from './DimensionInput';
 import {
   ColorFillProps,
@@ -106,6 +106,7 @@ export const BorderRow = memo(function BorderRow({
         />
         <InspectorPrimitives.HorizontalSeparator />
         <RadioGroup.Root
+          colorScheme="primary"
           id={borderPositionId}
           value={toPositionString(position)}
           onValueChange={handleChangePosition}

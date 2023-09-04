@@ -147,7 +147,7 @@ function Workspace({
       <Stack.H alignSelf={'center'} width={99}>
         <RadioGroup.Root
           value={cursorType}
-          variant="secondary"
+          colorScheme="secondary"
           allowEmpty
           onValueChange={(value: typeof cursorType) => {
             if (!value || value === 'pointer') {

@@ -12,11 +12,11 @@ import React, {
 import styled from 'styled-components';
 import { Tooltip } from './Tooltip';
 
-type RadioGroupVariant = 'primary' | 'secondary';
+type RadioGroupColorScheme = 'primary' | 'secondary';
 
 const StyledRoot = styled(ToggleGroupPrimitive.Root)<{
-  variant?: RadioGroupVariant;
-}>(({ theme, variant = 'primary' }) => ({
+  colorScheme?: RadioGroupColorScheme;
+}>(({ theme, colorScheme }) => ({
   appearance: 'none',
   width: '0px', // Reset intrinsic width
   flex: '1 1 0px',
@@ -29,16 +29,19 @@ const StyledRoot = styled(ToggleGroupPrimitive.Root)<{
   borderRadius: '4px',
   background: theme.colors.inputBackground,
   '&:focus': {
-    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors[variant]}`,
+    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${
+      theme.colors[colorScheme ?? 'primary']
+    }`,
   },
   display: 'flex',
   alignItems: 'stretch',
   minHeight: '27px',
+  padding: colorScheme === undefined ? '2px' : 0,
 }));
 
 const StyledItem = styled(ToggleGroupPrimitive.Item)<{
-  variant?: RadioGroupVariant;
-}>(({ theme, variant = 'primary' }) => ({
+  colorScheme?: RadioGroupColorScheme;
+}>(({ theme, colorScheme }) => ({
   position: 'relative',
   flex: '1 1 0',
   appearance: 'none',
@@ -54,15 +57,17 @@ const StyledItem = styled(ToggleGroupPrimitive.Item)<{
   verticalAlign: 'middle',
   '&:focus': {
     outline: 'none',
-    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors[variant]}`,
+    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${
+      theme.colors[colorScheme ?? 'primary']
+    }`,
   },
   '&[aria-checked="true"]': {
-    backgroundColor: theme.colors[variant],
-    color: 'white',
+    backgroundColor: theme.colors[colorScheme ?? 'neutralBackground'],
+    color: colorScheme ? 'white' : theme.colors.text,
   },
 }));
 
-interface Props {
+interface ItemProps {
   value: string;
   tooltip?: ReactNode;
   children: ReactNode;
@@ -70,17 +75,17 @@ interface Props {
 }
 
 const ToggleGroupItem = forwardRef(function ToggleGroupItem(
-  { value, tooltip, children, disabled = false }: Props,
+  { value, tooltip, children, disabled = false }: ItemProps,
   forwardedRef: React.ForwardedRef<HTMLButtonElement>,
 ) {
-  const { variant } = useContext(RadioGroupContext);
+  const { colorScheme } = useContext(RadioGroupContext);
 
   const itemElement = (
     <StyledItem
       ref={forwardedRef}
       value={value}
       disabled={disabled}
-      variant={variant}
+      colorScheme={colorScheme}
     >
       {children}
     </StyledItem>
@@ -94,36 +99,51 @@ const ToggleGroupItem = forwardRef(function ToggleGroupItem(
 });
 
 type RadioGroupContextValue = {
-  variant: RadioGroupVariant;
+  colorScheme?: RadioGroupColorScheme;
 };
 
 const RadioGroupContext = createContext<RadioGroupContextValue>({
-  variant: 'primary',
+  colorScheme: 'primary',
 });
 
-function ToggleGroupRoot({
-  onValueChange,
-  variant,
-  allowEmpty,
-  ...props
-}: Omit<ComponentProps<typeof StyledRoot>, 'type'> & {
+interface Props {
+  id?: string;
+  value?: string;
+  onValueChange?: ComponentProps<typeof StyledRoot>['onValueChange'];
+  colorScheme?: RadioGroupColorScheme;
   allowEmpty?: boolean;
-}) {
-  const contextValue = useMemo(() => ({ variant }), [variant]);
+  children: ReactNode;
+}
+
+function ToggleGroupRoot({
+  id,
+  value,
+  onValueChange,
+  colorScheme,
+  allowEmpty,
+  children,
+}: Props) {
+  const contextValue = useMemo(() => ({ colorScheme }), [colorScheme]);
+
+  const handleValueChange = useCallback(
+    (value: string) => {
+      if (!allowEmpty && !value) return;
+      onValueChange?.(value);
+    },
+    [allowEmpty, onValueChange],
+  );
 
   return (
     <RadioGroupContext.Provider value={contextValue}>
       <StyledRoot
-        {...props}
+        id={id}
         type="single"
-        onValueChange={useCallback(
-          (value: string) => {
-            if (!allowEmpty && !value) return;
-            onValueChange?.(value);
-          },
-          [allowEmpty, onValueChange],
-        )}
-      />
+        value={value}
+        colorScheme={colorScheme}
+        onValueChange={handleValueChange}
+      >
+        {children}
+      </StyledRoot>
     </RadioGroupContext.Provider>
   );
 }

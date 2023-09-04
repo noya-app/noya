@@ -81,6 +81,7 @@ export const SymbolLayoutRow = memo(function SymbolLayoutRow({
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
+          colorScheme="primary"
           value={isAnchorDisabled ? 'none' : layoutAxis?.toString()}
           onValueChange={useCallback(
             (value: string) =>

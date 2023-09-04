@@ -43,6 +43,7 @@ export const LayoutRadioGroup = memo(
   }) => (
     <RadioGroupContainer>
       <RadioGroup.Root
+        colorScheme="primary"
         id="layout"
         value={layout}
         onValueChange={useCallback(

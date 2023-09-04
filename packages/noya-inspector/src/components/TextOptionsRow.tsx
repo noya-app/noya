@@ -67,6 +67,7 @@ export const TextOptionsRow = memo(function TextOptionsRow({
           />
           <InspectorPrimitives.HorizontalSeparator />
           <RadioGroup.Root
+            colorScheme="primary"
             id={transformInputId}
             value={textTransform !== undefined ? textTransform.toString() : ''}
             onValueChange={useCallback(
