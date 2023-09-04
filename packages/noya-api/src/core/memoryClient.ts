@@ -97,9 +97,11 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
       name: string,
       description: string,
     ) => {
-      return streamString(
-        `<Box class="bg-red-500"><Text class="white">Hello</Text></Box>`,
-      );
+      return {
+        layout: streamString(
+          `<Box class="bg-red-500"><Text class="white">Hello</Text></Box>`,
+        ),
+      };
     },
   };
 

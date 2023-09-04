@@ -22,7 +22,7 @@ export async function* streamResponse(
   }
 }
 
-export async function streamString(value: string) {
+export function streamString(value: string) {
   async function* generator() {
     yield value;
   }

@@ -22,6 +22,11 @@ type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
 type NoyaFetchPolicy = 'no-cache' | 'cache-and-network' | 'network-only';
 
+type GeneratedLayout = {
+  provider?: string;
+  layout: string;
+};
+
 const GENERATED_LAYOUT_COUNT = 8;
 
 export class NoyaClient {
@@ -59,7 +64,7 @@ export class NoyaClient {
   generatedDescriptions$ = observable<Record<string, string>>({});
   loadingDescriptions$ = observable<Record<string, boolean>>({});
   generatedDescriptionIndex: Record<string, number> = {};
-  generatedLayouts$ = observable<Record<string, string[]>>({});
+  generatedLayouts$ = observable<Record<string, GeneratedLayout[]>>({});
   loadingLayouts$ = observable<Record<string, boolean[]>>({});
   generatedLayoutIndex: Record<string, number> = {};
   randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
@@ -214,7 +219,7 @@ export class NoyaClient {
 
     this.generatedLayouts$.set((prev) => ({
       ...prev,
-      [key]: rangeArray.map((_) => ''),
+      [key]: rangeArray.map((_) => ({ layout: '' })),
     }));
     this.loadingLayouts$.set((prev) => ({
       ...prev,
@@ -224,7 +229,7 @@ export class NoyaClient {
     const baseIndex = this.generatedLayoutIndex[key];
 
     const promises = rangeArray.map(async (index) => {
-      const iterable =
+      const generated =
         await this.networkClient.generate.componentLayoutsFromDescription(
           name,
           description,
@@ -232,13 +237,16 @@ export class NoyaClient {
         );
 
       let text = '';
-      for await (const chunk of iterable) {
+      for await (const chunk of generated.layout) {
         text += chunk;
         let nextText = text;
 
         this.generatedLayouts$.set((prev) => ({
           ...prev,
-          [key]: updateIndex(prev[key], index, nextText),
+          [key]: updateIndex(prev[key], index, {
+            provider: generated.provider,
+            layout: nextText,
+          }),
         }));
       }
 
@@ -249,8 +257,6 @@ export class NoyaClient {
     });
 
     await Promise.all(promises);
-
-    return;
   };
 
   #resetGenerateComponentDescription = (name: string) => {

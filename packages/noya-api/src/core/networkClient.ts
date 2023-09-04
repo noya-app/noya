@@ -204,11 +204,17 @@ export class NoyaNetworkClient {
     name: string,
     description: string,
     index: number,
-  ): Promise<AsyncIterable<string>> => {
-    if (this.isPreview)
-      return streamString(
-        `<Box class="bg-slate-50 flex-1"><Text>[Placeholder '${name}' component]</Text></Box>`,
-      );
+  ): Promise<{
+    provider?: string;
+    layout: AsyncIterable<string>;
+  }> => {
+    if (this.isPreview) {
+      return {
+        layout: streamString(
+          `<Box class="bg-slate-50 flex-1"><Text>[Placeholder '${name}' component]</Text></Box>`,
+        ),
+      };
+    }
 
     const response = await this.request(
       `${this.baseURI}/generate/component/layout?name=${encodeURIComponent(
@@ -217,7 +223,16 @@ export class NoyaNetworkClient {
       { credentials: 'include' },
     );
 
-    return streamResponse(response);
+    let provider = response.headers.get('X-Noya-Llm-Provider') ?? undefined;
+
+    if (provider === 'OPENAI_GPT4') provider = 'g4';
+    if (provider === 'OPENAI_GPT35TURBO') provider = 'g3';
+    if (provider === 'ANTHROPIC_CLAUDE2') provider = 'c2';
+
+    return {
+      provider: provider,
+      layout: streamResponse(response),
+    };
   };
 
   fetchWithBackoff = async (

@@ -49,7 +49,9 @@ class GeneratedLayoutManager {
   constructor(public client: NoyaAPI.Client) {
     observe(() => {
       const layouts = this.layouts$.get();
-      const elements = Object.values(layouts).flat();
+      const elements = Object.values(layouts)
+        .flat()
+        .map((generated) => generated.layout);
       const queries = elements.flatMap(findAllQueries);
 
       queries.forEach((query) => {
@@ -64,7 +66,10 @@ class GeneratedLayoutManager {
     return Object.fromEntries(
       Object.entries(layouts).map(([key, values]) => [
         key,
-        values.map(parseLayout),
+        values.map((generated) => ({
+          provider: generated.provider,
+          layout: parseLayout(generated.layout),
+        })),
       ]),
     );
   });
@@ -77,14 +82,15 @@ class GeneratedLayoutManager {
     return Object.fromEntries(
       Object.entries(layouts).map(([key, layouts]) => [
         key,
-        layouts.map((node, index) => {
-          const queries = findAllQueries(node);
+        layouts.map((generated, index) => {
+          const queries = findAllQueries(generated.layout);
           const layoutLoading = layoutsLoading[key]?.[index];
           const imagesLoading = queries.some((query) => !images[query]);
 
           return {
-            node: replaceAllImages(node, images),
+            node: replaceAllImages(generated.layout, images),
             loading: layoutLoading || imagesLoading,
+            provider: generated.provider,
           };
         }),
       ]),

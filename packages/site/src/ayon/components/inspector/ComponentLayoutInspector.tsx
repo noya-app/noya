@@ -86,6 +86,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
           description: selectedLayer.data.description,
           node: layout.node,
         },
+        badge: layout.provider,
       };
     });
   }, [

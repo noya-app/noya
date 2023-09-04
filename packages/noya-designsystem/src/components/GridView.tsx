@@ -175,8 +175,8 @@ const TextOverlay = styled.div({
 
 interface ItemProps<MenuItemType extends string = string> {
   id: string;
-  title: string;
-  subtitle?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
   selected?: boolean;
   onClick?: (event: React.MouseEvent) => void;
   onDoubleClick?: () => void;
@@ -247,8 +247,8 @@ const GridViewItem = forwardRef(function GridViewItem<
       )}
       {textPosition === 'overlay' && hovered && (title || subtitle) && (
         <TextOverlay>
-          <ItemTitle showBackground={true}>{title}</ItemTitle>
-          <ItemDescription>{subtitle}</ItemDescription>
+          {title && <ItemTitle showBackground={true}>{title}</ItemTitle>}
+          {subtitle && <ItemDescription>{subtitle}</ItemDescription>}
         </TextOverlay>
       )}
     </GridContainer>

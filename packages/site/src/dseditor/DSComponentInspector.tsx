@@ -135,7 +135,7 @@ export function DSComponentInspector({
                     );
 
                   let layout = '';
-                  for await (const chunk of iterable) {
+                  for await (const chunk of iterable.layout) {
                     layout += chunk;
                   }
 
