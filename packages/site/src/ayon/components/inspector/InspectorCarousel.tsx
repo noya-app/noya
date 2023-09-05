@@ -1,5 +1,5 @@
 import { StateProvider } from 'noya-app-state-context';
-import { Chip, GridView, Stack } from 'noya-designsystem';
+import { GridView, Stack } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { createInitialWorkspaceState, createSketchFile } from 'noya-state';
@@ -58,7 +58,7 @@ const CarouselItemComponent = memo(function CarouselItemComponent({
     <GridView.Item
       key={index}
       id={item.id}
-      title={<Chip size="small">{item.badge}</Chip>}
+      subtitle={item.badge}
       onClick={() => {
         onSelectItem(index);
       }}

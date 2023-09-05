@@ -41,6 +41,7 @@ const ChipElement = styled.span<{
     userSelect: 'none',
     display: 'inline-flex',
     alignItems: 'center',
+    lineHeight: '1.4',
     ...(size === 'medium'
       ? {
           fontSize: '11px',

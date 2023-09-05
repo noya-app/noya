@@ -119,6 +119,7 @@ const GridContainer = styled.div(({ theme }) => ({
 const ItemTitle = styled.span<{ showBackground: boolean }>(
   ({ theme, showBackground }) => ({
     ...theme.textStyles.small,
+    lineHeight: '1',
     color: theme.colors.text,
     fontWeight: 500,
     userSelect: 'none',
@@ -139,6 +140,8 @@ const ItemTitle = styled.span<{ showBackground: boolean }>(
 const ItemDescription = styled.span<{ showBackground: boolean }>(
   ({ theme, showBackground }) => ({
     ...theme.textStyles.small,
+    fontSize: '0.7rem',
+    lineHeight: '1',
     color: theme.colors.textMuted,
     userSelect: 'none',
     whiteSpace: 'pre',
@@ -183,6 +186,7 @@ const TextOverlay = styled.div({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  gap: '2px',
 });
 
 interface ItemProps<MenuItemType extends string = string> {
