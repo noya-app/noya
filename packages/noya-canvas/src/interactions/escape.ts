@@ -14,12 +14,12 @@ export function escapeInteraction(actions: EscapeActions) {
     ReactEventHandlers
   >({
     none: (interactionState, api) => ({
-      onKeyDown: api.handleKeyboardEvent({
+      keyboardShortcuts: {
         Escape: () => {
           actions.selectLayer([]);
           actions.reset();
         },
-      }),
+      },
     }),
   });
 }

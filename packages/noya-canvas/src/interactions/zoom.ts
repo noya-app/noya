@@ -77,7 +77,7 @@ export function zoomInteraction({
   const result: typeof handlers = (interactionState, key, api) => {
     return {
       ...handlers(interactionState, key, api),
-      onKeyDown: api.handleKeyboardEvent({
+      keyboardShortcuts: {
         'Mod-=': () => {
           api.logEvent('Project - View - Zoomed Wireframe (In)', {
             'Old Zoom Level': api.zoomValue,
@@ -102,7 +102,7 @@ export function zoomInteraction({
         'Mod-2': () => {
           zoomToFitSelection();
         },
-      }),
+      },
     };
   };
 

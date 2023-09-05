@@ -60,7 +60,7 @@ export const createEditBlockInteraction = ({
             event.preventDefault();
           }
         },
-        onKeyDown: api.handleKeyboardEvent({
+        keyboardShortcuts: {
           Enter: () => {
             const selectedLayerIds = api.selectedLayerIds;
 
@@ -72,7 +72,7 @@ export const createEditBlockInteraction = ({
               }
             }
           },
-        }),
+        },
       }),
       editingBlock: (interactionState, api) => {
         const handlers = [

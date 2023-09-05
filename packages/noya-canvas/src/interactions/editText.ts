@@ -153,7 +153,7 @@ export function editTextInteraction({
           }
         }
       },
-      onKeyDown: api.handleKeyboardEvent({
+      keyboardShortcuts: {
         // Cursor movement
         ArrowLeft: () => moveCursor('backward', 'character'),
         ArrowRight: () => moveCursor('forward', 'character'),
@@ -176,7 +176,7 @@ export function editTextInteraction({
         'Shift-Mod-ArrowRight': () => moveTextSelection('forward', 'line'),
         'Shift-Mod-ArrowUp': () => moveTextSelection('backward', 'all'),
         'Shift-Mod-ArrowDown': () => moveTextSelection('forward', 'all'),
-      }),
+      },
     }),
     maybeSelectingText: (interactionState, api) => ({
       onPointerMove: (event) => {

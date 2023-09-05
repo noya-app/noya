@@ -1,4 +1,5 @@
 import { composeEventHandlers } from '@radix-ui/primitive';
+import { KeyMap } from 'noya-keymap';
 import { unique } from 'noya-utils';
 import { useGesture } from 'react-use-gesture';
 import { RegularMenuItem } from '../components/internal/Menu';
@@ -12,6 +13,7 @@ function composeAllEventHandlers<E>(...handlers: ((e: E) => void)[]) {
     first,
   );
 }
+
 export type ReactDOMEventHandlers = ReturnType<
   ReturnType<typeof useGesture>
 > & {
@@ -29,6 +31,7 @@ export type ReactDOMEventHandlers = ReturnType<
 export type ReactEventHandlers<MenuItemType extends string = string> =
   ReactDOMEventHandlers & {
     onContributeMenuItems?: () => Optional<RegularMenuItem<MenuItemType>>[];
+    keyboardShortcuts?: KeyMap;
     onSelectMenuItem?: (id: string) => void;
   };
 

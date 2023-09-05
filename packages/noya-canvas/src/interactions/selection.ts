@@ -119,7 +119,7 @@ export function selectionInteraction({
           selectLayer([]);
         }
       },
-      onKeyDown: api.handleKeyboardEvent({
+      keyboardShortcuts: {
         Backspace: () => {
           api.logEvent('Project - Block - Deleted', {
             'Block Count': api.selectedLayerIds.length,
@@ -134,7 +134,7 @@ export function selectionInteraction({
 
           deleteLayer(api.selectedLayerIds);
         },
-      }),
+      },
     }),
   });
 }

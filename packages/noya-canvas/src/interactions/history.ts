@@ -49,10 +49,10 @@ export function historyInteraction({ undo, redo }: HistoryActions) {
             break;
         }
       },
-      onKeyDown: api.handleKeyboardEvent(shortcuts),
+      keyboardShortcuts: shortcuts,
     }),
     insert: (interactionState, api) => ({
-      onKeyDown: api.handleKeyboardEvent(shortcuts),
+      keyboardShortcuts: shortcuts,
     }),
   });
 }

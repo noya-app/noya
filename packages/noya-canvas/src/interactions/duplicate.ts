@@ -37,9 +37,9 @@ export function duplicateInteraction({ duplicateLayer }: DuplicateActions) {
   const result: typeof handlers = (interactionState, key, api) => {
     return {
       ...handlers(interactionState, key, api),
-      onKeyDown: api.handleKeyboardEvent({
+      keyboardShortcuts: {
         'Mod-d': () => duplicateLayer(api.selectedLayerIds),
-      }),
+      },
     };
   };
 

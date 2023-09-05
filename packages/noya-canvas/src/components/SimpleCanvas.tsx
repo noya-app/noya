@@ -1,6 +1,7 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
 import { ResizePosition } from 'noya-geometry';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { ILogEvent } from 'noya-log';
 import { Selectors } from 'noya-state';
 import React, {
@@ -63,21 +64,27 @@ export const SimpleCanvas = memo(
       focus: () => ref.current?.focus(),
     }));
 
-    const { actions, handlers, getMenuItems, onSelectMenuItem } =
-      useInteractionHandlers({
-        interactions,
-        elementInterface: {
-          focus: () => ref.current?.focus(),
-          releasePointerCapture: (pointerId) =>
-            ref.current?.releasePointerCapture(pointerId),
-          setPointerCapture: (pointerId) =>
-            ref.current?.setPointerCapture(pointerId),
-        },
-        logEvent: (...args) => logEvent?.(...args),
-      });
+    const {
+      actions,
+      handlers,
+      menuItems,
+      onSelectMenuItem,
+      keyboardShortcuts,
+    } = useInteractionHandlers({
+      interactions,
+      elementInterface: {
+        focus: () => ref.current?.focus(),
+        releasePointerCapture: (pointerId) =>
+          ref.current?.releasePointerCapture(pointerId),
+        setPointerCapture: (pointerId) =>
+          ref.current?.setPointerCapture(pointerId),
+      },
+      logEvent: (...args) => logEvent?.(...args),
+    });
 
     const cursor = useMemo(() => Selectors.getCursor(state), [state]);
-    const items = getMenuItems();
+
+    useKeyboardShortcuts(keyboardShortcuts);
 
     useCopyHandler();
 
@@ -105,7 +112,7 @@ export const SimpleCanvas = memo(
 
     return (
       <ContextMenu
-        items={items}
+        items={menuItems}
         onSelect={(id) => {
           onSelectMenuItem?.(id);
         }}

@@ -74,10 +74,10 @@ export const createMoveInteraction = (
             event.preventDefault();
           }
         },
-        onKeyDown: api.handleKeyboardEvent(shortcuts),
+        keyboardShortcuts: shortcuts,
       }),
       selectionMode: (interactionState, api) => ({
-        onKeyDown: api.handleKeyboardEvent(shortcuts),
+        keyboardShortcuts: shortcuts,
       }),
       maybeMove: (interactionState, api) => ({
         onPointerMove: (event) => {

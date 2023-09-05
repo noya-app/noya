@@ -11,7 +11,7 @@ import {
   usePlatformModKey,
 } from 'noya-designsystem';
 import { Point, Rect } from 'noya-geometry';
-import { handleKeyboardEvent } from 'noya-keymap';
+import { KeyMap, handleKeyboardEvent } from 'noya-keymap';
 import { ILogEvent } from 'noya-log';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
@@ -316,21 +316,30 @@ export function useInteractionHandlers({
     ),
   );
 
-  const getMenuItems = () =>
-    createSectionedMenu(
-      ...handlers.map((handler) =>
-        handler.onContributeMenuItems ? handler.onContributeMenuItems() : [],
-      ),
-    );
-
   const onSelectMenuItem = (item: string) => {
     handlers.map(
       (handler) => handler.onSelectMenuItem && handler.onSelectMenuItem(item),
     );
   };
 
+  const menuItems = createSectionedMenu(
+    ...handlers.map((handler) =>
+      handler.onContributeMenuItems ? handler.onContributeMenuItems() : [],
+    ),
+  );
+
+  const keyboardShortcuts = handlers.reduce<KeyMap>(
+    (result, handler) => ({ ...result, ...handler.keyboardShortcuts }),
+    {},
+  );
+
   const domHandlers = handlers.map((handler) => {
-    const { onContributeMenuItems, onSelectMenuItem, ...rest } = handler;
+    const {
+      onContributeMenuItems,
+      onSelectMenuItem,
+      keyboardShortcuts,
+      ...rest
+    } = handler;
     return rest;
   });
 
@@ -345,7 +354,8 @@ export function useInteractionHandlers({
       },
       ...domHandlers,
     ),
-    getMenuItems,
+    menuItems,
     onSelectMenuItem,
+    keyboardShortcuts,
   };
 }
