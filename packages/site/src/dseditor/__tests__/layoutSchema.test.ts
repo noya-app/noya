@@ -62,3 +62,14 @@ describe('stringOrNodes', () => {
     expect(result.children.length).toEqual(1);
   });
 });
+
+describe('props', () => {
+  test('adds image src prop', () => {
+    const root = Model.primitiveElement({
+      componentID: imageSymbolId,
+    });
+    const result = enforceSchema(root) as NoyaPrimitiveElement;
+    expect(result.props.length).toEqual(1);
+    expect(result.props[0].name).toEqual('src');
+  });
+});

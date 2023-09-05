@@ -36,6 +36,7 @@ import { NoyaPrimitiveElement } from './types';
 
 export type PrimitiveElementSchema = {
   children: 'none' | 'stringOrNodes' | 'nodes';
+  props?: Record<string, 'image'>;
 };
 
 export type PrimitiveElementMetadata = {
@@ -96,7 +97,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     id: imageSymbolId,
     name: 'Image',
     icon: <ImageIcon />,
-    schema: { children: 'none' },
+    schema: {
+      children: 'none',
+      props: {
+        src: 'image',
+      },
+    },
     aliases: ['Photo', 'Picture'],
   },
   {

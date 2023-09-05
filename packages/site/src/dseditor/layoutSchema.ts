@@ -12,7 +12,28 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
 
     if (!primitive) return node;
 
+    let props = node.props;
+
     if (primitive.schema) {
+      Object.entries(primitive.schema.props ?? {}).forEach(
+        ([name, propSchema]) => {
+          const prop = props.find((prop) => prop.name === name);
+
+          if (!prop) {
+            if (propSchema === 'image') {
+              props = [
+                ...props,
+                Model.generatorProp({
+                  name,
+                  generator: 'random-image',
+                  query: 'landscape',
+                }),
+              ];
+            }
+          }
+        },
+      );
+
       switch (primitive.schema.children) {
         case 'none':
           transformedChildren = [];
@@ -50,6 +71,7 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
 
     return {
       ...node,
+      props,
       children: transformedChildren,
     };
   });
