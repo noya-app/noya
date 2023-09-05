@@ -14,7 +14,11 @@ import { Tooltip } from './Tooltip';
 
 type RadioGroupColorScheme = 'primary' | 'secondary';
 
-const StyledRoot = styled(ToggleGroupPrimitive.Root)<{
+const ignoredProps = new Set(['colorScheme']);
+
+const StyledRoot = styled(ToggleGroupPrimitive.Root).withConfig({
+  shouldForwardProp: (prop) => !ignoredProps.has(prop),
+})<{
   colorScheme?: RadioGroupColorScheme;
 }>(({ theme, colorScheme }) => ({
   appearance: 'none',
@@ -39,7 +43,9 @@ const StyledRoot = styled(ToggleGroupPrimitive.Root)<{
   padding: colorScheme === undefined ? '2px' : 0,
 }));
 
-const StyledItem = styled(ToggleGroupPrimitive.Item)<{
+const StyledItem = styled(ToggleGroupPrimitive.Item).withConfig({
+  shouldForwardProp: (prop) => !ignoredProps.has(prop),
+})<{
   colorScheme?: RadioGroupColorScheme;
 }>(({ theme, colorScheme }) => ({
   position: 'relative',
@@ -55,15 +61,16 @@ const StyledItem = styled(ToggleGroupPrimitive.Item)<{
   alignItems: 'center',
   justifyContent: 'center',
   verticalAlign: 'middle',
+  '&[aria-checked="true"]': {
+    backgroundColor: colorScheme ? theme.colors[colorScheme] : 'white',
+    color: colorScheme ? 'white' : theme.colors.text,
+    boxShadow: colorScheme ? undefined : `0 1px 1px rgba(0,0,0,0.1)`,
+  },
   '&:focus': {
     outline: 'none',
     boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${
       theme.colors[colorScheme ?? 'primary']
     }`,
-  },
-  '&[aria-checked="true"]': {
-    backgroundColor: theme.colors[colorScheme ?? 'neutralBackground'],
-    color: colorScheme ? 'white' : theme.colors.text,
   },
 }));
 

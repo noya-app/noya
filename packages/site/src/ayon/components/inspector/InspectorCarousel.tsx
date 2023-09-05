@@ -58,8 +58,7 @@ const CarouselItemComponent = memo(function CarouselItemComponent({
     <GridView.Item
       key={index}
       id={item.id}
-      title={item.name ?? ''}
-      subtitle={<Chip size="small">{item.badge}</Chip>}
+      title={<Chip size="small">{item.badge}</Chip>}
       onClick={() => {
         onSelectItem(index);
       }}
