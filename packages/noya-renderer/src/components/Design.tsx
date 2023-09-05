@@ -374,7 +374,7 @@ const DesignBoundingRect = memo(function DesignBoundingRect() {
             key={layerId}
             layerId={layerId}
             strokeColor={strokeColor}
-            strokeWidth={isEditingBlock ? 4 : undefined}
+            strokeWidth={isEditingBlock ? 1 : undefined}
           />
         ))}
     </Group>
