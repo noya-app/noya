@@ -156,6 +156,7 @@ interface Props {
   size?: InputFieldSize;
   style?: React.CSSProperties;
   children?: React.ReactNode;
+  hideChildrenWhenFocused?: boolean;
 }
 
 export const InputFieldWithCompletions = memo(
@@ -173,6 +174,7 @@ export const InputFieldWithCompletions = memo(
       onBlur,
       style,
       children,
+      hideChildrenWhenFocused = false,
     }: Props,
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
@@ -381,7 +383,7 @@ export const InputFieldWithCompletions = memo(
           onKeyDown={handleKeyDown}
           style={style}
         />
-        {children}
+        {(!isFocused || !hideChildrenWhenFocused) && children}
         {loading && isFocused && (
           <InputField.Label>
             <ActivityIndicator />

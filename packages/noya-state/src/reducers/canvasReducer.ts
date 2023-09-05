@@ -374,6 +374,8 @@ export function canvasReducer(
                 return layer;
               })();
 
+        layer.do_objectID = draft.interactionState.id;
+
         if (shapeType === 'text') {
           if (layer.frame.width < 10) {
             layer.frame.width = 100;

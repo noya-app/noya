@@ -87,7 +87,7 @@ export const Content = memo(function Content({
 
   const setToastDataDebounced = useMemo(() => debounce(setToastData, 300), []);
 
-  const { canvasSize, isContextMenuOpen } = useWorkspace();
+  const { canvasSize, isContextMenuOpen, startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useAyonState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
@@ -370,6 +370,9 @@ export const Content = memo(function Content({
                       allowDrawingFromNoneState: false,
                       hasMovementThreshold: true,
                       inferBlockType,
+                      didDrawLayer: (id) => {
+                        startRenamingLayer(id);
+                      },
                     }),
                     Interactions.defaultCursor,
                   ]

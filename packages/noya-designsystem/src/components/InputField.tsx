@@ -154,8 +154,8 @@ const InputFieldDropdownMenu = memo(function InputFieldDropdownMenu<
 const ButtonContainer = styled.span<{ size: InputFieldSize }>(
   ({ theme, size }) => ({
     position: 'absolute',
-    right: size === 'large' ? '9px' : '2px',
-    top: size === 'large' ? '8px' : '2px',
+    right: size === 'large' ? '9px' : size === 'medium' ? '4px' : '2px',
+    top: size === 'large' ? '8px' : size === 'medium' ? '4px' : '2px',
   }),
 );
 
@@ -172,6 +172,8 @@ const InputFieldButton = memo(function InputFieldButton({
     (event: React.MouseEvent) => {
       if (inputRef && typeof inputRef !== 'function') {
         inputRef.current?.focus();
+        // Select all text
+        inputRef.current?.setSelectionRange(0, inputRef.current.value.length);
       }
 
       event.preventDefault();

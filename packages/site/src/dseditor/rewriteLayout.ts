@@ -103,6 +103,7 @@ const tailwindClassMapping: Record<string, string> = {
   gap: 'gap-2',
   transition: '',
   'duration-500': '',
+  fixed: '',
 };
 
 function rewriteClasses(

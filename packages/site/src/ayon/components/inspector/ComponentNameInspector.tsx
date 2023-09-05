@@ -1,11 +1,16 @@
 import { useGeneratedComponentNames, useNoyaClient } from 'noya-api';
+import { useWorkspace } from 'noya-app-state-context';
 import {
   CompletionItem,
   CompletionSectionHeader,
+  InputField,
   InputFieldWithCompletions,
+  Small,
+  Spacer,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Model } from '../../../dseditor/builders';
@@ -24,6 +29,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
   const client = useNoyaClient();
 
   const name = selectedLayer.name;
+  const { renamingLayer, didHandleFocus } = useWorkspace();
   const [customName, setCustomName] = useState(name);
   const { loading, names } = useGeneratedComponentNames(customName);
 
@@ -105,16 +111,44 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
     [customName, dispatch, selectedLayer.do_objectID],
   );
 
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  useKeyboardShortcuts({
+    '/': () => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(0, inputRef.current.value.length);
+    },
+  });
+
+  useEffect(() => {
+    if (renamingLayer !== selectedLayer.do_objectID) return;
+
+    didHandleFocus();
+
+    inputRef.current?.focus();
+    inputRef.current?.setSelectionRange(0, inputRef.current.value.length);
+  }, [didHandleFocus, renamingLayer, selectedLayer.do_objectID]);
+
   return (
     <InspectorPrimitives.LabeledRow label="Name">
       <InputFieldWithCompletions
+        ref={inputRef}
         initialValue={name}
         loading={loading}
         items={completionItems}
         onFocus={() => setCustomName(name)}
         onChange={(value) => setCustomName(value)}
         onSelectItem={handleSelectItem}
-      />
+        hideChildrenWhenFocused
+      >
+        <InputField.Button>
+          Edit
+          <Spacer.Horizontal size={8} inline />
+          <Small opacity="0.5" fontFamily="monospace">
+            /
+          </Small>
+        </InputField.Button>
+      </InputFieldWithCompletions>
     </InspectorPrimitives.LabeledRow>
   );
 });

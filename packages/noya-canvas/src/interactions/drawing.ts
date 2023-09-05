@@ -31,6 +31,7 @@ export const createDrawingInteraction =
     options: {
       allowDrawingFromNoneState?: boolean;
       hasMovementThreshold?: boolean;
+      didDrawLayer?: (id: string) => void;
       inferBlockType?: InferBlockType;
     } = {},
   ) =>
@@ -173,6 +174,7 @@ export const createDrawingInteraction =
 
           updateDrawing(canvasPoint, getScalingOptions(event));
           addDrawnLayer();
+          options.didDrawLayer?.(interactionState.id);
 
           api.releasePointerCapture?.(event.pointerId);
           event.preventDefault();

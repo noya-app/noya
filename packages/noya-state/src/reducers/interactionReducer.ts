@@ -7,6 +7,7 @@ import {
   UUID,
   getCursorForCompassDirection,
 } from 'noya-state';
+import { uuid } from 'noya-utils';
 import type React from 'react';
 import { CSSProperties, ReactNode, createElement } from 'react';
 
@@ -169,6 +170,7 @@ export type InteractionState =
     }
   | {
       type: 'drawing';
+      id: string;
       origin: Point;
       current: Point;
       shapeType: DrawableLayerType;
@@ -345,6 +347,7 @@ export function interactionReducer(
 
       return {
         type: 'drawing',
+        id: uuid(),
         origin: point,
         current: point,
         shapeType,
