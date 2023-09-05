@@ -95,6 +95,7 @@ const tailwindClassMapping: Record<string, string> = {
   'text-lg': 'variant-h6',
   'text-md': '',
   'text-sm': '',
+  'text-xs': '',
   'text-base': '',
   grow: 'flex-1',
   'flex-column': 'flex-col',
@@ -244,7 +245,16 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'paddingX',
     'paddingY',
   ],
-  Tag: ['flex'],
+  Tag: [
+    'flex',
+    'padding',
+    'paddingBottom',
+    'paddingLeft',
+    'paddingRight',
+    'paddingTop',
+    'paddingX',
+    'paddingY',
+  ],
 };
 
 export function rewriteForbiddenClassGroups(layout: LayoutNode) {

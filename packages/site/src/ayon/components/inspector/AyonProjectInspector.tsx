@@ -132,7 +132,7 @@ export function AyonProjectInspector({
           <GridView.Root
             scrollable={false}
             size="xs"
-            textPosition="toolip"
+            textPosition="overlay"
             bordered
           >
             <GridView.Section padding={0}>

@@ -136,14 +136,24 @@ const ItemTitle = styled.span<{ showBackground: boolean }>(
   }),
 );
 
-const ItemDescription = styled.span(({ theme }) => ({
-  ...theme.textStyles.small,
-  color: theme.colors.textMuted,
-  userSelect: 'none',
-  whiteSpace: 'pre',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-}));
+const ItemDescription = styled.span<{ showBackground: boolean }>(
+  ({ theme, showBackground }) => ({
+    ...theme.textStyles.small,
+    color: theme.colors.textMuted,
+    userSelect: 'none',
+    whiteSpace: 'pre',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+
+    ...(showBackground && {
+      background: theme.colors.sidebar.background,
+      // border: `1px solid ${theme.colors.dividerSubtle}`,
+      padding: '2px 4px',
+      borderRadius: '2px',
+      backdropFilter: 'blur(4px)',
+    }),
+  }),
+);
 
 const SectionTitle = styled.span<{ last?: boolean }>(
   ({ theme, last = false }) => ({
@@ -165,7 +175,9 @@ const TextOverlay = styled.div({
   position: 'absolute',
   inset: 0,
   display: 'flex',
-  alignItems: 'end',
+  flexDirection: 'column',
+  justifyContent: 'end',
+  alignItems: 'start',
   padding: '4px',
   pointerEvents: 'none',
   overflow: 'hidden',
@@ -242,13 +254,17 @@ const GridViewItem = forwardRef(function GridViewItem<
         <>
           <Spacer.Vertical size={8} />
           <ItemTitle showBackground={false}>{title || ' '}</ItemTitle>
-          <ItemDescription>{subtitle || ' '}</ItemDescription>
+          <ItemDescription showBackground={false}>
+            {subtitle || ' '}
+          </ItemDescription>
         </>
       )}
       {textPosition === 'overlay' && hovered && (title || subtitle) && (
         <TextOverlay>
-          {title && <ItemTitle showBackground={true}>{title}</ItemTitle>}
-          {subtitle && <ItemDescription>{subtitle}</ItemDescription>}
+          {title && <ItemTitle showBackground>{title}</ItemTitle>}
+          {subtitle && (
+            <ItemDescription showBackground>{subtitle}</ItemDescription>
+          )}
         </TextOverlay>
       )}
     </GridContainer>
@@ -268,7 +284,7 @@ const GridViewItem = forwardRef(function GridViewItem<
         content={
           <Stack.V gap={2}>
             <ItemTitle showBackground={false}>{title}</ItemTitle>
-            <ItemDescription>{subtitle}</ItemDescription>
+            <ItemDescription showBackground={false}>{subtitle}</ItemDescription>
           </Stack.V>
         }
       >
