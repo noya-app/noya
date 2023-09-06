@@ -9,7 +9,7 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { useHover } from '../hooks/useHover';
 import withSeparatorElements from '../utils/withSeparatorElements';
 import { ContextMenu } from './ContextMenu';
@@ -189,10 +189,34 @@ const TextOverlay = styled.div({
   gap: '2px',
 });
 
+const shimmer = keyframes({
+  '0%': {
+    backgroundPosition: '-200% 0',
+  },
+  '100%': {
+    backgroundPosition: '200% 0',
+  },
+});
+
+const Shimmer = styled.div`
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  animation: ${shimmer} 6s infinite linear;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(226, 232, 240, 0.5),
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+`;
+
 interface ItemProps<MenuItemType extends string = string> {
   id: string;
   title?: ReactNode;
   subtitle?: ReactNode;
+  loading?: boolean;
   selected?: boolean;
   onClick?: (event: React.MouseEvent) => void;
   onDoubleClick?: () => void;
@@ -210,6 +234,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     id,
     title,
     subtitle,
+    loading,
     selected,
     onClick,
     onDoubleClick,
@@ -271,6 +296,7 @@ const GridViewItem = forwardRef(function GridViewItem<
           )}
         </TextOverlay>
       )}
+      {loading && <Shimmer />}
     </GridContainer>
   );
 

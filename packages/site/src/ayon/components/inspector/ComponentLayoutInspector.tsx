@@ -74,8 +74,8 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     return undefined;
   }, []);
 
-  const carouselItems: InspectorCarouselItem[] = useMemo(() => {
-    return generatedLayout.map((layout, index) => {
+  const carouselItems = useMemo(() => {
+    return generatedLayout.map((layout, index): InspectorCarouselItem => {
       return {
         id: index.toString(),
         size: {
@@ -86,7 +86,8 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
           description: selectedLayer.data.description,
           node: layout.node,
         },
-        badge: layout.provider,
+        subtitle: layout.provider,
+        loading: layout.loading,
       };
     });
   }, [

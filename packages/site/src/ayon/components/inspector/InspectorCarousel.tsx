@@ -58,7 +58,8 @@ const CarouselItemComponent = memo(function CarouselItemComponent({
     <GridView.Item
       key={index}
       id={item.id}
-      subtitle={item.badge}
+      subtitle={item.subtitle}
+      loading={item.loading}
       onClick={() => {
         onSelectItem(index);
       }}
@@ -94,7 +95,8 @@ export type InspectorCarouselItem = {
   name?: string;
   data: CustomLayerData;
   size: Size;
-  badge?: string;
+  subtitle?: string;
+  loading: boolean;
 };
 
 export const InspectorCarousel = memo(function InspectorCarousel({
