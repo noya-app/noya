@@ -12,7 +12,7 @@ import { enforceSchema } from '../../dseditor/layoutSchema';
 import { primitiveElements } from '../../dseditor/primitiveElements';
 import { NoyaNode } from '../../dseditor/types';
 import { boxSymbolId } from '../symbols/symbolIds';
-import { CustomLayerData } from '../types';
+import { CustomLayerData, LayoutGenerationSource } from '../types';
 
 export type AyonAction =
   | [
@@ -25,7 +25,12 @@ export type AyonAction =
       layerId: string,
       activeGenerationIndex: number | undefined,
     ]
-  | [type: 'setLayerNode', layerId: string, node: NoyaNode | undefined];
+  | [
+      type: 'setLayerNode',
+      layerId: string,
+      node: NoyaNode | undefined,
+      source: LayoutGenerationSource | 'unset' | 'keep',
+    ];
 
 const ayonLayerReducer = (
   layer: Sketch.CustomLayer<CustomLayerData>,
@@ -33,10 +38,17 @@ const ayonLayerReducer = (
 ) => {
   switch (action[0]) {
     case 'setLayerNode': {
-      const [, , node] = action;
+      const [, , node, source] = action;
 
       return produce(layer, (draft) => {
         draft.data.node = node ? enforceSchema(node) : undefined;
+
+        if (source === 'unset') {
+          delete draft.data.layoutGenerationSource;
+        } else if (source === 'keep') {
+        } else {
+          draft.data.layoutGenerationSource = source;
+        }
       });
     }
     case 'setLayerDescription': {

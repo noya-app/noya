@@ -6,7 +6,6 @@ import {
   InputField,
   InputFieldWithCompletions,
   Small,
-  Spacer,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
@@ -94,7 +93,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         dispatch('batch', [
           ['setLayerName', selectedLayer.do_objectID, item.name],
           ['setLayerDescription', selectedLayer.do_objectID, ''],
-          ['setLayerNode', selectedLayer.do_objectID, node],
+          ['setLayerNode', selectedLayer.do_objectID, node, 'unset'],
         ]);
       } else {
         dispatch('batch', [
@@ -104,7 +103,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
             item.id === 'custom' ? customName : item.name,
           ],
           ['setLayerDescription', selectedLayer.do_objectID, undefined],
-          ['setLayerNode', selectedLayer.do_objectID, undefined],
+          ['setLayerNode', selectedLayer.do_objectID, undefined, 'unset'],
         ]);
       }
     },
@@ -142,8 +141,6 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         hideChildrenWhenFocused
       >
         <InputField.Button>
-          Edit
-          <Spacer.Horizontal size={8} inline />
           <Small opacity="0.5" fontFamily="monospace">
             /
           </Small>

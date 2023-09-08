@@ -2,13 +2,13 @@ import { useNoyaClient } from 'noya-api';
 import {
   ActivityIndicator,
   Button,
-  IconButton,
   Spacer,
+  lightTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { isDeepEqual } from 'noya-utils';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
 import { createResolvedNode, unresolve } from '../../../dseditor/traversal';
@@ -37,25 +37,19 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
 }: Props) {
   const dispatch = useAyonDispatch();
   const client = useNoyaClient();
-  const generatedLayout = useManagedLayout(
-    selectedLayer.name ?? '',
-    selectedLayer.data.description ?? '',
-  );
-  const activeIndex = selectedLayer.data.activeGenerationIndex ?? 0;
 
-  const handleShuffle = useCallback(() => {
-    dispatch('setLayerNode', selectedLayer.do_objectID, undefined);
-    client.generate.resetComponentLayouts(
-      selectedLayer.name,
-      selectedLayer.data.description ?? '',
-    );
-  }, [
-    client.generate,
-    dispatch,
-    selectedLayer.data.description,
-    selectedLayer.do_objectID,
-    selectedLayer.name,
-  ]);
+  const suggestionSourceName =
+    selectedLayer.data.layoutGenerationSource?.name ?? selectedLayer.name ?? '';
+  const suggestionSourceDescription =
+    selectedLayer.data.layoutGenerationSource?.description ??
+    selectedLayer.data.description ??
+    '';
+  const generatedLayout = useManagedLayout(
+    suggestionSourceName,
+    suggestionSourceDescription,
+  );
+
+  const activeIndex = selectedLayer.data.activeGenerationIndex ?? 0;
 
   const handleGenerateSuggestions = useCallback(() => {
     client.generate.resetComponentLayouts(
@@ -109,7 +103,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
 
       const newNode = unresolve(newResolvedNode);
 
-      dispatch('setLayerNode', selectedLayer.do_objectID, newNode);
+      dispatch('setLayerNode', selectedLayer.do_objectID, newNode, 'keep');
     },
     [dispatch, node, selectedLayer.do_objectID],
   );
@@ -126,6 +120,28 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     );
   }, [activeIndex, carouselItems, selectedLayer.data.node]);
 
+  // If there's a name and description and layout generation source,
+  // but no generated layouts, generate them
+  useEffect(() => {
+    if (
+      selectedLayer.name &&
+      selectedLayer.data.description &&
+      selectedLayer.data.layoutGenerationSource &&
+      generatedLayout.length === 0
+    ) {
+      client.generate.componentLayouts({
+        name: selectedLayer.name,
+        description: selectedLayer.data.description ?? '',
+      });
+    }
+  }, [
+    client,
+    generatedLayout.length,
+    selectedLayer.data.description,
+    selectedLayer.data.layoutGenerationSource,
+    selectedLayer.name,
+  ]);
+
   // if (selectedLayer.data.node) {
   //   console.log(
   //     activeIndex,
@@ -135,32 +151,34 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
   // }
   // console.log(diff(carouselItems[selectedIndex]?.data.node, selectedLayer.data.node));
 
+  const isGeneratingLayouts = generatedLayout.some((layout) => layout.loading);
+  const seeMoreDisabled =
+    !selectedLayer.data.description || isGeneratingLayouts;
+
   return (
-    <InspectorSection
-      title="Layout"
-      titleTextStyle="heading4"
-      right={
-        generatedLayout.some((layout) => layout.loading) ? (
-          <ActivityIndicator size={13} />
-        ) : (
-          <IconButton
-            iconName="ShuffleIcon"
-            onClick={handleShuffle}
-            size={13}
-            disabled={!selectedLayer.data.description}
-            tooltip="Generate new layout"
-          />
-        )
-      }
-    >
+    <InspectorSection title="Layout" titleTextStyle="heading4">
       {node && selectedLayer.data.description && (
         <>
           <InspectorPrimitives.SectionHeader>
             <InspectorPrimitives.Title>
               Suggested Layouts
             </InspectorPrimitives.Title>
+            <Spacer.Horizontal />
+            <Button
+              variant="none"
+              onClick={handleGenerateSuggestions}
+              disabled={seeMoreDisabled}
+              contentStyle={{
+                ...lightTheme.textStyles.label,
+                color: seeMoreDisabled
+                  ? undefined
+                  : lightTheme.colors.secondary,
+              }}
+            >
+              SEE MORE
+            </Button>
           </InspectorPrimitives.SectionHeader>
-          {carouselItems.length > 0 ? (
+          {carouselItems.length > 0 && (
             <InspectorCarousel
               items={carouselItems}
               selectedIndex={selectedIndex}
@@ -170,7 +188,12 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
                 // then clicks on a layout that's still loading.
                 if (generatedLayout[index]?.loading) {
                   dispatch('batch', [
-                    ['setLayerNode', selectedLayer.do_objectID, undefined],
+                    [
+                      'setLayerNode',
+                      selectedLayer.do_objectID,
+                      undefined,
+                      'unset',
+                    ],
                     [
                       'setLayerActiveGenerationIndex',
                       selectedLayer.do_objectID,
@@ -181,7 +204,15 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
                   const item = carouselItems[index];
 
                   dispatch('batch', [
-                    ['setLayerNode', selectedLayer.do_objectID, item.data.node],
+                    [
+                      'setLayerNode',
+                      selectedLayer.do_objectID,
+                      item.data.node,
+                      {
+                        name: selectedLayer.name,
+                        description: selectedLayer.data.description || '',
+                      },
+                    ],
                     [
                       'setLayerActiveGenerationIndex',
                       selectedLayer.do_objectID,
@@ -199,10 +230,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
                 }
               }}
             />
-          ) : (
-            <Button onClick={handleGenerateSuggestions}>
-              Generate Suggestions
-            </Button>
           )}
         </>
       )}

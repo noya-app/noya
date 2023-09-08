@@ -200,7 +200,7 @@ export const Content = memo(function Content({
             },
           });
 
-          dispatch('setLayerNode', layer.do_objectID, newNode);
+          dispatch('setLayerNode', layer.do_objectID, newNode, 'keep');
         } else {
           client.random.image({
             id: src.id,
@@ -236,9 +236,12 @@ export const Content = memo(function Content({
     // we trigger the generation of a layout.
     customLayers.forEach((layer) => {
       if (
-        !layer.name ||
-        layer.data.description === undefined ||
-        layer.data.node !== undefined
+        !(
+          layer.name &&
+          layer.data.description !== undefined &&
+          !layer.data.node &&
+          !layer.data.layoutGenerationSource
+        )
       ) {
         return;
       }
@@ -253,7 +256,10 @@ export const Content = memo(function Content({
       if (layouts[key] && layouts[key][index].loading) return;
 
       if (layouts[key] && layouts[key][index]) {
-        dispatch('setLayerNode', layer.do_objectID, layouts[key][index].node);
+        dispatch('setLayerNode', layer.do_objectID, layouts[key][index].node, {
+          name: layer.name,
+          description: layer.data.description,
+        });
       } else {
         client.generate.componentLayouts({
           name: layer.name,

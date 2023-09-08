@@ -1,5 +1,5 @@
 import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
-import { ActivityIndicator, IconButton } from 'noya-designsystem';
+import { ActivityIndicator, Button, Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { PRIMITIVE_TAG_MAP } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
+import { useManagedLayout } from '../GeneratedLayoutContext';
 
 const DescriptionTextArea = styled.textarea(({ theme }) => ({
   ...theme.textStyles.small,
@@ -41,11 +42,6 @@ export const ComponentDescriptionInspector = memo(
       selectedLayer.name ?? '',
     );
 
-    const handleShuffle = useCallback(() => {
-      dispatch('setLayerDescription', selectedLayer.do_objectID, undefined);
-      client.generate.resetComponentDescription(selectedLayer.name);
-    }, [client, dispatch, selectedLayer.do_objectID, selectedLayer.name]);
-
     const handleSetDescription = useCallback(
       (description: string) => {
         // If we're actively generating layers, set the layout to a placeholder box.
@@ -55,7 +51,12 @@ export const ComponentDescriptionInspector = memo(
 
           dispatch('batch', [
             ['setLayerDescription', selectedLayer.do_objectID, description],
-            ['setLayerNode', selectedLayer.do_objectID, node],
+            [
+              'setLayerNode',
+              selectedLayer.do_objectID,
+              node,
+              { name: '', description: '' },
+            ],
           ]);
 
           return;
@@ -72,29 +73,65 @@ export const ComponentDescriptionInspector = memo(
         : selectedLayer.data.description) ?? '';
     const textareaRef = useAutoResize(value);
 
+    const handleGenerateLayouts = useCallback(() => {
+      dispatch('setLayerNode', selectedLayer.do_objectID, undefined, 'unset');
+      client.generate.resetComponentLayouts(
+        selectedLayer.name,
+        selectedLayer.data.description ?? '',
+      );
+    }, [
+      client.generate,
+      dispatch,
+      selectedLayer.data.description,
+      selectedLayer.do_objectID,
+      selectedLayer.name,
+    ]);
+
+    const generatedLayout = useManagedLayout(
+      selectedLayer.name,
+      selectedLayer.data.description ?? '',
+    );
+
+    // If there's no node _and_ we're generating layouts
+    const isGeneratingLayouts =
+      !selectedLayer.data.node &&
+      generatedLayout.some((layout) => layout.loading);
+
+    const highlightRegenerationButton =
+      !isGeneratingLayouts &&
+      selectedLayer.data.node &&
+      selectedLayer.data.description &&
+      (selectedLayer.data.layoutGenerationSource?.name !== selectedLayer.name ||
+        selectedLayer.data.layoutGenerationSource?.description !==
+          selectedLayer.data.description);
+
     return (
-      <InspectorPrimitives.LabeledRow
-        label="Description"
-        right={
-          generatedDescription.loading ? (
-            <ActivityIndicator size={13} />
-          ) : (
-            <IconButton
-              iconName="ShuffleIcon"
-              onClick={handleShuffle}
-              size={13}
-              tooltip="Generate new description"
-            />
-          )
-        }
-      >
-        <DescriptionTextArea
-          ref={textareaRef}
-          value={value}
-          readOnly={generatedDescription.loading}
-          onChange={(event) => handleSetDescription(event.target.value)}
-        />
-      </InspectorPrimitives.LabeledRow>
+      <>
+        <InspectorPrimitives.LabeledRow
+          label="Description"
+          right={
+            generatedDescription.loading && <ActivityIndicator size={13} />
+          }
+        >
+          <DescriptionTextArea
+            ref={textareaRef}
+            value={value}
+            readOnly={generatedDescription.loading}
+            onChange={(event) => handleSetDescription(event.target.value)}
+          />
+        </InspectorPrimitives.LabeledRow>
+        <Button
+          disabled={
+            isGeneratingLayouts || selectedLayer.data.description === undefined
+          }
+          variant={highlightRegenerationButton ? 'secondary' : undefined}
+          onClick={handleGenerateLayouts}
+        >
+          Generate Layout
+          <Spacer.Horizontal inline size={8} />
+          {isGeneratingLayouts ? <ActivityIndicator size={13} /> : '✨'}
+        </Button>
+      </>
     );
   },
 );

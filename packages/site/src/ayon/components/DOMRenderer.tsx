@@ -170,7 +170,7 @@ const DOMRendererContent = memo(
 
                 const newNode = unresolve(newResolvedNode);
 
-                dispatch('setLayerNode', layer.do_objectID, newNode);
+                dispatch('setLayerNode', layer.do_objectID, newNode, 'keep');
               }}
               getStringValueAtPath={(path) => {
                 const layer = artboard.layers
