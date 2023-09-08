@@ -3061,10 +3061,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-design-system/protocol@^0.0.52":
-  version "0.0.52"
-  resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.52.tgz#967d1b95f6825bdd5db9490fd99a301f03a34951"
-  integrity sha512-3I6ir/M1Qk8eSTXn5nnwwBRfp9v/SZTli3FeK3BFxN0fhaCvi3KYYKWhQTw5Kc/b2J/PYZjgelKobUvBXyLeuw==
+"@noya-design-system/protocol@^0.0.53":
+  version "0.0.53"
+  resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.53.tgz#4e00dd5243946891ad661b6b62b6116401d2b6d8"
+  integrity sha512-hsn5D+AKuiMp7ecDxF00T6reJjl2HcabH4wNcDfwpzrLH88iu4S5zJHxAyBzel15HpycAMYFAH7xqaMxCHef/w==
   dependencies:
     react "^18.2.0"
 

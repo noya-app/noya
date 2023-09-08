@@ -130,6 +130,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     if (!system || !system.themeTransformer) return undefined;
 
     const t: Theme = {
+      colorMode: 'light',
       colors: {
         primary: (tailwindColors as any)[primary as any],
         neutral: tailwindColors.slate,

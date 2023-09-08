@@ -32,7 +32,8 @@ export function useOnboardingUpsell({ onShow }: { onShow: () => void }) {
 
   const didShowOnboardingUpsell =
     useMetadata<boolean>('didShowOnboardingUpsell') === true ||
-    NOYA_HOST?.includes('localhost');
+    NOYA_HOST?.includes('localhost') ||
+    NOYA_HOST?.includes('ngrok.io');
 
   useEffect(() => {
     if (!userData || isSubscribed || didShowOnboardingUpsell) {
