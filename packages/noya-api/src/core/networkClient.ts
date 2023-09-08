@@ -148,14 +148,39 @@ export class NoyaNetworkClient {
     width: number;
     height: number;
   }): Promise<NoyaRandomImageResponse> => {
-    const response = await this.request(
-      `${this.baseURI}/images/random?${encodeQueryParameters({
-        width: options.width,
-        height: options.height,
-        query: options.query,
-      })}`,
-      { credentials: 'include' },
-    );
+    let response: Response;
+
+    try {
+      response = await this.request(
+        `${this.baseURI}/images/random?${encodeQueryParameters({
+          width: options.width,
+          height: options.height,
+          query: options.query,
+        })}`,
+        { credentials: 'include' },
+      );
+    } catch (error) {
+      if (error instanceof NoyaAPIError && error.type === 'notFound') {
+        return {
+          url: `https://images.unsplash.com/photo-1515825838458-f2a94b20105a?ixid=M3w0Njc1MTh8MHwxfHJhbmRvbXx8fHx8fHx8fDE2OTQyMTI1MDF8&ixlib=rb-4.0.3&crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=${options.width}&h=${options.height}`,
+          metadata: { color: '#0c2626' },
+          source: {
+            name: 'Unsplash',
+            url: 'https://unsplash.com?utm_source=noya&utm_medium=referral',
+          },
+          user: {
+            name: 'Casey Horner',
+            url: 'https://unsplash.com/@mischievous_penguins?utm_source=noya&utm_medium=referral',
+          },
+          // page: {
+          //   name: 'high-angle photography of mountain at sunset',
+          //   url: 'https://unsplash.com/photos/mPnxwQBtUZE?utm_source=noya&utm_medium=referral',
+          // },
+        };
+      }
+
+      throw error;
+    }
 
     const json = await response.json();
     const parsed = randomImageResponseSchema.parse(json);
@@ -496,6 +521,8 @@ export class NoyaNetworkClient {
       );
     } else if (response.status === 401) {
       this.handleError(new NoyaAPIError('unauthorized', response.statusText));
+    } else if (response.status === 404) {
+      this.handleError(new NoyaAPIError('notFound', response.statusText));
     } else if (response.status >= 400) {
       this.handleError(new NoyaAPIError('unknown', response.statusText));
     }

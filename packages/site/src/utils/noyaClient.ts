@@ -33,6 +33,7 @@ export const networkClientThatRedirects = NOYA_HOST
               window.noyaPageWillReload = true;
               window.location.reload();
               return true;
+            case 'notFound': // Catch 404s internally
             case 'unknown':
               return false;
           }

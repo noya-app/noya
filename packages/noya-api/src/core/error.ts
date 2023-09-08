@@ -1,5 +1,6 @@
 type NoyaAPIErrorType =
   | 'unauthorized'
+  | 'notFound'
   | 'unknown'
   | 'internalServerError'
   | 'timeout';
