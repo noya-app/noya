@@ -156,13 +156,11 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     !selectedLayer.data.description || isGeneratingLayouts;
 
   return (
-    <InspectorSection title="Layout" titleTextStyle="heading4">
+    <InspectorSection title="UI Elements" titleTextStyle="heading4">
       {node && selectedLayer.data.description && (
         <>
           <InspectorPrimitives.SectionHeader>
-            <InspectorPrimitives.Title>
-              Suggested Layouts
-            </InspectorPrimitives.Title>
+            <InspectorPrimitives.Title>Suggestions</InspectorPrimitives.Title>
             <Spacer.Horizontal />
             <Button
               variant="none"
@@ -234,7 +232,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
         </>
       )}
       <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title>Current Layout</InspectorPrimitives.Title>
+        <InspectorPrimitives.Title>Current Elements</InspectorPrimitives.Title>
         <Spacer.Horizontal />
         {!selectedLayer.data.node && generatedLayout[activeIndex]?.loading && (
           <ActivityIndicator size={13} />

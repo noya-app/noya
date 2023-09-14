@@ -92,10 +92,9 @@ export const ComponentDescriptionInspector = memo(
       selectedLayer.data.description ?? '',
     );
 
-    // If there's no node _and_ we're generating layouts
-    const isGeneratingLayouts =
-      !selectedLayer.data.node &&
-      generatedLayout.some((layout) => layout.loading);
+    const isGeneratingLayouts = generatedLayout.some(
+      (layout) => layout.loading,
+    );
 
     const highlightRegenerationButton =
       !isGeneratingLayouts &&
@@ -108,7 +107,7 @@ export const ComponentDescriptionInspector = memo(
     return (
       <>
         <InspectorPrimitives.LabeledRow
-          label="Description"
+          label="Description of UI"
           right={
             generatedDescription.loading && <ActivityIndicator size={13} />
           }
@@ -121,15 +120,21 @@ export const ComponentDescriptionInspector = memo(
           />
         </InspectorPrimitives.LabeledRow>
         <Button
-          disabled={
-            isGeneratingLayouts || selectedLayer.data.description === undefined
-          }
+          // disabled={
+          //   !selectedLayer.data.node ||
+          //   isGeneratingLayouts ||
+          //   selectedLayer.data.description === undefined
+          // }
           variant={highlightRegenerationButton ? 'secondary' : undefined}
           onClick={handleGenerateLayouts}
         >
-          Generate Layout
+          Generate UI Elements
           <Spacer.Horizontal inline size={8} />
-          {isGeneratingLayouts ? <ActivityIndicator size={13} /> : '✨'}
+          {!selectedLayer.data.node && isGeneratingLayouts ? (
+            <ActivityIndicator size={13} />
+          ) : (
+            '✨'
+          )}
         </Button>
       </>
     );
