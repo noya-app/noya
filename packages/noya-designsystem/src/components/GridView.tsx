@@ -12,6 +12,7 @@ import React, {
 import styled, { keyframes } from 'styled-components';
 import { useHover } from '../hooks/useHover';
 import withSeparatorElements from '../utils/withSeparatorElements';
+import { ActivityIndicator } from './ActivityIndicator';
 import { ContextMenu } from './ContextMenu';
 import { MenuItem } from './internal/Menu';
 import { ScrollArea } from './ScrollArea';
@@ -210,6 +211,11 @@ const Shimmer = styled.div`
     rgba(255, 255, 255, 0)
   );
   background-size: 200% 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: end;
+  padding: 4px;
 `;
 
 interface ItemProps<MenuItemType extends string = string> {
@@ -296,7 +302,11 @@ const GridViewItem = forwardRef(function GridViewItem<
           )}
         </TextOverlay>
       )}
-      {loading && <Shimmer />}
+      {loading && (
+        <Shimmer>
+          <ActivityIndicator opacity={0.5} size={13} />
+        </Shimmer>
+      )}
     </GridContainer>
   );
 

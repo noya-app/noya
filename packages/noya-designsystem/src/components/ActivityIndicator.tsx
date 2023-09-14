@@ -3,6 +3,7 @@ import styled, { keyframes } from 'styled-components';
 
 interface Props {
   size?: number;
+  opacity?: number;
 }
 
 const spin = keyframes`
@@ -14,6 +15,7 @@ const Spinner = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  opacity: ${({ opacity }: Props) => opacity};
 `;
 
 // Use css syntax to support keyframes
@@ -28,9 +30,10 @@ const SpinnerCircle = styled.div<Props>`
 
 export const ActivityIndicator = memo(function ActivityIndicator({
   size = 16,
+  opacity = 1,
 }: Props) {
   return (
-    <Spinner>
+    <Spinner opacity={opacity}>
       <SpinnerCircle size={size} />
     </Spinner>
   );
