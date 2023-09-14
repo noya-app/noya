@@ -200,7 +200,7 @@ function Workspace({
                   !showInsertBlockOnboarding && (
                     <Stack.V alignItems="start">
                       <Small fontWeight={600}>Insert Tool</Small>
-                      <Small>Click and drag to draw a block.</Small>
+                      <Small>Click and drag to draw a component.</Small>
                       <Small>
                         Hold{' '}
                         <Chip colorScheme="secondary">
@@ -229,7 +229,7 @@ function Workspace({
                     scale: 0.85,
                   }}
                 />{' '}
-                to draw a block on the left canvas.
+                to draw a component on the left canvas.
               </Small>
               <Small>
                 You can activate this tool at any time by holding{' '}
