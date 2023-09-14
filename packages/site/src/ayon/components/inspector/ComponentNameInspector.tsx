@@ -42,12 +42,12 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
       },
       ...primitiveElements.flatMap((p): CompletionItem[] => [
         {
-          id: p.id,
+          id: `primitive:${p.id}:${p.name}`,
           name: p.name,
           icon: p.icon,
         },
         ...(p.aliases ?? []).map((alias) => ({
-          id: p.id,
+          id: `primitive:${p.id}:${alias}`,
           name: alias,
           icon: p.icon,
         })),
@@ -79,7 +79,10 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
 
   const handleSelectItem = useCallback(
     (item: CompletionItem) => {
-      const primitive = primitiveElements.find((p) => p.id === item.id);
+      const parts = item.id.split(':');
+
+      const primitive =
+        parts.length === 3 && primitiveElements.find((p) => p.id === parts[1]);
 
       if (primitive) {
         const node =
@@ -143,6 +146,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         onChange={(value) => setCustomName(value)}
         onSelectItem={handleSelectItem}
         hideChildrenWhenFocused
+        hideMenuWhenEmptyValue
       >
         <InputField.Button>
           <Small opacity="0.5" fontFamily="monospace">

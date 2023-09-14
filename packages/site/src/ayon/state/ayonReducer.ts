@@ -109,7 +109,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
 
         const layer = SketchModel.customLayer<CustomLayerData>({
           do_objectID: draft.interactionState.id,
-          name: 'Box',
+          name: '',
           frame: SketchModel.rect(rect),
           data: {
             description: '',

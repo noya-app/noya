@@ -157,6 +157,7 @@ interface Props {
   style?: React.CSSProperties;
   children?: React.ReactNode;
   hideChildrenWhenFocused?: boolean;
+  hideMenuWhenEmptyValue?: boolean;
 }
 
 export const InputFieldWithCompletions = memo(
@@ -175,6 +176,7 @@ export const InputFieldWithCompletions = memo(
       style,
       children,
       hideChildrenWhenFocused = false,
+      hideMenuWhenEmptyValue = false,
     }: Props,
     forwardedRef: ForwardedRef<HTMLInputElement>,
   ) {
@@ -347,7 +349,10 @@ export const InputFieldWithCompletions = memo(
           const listSize = { width, height };
 
           return (
-            <Stack.V flex={`0 0 ${height}px`}>
+            <Stack.V
+              flex={`0 0 ${height}px`}
+              display={!filter && hideMenuWhenEmptyValue ? 'none' : 'flex'}
+            >
               {filteredItems.length > 0 ? (
                 <CompletionMenu
                   ref={listRef}
@@ -382,6 +387,9 @@ export const InputFieldWithCompletions = memo(
           onFocusCapture={handleFocus}
           onKeyDown={handleKeyDown}
           style={style}
+          autoCapitalize="off"
+          autoComplete="one-time-code"
+          autoCorrect="off"
         />
         {(!isFocused || !hideChildrenWhenFocused) && children}
         {loading && isFocused && (
