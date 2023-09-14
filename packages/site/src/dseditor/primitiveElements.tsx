@@ -197,6 +197,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     icon: <TextIcon />,
     aliases: ['Label'],
     schema: { children: 'stringOrNodes' },
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Text',
+        componentID: textSymbolId,
+        classNames: Model.classNames(['flex-1']),
+        children: [Model.string('Text')],
+      }),
   },
   {
     id: textareaSymbolId,
