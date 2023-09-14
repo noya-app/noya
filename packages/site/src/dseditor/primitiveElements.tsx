@@ -35,7 +35,11 @@ import { Model } from './builders';
 import { NoyaPrimitiveElement } from './types';
 
 export type PrimitiveElementSchema = {
-  children: 'none' | 'stringOrNodes' | 'nodes';
+  children:
+    | 'none'
+    | 'stringOrNodes'
+    | 'nodes'
+    | { type: 'elementOfType'; componentId: string };
   props?: Record<string, 'image'>;
 };
 
@@ -152,7 +156,9 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     description: 'A select menu with options "Option 1" and "Option 2"',
     icon: <DropdownMenuIcon />,
     aliases: ['Dropdown'],
-    schema: { children: 'none' },
+    schema: {
+      children: { type: 'elementOfType', componentId: selectOptionSymbolId },
+    },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Select',

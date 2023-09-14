@@ -34,7 +34,12 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
         },
       );
 
-      switch (primitive.schema.children) {
+      const childrenSchema =
+        typeof primitive.schema.children === 'string'
+          ? { type: primitive.schema.children }
+          : primitive.schema.children;
+
+      switch (childrenSchema.type) {
         case 'none':
           transformedChildren = [];
           break;
@@ -65,6 +70,18 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
             transformedChildren = [Model.string({ value: '' })];
           }
           break;
+        }
+        case 'elementOfType': {
+          const filtered = transformedChildren.filter(
+            (node) =>
+              (node.type === 'noyaPrimitiveElement' ||
+                node.type === 'noyaCompositeElement') &&
+              node.componentID === childrenSchema.componentId,
+          );
+
+          if (filtered.length !== transformedChildren.length) {
+            transformedChildren = filtered;
+          }
         }
       }
     }

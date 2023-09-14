@@ -2,6 +2,8 @@ import {
   boxSymbolId,
   buttonSymbolId,
   imageSymbolId,
+  selectOptionSymbolId,
+  selectSymbolId,
 } from '../../ayon/symbols/symbolIds';
 import { Model } from '../builders';
 import { enforceSchema } from '../layoutSchema';
@@ -17,6 +19,7 @@ describe('none', () => {
     expect(result.children.length).toEqual(0);
   });
 });
+
 describe('nodes', () => {
   test('removes string child', () => {
     const root = Model.primitiveElement({
@@ -60,6 +63,27 @@ describe('stringOrNodes', () => {
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
     expect(result.children.length).toEqual(1);
+  });
+});
+
+describe('select with option children', () => {
+  test('removes non-option child', () => {
+    const root = Model.primitiveElement({
+      componentID: selectSymbolId,
+      children: [
+        Model.string({ value: 'foo' }),
+        Model.primitiveElement({
+          componentID: selectOptionSymbolId,
+          children: [],
+        }),
+        Model.primitiveElement(boxSymbolId),
+      ],
+    });
+    const result = enforceSchema(root) as NoyaPrimitiveElement;
+    expect(result.children.length).toEqual(1);
+    expect((result.children[0] as NoyaPrimitiveElement).componentID).toEqual(
+      selectOptionSymbolId,
+    );
   });
 });
 
