@@ -117,6 +117,21 @@ export const ComponentDescriptionInspector = memo(
             value={value}
             readOnly={generatedDescription.loading}
             onChange={(event) => handleSetDescription(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                // If the user is holding shift, insert a newline
+                if (event.shiftKey) return;
+
+                event.stopPropagation();
+                event.preventDefault();
+
+                textareaRef.current?.blur();
+
+                handleGenerateLayouts();
+              } else if (event.key === 'Escape') {
+                textareaRef.current?.blur();
+              }
+            }}
           />
         </InspectorPrimitives.LabeledRow>
         <Button
