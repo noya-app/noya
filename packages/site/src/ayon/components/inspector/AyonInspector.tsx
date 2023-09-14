@@ -65,11 +65,17 @@ export const AyonInspector = memo(function AyonInspector({
 
   const automaticTab = selectedLayers.length > 0 ? 'component' : 'project';
   const selectedTab = selectedTabOverride ?? automaticTab;
+  const selectedId = selectedLayers[0]?.do_objectID;
 
-  // Clear the override when the automatic tab changes
+  // Set the override when the automatic tab changes or the selection changes
   useEffect(() => {
-    setSelectedTabOverride(undefined);
-  }, [automaticTab]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    selectedId;
+
+    if (automaticTab === 'component') {
+      setSelectedTabOverride('component');
+    }
+  }, [automaticTab, selectedId]);
 
   return (
     <Stack.V
