@@ -108,6 +108,7 @@ export const classGroups = {
   autoCols: /^auto-cols/,
   autoRows: /^auto-rows/,
   gridFlow: /^grid-flow/,
+  gridCols: /^grid-cols/,
   lineHeight: /^leading-/,
   position: /^(absolute|relative|fixed|sticky)/,
   inset: /^inset-/,
@@ -437,7 +438,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     }
     case 'display': {
       return {
-        display: className,
+        display: className === 'hidden' ? 'none' : className,
       };
     }
     case 'position': {
@@ -519,6 +520,14 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       return {
         aspectRatio: (config.theme as any).aspectRatio[
           className.replace('aspect-', '')
+        ],
+      };
+    }
+    case 'gridCols': {
+      const value = getValue(className);
+      return {
+        gridTemplateColumns: (config.theme as any).gridTemplateColumns[
+          value || 'DEFAULT'
         ],
       };
     }
