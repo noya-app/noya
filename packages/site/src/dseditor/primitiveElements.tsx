@@ -42,6 +42,7 @@ export type PrimitiveElementSchema = {
 export type PrimitiveElementMetadata = {
   id: string;
   name: string;
+  description: string;
   aliases?: string[];
   icon?: ReactNode;
   schema: PrimitiveElementSchema;
@@ -52,12 +53,14 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: avatarSymbolId,
     name: 'Avatar',
+    description: 'A user avatar',
     icon: <AvatarIcon />,
     schema: { children: 'none' },
   },
   {
     id: boxSymbolId,
     name: 'Box',
+    description: 'A container for other elements',
     icon: <BoxIcon />,
     schema: { children: 'nodes' },
     initialValue: () =>
@@ -70,6 +73,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: buttonSymbolId,
     name: 'Button',
+    description: 'A button with the text "Submit"',
     icon: <ButtonIcon />,
     schema: { children: 'stringOrNodes' },
     initialValue: () =>
@@ -83,6 +87,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: checkboxSymbolId,
     name: 'Checkbox',
+    description: 'A checkbox with the label "Checkbox"',
     icon: <CheckboxIcon />,
     schema: { children: 'stringOrNodes' },
     initialValue: () =>
@@ -96,6 +101,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: imageSymbolId,
     name: 'Image',
+    description: 'An image',
     icon: <ImageIcon />,
     schema: {
       children: 'none',
@@ -108,12 +114,14 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: inputSymbolId,
     name: 'Input',
+    description: 'A text input',
     icon: <InputIcon />,
     schema: { children: 'none' },
   },
   {
     id: linkSymbolId,
     name: 'Link',
+    description: 'A link with the text "Link"',
     icon: <Link1Icon />,
     schema: { children: 'stringOrNodes' },
     initialValue: () =>
@@ -127,6 +135,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: radioSymbolId,
     name: 'Radio',
+    description: 'A radio button with the label "Radio"',
     icon: <RadiobuttonIcon />,
     schema: { children: 'stringOrNodes' },
     initialValue: () =>
@@ -140,6 +149,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: selectSymbolId,
     name: 'Select',
+    description: 'A select menu with options "Option 1" and "Option 2"',
     icon: <DropdownMenuIcon />,
     aliases: ['Dropdown'],
     schema: { children: 'none' },
@@ -150,7 +160,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         classNames: Model.classNames(['flex-1']),
         children: [
           Model.primitiveElement({
-            name: 'Option',
+            name: 'Option 1',
+            componentID: selectOptionSymbolId,
+            classNames: Model.classNames(['flex-1']),
+          }),
+          Model.primitiveElement({
+            name: 'Option 2',
             componentID: selectOptionSymbolId,
             classNames: Model.classNames(['flex-1']),
           }),
@@ -160,6 +175,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: selectOptionSymbolId,
     name: 'Option',
+    description: 'An option in a select menu',
     icon: <DropdownMenuIcon />,
     schema: { children: 'none' },
     aliases: ['Select Option', 'Dropdown Option'],
@@ -167,6 +183,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: switchSymbolId,
     name: 'Switch',
+    description: 'A switch',
     icon: <SwitchIcon />,
     schema: { children: 'none' },
     aliases: ['Toggle'],
@@ -174,12 +191,14 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: tableSymbolId,
     name: 'Table',
+    description: 'A table',
     icon: <TableIcon />,
     schema: { children: 'none' },
   },
   {
     id: tagSymbolId,
     name: 'Tag',
+    description: 'A tag with the text "Tag"',
     icon: <BadgeIcon />,
     aliases: ['Badge', 'Chip'],
     schema: { children: 'stringOrNodes' },
@@ -194,6 +213,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: textSymbolId,
     name: 'Text',
+    description: 'A text element with the text "Text"',
     icon: <TextIcon />,
     aliases: ['Label'],
     schema: { children: 'stringOrNodes' },
@@ -208,6 +228,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
   {
     id: textareaSymbolId,
     name: 'Textarea',
+    description: 'A text area that the user can type into',
     icon: <InputIcon />,
     schema: { children: 'none' },
   },
