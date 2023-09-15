@@ -5,9 +5,9 @@ import { AppLayout } from '../components/AppLayout';
 import { NavigationLinks } from '../components/NavigationLinks';
 import { Projects } from '../components/Projects';
 import {
-  getSubscriptionOverage,
   SubscriptionCard,
   SubscriptionUsageMeter,
+  getSubscriptionOverage,
   usageMeterThreshold,
 } from '../components/Subscription';
 import { Toolbar } from '../components/Toolbar';
@@ -15,12 +15,38 @@ import { UpgradeDialog } from '../components/UpgradeDialog';
 import { useOnboardingUpsell } from '../hooks/useOnboardingUpsellExperiment';
 
 export default function Project() {
+  // const billing = useBilling();
+
   useEffect(() => {
     amplitude.logEvent('App - Projects List - Opened');
   }, []);
 
   const client = useNoyaClient();
+
+  useEffect(() => {
+    // Force reload files so we don't show anything stale
+    client.reloadFiles();
+  }, [client]);
+
+  return (
+    <AppLayout
+      toolbar={
+        <Toolbar>
+          <NavigationLinks />
+        </Toolbar>
+      }
+      // footer={billing.subscriptionCard}
+    >
+      <Projects />
+      {/* {billing.upgradeDialog} */}
+    </AppLayout>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function useBilling() {
   const { files } = useNoyaFiles();
+
   const {
     subscriptions,
     availableProducts,
@@ -32,11 +58,6 @@ export default function Project() {
     onShow: () => setShowUpgradeDialog(true),
   });
 
-  useEffect(() => {
-    // Force reload files so we don't show anything stale
-    client.reloadFiles();
-  }, [client]);
-
   const overageItems = loadingBilling
     ? []
     : getSubscriptionOverage(
@@ -46,39 +67,27 @@ export default function Project() {
         usageMeterThreshold,
       );
 
-  return (
-    <AppLayout
-      toolbar={
-        <Toolbar>
-          <NavigationLinks />
-        </Toolbar>
-      }
-      footer={
-        overageItems.length > 0 &&
-        !showUpgradeDialog && (
-          <SubscriptionCard
-            name="Current Plan: Starter"
-            priceDescription="Free"
-            callToActionAccented
-            callToActionText="Upgrade"
-            callToActionUrl="/app/account"
-            onPressCallToAction={() => {
-              setShowUpgradeDialog(true);
-            }}
-          >
-            <SubscriptionUsageMeter items={overageItems} />
-          </SubscriptionCard>
-        )
-      }
-    >
-      <Projects />
-      {showUpgradeDialog && (
-        <UpgradeDialog
-          showUpgradeDialog={showUpgradeDialog}
-          setShowUpgradeDialog={setShowUpgradeDialog}
-          availableProducts={availableProducts}
-        />
-      )}
-    </AppLayout>
-  );
+  return {
+    upgradeDialog: showUpgradeDialog && (
+      <UpgradeDialog
+        showUpgradeDialog={showUpgradeDialog}
+        setShowUpgradeDialog={setShowUpgradeDialog}
+        availableProducts={availableProducts}
+      />
+    ),
+    subscriptionCard: overageItems.length > 0 && !showUpgradeDialog && (
+      <SubscriptionCard
+        name="Current Plan: Starter"
+        priceDescription="Free"
+        callToActionAccented
+        callToActionText="Upgrade"
+        callToActionUrl="/app/account"
+        onPressCallToAction={() => {
+          setShowUpgradeDialog(true);
+        }}
+      >
+        <SubscriptionUsageMeter items={overageItems} />
+      </SubscriptionCard>
+    ),
+  };
 }

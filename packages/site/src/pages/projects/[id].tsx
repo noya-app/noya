@@ -182,6 +182,48 @@ function FileEditor({ fileId }: { fileId: string }) {
 }
 
 function Content({ fileId }: { fileId: string }) {
+  const theme = useDesignSystemTheme();
+  const [leftToolbar, setLeftToolbar] = useState<ReactNode>(null);
+  const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
+  const [centerToolbar, setCenterToolbar] = useState<ReactNode>(null);
+
+  const project: ProjectContextValue = useMemo(
+    () => ({ setLeftToolbar, setCenterToolbar, setRightToolbar }),
+    [],
+  );
+
+  return (
+    <OnboardingProvider>
+      <ProjectProvider value={project}>
+        <Stack.V flex="1" background={theme.colors.canvas.background}>
+          <Toolbar
+            right={rightToolbar}
+            left={
+              leftToolbar
+              // billing.hasOverage ? (
+              //   <>
+              //     {billing.usageMeter}
+              //     {leftToolbar}
+              //   </>
+              // ) : (
+              //   leftToolbar
+              // )
+            }
+            // subscribeButton={billing.subscribeButton}
+          >
+            {centerToolbar || <FileTitle fileId={fileId} />}
+          </Toolbar>
+          <Divider variant="strong" />
+          <FileEditor fileId={fileId} />
+        </Stack.V>
+        {/* {billing.upgradeDialog} */}
+      </ProjectProvider>
+    </OnboardingProvider>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function useBilling() {
   const { files } = useNoyaFiles();
   const { subscriptions, availableProducts } = useNoyaBilling();
 
@@ -196,16 +238,6 @@ function Content({ fileId }: { fileId: string }) {
     (a, b) => b.count / b.limit - a.count / a.limit,
   )[0];
 
-  const theme = useDesignSystemTheme();
-  const [leftToolbar, setLeftToolbar] = useState<ReactNode>(null);
-  const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
-  const [centerToolbar, setCenterToolbar] = useState<ReactNode>(null);
-
-  const project: ProjectContextValue = useMemo(
-    () => ({ setLeftToolbar, setCenterToolbar, setRightToolbar }),
-    [],
-  );
-
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const isSubscribed = useIsSubscribed();
@@ -214,56 +246,35 @@ function Content({ fileId }: { fileId: string }) {
     onShow: () => setShowUpgradeDialog(true),
   });
 
-  return (
-    <OnboardingProvider>
-      <ProjectProvider value={project}>
-        <Stack.V flex="1" background={theme.colors.canvas.background}>
-          <Toolbar
-            right={rightToolbar}
-            left={
-              overageItem ? (
-                <>
-                  <SubscriptionUsageMeterSmall
-                    item={overageItem}
-                    onClick={() => {
-                      setShowUpgradeDialog(true);
-                    }}
-                  />
-                  {leftToolbar}
-                </>
-              ) : (
-                leftToolbar
-              )
-            }
-            subscribeButton={
-              !isSubscribed && (
-                <Button
-                  onClick={() => {
-                    setShowUpgradeDialog(true);
-                  }}
-                >
-                  Get Noya Pro
-                  <Spacer.Horizontal inline size={6} />
-                  <StarFilledIcon color="#fec422" />
-                </Button>
-              )
-            }
-          >
-            {centerToolbar || <FileTitle fileId={fileId} />}
-          </Toolbar>
-          <Divider variant="strong" />
-          <FileEditor fileId={fileId} />
-        </Stack.V>
-        {showUpgradeDialog && (
-          <UpgradeDialog
-            showUpgradeDialog={showUpgradeDialog}
-            setShowUpgradeDialog={setShowUpgradeDialog}
-            availableProducts={availableProducts}
-          />
-        )}
-      </ProjectProvider>
-    </OnboardingProvider>
-  );
+  return {
+    hasOverage: !!overageItem,
+    upgradeDialog: showUpgradeDialog && (
+      <UpgradeDialog
+        showUpgradeDialog={showUpgradeDialog}
+        setShowUpgradeDialog={setShowUpgradeDialog}
+        availableProducts={availableProducts}
+      />
+    ),
+    usageMeter: (
+      <SubscriptionUsageMeterSmall
+        item={overageItem}
+        onClick={() => {
+          setShowUpgradeDialog(true);
+        }}
+      />
+    ),
+    subscribeButton: !isSubscribed && (
+      <Button
+        onClick={() => {
+          setShowUpgradeDialog(true);
+        }}
+      >
+        Get Noya Pro
+        <Spacer.Horizontal inline size={6} />
+        <StarFilledIcon color="#fec422" />
+      </Button>
+    ),
+  };
 }
 
 const platform =

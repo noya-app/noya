@@ -430,7 +430,7 @@ export function getSubscriptionOverage(
   subscriptions: NoyaAPI.Subscription[],
   availableProducts: NoyaAPI.Product[],
   usageThreshold: number,
-) {
+): SubscriptionUsageItem[] {
   const product = findSubscribedProduct(subscriptions, availableProducts);
 
   if (product) return [];
