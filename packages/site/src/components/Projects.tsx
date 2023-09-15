@@ -17,6 +17,7 @@ import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
 import { ChevronDownIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
+import { castHashParameter, useUrlHashParameters } from 'noya-react-utils';
 import { Layers } from 'noya-state';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/utils/createAyonDocument';
@@ -28,6 +29,12 @@ import { Card } from './Subscription';
 const thumbnailSize = { width: 64, height: 64 };
 
 export function Projects() {
+  const urlHashParameters = useUrlHashParameters();
+  const isExperimental = castHashParameter(
+    urlHashParameters.experimental,
+    'boolean',
+  );
+
   const { push } = useRouter();
   const { files, loading } = useNoyaFiles();
   const client = useNoyaClient();
@@ -133,21 +140,23 @@ export function Projects() {
           separator={<DividerVertical />}
         >
           {newProjectButton}
-          <DropdownMenu<string>
-            items={[{ title: 'New Design System', value: 'new-ds' }]}
-            onSelect={(value) => {
-              switch (value) {
-                case 'new-ds': {
-                  handleCreateDesignSystem();
-                  return;
+          {isExperimental && (
+            <DropdownMenu<string>
+              items={[{ title: 'New Design System', value: 'new-ds' }]}
+              onSelect={(value) => {
+                switch (value) {
+                  case 'new-ds': {
+                    handleCreateDesignSystem();
+                    return;
+                  }
                 }
-              }
-            }}
-          >
-            <Button variant="secondary">
-              <ChevronDownIcon />
-            </Button>
-          </DropdownMenu>
+              }}
+            >
+              <Button variant="secondary">
+                <ChevronDownIcon />
+              </Button>
+            </DropdownMenu>
+          )}
         </Stack.H>
       </Stack.H>
       <Spacer.Vertical size={44} />

@@ -18,8 +18,6 @@ import { toZipFile } from 'noya-filesystem';
 import { Size } from 'noya-geometry';
 import {
   ChevronDownIcon,
-  CodeIcon,
-  CodeSandboxLogoIcon,
   CursorArrowIcon,
   FigmaLogoIcon,
   FileIcon,
@@ -27,7 +25,6 @@ import {
   ImageIcon,
   PlusIcon,
   SketchLogoIcon,
-  StarFilledIcon,
   TransformIcon,
 } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
@@ -303,29 +300,29 @@ function Workspace({
               title: 'Sketch',
               icon: <SketchLogoIcon />,
             },
-            SEPARATOR_ITEM,
-            {
-              value: 'react',
-              title: (
-                <>
-                  React Code
-                  <Spacer.Horizontal inline size={6} />
-                  <StarFilledIcon color="#fec422" />
-                </>
-              ),
-              icon: <CodeIcon />,
-            },
-            {
-              value: 'codesandbox',
-              title: (
-                <>
-                  CodeSandbox
-                  <Spacer.Horizontal inline size={6} />
-                  <StarFilledIcon color="#fec422" />
-                </>
-              ),
-              icon: <CodeSandboxLogoIcon />,
-            },
+            // SEPARATOR_ITEM,
+            // {
+            //   value: 'react',
+            //   title: (
+            //     <>
+            //       React Code
+            //       <Spacer.Horizontal inline size={6} />
+            //       <StarFilledIcon color="#fec422" />
+            //     </>
+            //   ),
+            //   icon: <CodeIcon />,
+            // },
+            // {
+            //   value: 'codesandbox',
+            //   title: (
+            //     <>
+            //       CodeSandbox
+            //       <Spacer.Horizontal inline size={6} />
+            //       <StarFilledIcon color="#fec422" />
+            //     </>
+            //   ),
+            //   icon: <CodeSandboxLogoIcon />,
+            // },
           ]}
           onSelect={async (value) => {
             if (!artboard) return;
