@@ -341,6 +341,8 @@ export const InputFieldWithCompletions = memo(
       [filteredItems, ref, handleIndexChange, selectItem, selectedIndex],
     );
 
+    const display = !filter && hideMenuWhenEmptyValue ? 'none' : 'flex';
+
     return (
       <InputField.Root
         size={size}
@@ -349,10 +351,7 @@ export const InputFieldWithCompletions = memo(
           const listSize = { width, height };
 
           return (
-            <Stack.V
-              flex={`0 0 ${height}px`}
-              display={!filter && hideMenuWhenEmptyValue ? 'none' : 'flex'}
-            >
+            <Stack.V flex={`0 0 ${height}px`} display={display}>
               {filteredItems.length > 0 ? (
                 <CompletionMenu
                   ref={listRef}
@@ -381,6 +380,7 @@ export const InputFieldWithCompletions = memo(
         <InputField.Input
           ref={ref}
           value={filter}
+          name="component"
           placeholder={placeholder}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -388,8 +388,14 @@ export const InputFieldWithCompletions = memo(
           onKeyDown={handleKeyDown}
           style={style}
           autoCapitalize="off"
-          autoComplete="one-time-code"
+          autoComplete="off"
           autoCorrect="off"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          aria-owns="component-listbox"
+          aria-expanded={isFocused && display !== 'none'}
+          aria-controls="component-listbox"
         />
         {(!isFocused || !hideChildrenWhenFocused) && children}
         {loading && isFocused && (

@@ -1,5 +1,6 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
 import React, {
+  AriaRole,
   FocusEventHandler,
   ForwardedRef,
   forwardRef,
@@ -23,6 +24,8 @@ type Props = {
   disabled?: boolean;
   value: string;
   placeholder?: string;
+  role?: AriaRole;
+  name?: HTMLInputElement['name'];
   onKeyDown?: KeyboardEventHandler;
   onClick?: MouseEventHandler;
   onDoubleClick?: MouseEventHandler;
