@@ -1,55 +1,30 @@
 import { useNoyaClient } from 'noya-api';
-import {
-  ActivityIndicator,
-  Button,
-  Spacer,
-  lightTheme,
-} from 'noya-designsystem';
+import { Button, Spacer, lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
-import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
-import { createResolvedNode, unresolve } from '../../../dseditor/traversal';
-import {
-  NoyaComponent,
-  NoyaNode,
-  NoyaResolvedNode,
-} from '../../../dseditor/types';
+import { NoyaNode } from '../../../dseditor/types';
+import { useCurrentGeneratedLayout } from '../../hooks/useCurrentGeneratedLayout';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
-import { useManagedLayout } from '../GeneratedLayoutContext';
 import { InspectorCarousel, InspectorCarouselItem } from './InspectorCarousel';
 
 type Props = {
   selectedLayer: Sketch.CustomLayer<CustomLayerData>;
-  highlightedPath?: string[];
-  setHighlightedPath: (path: string[] | undefined) => void;
   setPreviewNode: (node: NoyaNode | undefined) => void;
 };
 
 export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
   selectedLayer,
-  highlightedPath,
-  setHighlightedPath,
   setPreviewNode,
 }: Props) {
   const dispatch = useAyonDispatch();
   const client = useNoyaClient();
 
-  const suggestionSourceName =
-    selectedLayer.data.layoutGenerationSource?.name ?? selectedLayer.name ?? '';
-  const suggestionSourceDescription =
-    selectedLayer.data.layoutGenerationSource?.description ??
-    selectedLayer.data.description ??
-    '';
-  const generatedLayout = useManagedLayout(
-    suggestionSourceName,
-    suggestionSourceDescription,
-  );
-
-  const activeIndex = selectedLayer.data.activeGenerationIndex ?? 0;
+  const { generatedLayout, activeIndex, node } =
+    useCurrentGeneratedLayout(selectedLayer);
 
   const handleGenerateSuggestions = useCallback(() => {
     client.generate.resetComponentLayouts(
@@ -61,12 +36,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       description: selectedLayer.data.description ?? '',
     });
   }, [client.generate, selectedLayer.data.description, selectedLayer.name]);
-
-  const node = selectedLayer.data.node ?? generatedLayout[activeIndex]?.node;
-
-  const findComponent = useCallback((id: string): NoyaComponent | undefined => {
-    return undefined;
-  }, []);
 
   const carouselItems = useMemo(() => {
     return generatedLayout.map((layout, index): InspectorCarouselItem => {
@@ -90,23 +59,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.frame.width,
     selectedLayer.frame.height,
   ]);
-
-  const resolvedNode = useMemo(() => {
-    if (!node) return;
-
-    return createResolvedNode(findComponent, node);
-  }, [findComponent, node]);
-
-  const handleChange = useCallback(
-    (newResolvedNode: NoyaResolvedNode) => {
-      if (!node) return;
-
-      const newNode = unresolve(newResolvedNode);
-
-      dispatch('setLayerNode', selectedLayer.do_objectID, newNode, 'keep');
-    },
-    [dispatch, node, selectedLayer.do_objectID],
-  );
 
   const selectedIndex = useMemo(() => {
     if (!selectedLayer.data.node) return activeIndex;
@@ -141,15 +93,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     selectedLayer.data.layoutGenerationSource,
     selectedLayer.name,
   ]);
-
-  // if (selectedLayer.data.node) {
-  //   console.log(
-  //     activeIndex,
-  //     selectedIndex,
-  //     diff(carouselItems[activeIndex]?.data.node, selectedLayer.data.node),
-  //   );
-  // }
-  // console.log(diff(carouselItems[selectedIndex]?.data.node, selectedLayer.data.node));
 
   const isGeneratingLayouts = generatedLayout.some((layout) => layout.loading);
   const seeMoreDisabled =
@@ -231,22 +174,6 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
           )}
         </>
       )}
-      <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title>Current Elements</InspectorPrimitives.Title>
-        <Spacer.Horizontal />
-        {!selectedLayer.data.node && generatedLayout[activeIndex]?.loading && (
-          <ActivityIndicator size={13} />
-        )}
-      </InspectorPrimitives.SectionHeader>
-      {resolvedNode && resolvedNode.type !== 'noyaString' ? (
-        <DSLayoutTree
-          resolvedNode={resolvedNode}
-          onChange={handleChange}
-          findComponent={findComponent}
-          highlightedPath={highlightedPath}
-          setHighlightedPath={setHighlightedPath}
-        />
-      ) : null}
     </InspectorSection>
   );
 });

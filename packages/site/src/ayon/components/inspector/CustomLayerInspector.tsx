@@ -10,15 +10,11 @@ import { ComponentNameInspector } from './ComponentNameInspector';
 
 type Props = {
   selectedLayer: Sketch.CustomLayer<CustomLayerData>;
-  highlightedPath?: string[];
-  setHighlightedPath: (path: string[] | undefined) => void;
   setPreviewNode: (node: NoyaNode | undefined) => void;
 };
 
 export const CustomLayerInspector = memo(function CustomLayerInspector({
   selectedLayer,
-  highlightedPath,
-  setHighlightedPath,
   setPreviewNode,
 }: Props) {
   const theme = useDesignSystemTheme();
@@ -35,8 +31,6 @@ export const CustomLayerInspector = memo(function CustomLayerInspector({
       </InspectorSection>
       <ComponentLayoutInspector
         selectedLayer={selectedLayer}
-        highlightedPath={highlightedPath}
-        setHighlightedPath={setHighlightedPath}
         setPreviewNode={setPreviewNode}
       />
     </Stack.V>

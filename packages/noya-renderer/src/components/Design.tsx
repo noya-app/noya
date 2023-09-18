@@ -363,7 +363,7 @@ const DesignBoundingRect = memo(function DesignBoundingRect() {
       {isEditingBlock && boundingRect && (
         <FloatingBubbleLabel
           rect={boundingRect}
-          text="Editing Content"
+          text="Editing Elements"
           color={strokeColor}
         />
       )}
