@@ -1,5 +1,6 @@
 import { useNoyaClient } from 'noya-api';
 import {
+  Button,
   Divider,
   IconButton,
   InputField,
@@ -9,6 +10,7 @@ import {
   Switch,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { OpenInNewWindowIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { amplitude } from 'noya-log';
 import React, { useEffect, useReducer } from 'react';
@@ -152,6 +154,18 @@ export function ShareMenu({ fileId }: { fileId: string }) {
                     </InputField.Label>
                   </InputField.Root>
                 </InspectorPrimitives.Row>
+                <InspectorPrimitives.VerticalSeparator />
+                <Button
+                  as="a"
+                  variant="secondary"
+                  href={shareState.sharing.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Preview in new tab
+                  <Spacer.Horizontal size={6} inline />
+                  <OpenInNewWindowIcon />
+                </Button>
                 <InspectorPrimitives.VerticalSeparator />
                 <Divider overflow={10} />
                 <InspectorPrimitives.VerticalSeparator />

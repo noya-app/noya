@@ -28,6 +28,7 @@ export const ButtonElement = styled.button<{
 }>(({ theme, active, disabled, variant, flex }) => ({
   WebkitAppRegion: 'no-drag',
   ...theme.textStyles.small,
+  textDecoration: 'none',
   lineHeight: '1',
   flex: flex ?? '0 0 auto',
   position: 'relative',
@@ -139,6 +140,10 @@ export interface ButtonRootProps {
   onClick?: (event: React.MouseEvent) => void;
   onPointerDown?: (event: React.PointerEvent) => void;
   contentStyle?: CSSProperties;
+  as?: React.ElementType;
+  href?: string;
+  target?: string;
+  rel?: string;
 }
 
 export const Button = forwardRef(function Button(

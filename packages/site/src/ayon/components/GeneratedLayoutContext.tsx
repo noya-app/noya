@@ -1,6 +1,6 @@
 import { computed, observe } from '@legendapp/state';
 import { useSelector } from '@legendapp/state/react';
-import { NoyaAPI, useNoyaClient } from 'noya-api';
+import { NoyaAPI, useNoyaClient, useOptionalNoyaClient } from 'noya-api';
 import React, { memo } from 'react';
 import { parseLayout } from '../../dseditor/componentLayout';
 import { ElementHierarchy } from '../../dseditor/traversal';
@@ -104,10 +104,16 @@ const GeneratedLayoutContext = React.createContext<
 
 export const GeneratedLayoutProvider = memo(
   ({ children }: { children: React.ReactNode }) => {
-    const client = useNoyaClient();
+    const client = useOptionalNoyaClient();
 
     const manager = React.useMemo(
-      () => new GeneratedLayoutManager(client),
+      () =>
+        new GeneratedLayoutManager(
+          client ??
+            new NoyaAPI.Client({
+              networkClient: new NoyaAPI.MemoryClient(),
+            }),
+        ),
       [client],
     );
 

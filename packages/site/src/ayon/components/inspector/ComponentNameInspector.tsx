@@ -37,7 +37,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
       {
         type: 'sectionHeader',
         id: 'design-system',
-        name: 'Design System',
+        name: 'Design System Components',
         maxVisibleItems: 3,
       },
       ...primitiveElements.flatMap((p): CompletionItem[] => [
@@ -54,11 +54,20 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
       ]),
       { type: 'sectionHeader', id: 'create-new', name: 'Create with AI' },
       ...(customName && customName !== name
-        ? [{ id: 'custom', name: customName, alwaysInclude: true }]
+        ? [{ id: 'custom', name: customName, alwaysInclude: true, icon: '✨' }]
         : []),
-      { type: 'sectionHeader', id: 'generated', name: 'Other Suggestions' },
+      {
+        type: 'sectionHeader',
+        id: 'generated',
+        name: 'Other AI Suggestions',
+      },
       ...names.map(
-        ({ name }): CompletionItem => ({ id: name, name, alwaysInclude: true }),
+        ({ name }): CompletionItem => ({
+          id: name,
+          name,
+          alwaysInclude: true,
+          icon: '✨',
+        }),
       ),
     ],
     [customName, name, names],

@@ -7,7 +7,7 @@ export function getUrlHashParameters(): UrlHashParameters {
   try {
     return decodeQueryParameters(window.location.hash.slice(1));
   } catch (e) {
-    console.warn(e);
+    // console.warn(e);
     return {};
   }
 }

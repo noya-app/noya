@@ -199,6 +199,7 @@ function Content({
       </Toolbar>
       <Divider variant="strong" />
       <Ayon
+        padding={20}
         fileId={shareId}
         canvasRendererType="svg"
         initialDocument={initialFile.data.document}
