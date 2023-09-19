@@ -155,7 +155,6 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         onChange={(value) => setCustomName(value)}
         onSelectItem={handleSelectItem}
         hideChildrenWhenFocused
-        hideMenuWhenEmptyValue
       >
         <InputField.Button>
           <Small opacity="0.5" fontFamily="monospace">
