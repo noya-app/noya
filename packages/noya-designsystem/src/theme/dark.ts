@@ -20,6 +20,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.canvas.grid = 'rgba(0,0,0,0.1)';
   colors.sidebar.background = 'rgba(34,33,39,0.95)';
   colors.popover.background = 'rgba(34,33,39,1)';
+  colors.popover.divider = colors.divider;
   colors.listView.raisedBackground = 'rgba(181,178,255,0.1)';
   colors.listView.editingBackground = '#000';
   colors.slider.background = '#BBB';

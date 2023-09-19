@@ -85,6 +85,7 @@ export const AyonInspector = memo(function AyonInspector({
 
   return (
     <Stack.V
+      flex="1"
       background={'white'}
       width={'400px'}
       borderLeft={`1px solid ${theme.colors.dividerStrong}`}

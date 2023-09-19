@@ -332,184 +332,36 @@ export const Content = memo(function Content({
         />
       )}
       <Stack.H flex="1" alignItems="stretch" overflow="hidden">
-        <FileDropTarget
-          supportedFileTypes={[
-            'image/png' as const,
-            'image/jpeg' as const,
-            'image/webp' as const,
-          ]}
-          onDropFiles={addImageFiles}
-        >
-          <SimpleCanvas
-            autoFocus={!isPlayground}
-            padding={padding}
-            position={isPlayground ? undefined : 'top'}
-            logEvent={amplitude.logEvent}
-            interactions={
-              isPlayground
-                ? [
-                    Interactions.escape,
-                    Interactions.clipboard,
-                    Interactions.createEditBlock({ inferBlockType }),
-                    Interactions.selection,
-                    Interactions.marquee,
-                  ]
-                : [
-                    custom,
-                    Interactions.selectionMode,
-                    Interactions.duplicate,
-                    Interactions.reorder,
-                    Interactions.zoom,
-                    Interactions.escape,
-                    Interactions.history,
-                    Interactions.clipboard,
-                    Interactions.editText,
-                    Interactions.createEditBlock({ inferBlockType }),
-                    Interactions.focus,
-                    Interactions.pan,
-                    Interactions.scale,
-                    Interactions.createInsertMode({ inferBlockType }),
-                    Interactions.selection,
-                    Interactions.move,
-                    Interactions.marquee,
-                    Interactions.createDrawing({
-                      allowDrawingFromNoneState: false,
-                      hasMovementThreshold: true,
-                      inferBlockType,
-                      didDrawLayer: (id) => {
-                        startRenamingLayer(id);
-                      },
-                    }),
-                    Interactions.defaultCursor,
-                  ]
-            }
-            // widgets={
-            //   viewType !== 'previewOnly' && (
-            //     <>
-            //       {layers
-            //         .filter(
-            //           // TODO: put this back
-            //           (layer) => false,
-            //         )
-            //         .map((layer) => (
-            //           <Widget
-            //             key={layer.do_objectID}
-            //             layer={layer}
-            //             showToolbar={!isPlayground}
-            //             setOverriddenBlock={(blockContent) => {
-            //               if (blockContent) {
-            //                 // setOverriddenBlock({
-            //                 //   layerId: layer.do_objectID,
-            //                 //   blockContent,
-            //                 // });
-            //               } else {
-            //                 setOverriddenBlock(undefined);
-            //               }
-            //             }}
-            //             onChangeBlockType={(type: DrawableLayerType) => {
-            //               if (typeof type === 'string') return;
-
-            //               if (onboardingStep === 'insertedBlock') {
-            //                 setOnboardingStep?.('configuredBlockType');
-            //               }
-
-            //               amplitude.logEvent('Project - Block - Changed Type', {
-            //                 'Old Block Type': layer.symbolID,
-            //                 'New Block Type': type.symbolId,
-            //                 X: layer.frame.x,
-            //                 Y: layer.frame.y,
-            //                 Width: layer.frame.width,
-            //                 Height: layer.frame.height,
-            //               });
-
-            //               dispatch(
-            //                 'setSymbolInstanceSource',
-            //                 type.symbolId,
-            //                 'preserveCurrent',
-            //               );
-            //             }}
-            //             onChangeBlockContent={(content: BlockContent) => {
-            //               // const nextBlock =
-            //               //   Blocks[content.symbolId ?? layer.symbolID];
-            //               // const contentWithNormalizedText: BlockContent = {
-            //               //   ...content,
-            //               //   normalizedText:
-            //               //     content.blockText ?? nextBlock.placeholderText,
-            //               // };
-            //               // dispatch('batch', [
-            //               //   [
-            //               //     'setBlockContent',
-            //               //     layer.do_objectID,
-            //               //     contentWithNormalizedText,
-            //               //   ],
-            //               //   ...(contentWithNormalizedText.blockText !== ''
-            //               //     ? [
-            //               //         [
-            //               //           'setSymbolIdIsFixed',
-            //               //           layer.do_objectID,
-            //               //           true,
-            //               //         ] as Action,
-            //               //       ]
-            //               //     : []),
-            //               // ]);
-            //             }}
-            //             uploadAsset={uploadAsset}
-            //           />
-            //         ))}
-            //       {state.interactionState.type === 'drawing' && (
-            //         <DrawingWidget />
-            //       )}
-            //       {state.selectedLayerIds.length >= 2 && (
-            //         <MultipleSelectionWidget />
-            //       )}
-            //     </>
-            //   )
-            // }
-          >
-            {({ size }) =>
-              viewType !== 'previewOnly' && (
-                <>
-                  <InteractiveRenderer size={size}>
-                    <RenderingModeProvider value="interactive">
-                      <Design.Root>
-                        <Design.Background />
-                        <Design.Page />
-                        <Design.PixelGrid />
-                      </Design.Root>
-                    </RenderingModeProvider>
-                  </InteractiveRenderer>
-                </>
-              )
-            }
-          </SimpleCanvas>
-        </FileDropTarget>
-        <Overlay
-          style={
-            viewType === 'previewOnly' ? { pointerEvents: 'all' } : undefined
-          }
-        >
-          <DOMRenderer
-            ref={rendererRef}
-            overriddenBlock={overriddenBlock}
-            resizeBehavior="match-canvas"
-            ds={ds}
-            sync={!isPlayground}
-            highlightedNodePath={highlightedNodePath}
-            setHighlightedNodePath={setHighlightedNodePath}
-          />
-        </Overlay>
-        {viewType === 'combined' && (
-          <>
-            {!isPlayground && (
-              <AyonInspector
-                name={name}
-                onChangeName={onChangeName}
-                onDuplicate={onDuplicate}
+        <Stack.V flex="1" position="relative">
+          <Stack.V position="absolute" inset="0">
+            <Overlay>
+              <InteractiveRenderer size={canvasSize}>
+                <RenderingModeProvider value="interactive">
+                  <Design.Root>
+                    <Design.Background />
+                    <Design.Page />
+                    <Design.PixelGrid />
+                  </Design.Root>
+                </RenderingModeProvider>
+              </InteractiveRenderer>
+            </Overlay>
+            <Overlay
+              style={
+                viewType === 'previewOnly'
+                  ? { pointerEvents: 'all' }
+                  : undefined
+              }
+            >
+              <DOMRenderer
+                ref={rendererRef}
+                overriddenBlock={overriddenBlock}
+                resizeBehavior="match-canvas"
+                ds={ds}
+                sync={!isPlayground}
                 highlightedNodePath={highlightedNodePath}
                 setHighlightedNodePath={setHighlightedNodePath}
-                setPreviewNode={setOverriddenBlock}
               />
-            )}
+            </Overlay>
             <Overlay>
               <SVGRenderer size={canvasSize}>
                 <RenderingModeProvider value="interactive">
@@ -538,8 +390,76 @@ export const Content = memo(function Content({
                 </RenderingModeProvider>
               </SVGRenderer>
             </Overlay>
-          </>
-        )}
+            {/* The interactive canvas must render last to handle events.
+                Safari can't ignore pointer-events on iframes so the
+                iframe must be stacked behind the interactive layer. */}
+            <FileDropTarget
+              supportedFileTypes={[
+                'image/png' as const,
+                'image/jpeg' as const,
+                'image/webp' as const,
+              ]}
+              onDropFiles={addImageFiles}
+            >
+              <SimpleCanvas
+                autoFocus={!isPlayground}
+                padding={padding}
+                position={isPlayground ? undefined : 'top'}
+                logEvent={amplitude.logEvent}
+                interactions={
+                  isPlayground
+                    ? [
+                        Interactions.escape,
+                        Interactions.clipboard,
+                        Interactions.createEditBlock({ inferBlockType }),
+                        Interactions.selection,
+                        Interactions.marquee,
+                      ]
+                    : [
+                        custom,
+                        Interactions.selectionMode,
+                        Interactions.duplicate,
+                        Interactions.reorder,
+                        Interactions.zoom,
+                        Interactions.escape,
+                        Interactions.history,
+                        Interactions.clipboard,
+                        Interactions.editText,
+                        Interactions.createEditBlock({ inferBlockType }),
+                        Interactions.focus,
+                        Interactions.pan,
+                        Interactions.scale,
+                        Interactions.createInsertMode({ inferBlockType }),
+                        Interactions.selection,
+                        Interactions.move,
+                        Interactions.marquee,
+                        Interactions.createDrawing({
+                          allowDrawingFromNoneState: false,
+                          hasMovementThreshold: true,
+                          inferBlockType,
+                          didDrawLayer: (id) => {
+                            startRenamingLayer(id);
+                          },
+                        }),
+                        Interactions.defaultCursor,
+                      ]
+                }
+              />
+            </FileDropTarget>
+          </Stack.V>
+        </Stack.V>
+        <Stack.V flex="0" position="relative">
+          {viewType === 'combined' && (
+            <AyonInspector
+              name={name}
+              onChangeName={onChangeName}
+              onDuplicate={onDuplicate}
+              highlightedNodePath={highlightedNodePath}
+              setHighlightedNodePath={setHighlightedNodePath}
+              setPreviewNode={setOverriddenBlock}
+            />
+          )}
+        </Stack.V>
       </Stack.H>
     </>
   );

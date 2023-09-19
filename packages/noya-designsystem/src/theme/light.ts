@@ -47,6 +47,7 @@ export const colors = {
   },
   popover: {
     background: 'rgb(252,252,252)',
+    divider: 'transparent',
   },
   slider: {
     background: 'white',

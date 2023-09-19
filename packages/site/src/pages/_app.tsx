@@ -2,8 +2,8 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { NoyaAPI, NoyaAPIProvider } from 'noya-api';
 import {
-  darkTheme,
   DesignSystemConfigurationProvider,
+  darkTheme,
 } from 'noya-designsystem';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';

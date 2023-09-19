@@ -28,7 +28,7 @@ import { ICanvasElement } from './types';
 
 interface Props {
   rendererZIndex?: CanvasElementProps['rendererZIndex'];
-  children: CanvasElementProps['children'];
+  children?: CanvasElementProps['children'];
   widgets?: CanvasElementProps['widgets'];
   autoFocus?: CanvasElementProps['autoFocus'];
   interactions?: Interaction[];

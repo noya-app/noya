@@ -50,7 +50,7 @@ export interface CanvasElementProps extends ReactDOMEventHandlers {
   onChangeSize: (size: Size, insets: Insets) => void;
   insets?: Insets;
   rendererZIndex?: number;
-  children: ({ size }: { size: Size }) => ReactNode;
+  children?: ({ size }: { size: Size }) => ReactNode;
   widgets?: ReactNode;
   cursor?: CSSProperties['cursor'];
   autoFocus?: boolean;
@@ -137,7 +137,7 @@ export const CanvasElement = memo(
           onKeyPressCapture={onKeyPressCapture}
         />
         <InsetContainer insets={insets} zIndex={rendererZIndex}>
-          {canvasSize && children({ size: canvasSize })}
+          {canvasSize && children?.({ size: canvasSize })}
         </InsetContainer>
         {widgets}
       </Container>
