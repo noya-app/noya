@@ -4,13 +4,13 @@ import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
 import {
   Avatar,
   Button,
-  createSectionedMenu,
   DividerVertical,
   DropdownMenu,
   Popover,
   Small,
   Spacer,
   Stack,
+  createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import {
@@ -21,6 +21,7 @@ import {
   ExitIcon,
   FileTextIcon,
   InfoCircledIcon,
+  ListBulletIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
   VideoIcon,
@@ -80,6 +81,11 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
     [
       { title: 'Docs', value: 'docs', icon: <FileTextIcon /> },
       { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
+      {
+        title: 'Release Notes',
+        value: 'releaseNotes',
+        icon: <ListBulletIcon />,
+      },
     ],
     [
       { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
@@ -188,6 +194,10 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                     case 'reportIssue':
                       openInNewTab('https://airtable.com/shrtIsWGdVjSPZSbo');
                       return;
+                    case 'releaseNotes':
+                      openInNewTab(
+                        'https://noyasoftware.notion.site/Noya-Beta-Release-Notes-c93e33a749c841d09957cf0a654434c6',
+                      );
                   }
                 }}
               >
