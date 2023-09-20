@@ -279,6 +279,7 @@ interface ListViewClickInfo {
 
 interface ListViewRowProps<MenuItemType extends string = string> {
   id?: string;
+  tabIndex?: number;
   selected?: boolean;
   depth?: number;
   disabled?: boolean;
@@ -301,6 +302,7 @@ const ListViewRow = forwardRef(function ListViewRow<
 >(
   {
     id,
+    tabIndex = 0,
     selected = false,
     depth = 0,
     disabled = false,
@@ -389,7 +391,7 @@ const ListViewRow = forwardRef(function ListViewRow<
           { onPointerDown: renderProps.onPointerDown },
           { [pressEventName]: handlePress },
         )}
-        tabIndex={-1}
+        tabIndex={tabIndex}
       >
         {relativeDropPosition && (
           <ListViewDragIndicatorElement

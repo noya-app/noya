@@ -115,6 +115,11 @@ const GridContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
+
+  '&:focus': {
+    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+    outline: 'none',
+  },
 }));
 
 const ItemTitle = styled.span<{ showBackground: boolean }>(
@@ -274,7 +279,7 @@ const GridViewItem = forwardRef(function GridViewItem<
   );
 
   let element = (
-    <GridContainer id={id} ref={forwardedRef} {...hoverProps}>
+    <GridContainer id={id} ref={forwardedRef} {...hoverProps} tabIndex={0}>
       <ItemContainer
         bordered={bordered}
         selected={selected}

@@ -48,11 +48,9 @@ export const ButtonElement = styled.button<{
     : theme.colors.inputBackground,
   color: active ? 'white' : theme.colors.text,
   opacity: disabled ? 0.25 : 1,
-  ...(variant === 'normal' && {
-    '&:focus': {
-      boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
-    },
-  }),
+  '&:focus': {
+    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+  },
   '&:hover': {
     background: theme.colors.inputBackgroundLight,
   },

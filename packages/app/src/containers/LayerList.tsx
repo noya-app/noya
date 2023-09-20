@@ -187,6 +187,7 @@ const LayerRow = memo(
         selected={!isDragging && selected}
         disabled={!visible}
         hovered={!isDragging && hovered}
+        tabIndex={-1}
         {...props}
       >
         {isEditing ? (

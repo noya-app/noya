@@ -38,12 +38,14 @@ const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 let placeholderImage = 'data:image/svg+xml,' + encodeURIComponent(svg);
 
 export function renderResolvedNode({
+  isEditable,
   resolvedNode,
   primary,
   selectionOutlineColor,
   highlightedPath,
   system,
 }: {
+  isEditable: boolean;
   resolvedNode: NoyaResolvedNode;
   primary: string;
   selectionOutlineColor: string;
@@ -71,11 +73,11 @@ export function renderResolvedNode({
 
         return (
           <span
-            contentEditable
+            contentEditable={isEditable}
             key="editable-span"
             data-path={element.path.slice(0, -1).join('/')}
             data-stringpath={element.path.join('/')}
-            tabIndex={1}
+            tabIndex={isEditable ? 1 : -1}
             style={{
               fontFamily: 'inherit',
               fontSize: 'inherit',
@@ -143,6 +145,7 @@ export function renderResolvedNode({
           key={indexPath.join('/')}
           _passthrough={{
             'data-path': element.path.join('/'),
+            ...(!isEditable && { tabIndex: -1 }),
           }}
           {...(variant && { variant })}
           {...((element.componentID === textareaSymbolId ||
@@ -211,6 +214,7 @@ export function renderDSPreview({
   // );
 
   const content = renderResolvedNode({
+    isEditable: true,
     resolvedNode,
     primary,
     selectionOutlineColor,

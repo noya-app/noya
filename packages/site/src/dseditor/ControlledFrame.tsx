@@ -54,6 +54,7 @@ export const ControlledFrame = memo(
     return (
       <iframe
         ref={handleRef}
+        tabIndex={-1}
         style={{
           width: '100%',
           height: '100%',
