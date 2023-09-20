@@ -9,12 +9,12 @@ import { FloatingBubbleLabel } from './FloatingBubbleLabel';
 
 interface Props {
   rect: Rect;
-  includePartiallyContainedLayers: boolean;
+  includePartiallyContainedLayers?: boolean;
 }
 
 export default memo(function Marquee({
   rect,
-  includePartiallyContainedLayers,
+  includePartiallyContainedLayers = true,
 }: Props) {
   const CanvasKit = useCanvasKit();
   const { primary, secondary } = useTheme().colors;

@@ -65,7 +65,7 @@ export function marqueeInteraction(actions: MarqueeActions) {
           groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
           artboards: 'childrenOnly',
           includeLockedLayers: false,
-          includePartiallyContainedLayers: origin.x < current.x,
+          // includePartiallyContainedLayers: origin.x < current.x,
           includeLayersOutsideArtboardBounds: true,
         });
 
@@ -97,7 +97,7 @@ export function marqueeInteraction(actions: MarqueeActions) {
             groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'childrenOnly',
             includeLockedLayers: false,
-            includePartiallyContainedLayers: origin.x < current.x,
+            // includePartiallyContainedLayers: origin.x < current.x,
             includeLayersOutsideArtboardBounds: true,
           });
 

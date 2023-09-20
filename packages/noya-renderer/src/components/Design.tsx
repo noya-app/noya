@@ -90,12 +90,9 @@ const DesignMarquee = memo(function DesignMarquee() {
 
   if (interactionState.type !== 'marquee') return <></>;
 
-  const { origin, current } = interactionState;
-
   return (
     <Group transform={screenTransform}>
       <Marquee
-        includePartiallyContainedLayers={origin.x < current.x}
         rect={createRect(interactionState.origin, interactionState.current)}
       />
     </Group>
