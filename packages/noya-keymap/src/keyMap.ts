@@ -3,7 +3,17 @@ import { getPlatformShortcutName, PlatformKeyboardShortcut } from './shortcuts';
 
 export const FALLTHROUGH = 'fallthrough';
 
-export type KeyCommand = () => void | typeof FALLTHROUGH;
+export type KeyCommandFunction = () => void | typeof FALLTHROUGH;
+
+export type KeyCommandOptions = {
+  allowInInput?: boolean;
+};
+
+export type KeyCommandObject = KeyCommandOptions & {
+  command: KeyCommandFunction;
+};
+
+export type KeyCommand = KeyCommandObject | KeyCommandFunction;
 
 export type KeyMap = Record<string, KeyCommand>;
 

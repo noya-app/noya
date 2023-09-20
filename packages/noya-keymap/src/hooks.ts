@@ -41,9 +41,11 @@ export function useKeyboardShortcuts(
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (elementShouldHandleOwnShortcut(event.target)) return;
+      const invokedWithinInput = elementShouldHandleOwnShortcut(event.target);
 
-      handleKeyboardEvent(event, platformName, shortcutsRef.current);
+      handleKeyboardEvent(event, platformName, shortcutsRef.current, {
+        invokedWithinInput,
+      });
     };
 
     listenerElement?.addEventListener(eventName, handler);

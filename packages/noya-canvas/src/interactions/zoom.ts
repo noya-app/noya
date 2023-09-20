@@ -78,23 +78,32 @@ export function zoomInteraction({
     return {
       ...handlers(interactionState, key, api),
       keyboardShortcuts: {
-        'Mod-=': () => {
-          api.logEvent('Project - View - Zoomed Wireframe (In)', {
-            'Old Zoom Level': api.zoomValue,
-          });
-          zoomIn();
+        'Mod-=': {
+          allowInInput: true,
+          command: () => {
+            api.logEvent('Project - View - Zoomed Wireframe (In)', {
+              'Old Zoom Level': api.zoomValue,
+            });
+            zoomIn();
+          },
         },
-        'Mod--': () => {
-          api.logEvent('Project - View - Zoomed Wireframe (Out)', {
-            'Old Zoom Level': api.zoomValue,
-          });
-          zoomOut();
+        'Mod--': {
+          allowInInput: true,
+          command: () => {
+            api.logEvent('Project - View - Zoomed Wireframe (Out)', {
+              'Old Zoom Level': api.zoomValue,
+            });
+            zoomOut();
+          },
         },
-        'Mod-0': () => {
-          api.logEvent('Project - View - Zoomed Wireframe (Actual Size)', {
-            'Old Zoom Level': api.zoomValue,
-          });
-          zoomActualSize();
+        'Mod-0': {
+          allowInInput: true,
+          command: () => {
+            api.logEvent('Project - View - Zoomed Wireframe (Actual Size)', {
+              'Old Zoom Level': api.zoomValue,
+            });
+            zoomActualSize();
+          },
         },
         'Mod-1': () => {
           zoomToFitCanvas();
