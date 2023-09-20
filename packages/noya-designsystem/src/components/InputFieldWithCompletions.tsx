@@ -153,6 +153,7 @@ interface Props {
   onSelectItem?: (item: CompletionItem) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: () => void;
+  onDeleteWhenEmpty?: () => void;
   size?: InputFieldSize;
   style?: React.CSSProperties;
   children?: React.ReactNode;
@@ -173,6 +174,7 @@ export const InputFieldWithCompletions = memo(
       onHoverItem,
       onFocus,
       onBlur,
+      onDeleteWhenEmpty,
       style,
       children,
       hideChildrenWhenFocused = false,
@@ -305,40 +307,46 @@ export const InputFieldWithCompletions = memo(
 
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'ArrowDown') {
-          handleIndexChange(
-            getNextIndex(
-              filteredItems,
-              selectedIndex,
-              'next',
-              (item) => item.type === 'sectionHeader',
-            ),
-          );
+        switch (event.key) {
+          case 'ArrowDown':
+          case 'ArrowUp':
+            handleIndexChange(
+              getNextIndex(
+                filteredItems,
+                selectedIndex,
+                event.key === 'ArrowDown' ? 'next' : 'previous',
+                (item) => item.type === 'sectionHeader',
+              ),
+            );
 
-          event.preventDefault();
-          event.stopPropagation();
-        } else if (event.key === 'ArrowUp') {
-          handleIndexChange(
-            getNextIndex(
-              filteredItems,
-              selectedIndex,
-              'previous',
-              (item) => item.type === 'sectionHeader',
-            ),
-          );
-
-          event.preventDefault();
-          event.stopPropagation();
-        } else if (event.key === 'Enter') {
-          const item = filteredItems[selectedIndex];
-          selectItem(item);
-        } else if (event.key === 'Escape') {
-          if (ref && typeof ref === 'object') {
-            ref.current?.blur();
-          }
+            event.preventDefault();
+            event.stopPropagation();
+            break;
+          case 'Enter':
+            const item = filteredItems[selectedIndex];
+            selectItem(item);
+            break;
+          case 'Escape':
+            if (ref && typeof ref === 'object') {
+              ref.current?.blur();
+            }
+            break;
+          case 'Backspace':
+          case 'Delete':
+            if (filter === '') {
+              onDeleteWhenEmpty?.();
+            }
         }
       },
-      [filteredItems, ref, handleIndexChange, selectItem, selectedIndex],
+      [
+        handleIndexChange,
+        filteredItems,
+        selectedIndex,
+        selectItem,
+        ref,
+        filter,
+        onDeleteWhenEmpty,
+      ],
     );
 
     const display = !filter && hideMenuWhenEmptyValue ? 'none' : 'flex';

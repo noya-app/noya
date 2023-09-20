@@ -14,7 +14,9 @@ import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Model } from '../../../dseditor/builders';
 import { primitiveElements } from '../../../dseditor/primitiveElements';
+import { NoyaNode } from '../../../dseditor/types';
 import { useAyonDispatch } from '../../state/ayonState';
+import { boxSymbolId } from '../../symbols/symbolIds';
 import { CustomLayerData } from '../../types';
 
 type Props = {
@@ -126,6 +128,20 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
     [customName, dispatch, selectedLayer.do_objectID],
   );
 
+  const handleDeleteWhenEmpty = useCallback(() => {
+    if (
+      !selectedLayer.data.description &&
+      (!selectedLayer.data.node || isBoxWithNoChildren(selectedLayer.data.node))
+    ) {
+      dispatch('deleteLayer', selectedLayer.do_objectID);
+    }
+  }, [
+    dispatch,
+    selectedLayer.data.description,
+    selectedLayer.data.node,
+    selectedLayer.do_objectID,
+  ]);
+
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   useKeyboardShortcuts({
@@ -154,6 +170,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         onFocus={() => setCustomName(name)}
         onChange={(value) => setCustomName(value)}
         onSelectItem={handleSelectItem}
+        onDeleteWhenEmpty={handleDeleteWhenEmpty}
         hideChildrenWhenFocused
       >
         <InputField.Button>
@@ -165,3 +182,11 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
     </InspectorPrimitives.LabeledRow>
   );
 });
+
+function isBoxWithNoChildren(node: NoyaNode) {
+  return (
+    node.type === 'noyaPrimitiveElement' &&
+    node.children.length === 0 &&
+    node.componentID === boxSymbolId
+  );
+}
