@@ -1,3 +1,4 @@
+import { Emitter } from 'noya-fonts';
 import { Rect, Size } from 'noya-geometry';
 import { castHashParameter, getUrlHashParameters } from 'noya-react-utils';
 import { encodeQueryParameters } from 'noya-utils';
@@ -41,18 +42,80 @@ type NoyaNetworkClientOptions = {
   isPreview?: boolean;
 };
 
-export type NoyaNetworkRequest = {
-  request: Request;
-  completed: boolean;
-  response?: Response;
-  abort: () => void;
-  aborted?: boolean;
-};
+export type NoyaRequestHandle = ReturnType<NoyaRequest['handle']>;
 
-type RequestListener = (
-  request: NoyaNetworkRequest,
-  response: Promise<Response>,
-) => void;
+let requestId: number = 0;
+
+export class NoyaRequest extends Emitter<void[]> {
+  constructor(request: Request) {
+    super();
+    this.#request = request;
+  }
+
+  #request: Request;
+  response?: NoyaResponse;
+  id: number = requestId++;
+  completed: boolean = false;
+  abort?: () => void;
+  aborted?: boolean;
+
+  get isStreaming() {
+    return this.response?.isStreaming ?? false;
+  }
+
+  handle() {
+    return {
+      id: this.id,
+      method: this.#request.method,
+      completed: this.completed,
+      abort: this.abort,
+      aborted: this.aborted,
+      isStreaming: this.isStreaming,
+      url: this.#request.url,
+      status: this.response?.status,
+      abortStream: () => {
+        this.response?.abortStreamController.abort();
+      },
+    };
+  }
+}
+
+export class NoyaResponse extends Emitter<boolean[]> {
+  constructor(public response: Response) {
+    super();
+  }
+
+  isStreaming = false;
+
+  abortStreamController = new AbortController();
+
+  streamString = () =>
+    streamResponse(this.response, {
+      abortSignal: this.abortStreamController.signal,
+      onChangeStatus: (isStreaming) => {
+        this.isStreaming = isStreaming;
+        this.emit(isStreaming);
+      },
+    });
+
+  get headers() {
+    return this.response.headers;
+  }
+
+  get status() {
+    return this.response.status;
+  }
+
+  get statusText() {
+    return this.response.statusText;
+  }
+
+  get json() {
+    return this.response.json.bind(this.response);
+  }
+}
+
+type RequestListener = (request: NoyaRequest) => void;
 
 export interface INoyaNetworkClient {
   auth: NoyaNetworkClient['auth'];
@@ -73,11 +136,11 @@ export class NoyaNetworkClient {
 
   #requestListeners: RequestListener[] = [];
 
-  #emitRequst = (request: NoyaNetworkRequest, response: Promise<Response>) => {
+  #emitRequest = (request: NoyaRequest) => {
     const isDebug = castHashParameter(getUrlHashParameters().debug, 'boolean');
 
     if (isDebug) {
-      this.#requestListeners.forEach((listener) => listener(request, response));
+      this.#requestListeners.forEach((listener) => listener(request));
     }
   };
 
@@ -184,7 +247,7 @@ export class NoyaNetworkClient {
     width: number;
     height: number;
   }): Promise<NoyaRandomImageResponse> => {
-    let response: Response;
+    let response: NoyaResponse;
 
     try {
       response = await this.request(
@@ -258,7 +321,7 @@ export class NoyaNetworkClient {
       { credentials: 'include' },
     );
 
-    return streamResponse(response);
+    return response.streamString();
   };
 
   #generateComponentLayoutsFromDescription = async (
@@ -277,7 +340,7 @@ export class NoyaNetworkClient {
       };
     }
 
-    let response: Response;
+    let response: NoyaResponse;
 
     try {
       response = await this.requestWithoutErrorHandling(
@@ -300,15 +363,18 @@ export class NoyaNetworkClient {
 
     return {
       provider: provider,
-      layout: streamResponse(response),
+      layout: response.streamString(),
     };
   };
 
   fetchWithBackoff = async (
     ...[input, init]: Parameters<typeof fetch>
-  ): Promise<Response> => {
+  ): Promise<NoyaResponse> => {
     let response: Response | undefined;
+    let noyaResponse: NoyaResponse | undefined;
+
     let sleepTime = 2000;
+
     while (true) {
       const controller = new AbortController();
 
@@ -321,25 +387,29 @@ export class NoyaNetworkClient {
 
       const responsePromise = fetch(request);
 
-      const noyaNetworkRequest: NoyaNetworkRequest = {
-        request,
-        completed: false,
-        response: undefined,
-        abort: () => controller.abort(),
-      };
+      const noyaNetworkRequest = new NoyaRequest(request);
+      noyaNetworkRequest.abort = () => controller.abort();
 
       request.signal.addEventListener('abort', () => {
         noyaNetworkRequest.completed = true;
         noyaNetworkRequest.aborted = true;
+        noyaNetworkRequest.emit();
       });
 
-      this.#emitRequst(noyaNetworkRequest, responsePromise);
+      this.#emitRequest(noyaNetworkRequest);
 
       try {
         response = await responsePromise;
       } finally {
         noyaNetworkRequest.completed = true;
-        noyaNetworkRequest.response = response;
+        if (response) {
+          noyaResponse = new NoyaResponse(response);
+          noyaResponse.addListener(() => {
+            noyaNetworkRequest.emit();
+          });
+          noyaNetworkRequest.response = noyaResponse;
+        }
+        noyaNetworkRequest.emit();
       }
 
       clearTimeout(id);
@@ -351,13 +421,14 @@ export class NoyaNetworkClient {
       await new Promise((resolve) => setTimeout(resolve, currentSleepTime));
       sleepTime *= 1.5;
     }
-    return response;
+
+    return noyaResponse!;
   };
 
   request = async (
     ...parameters: Parameters<typeof fetch>
-  ): Promise<Response> => {
-    let response: Response;
+  ): Promise<NoyaResponse> => {
+    let response: NoyaResponse;
 
     try {
       response = await this.requestWithoutErrorHandling(...parameters);
@@ -377,7 +448,7 @@ export class NoyaNetworkClient {
 
   requestWithoutErrorHandling = async (
     ...parameters: Parameters<typeof fetch>
-  ): Promise<Response> => {
+  ): Promise<NoyaResponse> => {
     // If the page needs to reload, don't make any more requests
     if (typeof window !== 'undefined' && window.noyaPageWillReload) {
       return new Promise(() => {}) as any;
@@ -587,7 +658,7 @@ export class NoyaNetworkClient {
     throw error;
   };
 
-  handleHTTPErrors = (response: Response) => {
+  handleHTTPErrors = (response: NoyaResponse) => {
     if (response.status === 500) {
       this.handleError(
         new NoyaAPIError('internalServerError', response.statusText),

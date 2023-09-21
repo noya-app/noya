@@ -155,6 +155,7 @@ const RowContainer = styled.div<{
   showsActiveState: boolean;
   sectionHeaderVariant: ListViewSectionHeaderVariant;
   colorScheme: ListColorScheme;
+  gap: number;
 }>(
   ({
     theme,
@@ -169,6 +170,7 @@ const RowContainer = styled.div<{
     showsActiveState,
     sectionHeaderVariant,
     colorScheme,
+    gap,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -177,6 +179,7 @@ const RowContainer = styled.div<{
         ? theme.textStyles.label
         : theme.textStyles.small),
       ...(isSectionHeader && { fontWeight: 500 }),
+      gap,
       flex: '0 0 auto',
       userSelect: 'none',
       cursor: 'default',
@@ -286,6 +289,7 @@ interface ListViewRowProps<MenuItemType extends string = string> {
   draggable?: boolean;
   hovered?: boolean;
   sortable?: boolean;
+  gap?: number;
   onPress?: (info: ListViewClickInfo) => void;
   onDoubleClick?: () => void;
   onHoverChange?: (isHovering: boolean) => void;
@@ -303,6 +307,7 @@ const ListViewRow = forwardRef(function ListViewRow<
   {
     id,
     tabIndex = 0,
+    gap,
     selected = false,
     depth = 0,
     disabled = false,
@@ -374,6 +379,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         onContextMenu={onContextMenu}
         isSectionHeader={isSectionHeader}
         id={id}
+        gap={gap}
         {...hoverProps}
         onDoubleClick={handleDoubleClick}
         marginType={marginType}

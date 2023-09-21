@@ -4,7 +4,6 @@ import {
   IconButton,
   ListView,
   Small,
-  Spacer,
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -13,7 +12,7 @@ import {
   castHashParameter,
   useUrlHashParameters,
 } from 'noya-react-utils';
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
 // If a request contains 'api/', show only the part after 'api/'
 // Otherwise, show the full URL
@@ -23,45 +22,63 @@ function formatUrl(url: string) {
 }
 
 const NetworkDebugger = memo(function NetworkDebugger() {
-  const { requests, completedRequests } = useNetworkRequests();
-
-  const allRequests = useMemo(
-    () => [...requests, ...completedRequests],
-    [completedRequests, requests],
-  );
+  const requests = useNetworkRequests();
 
   return (
     <AutoSizer>
       {(size) => (
         <ListView.Root
           scrollable
-          data={allRequests}
+          data={requests}
           keyExtractor={(request, index) => index.toString()}
           divider
           virtualized={size}
-          renderItem={({ request, completed, abort, response, aborted }) => (
-            <ListView.Row>
-              <Chip size="small">{request.method}</Chip>
-              <Spacer.Horizontal size="4px" />
+          renderItem={({
+            method,
+            completed,
+            abort,
+            url,
+            aborted,
+            abortStream,
+            isStreaming,
+            status,
+          }) => (
+            <ListView.Row
+              gap={4}
+              onPress={() => {
+                // console.log('request', request, 'response', response);
+              }}
+            >
+              <Chip size="small">{method}</Chip>
               <ListView.RowTitle>
-                <Small fontSize="11px">{formatUrl(request.url)}</Small>
+                <Small fontSize="11px">{formatUrl(url)}</Small>
               </ListView.RowTitle>
               {!completed && (
                 <>
                   <IconButton iconName="CrossCircledIcon" onClick={abort} />
                 </>
               )}
-              <Spacer.Horizontal size="4px" />
+              {isStreaming && (
+                <Chip
+                  size="small"
+                  deletable
+                  onDelete={() => {
+                    abortStream?.();
+                  }}
+                >
+                  Streaming
+                </Chip>
+              )}
               {completed && (
                 <Chip
                   size="small"
                   colorScheme={
-                    response && response.status >= 200 && response.status < 300
+                    status && status >= 200 && status < 300
                       ? 'secondary'
                       : 'primary'
                   }
                 >
-                  {response ? response.status : aborted ? 'Aborted' : '?'}
+                  {aborted ? 'Aborted' : status}
                 </Chip>
               )}
             </ListView.Row>

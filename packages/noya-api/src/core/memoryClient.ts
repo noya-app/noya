@@ -1,6 +1,6 @@
 import { uuid } from 'noya-utils';
 import { fileReducer } from './collection';
-import { INoyaNetworkClient, NoyaNetworkRequest } from './networkClient';
+import { INoyaNetworkClient, NoyaRequest } from './networkClient';
 import {
   NoyaEmailList,
   NoyaFile,
@@ -35,17 +35,11 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
   }
 
   addRequestListener(
-    listener: (
-      request: NoyaNetworkRequest,
-      response: Promise<Response>,
-    ) => void,
+    listener: (request: NoyaRequest, response: Promise<Response>) => void,
   ) {}
 
   removeRequestListener(
-    listener: (
-      request: NoyaNetworkRequest,
-      response: Promise<Response>,
-    ) => void,
+    listener: (request: NoyaRequest, response: Promise<Response>) => void,
   ) {}
 
   userData = {
