@@ -78,6 +78,7 @@ export function elementShouldHandleOwnShortcut(target: EventTarget | null) {
   if (
     element instanceof HTMLInputElement ||
     element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLIFrameElement ||
     element.hasAttribute('contenteditable')
   ) {
     return true;

@@ -28,7 +28,27 @@ export const ControlledFrame = memo(
         let ok: boolean = false;
 
         try {
-          ok = event.data.type === 'ready' && event.data.id === id;
+          if (event.data.id === id) {
+            switch (event.data.type) {
+              case 'ready': {
+                ok = true;
+                break;
+              }
+              case 'keydown': {
+                const customEvent = new KeyboardEvent('keydown', {
+                  key: event.data.command.key,
+                  keyCode: event.data.command.keyCode,
+                  altKey: event.data.command.altKey,
+                  shiftKey: event.data.command.shiftKey,
+                  ctrlKey: event.data.command.ctrlKey,
+                  metaKey: event.data.command.metaKey,
+                  bubbles: true,
+                });
+
+                ref.current?.dispatchEvent(customEvent);
+              }
+            }
+          }
         } catch (e) {}
 
         if (ok) {
@@ -87,8 +107,10 @@ export const ControlledFrame = memo(
   }
 </style>
 <script>
+  const id = ${JSON.stringify(id)};
+
   const callback = () => {
-    parent.postMessage({ type: 'ready', id: ${JSON.stringify(id)} }, '*');
+    parent.postMessage({ id, type: 'ready' }, '*');
   }
 
   if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -96,6 +118,36 @@ export const ControlledFrame = memo(
   } else {
     document.addEventListener('DOMContentLoaded', callback);
   }
+
+  // Propagate keyboard shortcuts (keydown events) to the parent window
+  window.addEventListener('keydown', function(event) {
+    // Check if Cmd (for Mac) or Ctrl (for other OS) is pressed
+    if (event.metaKey || event.ctrlKey) {
+      // If the key pressed is an arrow key or other key used during text editing
+      // allow the default behavior and return.
+      if (
+        event.key === 'ArrowLeft' || 
+        event.key === 'ArrowRight' || 
+        event.key === 'ArrowUp' || 
+        event.key === 'ArrowDown'
+      ) {
+        return;
+      }
+
+      event.preventDefault();  // Prevent the default behavior (zoom)
+
+      const command = {
+        key: event.key,
+        keyCode: event.keyCode,
+        altKey: event.altKey,
+        shiftKey: event.shiftKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+      }
+  
+      parent.postMessage({ id, type: 'keydown', command }, '*');
+    }
+  });
 </script>
 </head>
 `}
