@@ -34,13 +34,9 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
     });
   }
 
-  addRequestListener(
-    listener: (request: NoyaRequest, response: Promise<Response>) => void,
-  ) {}
+  addRequestListener(listener: (request: NoyaRequest) => void) {}
 
-  removeRequestListener(
-    listener: (request: NoyaRequest, response: Promise<Response>) => void,
-  ) {}
+  removeRequestListener(listener: (request: NoyaRequest) => void) {}
 
   userData = {
     read: async () => {

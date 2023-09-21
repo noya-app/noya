@@ -294,12 +294,18 @@ export class NoyaNetworkClient {
 
     if (!options.name) return [];
 
-    const response = await this.request(
-      `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
-        options.name,
-      )}`,
-      { credentials: 'include' },
-    );
+    let response: NoyaResponse;
+
+    try {
+      response = await this.requestWithoutErrorHandling(
+        `${this.baseURI}/generate/component/names?name=${encodeURIComponent(
+          options.name,
+        )}`,
+        { credentials: 'include' },
+      );
+    } catch {
+      return [];
+    }
 
     const json = await response.json();
 
@@ -314,12 +320,20 @@ export class NoyaNetworkClient {
   ): Promise<AsyncIterable<string>> => {
     if (this.isPreview) return streamString(name);
 
-    const response = await this.request(
-      `${this.baseURI}/generate/component/description?name=${encodeURIComponent(
-        name,
-      )}&index=${index}`,
-      { credentials: 'include' },
-    );
+    let response: NoyaResponse;
+
+    try {
+      response = await this.request(
+        `${
+          this.baseURI
+        }/generate/component/description?name=${encodeURIComponent(
+          name,
+        )}&index=${index}`,
+        { credentials: 'include' },
+      );
+    } catch {
+      return streamString(name);
+    }
 
     return response.streamString();
   };

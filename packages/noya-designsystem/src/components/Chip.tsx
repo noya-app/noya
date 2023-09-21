@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { useHover } from '../hooks/useHover';
 
-type ChipColorScheme = 'primary' | 'secondary';
+type ChipColorScheme = 'primary' | 'secondary' | 'error';
 type ChipSize = 'small' | 'medium';
 type ChipVariant = 'solid' | 'outlined' | 'ghost';
 
@@ -26,6 +26,8 @@ const ChipElement = styled.span<{
       ? 'rgb(238, 229, 255)'
       : colorScheme === 'secondary'
       ? 'rgb(205, 238, 231)'
+      : colorScheme === 'error'
+      ? 'rgb(255, 219, 219)'
       : theme.colors.inputBackground;
 
   const subtleColor =
@@ -33,6 +35,8 @@ const ChipElement = styled.span<{
       ? 'rgba(238, 229, 255, 0.2)'
       : colorScheme === 'secondary'
       ? 'rgba(205, 238, 231, 0.2)'
+      : colorScheme === 'error'
+      ? 'rgba(255, 219, 219, 0.2)'
       : 'rgba(0, 0, 0, 0.1)';
 
   return {

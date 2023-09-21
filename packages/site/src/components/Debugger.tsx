@@ -75,7 +75,7 @@ const NetworkDebugger = memo(function NetworkDebugger() {
                   colorScheme={
                     status && status >= 200 && status < 300
                       ? 'secondary'
-                      : 'primary'
+                      : 'error'
                   }
                 >
                   {aborted ? 'Aborted' : status}
