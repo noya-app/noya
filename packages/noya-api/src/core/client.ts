@@ -1,9 +1,13 @@
-import { observable } from '@legendapp/state';
+import { observable, opaqueObject } from '@legendapp/state';
 import produce from 'immer';
 import { Rect } from 'noya-geometry';
 import { memoizedGetter, range } from 'noya-utils';
 import { fileReducer } from './collection';
-import { INoyaNetworkClient, NoyaNetworkClient } from './networkClient';
+import {
+  INoyaNetworkClient,
+  NoyaNetworkClient,
+  NoyaNetworkRequest,
+} from './networkClient';
 import {
   NoyaBilling,
   NoyaEmailList,
@@ -69,9 +73,26 @@ export class NoyaClient {
   generatedLayoutIndex: Record<string, number> = {};
   randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
   loadingRandomImages$ = observable<Record<string, boolean>>({});
+  requests$ = observable<NoyaNetworkRequest[]>([]);
+  completedRequests$ = observable<NoyaNetworkRequest[]>([]);
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
+
+    networkClient.addRequestListener((request, response) => {
+      this.requests$.push(opaqueObject(request));
+
+      response.then(() => {
+        this.requests$.set((requests) => requests.filter((r) => r !== request));
+
+        this.completedRequests$.unshift(opaqueObject(request));
+
+        // Only keep the last 200 completed requests
+        if (this.completedRequests$.get().length > 200) {
+          this.completedRequests$.set((requests) => requests.slice(0, 200));
+        }
+      });
+    });
 
     if (typeof window !== 'undefined') {
       this.#fetchSession();

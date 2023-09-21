@@ -1,12 +1,12 @@
 import { uuid } from 'noya-utils';
 import { fileReducer } from './collection';
-import { INoyaNetworkClient } from './networkClient';
+import { INoyaNetworkClient, NoyaNetworkRequest } from './networkClient';
 import {
   NoyaEmailList,
   NoyaFile,
-  noyaFileListSchema,
   NoyaShare,
   NoyaSharedFile,
+  noyaFileListSchema,
 } from './schema';
 import { streamString } from './streaming';
 
@@ -33,6 +33,20 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
       },
     });
   }
+
+  addRequestListener(
+    listener: (
+      request: NoyaNetworkRequest,
+      response: Promise<Response>,
+    ) => void,
+  ) {}
+
+  removeRequestListener(
+    listener: (
+      request: NoyaNetworkRequest,
+      response: Promise<Response>,
+    ) => void,
+  ) {}
 
   userData = {
     read: async () => {

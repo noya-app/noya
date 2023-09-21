@@ -29,6 +29,7 @@ import {
   usageMeterThreshold,
 } from '../../components/Subscription';
 
+import { Debugger } from '../../components/Debugger';
 import { EditableText } from '../../components/EditableText';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { Toolbar } from '../../components/Toolbar';
@@ -293,6 +294,7 @@ export default function Project(): JSX.Element {
   return (
     <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
       <Content fileId={id} />
+      <Debugger />
     </DesignSystemConfigurationProvider>
   );
 }

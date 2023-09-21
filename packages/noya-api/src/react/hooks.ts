@@ -1,6 +1,7 @@
 import { useSelector } from '@legendapp/state/react';
 import { NoyaAPI } from 'noya-api';
 import { useMemo } from 'react';
+import { NoyaNetworkRequest } from '../core/networkClient';
 import { NoyaGeneratedName } from '../core/schema';
 import { useNoyaClient, useOptionalNoyaClient } from './context';
 
@@ -73,4 +74,13 @@ export function useRandomImages() {
   const images = useSelector(randomImages$);
   const loading = useSelector(loadingRandomImages$);
   return useMemo(() => ({ images, loading }), [loading, images]);
+}
+
+export function useNetworkRequests() {
+  const { requests$, completedRequests$ } = useNoyaClient();
+  const requests = useSelector(requests$) as NoyaNetworkRequest[];
+  const completedRequests = useSelector(
+    completedRequests$,
+  ) as NoyaNetworkRequest[];
+  return { requests, completedRequests };
 }

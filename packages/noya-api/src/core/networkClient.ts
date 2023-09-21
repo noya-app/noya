@@ -1,4 +1,5 @@
 import { Rect, Size } from 'noya-geometry';
+import { castHashParameter, getUrlHashParameters } from 'noya-react-utils';
 import { encodeQueryParameters } from 'noya-utils';
 import { z } from 'zod';
 import { NoyaAPIError } from './error';
@@ -40,6 +41,19 @@ type NoyaNetworkClientOptions = {
   isPreview?: boolean;
 };
 
+export type NoyaNetworkRequest = {
+  request: Request;
+  completed: boolean;
+  response?: Response;
+  abort: () => void;
+  aborted?: boolean;
+};
+
+type RequestListener = (
+  request: NoyaNetworkRequest,
+  response: Promise<Response>,
+) => void;
+
 export interface INoyaNetworkClient {
   auth: NoyaNetworkClient['auth'];
   files: NoyaNetworkClient['files'];
@@ -50,10 +64,32 @@ export interface INoyaNetworkClient {
   metadata: NoyaNetworkClient['metadata'];
   generate: NoyaNetworkClient['generate'];
   random: NoyaNetworkClient['random'];
+  addRequestListener: NoyaNetworkClient['addRequestListener'];
+  removeRequestListener: NoyaNetworkClient['removeRequestListener'];
 }
 
 export class NoyaNetworkClient {
   constructor(public options: NoyaNetworkClientOptions) {}
+
+  #requestListeners: RequestListener[] = [];
+
+  #emitRequst = (request: NoyaNetworkRequest, response: Promise<Response>) => {
+    const isDebug = castHashParameter(getUrlHashParameters().debug, 'boolean');
+
+    if (isDebug) {
+      this.#requestListeners.forEach((listener) => listener(request, response));
+    }
+  };
+
+  addRequestListener = (listener: RequestListener) => {
+    this.#requestListeners.push(listener);
+  };
+
+  removeRequestListener = (listener: RequestListener) => {
+    this.#requestListeners = this.#requestListeners.filter(
+      (l) => l !== listener,
+    );
+  };
 
   get baseURI() {
     return this.options.baseURI;
@@ -241,12 +277,20 @@ export class NoyaNetworkClient {
       };
     }
 
-    const response = await this.request(
-      `${this.baseURI}/generate/component/layout?name=${encodeURIComponent(
-        name,
-      )}&description=${encodeURIComponent(description)}&index=${index}`,
-      { credentials: 'include' },
-    );
+    let response: Response;
+
+    try {
+      response = await this.requestWithoutErrorHandling(
+        `${this.baseURI}/generate/component/layout?name=${encodeURIComponent(
+          name,
+        )}&description=${encodeURIComponent(description)}&index=${index}`,
+        { credentials: 'include' },
+      );
+    } catch (error) {
+      return {
+        layout: streamString(`<Box class="bg-slate-50 flex-1" />`),
+      };
+    }
 
     let provider = response.headers.get('X-Noya-Llm-Provider') ?? undefined;
 
@@ -263,17 +307,40 @@ export class NoyaNetworkClient {
   fetchWithBackoff = async (
     ...[input, init]: Parameters<typeof fetch>
   ): Promise<Response> => {
-    let response: Response;
+    let response: Response | undefined;
     let sleepTime = 2000;
     while (true) {
       const controller = new AbortController();
 
       const id = setTimeout(() => controller.abort(), 60000);
 
-      response = await fetch(input, {
+      const request = new Request(input, {
         signal: controller.signal,
         ...init,
       });
+
+      const responsePromise = fetch(request);
+
+      const noyaNetworkRequest: NoyaNetworkRequest = {
+        request,
+        completed: false,
+        response: undefined,
+        abort: () => controller.abort(),
+      };
+
+      request.signal.addEventListener('abort', () => {
+        noyaNetworkRequest.completed = true;
+        noyaNetworkRequest.aborted = true;
+      });
+
+      this.#emitRequst(noyaNetworkRequest, responsePromise);
+
+      try {
+        response = await responsePromise;
+      } finally {
+        noyaNetworkRequest.completed = true;
+        noyaNetworkRequest.response = response;
+      }
 
       clearTimeout(id);
 
@@ -290,15 +357,10 @@ export class NoyaNetworkClient {
   request = async (
     ...parameters: Parameters<typeof fetch>
   ): Promise<Response> => {
-    // If the page needs to reload, don't make any more requests
-    if (typeof window !== 'undefined' && window.noyaPageWillReload) {
-      return new Promise(() => {}) as any;
-    }
-
     let response: Response;
 
     try {
-      response = await this.fetchWithBackoff(...parameters);
+      response = await this.requestWithoutErrorHandling(...parameters);
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         // There's no way to recover here, so we'll always throw.
@@ -311,6 +373,17 @@ export class NoyaNetworkClient {
 
     this.handleHTTPErrors(response);
     return response;
+  };
+
+  requestWithoutErrorHandling = async (
+    ...parameters: Parameters<typeof fetch>
+  ): Promise<Response> => {
+    // If the page needs to reload, don't make any more requests
+    if (typeof window !== 'undefined' && window.noyaPageWillReload) {
+      return new Promise(() => {}) as any;
+    }
+
+    return this.fetchWithBackoff(...parameters);
   };
 
   #readUserData = async () => {
