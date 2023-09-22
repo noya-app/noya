@@ -6,22 +6,18 @@ import {
   IconButton,
   InputField,
   ListView,
-  RadioGroup,
   ScrollArea,
   Select,
-  Small,
   Spacer,
   Stack,
   Text,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon, MoonIcon, SunIcon } from 'noya-icons';
+import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
-import { upperFirst } from 'noya-utils';
 import React from 'react';
-import styled from 'styled-components';
-import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { InspectorSection } from '../components/InspectorSection';
+import { DSThemeInspector } from './DSThemeInspector';
 import { NoyaComponent } from './types';
 
 const designSystems = {
@@ -29,20 +25,7 @@ const designSystems = {
   '@noya-design-system/antd': 'Ant Design',
   '@noya-design-system/chakra': 'Chakra UI',
 };
-
-const colorGroups = Object.entries(tailwindColors).flatMap(([name, colors]) => {
-  if (typeof colors === 'string') return [];
-
-  return name;
-});
-
 const noop = () => {};
-
-const SwatchGrid = styled.div({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(24px, 1fr))',
-  gap: '4px',
-});
 
 interface Props {
   name: string;
@@ -70,12 +53,8 @@ export function DSProjectInspector({
   onSelectComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
-
   const {
     source: { name: sourceName },
-    config: {
-      colors: { primary },
-    },
   } = ds;
 
   return (
@@ -112,80 +91,16 @@ export function DSProjectInspector({
               </Select>
             </InspectorPrimitives.LabeledRow>
           </InspectorSection>
-          <InspectorSection title="Theme" titleTextStyle="heading4">
-            <InspectorPrimitives.LabeledRow label="Primary Color">
-              <Select
-                id="primary-color"
-                value={primary}
-                options={colorGroups}
-                getTitle={upperFirst}
-                onChange={(value) => {
-                  setDS((state) =>
-                    produce(state, (draft) => {
-                      draft.config.colors.primary = value;
-                    }),
-                  );
-                }}
-              >
-                <Button flex="1">
-                  {primary}
-                  <Spacer.Horizontal />
-                  <ChevronDownIcon />
-                </Button>
-              </Select>
-            </InspectorPrimitives.LabeledRow>
-            <SwatchGrid>
-              {colorGroups.map((name) => (
-                <div
-                  key={name}
-                  role="button"
-                  onClick={() => {
-                    setDS((state) =>
-                      produce(state, (draft) => {
-                        draft.config.colors.primary = name;
-                      }),
-                    );
-                  }}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    background: (tailwindColors as any)[name as any][500],
-                    // Selected
-                    boxShadow:
-                      name === primary
-                        ? `0 0 0 2px ${theme.colors.primary}, 0 0 0 1px white inset`
-                        : undefined,
-                  }}
-                />
-              ))}
-            </SwatchGrid>
-            <InspectorPrimitives.LabeledRow label="Color Mode">
-              <RadioGroup.Root
-                id="color-mode"
-                value={ds.config.colorMode}
-                onValueChange={(value: 'light' | 'dark') => {
-                  setDS((state) =>
-                    produce(state, (draft) => {
-                      draft.config.colorMode = value;
-                    }),
-                  );
-                }}
-              >
-                <RadioGroup.Item value="light">
-                  <SunIcon />
-                  <Spacer.Horizontal size="6px" />
-                  <Small>Light</Small>
-                </RadioGroup.Item>
-                <RadioGroup.Item value="dark">
-                  <MoonIcon />
-                  <Spacer.Horizontal size="6px" />
-                  <Small>Dark</Small>
-                </RadioGroup.Item>
-              </RadioGroup.Root>
-            </InspectorPrimitives.LabeledRow>
-          </InspectorSection>
+          <DSThemeInspector
+            dsConfig={ds.config}
+            onChangeDSConfig={(config) => {
+              setDS((state) =>
+                produce(state, (draft) => {
+                  draft.config = config;
+                }),
+              );
+            }}
+          />
           <InspectorSection title="Components" titleTextStyle="heading4">
             <InspectorPrimitives.SectionHeader>
               <InspectorPrimitives.Title>Components</InspectorPrimitives.Title>

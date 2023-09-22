@@ -59,7 +59,7 @@ export function renderDSOverview({
   const sectionStyle: CSSProperties = {
     padding: '20px',
     borderRadius: '4px',
-    background: 'white',
+    // background: 'white',
     border: '1px solid #eee',
     display: 'flex',
     flexDirection: 'column',
@@ -82,7 +82,7 @@ export function renderDSOverview({
         gap: '12px',
         display: 'flex',
         flexDirection: 'column',
-        background: backgroundColor,
+        // background: backgroundColor,
         minHeight: '100%',
       }}
     >
