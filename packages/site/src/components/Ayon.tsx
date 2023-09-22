@@ -6,7 +6,6 @@ import {
   Chip,
   DropdownMenu,
   Popover,
-  RadioGroup,
   SEPARATOR_ITEM,
   Small,
   Spacer,
@@ -18,10 +17,8 @@ import { toZipFile } from 'noya-filesystem';
 import { Size } from 'noya-geometry';
 import {
   ChevronDownIcon,
-  CursorArrowIcon,
   FigmaLogoIcon,
   FileIcon,
-  GroupIcon,
   ImageIcon,
   PlusIcon,
   SketchLogoIcon,
@@ -142,116 +139,73 @@ function Workspace({
 
     setLeftToolbar(
       <Stack.H alignSelf={'center'} width={99}>
-        <RadioGroup.Root
-          value={cursorType}
-          colorScheme="secondary"
-          allowEmpty
-          onValueChange={(value: typeof cursorType) => {
-            if (!value || value === 'pointer') {
-              dispatch('interaction', ['reset']);
-              return;
-            }
-
-            switch (value) {
-              case 'region': {
-                dispatch('interaction', ['enableSelectionMode', 'mouse']);
-                break;
-              }
-              case 'insert': {
+        <Popover
+          sideOffset={0}
+          open={showInsertBlockOnboarding}
+          onClickClose={() => {
+            setOnboardingStep?.('insertedBlock');
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+          }}
+          closable
+          trigger={
+            <Button
+              variant={cursorType === 'insert' ? 'secondary' : undefined}
+              onClick={() => {
                 setOnboardingStep?.('insertedBlock');
                 dispatch('interaction', [
                   'insert',
                   { symbolId: boxSymbolId },
                   'mouse',
                 ]);
-                break;
+              }}
+              tooltip={
+                !showInsertBlockOnboarding && (
+                  <Stack.V alignItems="start">
+                    <Small fontWeight={600}>Insert Tool</Small>
+                    <Small>Click and drag to draw a component.</Small>
+                    <Small>
+                      Hold{' '}
+                      <Chip colorScheme="secondary">
+                        {getCurrentPlatform(navigator) === 'mac'
+                          ? 'Cmd ⌘'
+                          : 'Ctrl'}
+                      </Chip>{' '}
+                      to activate.
+                    </Small>
+                  </Stack.V>
+                )
               }
-            }
-          }}
+            >
+              <PlusIcon />
+              <Spacer.Horizontal size="6px" inline />
+              Insert Component
+            </Button>
+          }
         >
-          <RadioGroup.Item
-            value="pointer"
-            tooltip={
-              <Stack.V alignItems="start">
-                <Small fontWeight={600}>Pointer Tool</Small>
-                <Small>Click to select and drag blocks.</Small>
-              </Stack.V>
-            }
-          >
-            <CursorArrowIcon />
-          </RadioGroup.Item>
-          <Popover
-            sideOffset={0}
-            open={showInsertBlockOnboarding}
-            onClickClose={() => {
-              setOnboardingStep?.('insertedBlock');
-            }}
-            onCloseAutoFocus={(event) => {
-              event.preventDefault();
-            }}
-            closable
-            trigger={
-              <RadioGroup.Item
-                value="insert"
-                tooltip={
-                  !showInsertBlockOnboarding && (
-                    <Stack.V alignItems="start">
-                      <Small fontWeight={600}>Insert Tool</Small>
-                      <Small>Click and drag to draw a component.</Small>
-                      <Small>
-                        Hold{' '}
-                        <Chip colorScheme="secondary">
-                          {getCurrentPlatform(navigator) === 'mac'
-                            ? 'Cmd ⌘'
-                            : 'Ctrl'}
-                        </Chip>{' '}
-                        to activate.
-                      </Small>
-                    </Stack.V>
-                  )
-                }
-              >
-                <PlusIcon />
-              </RadioGroup.Item>
-            }
-          >
-            <Stack.V width={300} padding={20} gap={10}>
-              <Small fontWeight={'bold'}>Step 1: Insert a block</Small>
-              <Small>
-                Use the insert tool{' '}
-                <PlusIcon
-                  style={{
-                    display: 'inline-block',
-                    verticalAlign: 'text-bottom',
-                    scale: 0.85,
-                  }}
-                />{' '}
-                to draw a component on the left canvas.
-              </Small>
-              <Small>
-                You can activate this tool at any time by holding{' '}
-                <Chip colorScheme="secondary">
-                  {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
-                </Chip>
-              </Small>
-              <OnboardingAnimation src={InsertBlockWebp.src} />
-            </Stack.V>
-          </Popover>
-          <RadioGroup.Item
-            value="region"
-            tooltip={
-              <Stack.V alignItems="start">
-                <Small fontWeight={600}>Region Tool</Small>
-                <Small>Click and drag to draw a region.</Small>
-                <Small>
-                  Hold <Chip colorScheme="secondary">Shift</Chip> to activate.
-                </Small>
-              </Stack.V>
-            }
-          >
-            <GroupIcon />
-          </RadioGroup.Item>
-        </RadioGroup.Root>
+          <Stack.V width={300} padding={20} gap={10}>
+            <Small fontWeight={'bold'}>Step 1: Insert a component</Small>
+            <Small>
+              Use the insert tool{' '}
+              <PlusIcon
+                style={{
+                  display: 'inline-block',
+                  verticalAlign: 'text-bottom',
+                  scale: 0.85,
+                }}
+              />{' '}
+              to draw a component on the left canvas.
+            </Small>
+            <Small>
+              You can activate this tool at any time by holding{' '}
+              <Chip colorScheme="secondary">
+                {getCurrentPlatform(navigator) === 'mac' ? 'Cmd ⌘' : 'Ctrl'}
+              </Chip>
+            </Small>
+            <OnboardingAnimation src={InsertBlockWebp.src} />
+          </Stack.V>
+        </Popover>
       </Stack.H>,
     );
   }, [
