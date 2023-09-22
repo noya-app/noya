@@ -1,3 +1,4 @@
+import Sketch from 'noya-file-format';
 import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
 
@@ -48,12 +49,7 @@ export type DSSource = {
   version: string;
 };
 
-export type DSConfig = {
-  colorMode?: 'light' | 'dark';
-  colors: {
-    primary: string;
-  };
-};
+export type DSConfig = Sketch.DesignSystemThemeConfig;
 
 export type DS = {
   source: DSSource;

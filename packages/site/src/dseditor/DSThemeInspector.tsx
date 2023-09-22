@@ -28,11 +28,18 @@ export const SwatchGrid = styled.div({
   gap: '4px',
 });
 
+const DEFAULT_DS_CONFIG: DS['config'] = {
+  colorMode: 'light',
+  colors: {
+    primary: 'blue',
+  },
+};
+
 export function DSThemeInspector({
-  dsConfig,
+  dsConfig = DEFAULT_DS_CONFIG,
   onChangeDSConfig,
 }: {
-  dsConfig: DS['config'];
+  dsConfig?: DS['config'];
   onChangeDSConfig: (config: DS['config']) => void;
 }) {
   const {

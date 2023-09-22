@@ -61,7 +61,7 @@ export const DSProvider = function DSProvider({
         version: 'latest',
         type: 'npm',
       },
-      config: {
+      config: savedOrDefault?.config ?? {
         colorMode: 'light',
         colors: {
           primary: 'blue',
@@ -70,7 +70,7 @@ export const DSProvider = function DSProvider({
     };
 
     return result;
-  }, [savedOrDefault.id, savedOrDefault.type]);
+  }, [savedOrDefault?.config, savedOrDefault.id, savedOrDefault.type]);
 
   return (
     <DSContext.Provider

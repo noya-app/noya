@@ -1698,6 +1698,13 @@ export type Document = {
 export type DesignSystem = {
   id: string;
   type: 'standard' | 'custom';
+  config?: DesignSystemThemeConfig;
+};
+export type DesignSystemThemeConfig = {
+  colorMode?: 'light' | 'dark';
+  colors: {
+    primary: string;
+  };
 };
 /**
  * Union of all layers

@@ -1,5 +1,6 @@
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { DSConfig } from 'noya-api';
 import { Insets, Size } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
@@ -66,6 +67,7 @@ export type WorkspaceAction<T = never> =
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setIsContextMenuOpen', value: boolean]
   | [type: 'setDesignSystem', type: 'standard' | 'custom', id: string]
+  | [type: 'setDesignSystemConfig', dsConfig: DSConfig]
   | HistoryAction<T>;
 
 export function workspaceReducer(
@@ -80,10 +82,28 @@ export function workspaceReducer(
       const [, type, id] = action;
 
       return produce(state, (draft) => {
+        const existingConfig =
+          draft.history.present.sketch.document.designSystem?.config;
+
         draft.history.present.sketch.document.designSystem = {
           type,
           id,
+          config: existingConfig,
         };
+      });
+    }
+    case 'setDesignSystemConfig': {
+      const [, dsConfig] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.history.present.sketch.document.designSystem) {
+          draft.history.present.sketch.document.designSystem = {
+            id: '@noya-design-system/chakra',
+            type: 'standard',
+          };
+        }
+
+        draft.history.present.sketch.document.designSystem.config = dsConfig;
       });
     }
     case 'newFile': {

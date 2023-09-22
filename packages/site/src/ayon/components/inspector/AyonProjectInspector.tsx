@@ -22,6 +22,7 @@ import { Layers, Selectors } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
+import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
 
 const sizeList = [
   {
@@ -242,6 +243,12 @@ export function AyonProjectInspector({
           </DropdownMenu>
         </InspectorPrimitives.LabeledRow>
       </InspectorSection>
+      <DSThemeInspector
+        dsConfig={currentDesignSystem.config}
+        onChangeDSConfig={(config) => {
+          dispatch('setDesignSystemConfig', config);
+        }}
+      />
       <InspectorSection title="Actions" titleTextStyle="heading4">
         <Button onClick={onDuplicate}>Duplicate Project</Button>
       </InspectorSection>
