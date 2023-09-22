@@ -6,7 +6,7 @@ import { fileReducer } from './collection';
 import {
   INoyaNetworkClient,
   NoyaNetworkClient,
-  NoyaRequestHandle,
+  NoyaRequestSnapshot,
 } from './networkClient';
 import {
   NoyaBilling,
@@ -73,17 +73,17 @@ export class NoyaClient {
   generatedLayoutIndex: Record<string, number> = {};
   randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
   loadingRandomImages$ = observable<Record<string, boolean>>({});
-  requests$ = observable<NoyaRequestHandle[]>([]);
+  requests$ = observable<NoyaRequestSnapshot[]>([]);
 
   constructor({ networkClient }: NoyaClientOptions) {
     this.networkClient = networkClient;
 
     networkClient.addRequestListener((request) => {
-      this.requests$.unshift(request.handle());
+      this.requests$.unshift(request.snapshot());
 
       request.addListener(() => {
         this.requests$.set((requests) =>
-          requests.map((r) => (r.id === request.id ? request.handle() : r)),
+          requests.map((r) => (r.id === request.id ? request.snapshot() : r)),
         );
 
         // Only keep the last 200 requests

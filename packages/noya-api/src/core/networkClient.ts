@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 import { Emitter } from 'noya-fonts';
 import { Rect, Size } from 'noya-geometry';
 import { castHashParameter, getUrlHashParameters } from 'noya-react-utils';
@@ -42,28 +43,40 @@ type NoyaNetworkClientOptions = {
   isPreview?: boolean;
 };
 
-export type NoyaRequestHandle = ReturnType<NoyaRequest['handle']>;
+export type NoyaRequestSnapshot = ReturnType<NoyaRequest['snapshot']>;
 
 let requestId: number = 0;
 
 export class NoyaRequest extends Emitter<void[]> {
-  constructor(request: Request) {
+  constructor(request: Request, abort: () => void) {
     super();
     this.#request = request;
+    this.abort = abort;
   }
 
+  id: number = requestId++;
   #request: Request;
   response?: NoyaResponse;
-  id: number = requestId++;
   completed: boolean = false;
-  abort?: () => void;
-  aborted?: boolean;
+  abort: () => void;
+  aborted: boolean = false;
+  attempt: number = 1;
 
   get isStreaming() {
     return this.response?.isStreaming ?? false;
   }
 
-  handle() {
+  retryWithRequest(request: Request, abort: () => void) {
+    this.#request = request;
+    this.response = undefined;
+    this.completed = false;
+    this.abort = abort;
+    this.aborted = false;
+    this.attempt++;
+    this.emit();
+  }
+
+  snapshot() {
     return {
       id: this.id,
       method: this.#request.method,
@@ -73,6 +86,7 @@ export class NoyaRequest extends Emitter<void[]> {
       isStreaming: this.isStreaming,
       url: this.#request.url,
       status: this.response?.status,
+      attempt: this.attempt,
       abortStream: () => {
         this.response?.abortStreamController.abort();
       },
@@ -396,8 +410,8 @@ export class NoyaNetworkClient {
     ...[input, init]: Parameters<typeof fetch>
   ): Promise<NoyaResponse> => {
     let response: Response | undefined;
+    let noyaRequest: NoyaRequest | undefined;
     let noyaResponse: NoyaResponse | undefined;
-
     let sleepTime = 2000;
 
     while (true) {
@@ -418,29 +432,25 @@ export class NoyaNetworkClient {
 
       const responsePromise = fetch(request);
 
-      const noyaNetworkRequest = new NoyaRequest(request);
-      noyaNetworkRequest.abort = () => controller.abort();
-
-      request.signal.addEventListener('abort', () => {
-        noyaNetworkRequest.completed = true;
-        noyaNetworkRequest.aborted = true;
-        noyaNetworkRequest.emit();
-      });
-
-      this.#emitRequest(noyaNetworkRequest);
+      if (!noyaRequest) {
+        noyaRequest = new NoyaRequest(request, () => controller.abort());
+        this.#emitRequest(noyaRequest);
+      } else {
+        noyaRequest.retryWithRequest(request, () => controller.abort());
+      }
 
       try {
         response = await responsePromise;
       } finally {
-        noyaNetworkRequest.completed = true;
-        if (response) {
-          noyaResponse = new NoyaResponse(response);
-          noyaResponse.addListener(() => {
-            noyaNetworkRequest.emit();
-          });
-          noyaNetworkRequest.response = noyaResponse;
-        }
-        noyaNetworkRequest.emit();
+        noyaResponse = response ? new NoyaResponse(response) : undefined;
+        noyaResponse?.addListener(() => {
+          noyaRequest?.emit();
+        });
+
+        noyaRequest.completed = true;
+        noyaRequest.aborted = controller.signal.aborted;
+        noyaRequest.response = noyaResponse;
+        noyaRequest.emit();
       }
 
       clearTimeout(id);

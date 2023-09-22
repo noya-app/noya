@@ -115,6 +115,7 @@ const NetworkDebugger = memo(function NetworkDebugger() {
               abortStream,
               isStreaming,
               status,
+              attempt,
             }) => (
               <ListView.Row
                 gap={4}
@@ -131,10 +132,12 @@ const NetworkDebugger = memo(function NetworkDebugger() {
                     <IconButton iconName="CrossCircledIcon" onClick={abort} />
                   </>
                 )}
+                {attempt > 1 && <Chip size="small">Attempt {attempt}</Chip>}
                 {isStreaming && (
                   <Chip
                     size="small"
                     deletable
+                    colorScheme="primary"
                     onDelete={() => {
                       abortStream?.();
                     }}
