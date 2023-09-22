@@ -223,6 +223,8 @@ export class NoyaClient {
   componentLayoutCacheKey = (name: string, description: string) =>
     `${name.trim().toLowerCase()}:${description.trim().toLowerCase()}`;
 
+  #outstandingLayoutRequests = new Map<string, AbortController>();
+
   #generateComponentLayouts = async (options: {
     name: string;
     description: string;
@@ -248,12 +250,16 @@ export class NoyaClient {
     this.generatedLayoutIndex[key] = this.generatedLayoutIndex[key] ?? 0;
     const baseIndex = this.generatedLayoutIndex[key];
 
+    const abortController = new AbortController();
+    this.#outstandingLayoutRequests.set(key, abortController);
+
     const promises = rangeArray.map(async (index) => {
       const generated =
         await this.networkClient.generate.componentLayoutsFromDescription(
           name,
           description,
           baseIndex + index,
+          abortController.signal,
         );
 
       let text = '';
@@ -296,6 +302,9 @@ export class NoyaClient {
     const index = this.generatedLayoutIndex[key];
     this.generatedLayoutIndex[key] =
       index !== undefined ? index + GENERATED_LAYOUT_COUNT : 0;
+
+    const abortController = this.#outstandingLayoutRequests.get(key);
+    abortController?.abort();
   };
 
   #fetchSession = async () => {

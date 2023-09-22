@@ -342,6 +342,7 @@ export class NoyaNetworkClient {
     name: string,
     description: string,
     index: number,
+    abortSignal?: AbortSignal,
   ): Promise<{
     provider?: string;
     layout: AsyncIterable<string>;
@@ -361,13 +362,23 @@ export class NoyaNetworkClient {
         `${this.baseURI}/generate/component/layout?name=${encodeURIComponent(
           name,
         )}&description=${encodeURIComponent(description)}&index=${index}`,
-        { credentials: 'include' },
+        { credentials: 'include', signal: abortSignal },
       );
     } catch (error) {
       return {
         layout: streamString(`<Box class="bg-slate-50 flex-1" />`),
       };
     }
+
+    if (abortSignal?.aborted) {
+      return {
+        layout: streamString(`<Box class="bg-slate-50 flex-1" />`),
+      };
+    }
+
+    abortSignal?.addEventListener('abort', () => {
+      response.abortStreamController.abort();
+    });
 
     let provider = response.headers.get('X-Noya-Llm-Provider') ?? undefined;
 
@@ -391,6 +402,12 @@ export class NoyaNetworkClient {
 
     while (true) {
       const controller = new AbortController();
+
+      if (init?.signal) {
+        init.signal.addEventListener('abort', () => {
+          controller.abort();
+        });
+      }
 
       const id = setTimeout(() => controller.abort(), 60000);
 

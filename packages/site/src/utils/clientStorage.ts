@@ -5,6 +5,9 @@ const ClientStorageDefinitions = {
   ayonOnboardingStep: 'noya-ayon-onboarding-step',
   welcomeCardDismissed: 'noya-ayon-welcome-card-dismissed',
   ayonLayerInspectorView: 'noya-ayon-layer-inspector-view',
+  networkDebuggerFilter: 'noya-ayon-network-debugger-filter',
+  networkDebuggerPendingFilter: 'noya-ayon-network-debugger-pending-filter',
+  networkDebuggerStreamingFilter: 'noya-ayon-network-debugger-streaming-filter',
 };
 
 export const ayonOnboardingStep = [
@@ -15,7 +18,7 @@ export const ayonOnboardingStep = [
   'dismissedSupportInfo',
 ] as const;
 
-export type AyonOnboardingStep = typeof ayonOnboardingStep[number];
+export type AyonOnboardingStep = (typeof ayonOnboardingStep)[number];
 
 type ClientStorageKey = keyof typeof ClientStorageDefinitions;
 
