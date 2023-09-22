@@ -155,7 +155,8 @@ const RowContainer = styled.div<{
   showsActiveState: boolean;
   sectionHeaderVariant: ListViewSectionHeaderVariant;
   colorScheme: ListColorScheme;
-  gap: number;
+  gap: CSSProperties['gap'];
+  backgroundColor?: CSSProperties['backgroundColor'];
 }>(
   ({
     theme,
@@ -171,6 +172,7 @@ const RowContainer = styled.div<{
     sectionHeaderVariant,
     colorScheme,
     gap,
+    backgroundColor,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -240,6 +242,9 @@ const RowContainer = styled.div<{
       ...(divider && {
         borderBottom: `1px solid ${theme.colors.dividerSubtle}`,
       }),
+      ...(backgroundColor && {
+        backgroundColor,
+      }),
     };
   },
 );
@@ -289,7 +294,8 @@ interface ListViewRowProps<MenuItemType extends string = string> {
   draggable?: boolean;
   hovered?: boolean;
   sortable?: boolean;
-  gap?: number;
+  gap?: CSSProperties['gap'];
+  backgroundColor?: CSSProperties['backgroundColor'];
   onPress?: (info: ListViewClickInfo) => void;
   onDoubleClick?: () => void;
   onHoverChange?: (isHovering: boolean) => void;
@@ -308,6 +314,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     id,
     tabIndex = 0,
     gap,
+    backgroundColor,
     selected = false,
     depth = 0,
     disabled = false,
@@ -380,6 +387,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         isSectionHeader={isSectionHeader}
         id={id}
         gap={gap}
+        backgroundColor={backgroundColor}
         {...hoverProps}
         onDoubleClick={handleDoubleClick}
         marginType={marginType}

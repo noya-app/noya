@@ -305,6 +305,7 @@ export class NoyaClient {
 
     const abortController = this.#outstandingLayoutRequests.get(key);
     abortController?.abort();
+    this.#outstandingLayoutRequests.delete(key);
   };
 
   #fetchSession = async () => {

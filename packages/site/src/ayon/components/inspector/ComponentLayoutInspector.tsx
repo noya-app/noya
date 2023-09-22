@@ -76,10 +76,17 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
   // but no generated layouts, generate them
   useEffect(() => {
     if (
+      generatedLayout.length === 0 &&
       selectedLayer.name &&
       selectedLayer.data.description &&
       selectedLayer.data.layoutGenerationSource &&
-      generatedLayout.length === 0
+      isDeepEqual(
+        {
+          name: selectedLayer.name,
+          description: selectedLayer.data.description,
+        },
+        selectedLayer.data.layoutGenerationSource,
+      )
     ) {
       client.generate.componentLayouts({
         name: selectedLayer.name,

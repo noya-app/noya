@@ -27,6 +27,7 @@ function formatUrl(url: string) {
 }
 
 const NetworkDebugger = memo(function NetworkDebugger() {
+  const theme = useDesignSystemTheme();
   const requests = useNetworkRequests();
   const [filter, setFilter] = usePersistentState('networkDebuggerFilter');
   const [pendingFilter, setPendingFilter] = usePersistentState<'on' | 'off'>(
@@ -63,7 +64,7 @@ const NetworkDebugger = memo(function NetworkDebugger() {
 
   return (
     <>
-      <Stack.V padding="10px" gap="8px">
+      <Stack.V padding="12px" gap="8px">
         <Stack.H>
           <InputField.Root>
             <InputField.Input
@@ -83,7 +84,7 @@ const NetworkDebugger = memo(function NetworkDebugger() {
             onDelete={() => setPendingFilter('off')}
             colorScheme={pendingFilter === 'on' ? 'secondary' : undefined}
           >
-            {pendingCount} pending
+            {pendingCount} in flight
           </Chip>
           <Chip
             size="small"
@@ -118,10 +119,12 @@ const NetworkDebugger = memo(function NetworkDebugger() {
               attempt,
             }) => (
               <ListView.Row
-                gap={4}
-                onPress={() => {
-                  // console.log('request', request, 'response', response);
-                }}
+                gap="4px"
+                backgroundColor={
+                  completed && !isStreaming
+                    ? theme.colors.dividerSubtle
+                    : undefined
+                }
               >
                 <Chip size="small">{method}</Chip>
                 <ListView.RowTitle>
@@ -132,7 +135,7 @@ const NetworkDebugger = memo(function NetworkDebugger() {
                     <IconButton iconName="CrossCircledIcon" onClick={abort} />
                   </>
                 )}
-                {attempt > 1 && <Chip size="small">Attempt {attempt}</Chip>}
+                {attempt > 1 && <Chip size="small">Retry {attempt - 1}</Chip>}
                 {isStreaming && (
                   <Chip
                     size="small"
