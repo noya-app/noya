@@ -127,7 +127,7 @@ const DOMRendererContent = memo(
             <DSControlledRenderer
               ref={forwardedRef}
               sourceName={ds.source.name}
-              primary={ds.config.colors.primary}
+              config={ds.config}
               sync={sync}
               setHighlightedPath={(path) => {
                 if (!selectedLayerId) return;

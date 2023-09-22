@@ -6,14 +6,16 @@ import {
   IconButton,
   InputField,
   ListView,
+  RadioGroup,
   ScrollArea,
   Select,
+  Small,
   Spacer,
   Stack,
   Text,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
+import { ChevronDownIcon, MoonIcon, SunIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { upperFirst } from 'noya-utils';
 import React from 'react';
@@ -159,6 +161,30 @@ export function DSProjectInspector({
                 />
               ))}
             </SwatchGrid>
+            <InspectorPrimitives.LabeledRow label="Color Mode">
+              <RadioGroup.Root
+                id="color-mode"
+                value={ds.config.colorMode}
+                onValueChange={(value: 'light' | 'dark') => {
+                  setDS((state) =>
+                    produce(state, (draft) => {
+                      draft.config.colorMode = value;
+                    }),
+                  );
+                }}
+              >
+                <RadioGroup.Item value="light">
+                  <SunIcon />
+                  <Spacer.Horizontal size="6px" />
+                  <Small>Light</Small>
+                </RadioGroup.Item>
+                <RadioGroup.Item value="dark">
+                  <MoonIcon />
+                  <Spacer.Horizontal size="6px" />
+                  <Small>Dark</Small>
+                </RadioGroup.Item>
+              </RadioGroup.Root>
+            </InspectorPrimitives.LabeledRow>
           </InspectorSection>
           <InspectorSection title="Components" titleTextStyle="heading4">
             <InspectorPrimitives.SectionHeader>

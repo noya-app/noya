@@ -6,6 +6,7 @@ import {
   component,
   transform,
 } from '@noya-design-system/protocol';
+import { DSConfig } from 'noya-api';
 import { Stack } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
 import { useStableCallback } from 'noya-react-utils';
@@ -59,7 +60,7 @@ export interface IDSRenderer {
 
 type Props = {
   sourceName: string;
-  primary: string;
+  config: DSConfig;
   renderContent: (options: DSRenderProps) => React.ReactNode;
   serializedSelection?: SerializedSelection;
   setSerializedSelection?: (value: SerializedSelection | undefined) => void;
@@ -72,7 +73,7 @@ type Props = {
 export const DSRenderer = forwardRef(function DSRenderer(
   {
     sourceName,
-    primary,
+    config,
     renderContent,
     serializedSelection,
     setSerializedSelection,
@@ -130,9 +131,9 @@ export const DSRenderer = forwardRef(function DSRenderer(
     if (!system || !system.themeTransformer) return undefined;
 
     const t: Theme = {
-      colorMode: 'light',
+      colorMode: config.colorMode ?? 'light',
       colors: {
-        primary: (tailwindColors as any)[primary as any],
+        primary: (tailwindColors as any)[config.colors.primary ?? 'blue'],
         neutral: tailwindColors.slate,
       },
     };
@@ -140,7 +141,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     const themeValue = transform({ theme: t }, system.themeTransformer);
 
     return themeValue;
-  }, [primary, system]);
+  }, [config.colorMode, config.colors.primary, system]);
 
   const lock = useRef(false);
 
@@ -155,7 +156,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     const content = renderContent({
       system,
       theme,
-      primary,
+      primary: config.colors.primary,
       iframe,
     });
 
@@ -182,10 +183,10 @@ export const DSRenderer = forwardRef(function DSRenderer(
     renderContent,
     root,
     system,
-    primary,
     serializedSelection,
     ready,
     sync,
+    config.colors.primary,
   ]);
 
   useEffect(() => {

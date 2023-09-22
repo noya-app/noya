@@ -1,4 +1,6 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { DSConfig } from 'noya-api';
+import { darkTheme, lightTheme } from 'noya-designsystem';
 import { findLast, unique } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
@@ -193,14 +195,14 @@ export function renderResolvedNode({
 export function renderDSPreview({
   renderProps: props,
   highlightedPath,
-  primary,
+  dsConfig,
   resolvedNode,
   canvasBackgroundColor,
   selectionOutlineColor,
 }: {
   renderProps: DSRenderProps;
   highlightedPath: string[] | undefined;
-  primary: string;
+  dsConfig: DSConfig;
   resolvedNode: NoyaResolvedNode;
   canvasBackgroundColor: string;
   selectionOutlineColor: string;
@@ -216,16 +218,26 @@ export function renderDSPreview({
   const content = renderResolvedNode({
     isEditable: true,
     resolvedNode,
-    primary,
+    primary: dsConfig.colors.primary,
     selectionOutlineColor,
     highlightedPath,
     system: props.system,
   });
 
+  const colorMode = dsConfig.colorMode ?? 'light';
+  const noyaTheme = colorMode === 'light' ? lightTheme : darkTheme;
+  const bgColor = noyaTheme.colors.canvas.background;
+  const dotColor =
+    colorMode === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.15)';
+
+  const computedBackgroundColor = props.iframe.contentWindow?.getComputedStyle(
+    props.iframe.contentDocument!.body,
+  ).backgroundColor;
+
   return (
     <div
       style={{
-        backgroundImage: `radial-gradient(circle at 0px 0px, rgba(0,0,0,0.25) 1px, ${canvasBackgroundColor} 0px)`,
+        backgroundImage: `radial-gradient(circle at 0px 0px, ${dotColor} 1px, ${bgColor} 0px)`,
         backgroundSize: '10px 10px',
         flex: 1,
         display: 'flex',
@@ -238,9 +250,10 @@ export function renderDSPreview({
       <div
         style={{
           display: 'flex',
-          background: 'white',
+          background: computedBackgroundColor,
           overflow: 'hidden',
           position: 'relative',
+          transition: 'background 0.2s',
         }}
       >
         {content}

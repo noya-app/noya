@@ -43,9 +43,7 @@ export function DSEditor({
 
   const {
     source: { name: sourceName },
-    config: {
-      colors: { primary },
-    },
+    config,
     components = initialComponents,
   } = ds as DS & {
     components: NoyaComponent[];
@@ -173,7 +171,7 @@ export function DSEditor({
         return renderDSPreview({
           renderProps: props,
           highlightedPath,
-          primary,
+          dsConfig: config,
           resolvedNode,
           canvasBackgroundColor: theme.colors.canvas.background,
           selectionOutlineColor: theme.colors.primary,
@@ -187,7 +185,7 @@ export function DSEditor({
     },
     [
       highlightedPath,
-      primary,
+      config,
       resolvedNode,
       selection,
       theme.colors.canvas.background,
@@ -224,7 +222,7 @@ export function DSEditor({
         <DSControlledRenderer
           ref={rendererRef}
           sourceName={sourceName}
-          primary={primary}
+          config={config}
           renderContent={handleRenderContent}
           getStringValueAtPath={(path) => {
             if (!resolvedNode) return undefined;

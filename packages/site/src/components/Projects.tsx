@@ -107,6 +107,7 @@ export function Projects() {
         version: 'latest',
       },
       config: {
+        colorMode: 'light',
         colors: {
           primary: 'blue',
         },

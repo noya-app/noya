@@ -49,6 +49,7 @@ export type DSSource = {
 };
 
 export type DSConfig = {
+  colorMode?: 'light' | 'dark';
   colors: {
     primary: string;
   };

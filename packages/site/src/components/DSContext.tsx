@@ -62,6 +62,7 @@ export const DSProvider = function DSProvider({
         type: 'npm',
       },
       config: {
+        colorMode: 'light',
         colors: {
           primary: 'blue',
         },

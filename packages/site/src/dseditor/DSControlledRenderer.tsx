@@ -7,7 +7,7 @@ import { SerializedSelection, closest } from './dom';
 
 type Props = Pick<
   ComponentProps<typeof DSRenderer>,
-  'primary' | 'sourceName' | 'renderContent' | 'setHighlightedPath' | 'sync'
+  'config' | 'sourceName' | 'renderContent' | 'setHighlightedPath' | 'sync'
 > & {
   onChangeTextAtPath?: (args: { path: string[]; value: string }) => void;
   getStringValueAtPath: (path: string[]) => string | undefined;
