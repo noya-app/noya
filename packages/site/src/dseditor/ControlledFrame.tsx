@@ -129,7 +129,15 @@ export const ControlledFrame = memo(
         event.key === 'ArrowLeft' || 
         event.key === 'ArrowRight' || 
         event.key === 'ArrowUp' || 
-        event.key === 'ArrowDown'
+        event.key === 'ArrowDown' ||
+        event.key === 'Backspace' ||
+        event.key === 'Delete' ||
+        event.key === 'a' ||
+        event.key === 'c' ||
+        event.key === 'v' ||
+        event.key === 'x' ||
+        event.key === 'z' ||
+        event.key === 'y'
       ) {
         return;
       }
