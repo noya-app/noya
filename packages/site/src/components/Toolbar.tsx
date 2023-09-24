@@ -183,7 +183,7 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                       return;
                     case 'introVideo':
                       openInNewTab(
-                        'https://vimeo.com/noyasoftware/noya-welcome-video',
+                        'https://vimeo.com/noyasoftware/noya-beta-overview',
                       );
                       return;
                     case 'help':
