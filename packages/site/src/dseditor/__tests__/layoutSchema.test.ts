@@ -22,13 +22,16 @@ describe('none', () => {
 });
 
 describe('nodes', () => {
-  test('removes string child', () => {
+  test('wraps string child', () => {
     const root = Model.primitiveElement({
       componentID: boxSymbolId,
       children: [Model.string({ value: 'foo' })],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
-    expect(result.children.length).toEqual(0);
+    expect(result.children.length).toEqual(1);
+    expect((result.children[0] as NoyaPrimitiveElement).componentID).toEqual(
+      textSymbolId,
+    );
   });
 });
 
@@ -63,6 +66,7 @@ describe('stringOrNodes', () => {
       ],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
+    expect(result.children.length).toEqual(2);
     expect((result.children[0] as NoyaPrimitiveElement).componentID).toEqual(
       textSymbolId,
     );

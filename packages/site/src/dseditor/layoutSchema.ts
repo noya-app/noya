@@ -45,8 +45,13 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
           transformedChildren = [];
           break;
         case 'nodes':
-          transformedChildren = transformedChildren.filter(
-            (node) => node.type !== 'noyaString',
+          transformedChildren = transformedChildren.map((node) =>
+            node.type === 'noyaString'
+              ? Model.primitiveElement({
+                  componentID: textSymbolId,
+                  children: [node],
+                })
+              : node,
           );
           break;
         case 'stringOrNodes': {
