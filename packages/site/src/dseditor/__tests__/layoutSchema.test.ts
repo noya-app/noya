@@ -4,6 +4,7 @@ import {
   imageSymbolId,
   selectOptionSymbolId,
   selectSymbolId,
+  textSymbolId,
 } from '../../ayon/symbols/symbolIds';
 import { Model } from '../builders';
 import { enforceSchema } from '../layoutSchema';
@@ -51,7 +52,7 @@ describe('stringOrNodes', () => {
     expect((result.children[0] as NoyaString).value).toEqual('foobar');
   });
 
-  test('removes string child if there is a node', () => {
+  test('wraps string child in text element if there is a node', () => {
     const root = Model.primitiveElement({
       componentID: buttonSymbolId,
       children: [
@@ -62,7 +63,9 @@ describe('stringOrNodes', () => {
       ],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
-    expect(result.children.length).toEqual(1);
+    expect((result.children[0] as NoyaPrimitiveElement).componentID).toEqual(
+      textSymbolId,
+    );
   });
 });
 

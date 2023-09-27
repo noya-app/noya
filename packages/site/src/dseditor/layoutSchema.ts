@@ -1,4 +1,5 @@
 import { partition } from 'noya-utils';
+import { textSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_MAP } from './primitiveElements';
 import { ElementHierarchy } from './traversal';
@@ -53,9 +54,16 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
             transformedChildren,
             (node): node is NoyaString => node.type === 'noyaString',
           );
-          // If there are elements, remove all strings
+          // If there are elements, wrap each string in a text nodes
           if (elements.length > 0) {
-            transformedChildren = elements;
+            transformedChildren = transformedChildren.map((node) =>
+              node.type === 'noyaString'
+                ? Model.primitiveElement({
+                    componentID: textSymbolId,
+                    children: [node],
+                  })
+                : node,
+            );
           }
           // If multiple strings, merge them
           else if (strings.length > 1) {
