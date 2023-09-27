@@ -104,6 +104,10 @@ const tailwindClassMapping: Record<string, string> = {
   transition: '',
   'duration-500': '',
   fixed: '',
+  'list-none': '',
+  'list-disc': '',
+  'list-decimal': '',
+  bullet: '',
 };
 
 function rewriteClasses(
