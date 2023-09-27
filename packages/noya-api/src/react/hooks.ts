@@ -3,7 +3,11 @@ import { NoyaAPI } from 'noya-api';
 import { useMemo } from 'react';
 import { NoyaRequestSnapshot } from '../core/networkClient';
 import { NoyaGeneratedName } from '../core/schema';
-import { useNoyaClient, useOptionalNoyaClient } from './context';
+import {
+  useNoyaClient,
+  useNoyaClientOrFallback,
+  useOptionalNoyaClient,
+} from './context';
 
 export function useNoyaFiles() {
   const files = useSelector(useNoyaClient().files$);
@@ -44,7 +48,7 @@ export function useMetadata<T extends NoyaAPI.Json>(key: string) {
 
 export function useGeneratedComponentNames(name: string) {
   const key = name.trim().toLowerCase();
-  const { generatedNames$, loadingNames$ } = useNoyaClient();
+  const { generatedNames$, loadingNames$ } = useNoyaClientOrFallback();
   const result = useSelector(
     () => generatedNames$[key].get() as NoyaGeneratedName[] | undefined,
   );
@@ -53,7 +57,8 @@ export function useGeneratedComponentNames(name: string) {
 }
 
 export function useGeneratedComponentDescriptions() {
-  const { generatedDescriptions$, loadingDescriptions$ } = useNoyaClient();
+  const { generatedDescriptions$, loadingDescriptions$ } =
+    useNoyaClientOrFallback();
   const descriptions = useSelector(generatedDescriptions$);
   const loading = useSelector(loadingDescriptions$);
   return useMemo(() => ({ descriptions, loading }), [loading, descriptions]);
@@ -61,7 +66,8 @@ export function useGeneratedComponentDescriptions() {
 
 export function useGeneratedComponentDescription(name: string) {
   const key = name.trim().toLowerCase();
-  const { generatedDescriptions$, loadingDescriptions$ } = useNoyaClient();
+  const { generatedDescriptions$, loadingDescriptions$ } =
+    useNoyaClientOrFallback();
   const description = useSelector(
     () => generatedDescriptions$[key].get() as string | undefined,
   );
@@ -70,14 +76,14 @@ export function useGeneratedComponentDescription(name: string) {
 }
 
 export function useRandomImages() {
-  const { randomImages$, loadingRandomImages$ } = useNoyaClient();
+  const { randomImages$, loadingRandomImages$ } = useNoyaClientOrFallback();
   const images = useSelector(randomImages$);
   const loading = useSelector(loadingRandomImages$);
   return useMemo(() => ({ images, loading }), [loading, images]);
 }
 
 export function useNetworkRequests() {
-  const { requests$ } = useNoyaClient();
+  const { requests$ } = useNoyaClientOrFallback();
   const requests = useSelector(requests$) as NoyaRequestSnapshot[];
   return requests;
 }

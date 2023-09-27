@@ -1,9 +1,9 @@
-import { DS, useNoyaClient } from 'noya-api';
+import { DS, useNoyaClientOrFallback } from 'noya-api';
 import Sketch from 'noya-file-format';
 import React, { useEffect, useMemo, useState } from 'react';
 
 const useDSReference = (fileId: string | undefined) => {
-  const client = useNoyaClient();
+  const client = useNoyaClientOrFallback();
 
   const [ds, setDS] = useState<DS | undefined>();
 

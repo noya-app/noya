@@ -1,7 +1,7 @@
 import {
   DS,
   useGeneratedComponentDescriptions,
-  useNoyaClient,
+  useNoyaClientOrFallback,
   useRandomImages,
 } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
@@ -80,7 +80,7 @@ export const Content = memo(function Content({
   name: string;
   onChangeName?: (name: string) => void;
 }) {
-  const client = useNoyaClient();
+  const client = useNoyaClientOrFallback();
   const [toastData, setToastData] = useState<
     { attribution: Attribution; key: string } | undefined
   >();

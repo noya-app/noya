@@ -1,4 +1,4 @@
-import { DS, useNoyaClient } from 'noya-api';
+import { DS, useNoyaClientOrFallback } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import { lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -66,7 +66,7 @@ const DOMRendererContent = memo(
     },
     forwardedRef: React.ForwardedRef<IDSRenderer>,
   ): JSX.Element {
-    const client = useNoyaClient();
+    const client = useNoyaClientOrFallback();
     const [state, dispatch] = useAyonState();
     const { canvasInsets, highlightedLayer } = useWorkspace();
     const page = Selectors.getCurrentPage(state);
