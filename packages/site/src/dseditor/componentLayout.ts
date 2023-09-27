@@ -83,9 +83,7 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
           ?.split(' ')
           .map((value) => Model.className(value)),
         props: [
-          ...(elementName === 'Image' && node.attributes.src
-            ? [Model.stringProp({ name: 'src', value: node.attributes.src })]
-            : elementName === 'Image' && node.attributes.alt
+          ...(elementName === 'Image' && node.attributes.alt
             ? [
                 Model.generatorProp({
                   name: 'src',

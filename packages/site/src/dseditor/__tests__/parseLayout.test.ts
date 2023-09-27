@@ -1,11 +1,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import { parseLayout } from '../componentLayout';
-import {
-  NoyaGeneratorProp,
-  NoyaPrimitiveElement,
-  NoyaStringProp,
-} from '../types';
+import { NoyaGeneratorProp, NoyaPrimitiveElement } from '../types';
 
 // Jest doesn't know how to import a text file, so we mock it
 jest.mock('../../../safelist.txt', () => {
@@ -17,16 +13,18 @@ jest.mock('../../../safelist.txt', () => {
   };
 });
 
-it('parses image src', () => {
+// Sometimes generated layouts will have references to images that don't exist
+// e.g. logo.png, so we ignore any generated image srcs
+it('ignores image src', () => {
   const element = parseLayout(
     '<Image src="https://via.placeholder.com/150" />',
   ) as NoyaPrimitiveElement;
 
-  const prop0 = element.props[0] as NoyaStringProp;
+  const prop0 = element.props[0] as NoyaGeneratorProp;
 
-  expect(prop0.type).toEqual('string');
-  expect(prop0.name).toEqual('src');
-  expect(prop0.value).toEqual('https://via.placeholder.com/150');
+  expect(prop0.type).toEqual('generator');
+  expect(prop0.generator).toEqual('random-image');
+  expect(prop0.query).toEqual('landscape');
 });
 
 it('parses image alt', () => {
