@@ -310,8 +310,13 @@ export function rewriteIconSize(layout: LayoutNode) {
   });
 }
 
+const iconWidthRE = /^w-(1|2|3|4|5|6)$/;
+const iconHeightRE = /^h-(1|2|3|4|5|6)$/;
+
 /**
- * If an Image has "icon" in its name or alt, replace the image with an Icon.
+ * Replace Image with Icon if:
+ * - Image has "icon" in its name or alt
+ * - Image has width and height 6 or less
  */
 export function rewriteImageToIcon(layout: LayoutNode) {
   return LayoutHierarchy.map<LayoutNode | string>(
@@ -319,15 +324,22 @@ export function rewriteImageToIcon(layout: LayoutNode) {
     (node, transformedChildren) => {
       if (typeof node === 'string') return node;
 
-      if (
-        node.tag === 'Image' &&
-        (node.attributes.alt?.match(/icon/i) ||
-          node.attributes.name?.match(/icon/i))
-      ) {
-        return {
-          ...node,
-          tag: 'Icon',
-        };
+      if (node.tag === 'Image') {
+        if (
+          node.attributes.alt?.match(/icon/i) ||
+          node.attributes.name?.match(/icon/i)
+        ) {
+          return { ...node, tag: 'Icon' };
+        }
+
+        const classes = parseClasses(node.attributes.class);
+
+        if (
+          classes.some((name) => iconWidthRE.test(name)) &&
+          classes.some((name) => iconHeightRE.test(name))
+        ) {
+          return { ...node, tag: 'Icon' };
+        }
       }
 
       return {
@@ -347,6 +359,10 @@ export function rewriteSvgToIcon(layout: LayoutNode) {
       if (node.tag === 'svg') {
         return {
           ...node,
+          attributes: {
+            ...node.attributes,
+            alt: node.attributes.alt ?? node.attributes.name ?? 'icon',
+          },
           tag: 'Icon',
         };
       }
@@ -464,8 +480,8 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteHTMLEntities(layout);
   layout = rewriteImagesWithChildren(layout);
-  layout = rewriteImageToIcon(layout);
   layout = rewriteSvgToIcon(layout);
+  layout = rewriteImageToIcon(layout);
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);

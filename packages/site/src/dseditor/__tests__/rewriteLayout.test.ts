@@ -151,13 +151,16 @@ it('adds w-6 and h-6 to icons without a size', () => {
   );
 });
 
-it('convert images to icons if they contain "icon"', () => {
+it('convert images to icons if they contain "icon" or are icon-sized', () => {
   expect(rewriteImageToIcon(layoutNode('Image', { name: 'icon' }))).toEqual(
     layoutNode('Icon', { name: 'icon' }),
   );
   expect(
     rewriteImageToIcon(layoutNode('Image', { alt: 'Some Icon Test' })),
   ).toEqual(layoutNode('Icon', { alt: 'Some Icon Test' }));
+  expect(rewriteImageToIcon(layoutNode('Image', { class: 'w-4 h-4' }))).toEqual(
+    layoutNode('Icon', { class: 'w-4 h-4' }),
+  );
 });
 
 it('normalizes spacing to 4 units', () => {

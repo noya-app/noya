@@ -27,6 +27,7 @@ const IMAGE_ALT_REWRITE_MAP = new Set([
   'or',
   'of',
   'and',
+  'for',
   'supporting',
   'visual',
   'like',
@@ -83,13 +84,13 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
         children: transformedChildren,
         classNames: classes.map((value) => Model.className(value)),
         props: [
-          ...(elementName === 'Image' && node.attributes.alt
+          ...(elementName === 'Image'
             ? [
                 Model.generatorProp({
                   name: 'src',
                   generator:
                     initialTag === 'icon' ? 'random-icon' : 'random-image',
-                  query: rewriteImageAlt(node.attributes.alt),
+                  query: rewriteImageAlt(node.attributes.alt ?? 'landscape'),
                 }),
               ]
             : []),
