@@ -6,6 +6,24 @@ import {
   hasClassGroup,
 } from '../ayon/tailwind/tailwind';
 
+export function rewriteRemoveHiddenElements(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      return {
+        ...node,
+        children: transformedChildren.filter(
+          (child) =>
+            typeof child === 'string' ||
+            !child.attributes.class?.includes('hidden'),
+        ),
+      };
+    },
+  ) as LayoutNode;
+}
+
 let domParser: DOMParser | undefined;
 
 /**
@@ -511,6 +529,7 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
 // }
 
 export function rewriteLayout(layout: LayoutNode) {
+  layout = rewriteRemoveHiddenElements(layout);
   layout = rewriteHTMLEntities(layout);
   layout = rewriteImagesWithChildren(layout);
   layout = rewriteSvgToIcon(layout);

@@ -14,6 +14,7 @@ import {
   rewriteInferFlex,
   rewriteInlineFlexButtonAndLink,
   rewritePositionedParent,
+  rewriteRemoveHiddenElements,
   rewriteRootClasses,
   rewriteTailwindClasses,
   unescapeHTML,
@@ -210,4 +211,21 @@ it('unescapes html entities', () => {
   expect(
     rewriteHTMLEntities(layoutNode('Text', {}, ['  hello&lt;world  '])),
   ).toEqual(layoutNode('Text', {}, ['  hello<world  ']));
+});
+
+it('removes hidden elements', () => {
+  expect(
+    rewriteRemoveHiddenElements(
+      layoutNode('Box', {}, [
+        layoutNode('Box'),
+        layoutNode('Box', { class: 'hidden' }),
+        layoutNode('Box', { class: 'flex' }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', {}, [
+      layoutNode('Box'),
+      layoutNode('Box', { class: 'flex' }),
+    ]),
+  );
 });
