@@ -471,9 +471,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'minWidth': {
       const value = getValue(className);
       return {
-        minWidth: (config.theme as any).minWidth(themeParameter)[
-          value || 'none'
-        ],
+        minWidth: (config.theme as any).minWidth[value || 'none'],
       };
     }
     case 'maxHeight': {
@@ -487,9 +485,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'minHeight': {
       const value = getValue(className);
       return {
-        minHeight: (config.theme as any).minHeight(themeParameter)[
-          value || 'none'
-        ],
+        minHeight: (config.theme as any).minHeight[value || 'none'],
       };
     }
     case 'top':

@@ -203,6 +203,30 @@ describe('resolves styles', () => {
       top: '1rem',
     });
   });
+
+  it('minWidth', () => {
+    expect(resolveTailwindClass('min-w-0')).toEqual({
+      minWidth: '0px',
+    });
+  });
+
+  it('maxWidth', () => {
+    expect(resolveTailwindClass('max-w-full')).toEqual({
+      maxWidth: '100%',
+    });
+  });
+
+  it('minHeight', () => {
+    expect(resolveTailwindClass('min-h-0')).toEqual({
+      minHeight: '0px',
+    });
+  });
+
+  it('maxHeight', () => {
+    expect(resolveTailwindClass('max-h-full')).toEqual({
+      maxHeight: '100%',
+    });
+  });
 });
 
 describe('parameters', () => {
