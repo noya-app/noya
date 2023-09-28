@@ -67,6 +67,10 @@ export const classGroups = {
   items: /^items/,
   width: /^w-/,
   height: /^h-/,
+  minWidth: /^min-w-/,
+  minHeight: /^min-h-/,
+  maxWidth: /^max-w-/,
+  maxHeight: /^max-h-/,
   aspectRatio: /^aspect-/,
   top: /^top-/,
   right: /^right-/,
@@ -179,7 +183,11 @@ function configSelector(...keyPath: string[]) {
   return get(config.theme as any, keyPath);
 }
 
-const themeParameter = { theme: configSelector, colors: tailwindColors };
+const themeParameter = {
+  theme: configSelector,
+  colors: tailwindColors,
+  breakpoints: () => {},
+};
 
 export function getColor(className: string) {
   const custom = customValueRE.exec(className)?.[1];
@@ -450,6 +458,38 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const value = getValue(className);
       return {
         width: (config.theme as any).width(themeParameter)[value || 'auto'],
+      };
+    }
+    case 'maxWidth': {
+      const value = getValue(className);
+      return {
+        maxWidth: (config.theme as any).maxWidth(themeParameter)[
+          value || 'none'
+        ],
+      };
+    }
+    case 'minWidth': {
+      const value = getValue(className);
+      return {
+        minWidth: (config.theme as any).minWidth(themeParameter)[
+          value || 'none'
+        ],
+      };
+    }
+    case 'maxHeight': {
+      const value = getValue(className);
+      return {
+        maxHeight: (config.theme as any).maxHeight(themeParameter)[
+          value || 'none'
+        ],
+      };
+    }
+    case 'minHeight': {
+      const value = getValue(className);
+      return {
+        minHeight: (config.theme as any).minHeight(themeParameter)[
+          value || 'none'
+        ],
       };
     }
     case 'top':

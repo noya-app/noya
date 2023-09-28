@@ -5,7 +5,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /^(grow|shrink|inset-|object-|top-|right-|bottom-|left-|flex|absolute|relative|shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self|underline|line-through|overline|no-underline|backdrop).*/,
+        /^(grow|shrink|inset-|object-|top-|right-|bottom-|left-|flex|absolute|relative|shadow|border|rounded|opacity|bg|fill|blur|text|font|flex|items|justify|gap|basis|aspect|p-|px-|py-|pt-|pr-|pb-|pl-|m-|mx-|my-|mt-|mr-|mb-|ml-|truncate|leading|self|underline|line-through|overline|no-underline|backdrop|max-w-|min-w-|max-h-|min-h-).*/,
     },
   ],
   plugins: [
@@ -22,6 +22,10 @@ module.exports = {
         'relative',
         'w-{width}',
         'h-{height}',
+        'max-w-{maxWidth}',
+        'max-h-{maxHeight}',
+        'min-w-{minWidth}',
+        'min-h-{minHeight}',
         'top-{inset}',
         'right-{inset}',
         'bottom-{inset}',
