@@ -8,6 +8,8 @@ import {
   rewriteFlex1ButtonInColumn,
   rewriteForbiddenClassGroups,
   rewriteHTMLEntities,
+  rewriteIconSize,
+  rewriteImageToIcon,
   rewriteImagesWithChildren,
   rewriteInferFlex,
   rewritePositionedParent,
@@ -132,6 +134,30 @@ it('removes flex-1 from button in a flex-col', () => {
   ).toEqual(
     layoutNode('Box', { class: 'flex flex-col' }, [layoutNode('Button')]),
   );
+});
+
+it('adds w-6 and h-6 to icons without a size', () => {
+  expect(rewriteIconSize(layoutNode('Icon'))).toEqual(
+    layoutNode('Icon', { class: 'w-6 h-6' }),
+  );
+  expect(rewriteIconSize(layoutNode('Icon', { class: 'w-1/3' }))).toEqual(
+    layoutNode('Icon', { class: 'w-1/3 h-6' }),
+  );
+  expect(rewriteIconSize(layoutNode('Icon', { class: 'h-1/3' }))).toEqual(
+    layoutNode('Icon', { class: 'h-1/3 w-6' }),
+  );
+  expect(rewriteIconSize(layoutNode('Icon', { class: 'w-1/3 h-1/3' }))).toEqual(
+    layoutNode('Icon', { class: 'w-1/3 h-1/3' }),
+  );
+});
+
+it('convert images to icons if they contain "icon"', () => {
+  expect(rewriteImageToIcon(layoutNode('Image', { name: 'icon' }))).toEqual(
+    layoutNode('Icon', { name: 'icon' }),
+  );
+  expect(
+    rewriteImageToIcon(layoutNode('Image', { alt: 'Some Icon Test' })),
+  ).toEqual(layoutNode('Icon', { alt: 'Some Icon Test' }));
 });
 
 it('normalizes spacing to 4 units', () => {

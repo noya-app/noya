@@ -295,6 +295,70 @@ export function rewriteFlex1ButtonInColumn(layout: LayoutNode) {
   });
 }
 
+/**
+ * If an icon doesn't have a width and/or height, add a width and/or height of 24.
+ */
+export function rewriteIconSize(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    if (node.tag !== 'Icon') return;
+    if (!hasClassGroup('width', classes)) {
+      classes.push('w-6');
+    }
+    if (!hasClassGroup('height', classes)) {
+      classes.push('h-6');
+    }
+  });
+}
+
+/**
+ * If an Image has "icon" in its name or alt, replace the image with an Icon.
+ */
+export function rewriteImageToIcon(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      if (
+        node.tag === 'Image' &&
+        (node.attributes.alt?.match(/icon/i) ||
+          node.attributes.name?.match(/icon/i))
+      ) {
+        return {
+          ...node,
+          tag: 'Icon',
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
+export function rewriteSvgToIcon(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      if (node.tag === 'svg') {
+        return {
+          ...node,
+          tag: 'Icon',
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
 export function rewritePositionedParent(layout: LayoutNode) {
   return LayoutHierarchy.map<LayoutNode | string>(
     layout,
@@ -400,9 +464,12 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteHTMLEntities(layout);
   layout = rewriteImagesWithChildren(layout);
+  layout = rewriteImageToIcon(layout);
+  layout = rewriteSvgToIcon(layout);
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);
+  layout = rewriteIconSize(layout);
   layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);

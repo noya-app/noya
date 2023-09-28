@@ -35,3 +35,17 @@ it('removes comments', () => {
     ],
   });
 });
+
+it('parses data attributes', () => {
+  expect(
+    parseComponentLayout(`
+    <div name="test" [data-tab-active="Tab 1"]>
+      Content
+    </div>
+  `),
+  ).toEqual<LayoutNode>({
+    tag: 'div',
+    attributes: { name: 'test' },
+    children: ['Content'],
+  });
+});

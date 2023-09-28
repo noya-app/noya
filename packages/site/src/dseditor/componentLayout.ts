@@ -71,23 +71,24 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
         return Model.string({ value: node });
       }
 
-      const primitive =
-        PRIMITIVE_TAG_MAP[node.tag.toLowerCase()] ?? PRIMITIVE_TAG_MAP['box'];
+      const initialTag = node.tag.toLowerCase();
+      const tag = initialTag === 'icon' ? 'image' : initialTag;
+      const primitive = PRIMITIVE_TAG_MAP[tag] ?? PRIMITIVE_TAG_MAP['box'];
       const elementName = primitive.name;
+      const classes = node.attributes.class?.split(' ') ?? [];
 
       return Model.primitiveElement({
         componentID: primitive.id,
         name: node.attributes.name || primitive.name,
         children: transformedChildren,
-        classNames: node.attributes.class
-          ?.split(' ')
-          .map((value) => Model.className(value)),
+        classNames: classes.map((value) => Model.className(value)),
         props: [
           ...(elementName === 'Image' && node.attributes.alt
             ? [
                 Model.generatorProp({
                   name: 'src',
-                  generator: 'random-image',
+                  generator:
+                    initialTag === 'icon' ? 'random-icon' : 'random-image',
                   query: rewriteImageAlt(node.attributes.alt),
                 }),
               ]

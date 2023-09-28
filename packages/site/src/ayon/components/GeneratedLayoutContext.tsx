@@ -28,9 +28,10 @@ function findAllQueries(root: NoyaNode): Query[] {
   });
 }
 
-function replaceAllImages(
+function replaceAllAssets(
   root: NoyaNode,
   images: Record<string, NoyaAPI.RandomImageResponse>,
+  icons: Record<string, NoyaAPI.RandomIconResponse>,
 ) {
   return ElementHierarchy.map<NoyaNode>(root, (node, transformedChildren) => {
     if (node.type !== 'noyaPrimitiveElement') return node;
@@ -38,19 +39,25 @@ function replaceAllImages(
     return {
       ...node,
       children: transformedChildren,
-      props: node.props.map((prop) =>
-        prop.name === 'src' &&
-        prop.type === 'generator' &&
-        prop.generator === 'random-image' &&
-        !prop.result &&
-        images[prop.query]
-          ? {
+      props: node.props.map((prop) => {
+        if (prop.name === 'src' && prop.type === 'generator' && !prop.result) {
+          if (prop.generator === 'random-image' && images[prop.query]) {
+            return {
               ...prop,
               result: images[prop.query].url,
               resolvedQuery: prop.query,
-            }
-          : prop,
-      ),
+            };
+          } else if (prop.generator === 'random-icon' && icons[prop.query]) {
+            return {
+              ...prop,
+              result: icons[prop.query].icons[0] ?? '',
+              resolvedQuery: prop.query,
+            };
+          }
+        }
+
+        return prop;
+      }),
     };
   });
 }
@@ -110,7 +117,7 @@ class GeneratedLayoutManager {
           );
 
           return {
-            node: replaceAllImages(generated.layout, images),
+            node: replaceAllAssets(generated.layout, images, icons),
             loading: layoutLoading || assetsLoading,
             provider: generated.provider,
           };

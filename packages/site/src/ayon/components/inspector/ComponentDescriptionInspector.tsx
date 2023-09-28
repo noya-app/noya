@@ -118,10 +118,8 @@ export const ComponentDescriptionInspector = memo(
             readOnly={generatedDescription.loading}
             onChange={(event) => handleSetDescription(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                // If the user is holding shift, insert a newline
-                if (event.shiftKey) return;
-
+              // If the user is holding cmd/ctrl and presses enter, generate the layout
+              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
                 event.stopPropagation();
                 event.preventDefault();
 

@@ -62,6 +62,11 @@ export function parseComponentLayout(source: string): LayoutNode {
   // Replace html-style comments "<!-- ... -->" with an empty string.
   source = source.replace(/<!--.*?-->/gs, '');
 
+  // Replace data attributes "[data-...]" with an empty string.
+  // This isn't valid HTML but can appear in GPT3.5 output.
+  // E.g. <div name="foo" [data-tab-active="Tab 1"]>
+  source = source.replace(/\[data-.*?\]/gs, '');
+
   const sourceFile = ts.createSourceFile(
     'temp.tsx',
     source,
