@@ -98,6 +98,8 @@ const tailwindClassMapping: Record<string, string> = {
   'text-xs': '',
   'text-base': '',
   grow: 'flex-1',
+  'flex-grow': 'grow',
+  'flex-shrink': 'shrink',
   'flex-column': 'flex-col',
   'flex-column-reverse': 'flex-col-reverse',
   gap: 'gap-2',
@@ -298,13 +300,13 @@ export function rewriteFlex1ButtonInColumn(layout: LayoutNode) {
 /**
  * If a button has multiple children, apply inline-flex and gap-2 to the button.
  */
-export function rewriteInlineFlexButton(layout: LayoutNode) {
+export function rewriteInlineFlexButtonAndLink(layout: LayoutNode) {
   // eslint-disable-next-line @shopify/prefer-early-return
   return rewriteClasses(layout, (node, indexPath, classes) => {
     if (
-      node.tag === 'Button' &&
+      (node.tag === 'Button' || node.tag === 'Link') &&
       node.children.length > 1 &&
-      !classes.includes('inline-flex')
+      !hasClassGroup('display', classes)
     ) {
       classes.push('inline-flex');
 
@@ -497,6 +499,17 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
   ) as LayoutNode;
 }
 
+// export function rewriteAlwaysFlexGap(layout: LayoutNode) {
+//   return rewriteClasses(layout, (node, indexPath, classes) => {
+//     if (
+//       !hasClassGroup('gap', classes) &&
+//       (classes.includes('flex') || classes.includes('inline-flex'))
+//     ) {
+//       classes.push('gap-4');
+//     }
+//   });
+// }
+
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteHTMLEntities(layout);
   layout = rewriteImagesWithChildren(layout);
@@ -505,7 +518,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);
-  layout = rewriteInlineFlexButton(layout);
+  layout = rewriteInlineFlexButtonAndLink(layout);
   layout = rewriteIconSize(layout);
   layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);

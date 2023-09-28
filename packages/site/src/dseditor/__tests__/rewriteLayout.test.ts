@@ -12,7 +12,7 @@ import {
   rewriteImageToIcon,
   rewriteImagesWithChildren,
   rewriteInferFlex,
-  rewriteInlineFlexButton,
+  rewriteInlineFlexButtonAndLink,
   rewritePositionedParent,
   rewriteRootClasses,
   rewriteTailwindClasses,
@@ -139,7 +139,7 @@ it('removes flex-1 from button in a flex-col', () => {
 
 it('adds inline-flex and gap-2 to buttons with multiple children', () => {
   expect(
-    rewriteInlineFlexButton(
+    rewriteInlineFlexButtonAndLink(
       layoutNode('Box', {}, [
         layoutNode('Button', {}, [layoutNode('Text')]),
         layoutNode('Button', {}, [layoutNode('Text'), layoutNode('Text')]),
