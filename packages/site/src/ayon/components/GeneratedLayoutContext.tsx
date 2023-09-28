@@ -4,9 +4,14 @@ import { NoyaAPI, useNoyaClient, useOptionalNoyaClient } from 'noya-api';
 import React, { memo } from 'react';
 import { parseLayout } from '../../dseditor/componentLayout';
 import { ElementHierarchy } from '../../dseditor/traversal';
-import { NoyaNode } from '../../dseditor/types';
+import { NoyaGeneratorProp, NoyaNode } from '../../dseditor/types';
 
-function findAllQueries(root: NoyaNode) {
+type Query = {
+  query: string;
+  type: NoyaGeneratorProp['generator'];
+};
+
+function findAllQueries(root: NoyaNode): Query[] {
   return ElementHierarchy.flatMap(root, (node) => {
     if (node.type !== 'noyaPrimitiveElement') return [];
 
@@ -14,7 +19,12 @@ function findAllQueries(root: NoyaNode) {
 
     if (!src || src.type !== 'generator') return [];
 
-    return [src.query];
+    return [
+      {
+        query: src.query,
+        type: src.generator,
+      },
+    ];
   });
 }
 
@@ -54,8 +64,15 @@ class GeneratedLayoutManager {
         .map((generated) => generated.layout);
       const queries = elements.flatMap(findAllQueries);
 
-      queries.forEach((query) => {
-        client.random.image({ query, width: 1000, height: 1000 });
+      queries.forEach(({ query, type }) => {
+        switch (type) {
+          case 'random-image':
+            client.random.image({ query, width: 1000, height: 1000 });
+            break;
+          case 'random-icon':
+            client.random.icon({ query });
+            break;
+        }
       });
     });
   }
@@ -78,6 +95,7 @@ class GeneratedLayoutManager {
     const layouts = this.layouts$.get();
     const layoutsLoading = this.client.loadingLayouts$.get();
     const images = this.client.randomImages$.get();
+    const icons = this.client.randomIcons$.get();
 
     return Object.fromEntries(
       Object.entries(layouts).map(([key, layouts]) => [
@@ -85,11 +103,15 @@ class GeneratedLayoutManager {
         layouts.map((generated, index) => {
           const queries = findAllQueries(generated.layout);
           const layoutLoading = layoutsLoading[key]?.[index];
-          const imagesLoading = queries.some((query) => !images[query]);
+          const assetsLoading = queries.some((query) =>
+            query.type === 'random-image'
+              ? !images[query.query]
+              : !icons[query.query],
+          );
 
           return {
             node: replaceAllImages(generated.layout, images),
-            loading: layoutLoading || imagesLoading,
+            loading: layoutLoading || assetsLoading,
             provider: generated.provider,
           };
         }),

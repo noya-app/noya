@@ -16,6 +16,7 @@ import {
   NoyaGeneratedName,
   NoyaJson,
   NoyaMetadataItem,
+  NoyaRandomIconResponse,
   NoyaRandomImageResponse,
   NoyaSession,
   NoyaUserData,
@@ -73,6 +74,8 @@ export class NoyaClient {
   generatedLayoutIndex: Record<string, number> = {};
   randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
   loadingRandomImages$ = observable<Record<string, boolean>>({});
+  randomIcons$ = observable<Record<string, NoyaRandomIconResponse>>({});
+  loadingRandomIcons$ = observable<Record<string, boolean>>({});
   requests$ = observable<NoyaRequestSnapshot[]>([]);
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -113,7 +116,9 @@ export class NoyaClient {
   get random() {
     return memoizedGetter(this, 'random', {
       image: this.#fetchRandomImage,
+      icon: this.#fetchRandomIcon,
       resetImage: this.#resetRandomImage,
+      resetIcon: this.#resetRandomIcon,
     });
   }
 
@@ -122,6 +127,8 @@ export class NoyaClient {
     const normalized = query.trim().toLowerCase();
     return id ? `${id}:${normalized}` : normalized;
   };
+
+  randomIconCacheKey = this.randomImageCacheKey;
 
   #fetchRandomImage = async (
     options: { id?: string } & Parameters<
@@ -144,11 +151,39 @@ export class NoyaClient {
     this.loadingRandomImages$.set((prev) => ({ ...prev, [key]: false }));
   };
 
+  #fetchRandomIcon = async (
+    options: { id?: string } & Parameters<
+      INoyaNetworkClient['random']['icon']
+    >[0],
+  ) => {
+    const key = this.randomImageCacheKey(options);
+
+    if (this.loadingRandomIcons$[key].get()) return;
+
+    const existing = this.randomIcons$[key].get();
+
+    if (existing) return existing;
+
+    this.loadingRandomIcons$.set((prev) => ({ ...prev, [key]: true }));
+
+    const data = await this.networkClient.random.icon(options);
+
+    this.randomIcons$.set((prev) => ({ ...prev, [key]: data }));
+    this.loadingRandomIcons$.set((prev) => ({ ...prev, [key]: false }));
+  };
+
   #resetRandomImage = (options: { id?: string; query: string }) => {
     const key = this.randomImageCacheKey(options);
 
     this.randomImages$[key].delete();
     this.loadingRandomImages$[key].delete();
+  };
+
+  #resetRandomIcon = (options: { id?: string; query: string }) => {
+    const key = this.randomIconCacheKey(options);
+
+    this.randomIcons$[key].delete();
+    this.loadingRandomIcons$[key].delete();
   };
 
   get generate() {

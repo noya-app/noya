@@ -179,6 +179,11 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
         source: { url: '', name: '' },
       });
     },
+    icon: () => {
+      return Promise.resolve({
+        icons: [],
+      });
+    },
   };
 
   stringify() {

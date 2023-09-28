@@ -10,6 +10,7 @@ import {
   NoyaFileData,
   NoyaGeneratedName,
   NoyaJson,
+  NoyaRandomIconResponse,
   NoyaRandomImageResponse,
   generatedNameSchema,
   noyaAssetSchema,
@@ -21,6 +22,7 @@ import {
   noyaShareSchema,
   noyaSharedFileSchema,
   noyaUserDataSchema,
+  randomIconResponseSchema,
   randomImageResponseSchema,
 } from './schema';
 import { streamResponse, streamString } from './streaming';
@@ -253,8 +255,53 @@ export class NoyaNetworkClient {
   get random() {
     return {
       image: this.#randomImage,
+      icon: this.#randomIcon,
     };
   }
+
+  #randomIcon = async (options: {
+    query: string;
+  }): Promise<NoyaRandomIconResponse> => {
+    let response: NoyaResponse;
+
+    try {
+      response = await this.request(
+        `https://api.iconify.design/search?${encodeQueryParameters({
+          limit: 32, // This is the minimum supported by the API
+          query: options.query,
+        })}`,
+      );
+    } catch (error) {
+      return { icons: [] };
+    }
+
+    const json = await response.json();
+    const parsed = randomIconResponseSchema.parse(json);
+
+    const sorted = parsed.icons.sort((a, b) => {
+      // If an exact match, order first
+      if (a === options.query) return -1;
+      if (b === options.query) return 1;
+
+      // Otherwise, split on ':' and compare the second part
+      const [, aName] = a.split(':');
+      const [, bName] = b.split(':');
+
+      if (aName === options.query) return -1;
+      if (bName === options.query) return 1;
+
+      return 0;
+    });
+
+    const urls = sorted.map((icon) => {
+      const [iconPrefix, iconName] = icon.split(':');
+      return `https://api.iconify.design/${iconPrefix}/${iconName}.svg`;
+    });
+
+    return {
+      icons: urls,
+    };
+  };
 
   #randomImage = async (options: {
     query: string;

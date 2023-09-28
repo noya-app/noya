@@ -12,7 +12,12 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { CaretDownIcon } from 'noya-icons';
+import {
+  CaretDownIcon,
+  ImageIcon,
+  ShuffleIcon,
+  VercelLogoIcon,
+} from 'noya-icons';
 import { isDeepEqual, uuid } from 'noya-utils';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
@@ -611,8 +616,6 @@ export const DSLayoutRow = memo(function DSLayerRow({
         {node.type === 'noyaPrimitiveElement' &&
           node.props.length > 0 &&
           node.props.map((prop) => {
-            const name = prop.name === 'src' ? 'source' : prop.name;
-
             return (
               <InputField.Root labelPosition="end" labelSize={60} size="small">
                 <InputField.Input
@@ -657,19 +660,79 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   }}
                 />
                 <InputField.Label>
-                  {name}
-                  {prop.type === 'generator' ? ` (random)\u00A0` : ''}
+                  {prop.type === 'generator'
+                    ? `${
+                        prop.generator === 'random-icon'
+                          ? 'Iconify'
+                          : 'Unsplash Stock Photo'
+                      }\u00A0\u00A0`
+                    : prop.name}
                 </InputField.Label>
                 {prop.type === 'generator' && (
                   <InputField.DropdownMenu
-                    items={[{ value: 'shuffle', title: 'Shuffle Image' }]}
+                    items={createSectionedMenu(
+                      [
+                        prop.generator === 'random-image' && {
+                          value: 'shuffle',
+                          title: 'Shuffle',
+                          icon: <ShuffleIcon />,
+                        },
+                      ],
+                      [
+                        prop.generator !== 'random-icon' && {
+                          value: 'random-icon',
+                          title: 'Switch to Icon',
+                          icon: <VercelLogoIcon />,
+                        },
+                        prop.generator !== 'random-image' && {
+                          value: 'random-image',
+                          title: 'Switch to Stock Photo',
+                          icon: <ImageIcon />,
+                        },
+                      ],
+                    )}
                     onSelect={(value) => {
                       switch (value) {
+                        case 'random-image':
+                        case 'random-icon': {
+                          onChange(
+                            ResolvedHierarchy.replace(resolvedNode, {
+                              at: indexPath,
+                              node: {
+                                ...node,
+                                props: node.props.map((p) =>
+                                  p.name === prop.name &&
+                                  p.type === 'generator' &&
+                                  p.generator === prop.generator
+                                    ? {
+                                        ...p,
+                                        generator: value,
+                                        result: undefined,
+                                        resolvedQuery: undefined,
+                                      }
+                                    : p,
+                                ),
+                              },
+                            }),
+                          );
+                          break;
+                        }
                         case 'shuffle': {
-                          client.random.resetImage({
-                            id: prop.id,
-                            query: prop.query,
-                          });
+                          switch (prop.generator) {
+                            case 'random-image':
+                              client.random.resetImage({
+                                id: prop.id,
+                                query: prop.query,
+                              });
+                              break;
+                            case 'random-icon':
+                              client.random.resetIcon({
+                                id: prop.id,
+                                query: prop.query,
+                              });
+                              break;
+                          }
+
                           onChange(
                             ResolvedHierarchy.replace(resolvedNode, {
                               at: indexPath,

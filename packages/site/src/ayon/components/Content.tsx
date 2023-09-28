@@ -2,6 +2,7 @@ import {
   DS,
   useGeneratedComponentDescriptions,
   useNoyaClientOrFallback,
+  useRandomIcons,
   useRandomImages,
 } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
@@ -156,6 +157,7 @@ export const Content = memo(function Content({
   const layouts = useManagedLayouts();
 
   const { images, loading: loadingImages } = useRandomImages();
+  const { icons, loading: loadingIcons } = useRandomIcons();
 
   useEffect(() => {
     // Resolve images. Find any unresolved src props and trigger the generation
@@ -176,42 +178,91 @@ export const Content = memo(function Content({
 
         if (!shouldGenerate) return;
 
-        const key = client.randomImageCacheKey({
-          id: src.id,
-          query: src.query,
-        });
+        switch (src.generator) {
+          case 'random-image': {
+            const key = client.randomImageCacheKey({
+              id: src.id,
+              query: src.query,
+            });
 
-        if (loadingImages[key]) return;
+            if (loadingImages[key]) return;
 
-        if (images[key]) {
-          const newNode = ElementHierarchy.replace(layerNode, {
-            at: indexPath,
-            node: {
-              ...node,
-              props: node.props.map((prop) =>
-                prop.name === 'src'
-                  ? {
-                      ...prop,
-                      result: images[key].url,
-                      resolvedQuery: src.query,
-                    }
-                  : prop,
-              ),
-            },
-          });
+            if (images[key]) {
+              const newNode = ElementHierarchy.replace(layerNode, {
+                at: indexPath,
+                node: {
+                  ...node,
+                  props: node.props.map((prop) =>
+                    prop.name === 'src'
+                      ? {
+                          ...prop,
+                          result: images[key].url,
+                          resolvedQuery: src.query,
+                        }
+                      : prop,
+                  ),
+                },
+              });
 
-          dispatch('setLayerNode', layer.do_objectID, newNode, 'keep');
-        } else {
-          client.random.image({
-            id: src.id,
-            query: src.query,
-            height: layer.frame.height,
-            width: layer.frame.width,
-          });
+              dispatch('setLayerNode', layer.do_objectID, newNode, 'keep');
+            } else {
+              client.random.image({
+                id: src.id,
+                query: src.query,
+                height: layer.frame.height,
+                width: layer.frame.width,
+              });
+            }
+
+            break;
+          }
+          case 'random-icon': {
+            const key = client.randomIconCacheKey({
+              id: src.id,
+              query: src.query,
+            });
+
+            if (loadingIcons[key]) return;
+
+            if (icons[key]) {
+              const newNode = ElementHierarchy.replace(layerNode, {
+                at: indexPath,
+                node: {
+                  ...node,
+                  props: node.props.map((prop) =>
+                    prop.name === 'src'
+                      ? {
+                          ...prop,
+                          result: icons[key].icons[0] ?? '',
+                          resolvedQuery: src.query,
+                        }
+                      : prop,
+                  ),
+                },
+              });
+
+              dispatch('setLayerNode', layer.do_objectID, newNode, 'keep');
+            } else {
+              client.random.icon({
+                id: src.id,
+                query: src.query,
+              });
+            }
+
+            break;
+          }
         }
       });
     });
-  }, [client, customLayers, dispatch, images, loadingImages]);
+  }, [
+    client,
+    customLayers,
+    dispatch,
+    icons,
+    images,
+    loadingIcons,
+    loadingImages,
+  ]);
 
   useEffect(() => {
     // Resolve descriptions. If a custom layer has a name but no description,

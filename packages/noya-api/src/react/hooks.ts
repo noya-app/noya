@@ -82,6 +82,13 @@ export function useRandomImages() {
   return useMemo(() => ({ images, loading }), [loading, images]);
 }
 
+export function useRandomIcons() {
+  const { randomIcons$, loadingRandomIcons$ } = useNoyaClientOrFallback();
+  const icons = useSelector(randomIcons$);
+  const loading = useSelector(loadingRandomIcons$);
+  return useMemo(() => ({ icons, loading }), [loading, icons]);
+}
+
 export function useNetworkRequests() {
   const { requests$ } = useNoyaClientOrFallback();
   const requests = useSelector(requests$) as NoyaRequestSnapshot[];
