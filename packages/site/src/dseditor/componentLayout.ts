@@ -56,7 +56,7 @@ const IMAGE_ALT_REWRITE_MAP = new Set([
 
 function rewriteImageAlt(string: string) {
   return (
-    string
+    (string || '')
       .toLowerCase()
       .split(' ')
       .filter((word) => !IMAGE_ALT_REWRITE_MAP.has(word.toLowerCase()))
