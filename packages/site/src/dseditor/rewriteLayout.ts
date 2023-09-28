@@ -296,6 +296,26 @@ export function rewriteFlex1ButtonInColumn(layout: LayoutNode) {
 }
 
 /**
+ * If a button has multiple children, apply inline-flex and gap-2 to the button.
+ */
+export function rewriteInlineFlexButton(layout: LayoutNode) {
+  // eslint-disable-next-line @shopify/prefer-early-return
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    if (
+      node.tag === 'Button' &&
+      node.children.length > 1 &&
+      !classes.includes('inline-flex')
+    ) {
+      classes.push('inline-flex');
+
+      if (!hasClassGroup('gap', classes)) {
+        classes.push('gap-2');
+      }
+    }
+  });
+}
+
+/**
  * If an icon doesn't have a width and/or height, add a width and/or height of 24.
  */
 export function rewriteIconSize(layout: LayoutNode) {
@@ -485,6 +505,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);
+  layout = rewriteInlineFlexButton(layout);
   layout = rewriteIconSize(layout);
   layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);

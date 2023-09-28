@@ -268,7 +268,7 @@ export class NoyaNetworkClient {
       response = await this.request(
         `https://api.iconify.design/search?${encodeQueryParameters({
           limit: 32, // This is the minimum supported by the API
-          query: options.query,
+          query: options.query || 'menu',
         })}`,
       );
     } catch (error) {

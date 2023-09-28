@@ -2062,3 +2062,4 @@ grow-0
 shrink
 shrink-0
 flex
+inline-flex

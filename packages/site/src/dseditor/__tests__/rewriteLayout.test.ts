@@ -12,6 +12,7 @@ import {
   rewriteImageToIcon,
   rewriteImagesWithChildren,
   rewriteInferFlex,
+  rewriteInlineFlexButton,
   rewritePositionedParent,
   rewriteRootClasses,
   rewriteTailwindClasses,
@@ -133,6 +134,35 @@ it('removes flex-1 from button in a flex-col', () => {
     ),
   ).toEqual(
     layoutNode('Box', { class: 'flex flex-col' }, [layoutNode('Button')]),
+  );
+});
+
+it('adds inline-flex and gap-2 to buttons with multiple children', () => {
+  expect(
+    rewriteInlineFlexButton(
+      layoutNode('Box', {}, [
+        layoutNode('Button', {}, [layoutNode('Text')]),
+        layoutNode('Button', {}, [layoutNode('Text'), layoutNode('Text')]),
+        layoutNode('Button', {}, [
+          layoutNode('Text'),
+          layoutNode('Text'),
+          layoutNode('Text'),
+        ]),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', {}, [
+      layoutNode('Button', {}, [layoutNode('Text')]),
+      layoutNode('Button', { class: 'inline-flex gap-2' }, [
+        layoutNode('Text'),
+        layoutNode('Text'),
+      ]),
+      layoutNode('Button', { class: 'inline-flex gap-2' }, [
+        layoutNode('Text'),
+        layoutNode('Text'),
+        layoutNode('Text'),
+      ]),
+    ]),
   );
 });
 
