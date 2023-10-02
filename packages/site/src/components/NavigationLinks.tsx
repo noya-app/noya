@@ -48,10 +48,10 @@ export function NavigationLinks() {
       <Link href={'/'} passHref>
         <StyledLink>Projects</StyledLink>
       </Link>
-      <Link href={'/docs'} passHref>
+      {/* <Link href={'/docs'} passHref>
         <StyledLink activePrefix="/docs">Docs</StyledLink>
       </Link>
-      <StyledLink href={'/templates'}>Templates</StyledLink>
+      <StyledLink href={'/templates'}>Templates</StyledLink> */}
     </Stack.H>
   );
 }

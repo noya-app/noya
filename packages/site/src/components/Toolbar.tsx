@@ -15,11 +15,9 @@ import {
 } from 'noya-designsystem';
 import {
   ChevronDownIcon,
-  CopyIcon,
   DiscordLogoIcon,
   EnvelopeClosedIcon,
   ExitIcon,
-  FileTextIcon,
   InfoCircledIcon,
   ListBulletIcon,
   PersonIcon,
@@ -79,8 +77,8 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const userMenuItems = createSectionedMenu(
     [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
     [
-      { title: 'Docs', value: 'docs', icon: <FileTextIcon /> },
-      { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
+      // { title: 'Docs', value: 'docs', icon: <FileTextIcon /> },
+      // { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
       {
         title: 'Release Notes',
         value: 'releaseNotes',
@@ -160,16 +158,16 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                         router.push('/account');
                       }
                       return;
-                    case 'docs':
-                      if (isProjectsPath) {
-                        openInNewTab(`${NOYA_HOST}/app/docs`);
-                      } else {
-                        router.push('/docs');
-                      }
-                      return;
-                    case 'templates':
-                      window.location.href = `${NOYA_HOST}/templates`;
-                      return;
+                    // case 'docs':
+                    //   if (isProjectsPath) {
+                    //     openInNewTab(`${NOYA_HOST}/app/docs`);
+                    //   } else {
+                    //     router.push('/docs');
+                    //   }
+                    //   return;
+                    // case 'templates':
+                    //   window.location.href = `${NOYA_HOST}/templates`;
+                    //   return;
                     case 'signOut':
                       window.location.href = `${NOYA_HOST}/api/auth/signout`;
                       return;
