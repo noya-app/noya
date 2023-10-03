@@ -17,7 +17,7 @@ export function rewriteRemoveHiddenElements(layout: LayoutNode) {
         children: transformedChildren.filter(
           (child) =>
             typeof child === 'string' ||
-            !child.attributes.class?.includes('hidden'),
+            !parseClasses(child.attributes.class).includes('hidden'),
         ),
       };
     },

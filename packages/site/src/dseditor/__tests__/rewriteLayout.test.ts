@@ -228,4 +228,12 @@ it('removes hidden elements', () => {
       layoutNode('Box', { class: 'flex' }),
     ]),
   );
+
+  expect(
+    rewriteRemoveHiddenElements(
+      layoutNode('Box', {}, [layoutNode('Box', { class: 'overflow-hidden' })]),
+    ),
+  ).toEqual(
+    layoutNode('Box', {}, [layoutNode('Box', { class: 'overflow-hidden' })]),
+  );
 });
