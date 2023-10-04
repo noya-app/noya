@@ -11,5 +11,5 @@ jobs:
       - uses: actions/setup-node@main
         with:
           node-version: 16.18.1
-      - run: yarn
+      - run: yarn install --ignore-optional
       - run: yarn build:site
