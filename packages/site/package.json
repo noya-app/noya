@@ -29,6 +29,9 @@
     "react-resizable-panels": "^0.0.33",
     "vscode-fuzzy-scorer": "^0.0.4"
   },
+  "optionalDependencies": {
+    "@dabbott/patterns": "^0.0.4"
+  },
   "devDependencies": {
     "@types/cookie": "^0.5.1",
     "@types/lodash.debounce": "^4.0.7",

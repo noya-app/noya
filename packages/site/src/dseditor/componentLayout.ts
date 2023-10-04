@@ -9,6 +9,7 @@ import {
   parseComponentLayout,
 } from 'noya-compiler';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
+import { createSeed } from '../ayon/utils/patterns';
 import { enforceSchema } from './layoutSchema';
 import { rewriteLayout } from './rewriteLayout';
 
@@ -67,7 +68,7 @@ function rewriteImageAlt(string: string) {
 function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
   const result = LayoutHierarchy.map<NoyaNode>(
     layout,
-    (node, transformedChildren) => {
+    (node, transformedChildren, indexPath) => {
       if (typeof node === 'string') {
         return Model.string({ value: node });
       }
@@ -77,21 +78,31 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
       const primitive = PRIMITIVE_TAG_MAP[tag] ?? PRIMITIVE_TAG_MAP['box'];
       const elementName = primitive.name;
       const classes = node.attributes.class?.split(' ') ?? [];
+      const name = node.attributes.name || primitive.name;
 
       return Model.primitiveElement({
         componentID: primitive.id,
-        name: node.attributes.name || primitive.name,
+        name,
         children: transformedChildren,
         classNames: classes.map((value) => Model.className(value)),
         props: [
           ...(elementName === 'Image'
             ? [
-                Model.generatorProp({
-                  name: 'src',
-                  generator:
-                    initialTag === 'icon' ? 'random-icon' : 'random-image',
-                  query: rewriteImageAlt(node.attributes.alt ?? 'landscape'),
-                }),
+                initialTag === 'icon'
+                  ? Model.generatorProp({
+                      name: 'src',
+                      generator: 'random-icon',
+                      query: rewriteImageAlt(
+                        node.attributes.alt ?? 'landscape',
+                      ),
+                    })
+                  : Model.generatorProp({
+                      name: 'src',
+                      generator: 'geometric',
+                      query: createSeed(
+                        [...indexPath, ...classes, name].join('/'),
+                      ),
+                    }),
               ]
             : []),
           ...(elementName === 'Input' && node.attributes.placeholder

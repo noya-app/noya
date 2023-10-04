@@ -1,4 +1,4 @@
-import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { DesignSystemDefinition, Theme } from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { findLast, unique } from 'noya-utils';
@@ -19,25 +19,49 @@ import {
   textareaSymbolId,
 } from '../ayon/symbols/symbolIds';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
+import { tailwindColors } from '../ayon/tailwind/tailwind.config';
+import { createPatternSVG, replaceColorPalette } from '../ayon/utils/patterns';
 import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { ResolvedHierarchy } from './resolvedHierarchy';
-import { NoyaResolvedNode } from './types';
+import { NoyaProp, NoyaResolvedNode } from './types';
 
 // const pixel = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkMAYAADkANVKH3ScAAAAASUVORK5CYII=`;
 // const placeholderImage = `data:image/png;base64,${pixel}`;
 
-const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+const svg = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
 <defs>
     <linearGradient id="greenToBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
+        <stop offset="0%" style="stop-color:#666666;stop-opacity:0.5" />
+        <stop offset="100%" style="stop-color:#cccccc;stop-opacity:0.5" />
     </linearGradient>
 </defs>
 <rect x="0" y="0" width="100" height="100" fill="url(#greenToBlueGradient)" />
 </svg>`;
 
-let placeholderImage = 'data:image/svg+xml,' + encodeURIComponent(svg);
+function svgToDataUri(svg: string) {
+  // svg = svg.replace(/<svg/, '<svg shape-rendering="crispEdges"');
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+let placeholderImage = svgToDataUri(svg);
+
+function getImageFromProp(
+  primaryScale: Theme['colors']['primary'],
+  prop?: NoyaProp,
+) {
+  if (!prop) return placeholderImage;
+  if (prop.type !== 'generator') return placeholderImage;
+  if (prop.generator === 'geometric') {
+    return svgToDataUri(
+      replaceColorPalette(createPatternSVG(prop.query), primaryScale),
+    );
+  }
+  if (prop.result) {
+    return prop.result;
+  }
+  return placeholderImage;
+}
 
 export function renderResolvedNode({
   isEditable,
@@ -139,6 +163,10 @@ export function renderResolvedNode({
       const srcProp = namedProps['src'];
       const placeholderProp = namedProps['placeholder'];
 
+      const primaryScale = (tailwindColors as any)[
+        primary
+      ] as Theme['colors']['primary'];
+
       return (
         <PrimitiveComponent
           style={style}
@@ -166,9 +194,8 @@ export function renderResolvedNode({
             // src: 'https://placehold.it/300x300',
             // src: 'https://picsum.photos/300/300',
             src:
-              srcProp && srcProp.type === 'generator' && srcProp.result
-                ? srcProp.result
-                : placeholderImage,
+              // If we have a result
+              getImageFromProp(primaryScale, srcProp),
           })}
           {...(element.componentID === selectSymbolId && {
             options: unique(transformedChildren),

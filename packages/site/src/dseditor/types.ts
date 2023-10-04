@@ -74,7 +74,7 @@ export type NoyaStringProp = {
 export type NoyaGeneratorProp = {
   type: 'generator';
   id: string;
-  generator: 'random-image' | 'random-icon';
+  generator: 'random-image' | 'random-icon' | 'geometric';
   name: string;
   query: string;
   result?: string;

@@ -22,7 +22,7 @@ We're not trying to grow the open source community at this time, but if you'd li
 To install, navigate to the root directory and run:
 
 ```
-yarn
+yarn install --ignore-optional
 ```
 
 Then, to launch the reference app:

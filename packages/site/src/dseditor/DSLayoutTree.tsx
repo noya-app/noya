@@ -13,6 +13,7 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import {
+  BoxModelIcon,
   CaretDownIcon,
   ImageIcon,
   ShuffleIcon,
@@ -24,6 +25,7 @@ import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuB
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { allClassNames } from '../ayon/tailwind/tailwind';
+import { randomSeed } from '../ayon/utils/patterns';
 import { Model } from './builders';
 import {
   PRIMITIVE_ELEMENT_NAMES,
@@ -619,8 +621,17 @@ export const DSLayoutRow = memo(function DSLayerRow({
             return (
               <InputField.Root labelPosition="end" labelSize={60} size="small">
                 <InputField.Input
-                  value={prop.type === 'generator' ? prop.query : prop.value}
+                  value={
+                    prop.type === 'generator'
+                      ? prop.generator === 'geometric'
+                        ? ''
+                        : prop.query
+                      : prop.value
+                  }
                   allowSubmittingWithSameValue
+                  disabled={
+                    prop.type === 'generator' && prop.generator === 'geometric'
+                  }
                   submitAutomaticallyAfterDelay={
                     prop.type === 'generator' ? 300 : 100
                   }
@@ -662,7 +673,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 <InputField.Label>
                   {prop.type === 'generator'
                     ? `${
-                        prop.generator === 'random-icon'
+                        prop.generator === 'geometric'
+                          ? 'Geometric Pattern'
+                          : prop.generator === 'random-icon'
                           ? 'Iconify'
                           : 'Unsplash Stock Photo'
                       }\u00A0\u00A0`
@@ -672,7 +685,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   <InputField.DropdownMenu
                     items={createSectionedMenu(
                       [
-                        prop.generator === 'random-image' && {
+                        (prop.generator === 'random-image' ||
+                          prop.generator === 'geometric') && {
                           value: 'shuffle',
                           title: 'Shuffle',
                           icon: <ShuffleIcon />,
@@ -689,10 +703,16 @@ export const DSLayoutRow = memo(function DSLayerRow({
                           title: 'Switch to Stock Photo',
                           icon: <ImageIcon />,
                         },
+                        prop.generator !== 'geometric' && {
+                          value: 'geometric',
+                          title: 'Switch to Geometric Pattern',
+                          icon: <BoxModelIcon />,
+                        },
                       ],
                     )}
                     onSelect={(value) => {
                       switch (value) {
+                        case 'geometric':
                         case 'random-image':
                         case 'random-icon': {
                           onChange(
@@ -707,6 +727,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
                                     ? {
                                         ...p,
                                         generator: value,
+                                        query: '',
                                         result: undefined,
                                         resolvedQuery: undefined,
                                       }
@@ -744,6 +765,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
                                   p.generator === prop.generator
                                     ? {
                                         ...p,
+                                        query:
+                                          prop.generator === 'geometric'
+                                            ? randomSeed()
+                                            : p.query,
                                         result: undefined,
                                         resolvedQuery: undefined,
                                       }
@@ -774,19 +799,23 @@ export const DSLayoutRow = memo(function DSLayerRow({
                         overflow: 'hidden',
                       }}
                     >
-                      <img
-                        src={prop.result}
-                        alt=""
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          height: '100%',
-                          width: '100%',
-                          objectFit: 'cover',
-                          objectPosition: 'center',
-                          borderRadius: '4px',
-                        }}
-                      />
+                      {prop.generator === 'geometric' ? (
+                        <BoxModelIcon color="#aaa" />
+                      ) : (
+                        <img
+                          src={prop.result}
+                          alt=""
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            height: '100%',
+                            width: '100%',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            borderRadius: '4px',
+                          }}
+                        />
+                      )}
                       {hovered && (
                         <>
                           <div

@@ -17,7 +17,8 @@ function findAllQueries(root: NoyaNode): Query[] {
 
     const src = node.props.find((prop) => prop.name === 'src');
 
-    if (!src || src.type !== 'generator') return [];
+    if (!src || src.type !== 'generator' || src.generator === 'geometric')
+      return [];
 
     return [
       {

@@ -68,7 +68,7 @@ const DOMRendererContent = memo(
   ): JSX.Element {
     const client = useNoyaClientOrFallback();
     const [state, dispatch] = useAyonState();
-    const { canvasInsets, highlightedLayer } = useWorkspace();
+    const { canvasInsets } = useWorkspace();
     const page = Selectors.getCurrentPage(state);
     const artboard = page.layers[0] as Sketch.Artboard;
     const rect = Selectors.getBoundingRect(page, [artboard.do_objectID])!;
@@ -285,11 +285,11 @@ const DOMRendererContent = memo(
                         left: layer.frame.x,
                         width: layer.frame.width,
                         height: layer.frame.height,
-                        overflow:
-                          layer.do_objectID === selectedLayerId ||
-                          layer.do_objectID === highlightedLayer?.id
-                            ? 'visible'
-                            : 'hidden',
+                        // overflow:
+                        //   layer.do_objectID === selectedLayerId ||
+                        //   layer.do_objectID === highlightedLayer?.id
+                        //     ? 'visible'
+                        //     : 'hidden',
                         display: 'flex',
                       }}
                     >
