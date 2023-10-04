@@ -1,5 +1,6 @@
+import { NoyaAPI } from 'noya-api';
 import { DrawableLayerType } from 'noya-state';
-import { NoyaNode } from '../dseditor/types';
+import { NoyaGeneratorProp, NoyaNode } from '../dseditor/types';
 
 export type InferredBlockTypeResult = {
   type: DrawableLayerType;
@@ -13,11 +14,17 @@ export type LayoutGenerationSource = {
   description: string;
 };
 
+export type PreferredImageGenerator = Exclude<
+  NoyaGeneratorProp['generator'],
+  'random-icon'
+>;
+
 export type CustomLayerData = {
   description?: string;
   node?: NoyaNode;
   activeGenerationIndex?: number;
   layoutGenerationSource?: LayoutGenerationSource;
+  preferredImageGenerator?: NoyaAPI.ImageGenerator;
 };
 
 export type NodePath = { path: string[]; layerId: string };

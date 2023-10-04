@@ -1,17 +1,17 @@
-import { memoize } from 'noya-utils';
-import { Model } from './builders';
-import { PRIMITIVE_TAG_MAP } from './primitiveElements';
-import { NoyaNode } from './types';
-
+import { NoyaAPI } from 'noya-api';
 import {
   LayoutHierarchy,
   LayoutNode,
   parseComponentLayout,
 } from 'noya-compiler';
+import { memoize } from 'noya-utils';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { createSeed } from '../ayon/utils/patterns';
+import { Model } from './builders';
 import { enforceSchema } from './layoutSchema';
+import { PRIMITIVE_TAG_MAP } from './primitiveElements';
 import { rewriteLayout } from './rewriteLayout';
+import { NoyaNode } from './types';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([
   'related',
@@ -65,7 +65,10 @@ function rewriteImageAlt(string: string) {
   );
 }
 
-function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
+function convertLayoutToComponent(
+  layout: LayoutNode,
+  imageGenerator: NoyaAPI.ImageGenerator,
+): NoyaNode {
   const result = LayoutHierarchy.map<NoyaNode>(
     layout,
     (node, transformedChildren, indexPath) => {
@@ -92,6 +95,14 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
                   ? Model.generatorProp({
                       name: 'src',
                       generator: 'random-icon',
+                      query: rewriteImageAlt(
+                        node.attributes.alt ?? 'landscape',
+                      ),
+                    })
+                  : imageGenerator === 'random-image'
+                  ? Model.generatorProp({
+                      name: 'src',
+                      generator: 'random-image',
                       query: rewriteImageAlt(
                         node.attributes.alt ?? 'landscape',
                       ),
@@ -125,8 +136,11 @@ function convertLayoutToComponent(layout: LayoutNode): NoyaNode {
   return result;
 }
 
-export const parseLayout = memoize(function parseLayout(html: string) {
+export const parseLayout = memoize(function parseLayout(
+  html: string,
+  imageGenerator: NoyaAPI.ImageGenerator,
+) {
   let layout = parseComponentLayout(html);
   layout = rewriteLayout(layout);
-  return enforceSchema(convertLayoutToComponent(layout));
+  return enforceSchema(convertLayoutToComponent(layout, imageGenerator));
 });

@@ -18,6 +18,7 @@ jest.mock('../../../safelist.txt', () => {
 it('ignores image src', () => {
   const element = parseLayout(
     '<Image src="https://via.placeholder.com/150" />',
+    'random-image',
   ) as NoyaPrimitiveElement;
 
   const prop0 = element.props[0] as NoyaGeneratorProp;
@@ -30,6 +31,7 @@ it('ignores image src', () => {
 it('parses image alt', () => {
   const element = parseLayout(
     '<Image alt="Shopping related image" />',
+    'random-image',
   ) as NoyaPrimitiveElement;
 
   const prop0 = element.props[0] as NoyaGeneratorProp;
@@ -37,6 +39,16 @@ it('parses image alt', () => {
   expect(prop0.type).toEqual('generator');
   expect(prop0.name).toEqual('src');
   expect(prop0.query).toEqual('shopping');
+});
+
+it('uses geometric image', () => {
+  const element = parseLayout('<Image />', 'geometric') as NoyaPrimitiveElement;
+
+  const prop0 = element.props[0] as NoyaGeneratorProp;
+
+  expect(prop0.type).toEqual('generator');
+  expect(prop0.generator).toEqual('geometric');
+  expect(prop0.query).toEqual('v1/flex-1/Image');
 });
 
 // eslint-disable-next-line jest/no-commented-out-tests

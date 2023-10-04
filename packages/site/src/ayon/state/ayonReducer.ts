@@ -12,7 +12,11 @@ import { enforceSchema } from '../../dseditor/layoutSchema';
 import { primitiveElements } from '../../dseditor/primitiveElements';
 import { NoyaNode } from '../../dseditor/types';
 import { boxSymbolId } from '../symbols/symbolIds';
-import { CustomLayerData, LayoutGenerationSource } from '../types';
+import {
+  CustomLayerData,
+  LayoutGenerationSource,
+  PreferredImageGenerator,
+} from '../types';
 
 export type AyonAction =
   | [
@@ -24,6 +28,11 @@ export type AyonAction =
       type: 'setLayerActiveGenerationIndex',
       layerId: string,
       activeGenerationIndex: number | undefined,
+    ]
+  | [
+      type: 'setPreferredImageGenerator',
+      layerId: string,
+      generator: PreferredImageGenerator,
     ]
   | [
       type: 'setLayerNode',
@@ -65,6 +74,13 @@ const ayonLayerReducer = (
         draft.data.activeGenerationIndex = activeGenerationIndex;
       });
     }
+    case 'setPreferredImageGenerator': {
+      const [, , generator] = action;
+
+      return produce(layer, (draft) => {
+        draft.data.preferredImageGenerator = generator;
+      });
+    }
   }
 };
 
@@ -72,6 +88,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
   switch (action[0]) {
     case 'setLayerNode':
     case 'setLayerDescription':
+    case 'setPreferredImageGenerator':
     case 'setLayerActiveGenerationIndex': {
       const [, id] = action;
 

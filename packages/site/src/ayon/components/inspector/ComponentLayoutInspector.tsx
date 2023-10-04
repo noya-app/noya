@@ -34,8 +34,14 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     client.generate.componentLayouts({
       name: selectedLayer.name,
       description: selectedLayer.data.description ?? '',
+      imageGenerator: selectedLayer.data.preferredImageGenerator ?? 'geometric',
     });
-  }, [client.generate, selectedLayer.data.description, selectedLayer.name]);
+  }, [
+    client.generate,
+    selectedLayer.data.description,
+    selectedLayer.data.preferredImageGenerator,
+    selectedLayer.name,
+  ]);
 
   const carouselItems = useMemo(() => {
     return generatedLayout.map((layout, index): InspectorCarouselItem => {
@@ -91,6 +97,8 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
       client.generate.componentLayouts({
         name: selectedLayer.name,
         description: selectedLayer.data.description ?? '',
+        imageGenerator:
+          selectedLayer.data.preferredImageGenerator ?? 'geometric',
       });
     }
   }, [
@@ -98,6 +106,7 @@ export const ComponentLayoutInspector = memo(function ComponentLayoutInspector({
     generatedLayout.length,
     selectedLayer.data.description,
     selectedLayer.data.layoutGenerationSource,
+    selectedLayer.data.preferredImageGenerator,
     selectedLayer.name,
   ]);
 

@@ -93,7 +93,7 @@ class GeneratedLayoutManager {
         key,
         values.map((generated) => ({
           provider: generated.provider,
-          layout: parseLayout(generated.layout),
+          layout: parseLayout(generated.layout, generated.imageGenerator),
         })),
       ]),
     );

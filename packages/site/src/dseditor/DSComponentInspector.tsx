@@ -141,7 +141,7 @@ export function DSComponentInspector({
 
                   onChangeComponent({
                     ...component,
-                    rootElement: parseLayout(layout),
+                    rootElement: parseLayout(layout, 'geometric'),
                   });
                 }}
               >

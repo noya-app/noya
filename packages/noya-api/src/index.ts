@@ -1,4 +1,4 @@
-import { NoyaClient } from './core/client';
+import { NoyaClient, NoyaImageGenerator } from './core/client';
 import { NoyaAPIError } from './core/error';
 import { NoyaLocalStorageClient } from './core/localStorageClient';
 import { NoyaMemoryClient } from './core/memoryClient';
@@ -60,6 +60,7 @@ export namespace NoyaAPI {
   export type GeneratedName = NoyaGeneratedName;
   export type RandomImageResponse = NoyaRandomImageResponse;
   export type RandomIconResponse = NoyaRandomIconResponse;
+  export type ImageGenerator = NoyaImageGenerator;
 }
 
 export type { DS, DSConfig, DSSource };

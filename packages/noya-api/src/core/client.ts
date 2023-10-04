@@ -27,8 +27,11 @@ type NoyaClientOptions = { networkClient: INoyaNetworkClient };
 
 type NoyaFetchPolicy = 'no-cache' | 'cache-and-network' | 'network-only';
 
+export type NoyaImageGenerator = 'random-image' | 'geometric';
+
 type GeneratedLayout = {
   provider?: string;
+  imageGenerator: NoyaImageGenerator;
   layout: string;
 };
 
@@ -263,6 +266,7 @@ export class NoyaClient {
   #generateComponentLayouts = async (options: {
     name: string;
     description: string;
+    imageGenerator: 'random-image' | 'geometric';
   }) => {
     const name = options.name.trim();
     const description = options.description.trim();
@@ -276,7 +280,10 @@ export class NoyaClient {
 
     this.generatedLayouts$.set((prev) => ({
       ...prev,
-      [key]: rangeArray.map((_) => ({ layout: '' })),
+      [key]: rangeArray.map((_) => ({
+        layout: '',
+        imageGenerator: options.imageGenerator,
+      })),
     }));
     this.loadingLayouts$.set((prev) => ({
       ...prev,
@@ -307,6 +314,7 @@ export class NoyaClient {
           [key]: updateIndex(prev[key], index, {
             provider: generated.provider,
             layout: nextText,
+            imageGenerator: options.imageGenerator,
           }),
         }));
       }

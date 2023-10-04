@@ -315,6 +315,7 @@ export const Content = memo(function Content({
         client.generate.componentLayouts({
           name: layer.name,
           description: layer.data.description,
+          imageGenerator: layer.data.preferredImageGenerator ?? 'geometric',
         });
       }
     });

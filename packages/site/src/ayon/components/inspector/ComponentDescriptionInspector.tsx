@@ -1,12 +1,12 @@
 import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
-import { ActivityIndicator, Button, Spacer } from 'noya-designsystem';
+import { ActivityIndicator, Button, Select, Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { PRIMITIVE_TAG_MAP } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';
-import { CustomLayerData } from '../../types';
+import { CustomLayerData, PreferredImageGenerator } from '../../types';
 import { useManagedLayout } from '../GeneratedLayoutContext';
 
 const DescriptionTextArea = styled.textarea(({ theme }) => ({
@@ -132,12 +132,29 @@ export const ComponentDescriptionInspector = memo(
             }}
           />
         </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.LabeledRow label="Placeholder Images">
+          <Select<PreferredImageGenerator>
+            id="preferredImageGenerator"
+            value={selectedLayer.data.preferredImageGenerator ?? 'geometric'}
+            options={['geometric', 'random-image']}
+            getTitle={(value) => {
+              switch (value) {
+                case 'geometric':
+                  return 'Geometric Patterns';
+                case 'random-image':
+                  return 'Unsplash Stock Photos';
+              }
+            }}
+            onChange={(value) => {
+              dispatch(
+                'setPreferredImageGenerator',
+                selectedLayer.do_objectID,
+                value,
+              );
+            }}
+          />
+        </InspectorPrimitives.LabeledRow>
         <Button
-          // disabled={
-          //   !selectedLayer.data.node ||
-          //   isGeneratingLayouts ||
-          //   selectedLayer.data.description === undefined
-          // }
           variant={highlightRegenerationButton ? 'secondary' : undefined}
           onClick={handleGenerateLayouts}
         >
