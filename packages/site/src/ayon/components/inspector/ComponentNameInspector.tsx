@@ -128,6 +128,15 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
     [customName, dispatch, selectedLayer.do_objectID],
   );
 
+  const handleBlur = useCallback(
+    (didSubmit: boolean, value: string) => {
+      if (!didSubmit) {
+        dispatch('setLayerName', selectedLayer.do_objectID, value);
+      }
+    },
+    [dispatch, selectedLayer.do_objectID],
+  );
+
   const handleDeleteWhenEmpty = useCallback(() => {
     if (
       !selectedLayer.data.description &&
@@ -172,6 +181,7 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
         onSelectItem={handleSelectItem}
         onDeleteWhenEmpty={handleDeleteWhenEmpty}
         hideChildrenWhenFocused
+        onBlur={handleBlur}
       >
         <InputField.Button>
           <Small opacity="0.5" fontFamily="monospace">

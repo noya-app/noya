@@ -152,7 +152,7 @@ interface Props {
   onHoverItem?: (item: CompletionItem | undefined) => void;
   onSelectItem?: (item: CompletionItem) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onBlur?: () => void;
+  onBlur?: (didSubmit: boolean, value: string) => void;
   onDeleteWhenEmpty?: () => void;
   size?: InputFieldSize;
   style?: React.CSSProperties;
@@ -266,9 +266,20 @@ export const InputFieldWithCompletions = memo(
       }
     }, [selectedIndex]);
 
+    // Keep track of the last submitted value so we can detect whether a blur
+    // event was caused by selecting an item or not
+    const lastSubmittedValueRef = useRef<
+      { filter: string; itemName: string } | undefined
+    >(undefined);
+
     const selectItem = useCallback(
       (item: CompletionListItem) => {
         if (item.type === 'sectionHeader') return;
+
+        lastSubmittedValueRef.current = {
+          filter,
+          itemName: item.name,
+        };
 
         onSelectItem?.(item);
         onHoverItem?.(undefined);
@@ -277,7 +288,7 @@ export const InputFieldWithCompletions = memo(
           ref.current?.blur();
         }
       },
-      [onSelectItem, onHoverItem, ref],
+      [filter, onSelectItem, onHoverItem, ref],
     );
 
     const handleChange = useCallback(
@@ -287,9 +298,10 @@ export const InputFieldWithCompletions = memo(
 
     const handleBlur = useCallback(() => {
       setIsFocused(false);
+      const didSubmit = lastSubmittedValueRef.current?.filter === filter;
       updateState({ selectedIndex: 0, filter: initialValue }, 'resetHover');
-      onBlur?.();
-    }, [initialValue, onBlur, updateState]);
+      onBlur?.(didSubmit, filter);
+    }, [filter, initialValue, onBlur, updateState]);
 
     const handleFocus = useCallback(
       (event) => {
