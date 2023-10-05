@@ -147,6 +147,7 @@ export interface ChipProps {
   onClick?: () => void;
   onHoverDeleteChange?: (hovering: boolean) => void;
   style?: React.CSSProperties;
+  tabIndex?: number;
 }
 
 export const Chip = memo(function Chip({
@@ -158,6 +159,7 @@ export const Chip = memo(function Chip({
   size = 'medium',
   variant = 'solid',
   monospace = false,
+  tabIndex,
   onDelete,
   onClick,
   onAdd,
@@ -178,6 +180,7 @@ export const Chip = memo(function Chip({
       size={size}
       monospace={monospace}
       isInteractive={!!handleClick}
+      tabIndex={tabIndex}
     >
       {children}
       {deletable && (

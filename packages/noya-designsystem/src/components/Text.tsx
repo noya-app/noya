@@ -48,6 +48,7 @@ export type TextBreakpointList = BreakpointCollection<StyleProps>;
 
 interface Props extends StyleProps {
   as?: keyof ReactHTML;
+  href?: string;
   className?: string;
   variant: keyof Theme['textStyles'];
   breakpoints?: BreakpointCollection<StyleProps> | null | false;
@@ -68,7 +69,16 @@ const StyledElement = styled.span<
 }));
 
 export const Text = forwardRef(function Text(
-  { as, variant, breakpoints, children, className, color, ...rest }: Props,
+  {
+    as,
+    variant,
+    breakpoints,
+    children,
+    className,
+    color,
+    href,
+    ...rest
+  }: Props,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
   const element = as ?? elements[variant] ?? 'span';
@@ -82,6 +92,7 @@ export const Text = forwardRef(function Text(
       breakpoints={breakpoints}
       styleProps={rest}
       color={color}
+      {...(href && { href })}
     >
       {children}
     </StyledElement>

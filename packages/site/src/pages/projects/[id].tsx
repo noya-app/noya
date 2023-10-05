@@ -7,11 +7,12 @@ import {
   Divider,
   Spacer,
   Stack,
+  Text,
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
-import { StarFilledIcon } from 'noya-icons';
+import { CaretRightIcon, StarFilledIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
@@ -29,6 +30,7 @@ import {
   usageMeterThreshold,
 } from '../../components/Subscription';
 
+import Link from 'next/link';
 import { Debugger } from '../../components/Debugger';
 import { EditableText } from '../../components/EditableText';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
@@ -212,7 +214,23 @@ function Content({ fileId }: { fileId: string }) {
             }
             // subscribeButton={billing.subscribeButton}
           >
-            {centerToolbar || <FileTitle fileId={fileId} />}
+            {centerToolbar || (
+              <Stack.H gap="4px" alignItems="center">
+                <Link href="/" passHref>
+                  <Text
+                    color="textMuted"
+                    variant="small"
+                    as="a"
+                    textDecoration="underline"
+                    lineHeight="15px"
+                  >
+                    All Projects
+                  </Text>
+                </Link>
+                <CaretRightIcon />
+                <FileTitle fileId={fileId} />
+              </Stack.H>
+            )}
           </Toolbar>
           <Divider variant="strong" />
           <FileEditor fileId={fileId} />

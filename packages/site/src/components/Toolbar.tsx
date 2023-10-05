@@ -23,6 +23,7 @@ import {
   PersonIcon,
   QuestionMarkCircledIcon,
   VideoIcon,
+  ViewHorizontalIcon,
 } from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
@@ -75,17 +76,21 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const router = useRouter();
 
   const userMenuItems = createSectionedMenu(
-    [{ title: 'Account', value: 'account', icon: <PersonIcon /> }],
     [
+      {
+        title: 'All Projects',
+        value: 'projects',
+        icon: <ViewHorizontalIcon />,
+      },
       // { title: 'Docs', value: 'docs', icon: <FileTextIcon /> },
       // { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
+    ],
+    [
       {
         title: 'Release Notes',
         value: 'releaseNotes',
         icon: <ListBulletIcon />,
       },
-    ],
-    [
       { title: 'Intro Video', value: 'introVideo', icon: <VideoIcon /> },
       { title: 'Discord', value: 'discord', icon: <DiscordLogoIcon /> },
       { title: 'Contact us', value: 'contact', icon: <EnvelopeClosedIcon /> },
@@ -96,7 +101,10 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
       },
       { title: 'Get help', value: 'help', icon: <QuestionMarkCircledIcon /> },
     ],
-    [{ title: 'Sign out', value: 'signOut', icon: <ExitIcon /> }],
+    [
+      { title: 'Account', value: 'account', icon: <PersonIcon /> },
+      { title: 'Sign out', value: 'signOut', icon: <ExitIcon /> },
+    ],
   );
 
   const { onboardingStep, setOnboardingStep } = useOnboarding();
@@ -151,6 +159,10 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                 }}
                 onSelect={(value) => {
                   switch (value) {
+                    case 'projects': {
+                      router.push('/');
+                      return;
+                    }
                     case 'account':
                       if (isProjectsPath) {
                         openInNewTab(`${NOYA_HOST}/app/account`);
