@@ -2,7 +2,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from 'noya-state';
 
 const artboard = SketchModel.artboard({
-  name: 'Wireframe',
+  name: 'Page',
   frame: SketchModel.rect({
     x: 0,
     y: 0,
