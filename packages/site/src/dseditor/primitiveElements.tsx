@@ -120,6 +120,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       },
     },
     aliases: ['Photo', 'Picture'],
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Image',
+        componentID: imageSymbolId,
+        classNames: Model.classNames(['flex-1', 'object-cover']),
+      }),
   },
   {
     id: inputSymbolId,

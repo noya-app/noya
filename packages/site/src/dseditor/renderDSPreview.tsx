@@ -20,31 +20,16 @@ import {
 } from '../ayon/symbols/symbolIds';
 import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
-import { createPatternSVG, replaceColorPalette } from '../ayon/utils/patterns';
+import {
+  createPatternSVG,
+  placeholderImage,
+  replaceColorPalette,
+  svgToDataUri,
+} from '../ayon/utils/patterns';
 import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { NoyaProp, NoyaResolvedNode } from './types';
-
-// const pixel = `iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkMAYAADkANVKH3ScAAAAASUVORK5CYII=`;
-// const placeholderImage = `data:image/png;base64,${pixel}`;
-
-const svg = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-<defs>
-    <linearGradient id="greenToBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#666666;stop-opacity:0.5" />
-        <stop offset="100%" style="stop-color:#cccccc;stop-opacity:0.5" />
-    </linearGradient>
-</defs>
-<rect x="0" y="0" width="100" height="100" fill="url(#greenToBlueGradient)" />
-</svg>`;
-
-function svgToDataUri(svg: string) {
-  // svg = svg.replace(/<svg/, '<svg shape-rendering="crispEdges"');
-  return 'data:image/svg+xml,' + encodeURIComponent(svg);
-}
-
-let placeholderImage = svgToDataUri(svg);
 
 function getImageFromProp(
   primaryScale: Theme['colors']['primary'],
