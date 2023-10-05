@@ -34,6 +34,16 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
   const [customName, setCustomName] = useState(name);
   const { loading, names } = useGeneratedComponentNames(customName);
 
+  // Track whether the user has manually changed the name.
+  // If they haven't, we'll delete the layer when they delete the name.
+  const isNameDirtyRef = React.useRef(false);
+
+  useEffect(() => {
+    if (isNameDirtyRef.current === false) {
+      isNameDirtyRef.current = customName !== '' || name !== '';
+    }
+  }, [customName, name]);
+
   const completionItems = useMemo(
     (): (CompletionItem | CompletionSectionHeader)[] => [
       {
@@ -138,6 +148,8 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
   );
 
   const handleDeleteWhenEmpty = useCallback(() => {
+    if (isNameDirtyRef.current) return;
+
     if (
       !selectedLayer.data.description &&
       (!selectedLayer.data.node || isBoxWithNoChildren(selectedLayer.data.node))
