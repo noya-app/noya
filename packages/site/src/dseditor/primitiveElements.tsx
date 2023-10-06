@@ -138,6 +138,15 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         placeholder: 'string',
       },
     },
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Input',
+        componentID: inputSymbolId,
+        classNames: Model.classNames(['flex-1']),
+        props: [
+          Model.stringProp({ name: 'placeholder', value: 'Placeholder' }),
+        ],
+      }),
   },
   {
     id: linkSymbolId,
@@ -259,6 +268,15 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         placeholder: 'string',
       },
     },
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Textarea',
+        componentID: textareaSymbolId,
+        classNames: Model.classNames(['flex-1', 'h-full', 'min-h-0']),
+        props: [
+          Model.stringProp({ name: 'placeholder', value: 'Placeholder' }),
+        ],
+      }),
   },
 ];
 
