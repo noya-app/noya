@@ -86,6 +86,12 @@ export const ControlledFrame = memo(
 <head>
 <style>
   html, body { height: 100%; overflow: hidden; }
+
+  * {
+    /* antd doesn't set a border-style or width, so we set these for convenience */
+    border-width: 0;
+    border-style: solid;
+  }
  
   *::selection {
     background-color: rgb(179,215,254);
