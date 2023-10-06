@@ -106,6 +106,14 @@ export const createEditBlockInteraction = ({
             event.preventDefault();
           },
           onPointerMove: fallbackInteractions.onPointerMove,
+          keyboardShortcuts: {
+            Escape: {
+              allowInInput: true,
+              command: () => {
+                reset();
+              },
+            },
+          },
         };
       },
     });

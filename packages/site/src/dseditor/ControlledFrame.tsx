@@ -128,7 +128,8 @@ export const ControlledFrame = memo(
   // Propagate keyboard shortcuts (keydown events) to the parent window
   window.addEventListener('keydown', function(event) {
     // Check if Cmd (for Mac) or Ctrl (for other OS) is pressed
-    if (event.metaKey || event.ctrlKey) {
+    // Also handle Escape for exiting editing mode
+    if (event.metaKey || event.ctrlKey || event.key === 'Escape') {
       // If the key pressed is an arrow key or other key used during text editing
       // allow the default behavior and return.
       if (
