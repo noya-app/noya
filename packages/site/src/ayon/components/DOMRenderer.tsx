@@ -41,6 +41,7 @@ const ArtboardElement = styled.div<{ rect: Sketch.Rect }>(({ rect }) => ({
   width: rect.width,
   height: rect.height,
   outline: '1px solid #e0e0e0',
+  backgroundColor: '#fff',
 }));
 
 const WrapperElement = styled.div({
