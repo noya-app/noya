@@ -30,6 +30,7 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   convertPoint: (point: Point, to: 'screen' | 'canvas') => Point;
   getScreenPoint: (input: OffsetPoint) => Point;
   getCanvasPoint: (input: OffsetPoint) => Point;
+  getLayerPoint: (layerId: string, input: OffsetPoint) => Point;
   getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => string[];
   getLayerIdAtPoint: (
     point: Point,

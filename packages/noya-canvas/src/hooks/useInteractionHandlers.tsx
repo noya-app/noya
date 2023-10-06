@@ -229,6 +229,11 @@ export function useInteractionHandlers({
       getScreenPoint: getPoint,
       getCanvasPoint: (input: OffsetPoint) =>
         convertPoint(scrollOrigin, zoomValue, getPoint(input), 'canvas'),
+      getLayerPoint: (layerId: string, input: OffsetPoint) =>
+        convertPoint(scrollOrigin, zoomValue, getPoint(input), {
+          layerId,
+          page: getCurrentPage(state),
+        }),
       getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
         const layers = Selectors.getLayersInRect(
           state,
