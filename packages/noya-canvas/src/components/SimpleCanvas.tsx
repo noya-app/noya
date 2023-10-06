@@ -118,6 +118,13 @@ export const SimpleCanvas = memo(
         }}
         onOpenChange={(isOpen) => {
           setIsContextMenuOpen(isOpen);
+
+          // Prevents a confusing state where the context menu is open but the
+          // drawing interaction is still active. Maybe we should generalize
+          // this to other interactions and/or make an API for it?
+          if (state.interactionState.type === 'drawing') {
+            actions.reset();
+          }
         }}
       >
         <CanvasElement
