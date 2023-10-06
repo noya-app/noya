@@ -51,6 +51,7 @@ export type PrimitiveElementMetadata = {
   icon?: ReactNode;
   schema: PrimitiveElementSchema;
   initialValue?: () => NoyaPrimitiveElement;
+  variants?: string[];
 };
 
 export const primitiveElements: PrimitiveElementMetadata[] = [
@@ -86,6 +87,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     description: 'A button with the text "Submit"',
     icon: <ButtonIcon />,
     schema: { children: 'stringOrNodes' },
+    variants: ['solid', 'outline', 'text'],
     initialValue: () =>
       Model.primitiveElement({
         name: 'Button',
@@ -249,6 +251,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     icon: <TextIcon />,
     aliases: ['Label'],
     schema: { children: 'stringOrNodes' },
+    variants: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
     initialValue: () =>
       Model.primitiveElement({
         name: 'Text',

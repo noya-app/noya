@@ -17,6 +17,7 @@ import {
   CaretDownIcon,
   ImageIcon,
   ShuffleIcon,
+  StarIcon,
   VercelLogoIcon,
 } from 'noya-icons';
 import { isDeepEqual, uuid } from 'noya-utils';
@@ -28,12 +29,13 @@ import { allClassNames } from '../ayon/tailwind/tailwind';
 import { randomSeed } from '../ayon/utils/patterns';
 import { Model } from './builders';
 import {
+  PRIMITIVE_ELEMENT_MAP,
   PRIMITIVE_ELEMENT_NAMES,
   primitiveElements,
 } from './primitiveElements';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
-import { NoyaResolvedNode } from './types';
+import { NoyaPrimitiveElement, NoyaResolvedNode } from './types';
 
 type LayoutTreeItem = {
   depth: number;
@@ -218,6 +220,20 @@ const styleItems = allClassNames.map(
     id: item,
     icon: <HashtagIcon item={item} />,
   }),
+);
+
+const primitiveElementStyleItems = Object.fromEntries(
+  Object.entries(PRIMITIVE_ELEMENT_MAP).map(([id, metadata]) => [
+    id,
+    [
+      ...styleItems,
+      ...(metadata.variants ?? []).map((variant) => ({
+        name: `variant-${variant}`,
+        id: `variant-${variant}`,
+        icon: <StarIcon />,
+      })),
+    ],
+  ]),
 );
 
 const typeItems = primitiveElements.flatMap((p): CompletionItem[] => [
@@ -470,7 +486,11 @@ export const DSLayoutRow = memo(function DSLayerRow({
           <InputFieldWithCompletions
             ref={styleSearchInputRef}
             placeholder={'Find style'}
-            items={styleItems}
+            items={
+              primitiveElementStyleItems[
+                (node as NoyaPrimitiveElement).componentID
+              ] ?? styleItems
+            }
             onBlur={() => {
               setIsSearchingStyles(false);
             }}
