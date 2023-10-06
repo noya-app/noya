@@ -125,6 +125,11 @@ export const createDrawingInteraction =
 
           event.preventDefault();
         },
+        keyboardShortcuts: {
+          Escape: () => {
+            reset();
+          },
+        },
       }),
       drawing: (interactionState, api) => ({
         onPointerMove: (event) => {
