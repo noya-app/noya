@@ -40,7 +40,7 @@ export type PrimitiveElementSchema = {
     | 'stringOrNodes'
     | 'nodes'
     | { type: 'elementOfType'; componentId: string };
-  props?: Record<string, 'image'>;
+  props?: Record<string, 'image' | 'string'>;
 };
 
 export type PrimitiveElementMetadata = {
@@ -132,7 +132,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Input',
     description: 'A text input',
     icon: <InputIcon />,
-    schema: { children: 'none' },
+    schema: {
+      children: 'none',
+      props: {
+        placeholder: 'string',
+      },
+    },
   },
   {
     id: linkSymbolId,
@@ -248,7 +253,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Textarea',
     description: 'A text area that the user can type into',
     icon: <InputIcon />,
-    schema: { children: 'none' },
+    schema: {
+      children: 'none',
+      props: {
+        placeholder: 'string',
+      },
+    },
   },
 ];
 

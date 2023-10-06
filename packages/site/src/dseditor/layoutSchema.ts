@@ -30,6 +30,14 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
                   query: 'landscape',
                 }),
               ];
+            } else if (propSchema === 'string') {
+              props = [
+                ...props,
+                Model.stringProp({
+                  name,
+                  value: '',
+                }),
+              ];
             }
           }
         },
