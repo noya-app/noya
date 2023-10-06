@@ -34,7 +34,10 @@ export function createCustomLayerInteraction({
           );
 
           if (interactionState.layerId === layerId) {
-            onPointerDown?.({ point: api.getCanvasPoint(event.nativeEvent) });
+            onPointerDown?.({
+              point: api.getLayerPoint(layerId, event.nativeEvent),
+            });
+
             event.preventDefault();
           }
         },
@@ -49,9 +52,11 @@ export function createCustomLayerInteraction({
             },
           );
 
-          onPointerMove?.({ point: api.getCanvasPoint(event.nativeEvent) });
-
           if (interactionState.layerId === layerId) {
+            onPointerMove?.({
+              point: api.getLayerPoint(layerId, event.nativeEvent),
+            });
+
             actions.setCursor('text');
             event.preventDefault();
             return;
@@ -68,9 +73,11 @@ export function createCustomLayerInteraction({
             },
           );
 
-          onPointerUp?.({ point: api.getCanvasPoint(event.nativeEvent) });
-
           if (interactionState.layerId === layerId) {
+            onPointerUp?.({
+              point: api.getLayerPoint(layerId, event.nativeEvent),
+            });
+
             event.preventDefault();
             return;
           }
