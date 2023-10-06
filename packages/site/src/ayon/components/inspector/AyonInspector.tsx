@@ -8,10 +8,11 @@ import {
 } from 'noya-designsystem';
 import { useShallowArray } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { NoyaNode } from '../../../dseditor/types';
 import { CustomLayerData, NodePath } from '../../types';
 import { AyonElementsInspector } from './AyonElementsInspector';
+import { AyonMultipleComponentsInspector } from './AyonMultipleComponentsInspector';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
 
@@ -41,6 +42,10 @@ export const AyonInspector = memo(function AyonInspector({
     Selectors.getSelectedLayers(state).filter(
       Layers.isCustomLayer<CustomLayerData>,
     ),
+  );
+  const selectedLayerIds = useMemo(
+    () => selectedLayers.map((layer) => layer.do_objectID),
+    [selectedLayers],
   );
 
   const highlightedPath =
@@ -118,7 +123,9 @@ export const AyonInspector = memo(function AyonInspector({
           />
         )}
         {selectedTab === 'component' &&
-          (selectedLayers.length === 1 ? (
+          (selectedLayers.length > 1 ? (
+            <AyonMultipleComponentsInspector layerIds={selectedLayerIds} />
+          ) : selectedLayers.length === 1 ? (
             <CustomLayerInspector
               selectedLayer={selectedLayers[0]}
               setPreviewNode={setPreviewNode}

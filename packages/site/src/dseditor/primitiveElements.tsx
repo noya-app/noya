@@ -141,10 +141,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       },
     },
     initialValue: () =>
+      // We likely don't want flex-1 on inputs. It doesn't look great and
+      // if they user then puts them into a stack, they'll stretch strangely.
+      // Instead the user should be using textarea (maybe we can suggest this).
       Model.primitiveElement({
         name: 'Input',
         componentID: inputSymbolId,
-        classNames: Model.classNames(['flex-1']),
         props: [
           Model.stringProp({ name: 'placeholder', value: 'Placeholder' }),
         ],

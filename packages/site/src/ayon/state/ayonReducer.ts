@@ -1,4 +1,5 @@
 import { produce } from 'immer';
+import cloneDeep from 'lodash/cloneDeep';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import {
@@ -8,8 +9,13 @@ import {
   Selectors,
   interactionReducer,
 } from 'noya-state';
+import { upperFirst } from 'noya-utils';
+import { Model } from '../../dseditor/builders';
 import { enforceSchema } from '../../dseditor/layoutSchema';
-import { primitiveElements } from '../../dseditor/primitiveElements';
+import {
+  PRIMITIVE_ELEMENT_NAMES,
+  primitiveElements,
+} from '../../dseditor/primitiveElements';
 import { NoyaNode } from '../../dseditor/types';
 import { boxSymbolId } from '../symbols/symbolIds';
 import {
@@ -18,7 +24,7 @@ import {
   PreferredImageGenerator,
 } from '../types';
 
-export type AyonAction =
+type AyonLayerAction =
   | [
       type: 'setLayerDescription',
       layerId: string,
@@ -41,10 +47,18 @@ export type AyonAction =
       source: LayoutGenerationSource | 'unset' | 'keep',
     ];
 
+export type AyonAction =
+  | AyonLayerAction
+  | [
+      type: 'mergeIntoStack',
+      layerIds: string[],
+      orientation: 'horizontal' | 'vertical',
+    ];
+
 const ayonLayerReducer = (
   layer: Sketch.CustomLayer<CustomLayerData>,
-  action: AyonAction,
-) => {
+  action: AyonLayerAction,
+): Sketch.CustomLayer<CustomLayerData> => {
   switch (action[0]) {
     case 'setLayerNode': {
       const [, , node, source] = action;
@@ -86,6 +100,98 @@ const ayonLayerReducer = (
 
 export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
   switch (action[0]) {
+    case 'mergeIntoStack': {
+      const [, layerIds, orientation] = action;
+
+      const page = Selectors.getCurrentPage(state);
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const allLayers = Layers.findAll<Sketch.CustomLayer<CustomLayerData>>(
+        page,
+        (layer): layer is Sketch.CustomLayer<CustomLayerData> =>
+          Layers.isCustomLayer<CustomLayerData>(layer) &&
+          layerIds.includes(layer.do_objectID),
+      );
+      const foundIds = allLayers.map((layer) => layer.do_objectID);
+      const allIndexPaths = Layers.findAllIndexPaths<Sketch.AnyLayer>(
+        page,
+        (layer) => foundIds.includes(layer.do_objectID),
+      );
+
+      if (allLayers.length === 0) return state;
+
+      // Find the parent of the first layer
+      const firstIndexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === allLayers[0].do_objectID,
+      );
+
+      if (!firstIndexPath) return state;
+
+      const parentIndexPath = firstIndexPath.slice(0, -1);
+
+      if (!parentIndexPath) return state;
+
+      const boundingRect = Selectors.getBoundingRect(page, layerIds);
+
+      if (!boundingRect) return state;
+
+      // Sort by bounding box
+      allLayers.sort((a, b) => {
+        const aRect = SketchModel.rect(a.frame);
+        const bRect = SketchModel.rect(b.frame);
+
+        return orientation === 'vertical'
+          ? aRect.y - bRect.y
+          : aRect.x - bRect.x;
+      });
+
+      function getElementName(layer: Sketch.CustomLayer<CustomLayerData>) {
+        if (!layer.name && !layer.data.description) {
+          if (layer.data.node?.type === 'noyaPrimitiveElement') {
+            return PRIMITIVE_ELEMENT_NAMES[layer.data.node.componentID];
+          } else {
+            return '';
+          }
+        }
+
+        return [layer.name, layer.data.description].filter(Boolean).join(': ');
+      }
+
+      const layer = SketchModel.customLayer<CustomLayerData>({
+        name: `${upperFirst(orientation)} Stack`,
+        frame: SketchModel.rect(boundingRect),
+        data: {
+          description:
+            `A ${orientation} stack containing:\n\n` +
+            allLayers.map(getElementName).filter(Boolean).join('\n\n'),
+          node: Model.primitiveElement({
+            componentID: boxSymbolId,
+            classNames: Model.classNames([
+              'flex-1',
+              'flex',
+              orientation === 'vertical' ? 'flex-col' : 'flex-row',
+            ]),
+            children: allLayers.flatMap((layer) =>
+              layer.data.node ? [cloneDeep(layer.data.node)] : [],
+            ),
+          }),
+        },
+      });
+
+      state = produce(state, (draft) => {
+        draft.selectedLayerIds = [layer.do_objectID];
+        Selectors.deleteLayers(allIndexPaths, draft.sketch.pages[pageIndex]);
+      });
+
+      state = Selectors.insertLayerAtIndexPath(
+        state,
+        layer,
+        parentIndexPath,
+        'inside',
+      );
+
+      return state;
+    }
     case 'setLayerNode':
     case 'setLayerDescription':
     case 'setPreferredImageGenerator':
