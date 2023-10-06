@@ -114,6 +114,9 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
     }
     case 'addDrawnLayer': {
       const pageIndex = Selectors.getCurrentPageIndex(state);
+      const meta = Selectors.getCurrentPageMetadata(state);
+
+      const minimumSize = 2 / meta.zoomValue;
 
       return produce(state, (draft) => {
         if (draft.interactionState.type !== 'drawing') return;
@@ -124,21 +127,26 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
           draft.interactionState.options,
         );
 
-        const layer = SketchModel.customLayer<CustomLayerData>({
-          do_objectID: draft.interactionState.id,
-          name: '',
-          frame: SketchModel.rect(rect),
-          data: {
-            description: '',
-            node: primitiveElements
-              .find((p) => p.id === boxSymbolId)
-              ?.initialValue?.(),
-          },
-        });
+        if (rect.width > minimumSize && rect.height > minimumSize) {
+          const layer = SketchModel.customLayer<CustomLayerData>({
+            do_objectID: draft.interactionState.id,
+            name: '',
+            frame: SketchModel.rect(rect),
+            data: {
+              description: '',
+              node: primitiveElements
+                .find((p) => p.id === boxSymbolId)
+                ?.initialValue?.(),
+            },
+          });
 
-        Selectors.addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
+          Selectors.addToParentLayer(
+            draft.sketch.pages[pageIndex].layers,
+            layer,
+          );
 
-        draft.selectedLayerIds = [layer.do_objectID];
+          draft.selectedLayerIds = [layer.do_objectID];
+        }
 
         draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
