@@ -157,13 +157,17 @@ export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
         return [layer.name, layer.data.description].filter(Boolean).join(': ');
       }
 
+      const name = `${upperFirst(orientation)} Stack`;
+      const description =
+        `A ${orientation} stack containing:\n\n` +
+        allLayers.map(getElementName).filter(Boolean).join('\n\n');
+
       const layer = SketchModel.customLayer<CustomLayerData>({
-        name: `${upperFirst(orientation)} Stack`,
+        name,
         frame: SketchModel.rect(boundingRect),
         data: {
-          description:
-            `A ${orientation} stack containing:\n\n` +
-            allLayers.map(getElementName).filter(Boolean).join('\n\n'),
+          description,
+          layoutGenerationSource: { name, description },
           node: Model.primitiveElement({
             componentID: boxSymbolId,
             classNames: Model.classNames([
