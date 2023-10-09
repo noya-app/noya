@@ -67,6 +67,8 @@ export function DSProjectInspector({
                 <InputField.Input value={fileName} onChange={onChangeName} />
               </InputField.Root>
             </InspectorPrimitives.LabeledRow>
+          </InspectorSection>
+          <InspectorSection title="Theme" titleTextStyle="heading4">
             <InspectorPrimitives.LabeledRow label="Base Library">
               <Select
                 id="design-system"
@@ -90,17 +92,17 @@ export function DSProjectInspector({
                 </Button>
               </Select>
             </InspectorPrimitives.LabeledRow>
+            <DSThemeInspector
+              dsConfig={ds.config}
+              onChangeDSConfig={(config) => {
+                setDS((state) =>
+                  produce(state, (draft) => {
+                    draft.config = config;
+                  }),
+                );
+              }}
+            />
           </InspectorSection>
-          <DSThemeInspector
-            dsConfig={ds.config}
-            onChangeDSConfig={(config) => {
-              setDS((state) =>
-                produce(state, (draft) => {
-                  draft.config = config;
-                }),
-              );
-            }}
-          />
           <InspectorSection title="Components" titleTextStyle="heading4">
             <InspectorPrimitives.SectionHeader>
               <InspectorPrimitives.Title>Components</InspectorPrimitives.Title>

@@ -12,7 +12,6 @@ import { upperFirst } from 'noya-utils';
 import React from 'react';
 import styled from 'styled-components';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
-import { InspectorSection } from '../components/InspectorSection';
 import { ColorModeInput } from './ColorModeInput';
 
 export const colorGroups = Object.entries(tailwindColors).flatMap(
@@ -49,7 +48,7 @@ export function DSThemeInspector({
   const theme = useDesignSystemTheme();
 
   return (
-    <InspectorSection title="Theme" titleTextStyle="heading4">
+    <>
       <InspectorPrimitives.LabeledRow label="Primary Color">
         <Select
           id="primary-color"
@@ -110,6 +109,6 @@ export function DSThemeInspector({
           }}
         />
       </InspectorPrimitives.LabeledRow>
-    </InspectorSection>
+    </>
   );
 }
