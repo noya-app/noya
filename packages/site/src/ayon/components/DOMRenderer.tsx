@@ -2,7 +2,7 @@ import { DS, useNoyaClientOrFallback } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import { lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Size, createResizeTransform } from 'noya-geometry';
+import { AffineTransform, Size, createResizeTransform } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
 import React, {
@@ -93,10 +93,11 @@ const DOMRendererContent = memo(
     forwardedRef: React.ForwardedRef<IDSRenderer>,
   ): JSX.Element {
     const client = useNoyaClientOrFallback();
+    const generatedLayouts = useManagedLayouts();
     const [state, dispatch] = useAyonState();
     const { canvasInsets } = useWorkspace();
+
     const page = Selectors.getCurrentPage(state);
-    const artboard = page.layers[0] as Sketch.Artboard;
     const editingLayerId =
       state.interactionState.type === 'editingBlock'
         ? state.interactionState.layerId
@@ -106,204 +107,221 @@ const DOMRendererContent = memo(
         ? state.selectedLayerIds[0]
         : undefined;
 
-    const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
-    const containerTransform = createResizeTransform(artboard.frame, size, {
-      scalingMode: 'down',
-      padding,
-    });
-    const transform =
-      resizeBehavior === 'match-canvas' ? canvasTransform : containerTransform;
+    function getTransform() {
+      const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
+
+      if (resizeBehavior === 'match-canvas') return canvasTransform;
+
+      const artboard = page.layers.at(0);
+
+      if (!artboard) return AffineTransform.identity;
+
+      return createResizeTransform(artboard.frame, size, {
+        scalingMode: 'down',
+        padding,
+      });
+    }
+
+    const transform = getTransform();
 
     const findComponent = useCallback(
       (id: string) =>
         initialComponents.find((component) => component.componentID === id),
       [],
     );
-    const generatedLayouts = useManagedLayouts();
 
     return (
       <CanvasElement transform={transform.toString()}>
-        <ArtboardElement rect={artboard.frame}>
-          <WrapperElement>
-            <ErrorBoundary>
-              <DSControlledRenderer
-                ref={forwardedRef}
-                sourceName={ds.source.name}
-                config={ds.config}
-                sync={sync}
-                setHighlightedPath={(path) => {
-                  if (!selectedLayerId) return;
+        {page.layers.filter(Layers.isArtboard).map((artboard) => {
+          return (
+            <ArtboardElement key={artboard.do_objectID} rect={artboard.frame}>
+              <WrapperElement>
+                <ErrorBoundary>
+                  <DSControlledRenderer
+                    ref={forwardedRef}
+                    sourceName={ds.source.name}
+                    config={ds.config}
+                    sync={sync}
+                    setHighlightedPath={(path) => {
+                      if (!selectedLayerId) return;
 
-                  setHighlightedNodePath?.(
-                    path ? { layerId: selectedLayerId, path } : undefined,
-                  );
-                }}
-                onChangeTextAtPath={({ path, value }) => {
-                  const layer = artboard.layers
-                    .filter(Layers.isCustomLayer<CustomLayerData>)
-                    .find((layer) => layer.do_objectID === editingLayerId);
+                      setHighlightedNodePath?.(
+                        path ? { layerId: selectedLayerId, path } : undefined,
+                      );
+                    }}
+                    onChangeTextAtPath={({ path, value }) => {
+                      const layer = artboard.layers
+                        .filter(Layers.isCustomLayer<CustomLayerData>)
+                        .find((layer) => layer.do_objectID === editingLayerId);
 
-                  if (!layer || !layer.data.node) return undefined;
+                      if (!layer || !layer.data.node) return undefined;
 
-                  const resolvedNode = createResolvedNode(
-                    findComponent,
-                    layer.data.node,
-                  );
-
-                  const indexPath = ResolvedHierarchy.findIndexPath(
-                    resolvedNode,
-                    (node) => node.path.join('/') === path.join('/'),
-                  );
-
-                  if (!indexPath) return;
-
-                  const originalNode = ResolvedHierarchy.access(
-                    resolvedNode,
-                    indexPath,
-                  ) as NoyaResolvedString;
-
-                  const newResolvedNode = ResolvedHierarchy.replace(
-                    resolvedNode,
-                    {
-                      at: indexPath,
-                      node: { ...originalNode, value },
-                    },
-                  );
-
-                  const newNode = unresolve(newResolvedNode);
-
-                  dispatch('setLayerNode', layer.do_objectID, newNode, 'keep');
-                }}
-                getStringValueAtPath={(path) => {
-                  const layer = artboard.layers
-                    .filter(Layers.isCustomLayer<CustomLayerData>)
-                    .find((layer) => layer.do_objectID === editingLayerId);
-
-                  if (!layer) return undefined;
-
-                  const resolvedNode = createResolvedNode(
-                    findComponent,
-                    layer.data.node ??
-                      Model.primitiveElement({
-                        componentID: boxSymbolId,
-                      }),
-                  );
-
-                  if (!resolvedNode) return undefined;
-
-                  return ResolvedHierarchy.find<NoyaResolvedString>(
-                    resolvedNode,
-                    (node): node is NoyaResolvedString =>
-                      node.type === 'noyaString' &&
-                      node.path.join('/') === path.join('/'),
-                  )?.value;
-                }}
-                renderContent={(props) => {
-                  const layers = artboard.layers.filter(
-                    Layers.isCustomLayer<CustomLayerData>,
-                  );
-
-                  return layers.map((layer) => {
-                    function createLoadingNode() {
-                      if (!layer.data.description) return;
-
-                      const key = client.componentLayoutCacheKey(
-                        layer.name,
-                        layer.data.description,
+                      const resolvedNode = createResolvedNode(
+                        findComponent,
+                        layer.data.node,
                       );
 
-                      const layouts = generatedLayouts[key];
-                      const activeIndex = layer.data.activeGenerationIndex ?? 0;
+                      const indexPath = ResolvedHierarchy.findIndexPath(
+                        resolvedNode,
+                        (node) => node.path.join('/') === path.join('/'),
+                      );
 
-                      if (!layouts || !layouts[activeIndex]) return undefined;
+                      if (!indexPath) return;
 
-                      return layouts[activeIndex].node;
-                    }
+                      const originalNode = ResolvedHierarchy.access(
+                        resolvedNode,
+                        indexPath,
+                      ) as NoyaResolvedString;
 
-                    function createPlaceholderNode() {
-                      return Model.primitiveElement({
-                        componentID: boxSymbolId,
-                        classNames: [
-                          Model.className('flex-1'),
-                          Model.className('flex'),
-                          Model.className('items-center'),
-                          Model.className('justify-center'),
-                          Model.className('text-center'),
-                          Model.className('p-4'),
-                        ],
-                        children: [
-                          layer.data.description === undefined
-                            ? Model.primitiveElement({
-                                componentID: textSymbolId,
-                                children: [
-                                  Model.string(
-                                    `Generating ${layer.name} description...`,
-                                  ),
-                                ],
-                              })
-                            : Model.primitiveElement({
-                                componentID: textSymbolId,
-                                children: [
-                                  Model.string(
-                                    `Generating ${layer.name} layout...`,
-                                  ),
-                                ],
-                              }),
-                        ],
-                      });
-                    }
+                      const newResolvedNode = ResolvedHierarchy.replace(
+                        resolvedNode,
+                        {
+                          at: indexPath,
+                          node: { ...originalNode, value },
+                        },
+                      );
 
-                    const resolvedNode = createResolvedNode(
-                      findComponent,
-                      layer.do_objectID === selectedLayerId && overriddenBlock
-                        ? overriddenBlock
-                        : layer.data.node ??
-                            createLoadingNode() ??
-                            createPlaceholderNode(),
-                    );
+                      const newNode = unresolve(newResolvedNode);
 
-                    const content = renderResolvedNode({
-                      isEditable: layer.do_objectID === editingLayerId,
-                      resolvedNode,
-                      primary: props.primary,
-                      system: props.system,
-                      highlightedPath:
-                        highlightedNodePath &&
-                        layer.do_objectID === highlightedNodePath.layerId
-                          ? highlightedNodePath.path
-                          : undefined,
-                      selectionOutlineColor: lightTheme.colors.secondary,
-                    });
+                      dispatch(
+                        'setLayerNode',
+                        layer.do_objectID,
+                        newNode,
+                        'keep',
+                      );
+                    }}
+                    getStringValueAtPath={(path) => {
+                      const layer = artboard.layers
+                        .filter(Layers.isCustomLayer<CustomLayerData>)
+                        .find((layer) => layer.do_objectID === editingLayerId);
 
-                    return (
-                      <div
-                        key={layer.do_objectID}
-                        className={
-                          !layer.data.node ? 'noya-skeleton-shimmer' : undefined
+                      if (!layer) return undefined;
+
+                      const resolvedNode = createResolvedNode(
+                        findComponent,
+                        layer.data.node ??
+                          Model.primitiveElement({
+                            componentID: boxSymbolId,
+                          }),
+                      );
+
+                      if (!resolvedNode) return undefined;
+
+                      return ResolvedHierarchy.find<NoyaResolvedString>(
+                        resolvedNode,
+                        (node): node is NoyaResolvedString =>
+                          node.type === 'noyaString' &&
+                          node.path.join('/') === path.join('/'),
+                      )?.value;
+                    }}
+                    renderContent={(props) => {
+                      const layers = artboard.layers.filter(
+                        Layers.isCustomLayer<CustomLayerData>,
+                      );
+
+                      return layers.map((layer) => {
+                        function createLoadingNode() {
+                          if (!layer.data.description) return;
+
+                          const key = client.componentLayoutCacheKey(
+                            layer.name,
+                            layer.data.description,
+                          );
+
+                          const layouts = generatedLayouts[key];
+                          const activeIndex =
+                            layer.data.activeGenerationIndex ?? 0;
+
+                          if (!layouts || !layouts[activeIndex])
+                            return undefined;
+
+                          return layouts[activeIndex].node;
                         }
-                        style={{
-                          position: 'absolute',
-                          top: layer.frame.y,
-                          left: layer.frame.x,
-                          width: layer.frame.width,
-                          height: layer.frame.height,
-                          // overflow:
-                          //   layer.do_objectID === selectedLayerId ||
-                          //   layer.do_objectID === highlightedLayer?.id
-                          //     ? 'visible'
-                          //     : 'hidden',
-                          display: 'flex',
-                        }}
-                      >
-                        {content}
-                      </div>
-                    );
-                  });
-                }}
-              />
-            </ErrorBoundary>
-          </WrapperElement>
-        </ArtboardElement>
+
+                        function createPlaceholderNode() {
+                          return Model.primitiveElement({
+                            componentID: boxSymbolId,
+                            classNames: [
+                              Model.className('flex-1'),
+                              Model.className('flex'),
+                              Model.className('items-center'),
+                              Model.className('justify-center'),
+                              Model.className('text-center'),
+                              Model.className('p-4'),
+                            ],
+                            children: [
+                              layer.data.description === undefined
+                                ? Model.primitiveElement({
+                                    componentID: textSymbolId,
+                                    children: [
+                                      Model.string(
+                                        `Generating ${layer.name} description...`,
+                                      ),
+                                    ],
+                                  })
+                                : Model.primitiveElement({
+                                    componentID: textSymbolId,
+                                    children: [
+                                      Model.string(
+                                        `Generating ${layer.name} layout...`,
+                                      ),
+                                    ],
+                                  }),
+                            ],
+                          });
+                        }
+
+                        const resolvedNode = createResolvedNode(
+                          findComponent,
+                          layer.do_objectID === selectedLayerId &&
+                            overriddenBlock
+                            ? overriddenBlock
+                            : layer.data.node ??
+                                createLoadingNode() ??
+                                createPlaceholderNode(),
+                        );
+
+                        const content = renderResolvedNode({
+                          isEditable: layer.do_objectID === editingLayerId,
+                          resolvedNode,
+                          primary: props.primary,
+                          system: props.system,
+                          highlightedPath:
+                            highlightedNodePath &&
+                            layer.do_objectID === highlightedNodePath.layerId
+                              ? highlightedNodePath.path
+                              : undefined,
+                          selectionOutlineColor: lightTheme.colors.secondary,
+                        });
+
+                        return (
+                          <div
+                            key={layer.do_objectID}
+                            className={
+                              !layer.data.node
+                                ? 'noya-skeleton-shimmer'
+                                : undefined
+                            }
+                            style={{
+                              position: 'absolute',
+                              top: layer.frame.y,
+                              left: layer.frame.x,
+                              width: layer.frame.width,
+                              height: layer.frame.height,
+                              display: 'flex',
+                            }}
+                          >
+                            {content}
+                          </div>
+                        );
+                      });
+                    }}
+                  />
+                </ErrorBoundary>
+              </WrapperElement>
+            </ArtboardElement>
+          );
+        })}
       </CanvasElement>
     );
   }),
