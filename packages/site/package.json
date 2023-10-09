@@ -14,7 +14,7 @@
     "@jcoreio/async-throttle": "^1.4.3",
     "@mdx-js/loader": "1.6.22",
     "@mdx-js/react": "1.6.22",
-    "@noya-design-system/protocol": "^0.0.53",
+    "@noya-design-system/protocol": "^0.0.55",
     "@radix-ui/react-portal": "^1.0.1",
     "@types/styled-components": "^5.1.14",
     "cookie": "^0.5.0",

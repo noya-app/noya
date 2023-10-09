@@ -1,3 +1,4 @@
+import { component } from '@noya-design-system/protocol';
 import {
   AvatarIcon,
   BadgeIcon,
@@ -94,6 +95,20 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         componentID: buttonSymbolId,
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Submit')],
+      }),
+  },
+  {
+    id: component.id.Card,
+    name: 'Card',
+    description: 'A card',
+    icon: <BoxIcon />,
+    schema: { children: 'nodes' },
+    variants: ['elevated', 'outline', 'solid'],
+    initialValue: () =>
+      Model.primitiveElement({
+        name: 'Card',
+        componentID: component.id.Card,
+        classNames: Model.classNames(['flex-1', 'p-4']),
       }),
   },
   {

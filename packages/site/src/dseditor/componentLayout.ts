@@ -83,6 +83,18 @@ function convertLayoutToComponent(
       const classes = node.attributes.class?.split(' ') ?? [];
       const name = node.attributes.name || primitive.name;
 
+      if (elementName === 'Card') {
+        // Assign a random variant. Elevated should be most common
+        const variantOptions = ['elevated', 'elevated', 'outline', 'solid'];
+        const rootClassCount = layout.attributes.class?.split(' ').length ?? 0;
+        const offset = indexPath.length + rootClassCount;
+        const variant = variantOptions[offset % variantOptions.length];
+
+        if (variant !== 'elevated') {
+          classes.push(`variant-${variant}`);
+        }
+      }
+
       return Model.primitiveElement({
         componentID: primitive.id,
         name,
@@ -110,9 +122,7 @@ function convertLayoutToComponent(
                   : Model.generatorProp({
                       name: 'src',
                       generator: 'geometric',
-                      query: createSeed(
-                        [...indexPath, ...classes, name].join('/'),
-                      ),
+                      query: createSeed(indexPath.join('/')),
                     }),
               ]
             : []),

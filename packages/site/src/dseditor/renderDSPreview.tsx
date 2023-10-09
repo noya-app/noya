@@ -1,4 +1,8 @@
-import { DesignSystemDefinition, Theme } from '@noya-design-system/protocol';
+import {
+  DesignSystemDefinition,
+  Theme,
+  component,
+} from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { findLast, unique } from 'noya-utils';
@@ -190,7 +194,8 @@ export function renderResolvedNode({
             element.componentID === buttonSymbolId ||
             element.componentID === linkSymbolId ||
             element.componentID === tagSymbolId ||
-            element.componentID === textSymbolId) && {
+            element.componentID === textSymbolId ||
+            element.componentID === component.id.Card) && {
             children: transformedChildren,
           })}
           // Components with labels

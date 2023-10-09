@@ -4,6 +4,8 @@ import path from 'path';
 import {
   replaceHTMLEntities,
   rewriteAbsoluteFill,
+  rewriteBoxToCard,
+  rewriteCardPadding,
   rewriteConsistentSpacing,
   rewriteFlex1ButtonInColumn,
   rewriteForbiddenClassGroups,
@@ -235,5 +237,70 @@ it('removes hidden elements', () => {
     ),
   ).toEqual(
     layoutNode('Box', {}, [layoutNode('Box', { class: 'overflow-hidden' })]),
+  );
+});
+
+it('adds padding to cards', () => {
+  expect(rewriteCardPadding(layoutNode('Card'))).toEqual(
+    layoutNode('Card', { class: 'flex-col gap-4' }),
+  );
+  expect(rewriteCardPadding(layoutNode('Card', { class: 'p-2' }))).toEqual(
+    layoutNode('Card', { class: 'p-2 flex-col gap-4' }),
+  );
+  expect(
+    rewriteConsistentSpacing(
+      rewriteCardPadding(layoutNode('Card', { class: 'gap-2 flex-row' })),
+    ),
+  ).toEqual(layoutNode('Card', { class: 'gap-4 flex-row' }));
+});
+
+it('converts boxes to cards', () => {
+  const implicitCard = 'p-4 border';
+  expect(rewriteBoxToCard(layoutNode('Box', { class: implicitCard }))).toEqual(
+    layoutNode('Card', { class: implicitCard }),
+  );
+  expect(
+    rewriteForbiddenClassGroups(
+      rewriteBoxToCard(layoutNode('Box', { class: 'p-2 border' })),
+    ),
+  ).toEqual(layoutNode('Card'));
+  expect(
+    rewriteBoxToCard(
+      layoutNode('Box', { class: implicitCard }, [
+        layoutNode('Box', { class: implicitCard }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', { class: implicitCard }, [
+      layoutNode('Card', { class: implicitCard }),
+    ]),
+  );
+  expect(
+    rewriteBoxToCard(
+      layoutNode('Card', { class: implicitCard }, [
+        layoutNode('Box', { class: implicitCard }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Card', { class: implicitCard }, [
+      layoutNode('Box', { class: implicitCard }),
+    ]),
+  );
+  expect(
+    rewriteBoxToCard(
+      layoutNode('Box', { class: implicitCard }, [
+        layoutNode('Card', { class: implicitCard }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', { class: implicitCard }, [
+      layoutNode('Card', { class: implicitCard }),
+    ]),
+  );
+  expect(rewriteBoxToCard(layoutNode('Box', { name: 'Example Card' }))).toEqual(
+    layoutNode('Card', { name: 'Example Card' }),
+  );
+  expect(rewriteBoxToCard(layoutNode('Box', { name: 'Card Title' }))).toEqual(
+    layoutNode('Box', { name: 'Card Title' }),
   );
 });

@@ -4,6 +4,7 @@ import {
   ClassGroupKey,
   getTailwindClassGroup,
   hasClassGroup,
+  isTailwindClassGroup,
 } from '../ayon/tailwind/tailwind';
 
 export function rewriteRemoveHiddenElements(layout: LayoutNode) {
@@ -261,6 +262,20 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'background',
     'textColor',
   ],
+  Card: [
+    'padding',
+    'paddingBottom',
+    'paddingLeft',
+    'paddingRight',
+    'paddingTop',
+    'paddingX',
+    'paddingY',
+    'borderRadius',
+    'borderWidth',
+    'borderColor',
+    'boxShadow',
+    'background',
+  ],
   Select: [
     'padding',
     'paddingBottom',
@@ -379,6 +394,67 @@ export function rewriteImageToIcon(layout: LayoutNode) {
           classes.some((name) => iconHeightRE.test(name))
         ) {
           return { ...node, tag: 'Icon' };
+        }
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
+// Match: "Card", "Restaurant Card", "Card 1"
+// Don't match: "Card Grid" or "Card Title"
+const cardRE = /card(\s*\d)?$/i;
+
+/**
+ * Replace Box/div with Card if it has:
+ * - a name that ends with "Card"
+ *   (e.g. "Restaurant Card" but not "Card Title" or "Card Grid")
+ * - "padding && (border || shadow || background)" class.
+ *
+ * We shouldn't do this if we're already within a Card component or if
+ * we have any Card children. We convert from innermost to outermost.
+ */
+export function rewriteBoxToCard(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren, indexPath) => {
+      if (typeof node === 'string') return node;
+
+      if (node.tag === 'Box' || node.tag === 'div') {
+        const classes = parseClasses(node.attributes.class);
+
+        if (
+          node.attributes.name?.match(cardRE) ||
+          (hasClassGroup('padding', classes) &&
+            (hasClassGroup('borderWidth', classes) ||
+              hasClassGroup('boxShadow', classes) ||
+              hasClassGroup('background', classes)))
+        ) {
+          const ancestors = LayoutHierarchy.accessPath(
+            layout,
+            indexPath.slice(0, -1),
+          );
+
+          const hasCardChild = transformedChildren.some(
+            (child) =>
+              LayoutHierarchy.find(
+                child,
+                (node) => typeof node !== 'string' && node.tag === 'Card',
+              ) !== undefined,
+          );
+
+          if (
+            ancestors.every(
+              (ancestor) => (ancestor as LayoutNode).tag !== 'Card',
+            ) &&
+            !hasCardChild
+          ) {
+            return { ...node, tag: 'Card', children: transformedChildren };
+          }
         }
       }
 
@@ -517,6 +593,30 @@ export function rewriteAbsoluteFill(layout: LayoutNode) {
   ) as LayoutNode;
 }
 
+/**
+ * Add "flex-col" unless conflicting classes are present.
+ * Add  "gap-4" to cards without padding/gap. The consistent spacing rewrite
+ * will replace any other padding values.
+ */
+export function rewriteCardPadding(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    if (node.tag !== 'Card') return;
+
+    // Always use flex as the default
+    classes = classes.filter((name) => !isTailwindClassGroup(name, 'display'));
+
+    if (!hasClassGroup('flexDirection', classes)) {
+      classes.push('flex-col');
+    }
+
+    if (!hasClassGroup('gap', classes)) {
+      classes.push('gap-4');
+    }
+
+    return classes;
+  });
+}
+
 // export function rewriteAlwaysFlexGap(layout: LayoutNode) {
 //   return rewriteClasses(layout, (node, indexPath, classes) => {
 //     if (
@@ -534,11 +634,13 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteImagesWithChildren(layout);
   layout = rewriteSvgToIcon(layout);
   layout = rewriteImageToIcon(layout);
+  layout = rewriteBoxToCard(layout);
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);
   layout = rewriteInlineFlexButtonAndLink(layout);
   layout = rewriteIconSize(layout);
+  layout = rewriteCardPadding(layout);
   layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);
