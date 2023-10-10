@@ -1,55 +1,96 @@
-import { NoyaAPI, useNoyaClient } from 'noya-api';
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   Button,
-  DropdownMenu,
-  RegularMenuItem,
+  ExtractMenuItemType,
+  IconButton,
+  InputField,
+  ListView,
+  SEPARATOR_ITEM,
   Spacer,
+  Stack,
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
-import React, { useCallback, useEffect, useState } from 'react';
+import { findLast, uuid } from 'noya-utils';
+import React, { useLayoutEffect, useState } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
 import { useAyonState } from '../../state/ayonState';
-import { AyonPageSizeInspector } from './AyonPageSizeInspector';
-
-const designSystems = {
-  '@noya-design-system/mui': 'Material Design',
-  '@noya-design-system/antd': 'Ant Design',
-  '@noya-design-system/chakra': 'Chakra UI',
-};
+import { DesignSystemPicker } from './DesignSystemPicker';
+import { DraggableMenuButton } from './DraggableMenuButton';
 
 const noop = () => {};
 
 export function AyonProjectInspector({
   name,
   onChangeName = noop,
-  onDuplicate = noop,
 }: {
   name: string;
   onChangeName?: (name: string) => void;
-  onDuplicate?: () => void;
 }) {
+  const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
-
-  const artboard = Layers.find(
-    Selectors.getCurrentPage(state),
-    Layers.isArtboard,
-  );
 
   const currentDesignSystem =
     state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
 
-  if (!artboard) return null;
-
   return (
     <>
-      <AyonPageSizeInspector artboard={artboard} />
+      <InspectorSection title="Project" titleTextStyle="heading3">
+        <InspectorPrimitives.LabeledRow label="Name">
+          <InputField.Root>
+            <InputField.Input
+              value={name}
+              onChange={onChangeName}
+              placeholder="Untitled"
+            />
+          </InputField.Root>
+        </InspectorPrimitives.LabeledRow>
+      </InspectorSection>
+      <InspectorSection
+        title="Pages"
+        titleTextStyle="heading4"
+        right={
+          <Button
+            onClick={() => {
+              const newArtboardId = uuid();
+
+              const sizeOfLastArtboard = findLast(
+                Selectors.getCurrentPage(state).layers,
+                Layers.isArtboard,
+              )?.frame ?? {
+                width: 1280,
+                height: 720,
+              };
+
+              dispatch('batch', [
+                [
+                  'insertArtboard',
+                  {
+                    name: 'Page',
+                    id: newArtboardId,
+                    width: sizeOfLastArtboard.width,
+                    height: sizeOfLastArtboard.height,
+                  },
+                ],
+                ['selectLayer', newArtboardId],
+                ['zoomToFit*', { type: 'layer', value: newArtboardId }],
+              ]);
+
+              startRenamingLayer(newArtboardId);
+            }}
+          >
+            <IconButton iconName="PlusIcon" />
+            <Spacer.Horizontal size={8} />
+            New Page
+          </Button>
+        }
+      >
+        <AyonArtboardList />
+      </InspectorSection>
       <InspectorSection title="Theme" titleTextStyle="heading4">
         <InspectorPrimitives.LabeledRow label="Design System">
           <DesignSystemPicker />
@@ -65,68 +106,157 @@ export function AyonProjectInspector({
   );
 }
 
-function DesignSystemPicker() {
-  const theme = useDesignSystemTheme();
+function AyonArtboardList() {
   const [state, dispatch] = useAyonState();
-  const [{ files, loading }, setFiles] = useState<{
-    files: NoyaAPI.File[];
-    loading: boolean;
-  }>({ files: [], loading: true });
-  const client = useNoyaClient();
-
-  useEffect(() => {
-    client.networkClient.files.list().then((files) => {
-      setFiles({ files, loading: false });
-    });
-  }, [client]);
-
-  const customDesignSystems = files
-    .filter((file) => file.data.type === 'io.noya.ds')
-    .map((file): RegularMenuItem<string> => {
-      return {
-        value: file.id,
-        title: file.data.name,
-      };
-    });
-
-  const designSystemMenu = createSectionedMenu(
-    Object.entries(designSystems).map(([key, value]) => ({
-      value: key as keyof typeof designSystems,
-      title: value,
-    })),
-    customDesignSystems,
+  const theme = useDesignSystemTheme();
+  const { startRenamingLayer, renamingLayer, didHandleFocus } = useWorkspace();
+  const artboards = Selectors.getCurrentPage(state).layers.filter(
+    Layers.isArtboard,
   );
+  const selectedLayerIds = state.selectedLayerIds;
+  const [editingLayer, setEditingLayer] = useState<string | undefined>();
 
-  const currentDesignSystem =
-    state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
+  useLayoutEffect(() => {
+    if (!renamingLayer) return;
 
-  const displayName =
-    currentDesignSystem.type === 'standard'
-      ? designSystems[currentDesignSystem.id as keyof typeof designSystems]
-      : customDesignSystems.find(
-          (item) => item.value === currentDesignSystem.id,
-        )?.title ?? null;
+    setTimeout(() => {
+      setEditingLayer(renamingLayer);
+      didHandleFocus();
+    }, 50);
+  }, [didHandleFocus, renamingLayer]);
 
-  const handleSelect = useCallback(
-    (value: string) => {
-      if (loading) return;
-
-      if (value.startsWith('@noya-design-system')) {
-        dispatch('setDesignSystem', 'standard', value);
-      } else {
-        dispatch('setDesignSystem', 'custom', value);
-      }
-    },
-    [dispatch, loading],
-  );
+  const data = [...artboards, SEPARATOR_ITEM, 'Example'];
 
   return (
-    <DropdownMenu items={designSystemMenu} onSelect={handleSelect}>
-      <Button flex="1">
-        {displayName}
-        <Spacer.Horizontal />
-        <ChevronDownIcon color={theme.colors.icon} />
-      </Button>
-    </DropdownMenu>
+    <ListView.Root
+      data={data}
+      sortable
+      variant="bare"
+      keyExtractor={(artboard) =>
+        typeof artboard === 'string' ? artboard : artboard.do_objectID
+      }
+      sectionHeaderVariant="label"
+      // pressEventName="onPointerDown"
+      renderItem={(artboard, _, { isDragging }) => {
+        if (artboard === SEPARATOR_ITEM) {
+          return (
+            <ListView.Row
+              key={artboard}
+              isSectionHeader
+              backgroundColor="transparent"
+            >
+              <Stack.H padding="12px 0 10px 0">
+                <ListView.RowTitle>Suggested Pages</ListView.RowTitle>
+              </Stack.H>
+            </ListView.Row>
+          );
+        }
+        // else if (typeof artboard === 'string') {
+        //   return (
+        //     <ListView.Row key={artboard} backgroundColor="transparent">
+        //       <ListView.RowTitle>Hello</ListView.RowTitle>
+        //     </ListView.Row>
+        //   );
+        // }
+
+        const id =
+          typeof artboard === 'string' ? artboard : artboard.do_objectID;
+        const name = typeof artboard === 'string' ? artboard : artboard.name;
+        const isSuggestedPage = typeof artboard === 'string';
+
+        const isSelected = selectedLayerIds.includes(id);
+        const isEditing = editingLayer === id;
+
+        const menu = createSectionedMenu(
+          [!isEditing && { value: 'rename', title: 'Rename' }],
+          [
+            !isEditing && { value: 'duplicate', title: 'Duplicate' },
+            !isEditing && { value: 'delete', title: 'Delete' },
+          ],
+        );
+
+        const handleSelect = (value: ExtractMenuItemType<(typeof menu)[0]>) => {
+          switch (value) {
+            case 'rename':
+              startRenamingLayer(id);
+              break;
+            case 'duplicate':
+              dispatch('duplicateLayer', [id]);
+              break;
+            case 'delete':
+              dispatch('deleteLayer', id);
+              break;
+          }
+        };
+
+        const handleSubmitEditing = (name: string) => {
+          setEditingLayer(undefined);
+
+          if (!name) return;
+
+          dispatch('setLayerName', id, name);
+        };
+
+        return (
+          <ListView.Row
+            key={id}
+            id={id}
+            depth={0}
+            selected={isSelected}
+            backgroundColor="transparent"
+            menuItems={menu}
+            onSelectMenuItem={handleSelect}
+            onPress={() => {
+              if (isSuggestedPage) return;
+              dispatch('batch', [
+                ['selectLayer', id],
+                ['zoomToFit*', { type: 'layer', value: id }],
+              ]);
+            }}
+            onDoubleClick={() => {
+              if (isSuggestedPage) return;
+              startRenamingLayer(id);
+            }}
+          >
+            <DraggableMenuButton
+              isVisible
+              items={menu}
+              onSelect={handleSelect}
+            />
+            <Spacer.Horizontal size={8} />
+            <Stack.V
+              flex="1 1 0%"
+              padding="1px"
+              borderRadius="4px"
+              margin="2px 0"
+              gap="2px"
+              border={`1px solid ${theme.colors.divider}`}
+              color={'inherit'}
+              background={isSelected ? theme.colors.primary : 'transparent'}
+            >
+              <Stack.H padding="4px 6px" alignItems="center" gap="4px">
+                {isEditing ? (
+                  <ListView.EditableRowTitle
+                    autoFocus
+                    value={name}
+                    onSubmitEditing={handleSubmitEditing}
+                  />
+                ) : (
+                  <ListView.RowTitle>{name}</ListView.RowTitle>
+                )}
+              </Stack.H>
+            </Stack.V>
+            {isSuggestedPage && !isDragging && (
+              <>
+                <Spacer.Horizontal size={8} />
+                <IconButton iconName="PlusIcon" color={theme.colors.icon} />
+                <Spacer.Horizontal size={8} />
+                <IconButton iconName="TrashIcon" color={theme.colors.icon} />
+              </>
+            )}
+          </ListView.Row>
+        );
+      }}
+    />
   );
 }

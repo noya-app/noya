@@ -95,6 +95,10 @@ export const DraggableMenuButton = memo(function DraggableMenuButton<
     <DotButtonElement
       onPointerDownCapture={handlePointerDownCapture}
       onPointerUp={handlePointerUp}
+      onClick={(event) => {
+        event.stopPropagation();
+        event.preventDefault();
+      }}
     >
       <DropdownMenu
         open={open}

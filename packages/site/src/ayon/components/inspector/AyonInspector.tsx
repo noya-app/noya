@@ -13,6 +13,7 @@ import { NoyaNode } from '../../../dseditor/types';
 import { CustomLayerData, NodePath } from '../../types';
 import { AyonElementsInspector } from './AyonElementsInspector';
 import { AyonMultipleComponentsInspector } from './AyonMultipleComponentsInspector';
+import { AyonPageInspector } from './AyonPageInspector';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
 
@@ -21,7 +22,6 @@ type TabName = 'project' | 'component' | 'elements';
 type Props = {
   name: string;
   onChangeName?: (name: string) => void;
-  onDuplicate?: () => void;
   highlightedNodePath?: NodePath;
   setHighlightedNodePath: (value: NodePath | undefined) => void;
   setPreviewNode: (node: NoyaNode | undefined) => void;
@@ -30,7 +30,6 @@ type Props = {
 export const AyonInspector = memo(function AyonInspector({
   name,
   onChangeName,
-  onDuplicate,
   highlightedNodePath,
   setHighlightedNodePath,
   setPreviewNode,
@@ -38,31 +37,36 @@ export const AyonInspector = memo(function AyonInspector({
   const theme = useDesignSystemTheme();
   const [state] = useApplicationState();
 
-  const selectedLayers = useShallowArray(
-    Selectors.getSelectedLayers(state).filter(
-      Layers.isCustomLayer<CustomLayerData>,
-    ),
-  );
-  const selectedLayerIds = useMemo(
-    () => selectedLayers.map((layer) => layer.do_objectID),
+  const selectedLayers = useShallowArray(Selectors.getSelectedLayers(state));
+
+  const selectedArtboards = useMemo(
+    () => selectedLayers.filter(Layers.isArtboard),
     [selectedLayers],
+  );
+  const selectedCustomLayers = useMemo(
+    () => selectedLayers.filter(Layers.isCustomLayer<CustomLayerData>),
+    [selectedLayers],
+  );
+  const selectedCustomLayerIds = useMemo(
+    () => selectedCustomLayers.map((layer) => layer.do_objectID),
+    [selectedCustomLayers],
   );
 
   const highlightedPath =
     highlightedNodePath &&
-    highlightedNodePath.layerId === selectedLayers[0]?.do_objectID
+    highlightedNodePath.layerId === selectedCustomLayers[0]?.do_objectID
       ? highlightedNodePath.path
       : undefined;
 
   const setHighlightedPath = useCallback(
     (path: string[] | undefined) => {
       setHighlightedNodePath(
-        selectedLayers[0] && path
-          ? { layerId: selectedLayers[0].do_objectID, path }
+        selectedCustomLayers[0] && path
+          ? { layerId: selectedCustomLayers[0].do_objectID, path }
           : undefined,
       );
     },
-    [selectedLayers, setHighlightedNodePath],
+    [selectedCustomLayers, setHighlightedNodePath],
   );
 
   const [selectedTabOverride, setSelectedTabOverride] = React.useState<
@@ -70,13 +74,14 @@ export const AyonInspector = memo(function AyonInspector({
   >(undefined);
 
   const automaticTab =
-    selectedLayers.length > 0 && state.interactionState.type === 'editingBlock'
+    selectedCustomLayers.length > 0 &&
+    state.interactionState.type === 'editingBlock'
       ? 'elements'
-      : selectedLayers.length > 0
+      : selectedCustomLayers.length > 0
       ? 'component'
       : 'project';
   const selectedTab = selectedTabOverride ?? automaticTab;
-  const selectedId = selectedLayers[0]?.do_objectID;
+  const selectedId = selectedCustomLayers[0]?.do_objectID;
 
   // Set the override when the automatic tab changes or the selection changes
   useEffect(() => {
@@ -91,26 +96,28 @@ export const AyonInspector = memo(function AyonInspector({
   function renderTabContent() {
     switch (selectedTab) {
       case 'project':
-        return (
-          <AyonProjectInspector
-            name={name}
-            onChangeName={onChangeName}
-            onDuplicate={onDuplicate}
-          />
-        );
+        return <AyonProjectInspector name={name} onChangeName={onChangeName} />;
       case 'component':
-        return selectedLayers.length > 1 ? (
-          <AyonMultipleComponentsInspector layerIds={selectedLayerIds} />
-        ) : selectedLayers.length === 1 ? (
+        // If we have a selection of artboards, show the page inspector
+        if (
+          selectedArtboards.length > 0 &&
+          selectedArtboards.length === selectedLayers.length
+        ) {
+          return <AyonPageInspector selectedArtboards={selectedArtboards} />;
+        }
+
+        return selectedCustomLayers.length > 1 ? (
+          <AyonMultipleComponentsInspector layerIds={selectedCustomLayerIds} />
+        ) : selectedCustomLayers.length === 1 ? (
           <CustomLayerInspector
-            selectedLayer={selectedLayers[0]}
+            selectedLayer={selectedCustomLayers[0]}
             setPreviewNode={setPreviewNode}
           />
         ) : null;
       case 'elements':
-        return selectedLayers.length === 1 ? (
+        return selectedCustomLayers.length === 1 ? (
           <AyonElementsInspector
-            selectedLayer={selectedLayers[0]}
+            selectedLayer={selectedCustomLayers[0]}
             highlightedPath={highlightedPath}
             setHighlightedPath={setHighlightedPath}
           />
@@ -156,7 +163,7 @@ export const AyonInspector = memo(function AyonInspector({
             {tabContent}
           </Stack.V>
         ) : (
-          <NoSelection count={selectedLayers.length} />
+          <NoSelection count={selectedCustomLayers.length} />
         )}
       </ScrollArea>
     </Stack.V>

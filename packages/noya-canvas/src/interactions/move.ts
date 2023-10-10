@@ -65,7 +65,7 @@ export const createMoveInteraction = (
               ? 'childrenOnly'
               : 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
-            includeLayersOutsideArtboardBounds: true,
+            // includeLayersOutsideArtboardBounds: true,
           });
 
           if (layerId) {

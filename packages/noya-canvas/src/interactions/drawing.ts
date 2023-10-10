@@ -82,7 +82,7 @@ export const createDrawingInteraction =
               groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'childrenOnly',
               includeLockedLayers: false,
-              includeLayersOutsideArtboardBounds: true,
+              // includeLayersOutsideArtboardBounds: true,
             },
           );
 

@@ -3,7 +3,6 @@ import Sketch from 'noya-file-format';
 import { DesktopIcon, LaptopIcon, MobileIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import React from 'react';
-import { InspectorSection } from '../../../components/InspectorSection';
 import { useAyonDispatch } from '../../state/ayonState';
 
 export const sizeList = [
@@ -33,7 +32,7 @@ export const sizeList = [
   },
 ];
 
-export function AyonPageSizeInspector({
+export function AyonPageSizeInspectorRow({
   artboard,
 }: {
   artboard: Sketch.AnyLayer;
@@ -41,7 +40,7 @@ export function AyonPageSizeInspector({
   const dispatch = useAyonDispatch();
 
   return (
-    <InspectorSection title="Page Size" titleTextStyle="heading4">
+    <>
       <Stack.V flex="1">
         <GridView.Root
           scrollable={false}
@@ -129,6 +128,6 @@ export function AyonPageSizeInspector({
           label="H"
         />
       </InspectorPrimitives.Row>
-    </InspectorSection>
+    </>
   );
 }

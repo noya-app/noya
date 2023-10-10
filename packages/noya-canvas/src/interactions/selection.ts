@@ -64,7 +64,7 @@ export function selectionInteraction({
               ? 'childrenOnly'
               : 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
-            includeLayersOutsideArtboardBounds: true,
+            // includeLayersOutsideArtboardBounds: true,
           },
         );
 
@@ -91,7 +91,7 @@ export function selectionInteraction({
               ? 'childrenOnly'
               : 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
-            includeLayersOutsideArtboardBounds: true,
+            // includeLayersOutsideArtboardBounds: true,
           },
         );
 

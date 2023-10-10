@@ -67,7 +67,6 @@ export const Content = memo(function Content({
   canvasRendererType = 'canvas',
   isPlayground,
   ds,
-  onDuplicate,
   name,
   onChangeName,
 }: {
@@ -77,7 +76,6 @@ export const Content = memo(function Content({
   canvasRendererType?: CanvasRendererType;
   isPlayground?: boolean;
   ds: DS;
-  onDuplicate?: () => void;
   name: string;
   onChangeName?: (name: string) => void;
 }) {
@@ -505,7 +503,6 @@ export const Content = memo(function Content({
             <AyonInspector
               name={name}
               onChangeName={onChangeName}
-              onDuplicate={onDuplicate}
               highlightedNodePath={highlightedNodePath}
               setHighlightedNodePath={setHighlightedNodePath}
               setPreviewNode={setOverriddenBlock}

@@ -20,6 +20,7 @@ import {
   resize,
   roundPoint,
   transformRect,
+  unionRects,
 } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
@@ -110,7 +111,7 @@ export type CanvasAction =
     ]
   | [
       type: 'insertArtboard',
-      details: { name: string; width: number; height: number },
+      details: { name: string; width: number; height: number; id?: string },
     ]
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
@@ -245,18 +246,33 @@ export function canvasReducer(
       });
     }
     case 'insertArtboard': {
-      const [, { name, width, height }] = action;
+      const [, { name, width, height, id }] = action;
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const { scrollOrigin } = getCurrentPageMetadata(state);
 
+      const defaultInsertionPoint = {
+        x: -scrollOrigin.x + 100,
+        y: -scrollOrigin.y + 100,
+      };
+
+      // Determine positioning based on other artboards.
+      // If there are no artboards, position relative to scrollOrigin.
+      const artboards = Layers.findAll(page, Layers.isArtboard);
+      const frame = unionRects(...artboards.map((artboard) => artboard.frame));
+
+      const insertionPoint =
+        artboards.length > 0
+          ? { x: frame.x + frame.width + 100, y: frame.y }
+          : defaultInsertionPoint;
+
       return produce(state, (draft) => {
         const layer = SketchModel.artboard({
+          do_objectID: id,
           name,
           frame: SketchModel.rect({
-            // TODO: Figure out positioning based on other artboards.
-            // Also, don't hardcode sidebar width.
-            x: -scrollOrigin.x + 100,
-            y: -scrollOrigin.y + 100,
+            x: insertionPoint.x,
+            y: insertionPoint.y,
             width,
             height,
           }),

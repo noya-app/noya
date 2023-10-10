@@ -196,7 +196,6 @@ const FileEditor = memo(
         initialDocument={initialFile.data.document}
         onChangeDocument={onChangeDocument}
         onChangeName={updateName}
-        onDuplicate={duplicateFile}
         downloadFile={downloadFile}
       />
     );

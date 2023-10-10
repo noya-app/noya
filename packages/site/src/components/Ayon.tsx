@@ -35,7 +35,6 @@ import {
   useFontManager,
 } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
-import { SketchModel } from 'noya-sketch-model';
 import {
   Layers,
   Selectors,
@@ -58,8 +57,7 @@ import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Content } from '../ayon/components/Content';
 import { GeneratedLayoutProvider } from '../ayon/components/GeneratedLayoutContext';
 import { ayonReducer } from '../ayon/state/ayonReducer';
-import { ayonLibraryId, boxSymbolId } from '../ayon/symbols/symbolIds';
-import { librarySymbols } from '../ayon/symbols/symbols';
+import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
@@ -81,7 +79,6 @@ function Workspace({
   uploadAsset,
   name,
   onChangeName,
-  onDuplicate,
   viewType = 'combined',
   padding,
   canvasRendererType,
@@ -89,7 +86,6 @@ function Workspace({
   isPlayground,
 }: {
   fileId: string;
-  onDuplicate?: () => void;
   name: string;
   onChangeName?: (name: string) => void;
   viewType?: ViewType;
@@ -409,7 +405,6 @@ function Workspace({
     <Content
       name={name}
       onChangeName={onChangeName}
-      onDuplicate={onDuplicate}
       canvasRendererType={canvasRendererType}
       uploadAsset={uploadAsset}
       viewType={viewType}
@@ -453,23 +448,23 @@ const AyonControlledState = memo(function AyonWithState({
     const workspace = createInitialWorkspaceState(initialDocument);
 
     return produce(workspace, (draft) => {
-      draft.preferences.showDotGrid = true;
-      draft.preferences.wireframeMode = true;
+      // draft.preferences.showDotGrid = false;
+      // draft.preferences.wireframeMode = true;
 
-      const artboardId = Layers.find(
-        draft.history.present.sketch.pages[0],
-        Layers.isArtboard,
-      )?.do_objectID;
+      // const artboardId = Layers.find(
+      //   draft.history.present.sketch.pages[0],
+      //   Layers.isArtboard,
+      // )?.do_objectID;
 
-      draft.history.present.isolatedLayerId = artboardId;
+      // draft.history.present.isolatedLayerId = artboardId;
 
-      draft.history.present.sketch.document.foreignSymbols = librarySymbols.map(
-        (symbol) =>
-          SketchModel.foreignSymbol({
-            symbolMaster: symbol,
-            libraryID: ayonLibraryId,
-          }),
-      );
+      // draft.history.present.sketch.document.foreignSymbols = librarySymbols.map(
+      //   (symbol) =>
+      //     SketchModel.foreignSymbol({
+      //       symbolMaster: symbol,
+      //       libraryID: ayonLibraryId,
+      //     }),
+      // );
 
       return draft;
     });

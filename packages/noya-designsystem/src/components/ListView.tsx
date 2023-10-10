@@ -244,6 +244,12 @@ const RowContainer = styled.div<{
       }),
       ...(backgroundColor && {
         backgroundColor,
+        '&:hover': {
+          backgroundColor,
+        },
+        '&:active': {
+          backgroundColor,
+        },
       }),
     };
   },

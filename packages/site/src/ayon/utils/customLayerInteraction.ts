@@ -29,7 +29,7 @@ export function createCustomLayerInteraction({
               groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
-              includeLayersOutsideArtboardBounds: true,
+              // includeLayersOutsideArtboardBounds: true,
             },
           );
 
@@ -48,7 +48,7 @@ export function createCustomLayerInteraction({
               groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
-              includeLayersOutsideArtboardBounds: true,
+              // includeLayersOutsideArtboardBounds: true,
             },
           );
 
@@ -69,7 +69,7 @@ export function createCustomLayerInteraction({
               groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
-              includeLayersOutsideArtboardBounds: true,
+              // includeLayersOutsideArtboardBounds: true,
             },
           );
 
