@@ -206,6 +206,7 @@ export function AyonProjectInspector({
 }
 
 function DesignSystemPicker() {
+  const theme = useDesignSystemTheme();
   const [state, dispatch] = useAyonState();
   const [{ files, loading }, setFiles] = useState<{
     files: NoyaAPI.File[];
@@ -264,7 +265,7 @@ function DesignSystemPicker() {
       <Button flex="1">
         {displayName}
         <Spacer.Horizontal />
-        <ChevronDownIcon />
+        <ChevronDownIcon color={theme.colors.icon} />
       </Button>
     </DropdownMenu>
   );
