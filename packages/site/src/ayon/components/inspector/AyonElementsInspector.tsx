@@ -1,8 +1,4 @@
-import {
-  ActivityIndicator,
-  Stack,
-  useDesignSystemTheme,
-} from 'noya-designsystem';
+import { ActivityIndicator } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
@@ -20,28 +16,6 @@ type Props = {
 };
 
 export const AyonElementsInspector = memo(function AyonElementsInspector({
-  selectedLayer,
-  highlightedPath,
-  setHighlightedPath,
-}: Props) {
-  const theme = useDesignSystemTheme();
-
-  return (
-    <Stack.V
-      gap="1px"
-      position="relative"
-      background={theme.colors.canvas.background}
-    >
-      <ElementInspector
-        selectedLayer={selectedLayer}
-        highlightedPath={highlightedPath}
-        setHighlightedPath={setHighlightedPath}
-      />
-    </Stack.V>
-  );
-});
-
-const ElementInspector = memo(function ElementInspector({
   selectedLayer,
   highlightedPath,
   setHighlightedPath,

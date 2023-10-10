@@ -88,6 +88,38 @@ export const AyonInspector = memo(function AyonInspector({
     }
   }, [automaticTab, selectedId]);
 
+  function renderTabContent() {
+    switch (selectedTab) {
+      case 'project':
+        return (
+          <AyonProjectInspector
+            name={name}
+            onChangeName={onChangeName}
+            onDuplicate={onDuplicate}
+          />
+        );
+      case 'component':
+        return selectedLayers.length > 1 ? (
+          <AyonMultipleComponentsInspector layerIds={selectedLayerIds} />
+        ) : selectedLayers.length === 1 ? (
+          <CustomLayerInspector
+            selectedLayer={selectedLayers[0]}
+            setPreviewNode={setPreviewNode}
+          />
+        ) : null;
+      case 'elements':
+        return selectedLayers.length === 1 ? (
+          <AyonElementsInspector
+            selectedLayer={selectedLayers[0]}
+            highlightedPath={highlightedPath}
+            setHighlightedPath={setHighlightedPath}
+          />
+        ) : null;
+    }
+  }
+
+  const tabContent = renderTabContent();
+
   return (
     <Stack.V
       flex="1"
@@ -115,34 +147,17 @@ export const AyonInspector = memo(function AyonInspector({
         </RadioGroup.Root>
       </Stack.H>
       <ScrollArea>
-        {selectedTab === 'project' && (
-          <AyonProjectInspector
-            name={name}
-            onChangeName={onChangeName}
-            onDuplicate={onDuplicate}
-          />
+        {tabContent ? (
+          <Stack.V
+            gap="1px"
+            position="relative"
+            background={theme.colors.canvas.background}
+          >
+            {tabContent}
+          </Stack.V>
+        ) : (
+          <NoSelection count={selectedLayers.length} />
         )}
-        {selectedTab === 'component' &&
-          (selectedLayers.length > 1 ? (
-            <AyonMultipleComponentsInspector layerIds={selectedLayerIds} />
-          ) : selectedLayers.length === 1 ? (
-            <CustomLayerInspector
-              selectedLayer={selectedLayers[0]}
-              setPreviewNode={setPreviewNode}
-            />
-          ) : (
-            <NoSelection count={selectedLayers.length} />
-          ))}
-        {selectedTab === 'elements' &&
-          (selectedLayers.length === 1 ? (
-            <AyonElementsInspector
-              selectedLayer={selectedLayers[0]}
-              highlightedPath={highlightedPath}
-              setHighlightedPath={setHighlightedPath}
-            />
-          ) : (
-            <NoSelection count={selectedLayers.length} />
-          ))}
       </ScrollArea>
     </Stack.V>
   );

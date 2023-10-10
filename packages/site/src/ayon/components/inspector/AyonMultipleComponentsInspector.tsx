@@ -1,4 +1,4 @@
-import { Button, Spacer, Stack, useDesignSystemTheme } from 'noya-designsystem';
+import { Button, Spacer } from 'noya-designsystem';
 import { ViewHorizontalIcon, ViewVerticalIcon } from 'noya-icons';
 import React, { memo, useCallback } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
@@ -10,7 +10,6 @@ export const AyonMultipleComponentsInspector = memo(
   }: {
     layerIds: string[];
   }) {
-    const theme = useDesignSystemTheme();
     const dispatch = useAyonDispatch();
 
     const handleMergeIntoVerticalStack = useCallback(() => {
@@ -22,24 +21,18 @@ export const AyonMultipleComponentsInspector = memo(
     }, [dispatch, layerIds]);
 
     return (
-      <Stack.V
-        gap="1px"
-        position="relative"
-        background={theme.colors.canvas.background}
-      >
-        <InspectorSection title="Actions" titleTextStyle="heading4">
-          <Button onClick={handleMergeIntoVerticalStack}>
-            Group as Vertical Stack
-            <Spacer.Horizontal inline size="6px" />
-            <ViewHorizontalIcon />
-          </Button>
-          <Button onClick={handleMergeIntoHorizontalStack}>
-            Group as Horizontal Stack
-            <Spacer.Horizontal inline size="6px" />
-            <ViewVerticalIcon />
-          </Button>
-        </InspectorSection>
-      </Stack.V>
+      <InspectorSection title="Actions" titleTextStyle="heading4">
+        <Button onClick={handleMergeIntoVerticalStack}>
+          Group as Vertical Stack
+          <Spacer.Horizontal inline size="6px" />
+          <ViewHorizontalIcon />
+        </Button>
+        <Button onClick={handleMergeIntoHorizontalStack}>
+          Group as Horizontal Stack
+          <Spacer.Horizontal inline size="6px" />
+          <ViewVerticalIcon />
+        </Button>
+      </InspectorSection>
     );
   },
 );

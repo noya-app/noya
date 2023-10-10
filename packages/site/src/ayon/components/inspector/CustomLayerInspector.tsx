@@ -1,4 +1,3 @@
-import { Stack, useDesignSystemTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import React, { memo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
@@ -17,14 +16,8 @@ export const CustomLayerInspector = memo(function CustomLayerInspector({
   selectedLayer,
   setPreviewNode,
 }: Props) {
-  const theme = useDesignSystemTheme();
-
   return (
-    <Stack.V
-      gap="1px"
-      position="relative"
-      background={theme.colors.canvas.background}
-    >
+    <>
       <InspectorSection title="Component" titleTextStyle="heading3">
         <ComponentNameInspector selectedLayer={selectedLayer} />
         <ComponentDescriptionInspector selectedLayer={selectedLayer} />
@@ -33,6 +26,6 @@ export const CustomLayerInspector = memo(function CustomLayerInspector({
         selectedLayer={selectedLayer}
         setPreviewNode={setPreviewNode}
       />
-    </Stack.V>
+    </>
   );
 });
