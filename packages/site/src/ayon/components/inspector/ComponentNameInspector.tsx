@@ -121,7 +121,12 @@ export const ComponentNameInspector = memo(function ComponentNameInspector({
             selectedLayer.do_objectID,
             primitive.description,
           ],
-          ['setLayerNode', selectedLayer.do_objectID, node, 'unset'],
+          [
+            'setLayerNode',
+            selectedLayer.do_objectID,
+            node,
+            { name: item.name, description: primitive.description },
+          ],
         ]);
       } else {
         dispatch('batch', [
