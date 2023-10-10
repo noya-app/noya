@@ -31,8 +31,6 @@ export * from './components/GridView';
 export * from './components/IconButton';
 export * from './components/InputField';
 export * from './components/InputFieldWithCompletions';
-export { SEPARATOR_ITEM, KeyboardShortcut } from './components/internal/Menu';
-export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 export * from './components/Label';
 export * from './components/LabeledElementView';
 export * from './components/ListView';
@@ -51,6 +49,12 @@ export * from './components/Text';
 export * from './components/Toast';
 export * from './components/Tooltip';
 export * from './components/TreeView';
+export { KeyboardShortcut, SEPARATOR_ITEM } from './components/internal/Menu';
+export type {
+  ExtractMenuItemType,
+  MenuItem,
+  RegularMenuItem,
+} from './components/internal/Menu';
 export * from './contexts/DesignSystemConfiguration';
 export * from './contexts/DialogContext';
 // Contexts
@@ -67,8 +71,8 @@ export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
 export * from './utils/mouseEvent';
 // Utils
-export * from './utils/sketchColor';
-export * from './utils/sketchPattern';
 export * from './utils/completions';
 export * from './utils/fuzzyScorer';
+export * from './utils/sketchColor';
+export * from './utils/sketchPattern';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

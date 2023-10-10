@@ -26,6 +26,11 @@ export type MenuItem<T extends string> =
   | typeof SEPARATOR_ITEM
   | RegularMenuItem<T>;
 
+// Extract type T of RegularMenuItem<T> within MenuItem<T>
+export type ExtractMenuItemType<T> = T extends RegularMenuItem<infer U>
+  ? U
+  : never;
+
 export const CHECKBOX_WIDTH = 15;
 export const CHECKBOX_RIGHT_INSET = 3;
 

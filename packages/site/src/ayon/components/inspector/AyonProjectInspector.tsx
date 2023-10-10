@@ -201,9 +201,6 @@ export function AyonProjectInspector({
           }}
         />
       </InspectorSection>
-      <InspectorSection title="Actions" titleTextStyle="heading4">
-        <Button onClick={onDuplicate}>Duplicate Project</Button>
-      </InspectorSection>
     </Stack.V>
   );
 }

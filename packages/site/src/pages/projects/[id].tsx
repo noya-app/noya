@@ -5,22 +5,28 @@ import {
   Button,
   DesignSystemConfigurationProvider,
   Divider,
+  DropdownMenu,
+  ExtractMenuItemType,
+  IconButton,
   Spacer,
   Stack,
   Text,
+  createSectionedMenu,
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
-import { CaretRightIcon, StarFilledIcon } from 'noya-icons';
+import { DotFilledIcon, StarFilledIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
 import React, {
   ReactNode,
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useState,
 } from 'react';
@@ -79,112 +85,125 @@ const FileTitle = memo(function FileTitle({ fileId }: { fileId: string }) {
   );
 });
 
-function FileEditor({ fileId }: { fileId: string }) {
-  const router = useRouter();
-  const client = useNoyaClient();
-  const { files } = useNoyaFiles();
-  const cachedFile = files.find((file) => file.id === fileId);
+type IFileEditor = {
+  duplicateFile: () => void;
+};
 
-  // The Ayon component is a controlled component that manages its own state
-  const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
+const FileEditor = memo(
+  forwardRef(function FileEditor(
+    { fileId }: { fileId: string },
+    forwardedRef: React.ForwardedRef<IFileEditor>,
+  ) {
+    const router = useRouter();
+    const client = useNoyaClient();
+    const { files } = useNoyaFiles();
+    const cachedFile = files.find((file) => file.id === fileId);
 
-  useEffect(() => {
-    // Load the latest version of this file from the server
-    client.files.read(fileId).then(setInitialFile);
-  }, [client, fileId]);
+    // The Ayon component is a controlled component that manages its own state
+    const [initialFile, setInitialFile] = useState<NoyaAPI.File | undefined>();
 
-  const updateFileDocumentDebounced = useMemo(
-    () => debounce(client.files.updateFileDocument, 250, { maxWait: 1000 }),
-    [client],
-  );
+    useEffect(() => {
+      // Load the latest version of this file from the server
+      client.files.read(fileId).then(setInitialFile);
+    }, [client, fileId]);
 
-  const updateName = useCallback(
-    async (newName: string) => {
-      // if (!newName) return;
+    const updateFileDocumentDebounced = useMemo(
+      () => debounce(client.files.updateFileDocument, 250, { maxWait: 1000 }),
+      [client],
+    );
 
-      client.files.updateFileName(fileId, newName);
-    },
-    [client.files, fileId],
-  );
+    const updateName = useCallback(
+      async (newName: string) => {
+        // if (!newName) return;
 
-  useEffect(() => {
-    const handler = (event: BeforeUnloadEvent) => {
-      if (window.noyaPageWillReload) return;
+        client.files.updateFileName(fileId, newName);
+      },
+      [client.files, fileId],
+    );
 
-      if (!updateFileDocumentDebounced.pending()) return;
+    useEffect(() => {
+      const handler = (event: BeforeUnloadEvent) => {
+        if (window.noyaPageWillReload) return;
 
+        if (!updateFileDocumentDebounced.pending()) return;
+
+        updateFileDocumentDebounced.flush();
+
+        const message = "Your edits haven't finished syncing. Are you sure?";
+
+        event.preventDefault();
+        event.returnValue = message;
+        return message;
+      };
+
+      window.addEventListener('beforeunload', handler, { capture: true });
+
+      return () => {
+        window.removeEventListener('beforeunload', handler, { capture: true });
+      };
+    }, [updateFileDocumentDebounced]);
+
+    const uploadAsset = async (file: ArrayBuffer) => {
+      const assetId = await client.assets.create(file, fileId);
+
+      return client.assets.url(assetId);
+    };
+
+    const downloadFile = useCallback(
+      async (format: NoyaAPI.ExportFormat, size: Size, name: string) => {
+        const url = client.files.download.url(fileId, format, size);
+        downloadUrl(url, name);
+      },
+      [fileId, client.files.download],
+    );
+
+    const duplicateFile = useCallback(() => {
       updateFileDocumentDebounced.flush();
 
-      const message = "Your edits haven't finished syncing. Are you sure?";
+      router.push(`/projects/${fileId}/duplicate`);
+    }, [fileId, router, updateFileDocumentDebounced]);
 
-      event.preventDefault();
-      event.returnValue = message;
-      return message;
-    };
+    const onChangeDocument = useCallback(
+      (document: NoyaAPI.FileData['document']) =>
+        updateFileDocumentDebounced(fileId, document),
+      [fileId, updateFileDocumentDebounced],
+    );
 
-    window.addEventListener('beforeunload', handler, { capture: true });
+    useImperativeHandle(forwardedRef, () => ({
+      duplicateFile,
+    }));
 
-    return () => {
-      window.removeEventListener('beforeunload', handler, { capture: true });
-    };
-  }, [updateFileDocumentDebounced]);
+    if (!initialFile || !cachedFile) return null;
 
-  const uploadAsset = async (file: ArrayBuffer) => {
-    const assetId = await client.assets.create(file, fileId);
+    if (initialFile.data.type === 'io.noya.ds') {
+      return (
+        <DSEditor
+          name={cachedFile.data.name}
+          onChangeName={updateName}
+          initialDocument={initialFile.data.document}
+          onChangeDocument={onChangeDocument}
+        />
+      );
+    }
 
-    return client.assets.url(assetId);
-  };
-
-  const downloadFile = useCallback(
-    async (format: NoyaAPI.ExportFormat, size: Size, name: string) => {
-      const url = client.files.download.url(fileId, format, size);
-      downloadUrl(url, name);
-    },
-    [fileId, client.files.download],
-  );
-
-  const duplicateFile = useCallback(() => {
-    updateFileDocumentDebounced.flush();
-
-    router.push(`/projects/${fileId}/duplicate`);
-  }, [fileId, router, updateFileDocumentDebounced]);
-
-  const onChangeDocument = useCallback(
-    (document: NoyaAPI.FileData['document']) =>
-      updateFileDocumentDebounced(fileId, document),
-    [fileId, updateFileDocumentDebounced],
-  );
-
-  if (!initialFile || !cachedFile) return null;
-
-  if (initialFile.data.type === 'io.noya.ds') {
     return (
-      <DSEditor
+      <Ayon
+        fileId={fileId}
+        canvasRendererType="svg"
+        padding={20}
+        uploadAsset={uploadAsset}
         name={cachedFile.data.name}
-        onChangeName={updateName}
         initialDocument={initialFile.data.document}
         onChangeDocument={onChangeDocument}
+        onChangeName={updateName}
+        onDuplicate={duplicateFile}
+        downloadFile={downloadFile}
       />
     );
-  }
+  }),
+);
 
-  return (
-    <Ayon
-      fileId={fileId}
-      canvasRendererType="svg"
-      padding={20}
-      uploadAsset={uploadAsset}
-      name={cachedFile.data.name}
-      initialDocument={initialFile.data.document}
-      onChangeDocument={onChangeDocument}
-      onChangeName={updateName}
-      onDuplicate={duplicateFile}
-      downloadFile={downloadFile}
-    />
-  );
-}
-
-function Content({ fileId }: { fileId: string }) {
+const Content = memo(function Content({ fileId }: { fileId: string }) {
   const theme = useDesignSystemTheme();
   const [leftToolbar, setLeftToolbar] = useState<ReactNode>(null);
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
@@ -193,6 +212,23 @@ function Content({ fileId }: { fileId: string }) {
   const project: ProjectContextValue = useMemo(
     () => ({ setLeftToolbar, setCenterToolbar, setRightToolbar }),
     [],
+  );
+
+  const fileEditorRef = React.useRef<IFileEditor>(null);
+  const fileMenu = useMemo(
+    () =>
+      createSectionedMenu([{ value: 'duplicate', title: 'Duplicate Project' }]),
+    [],
+  );
+  const handleSelect = useCallback(
+    (value: ExtractMenuItemType<(typeof fileMenu)[number]>) => {
+      switch (value) {
+        case 'duplicate':
+          fileEditorRef.current?.duplicateFile();
+          break;
+      }
+    },
+    [fileEditorRef],
   );
 
   return (
@@ -227,19 +263,22 @@ function Content({ fileId }: { fileId: string }) {
                     All Projects
                   </Text>
                 </Link>
-                <CaretRightIcon />
+                <DotFilledIcon width="9px" style={{ margin: '0 3px' }} />
                 <FileTitle fileId={fileId} />
+                <DropdownMenu items={fileMenu} onSelect={handleSelect}>
+                  <IconButton iconName="CaretDownIcon" />
+                </DropdownMenu>
               </Stack.H>
             )}
           </Toolbar>
           <Divider variant="strong" />
-          <FileEditor fileId={fileId} />
+          <FileEditor ref={fileEditorRef} fileId={fileId} />
         </Stack.V>
         {/* {billing.upgradeDialog} */}
       </ProjectProvider>
     </OnboardingProvider>
   );
-}
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useBilling() {
@@ -299,7 +338,7 @@ function useBilling() {
 const platform =
   typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
-export default function Project(): JSX.Element {
+export default memo(function Project(): JSX.Element {
   const { query } = useRouter();
   const id = query.id as string | undefined;
 
@@ -315,4 +354,4 @@ export default function Project(): JSX.Element {
       <Debugger />
     </DesignSystemConfigurationProvider>
   );
-}
+});

@@ -107,7 +107,7 @@ export const AyonInspector = memo(function AyonInspector({
             <Small>Project</Small>
           </RadioGroup.Item>
           <RadioGroup.Item value="component">
-            <Small>Component</Small>
+            <Small>Selection</Small>
           </RadioGroup.Item>
           <RadioGroup.Item value="elements">
             <Small>Elements</Small>
