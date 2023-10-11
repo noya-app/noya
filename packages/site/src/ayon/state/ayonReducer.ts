@@ -63,7 +63,8 @@ export type AyonAction =
         name: string;
         relativeTo?: { id: string; position: 'above' | 'below' };
       },
-    ];
+    ]
+  | [type: 'setProjectDescription', description: string];
 
 const ayonLayerReducer = (
   layer: Sketch.CustomLayer<CustomLayerData>,
@@ -115,6 +116,14 @@ export const ayonReducer: CustomReducer<AyonAction> = (
   context,
 ) => {
   switch (action[0]) {
+    case 'setProjectDescription': {
+      const [, description] = action;
+
+      return produce(state, (draft) => {
+        draft.sketch.meta.noya ||= {};
+        draft.sketch.meta.noya.projectDescription = description;
+      });
+    }
     case 'insertArtboardAndFocus': {
       const [, { layerId = uuid(), name, relativeTo }] = action;
 

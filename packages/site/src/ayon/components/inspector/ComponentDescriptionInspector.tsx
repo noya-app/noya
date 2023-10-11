@@ -2,33 +2,12 @@ import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
 import { ActivityIndicator, Button, Select, Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
-import React, { memo, useCallback, useEffect, useRef } from 'react';
-import styled from 'styled-components';
+import React, { memo, useCallback } from 'react';
 import { PRIMITIVE_TAG_MAP } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData, PreferredImageGenerator } from '../../types';
 import { useManagedLayout } from '../GeneratedLayoutContext';
-
-const DescriptionTextArea = styled.textarea(({ theme }) => ({
-  ...theme.textStyles.small,
-  color: theme.colors.text,
-  background: theme.colors.inputBackground,
-  width: '0px', // Reset intrinsic width
-  flex: '1 1 0px',
-  padding: '4px 6px',
-  border: 'none',
-  outline: 'none',
-  height: 100,
-  borderRadius: '4px',
-  '&:focus': {
-    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
-  },
-  // readonly
-  '&:read-only': {
-    color: theme.colors.textDisabled,
-  },
-  resize: 'none',
-}));
+import { DescriptionTextArea, useAutoResize } from './DescriptionTextArea';
 
 type Props = {
   selectedLayer: Sketch.CustomLayer<CustomLayerData>;
@@ -170,16 +149,3 @@ export const ComponentDescriptionInspector = memo(
     );
   },
 );
-
-const useAutoResize = (value: string) => {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    if (!textareaRef.current) return;
-
-    textareaRef.current.style.height = 'auto'; // Reset the height
-    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-  }, [value]);
-
-  return textareaRef;
-};

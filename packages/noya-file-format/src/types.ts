@@ -1598,6 +1598,11 @@ export type Meta = {
   saveHistory: string[];
   appVersion: string;
   build: number;
+
+  // Custom
+  noya?: {
+    projectDescription?: string;
+  };
 };
 /**
  * Enumeration of the Apple bundle ids for the various variants of Sketch

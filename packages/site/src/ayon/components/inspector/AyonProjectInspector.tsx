@@ -23,7 +23,7 @@ import Sketch from 'noya-file-format';
 import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
-import { uuid } from 'noya-utils';
+import { debounce, uuid } from 'noya-utils';
 import React, {
   useCallback,
   useEffect,
@@ -36,6 +36,7 @@ import { InspectorSection } from '../../../components/InspectorSection';
 import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
 import { usePersistentState } from '../../../utils/clientStorage';
 import { useAyonState } from '../../state/ayonState';
+import { DescriptionTextArea, useAutoResize } from './DescriptionTextArea';
 import { DesignSystemPicker } from './DesignSystemPicker';
 import { DraggableMenuButton } from './DraggableMenuButton';
 
@@ -61,12 +62,24 @@ export function AyonProjectInspector({
     .layers.filter(Layers.isArtboard)
     .map((artboard) => artboard.name);
 
+  const projectDescription = state.sketch.meta.noya?.projectDescription ?? '';
+  const descriptionRef = useAutoResize(projectDescription);
+
   useEffect(() => {
     client.generate.pageNames({
       projectName: name,
+      projectDescription,
       existingPageNames,
     });
-  }, [client, existingPageNames, name]);
+  }, [client, existingPageNames, name, projectDescription]);
+
+  const handleChangeDescriptionDebounced = useMemo(
+    () =>
+      debounce((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        dispatch('setProjectDescription', event.target.value);
+      }, 300),
+    [dispatch],
+  );
 
   return (
     <>
@@ -81,6 +94,14 @@ export function AyonProjectInspector({
               submitAutomaticallyAfterDelay={300}
             />
           </InputField.Root>
+        </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.LabeledRow label="Description">
+          <DescriptionTextArea
+            ref={descriptionRef}
+            defaultValue={projectDescription}
+            placeholder="An app where users can..."
+            onChange={handleChangeDescriptionDebounced}
+          />
         </InspectorPrimitives.LabeledRow>
       </InspectorSection>
       <InspectorSection
@@ -105,6 +126,7 @@ export function AyonProjectInspector({
       >
         <AyonArtboardList
           projectName={name}
+          projectDescription={projectDescription}
           existingPageNames={existingPageNames}
         />
       </InspectorSection>
@@ -125,9 +147,11 @@ export function AyonProjectInspector({
 
 function AyonArtboardList({
   projectName,
+  projectDescription,
   existingPageNames,
 }: {
   projectName: string;
+  projectDescription: string;
   existingPageNames: string[];
 }) {
   const client = useNoyaClientOrFallback();
@@ -212,6 +236,7 @@ function AyonArtboardList({
             // Accept the generation
             client.random.resetPageName(suggestion.index, 'accept', {
               projectName,
+              projectDescription,
               existingPageNames,
             });
             dispatch('insertArtboardAndFocus', {
@@ -226,7 +251,15 @@ function AyonArtboardList({
 
           dispatch('moveLayer', sourceId, destinationId, reversedPosition);
         },
-        [artboards, client, data, dispatch, existingPageNames, projectName],
+        [
+          artboards,
+          client,
+          data,
+          dispatch,
+          existingPageNames,
+          projectDescription,
+          projectName,
+        ],
       )}
       renderItem={(artboard, _, { isDragging }) => {
         if (typeof artboard === 'string') {
@@ -385,6 +418,7 @@ function AyonArtboardList({
                   onClick={() => {
                     client.random.resetPageName(index, 'accept', {
                       projectName,
+                      projectDescription,
                       existingPageNames,
                     });
                     dispatch('insertArtboardAndFocus', { name });
@@ -397,6 +431,7 @@ function AyonArtboardList({
                   onClick={() => {
                     client.random.resetPageName(index, 'reject', {
                       projectName,
+                      projectDescription,
                       existingPageNames,
                     });
                   }}

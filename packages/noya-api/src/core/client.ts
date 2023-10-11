@@ -211,14 +211,31 @@ export class NoyaClient {
     });
   }
 
+  #getGeneratePageNameKey = (options: {
+    projectName: string;
+    projectDescription: string;
+  }) => {
+    const { projectName, projectDescription } = options;
+
+    return [projectName, projectDescription]
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .join(':');
+  };
+
   #getGeneratePageNamePrompt = ({
     projectName,
+    projectDescription,
     existingPageNames,
   }: {
     projectName: string;
+    projectDescription: string;
     existingPageNames: string[];
   }) => {
-    const base = `I'm creating a website/app with the title "${projectName}".`;
+    const name = `I'm creating a website/app with the title \`\`\`${projectName}\`\`\`.`;
+    const description = projectDescription
+      ? `A short description of my website/app is: \`\`\`${projectDescription}\`\`\`.`
+      : '';
     const existing =
       existingPageNames.length > 0
         ? `I already have the pages: ${existingPageNames.join(', ')}.`
@@ -232,25 +249,30 @@ export class NoyaClient {
       .join(' ');
     const shape = `Respond ONLY with a JSON array of strings (page names), e.g. ["Page 1", "Page 2", ...]`;
 
-    return [base, existing, question, shape].filter(Boolean).join('\n');
+    return [name, description, existing, question, shape]
+      .filter(Boolean)
+      .join('\n');
   };
 
   generatePageNames = async (options: {
     projectName: string;
+    projectDescription: string;
     existingPageNames: string[];
   }): Promise<void> => {
     const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+    const key = this.#getGeneratePageNameKey(options);
 
-    // console.log(
-    //   'Generated page names at start:',
-    //   this.generatedPageNames$.get(),
-    // );
-
-    // Delete any item where the key doesn't match
+    // Delete any item where the key doesn't match, or where the name matches
+    // an existing/rejected page name
     this.generatedPageNames$.set((prev) =>
       rangeArray.map((i) => {
         const item = prev[i];
-        return item && item.key === options.projectName ? item : undefined;
+        return item &&
+          item.key === key &&
+          !options.existingPageNames.includes(item.name) &&
+          !this.#rejectedPageNames.has(item.name)
+          ? item
+          : undefined;
       }),
     );
 
@@ -273,9 +295,7 @@ export class NoyaClient {
     // Mark all empty names as loading
     this.generatedPageNames$.set((prev) =>
       rangeArray.map((i) =>
-        prev[i]
-          ? prev[i]
-          : { name: '', loading: true, key: options.projectName },
+        prev[i] ? prev[i] : { name: '', loading: true, key },
       ),
     );
 
@@ -313,7 +333,7 @@ export class NoyaClient {
         if (item && !item.loading) return item;
 
         // If the key doesn't match, discard this response
-        if (item?.key !== options.projectName) return item;
+        if (item?.key !== key) return item;
 
         let name: string | undefined;
 
@@ -325,7 +345,7 @@ export class NoyaClient {
         return {
           name: name || 'New Page',
           loading: false,
-          key: options.projectName,
+          key: key,
         };
       }),
     );
@@ -342,21 +362,21 @@ export class NoyaClient {
     options?: Parameters<typeof this.generatePageNames>[0],
   ) => {
     const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
-    const name = this.generatedPageNames$.get()[index]?.name;
+    const generated = this.generatedPageNames$.get()[index]?.name;
 
     // Add the name to the rejected set
-    if (action === 'reject' && name) {
-      this.#rejectedPageNames.add(name);
+    if (action === 'reject' && generated) {
+      this.#rejectedPageNames.add(generated);
     }
 
     this.generatedPageNames$.set((prev) =>
       rangeArray.map((i) => (i === index ? undefined : prev[i])),
     );
 
-    if (options && name) {
+    if (options && generated) {
       const existingPageNames =
         action === 'accept'
-          ? [...options.existingPageNames, name]
+          ? [...options.existingPageNames, generated]
           : options.existingPageNames;
 
       this.generatePageNames({ ...options, existingPageNames });

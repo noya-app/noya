@@ -14,9 +14,9 @@ import {
 } from 'noya-utils';
 import React, {
   ComponentProps,
-  memo,
   ReactNode,
   SVGProps,
+  memo,
   useMemo,
   useRef,
 } from 'react';
