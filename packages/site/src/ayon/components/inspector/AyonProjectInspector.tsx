@@ -1,4 +1,8 @@
-import { useGeneratedPageNames, useNoyaClientOrFallback } from 'noya-api';
+import {
+  EnhancedGeneratedPageName,
+  useGeneratedPageNames,
+  useNoyaClientOrFallback,
+} from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import {
   ActivityIndicator,
@@ -7,6 +11,7 @@ import {
   IconButton,
   InputField,
   ListView,
+  RelativeDropPosition,
   SEPARATOR_ITEM,
   Spacer,
   Stack,
@@ -14,11 +19,18 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
@@ -77,7 +89,7 @@ export function AyonProjectInspector({
             onClick={() => {
               const newArtboardId = uuid();
               dispatch('insertArtboardAndFocus', {
-                name,
+                name: 'Page',
                 layerId: newArtboardId,
               });
               startRenamingLayer(newArtboardId);
@@ -140,11 +152,14 @@ function AyonArtboardList({
     }, 50);
   }, [didHandleFocus, renamingLayer]);
 
-  const data = [
-    ...artboards,
-    SEPARATOR_ITEM,
-    ...(suggestionMode === 'show' ? generatedPageNames : []),
-  ];
+  const data = useMemo(
+    () => [
+      ...artboards,
+      SEPARATOR_ITEM,
+      ...(suggestionMode === 'show' ? generatedPageNames : []),
+    ],
+    [artboards, generatedPageNames, suggestionMode],
+  );
 
   return (
     <ListView.Root
@@ -159,7 +174,58 @@ function AyonArtboardList({
           : artboard.do_objectID
       }
       sectionHeaderVariant="label"
-      // pressEventName="onPointerDown"
+      acceptsDrop={useCallback(
+        (
+          sourceId: string,
+          destinationId: string,
+          relationDropPosition: RelativeDropPosition,
+        ) => {
+          if (relationDropPosition === 'inside') return false;
+
+          const destinationItem = data.find((item): item is Sketch.Artboard => {
+            if (typeof item === 'string') return false;
+            if ('type' in item) return false;
+            return item.do_objectID === destinationId;
+          });
+
+          return !!destinationItem;
+        },
+        [data],
+      )}
+      onMoveItem={useCallback(
+        (
+          sourceIndex: number,
+          destinationIndex: number,
+          position: RelativeDropPosition,
+        ) => {
+          const destinationId = artboards[destinationIndex].do_objectID;
+
+          // 'moveLayer' assumes a reversed array, so we need to reverse the position
+          const reversedPosition = position === 'below' ? 'above' : 'below';
+
+          // If sourceIndex is greater than the number of artboards, it's a generated page
+          if (sourceIndex >= artboards.length) {
+            const suggestion = data[sourceIndex] as EnhancedGeneratedPageName;
+
+            // Accept the generation
+            client.random.resetPageName(suggestion.index, 'accept', {
+              projectName,
+              existingPageNames,
+            });
+            dispatch('insertArtboardAndFocus', {
+              name: suggestion.name,
+              relativeTo: { id: destinationId, position: reversedPosition },
+            });
+
+            return;
+          }
+
+          const sourceId = artboards[sourceIndex].do_objectID;
+
+          dispatch('moveLayer', sourceId, destinationId, reversedPosition);
+        },
+        [artboards, client, data, dispatch, existingPageNames, projectName],
+      )}
       renderItem={(artboard, _, { isDragging }) => {
         if (typeof artboard === 'string') {
           return (

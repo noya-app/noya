@@ -3,6 +3,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import {
+  Action,
   CustomReducer,
   Layers,
   ParentLayer,
@@ -57,7 +58,11 @@ export type AyonAction =
     ]
   | [
       type: 'insertArtboardAndFocus',
-      options: { layerId?: string; name: string },
+      options: {
+        layerId?: string;
+        name: string;
+        relativeTo?: { id: string; position: 'above' | 'below' };
+      },
     ];
 
 const ayonLayerReducer = (
@@ -111,7 +116,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (
 ) => {
   switch (action[0]) {
     case 'insertArtboardAndFocus': {
-      const [, { layerId = uuid(), name }] = action;
+      const [, { layerId = uuid(), name, relativeTo }] = action;
 
       const size = findLast(
         Selectors.getCurrentPage(state).layers,
@@ -120,6 +125,10 @@ export const ayonReducer: CustomReducer<AyonAction> = (
         width: 1280,
         height: 720,
       };
+
+      const moveAction: Action | undefined = relativeTo
+        ? ['moveLayer', layerId, relativeTo.id, relativeTo.position]
+        : undefined;
 
       state = applicationReducer(
         state,
@@ -132,6 +141,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (
             ],
             ['selectLayer', layerId],
             ['zoomToFit*', { type: 'layer', value: layerId }],
+            ...(moveAction ? [moveAction] : []),
           ],
         ],
         CanvasKit,
