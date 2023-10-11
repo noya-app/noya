@@ -75,8 +75,10 @@ export function AyonProjectInspector({
           <InputField.Root>
             <InputField.Input
               value={name}
-              onChange={onChangeName}
+              onSubmit={onChangeName}
               placeholder="Untitled"
+              allowSubmittingWithSameValue
+              submitAutomaticallyAfterDelay={300}
             />
           </InputField.Root>
         </InspectorPrimitives.LabeledRow>

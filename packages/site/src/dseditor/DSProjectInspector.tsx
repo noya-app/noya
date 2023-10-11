@@ -64,7 +64,7 @@ export function DSProjectInspector({
           <InspectorSection title="Design System" titleTextStyle="heading3">
             <InspectorPrimitives.LabeledRow label="Name">
               <InputField.Root>
-                <InputField.Input value={fileName} onChange={onChangeName} />
+                <InputField.Input value={fileName} onSubmit={onChangeName} />
               </InputField.Root>
             </InspectorPrimitives.LabeledRow>
           </InspectorSection>

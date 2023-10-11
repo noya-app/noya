@@ -42,7 +42,7 @@ export const GENERATED_PAGE_NAME_COUNT = 5;
 export type GeneratedPageName = {
   name: string;
   loading: boolean;
-  prompt: string;
+  key: string;
 };
 
 export class NoyaClient {
@@ -246,7 +246,15 @@ export class NoyaClient {
     //   this.generatedPageNames$.get(),
     // );
 
-    // If all names are already generated/generating, return
+    // Delete any item where the key doesn't match
+    this.generatedPageNames$.set((prev) =>
+      rangeArray.map((i) => {
+        const item = prev[i];
+        return item && item.key === options.projectName ? item : undefined;
+      }),
+    );
+
+    // If all names are already generated, return
     if (rangeArray.every((i) => !!this.generatedPageNames$.get()[i])) return;
 
     // console.log('generating page names', options);
@@ -265,7 +273,9 @@ export class NoyaClient {
     // Mark all empty names as loading
     this.generatedPageNames$.set((prev) =>
       rangeArray.map((i) =>
-        prev[i] ? prev[i] : { name: '', loading: true, prompt },
+        prev[i]
+          ? prev[i]
+          : { name: '', loading: true, key: options.projectName },
       ),
     );
 
@@ -302,6 +312,9 @@ export class NoyaClient {
 
         if (item && !item.loading) return item;
 
+        // If the key doesn't match, discard this response
+        if (item?.key !== options.projectName) return item;
+
         let name: string | undefined;
 
         // Loop through the names until we find one that doesn't exist
@@ -309,7 +322,11 @@ export class NoyaClient {
           name = names[nameIndex++];
         } while (existingNames.has(name) || this.#rejectedPageNames.has(name));
 
-        return { name: name || 'New Page', loading: false, prompt };
+        return {
+          name: name || 'New Page',
+          loading: false,
+          key: options.projectName,
+        };
       }),
     );
 

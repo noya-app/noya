@@ -112,7 +112,7 @@ export function useGeneratedPageNames(): EnhancedGeneratedPageName[] {
     // Fill any empty slots with default names in the 'loading' state
     const withDefaults = rangeArray.map((index): GeneratedPageName => {
       const name = names[index];
-      return name ?? { name: `Page ${index + 1}`, loading: true, prompt: '' };
+      return name ?? { name: `Page ${index + 1}`, loading: true, key: '' };
     });
 
     return withDefaults.map(
