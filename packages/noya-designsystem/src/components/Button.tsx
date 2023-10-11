@@ -26,7 +26,6 @@ export const ButtonElement = styled.button<{
   variant: ButtonVariant;
   flex?: CSSProperties['flex'];
 }>(({ theme, active, disabled, variant, flex }) => ({
-  WebkitAppRegion: 'no-drag',
   ...theme.textStyles.small,
   textDecoration: 'none',
   lineHeight: '1',
@@ -34,6 +33,8 @@ export const ButtonElement = styled.button<{
   position: 'relative',
   border: '0',
   outline: 'none',
+  WebkitAppRegion: 'no-drag',
+  userSelect: 'none',
   minWidth: variant === 'normal' ? '31px' : undefined,
   textAlign: 'left',
   borderRadius: '4px',

@@ -8,9 +8,11 @@ import {
   SEPARATOR_ITEM,
   Spacer,
   Stack,
+  Text,
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import { findLast, uuid } from 'noya-utils';
@@ -31,6 +33,7 @@ export function AyonProjectInspector({
   name: string;
   onChangeName?: (name: string) => void;
 }) {
+  const theme = useDesignSystemTheme();
   const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
 
@@ -83,7 +86,7 @@ export function AyonProjectInspector({
               startRenamingLayer(newArtboardId);
             }}
           >
-            <IconButton iconName="PlusIcon" />
+            <PlusIcon color={theme.colors.icon} />
             <Spacer.Horizontal size={8} />
             New Page
           </Button>
@@ -125,7 +128,7 @@ function AyonArtboardList() {
     }, 50);
   }, [didHandleFocus, renamingLayer]);
 
-  const data = [...artboards, SEPARATOR_ITEM, 'Example'];
+  const data = [...artboards, SEPARATOR_ITEM, 'Example', 'Test'];
 
   return (
     <ListView.Root
@@ -144,9 +147,12 @@ function AyonArtboardList() {
               key={artboard}
               isSectionHeader
               backgroundColor="transparent"
+              tabIndex={-1}
             >
-              <Stack.H padding="12px 0 10px 0">
-                <ListView.RowTitle>Suggested Pages</ListView.RowTitle>
+              <Stack.H padding="12px 0 4px 0">
+                <Text variant="label" color="textSubtle" fontWeight="bold">
+                  Suggested Pages
+                </Text>
               </Stack.H>
             </ListView.Row>
           );
