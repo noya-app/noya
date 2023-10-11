@@ -448,6 +448,7 @@ const AyonControlledState = memo(function AyonWithState({
     const workspace = createInitialWorkspaceState(initialDocument);
 
     return produce(workspace, (draft) => {
+      draft.nextFocusAction = { type: 'focusFirstArtboard' };
       // draft.preferences.showDotGrid = false;
       // draft.preferences.wireframeMode = true;
 

@@ -26,7 +26,8 @@ export type CanvasInsets = { left: number; right: number };
 
 export type NextFocusAction =
   | { type: 'renamePage'; id: string }
-  | { type: 'renameLayer'; id: string };
+  | { type: 'renameLayer'; id: string }
+  | { type: 'focusFirstArtboard' };
 
 /**
  * This object contains state that shouldn't be part of `history`.

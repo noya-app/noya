@@ -88,6 +88,8 @@ export function useWorkspace() {
   const renamingLayer =
     nextFocusAction?.type === 'renameLayer' ? nextFocusAction.id : undefined;
 
+  const focusingFirstArtboard = nextFocusAction?.type === 'focusFirstArtboard';
+
   // The preferences for showing the various interface elements combine to feel natural
   // for the user, but can look misleading in code. E.g. if `showInterface`
   // is false, then we don't show the left sidebar even if `showLeftSidebar` is true.
@@ -124,6 +126,7 @@ export function useWorkspace() {
       actuallyShowInterface,
       isContextMenuOpen,
       setIsContextMenuOpen,
+      focusingFirstArtboard,
     }),
     [
       canvasInsets,
@@ -148,6 +151,7 @@ export function useWorkspace() {
       actuallyShowInterface,
       isContextMenuOpen,
       setIsContextMenuOpen,
+      focusingFirstArtboard,
     ],
   );
 }

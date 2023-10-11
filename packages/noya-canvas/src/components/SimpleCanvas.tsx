@@ -3,7 +3,7 @@ import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
 import { ResizePosition } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { ILogEvent } from 'noya-log';
-import { Selectors } from 'noya-state';
+import { Layers, Selectors, getCurrentPage } from 'noya-state';
 import React, {
   ForwardedRef,
   forwardRef,
@@ -57,7 +57,8 @@ export const SimpleCanvas = memo(
   ) {
     const ref = useRef<ICanvasElement>(null);
     const [state, dispatch] = useApplicationState();
-    const { setIsContextMenuOpen } = useWorkspace();
+    const { setIsContextMenuOpen, focusingFirstArtboard, didHandleFocus } =
+      useWorkspace();
     const { canvasSize } = useWorkspace();
 
     useImperativeHandle(forwardedRef, () => ({
@@ -95,20 +96,66 @@ export const SimpleCanvas = memo(
         }),
     });
 
-    // When canvasSize changes, zoom to fit the isolated layer
-    useLayoutEffect(() => {
-      if (!state.isolatedLayerId) return;
+    const firstArtboardId = useMemo(
+      () => getCurrentPage(state)?.layers.find(Layers.isArtboard)?.do_objectID,
+      [state],
+    );
 
-      // canvasSize always exists, but we include it here so it's automatically added
-      // as a dependency of useLayoutEffect
-      if (!canvasSize) return;
+    useLayoutEffect(() => {
+      if (
+        state.isolatedLayerId ||
+        !focusingFirstArtboard ||
+        !firstArtboardId ||
+        canvasSize.width === 0 ||
+        canvasSize.height === 0
+      ) {
+        return;
+      }
+
+      didHandleFocus();
+
+      dispatch(
+        'zoomToFit*',
+        { type: 'layer', value: firstArtboardId },
+        { padding, max: 1, position },
+      );
+    }, [
+      canvasSize,
+      didHandleFocus,
+      dispatch,
+      firstArtboardId,
+      focusingFirstArtboard,
+      padding,
+      position,
+      state.isolatedLayerId,
+    ]);
+
+    // When canvasSize changes, zoom to fit the isolated layer.
+    // Note that even if we don't check canvasSize width/height,
+    // it should be listed as a dependency so that the effect triggers.
+    useLayoutEffect(() => {
+      if (
+        !state.isolatedLayerId ||
+        canvasSize.width === 0 ||
+        canvasSize.height === 0
+      ) {
+        return;
+      }
 
       dispatch(
         'zoomToFit*',
         { type: 'layer', value: state.isolatedLayerId },
         { padding, max: 1, position },
       );
-    }, [canvasSize, state.isolatedLayerId, dispatch, padding, position]);
+    }, [
+      canvasSize,
+      state.isolatedLayerId,
+      dispatch,
+      padding,
+      position,
+      focusingFirstArtboard,
+      didHandleFocus,
+    ]);
 
     return (
       <ContextMenu
