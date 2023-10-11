@@ -1,5 +1,7 @@
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { useGeneratedPageNames, useNoyaClientOrFallback } from 'noya-api';
+import { useWorkspace } from 'noya-app-state-context';
 import {
+  ActivityIndicator,
   Button,
   ExtractMenuItemType,
   IconButton,
@@ -15,11 +17,12 @@ import {
 import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
-import { findLast, uuid } from 'noya-utils';
-import React, { useLayoutEffect, useState } from 'react';
+import { uuid } from 'noya-utils';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
+import { usePersistentState } from '../../../utils/clientStorage';
 import { useAyonState } from '../../state/ayonState';
 import { DesignSystemPicker } from './DesignSystemPicker';
 import { DraggableMenuButton } from './DraggableMenuButton';
@@ -33,12 +36,25 @@ export function AyonProjectInspector({
   name: string;
   onChangeName?: (name: string) => void;
 }) {
+  const client = useNoyaClientOrFallback();
+
   const theme = useDesignSystemTheme();
   const { startRenamingLayer } = useWorkspace();
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useAyonState();
 
   const currentDesignSystem =
     state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
+
+  const existingPageNames = Selectors.getCurrentPage(state)
+    .layers.filter(Layers.isArtboard)
+    .map((artboard) => artboard.name);
+
+  useEffect(() => {
+    client.generate.pageNames({
+      projectName: name,
+      existingPageNames,
+    });
+  }, [client, existingPageNames, name]);
 
   return (
     <>
@@ -60,29 +76,10 @@ export function AyonProjectInspector({
           <Button
             onClick={() => {
               const newArtboardId = uuid();
-
-              const sizeOfLastArtboard = findLast(
-                Selectors.getCurrentPage(state).layers,
-                Layers.isArtboard,
-              )?.frame ?? {
-                width: 1280,
-                height: 720,
-              };
-
-              dispatch('batch', [
-                [
-                  'insertArtboard',
-                  {
-                    name: 'Page',
-                    id: newArtboardId,
-                    width: sizeOfLastArtboard.width,
-                    height: sizeOfLastArtboard.height,
-                  },
-                ],
-                ['selectLayer', newArtboardId],
-                ['zoomToFit*', { type: 'layer', value: newArtboardId }],
-              ]);
-
+              dispatch('insertArtboardAndFocus', {
+                name,
+                layerId: newArtboardId,
+              });
               startRenamingLayer(newArtboardId);
             }}
           >
@@ -92,7 +89,10 @@ export function AyonProjectInspector({
           </Button>
         }
       >
-        <AyonArtboardList />
+        <AyonArtboardList
+          projectName={name}
+          existingPageNames={existingPageNames}
+        />
       </InspectorSection>
       <InspectorSection title="Theme" titleTextStyle="heading4">
         <InspectorPrimitives.LabeledRow label="Design System">
@@ -109,7 +109,14 @@ export function AyonProjectInspector({
   );
 }
 
-function AyonArtboardList() {
+function AyonArtboardList({
+  projectName,
+  existingPageNames,
+}: {
+  projectName: string;
+  existingPageNames: string[];
+}) {
+  const client = useNoyaClientOrFallback();
   const [state, dispatch] = useAyonState();
   const theme = useDesignSystemTheme();
   const { startRenamingLayer, renamingLayer, didHandleFocus } = useWorkspace();
@@ -118,6 +125,11 @@ function AyonArtboardList() {
   );
   const selectedLayerIds = state.selectedLayerIds;
   const [editingLayer, setEditingLayer] = useState<string | undefined>();
+
+  const generatedPageNames = useGeneratedPageNames();
+  const [suggestionMode, setSuggestionMode] = usePersistentState<
+    'show' | 'hide'
+  >('ayonShowPageSuggestions', 'show');
 
   useLayoutEffect(() => {
     if (!renamingLayer) return;
@@ -128,7 +140,11 @@ function AyonArtboardList() {
     }, 50);
   }, [didHandleFocus, renamingLayer]);
 
-  const data = [...artboards, SEPARATOR_ITEM, 'Example', 'Test'];
+  const data = [
+    ...artboards,
+    SEPARATOR_ITEM,
+    ...(suggestionMode === 'show' ? generatedPageNames : []),
+  ];
 
   return (
     <ListView.Root
@@ -136,12 +152,16 @@ function AyonArtboardList() {
       sortable
       variant="bare"
       keyExtractor={(artboard) =>
-        typeof artboard === 'string' ? artboard : artboard.do_objectID
+        typeof artboard === 'string'
+          ? artboard
+          : 'type' in artboard
+          ? artboard.index.toString()
+          : artboard.do_objectID
       }
       sectionHeaderVariant="label"
       // pressEventName="onPointerDown"
       renderItem={(artboard, _, { isDragging }) => {
-        if (artboard === SEPARATOR_ITEM) {
+        if (typeof artboard === 'string') {
           return (
             <ListView.Row
               key={artboard}
@@ -149,10 +169,28 @@ function AyonArtboardList() {
               backgroundColor="transparent"
               tabIndex={-1}
             >
-              <Stack.H padding="12px 0 4px 0">
+              <Stack.H padding="12px 0 4px 0" gap="2px">
                 <Text variant="label" color="textSubtle" fontWeight="bold">
                   Suggested Pages
                 </Text>
+                <IconButton
+                  contentStyle={{
+                    position: 'relative',
+                    top: '-1px',
+                    height: '12px',
+                    margin: '-4px 0',
+                  }}
+                  iconName={
+                    suggestionMode === 'show'
+                      ? 'CaretDownIcon'
+                      : 'CaretRightIcon'
+                  }
+                  onClick={() => {
+                    setSuggestionMode(
+                      suggestionMode === 'show' ? 'hide' : 'show',
+                    );
+                  }}
+                />
               </Stack.H>
             </ListView.Row>
           );
@@ -165,10 +203,22 @@ function AyonArtboardList() {
         //   );
         // }
 
-        const id =
-          typeof artboard === 'string' ? artboard : artboard.do_objectID;
-        const name = typeof artboard === 'string' ? artboard : artboard.name;
-        const isSuggestedPage = typeof artboard === 'string';
+        const { id, name, isSuggestedPage, isLoading, index } =
+          'type' in artboard
+            ? {
+                id: artboard.index.toString(),
+                name: artboard.name,
+                isSuggestedPage: true,
+                isLoading: artboard.loading,
+                index: artboard.index,
+              }
+            : {
+                id: artboard.do_objectID,
+                name: artboard.name,
+                isSuggestedPage: false,
+                isLoading: false,
+                index: -1,
+              };
 
         const isSelected = selectedLayerIds.includes(id);
         const isEditing = editingLayer === id;
@@ -223,6 +273,7 @@ function AyonArtboardList() {
               if (isSuggestedPage) return;
               startRenamingLayer(id);
             }}
+            disabled={isLoading}
           >
             <DraggableMenuButton
               isVisible
@@ -247,17 +298,41 @@ function AyonArtboardList() {
                     value={name}
                     onSubmitEditing={handleSubmitEditing}
                   />
+                ) : isLoading ? (
+                  <>
+                    <ListView.RowTitle>Loading...</ListView.RowTitle>
+                    <ActivityIndicator opacity={0.5} />
+                  </>
                 ) : (
                   <ListView.RowTitle>{name}</ListView.RowTitle>
                 )}
               </Stack.H>
             </Stack.V>
-            {isSuggestedPage && !isDragging && (
+            {isSuggestedPage && !isLoading && !isDragging && (
               <>
                 <Spacer.Horizontal size={8} />
-                <IconButton iconName="PlusIcon" color={theme.colors.icon} />
+                <IconButton
+                  iconName="PlusIcon"
+                  color={theme.colors.icon}
+                  onClick={() => {
+                    client.random.resetPageName(index, 'accept', {
+                      projectName,
+                      existingPageNames,
+                    });
+                    dispatch('insertArtboardAndFocus', { name });
+                  }}
+                />
                 <Spacer.Horizontal size={8} />
-                <IconButton iconName="TrashIcon" color={theme.colors.icon} />
+                <IconButton
+                  iconName="TrashIcon"
+                  color={theme.colors.icon}
+                  onClick={() => {
+                    client.random.resetPageName(index, 'reject', {
+                      projectName,
+                      existingPageNames,
+                    });
+                  }}
+                />
               </>
             )}
           </ListView.Row>

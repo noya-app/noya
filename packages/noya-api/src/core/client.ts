@@ -21,6 +21,7 @@ import {
   NoyaSession,
   NoyaUserData,
 } from './schema';
+import { asyncIterableToString } from './streaming';
 import { throttleAsync } from './throttleAsync';
 
 type NoyaClientOptions = { networkClient: INoyaNetworkClient };
@@ -36,6 +37,13 @@ type GeneratedLayout = {
 };
 
 const GENERATED_LAYOUT_COUNT = 8;
+export const GENERATED_PAGE_NAME_COUNT = 5;
+
+export type GeneratedPageName = {
+  name: string;
+  loading: boolean;
+  prompt: string;
+};
 
 export class NoyaClient {
   networkClient: INoyaNetworkClient;
@@ -79,6 +87,7 @@ export class NoyaClient {
   loadingRandomImages$ = observable<Record<string, boolean>>({});
   randomIcons$ = observable<Record<string, NoyaRandomIconResponse>>({});
   loadingRandomIcons$ = observable<Record<string, boolean>>({});
+  generatedPageNames$ = observable<(GeneratedPageName | undefined)[]>([]);
   requests$ = observable<NoyaRequestSnapshot[]>([]);
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -122,6 +131,7 @@ export class NoyaClient {
       icon: this.#fetchRandomIcon,
       resetImage: this.#resetRandomImage,
       resetIcon: this.#resetRandomIcon,
+      resetPageName: this.#resetGeneratedPageName,
     });
   }
 
@@ -191,13 +201,150 @@ export class NoyaClient {
 
   get generate() {
     return memoizedGetter(this, 'generate', {
+      pageNames: this.generatePageNames,
       componentNames: this.#generateComponentNames,
       componentDescription: this.#generateComponentDescription,
       componentLayouts: this.#generateComponentLayouts,
+      resetGeneratedPageName: this.#resetGeneratedPageName,
       resetComponentDescription: this.#resetGenerateComponentDescription,
       resetComponentLayouts: this.#resetGenerateComponentLayouts,
     });
   }
+
+  #getGeneratePageNamePrompt = ({
+    projectName,
+    existingPageNames,
+  }: {
+    projectName: string;
+    existingPageNames: string[];
+  }) => {
+    const base = `I'm creating a website/app with the title "${projectName}".`;
+    const existing =
+      existingPageNames.length > 0
+        ? `I already have the pages: ${existingPageNames.join(', ')}.`
+        : '';
+    const question = [
+      `What are the titles of the`,
+      existingPageNames.length > 0 ? 'OTHER' : '',
+      `key pages on my website/app?`,
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const shape = `Respond ONLY with a JSON array of strings (page names), e.g. ["Page 1", "Page 2", ...]`;
+
+    return [base, existing, question, shape].filter(Boolean).join('\n');
+  };
+
+  generatePageNames = async (options: {
+    projectName: string;
+    existingPageNames: string[];
+  }): Promise<void> => {
+    const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+
+    // console.log(
+    //   'Generated page names at start:',
+    //   this.generatedPageNames$.get(),
+    // );
+
+    // If all names are already generated/generating, return
+    if (rangeArray.every((i) => !!this.generatedPageNames$.get()[i])) return;
+
+    // console.log('generating page names', options);
+
+    // Compact any gaps in the list
+    this.generatedPageNames$.set((prev) =>
+      [...prev].sort((a, b) => {
+        if (a === undefined) return 1;
+        if (b === undefined) return -1;
+        return 0;
+      }),
+    );
+
+    const prompt = this.#getGeneratePageNamePrompt(options);
+
+    // Mark all empty names as loading
+    this.generatedPageNames$.set((prev) =>
+      rangeArray.map((i) =>
+        prev[i] ? prev[i] : { name: '', loading: true, prompt },
+      ),
+    );
+
+    const iterator = await this.networkClient.generate.fromPrompt(prompt);
+
+    const text = await asyncIterableToString(iterator);
+
+    // The response is a JSON array of strings, potentially within other text.
+    // Slice a substring right before the first "[" and right after the last "]".
+    const startIndex = text.indexOf('[');
+    const endIndex = text.lastIndexOf(']');
+    const substring = text.slice(startIndex, endIndex + 1);
+    let names: string[] = [];
+
+    try {
+      names = JSON.parse(substring) as string[];
+    } catch (e) {}
+
+    // console.log('Generated page names:', names);
+
+    let nameIndex = 0;
+
+    const existingNames = new Set([
+      ...options.existingPageNames,
+      ...this.generatedPageNames$
+        .get()
+        .flatMap((item) => (item?.name ? [item.name] : [])),
+    ]);
+
+    // Mark empty/loading names as loaded and assign a name
+    this.generatedPageNames$.set((prev) =>
+      rangeArray.map((i) => {
+        const item = prev[i];
+
+        if (item && !item.loading) return item;
+
+        let name: string | undefined;
+
+        // Loop through the names until we find one that doesn't exist
+        do {
+          name = names[nameIndex++];
+        } while (existingNames.has(name) || this.#rejectedPageNames.has(name));
+
+        return { name: name || 'New Page', loading: false, prompt };
+      }),
+    );
+
+    // console.log('Generated page names:', this.generatedPageNames$.get());
+  };
+
+  // Set of strings rejected by the user
+  #rejectedPageNames = new Set<string>();
+
+  #resetGeneratedPageName = (
+    index: number,
+    action: 'accept' | 'reject',
+    options?: Parameters<typeof this.generatePageNames>[0],
+  ) => {
+    const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+    const name = this.generatedPageNames$.get()[index]?.name;
+
+    // Add the name to the rejected set
+    if (action === 'reject' && name) {
+      this.#rejectedPageNames.add(name);
+    }
+
+    this.generatedPageNames$.set((prev) =>
+      rangeArray.map((i) => (i === index ? undefined : prev[i])),
+    );
+
+    if (options && name) {
+      const existingPageNames =
+        action === 'accept'
+          ? [...options.existingPageNames, name]
+          : options.existingPageNames;
+
+      this.generatePageNames({ ...options, existingPageNames });
+    }
+  };
 
   #generateComponentNames = async (options: {
     name: string;

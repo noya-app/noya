@@ -8,6 +8,7 @@ const ClientStorageDefinitions = {
   networkDebuggerFilter: 'noya-ayon-network-debugger-filter',
   networkDebuggerPendingFilter: 'noya-ayon-network-debugger-pending-filter',
   networkDebuggerStreamingFilter: 'noya-ayon-network-debugger-streaming-filter',
+  ayonShowPageSuggestions: 'noya-ayon-show-page-suggestions',
 };
 
 export const ayonOnboardingStep = [

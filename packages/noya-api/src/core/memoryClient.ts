@@ -93,6 +93,7 @@ export class NoyaMemoryClient implements INoyaNetworkClient {
   };
 
   generate = {
+    fromPrompt: async () => streamString('Page'),
     componentNames: async () => [{ name: 'My Component' }],
     componentDescriptionFromName: async (name: string) => {
       return streamString('My Component');

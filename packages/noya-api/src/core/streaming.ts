@@ -43,3 +43,17 @@ export function streamString(value: string) {
 
   return generator();
 }
+
+export async function asyncIterableToArray<T>(iterable: AsyncIterable<T>) {
+  const result: T[] = [];
+
+  for await (const value of iterable) {
+    result.push(value);
+  }
+
+  return result;
+}
+
+export async function asyncIterableToString(iterable: AsyncIterable<string>) {
+  return (await asyncIterableToArray(iterable)).join('');
+}

@@ -245,6 +245,7 @@ export class NoyaNetworkClient {
 
   get generate() {
     return {
+      fromPrompt: this.#generateFromPrompt,
       componentNames: this.#generateComponentNames,
       componentDescriptionFromName: this.#generateComponentDescriptionFromName,
       componentLayoutsFromDescription:
@@ -373,6 +374,45 @@ export class NoyaNetworkClient {
     const schema = z.array(generatedNameSchema);
     const parsed = schema.safeParse(json);
     return parsed.success ? parsed.data : [];
+  };
+
+  #generateFromPrompt = async (
+    prompt: string,
+    options: {
+      rect?: Rect;
+      abortSignal?: AbortSignal;
+    } = {},
+  ): Promise<AsyncIterable<string>> => {
+    if (this.isPreview) return streamString(prompt);
+
+    let response: NoyaResponse;
+
+    try {
+      response = await this.requestWithoutErrorHandling(
+        `${this.baseURI}/generate/generation?prompt=${encodeURIComponent(
+          prompt,
+        )}`,
+        { credentials: 'include', signal: options.abortSignal },
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        // There's no way to recover here, so we'll always throw.
+        // But we still allow global error handling to run first.
+        this.handleError(new NoyaAPIError('timeout', 'Request timed out'));
+      }
+
+      throw error;
+    }
+
+    if (options.abortSignal?.aborted) {
+      return streamString(prompt);
+    }
+
+    options.abortSignal?.addEventListener('abort', () => {
+      response.abortStreamController.abort();
+    });
+
+    return response.streamString();
   };
 
   #generateComponentDescriptionFromName = async (

@@ -1,6 +1,8 @@
 import { useSelector } from '@legendapp/state/react';
 import { NoyaAPI } from 'noya-api';
+import { range } from 'noya-utils';
 import { useMemo } from 'react';
+import { GENERATED_PAGE_NAME_COUNT, GeneratedPageName } from '../core/client';
 import { NoyaRequestSnapshot } from '../core/networkClient';
 import { NoyaGeneratedName } from '../core/schema';
 import {
@@ -93,4 +95,35 @@ export function useNetworkRequests() {
   const { requests$ } = useNoyaClientOrFallback();
   const requests = useSelector(requests$) as NoyaRequestSnapshot[];
   return requests;
+}
+
+export type EnhancedGeneratedPageName = GeneratedPageName & {
+  index: number;
+  type: 'suggestion';
+};
+
+export function useGeneratedPageNames(): EnhancedGeneratedPageName[] {
+  const { generatedPageNames$ } = useNoyaClientOrFallback();
+  const names = useSelector(generatedPageNames$) as GeneratedPageName[];
+
+  const namesWithDefaultsAndTypes = useMemo(() => {
+    const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+
+    // Fill any empty slots with default names in the 'loading' state
+    const withDefaults = rangeArray.map((index): GeneratedPageName => {
+      const name = names[index];
+      return name ?? { name: `Page ${index + 1}`, loading: true, prompt: '' };
+    });
+
+    return withDefaults.map(
+      (name, index): EnhancedGeneratedPageName => ({
+        ...name,
+        index,
+        type: 'suggestion',
+      }),
+    );
+  }, [names]);
+
+  // Take the first 3
+  return namesWithDefaultsAndTypes.slice(0, 3);
 }

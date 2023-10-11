@@ -7,9 +7,10 @@ import {
   Layers,
   ParentLayer,
   Selectors,
+  applicationReducer,
   interactionReducer,
 } from 'noya-state';
-import { upperFirst } from 'noya-utils';
+import { findLast, upperFirst, uuid } from 'noya-utils';
 import { Model } from '../../dseditor/builders';
 import { enforceSchema } from '../../dseditor/layoutSchema';
 import {
@@ -53,6 +54,10 @@ export type AyonAction =
       type: 'mergeIntoStack',
       layerIds: string[],
       orientation: 'horizontal' | 'vertical',
+    ]
+  | [
+      type: 'insertArtboardAndFocus',
+      options: { layerId?: string; name: string },
     ];
 
 const ayonLayerReducer = (
@@ -98,8 +103,43 @@ const ayonLayerReducer = (
   }
 };
 
-export const ayonReducer: CustomReducer<AyonAction> = (state, action) => {
+export const ayonReducer: CustomReducer<AyonAction> = (
+  state,
+  action,
+  CanvasKit,
+  context,
+) => {
   switch (action[0]) {
+    case 'insertArtboardAndFocus': {
+      const [, { layerId = uuid(), name }] = action;
+
+      const size = findLast(
+        Selectors.getCurrentPage(state).layers,
+        Layers.isArtboard,
+      )?.frame ?? {
+        width: 1280,
+        height: 720,
+      };
+
+      state = applicationReducer(
+        state,
+        [
+          'batch',
+          [
+            [
+              'insertArtboard',
+              { name, id: layerId, width: size.width, height: size.height },
+            ],
+            ['selectLayer', layerId],
+            ['zoomToFit*', { type: 'layer', value: layerId }],
+          ],
+        ],
+        CanvasKit,
+        context,
+      );
+
+      return state;
+    }
     case 'mergeIntoStack': {
       const [, layerIds, orientation] = action;
 
