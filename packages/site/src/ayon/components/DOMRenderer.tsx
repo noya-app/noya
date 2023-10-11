@@ -133,12 +133,18 @@ const DOMRendererContent = memo(
     return (
       <CanvasElement transform={transform.toString()}>
         {page.layers.filter(Layers.isArtboard).map((artboard) => {
+          const containsEditingLayer = artboard.layers.some(
+            (layer) => layer.do_objectID === editingLayerId,
+          );
+          // Attach the ref to the currently edited layer
+          const editingRef = containsEditingLayer ? forwardedRef : undefined;
+
           return (
             <ArtboardElement key={artboard.do_objectID} rect={artboard.frame}>
               <WrapperElement>
                 <ErrorBoundary>
                   <DSControlledRenderer
-                    ref={forwardedRef}
+                    ref={editingRef}
                     sourceName={ds.source.name}
                     config={ds.config}
                     sync={sync}
