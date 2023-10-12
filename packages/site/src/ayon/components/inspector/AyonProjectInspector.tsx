@@ -358,7 +358,7 @@ function AyonArtboardList({
               if (isSuggestedPage) return;
               dispatch('batch', [
                 ['selectLayer', id],
-                ['zoomToFit*', { type: 'layer', value: id }],
+                ['zoomToFit*', { type: 'layer', value: id }, { padding: 20 }],
               ]);
             }}
             onDoubleClick={() => {
