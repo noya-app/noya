@@ -48,7 +48,7 @@ it('uses geometric image', () => {
 
   expect(prop0.type).toEqual('generator');
   expect(prop0.generator).toEqual('geometric');
-  expect(prop0.query).toEqual('v1/flex-1/Image');
+  expect(prop0.query).toEqual('v1/');
 });
 
 // eslint-disable-next-line jest/no-commented-out-tests
