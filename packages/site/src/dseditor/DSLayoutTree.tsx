@@ -20,7 +20,7 @@ import {
   StarIcon,
   VercelLogoIcon,
 } from 'noya-icons';
-import { isDeepEqual, uuid } from 'noya-utils';
+import { isDeepEqual, range, uuid } from 'noya-utils';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
@@ -214,13 +214,32 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
   }
 }
 
-const styleItems = allClassNames.map(
-  (item): CompletionItem => ({
-    name: item,
-    id: item,
-    icon: <HashtagIcon item={item} />,
-  }),
-);
+const colorScale = [50, ...range(100, 1000, 100)];
+
+// bg-primary-100 through bg-primary-900
+const primaryStyles = [
+  ...colorScale.map((value) => `bg-primary-${value}`),
+  ...colorScale.map((value) => `text-primary-${value}`),
+  ...colorScale.map((value) => `border-primary-${value}`),
+];
+
+const styleItems = allClassNames
+  .map(
+    (item): CompletionItem => ({
+      name: item,
+      id: item,
+      icon: <HashtagIcon item={item} />,
+    }),
+  )
+  .concat(
+    primaryStyles.map(
+      (item): CompletionItem => ({
+        name: item,
+        id: item,
+        icon: <HashtagIcon item={item} />,
+      }),
+    ),
+  );
 
 const primitiveElementStyleItems = Object.fromEntries(
   Object.entries(PRIMITIVE_ELEMENT_MAP).map(([id, metadata]) => [
