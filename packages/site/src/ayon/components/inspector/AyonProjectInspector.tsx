@@ -145,6 +145,7 @@ function AyonArtboardList({
   );
   const selectedLayerIds = state.selectedLayerIds;
   const [editingLayer, setEditingLayer] = useState<string | undefined>();
+  const [hoveredLayer, setHoveredLayer] = useState<string | undefined>();
 
   const generatedPageNames = useGeneratedPageNames();
   const [suggestionMode, setSuggestionMode] = usePersistentState<
@@ -305,6 +306,7 @@ function AyonArtboardList({
 
         const isSelected = selectedLayerIds.includes(id);
         const isEditing = editingLayer === id;
+        const isHovered = hoveredLayer === id;
 
         const menu = createSectionedMenu(
           [!isEditing && { value: 'rename', title: 'Rename' }],
@@ -344,6 +346,13 @@ function AyonArtboardList({
             selected={isSelected}
             backgroundColor="transparent"
             menuItems={menu}
+            onHoverChange={(isHovered) => {
+              if (isHovered) {
+                setHoveredLayer(id);
+              } else {
+                setHoveredLayer(undefined);
+              }
+            }}
             onSelectMenuItem={handleSelect}
             onPress={() => {
               if (isSuggestedPage) return;
@@ -372,7 +381,17 @@ function AyonArtboardList({
               gap="2px"
               border={`1px solid ${theme.colors.divider}`}
               color={'inherit'}
-              background={isSelected ? theme.colors.primary : 'transparent'}
+              background={
+                isDragging
+                  ? 'transparent'
+                  : isSelected && isHovered
+                  ? theme.colors.primaryLight
+                  : isSelected
+                  ? theme.colors.primary
+                  : isHovered
+                  ? theme.colors.inputBackground
+                  : 'transparent'
+              }
             >
               <Stack.H padding="4px 6px" alignItems="center" gap="4px">
                 {isEditing ? (
