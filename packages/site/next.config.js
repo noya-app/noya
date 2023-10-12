@@ -25,6 +25,10 @@ const withConfig = (nextConfig) => ({
       config.resolve.fallback.fs = false;
     }
 
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      /Critical dependency: the request of a dependency is an expression/,
+    ];
     config.module = {
       ...config.module,
       rules: [

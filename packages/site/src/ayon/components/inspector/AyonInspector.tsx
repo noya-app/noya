@@ -6,18 +6,22 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { InspectorPrimitives } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
+import { InspectorSection } from '../../../components/InspectorSection';
+import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
 import { NoyaNode } from '../../../dseditor/types';
+import { useAyonState } from '../../state/ayonState';
 import { CustomLayerData, NodePath } from '../../types';
 import { AyonElementsInspector } from './AyonElementsInspector';
 import { AyonMultipleComponentsInspector } from './AyonMultipleComponentsInspector';
 import { AyonPageInspector } from './AyonPageInspector';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
-
-type TabName = 'project' | 'component' | 'elements';
+import { DesignSystemPicker } from './DesignSystemPicker';
 
 type Props = {
   name: string;
@@ -27,6 +31,39 @@ type Props = {
   setPreviewNode: (node: NoyaNode | undefined) => void;
 };
 
+const InspectorContainer = memo(function InspectorContainer({
+  width,
+  header,
+  children,
+  fallback,
+}: {
+  width: number | string;
+  header?: React.ReactNode;
+  children?: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
+  const theme = useDesignSystemTheme();
+
+  return (
+    <Stack.V flex="1" background="white" width={width} position="relative">
+      {header}
+      {children ? (
+        <ScrollArea>
+          <Stack.V
+            gap="1px"
+            position="relative"
+            background={theme.colors.canvas.background}
+          >
+            {children}
+          </Stack.V>
+        </ScrollArea>
+      ) : (
+        fallback
+      )}
+    </Stack.V>
+  );
+});
+
 export const AyonInspector = memo(function AyonInspector({
   name,
   onChangeName,
@@ -34,7 +71,8 @@ export const AyonInspector = memo(function AyonInspector({
   setHighlightedNodePath,
   setPreviewNode,
 }: Props) {
-  const theme = useDesignSystemTheme();
+  type TabName = 'component' | 'elements';
+
   const [state] = useApplicationState();
 
   const selectedLayers = useShallowArray(Selectors.getSelectedLayers(state));
@@ -73,13 +111,11 @@ export const AyonInspector = memo(function AyonInspector({
     TabName | undefined
   >(undefined);
 
-  const automaticTab =
+  const automaticTab: TabName =
     selectedCustomLayers.length > 0 &&
     state.interactionState.type === 'editingBlock'
       ? 'elements'
-      : selectedCustomLayers.length > 0
-      ? 'component'
-      : 'project';
+      : 'component';
   const selectedTab = selectedTabOverride ?? automaticTab;
   const selectedId = selectedCustomLayers[0]?.do_objectID;
 
@@ -95,8 +131,6 @@ export const AyonInspector = memo(function AyonInspector({
 
   function renderTabContent() {
     switch (selectedTab) {
-      case 'project':
-        return <AyonProjectInspector name={name} onChangeName={onChangeName} />;
       case 'component':
         // If we have a selection of artboards, show the page inspector
         if (
@@ -128,45 +162,30 @@ export const AyonInspector = memo(function AyonInspector({
   const tabContent = renderTabContent();
 
   return (
-    <Stack.V
-      flex="1"
-      background={'white'}
-      width={'400px'}
-      borderLeft={`1px solid ${theme.colors.dividerStrong}`}
-    >
-      <Stack.H padding={'12px'}>
-        <RadioGroup.Root
-          id={'inspector-tab'}
-          value={selectedTab}
-          onValueChange={(value: TabName) => {
-            setSelectedTabOverride(value);
-          }}
-        >
-          <RadioGroup.Item value="project">
-            <Small>Project</Small>
-          </RadioGroup.Item>
-          <RadioGroup.Item value="component">
-            <Small>Selection</Small>
-          </RadioGroup.Item>
-          <RadioGroup.Item value="elements">
-            <Small>Elements</Small>
-          </RadioGroup.Item>
-        </RadioGroup.Root>
-      </Stack.H>
-      <ScrollArea>
-        {tabContent ? (
-          <Stack.V
-            gap="1px"
-            position="relative"
-            background={theme.colors.canvas.background}
+    <InspectorContainer
+      width="400px"
+      fallback={<NoSelection count={selectedCustomLayers.length} />}
+      header={
+        <Stack.H padding="12px">
+          <RadioGroup.Root
+            id="inspector-tab"
+            value={selectedTab}
+            onValueChange={(value: TabName) => {
+              setSelectedTabOverride(value);
+            }}
           >
-            {tabContent}
-          </Stack.V>
-        ) : (
-          <NoSelection count={selectedCustomLayers.length} />
-        )}
-      </ScrollArea>
-    </Stack.V>
+            <RadioGroup.Item value="component">
+              <Small>Selection</Small>
+            </RadioGroup.Item>
+            <RadioGroup.Item value="elements">
+              <Small>Elements</Small>
+            </RadioGroup.Item>
+          </RadioGroup.Root>
+        </Stack.H>
+      }
+    >
+      {tabContent}
+    </InspectorContainer>
   );
 });
 
@@ -184,3 +203,54 @@ function NoSelection({ count }: { count: number }) {
     </Stack.V>
   );
 }
+
+export const AyonSidebar = memo(function AyonSidebar(
+  props: Pick<Props, 'name' | 'onChangeName'>,
+) {
+  type TabName = 'project' | 'theme';
+
+  const theme = useDesignSystemTheme();
+  const [state, dispatch] = useAyonState();
+  const [selectedTab, setSelectedTab] = React.useState<TabName>('project');
+
+  return (
+    <InspectorContainer
+      width={theme.sizes.sidebarWidth}
+      header={
+        <Stack.H padding="12px">
+          <RadioGroup.Root
+            id="inspector-tab"
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+          >
+            <RadioGroup.Item value="project">
+              <Small>Project</Small>
+            </RadioGroup.Item>
+            <RadioGroup.Item value="theme">
+              <Small>Theme</Small>
+            </RadioGroup.Item>
+          </RadioGroup.Root>
+        </Stack.H>
+      }
+    >
+      {selectedTab === 'project' ? (
+        <AyonProjectInspector {...props} />
+      ) : (
+        <InspectorSection title="Theme" titleTextStyle="heading3">
+          <InspectorPrimitives.LabeledRow label="Design System">
+            <DesignSystemPicker />
+          </InspectorPrimitives.LabeledRow>
+          <DSThemeInspector
+            dsConfig={
+              (state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM)
+                .config
+            }
+            onChangeDSConfig={(config) => {
+              dispatch('setDesignSystemConfig', config);
+            }}
+          />
+        </InspectorSection>
+      )}
+    </InspectorContainer>
+  );
+});

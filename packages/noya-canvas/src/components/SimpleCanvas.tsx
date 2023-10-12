@@ -117,7 +117,7 @@ export const SimpleCanvas = memo(
       dispatch(
         'zoomToFit*',
         { type: 'layer', value: firstArtboardId },
-        { padding, max: 1, position },
+        // { padding, max: 1, position },
       );
     }, [
       canvasSize,

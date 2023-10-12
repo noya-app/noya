@@ -12,7 +12,7 @@ import {
   SimpleCanvas,
   convertPoint,
 } from 'noya-canvas';
-import { Stack, Toast } from 'noya-designsystem';
+import { DividerVertical, Stack, Toast } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
 import {
@@ -42,14 +42,13 @@ import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
 import { Attribution } from '../resolve/RandomImageResolver';
 import { resolveLayer } from '../resolve/resolve';
-import { Stacking } from '../stacking';
 import { useAyonState } from '../state/ayonState';
 import { CustomLayerData, NodePath, ViewType } from '../types';
 import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { useManagedLayouts } from './GeneratedLayoutContext';
-import { AyonInspector } from './inspector/AyonInspector';
+import { AyonInspector, AyonSidebar } from './inspector/AyonInspector';
 
 const Overlay = styled.div({
   position: 'absolute',
@@ -86,7 +85,7 @@ export const Content = memo(function Content({
 
   const setToastDataDebounced = useMemo(() => debounce(setToastData, 300), []);
 
-  const { canvasSize, isContextMenuOpen, startRenamingLayer } = useWorkspace();
+  const { canvasSize, startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useAyonState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
     Layers.isSymbolInstance,
@@ -381,8 +380,18 @@ export const Content = memo(function Content({
           content={<AttributionCard {...toastData.attribution} />}
         />
       )}
-      <Stack.H flex="1" alignItems="stretch" overflow="hidden">
-        <Stack.V flex="1" position="relative">
+      <Stack.H
+        flex="1"
+        alignItems="stretch"
+        overflow="hidden"
+        separator={<DividerVertical variant="strong" />}
+      >
+        <Stack.V flex="0" position="relative">
+          {viewType === 'combined' && (
+            <AyonSidebar name={name} onChangeName={onChangeName} />
+          )}
+        </Stack.V>
+        <Stack.V flex="1" position="relative" overflow="hidden">
           <Stack.V position="absolute" inset="0">
             <Overlay>
               <InteractiveRenderer size={canvasSize}>
@@ -424,9 +433,11 @@ export const Content = memo(function Content({
               </SVGRenderer>
             </Overlay>
             <Overlay
-              style={{
-                zIndex: isContextMenuOpen ? undefined : Stacking.level.overlay,
-              }}
+              style={
+                {
+                  // zIndex: isContextMenuOpen ? undefined : Stacking.level.overlay,
+                }
+              }
             >
               <SVGRenderer size={canvasSize}>
                 <RenderingModeProvider value="interactive">

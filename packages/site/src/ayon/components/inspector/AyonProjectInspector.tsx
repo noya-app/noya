@@ -31,13 +31,10 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
-import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
 import { usePersistentState } from '../../../utils/clientStorage';
 import { useAyonState } from '../../state/ayonState';
 import { DescriptionTextArea, useAutoResize } from './DescriptionTextArea';
-import { DesignSystemPicker } from './DesignSystemPicker';
 import { DraggableMenuButton } from './DraggableMenuButton';
 
 const noop = () => {};
@@ -50,13 +47,9 @@ export function AyonProjectInspector({
   onChangeName?: (name: string) => void;
 }) {
   const client = useNoyaClientOrFallback();
-
   const theme = useDesignSystemTheme();
   const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useAyonState();
-
-  const currentDesignSystem =
-    state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM;
 
   const existingPageNames = Selectors.getCurrentPage(state)
     .layers.filter(Layers.isArtboard)
@@ -128,17 +121,6 @@ export function AyonProjectInspector({
           projectName={name}
           projectDescription={projectDescription}
           existingPageNames={existingPageNames}
-        />
-      </InspectorSection>
-      <InspectorSection title="Theme" titleTextStyle="heading4">
-        <InspectorPrimitives.LabeledRow label="Design System">
-          <DesignSystemPicker />
-        </InspectorPrimitives.LabeledRow>
-        <DSThemeInspector
-          dsConfig={currentDesignSystem.config}
-          onChangeDSConfig={(config) => {
-            dispatch('setDesignSystemConfig', config);
-          }}
         />
       </InspectorSection>
     </>

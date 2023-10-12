@@ -92,7 +92,7 @@ export function Projects() {
     const document = createAyonDocument();
 
     handleCreateProject({
-      name: 'Untitled',
+      name: '',
       type: 'io.noya.ayon',
       schemaVersion: '0.1.0',
       document,
@@ -115,7 +115,7 @@ export function Projects() {
     };
 
     handleCreateProject({
-      name: 'Untitled',
+      name: '',
       type: 'io.noya.ds',
       schemaVersion: '0.1.0',
       document,
