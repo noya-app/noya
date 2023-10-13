@@ -137,7 +137,12 @@ export const AyonInspector = memo(function AyonInspector({
           selectedArtboards.length > 0 &&
           selectedArtboards.length === selectedLayers.length
         ) {
-          return <AyonPageInspector selectedArtboards={selectedArtboards} />;
+          return (
+            <AyonPageInspector
+              projectName={name}
+              selectedArtboards={selectedArtboards}
+            />
+          );
         }
 
         return selectedCustomLayers.length > 1 ? (

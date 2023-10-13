@@ -81,6 +81,7 @@ const CarouselItemComponent = memo(function CarouselItemComponent({
             ds={ds}
             sync={false}
             padding={0}
+            renderingMode="static"
           />
         </StateProvider>
         {/* Block pointer events */}
