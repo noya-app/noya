@@ -42,6 +42,8 @@ export const GENERATED_PAGE_NAME_COUNT = 5;
 
 export type GeneratedPageName = {
   name: string;
+  width?: number;
+  height?: number;
   loading: boolean;
   key: string;
 };
@@ -89,6 +91,7 @@ export class NoyaClient {
   randomIcons$ = observable<Record<string, NoyaRandomIconResponse>>({});
   loadingRandomIcons$ = observable<Record<string, boolean>>({});
   generatedPageNames$ = observable<(GeneratedPageName | null)[]>([]);
+  generatedPageComponentNames$ = observable<(GeneratedPageName | null)[]>([]);
   requests$ = observable<NoyaRequestSnapshot[]>([]);
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -133,6 +136,7 @@ export class NoyaClient {
       resetImage: this.#resetRandomImage,
       resetIcon: this.#resetRandomIcon,
       resetPageName: this.#resetGeneratedPageName,
+      resetPageComponentName: this.#resetGeneratedComponentName,
     });
   }
 
@@ -203,6 +207,7 @@ export class NoyaClient {
   get generate() {
     return memoizedGetter(this, 'generate', {
       pageNames: this.generatePageNames,
+      pageComponentNames: this.generatePageComponentNames,
       componentNames: this.#generateComponentNames,
       componentDescription: this.#generateComponentDescription,
       componentLayouts: this.#generateComponentLayouts,
@@ -219,6 +224,19 @@ export class NoyaClient {
     const { projectName, projectDescription } = options;
 
     return [projectName, projectDescription]
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .join(':');
+  };
+
+  #getGeneratePageComponentNameKey = (options: {
+    projectName: string;
+    projectDescription: string;
+    pageName: string;
+  }) => {
+    const { projectName, projectDescription, pageName } = options;
+
+    return [projectName, projectDescription, pageName]
       .map((value) => value.trim())
       .filter(Boolean)
       .join(':');
@@ -394,6 +412,175 @@ export class NoyaClient {
     this.loadingNames$.set((prev) => ({ ...prev, [key]: false }));
 
     return result;
+  };
+
+  #getGeneratePageComponentNamePrompt = ({
+    projectName,
+    projectDescription,
+    pageName,
+    existingComponentNames,
+  }: {
+    projectName: string;
+    projectDescription: string;
+    pageName: string;
+    existingComponentNames: string[];
+  }) => {
+    const name = `I'm creating a website/app with the title \`\`\`${projectName}\`\`\`.`;
+    const description = projectDescription
+      ? `A short description of my website/app is: \`\`\`${projectDescription}\`\`\`.`
+      : '';
+    const pName = `I'm currently creating a page with the title \`\`\`${pageName}\`\`\`.`;
+    const existing =
+      existingComponentNames.length > 0
+        ? `On this page I already have the components: ${existingComponentNames.join(
+            ', ',
+          )}.`
+        : '';
+    const question = [
+      `What are the names of the`,
+      existingComponentNames.length > 0 ? 'OTHER' : '',
+      `key components on this page? Also suggest a width and height for each component on a 1280x720 canvas.`,
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const shape = `Respond ONLY with a JSON array of objects containing { name, width, height }, e.g. \`\`\`[{ name: "Component 1", width: 300, height: 720 }, { name: "Component 2", width: 600, height: 400 }, ...]\`\`\``;
+
+    return [name, description, pName, existing, question, shape]
+      .filter(Boolean)
+      .join('\n');
+  };
+
+  generatePageComponentNames = async (options: {
+    projectName: string;
+    projectDescription: string;
+    pageName: string;
+    existingComponentNames: string[];
+  }): Promise<void> => {
+    const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+    const key = this.#getGeneratePageComponentNameKey(options);
+
+    // Delete any item where the key doesn't match, or where the name matches
+    // an existing/rejected page name
+    this.generatedPageComponentNames$.set((prev) =>
+      rightPad(
+        prev.filter(
+          (item) =>
+            item &&
+            item.key === key &&
+            !options.existingComponentNames.includes(item.name) &&
+            !this.#rejectedPageNames.has(item.name),
+        ),
+        GENERATED_PAGE_NAME_COUNT,
+        null,
+      ),
+    );
+
+    // If all names are already generated, return
+    if (rangeArray.every((i) => !!this.generatedPageComponentNames$.get()[i]))
+      return;
+
+    // console.log('generating page component names', options);
+
+    // Compact any gaps in the list
+    this.generatedPageComponentNames$.set((prev) =>
+      rightPad(compact(prev), GENERATED_PAGE_NAME_COUNT, null),
+    );
+
+    const prompt = this.#getGeneratePageComponentNamePrompt(options);
+
+    // Mark all empty names as loading
+    this.generatedPageComponentNames$.set((prev) =>
+      rangeArray.map((i) =>
+        prev[i] ? prev[i] : { name: '', loading: true, key },
+      ),
+    );
+
+    const iterator = await this.networkClient.generate.fromPrompt(prompt);
+
+    const text = await asyncIterableToString(iterator);
+
+    const itemSchema = z.object({
+      name: z.string(),
+      width: z.number(),
+      height: z.number(),
+    });
+
+    const parsed = z.array(itemSchema).safeParse(findAndParseJSONArray(text));
+    const names = parsed.success ? parsed.data : [];
+
+    let nameIndex = 0;
+
+    const existingNames = new Set([
+      ...options.existingComponentNames,
+      ...this.generatedPageComponentNames$
+        .get()
+        .flatMap((item) => (item?.name ? [item.name] : [])),
+    ]);
+
+    // Mark empty/loading names as loaded and assign a name
+    this.generatedPageComponentNames$.set((prev) =>
+      rangeArray.map((i) => {
+        const item = prev[i];
+
+        if (item && !item.loading) return item;
+
+        // If the key doesn't match, discard this response
+        if (item?.key !== key) return item;
+
+        let obj: z.infer<typeof itemSchema> | undefined;
+
+        // Loop through the objects until we find one where the name doesn't exist
+        do {
+          obj = names[nameIndex++];
+        } while (
+          obj &&
+          (existingNames.has(obj.name) ||
+            this.#rejectedComponentNames.has(obj.name))
+        );
+
+        obj ??= { name: '', width: 200, height: 200 };
+
+        return {
+          name: obj.name,
+          width: obj.width,
+          height: obj.height,
+          loading: false,
+          key: key,
+        };
+      }),
+    );
+
+    // console.log('Generated page names:', this.generatedPageComponentNames$.get());
+  };
+
+  // Set of strings rejected by the user
+  #rejectedComponentNames = new Set<string>();
+
+  #resetGeneratedComponentName = (
+    index: number,
+    action: 'accept' | 'reject',
+    options?: Parameters<typeof this.generatePageComponentNames>[0],
+  ) => {
+    const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+    const generated = this.generatedPageComponentNames$.get()[index]?.name;
+
+    // Add the name to the rejected set
+    if (action === 'reject' && generated) {
+      this.#rejectedComponentNames.add(generated);
+    }
+
+    this.generatedPageComponentNames$.set((prev) =>
+      rangeArray.map((i) => (i === index ? null : prev[i])),
+    );
+
+    if (options && generated) {
+      const existingComponentNames =
+        action === 'accept'
+          ? [...options.existingComponentNames, generated]
+          : options.existingComponentNames;
+
+      this.generatePageComponentNames({ ...options, existingComponentNames });
+    }
   };
 
   componentDescriptionCacheKey = (name: string) => name.trim().toLowerCase();

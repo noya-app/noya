@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
 import Sketch from 'noya-file-format';
+import { Rect, createBounds } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   Action,
@@ -62,6 +63,15 @@ export type AyonAction =
         layerId?: string;
         name: string;
         relativeTo?: { id: string; position: 'above' | 'below' };
+      },
+    ]
+  | [
+      type: 'insertPageComponent',
+      options: {
+        layerId?: string;
+        name: string;
+        width: number;
+        height: number;
       },
     ]
   | [type: 'setProjectDescription', description: string];
@@ -321,6 +331,64 @@ export const ayonReducer: CustomReducer<AyonAction> = (
           'reset',
         ]);
       });
+    }
+    case 'insertPageComponent': {
+      const [, { layerId = uuid(), name, width, height }] = action;
+
+      const selectedArtboard = Selectors.getSelectedLayers(state).filter(
+        Layers.isArtboard,
+      )[0];
+
+      if (!selectedArtboard) return state;
+
+      const artboardIndexPath = Selectors.getLayerIndexPath(
+        state,
+        selectedArtboard.do_objectID,
+      );
+
+      if (!artboardIndexPath) return state;
+
+      const predictedFrame: Rect = {
+        x: selectedArtboard.frame.x,
+        y: selectedArtboard.frame.y,
+        width,
+        height,
+      };
+
+      // Snap to full width
+      predictedFrame.width = selectedArtboard.frame.width;
+
+      // Stack below the last layer in the artboard, if one exists
+      if (selectedArtboard.layers.length > 0) {
+        const lastLayer =
+          selectedArtboard.layers[selectedArtboard.layers.length - 1];
+        predictedFrame.y = Math.ceil(createBounds(lastLayer.frame).maxY);
+      }
+
+      const layer = SketchModel.customLayer<CustomLayerData>({
+        do_objectID: layerId,
+        name,
+        frame: SketchModel.rect(predictedFrame),
+        // No description/node, we want to generate these
+        data: {},
+      });
+
+      // state = produce(state, (draft) => {
+      //   draft.selectedLayerIds = [layer.do_objectID];
+      // });
+
+      state = produce(state, (draft) => {
+        draft.sketch.pages[artboardIndexPath.pageIndex].layers.push(layer);
+      });
+
+      state = applicationReducer(
+        state,
+        ['moveLayer', layerId, selectedArtboard.do_objectID, 'inside'],
+        CanvasKit,
+        context,
+      );
+
+      return state;
     }
   }
 };

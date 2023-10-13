@@ -5,17 +5,13 @@ import {
 } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import {
-  ActivityIndicator,
   Button,
   ExtractMenuItemType,
-  IconButton,
   InputField,
   ListView,
   RelativeDropPosition,
   SEPARATOR_ITEM,
   Spacer,
-  Stack,
-  Text,
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -34,8 +30,8 @@ import React, {
 import { InspectorSection } from '../../../components/InspectorSection';
 import { usePersistentState } from '../../../utils/clientStorage';
 import { useAyonState } from '../../state/ayonState';
+import { AyonListRow, AyonListSectionHeader } from './AyonListPrimitives';
 import { DescriptionTextArea, useAutoResize } from './DescriptionTextArea';
-import { DraggableMenuButton } from './DraggableMenuButton';
 
 const noop = () => {};
 
@@ -138,7 +134,6 @@ function AyonArtboardList({
 }) {
   const client = useNoyaClientOrFallback();
   const [state, dispatch] = useAyonState();
-  const theme = useDesignSystemTheme();
   const { startRenamingLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const artboards = Selectors.getCurrentPage(state).layers.filter(
     Layers.isArtboard,
@@ -247,45 +242,17 @@ function AyonArtboardList({
       renderItem={(artboard, _, { isDragging }) => {
         if (typeof artboard === 'string') {
           return (
-            <ListView.Row
+            <AyonListSectionHeader
               key={artboard}
-              isSectionHeader
-              backgroundColor="transparent"
-              tabIndex={-1}
+              isExpanded={suggestionMode === 'show'}
+              onChangeExpanded={(isExpanded) =>
+                setSuggestionMode(isExpanded ? 'show' : 'hide')
+              }
             >
-              <Stack.H padding="12px 0 4px 0" gap="2px">
-                <Text variant="label" color="textSubtle" fontWeight="bold">
-                  Suggested Pages
-                </Text>
-                <IconButton
-                  contentStyle={{
-                    position: 'relative',
-                    top: '-1px',
-                    height: '12px',
-                    margin: '-4px 0',
-                  }}
-                  iconName={
-                    suggestionMode === 'show'
-                      ? 'CaretDownIcon'
-                      : 'CaretRightIcon'
-                  }
-                  onClick={() => {
-                    setSuggestionMode(
-                      suggestionMode === 'show' ? 'hide' : 'show',
-                    );
-                  }}
-                />
-              </Stack.H>
-            </ListView.Row>
+              Suggested Pages
+            </AyonListSectionHeader>
           );
         }
-        // else if (typeof artboard === 'string') {
-        //   return (
-        //     <ListView.Row key={artboard} backgroundColor="transparent">
-        //       <ListView.RowTitle>Hello</ListView.RowTitle>
-        //     </ListView.Row>
-        //   );
-        // }
 
         const { id, name, isSuggestedPage, isLoading, index } =
           'type' in artboard
@@ -339,12 +306,10 @@ function AyonArtboardList({
         };
 
         return (
-          <ListView.Row
+          <AyonListRow
             key={id}
             id={id}
-            depth={0}
             selected={isSelected}
-            backgroundColor="transparent"
             menuItems={menu}
             onHoverChange={(isHovered) => {
               if (isHovered) {
@@ -365,81 +330,29 @@ function AyonArtboardList({
               if (isSuggestedPage) return;
               startRenamingLayer(id);
             }}
-            disabled={isLoading}
-          >
-            <DraggableMenuButton
-              isVisible
-              items={menu}
-              onSelect={handleSelect}
-            />
-            <Spacer.Horizontal size={8} />
-            <Stack.V
-              flex="1 1 0%"
-              padding="1px"
-              borderRadius="4px"
-              margin="2px 0"
-              gap="2px"
-              border={`1px solid ${theme.colors.divider}`}
-              color={'inherit'}
-              background={
-                isDragging
-                  ? 'transparent'
-                  : isSelected && isHovered
-                  ? theme.colors.primaryLight
-                  : isSelected
-                  ? theme.colors.primary
-                  : isHovered
-                  ? theme.colors.inputBackground
-                  : 'transparent'
-              }
-            >
-              <Stack.H padding="4px 6px" alignItems="center" gap="4px">
-                {isEditing ? (
-                  <ListView.EditableRowTitle
-                    autoFocus
-                    value={name}
-                    onSubmitEditing={handleSubmitEditing}
-                  />
-                ) : isLoading ? (
-                  <>
-                    <ListView.RowTitle>Loading...</ListView.RowTitle>
-                    <ActivityIndicator opacity={0.5} />
-                  </>
-                ) : (
-                  <ListView.RowTitle>{name}</ListView.RowTitle>
-                )}
-              </Stack.H>
-            </Stack.V>
-            {isSuggestedPage && !isLoading && !isDragging && (
-              <>
-                <Spacer.Horizontal size={8} />
-                <IconButton
-                  iconName="PlusIcon"
-                  color={theme.colors.icon}
-                  onClick={() => {
-                    client.random.resetPageName(index, 'accept', {
-                      projectName,
-                      projectDescription,
-                      existingPageNames,
-                    });
-                    dispatch('insertArtboardAndFocus', { name });
-                  }}
-                />
-                <Spacer.Horizontal size={8} />
-                <IconButton
-                  iconName="TrashIcon"
-                  color={theme.colors.icon}
-                  onClick={() => {
-                    client.random.resetPageName(index, 'reject', {
-                      projectName,
-                      projectDescription,
-                      existingPageNames,
-                    });
-                  }}
-                />
-              </>
-            )}
-          </ListView.Row>
+            hovered={isHovered}
+            isLoading={isLoading}
+            isDragging={isDragging}
+            isEditing={isEditing}
+            name={name}
+            isSuggestedPage={isSuggestedPage}
+            handleSubmitEditing={handleSubmitEditing}
+            onClickPlus={() => {
+              client.random.resetPageName(index, 'accept', {
+                projectName,
+                projectDescription,
+                existingPageNames,
+              });
+              dispatch('insertArtboardAndFocus', { name });
+            }}
+            onClickTrash={() => {
+              client.random.resetPageName(index, 'reject', {
+                projectName,
+                projectDescription,
+                existingPageNames,
+              });
+            }}
+          />
         );
       }}
     />

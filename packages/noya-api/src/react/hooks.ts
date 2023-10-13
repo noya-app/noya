@@ -127,3 +127,30 @@ export function useGeneratedPageNames(): EnhancedGeneratedPageName[] {
   // Take the first 3
   return namesWithDefaultsAndTypes.slice(0, 3);
 }
+
+export function useGeneratedPageComponentNames(): EnhancedGeneratedPageName[] {
+  const { generatedPageComponentNames$: generatedComponentNames$ } =
+    useNoyaClientOrFallback();
+  const names = useSelector(generatedComponentNames$) as GeneratedPageName[];
+
+  const namesWithDefaultsAndTypes = useMemo(() => {
+    const rangeArray = range(0, GENERATED_PAGE_NAME_COUNT);
+
+    // Fill any empty slots with default names in the 'loading' state
+    const withDefaults = rangeArray.map((index): GeneratedPageName => {
+      const name = names[index];
+      return name ?? { name: `Component ${index + 1}`, loading: true, key: '' };
+    });
+
+    return withDefaults.map(
+      (name, index): EnhancedGeneratedPageName => ({
+        ...name,
+        index,
+        type: 'suggestion',
+      }),
+    );
+  }, [names]);
+
+  // Take the first 3
+  return namesWithDefaultsAndTypes.slice(0, 3);
+}
