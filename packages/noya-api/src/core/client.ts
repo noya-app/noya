@@ -2,6 +2,7 @@ import { observable } from '@legendapp/state';
 import produce from 'immer';
 import { Rect } from 'noya-geometry';
 import { memoizedGetter, range } from 'noya-utils';
+import { z } from 'zod';
 import { fileReducer } from './collection';
 import {
   INoyaNetworkClient,
@@ -87,7 +88,7 @@ export class NoyaClient {
   loadingRandomImages$ = observable<Record<string, boolean>>({});
   randomIcons$ = observable<Record<string, NoyaRandomIconResponse>>({});
   loadingRandomIcons$ = observable<Record<string, boolean>>({});
-  generatedPageNames$ = observable<(GeneratedPageName | undefined)[]>([]);
+  generatedPageNames$ = observable<(GeneratedPageName | null)[]>([]);
   requests$ = observable<NoyaRequestSnapshot[]>([]);
 
   constructor({ networkClient }: NoyaClientOptions) {
@@ -265,15 +266,17 @@ export class NoyaClient {
     // Delete any item where the key doesn't match, or where the name matches
     // an existing/rejected page name
     this.generatedPageNames$.set((prev) =>
-      rangeArray.map((i) => {
-        const item = prev[i];
-        return item &&
-          item.key === key &&
-          !options.existingPageNames.includes(item.name) &&
-          !this.#rejectedPageNames.has(item.name)
-          ? item
-          : undefined;
-      }),
+      rightPad(
+        prev.filter(
+          (item) =>
+            item &&
+            item.key === key &&
+            !options.existingPageNames.includes(item.name) &&
+            !this.#rejectedPageNames.has(item.name),
+        ),
+        GENERATED_PAGE_NAME_COUNT,
+        null,
+      ),
     );
 
     // If all names are already generated, return
@@ -283,11 +286,7 @@ export class NoyaClient {
 
     // Compact any gaps in the list
     this.generatedPageNames$.set((prev) =>
-      [...prev].sort((a, b) => {
-        if (a === undefined) return 1;
-        if (b === undefined) return -1;
-        return 0;
-      }),
+      rightPad(compact(prev), GENERATED_PAGE_NAME_COUNT, null),
     );
 
     const prompt = this.#getGeneratePageNamePrompt(options);
@@ -303,18 +302,8 @@ export class NoyaClient {
 
     const text = await asyncIterableToString(iterator);
 
-    // The response is a JSON array of strings, potentially within other text.
-    // Slice a substring right before the first "[" and right after the last "]".
-    const startIndex = text.indexOf('[');
-    const endIndex = text.lastIndexOf(']');
-    const substring = text.slice(startIndex, endIndex + 1);
-    let names: string[] = [];
-
-    try {
-      names = JSON.parse(substring) as string[];
-    } catch (e) {}
-
-    // console.log('Generated page names:', names);
+    const parsed = z.array(z.string()).safeParse(findAndParseJSONArray(text));
+    const names = parsed.success ? parsed.data : [];
 
     let nameIndex = 0;
 
@@ -370,7 +359,7 @@ export class NoyaClient {
     }
 
     this.generatedPageNames$.set((prev) =>
-      rangeArray.map((i) => (i === index ? undefined : prev[i])),
+      rangeArray.map((i) => (i === index ? null : prev[i])),
     );
 
     if (options && generated) {
@@ -729,4 +718,27 @@ export class NoyaClient {
 
 function updateIndex<T>(array: T[], index: number, value: T) {
   return [...array.slice(0, index), value, ...array.slice(index + 1)];
+}
+
+// The response is a JSON array, potentially within other text.
+// Slice a substring right before the first "[" and right after the last "]".
+function findAndParseJSONArray(text: string) {
+  const startIndex = text.indexOf('[');
+  const endIndex = text.lastIndexOf(']');
+  const substring = text.slice(startIndex, endIndex + 1);
+  let array: unknown[] = [];
+
+  try {
+    array = JSON.parse(substring) as unknown[];
+  } catch (e) {}
+
+  return array;
+}
+
+function compact<T>(array: (T | null | undefined)[]): T[] {
+  return array.filter((item) => item !== null && item !== undefined) as T[];
+}
+
+function rightPad<T>(array: T[], length: number, value: T) {
+  return [...array, ...new Array(length - array.length).fill(value)];
 }
