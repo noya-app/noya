@@ -13,19 +13,21 @@ import { DraggableMenuButton } from './DraggableMenuButton';
 
 const ExpandableIcon = styled(IconButton)({
   position: 'relative',
-  top: '-1px',
-  // height: '12px',
-  margin: '-4px 0',
+  // top: '-1px',
+  // height: '24px',
+  // margin: '-4px 0',
 });
 
 export const AyonListSectionHeader = memo(function AyonListSectionHeader({
   children,
   isExpanded,
   onChangeExpanded,
+  right,
 }: {
   children: React.ReactNode;
   isExpanded: boolean;
   onChangeExpanded: (value: boolean) => void;
+  right?: React.ReactNode;
 }) {
   const toggleIsExpanded = useCallback(() => {
     onChangeExpanded(!isExpanded);
@@ -33,14 +35,22 @@ export const AyonListSectionHeader = memo(function AyonListSectionHeader({
 
   return (
     <ListView.Row isSectionHeader backgroundColor="transparent" tabIndex={-1}>
-      <Stack.H padding="12px 0 4px 0" gap="2px">
-        <Text variant="label" color="textSubtle" fontWeight="bold">
+      <Stack.H padding="12px 0 4px 0" gap="2px" flex="1" alignItems="center">
+        <Text
+          variant="label"
+          color="textSubtle"
+          fontWeight="bold"
+          position="relative"
+          top="1px"
+        >
           {children}
         </Text>
         <ExpandableIcon
           iconName={isExpanded ? 'CaretDownIcon' : 'CaretRightIcon'}
           onClick={toggleIsExpanded}
         />
+        {right && <Spacer.Horizontal />}
+        {right}
       </Stack.H>
     </ListView.Row>
   );

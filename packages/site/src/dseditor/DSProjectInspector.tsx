@@ -19,7 +19,11 @@ import React from 'react';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSThemeInspector } from './DSThemeInspector';
 import { NoyaComponent } from './types';
-import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
+import {
+  AyonListRow,
+  AyonListSectionHeader,
+} from '../ayon/components/inspector/AyonListPrimitives';
+import { primitiveElements } from './primitiveElements';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -109,12 +113,16 @@ export function DSProjectInspector({
             />
           </InspectorSection>
           <InspectorSection title="Components" titleTextStyle="heading4">
-            <InspectorPrimitives.SectionHeader>
-              <InspectorPrimitives.Title>Components</InspectorPrimitives.Title>
-              <Spacer.Horizontal />
-              <IconButton iconName="PlusIcon" onClick={onNewComponent} />
-            </InspectorPrimitives.SectionHeader>
             <ListView.Root variant="bare">
+              <AyonListSectionHeader
+                isExpanded={false}
+                onChangeExpanded={function (value: boolean): void {}}
+                right={
+                  <IconButton iconName="PlusIcon" onClick={onNewComponent} />
+                }
+              >
+                Components
+              </AyonListSectionHeader>
               {components.map((component) => (
                 <AyonListRow
                   key={component.componentID}
@@ -136,6 +144,29 @@ export function DSProjectInspector({
                   }}
                 />
               ))}
+              <AyonListSectionHeader
+                isExpanded={false}
+                onChangeExpanded={function (value: boolean): void {}}
+              >
+                Primitives
+              </AyonListSectionHeader>
+              {primitiveElements.map((metadata) => {
+                return (
+                  <AyonListRow
+                    key={metadata.name}
+                    name={metadata.name}
+                    selected={false}
+                    onPress={() => {}}
+                    menuItems={[]}
+                    isLoading={false}
+                    isDragging={false}
+                    isEditing={false}
+                    isSuggestedPage={false}
+                    handleSubmitEditing={() => {}}
+                    onSelectMenuItem={(value) => {}}
+                  />
+                );
+              })}
             </ListView.Root>
           </InspectorSection>
           {system && (
