@@ -26,6 +26,7 @@ import {
   NoyaVariant,
   SelectedComponent,
 } from './types';
+import { enforceSchema } from './layoutSchema';
 
 interface Props {
   selection: SelectedComponent;
@@ -201,7 +202,7 @@ export function DSComponentInspector({
                         },
                       );
 
-                      const newRootElement = unresolve(instance);
+                      const newRootElement = enforceSchema(unresolve(instance));
 
                       onChangeComponent({
                         ...component,

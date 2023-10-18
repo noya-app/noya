@@ -19,6 +19,7 @@ import React from 'react';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSThemeInspector } from './DSThemeInspector';
 import { NoyaComponent } from './types';
+import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -64,7 +65,11 @@ export function DSProjectInspector({
           <InspectorSection title="Design System" titleTextStyle="heading3">
             <InspectorPrimitives.LabeledRow label="Name">
               <InputField.Root>
-                <InputField.Input value={fileName} onSubmit={onChangeName} />
+                <InputField.Input
+                  placeholder="Untitled"
+                  value={fileName}
+                  onSubmit={onChangeName}
+                />
               </InputField.Root>
             </InspectorPrimitives.LabeledRow>
           </InspectorSection>
@@ -109,13 +114,19 @@ export function DSProjectInspector({
               <Spacer.Horizontal />
               <IconButton iconName="PlusIcon" onClick={onNewComponent} />
             </InspectorPrimitives.SectionHeader>
-            <ListView.Root>
+            <ListView.Root variant="bare">
               {components.map((component) => (
-                <ListView.Row
+                <AyonListRow
                   key={component.componentID}
+                  name={component.name || 'Unnamed'}
                   selected={component.componentID === selectedComponentID}
                   onPress={() => onSelectComponent(component.componentID)}
                   menuItems={[{ value: 'delete', title: 'Delete' }]}
+                  isLoading={false}
+                  isDragging={false}
+                  isEditing={false}
+                  isSuggestedPage={false}
+                  handleSubmitEditing={() => {}}
                   onSelectMenuItem={(value) => {
                     switch (value) {
                       case 'delete':
@@ -123,11 +134,7 @@ export function DSProjectInspector({
                         break;
                     }
                   }}
-                >
-                  <Text variant="code" flex="1">
-                    {component.name || 'Unnamed'}
-                  </Text>
-                </ListView.Row>
+                />
               ))}
             </ListView.Root>
           </InspectorSection>

@@ -130,6 +130,7 @@ export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
 function isEmptyDiff(diff: NoyaDiffItem) {
   return (
     diff.name === undefined &&
+    diff.componentID === undefined &&
     diff.textValue === undefined &&
     !diff.classNames &&
     !diff.children
@@ -154,6 +155,10 @@ export function diffResolvedTrees(
     a.type === 'noyaPrimitiveElement' &&
     b.type === 'noyaPrimitiveElement'
   ) {
+    if (a.componentID !== b.componentID) {
+      currentItem.componentID = b.componentID;
+    }
+
     const classNamesDiff = computeArrayDiff(
       a.classNames,
       b.classNames,
@@ -178,6 +183,10 @@ export function diffResolvedTrees(
   const items: NoyaDiffItem[] = isEmptyDiff(currentItem) ? [] : [currentItem];
 
   if (a.type === 'noyaPrimitiveElement' && b.type === 'noyaPrimitiveElement') {
+    if (a.componentID !== b.componentID) {
+      currentItem.componentID = b.componentID;
+    }
+
     // Intersection of ids
     const aChildren = a.children.map((child) => child.id);
     const bChildren = b.children.map((child) => child.id);
@@ -256,6 +265,10 @@ export function applyResolvedDiff(
             .forEach((item) => {
               if (item.name !== undefined) {
                 newNode.name = item.name;
+              }
+
+              if (item.componentID !== undefined) {
+                newNode.componentID = item.componentID;
               }
 
               if (item.children) {

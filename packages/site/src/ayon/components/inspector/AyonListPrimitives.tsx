@@ -54,8 +54,8 @@ type RowProps<MenuItemType extends string> = {
   name: string;
   isSuggestedPage: boolean;
   handleSubmitEditing: (value: string) => void;
-  onClickPlus: () => void;
-  onClickTrash: () => void;
+  onClickPlus?: () => void;
+  onClickTrash?: () => void;
 } & Omit<
   React.ComponentProps<typeof ListView.Row<MenuItemType>>,
   'backgroundColor' | 'depth' | 'disabled' | 'children'

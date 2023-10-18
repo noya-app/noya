@@ -88,6 +88,7 @@ export type NoyaDiffItem = {
   children?: ArrayDiffItem<NoyaNode>[];
   textValue?: string;
   name?: string;
+  componentID?: string;
 };
 
 export type NoyaDiff = {

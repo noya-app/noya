@@ -6,7 +6,7 @@ jest.setTimeout(90000);
 
 const root = path.join(__dirname, '../..');
 
-const port = 4040;
+const port = 4041;
 
 function makeGraphQLQuery({ query }: { query: string }) {
   return new Promise<unknown>((resolve, reject) => {
