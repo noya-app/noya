@@ -121,26 +121,12 @@ export function DSProjectInspector({
                 destinationIndex: number,
                 position: RelativeDropPosition,
               ) => {
-                const componentID = components[sourceIndex].componentID;
-                const adjusted =
-                  position === 'above'
-                    ? destinationIndex
-                    : destinationIndex + 1;
-                onMoveComponent(componentID, adjusted);
-              }}
-              acceptsDrop={(sourceIndex, destinationIndex, position) => {
-                if (position === 'inside') return false;
-                const adjusted =
-                  position === 'above'
-                    ? destinationIndex
-                    : destinationIndex + 1;
-                if (
-                  sourceIndex === destinationIndex ||
-                  sourceIndex === adjusted
-                ) {
-                  return false;
-                }
-                return true;
+                if (position === 'inside') return;
+
+                onMoveComponent(
+                  components[sourceIndex].componentID,
+                  ListView.normalizeIndex(destinationIndex, position),
+                );
               }}
               renderItem={(component) => {
                 return (

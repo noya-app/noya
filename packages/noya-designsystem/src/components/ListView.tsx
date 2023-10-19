@@ -29,7 +29,12 @@ import { ContextMenu } from './ContextMenu';
 import { InputField } from './InputField';
 import { MenuItem } from './internal/Menu';
 import { ScrollArea } from './ScrollArea';
-import { DropValidator, RelativeDropPosition, Sortable } from './Sortable';
+import {
+  DropValidator,
+  normalizeListIndex,
+  RelativeDropPosition,
+  Sortable,
+} from './Sortable';
 import { Spacer } from './Spacer';
 
 export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
@@ -916,4 +921,5 @@ export namespace ListView {
         (headerVariant === 'label' ? sectionHeaderLabelHeight : rowHeight)
     );
   };
+  export const normalizeIndex = normalizeListIndex;
 }

@@ -31,17 +31,32 @@ import { createPortal } from 'react-dom';
 export type RelativeDropPosition = 'above' | 'below' | 'inside';
 
 export type DropValidator = (
-  sourceId: number,
-  destinationId: number,
+  sourceIndex: number,
+  destinationIndex: number,
   position: RelativeDropPosition,
 ) => boolean;
 
+export const normalizeListIndex = (
+  index: number,
+  position: 'above' | 'below',
+): number => {
+  return position === 'above' ? index : index + 1;
+};
+
 const defaultAcceptsDrop: DropValidator = (
-  sourceId,
-  destinationId,
+  sourceIndex,
+  destinationIndex,
   position,
 ) => {
-  return position !== 'inside' && sourceId !== destinationId;
+  if (position === 'inside') return false;
+
+  const normalized = normalizeListIndex(destinationIndex, position);
+
+  if (sourceIndex === normalized || sourceIndex + 1 === normalized) {
+    return false;
+  }
+
+  return true;
 };
 
 const SortableItemContext = createContext<{
