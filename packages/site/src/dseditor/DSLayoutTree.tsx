@@ -100,15 +100,9 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       indentation={24}
       sortable
       pressEventName="onPointerDown"
-      acceptsDrop={(
-        sourceId: string,
-        destinationId: string,
-        relationDropPosition: RelativeDropPosition,
-      ) => {
-        const sourceItem = flattened.find((item) => sourceId === item.key);
-        const destinationItem = flattened.find(
-          (item) => destinationId === item.key,
-        );
+      acceptsDrop={(sourceIndex, destinationIndex, relationDropPosition) => {
+        const sourceItem = flattened[sourceIndex];
+        const destinationItem = flattened[destinationIndex];
 
         if (!sourceItem || !destinationItem) return false;
 

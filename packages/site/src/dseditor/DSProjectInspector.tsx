@@ -3,9 +3,9 @@ import { produce } from 'immer';
 import { DS } from 'noya-api';
 import {
   Button,
-  IconButton,
   InputField,
   ListView,
+  RelativeDropPosition,
   ScrollArea,
   Select,
   Spacer,
@@ -16,10 +16,7 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React from 'react';
-import {
-  AyonListRow,
-  AyonListSectionHeader,
-} from '../ayon/components/inspector/AyonListPrimitives';
+import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSThemeInspector } from './DSThemeInspector';
 import { NoyaComponent } from './types';
@@ -42,6 +39,7 @@ interface Props {
   onNewComponent: () => void;
   onDeleteComponent: (componentID: string) => void;
   onSelectComponent: (componentID: string) => void;
+  onMoveComponent: (componentID: string, index: number) => void;
 }
 
 export function DSProjectInspector({
@@ -55,6 +53,7 @@ export function DSProjectInspector({
   onNewComponent,
   onDeleteComponent,
   onSelectComponent,
+  onMoveComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
   const {
@@ -112,38 +111,62 @@ export function DSProjectInspector({
             />
           </InspectorSection>
           <InspectorSection title="Components" titleTextStyle="heading4">
-            <ListView.Root variant="bare">
-              <AyonListSectionHeader
-                isExpanded={false}
-                onChangeExpanded={() => {}}
-                right={
-                  <IconButton iconName="PlusIcon" onClick={onNewComponent} />
+            <ListView.Root
+              variant="bare"
+              sortable
+              keyExtractor={(component) => component.componentID}
+              data={components}
+              onMoveItem={(
+                sourceIndex: number,
+                destinationIndex: number,
+                position: RelativeDropPosition,
+              ) => {
+                const componentID = components[sourceIndex].componentID;
+                const adjusted =
+                  position === 'above'
+                    ? destinationIndex
+                    : destinationIndex + 1;
+                onMoveComponent(componentID, adjusted);
+              }}
+              acceptsDrop={(sourceIndex, destinationIndex, position) => {
+                if (position === 'inside') return false;
+                const adjusted =
+                  position === 'above'
+                    ? destinationIndex
+                    : destinationIndex + 1;
+                if (
+                  sourceIndex === destinationIndex ||
+                  sourceIndex === adjusted
+                ) {
+                  return false;
                 }
-              >
-                Components
-              </AyonListSectionHeader>
-              {components.map((component) => (
-                <AyonListRow
-                  key={component.componentID}
-                  name={component.name || 'Unnamed'}
-                  selected={component.componentID === selectedComponentID}
-                  onPress={() => onSelectComponent(component.componentID)}
-                  menuItems={[{ value: 'delete', title: 'Delete' }]}
-                  isLoading={false}
-                  isDragging={false}
-                  isEditing={false}
-                  isSuggestedPage={false}
-                  handleSubmitEditing={() => {}}
-                  onSelectMenuItem={(value) => {
-                    switch (value) {
-                      case 'delete':
-                        onDeleteComponent(component.componentID);
-                        break;
-                    }
-                  }}
-                />
-              ))}
-            </ListView.Root>
+                return true;
+              }}
+              renderItem={(component) => {
+                return (
+                  <AyonListRow
+                    id={component.componentID}
+                    key={component.componentID}
+                    name={component.name || 'Unnamed'}
+                    selected={component.componentID === selectedComponentID}
+                    onPress={() => onSelectComponent(component.componentID)}
+                    menuItems={[{ value: 'delete', title: 'Delete' }]}
+                    isLoading={false}
+                    isDragging={false}
+                    isEditing={false}
+                    isSuggestedPage={false}
+                    handleSubmitEditing={() => {}}
+                    onSelectMenuItem={(value) => {
+                      switch (value) {
+                        case 'delete':
+                          onDeleteComponent(component.componentID);
+                          break;
+                      }
+                    }}
+                  />
+                );
+              }}
+            />
           </InspectorSection>
           {system && (
             <InspectorSection title="Library Details" titleTextStyle="heading4">

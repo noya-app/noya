@@ -476,10 +476,13 @@ export default memo(function LayerList({
       )}
       acceptsDrop={useCallback(
         (
-          sourceId: string,
-          destinationId: string,
+          sourceIndex: number,
+          destinationIndex: number,
           relationDropPosition: RelativeDropPosition,
         ) => {
+          const sourceId = items[sourceIndex].id;
+          const destinationId = items[destinationIndex].id;
+
           const sourceIds = selectedLayerIds.includes(sourceId)
             ? selectedLayerIds
             : sourceId;
@@ -545,7 +548,7 @@ export default memo(function LayerList({
 
           return true;
         },
-        [getStateSnapshot, selectedLayerIds],
+        [getStateSnapshot, items, selectedLayerIds],
       )}
     />
   );

@@ -157,22 +157,11 @@ export const AyonPageComponentList = function AyonPageComponentList({
       }
       sectionHeaderVariant="label"
       acceptsDrop={useCallback(
-        (
-          sourceId: string,
-          destinationId: string,
-          relationDropPosition: RelativeDropPosition,
-        ) => {
-          if (relationDropPosition === 'inside') return false;
-
-          const destinationItem = data.find(
-            (item): item is Sketch.CustomLayer<CustomLayerData> => {
-              if (typeof item === 'string') return false;
-              if ('type' in item) return false;
-              return item.do_objectID === destinationId;
-            },
-          );
-
-          return !!destinationItem;
+        (sourceIndex, destinationIndex, position) => {
+          if (position === 'inside') return false;
+          const item = data[destinationIndex];
+          if (!item || typeof item === 'string' || 'type' in item) return false;
+          return true;
         },
         [data],
       )}

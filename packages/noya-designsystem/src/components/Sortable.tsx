@@ -31,8 +31,8 @@ import { createPortal } from 'react-dom';
 export type RelativeDropPosition = 'above' | 'below' | 'inside';
 
 export type DropValidator = (
-  sourceId: string,
-  destinationId: string,
+  sourceId: number,
+  destinationId: number,
   position: RelativeDropPosition,
 ) => boolean;
 
@@ -45,10 +45,12 @@ const defaultAcceptsDrop: DropValidator = (
 };
 
 const SortableItemContext = createContext<{
+  keys: string[];
   position: Translate;
   acceptsDrop: DropValidator;
   setActivatorEvent: (event: PointerEvent) => void;
 }>({
+  keys: [],
   position: { x: 0, y: 0 },
   acceptsDrop: defaultAcceptsDrop,
   setActivatorEvent: () => {},
@@ -56,13 +58,17 @@ const SortableItemContext = createContext<{
 
 function validateDropIndicator(
   acceptsDrop: DropValidator,
+  keys: string[],
   activeId: string,
   overId: string,
   offsetTop: number,
   elementTop: number,
   elementHeight: number,
 ): RelativeDropPosition | undefined {
-  const acceptsDropInside = acceptsDrop(activeId, overId, 'inside');
+  const activeIndex = keys.indexOf(activeId);
+  const overIndex = keys.indexOf(overId);
+
+  const acceptsDropInside = acceptsDrop(activeIndex, overIndex, 'inside');
 
   // If we're in the center of the element, prefer dropping inside
   if (
@@ -77,7 +83,7 @@ function validateDropIndicator(
     offsetTop < elementTop + elementHeight / 2 ? 'above' : 'below';
 
   // Drop above or below if possible, falling back to inside
-  return acceptsDrop(activeId, overId, indicator)
+  return acceptsDrop(activeIndex, overIndex, indicator)
     ? indicator
     : acceptsDropInside
     ? 'inside'
@@ -107,7 +113,7 @@ function SortableItem<T extends HTMLElement>({
   disabled,
   children,
 }: ItemProps<T>) {
-  const { position, acceptsDrop, setActivatorEvent } =
+  const { keys, position, acceptsDrop, setActivatorEvent } =
     useContext(SortableItemContext);
   const sortable = useSortable({ id, disabled });
 
@@ -140,6 +146,7 @@ function SortableItem<T extends HTMLElement>({
       index >= 0 && index === overIndex && !isDragging && active && over
         ? validateDropIndicator(
             acceptsDrop,
+            keys,
             active.id,
             over.id,
             offsetTop,
@@ -216,6 +223,7 @@ function SortableRoot({
 
         const indicator = validateDropIndicator(
           acceptsDrop,
+          keys,
           active.id,
           over.id,
           offsetTop,
@@ -235,11 +243,12 @@ function SortableRoot({
     <SortableItemContext.Provider
       value={useMemo(
         () => ({
+          keys,
           acceptsDrop,
           position,
           setActivatorEvent,
         }),
-        [acceptsDrop, position, setActivatorEvent],
+        [acceptsDrop, keys, position, setActivatorEvent],
       )}
     >
       <DndContext

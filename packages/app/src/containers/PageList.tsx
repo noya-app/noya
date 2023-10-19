@@ -183,7 +183,10 @@ const PageListContent = memo(function PageListContent({
   }, [didHandleFocus, renamingPage]);
 
   const lastIndex = pageInfo.length - 1;
-  const pages = isExpanded ? pageInfo : pageInfo.slice(0, 1);
+  const pages = useMemo(
+    () => (isExpanded ? pageInfo : pageInfo.slice(0, 1)),
+    [isExpanded, pageInfo],
+  );
 
   // Limit the container size when we have enough pages
   const scrollable = pages.length > listScrollThreshold;
@@ -193,21 +196,19 @@ const PageListContent = memo(function PageListContent({
       <TreeView.Root
         sortable={!editingPage}
         scrollable={scrollable}
+        data={pages}
+        keyExtractor={useCallback((item: PageInfo) => item.id, [])}
         acceptsDrop={useCallback(
           (
-            sourceId: string,
-            destinationId: string,
+            sourceId: number,
+            destinationId: number,
             relationDropPosition: RelativeDropPosition,
           ) => {
             if (relationDropPosition === 'inside') return false;
-
-            const destinationItem = pageInfo.find(
-              (info) => destinationId === info.id,
-            );
-
+            const destinationItem = pages[destinationId];
             return destinationItem?.type === 'design';
           },
-          [pageInfo],
+          [pages],
         )}
         onMoveItem={useCallback(
           (
@@ -232,8 +233,6 @@ const PageListContent = memo(function PageListContent({
           },
           [dispatch, lastIndex],
         )}
-        data={pages}
-        keyExtractor={useCallback((item: PageInfo) => item.id, [])}
         renderItem={useCallback(
           (page: PageInfo, index, { isDragging }) => {
             const selected =

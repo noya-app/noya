@@ -216,6 +216,25 @@ export function DSEditor({
           components={components}
           onNewComponent={handleNewComponent}
           onDeleteComponent={handleDeleteComponent}
+          onMoveComponent={(componentID, index) => {
+            const removalIndex = components.findIndex(
+              (c) => c.componentID === componentID,
+            );
+
+            if (removalIndex === -1) return;
+
+            const component = components[removalIndex];
+            const newComponents = [...components];
+
+            newComponents.splice(removalIndex, 1);
+            newComponents.splice(
+              index < removalIndex ? index : index - 1,
+              0,
+              component,
+            );
+
+            setComponents(newComponents);
+          }}
         />
       )}
       <Stack.V flex="1" overflow="hidden" position="relative">

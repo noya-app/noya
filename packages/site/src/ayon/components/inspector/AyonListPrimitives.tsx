@@ -88,13 +88,16 @@ export const AyonListRow = memo(function AyonListRow<
 }: RowProps<MenuItemType>) {
   const theme = useDesignSystemTheme();
 
+  const [isHovered, setIsHovered] = React.useState(false);
+  const hovered = props.hovered ?? isHovered;
+
   return (
     <ListView.Row
       {...props}
       depth={0}
       backgroundColor="transparent"
       disabled={isLoading}
-      hovered={false}
+      onHoverChange={setIsHovered}
     >
       {props.menuItems && props.onSelectMenuItem && (
         <DraggableMenuButton
@@ -116,11 +119,11 @@ export const AyonListRow = memo(function AyonListRow<
         background={
           isDragging
             ? 'transparent'
-            : props.selected && props.hovered
+            : props.selected && hovered
             ? theme.colors.primaryLight
             : props.selected
             ? theme.colors.primary
-            : props.hovered
+            : hovered
             ? theme.colors.inputBackground
             : 'transparent'
         }

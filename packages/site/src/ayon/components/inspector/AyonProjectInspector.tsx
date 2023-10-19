@@ -15,7 +15,6 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
@@ -179,20 +178,11 @@ function AyonArtboardList({
       }
       sectionHeaderVariant="label"
       acceptsDrop={useCallback(
-        (
-          sourceId: string,
-          destinationId: string,
-          relationDropPosition: RelativeDropPosition,
-        ) => {
-          if (relationDropPosition === 'inside') return false;
-
-          const destinationItem = data.find((item): item is Sketch.Artboard => {
-            if (typeof item === 'string') return false;
-            if ('type' in item) return false;
-            return item.do_objectID === destinationId;
-          });
-
-          return !!destinationItem;
+        (sourceIndex, destinationIndex, position) => {
+          if (position === 'inside') return false;
+          const item = data[destinationIndex];
+          if (!item || typeof item === 'string' || 'type' in item) return false;
+          return true;
         },
         [data],
       )}

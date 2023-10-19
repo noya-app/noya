@@ -281,10 +281,13 @@ export function AyonLayerInspector({
           sortable={inspectorMode === 'advanced'}
           pressEventName="onPointerDown"
           acceptsDrop={(
-            sourceId: string,
-            destinationId: string,
+            sourceIndex: number,
+            destinationIndex: number,
             relationDropPosition: RelativeDropPosition,
           ) => {
+            const sourceId = flattened[sourceIndex].instance.do_objectID;
+            const destinationId =
+              flattened[destinationIndex].instance.do_objectID;
             const sourcePaths = Hierarchy.findAllIndexPaths(
               selectedLayer,
               (layer) => sourceId === layer.do_objectID,
