@@ -62,6 +62,7 @@ type RowProps<MenuItemType extends string> = {
   isDragging: boolean;
   isEditing: boolean;
   name: string;
+  content?: React.ReactNode;
   isSuggestedPage: boolean;
   handleSubmitEditing: (value: string) => void;
   onClickPlus?: () => void;
@@ -78,6 +79,7 @@ export const AyonListRow = memo(function AyonListRow<
   isDragging,
   isEditing,
   name,
+  content,
   isSuggestedPage,
   handleSubmitEditing,
   onClickPlus,
@@ -138,6 +140,7 @@ export const AyonListRow = memo(function AyonListRow<
           ) : (
             <ListView.RowTitle>{name}</ListView.RowTitle>
           )}
+          {content}
         </Stack.H>
       </Stack.V>
       {isSuggestedPage && !isLoading && !isDragging && (

@@ -27,6 +27,11 @@ const Ayon = dynamic(
   { ssr: false },
 );
 
+const DSEditorDynamic = dynamic(
+  () => import('../../dseditor/DSEditor').then((mod) => mod.DSEditor),
+  { ssr: false },
+);
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (!networkClientThatThrows) return;
 
@@ -94,53 +99,58 @@ function Content({
     );
   }
 
-  if (!initialFile || initialFile.data.type !== 'io.noya.ayon') return null;
+  if (!initialFile) return null;
 
-  const artboard = Layers.find(
-    initialFile.data.document.pages[0],
-    Layers.isArtboard,
-  );
+  function getSize() {
+    if (initialFile.data.type === 'io.noya.ayon') {
+      const artboard = Layers.find(
+        initialFile.data.document.pages[0],
+        Layers.isArtboard,
+      );
 
-  const screenshotUrl = `${networkClientThatThrows?.baseURI}/shares/${initialFile.id}.png?width=${artboard?.frame.width}&height=${artboard?.frame.height}`;
+      if (artboard) {
+        return {
+          width: artboard.frame.width,
+          height: artboard.frame.height,
+        };
+      }
+    }
+
+    return { width: 512, height: 512 };
+  }
+
+  const size = getSize();
+
+  const screenshotUrl = `${networkClientThatThrows?.baseURI}/shares/${initialFile.id}.png?width=${size.width}&height=${size.height}`;
 
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
       <Head>
         <meta name="description" content="Created with Noya" />
-        {artboard && (
-          <>
-            <meta
-              property="og:url"
-              content={`${NOYA_HOST}/app/share/${initialFile.id}`}
-            />
-            <meta property="og:title" content={initialFile.data.name} />
-            <meta property="og:description" content="Created with Noya" />
-            <meta property="og:image" content={screenshotUrl} />
-            <meta
-              property="og:image:width"
-              content={`${artboard.frame.width}`}
-            />
-            <meta
-              property="og:image:height"
-              content={`${artboard.frame.height}`}
-            />
-            <meta property="og:image:user_generated" content="true" />
-            <meta property="og:type" content="article" />
-            <meta
-              property="og:article:published_time"
-              content={`${initialFile.createdAt}`}
-            />
-            <meta
-              property="og:article:modified_time"
-              content={`${initialFile.updatedAt}`}
-            />
-            <meta name="twitter:card" content="summary" />
-            <meta name="twitter:site" content="@noyasoftware" />
-            <meta name="twitter:title" content={initialFile.data.name} />
-            <meta name="twitter:description" content="Created with Noya" />
-            <meta name="twitter:image" content={screenshotUrl} />
-          </>
-        )}
+        <meta
+          property="og:url"
+          content={`${NOYA_HOST}/app/share/${initialFile.id}`}
+        />
+        <meta property="og:title" content={initialFile.data.name} />
+        <meta property="og:description" content="Created with Noya" />
+        <meta property="og:image" content={screenshotUrl} />
+        <meta property="og:image:width" content={`${size.width}`} />
+        <meta property="og:image:height" content={`${size.height}`} />
+        <meta property="og:image:user_generated" content="true" />
+        <meta property="og:type" content="article" />
+        <meta
+          property="og:article:published_time"
+          content={`${initialFile.createdAt}`}
+        />
+        <meta
+          property="og:article:modified_time"
+          content={`${initialFile.updatedAt}`}
+        />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@noyasoftware" />
+        <meta name="twitter:title" content={initialFile.data.name} />
+        <meta name="twitter:description" content="Created with Noya" />
+        <meta name="twitter:image" content={screenshotUrl} />
       </Head>
       <Toolbar>
         <Small>{initialFile.data.name}</Small>
@@ -198,15 +208,22 @@ function Content({
         )}
       </Toolbar>
       <Divider variant="strong" />
-      <Ayon
-        padding={20}
-        fileId={shareId}
-        canvasRendererType="svg"
-        initialDocument={initialFile.data.document}
-        name={initialFile.data.name}
-        uploadAsset={async () => ''}
-        viewType="previewOnly"
-      />
+      {initialFile.data.type === 'io.noya.ayon' ? (
+        <Ayon
+          padding={20}
+          fileId={shareId}
+          canvasRendererType="svg"
+          initialDocument={initialFile.data.document}
+          name={initialFile.data.name}
+          uploadAsset={async () => ''}
+          viewType="previewOnly"
+        />
+      ) : initialFile.data.type === 'io.noya.ds' ? (
+        <DSEditorDynamic
+          name={initialFile.data.name}
+          initialDocument={initialFile.data.document}
+        />
+      ) : null}
     </Stack.V>
   );
 }

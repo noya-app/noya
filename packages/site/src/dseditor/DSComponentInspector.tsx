@@ -1,4 +1,3 @@
-import { useNoyaClient } from 'noya-api';
 import {
   Button,
   InputField,
@@ -11,9 +10,10 @@ import {
 import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
+import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSLayoutTree } from './DSLayoutTree';
-import { parseLayout } from './componentLayout';
+import { enforceSchema } from './layoutSchema';
 import {
   FindComponent,
   diffResolvedTrees,
@@ -26,7 +26,6 @@ import {
   NoyaVariant,
   SelectedComponent,
 } from './types';
-import { enforceSchema } from './layoutSchema';
 
 interface Props {
   selection: SelectedComponent;
@@ -47,7 +46,6 @@ export function DSComponentInspector({
   highlightedPath,
   setHighlightedPath,
 }: Props) {
-  const client = useNoyaClient();
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
 
@@ -99,69 +97,14 @@ export function DSComponentInspector({
                 }}
               />
             </InspectorPrimitives.LabeledRow>
-            <InspectorPrimitives.LabeledRow label="AI">
-              <Button
-                variant="secondary"
-                flex="1"
-                onClick={async () => {
-                  const iterable =
-                    await client.networkClient.generate.componentDescriptionFromName(
-                      component.name ?? 'Untitled',
-                      0,
-                    );
-
-                  let newDescription = '';
-                  for await (const chunk of iterable) {
-                    newDescription += chunk;
-                  }
-
-                  onChangeComponent({
-                    ...component,
-                    description: newDescription,
-                  });
-                }}
-              >
-                Generate Description
-              </Button>
-              <Spacer.Horizontal size={8} />
-              <Button
-                variant="secondary"
-                flex="1"
-                onClick={async () => {
-                  const iterable =
-                    await client.networkClient.generate.componentLayoutsFromDescription(
-                      component.name ?? 'Untitled',
-                      component.description ?? '',
-                      0,
-                    );
-
-                  let layout = '';
-                  for await (const chunk of iterable.layout) {
-                    layout += chunk;
-                  }
-
-                  onChangeComponent({
-                    ...component,
-                    rootElement: parseLayout(layout, 'geometric'),
-                  });
-                }}
-              >
-                Generate Layouts
-              </Button>
+            <InspectorPrimitives.LabeledRow label="Description">
+              <AutoResizingTextArea
+                value={component.description || ''}
+                onChangeText={(description) =>
+                  onChangeComponent({ ...component, description })
+                }
+              />
             </InspectorPrimitives.LabeledRow>
-            <textarea
-              onChange={(event) => {
-                onChangeComponent({
-                  ...component,
-                  description: event.target.value,
-                });
-              }}
-              style={{
-                minHeight: '100px',
-                background: theme.colors.inputBackground,
-              }}
-              value={component.description || ''}
-            />
           </InspectorSection>
           <InspectorSection
             title="Elements"

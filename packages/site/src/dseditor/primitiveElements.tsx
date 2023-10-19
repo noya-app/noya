@@ -331,3 +331,20 @@ PRIMITIVE_TAG_MAP['h6'] = PRIMITIVE_TAG_MAP['text'];
 PRIMITIVE_TAG_MAP['ul'] = PRIMITIVE_TAG_MAP['box'];
 PRIMITIVE_TAG_MAP['ol'] = PRIMITIVE_TAG_MAP['box'];
 PRIMITIVE_TAG_MAP['li'] = PRIMITIVE_TAG_MAP['text'];
+
+export function isPrimitiveElementId(id: string) {
+  return id in PRIMITIVE_ELEMENT_MAP;
+}
+
+export function initialPrimitiveValue(
+  primitiveElement: PrimitiveElementMetadata,
+): NoyaPrimitiveElement {
+  return (
+    primitiveElement.initialValue?.() ??
+    Model.primitiveElement({
+      name: primitiveElement.name,
+      componentID: primitiveElement.id,
+      classNames: Model.classNames(['flex-1']),
+    })
+  );
+}

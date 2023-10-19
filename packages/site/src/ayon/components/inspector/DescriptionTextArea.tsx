@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 export const DescriptionTextArea = styled.textarea(({ theme }) => ({
@@ -34,3 +34,28 @@ export const useAutoResize = (value: string) => {
 
   return textareaRef;
 };
+
+export const AutoResizingTextArea = memo(function AutoResizingTextArea({
+  value,
+  onChangeText,
+  ...rest
+}: Omit<React.ComponentProps<typeof DescriptionTextArea>, 'onChange'> & {
+  onChangeText: (value: string) => void;
+}) {
+  const textareaRef = useAutoResize(value);
+
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+      onChangeText(event.target.value),
+    [onChangeText],
+  );
+
+  return (
+    <DescriptionTextArea
+      ref={textareaRef}
+      {...rest}
+      onChange={handleChange}
+      value={value}
+    />
+  );
+});

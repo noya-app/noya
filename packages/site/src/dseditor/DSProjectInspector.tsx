@@ -16,14 +16,13 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React from 'react';
-import { InspectorSection } from '../components/InspectorSection';
-import { DSThemeInspector } from './DSThemeInspector';
-import { NoyaComponent } from './types';
 import {
   AyonListRow,
   AyonListSectionHeader,
 } from '../ayon/components/inspector/AyonListPrimitives';
-import { primitiveElements } from './primitiveElements';
+import { InspectorSection } from '../components/InspectorSection';
+import { DSThemeInspector } from './DSThemeInspector';
+import { NoyaComponent } from './types';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
@@ -116,7 +115,7 @@ export function DSProjectInspector({
             <ListView.Root variant="bare">
               <AyonListSectionHeader
                 isExpanded={false}
-                onChangeExpanded={function (value: boolean): void {}}
+                onChangeExpanded={() => {}}
                 right={
                   <IconButton iconName="PlusIcon" onClick={onNewComponent} />
                 }
@@ -144,29 +143,6 @@ export function DSProjectInspector({
                   }}
                 />
               ))}
-              <AyonListSectionHeader
-                isExpanded={false}
-                onChangeExpanded={function (value: boolean): void {}}
-              >
-                Primitives
-              </AyonListSectionHeader>
-              {primitiveElements.map((metadata) => {
-                return (
-                  <AyonListRow
-                    key={metadata.name}
-                    name={metadata.name}
-                    selected={false}
-                    onPress={() => {}}
-                    menuItems={[]}
-                    isLoading={false}
-                    isDragging={false}
-                    isEditing={false}
-                    isSuggestedPage={false}
-                    handleSubmitEditing={() => {}}
-                    onSelectMenuItem={(value) => {}}
-                  />
-                );
-              })}
             </ListView.Root>
           </InspectorSection>
           {system && (

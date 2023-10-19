@@ -2,7 +2,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useNoyaClient } from 'noya-api';
 import {
   Chip,
-  CompletionItem,
   InputField,
   InputFieldWithCompletions,
   RelativeDropPosition,
@@ -17,22 +16,20 @@ import {
   CaretDownIcon,
   ImageIcon,
   ShuffleIcon,
-  StarIcon,
   VercelLogoIcon,
 } from 'noya-icons';
-import { isDeepEqual, range, uuid } from 'noya-utils';
+import { isDeepEqual, uuid } from 'noya-utils';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
-import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
-import { allClassNames } from '../ayon/tailwind/tailwind';
 import { randomSeed } from '../ayon/utils/patterns';
 import { Model } from './builders';
 import {
-  PRIMITIVE_ELEMENT_MAP,
-  PRIMITIVE_ELEMENT_NAMES,
-  primitiveElements,
-} from './primitiveElements';
+  primitiveElementStyleItems,
+  styleItems,
+  typeItems,
+} from './completionItems';
+import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
 import { NoyaPrimitiveElement, NoyaResolvedNode } from './types';
@@ -213,60 +210,6 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
     }
   }
 }
-
-const colorScale = [50, ...range(100, 1000, 100)];
-
-// bg-primary-100 through bg-primary-900
-const primaryStyles = [
-  ...colorScale.map((value) => `bg-primary-${value}`),
-  ...colorScale.map((value) => `text-primary-${value}`),
-  ...colorScale.map((value) => `border-primary-${value}`),
-];
-
-const styleItems = allClassNames
-  .map(
-    (item): CompletionItem => ({
-      name: item,
-      id: item,
-      icon: <HashtagIcon item={item} />,
-    }),
-  )
-  .concat(
-    primaryStyles.map(
-      (item): CompletionItem => ({
-        name: item,
-        id: item,
-        icon: <HashtagIcon item={item} />,
-      }),
-    ),
-  );
-
-const primitiveElementStyleItems = Object.fromEntries(
-  Object.entries(PRIMITIVE_ELEMENT_MAP).map(([id, metadata]) => [
-    id,
-    [
-      ...styleItems,
-      ...(metadata.variants ?? []).map((variant) => ({
-        name: `variant-${variant}`,
-        id: `variant-${variant}`,
-        icon: <StarIcon />,
-      })),
-    ],
-  ]),
-);
-
-const typeItems = primitiveElements.flatMap((p): CompletionItem[] => [
-  {
-    id: p.id,
-    name: p.name,
-    icon: p.icon,
-  },
-  // ...(p.aliases ?? []).map((alias) => ({
-  //   id: p.id,
-  //   name: alias,
-  //   icon: p.icon,
-  // })),
-]);
 
 export const DSLayoutRow = memo(function DSLayerRow({
   id,
