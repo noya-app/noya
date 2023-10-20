@@ -15,13 +15,21 @@ function convertJsxElementToLayoutNode(
     const openingElement = ts.isJsxElement(node) ? node.openingElement : node;
     const tag = openingElement.tagName.getText();
     const attributes: { [name: string]: string } = {};
+    // eslint-disable-next-line @shopify/prefer-early-return
     openingElement.attributes.forEachChild((attribute) => {
       if (
         ts.isJsxAttribute(attribute) &&
         attribute.initializer &&
         ts.isStringLiteral(attribute.initializer)
       ) {
-        attributes[attribute.name.text] = attribute.initializer.text;
+        let name = attribute.name.text;
+
+        // convert className to class
+        if (name === 'className') {
+          name = 'class';
+        }
+
+        attributes[name] = attribute.initializer.text;
       }
     });
     const children: (LayoutNode | string)[] = [];
@@ -59,6 +67,13 @@ function findFirstJsxElement(
 }
 
 export function parseComponentLayout(source: string): LayoutNode {
+  // The target source may be in a ```lang...``` code block. If so, extract the source from the code block.
+  const codeBlockMatch = source.match(/```.*\n([\s\S]*)\n```/);
+
+  if (codeBlockMatch) {
+    source = codeBlockMatch[1];
+  }
+
   // Replace html-style comments "<!-- ... -->" with an empty string.
   source = source.replace(/<!--.*?-->/gs, '');
 

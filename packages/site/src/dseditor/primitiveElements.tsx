@@ -320,6 +320,10 @@ export const PRIMITIVE_TAG_MAP: Record<string, PrimitiveElementMetadata> =
 // In case the AI generates a tag name that doesn't match the primitive element name
 PRIMITIVE_TAG_MAP['img'] = PRIMITIVE_TAG_MAP['image'];
 PRIMITIVE_TAG_MAP['div'] = PRIMITIVE_TAG_MAP['box'];
+PRIMITIVE_TAG_MAP['main'] = PRIMITIVE_TAG_MAP['box'];
+PRIMITIVE_TAG_MAP['section'] = PRIMITIVE_TAG_MAP['box'];
+PRIMITIVE_TAG_MAP['header'] = PRIMITIVE_TAG_MAP['box'];
+PRIMITIVE_TAG_MAP['footer'] = PRIMITIVE_TAG_MAP['box'];
 PRIMITIVE_TAG_MAP['span'] = PRIMITIVE_TAG_MAP['text'];
 PRIMITIVE_TAG_MAP['p'] = PRIMITIVE_TAG_MAP['text'];
 PRIMITIVE_TAG_MAP['h1'] = PRIMITIVE_TAG_MAP['text'];
@@ -331,6 +335,7 @@ PRIMITIVE_TAG_MAP['h6'] = PRIMITIVE_TAG_MAP['text'];
 PRIMITIVE_TAG_MAP['ul'] = PRIMITIVE_TAG_MAP['box'];
 PRIMITIVE_TAG_MAP['ol'] = PRIMITIVE_TAG_MAP['box'];
 PRIMITIVE_TAG_MAP['li'] = PRIMITIVE_TAG_MAP['text'];
+PRIMITIVE_TAG_MAP['a'] = PRIMITIVE_TAG_MAP['link'];
 
 export function isPrimitiveElementId(id: string) {
   return id in PRIMITIVE_ELEMENT_MAP;
