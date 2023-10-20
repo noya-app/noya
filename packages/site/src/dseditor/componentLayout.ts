@@ -9,8 +9,9 @@ import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { createSeed } from '../ayon/utils/patterns';
 import { Model } from './builders';
 import { enforceSchema } from './layoutSchema';
-import { PRIMITIVE_TAG_MAP } from './primitiveElements';
+import { PRIMITIVE_ELEMENT_MAP, PRIMITIVE_TAG_MAP } from './primitiveElements';
 import { rewriteLayout } from './rewriteLayout';
+import { ElementHierarchy } from './traversal';
 import { NoyaNode } from './types';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([
@@ -150,7 +151,105 @@ export const parseLayout = memoize(function parseLayout(
   html: string,
   imageGenerator: NoyaAPI.ImageGenerator,
 ) {
-  let layout = parseComponentLayout(html);
-  layout = rewriteLayout(layout);
-  return enforceSchema(convertLayoutToComponent(layout, imageGenerator));
+  return parseLayoutWithOptions(html, imageGenerator, { rewrite: true });
 });
+
+export function parseLayoutWithOptions(
+  html: string,
+  imageGenerator: NoyaAPI.ImageGenerator,
+  { rewrite }: { rewrite: boolean },
+) {
+  let layout = parseComponentLayout(html);
+
+  if (rewrite) {
+    layout = rewriteLayout(layout);
+  }
+
+  return enforceSchema(convertLayoutToComponent(layout, imageGenerator));
+}
+
+export function exportLayout(layout: NoyaNode): string {
+  const layoutNode = noyaNodeToLayoutNode(layout);
+  return stringifyLayoutNode(layoutNode);
+}
+
+function noyaNodeToLayoutNode(layout: NoyaNode): string | LayoutNode {
+  return ElementHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, children): LayoutNode | string => {
+      if (node.type === 'noyaString') {
+        return node.value;
+      } else if (node.type === 'noyaPrimitiveElement') {
+        return {
+          tag: PRIMITIVE_ELEMENT_MAP[node.componentID].name,
+          attributes: {
+            ...(node.name && { name: node.name }),
+            ...Object.fromEntries(
+              node.props
+                .map((prop) => [
+                  prop.name,
+                  prop.type === 'string' ? prop.value : '',
+                ])
+                .filter(([_, value]) => value),
+            ),
+            ...(node.classNames.length > 0 && {
+              class: node.classNames
+                .map((className) => className.value)
+                .join(' '),
+            }),
+          },
+          children,
+        };
+      } else {
+        return {
+          tag: 'div',
+          attributes: {},
+          children,
+        };
+      }
+    },
+  );
+}
+
+function stringifyLayoutNode(root: string | LayoutNode): string {
+  let out = '';
+  let indent = 0;
+
+  LayoutHierarchy.visit(root, {
+    onEnter: (node: LayoutNode | string) => {
+      if (out !== '') {
+        out += `\n${'  '.repeat(indent)}`;
+      }
+
+      indent += 1;
+
+      if (typeof node === 'string') {
+        out += node;
+        return;
+      }
+
+      const attributes = Object.entries(node.attributes)
+        .map(([key, value]) => {
+          if (value) {
+            return `${key}="${value}"`;
+          }
+          return key;
+        })
+        .join(' ');
+
+      out += `<${[node.tag, attributes].filter(Boolean).join(' ')}>`;
+    },
+    onLeave: (node: LayoutNode | string) => {
+      indent -= 1;
+
+      if (typeof node === 'string') {
+        return;
+      }
+
+      out += `\n${'  '.repeat(indent)}`;
+      out += `</${node.tag}>`;
+    },
+  });
+
+  return out;
+}

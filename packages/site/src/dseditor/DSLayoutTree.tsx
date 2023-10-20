@@ -10,6 +10,7 @@ import {
   TreeView,
   createSectionedMenu,
   useDesignSystemTheme,
+  useOpenInputDialog,
 } from 'noya-designsystem';
 import {
   BoxModelIcon,
@@ -29,6 +30,7 @@ import {
   styleItems,
   typeItems,
 } from './completionItems';
+import { exportLayout, parseLayoutWithOptions } from './componentLayout';
 import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
@@ -291,15 +293,35 @@ export const DSLayoutRow = memo(function DSLayerRow({
         value: 'addType',
       },
     ],
+    [
+      { title: 'Copy HTML to Clipboard', value: 'copyHtml' },
+      {
+        title: 'Replace with HTML...',
+        value: 'replaceWithHtml',
+      },
+    ],
   );
   type MenuItemType = Exclude<
     Extract<(typeof menu)[number], object>['value'],
     undefined
   >;
   const hovered = highlightedPath?.join('/') === path.join('/');
-
-  const onSelectMenuItem = (value: MenuItemType) => {
+  const openInputDialog = useOpenInputDialog();
+  const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
+      case 'replaceWithHtml': {
+        const text = await openInputDialog('Paste Noya HTML');
+        if (!text) return;
+        const layout = parseLayoutWithOptions(text, 'geometric', {
+          rewrite: false,
+        });
+        onChange(createResolvedNode(findComponent, layout));
+        break;
+      }
+      case 'copyHtml': {
+        navigator.clipboard.writeText(exportLayout(resolvedNode));
+        break;
+      }
       case 'rename': {
         setEditingId(id);
         break;
