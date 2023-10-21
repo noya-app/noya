@@ -426,7 +426,7 @@ const cardRE = /card(\s*\d)?$/i;
  * Replace Box/div with Card if it has:
  * - a name that ends with "Card"
  *   (e.g. "Restaurant Card" but not "Card Title" or "Card Grid")
- * - "padding && (border || shadow || background)" class.
+ * - "padding && (border || shadow)" class.
  *
  * We shouldn't do this if we're already within a Card component or if
  * we have any Card children. We convert from innermost to outermost.
@@ -444,8 +444,7 @@ export function rewriteBoxToCard(layout: LayoutNode) {
           node.attributes.name?.match(cardRE) ||
           (hasClassGroup('padding', classes) &&
             (hasClassGroup('borderWidth', classes) ||
-              hasClassGroup('boxShadow', classes) ||
-              hasClassGroup('background', classes)))
+              hasClassGroup('boxShadow', classes)))
         ) {
           const ancestors = LayoutHierarchy.accessPath(
             layout,
