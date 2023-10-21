@@ -2,6 +2,8 @@ import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
 import { memoize, partition } from 'noya-utils';
 import {
   ClassGroupKey,
+  extractTailwindClassesByBreakpoint,
+  filterTailwindClassesByLastInGroup,
   getTailwindClassGroup,
   hasClassGroup,
   isTailwindClassGroup,
@@ -158,19 +160,30 @@ function rewriteClasses(
 
 export function rewriteTailwindClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
-    return classes
-      .filter(
-        (name) =>
-          name &&
-          !hallucinatedClasses.has(name) &&
-          !name.includes(':') &&
-          tailwindClassMapping[name] !== '',
-      )
-      .map(
-        (name) =>
-          tailwindClassMapping[name] ??
-          name.replace(/(?:space|gap)-(?:x|y)-(\d+)/, (_, n) => `gap-${n}`),
-      );
+    classes = classes.filter(
+      (name) =>
+        name &&
+        !hallucinatedClasses.has(name) &&
+        !name.includes(':') &&
+        tailwindClassMapping[name] !== '',
+    );
+
+    const hasSpaceX = classes.some((name) => /(space|gap)-x/.test(name));
+    const hasSpaceY = classes.some((name) => /(space|gap)-y/.test(name));
+
+    classes = classes.map(
+      (name) =>
+        tailwindClassMapping[name] ??
+        name.replace(/(?:space|gap)-(?:x|y)-(\d+)/, (_, n) => `gap-${n}`),
+    );
+
+    if (hasSpaceX) {
+      classes.push('flex', 'flex-row');
+    } else if (hasSpaceY) {
+      classes.push('flex', 'flex-col');
+    }
+
+    return classes;
   });
 }
 
@@ -247,7 +260,7 @@ export function rewriteInferFlex(layout: LayoutNode) {
 }
 
 const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
-  Button: [
+  button: [
     'padding',
     'paddingBottom',
     'paddingLeft',
@@ -262,7 +275,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'background',
     'textColor',
   ],
-  Card: [
+  card: [
     'padding',
     'paddingBottom',
     'paddingLeft',
@@ -276,7 +289,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'boxShadow',
     'background',
   ],
-  Select: [
+  select: [
     'padding',
     'paddingBottom',
     'paddingLeft',
@@ -285,7 +298,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'paddingX',
     'paddingY',
   ],
-  Tag: [
+  tag: [
     'flex',
     'padding',
     'paddingBottom',
@@ -299,7 +312,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
 
 export function rewriteForbiddenClassGroups(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
-    const forbiddenGroups = forbiddenClassGroups[node.tag];
+    const forbiddenGroups = forbiddenClassGroups[node.tag.toLowerCase()];
 
     if (forbiddenGroups) {
       classes = classes.filter((name) => {
@@ -617,6 +630,20 @@ export function rewriteCardPadding(layout: LayoutNode) {
   });
 }
 
+// Keep classNames starting with sm: and md:, but remove the prefixes.
+// Remove any classNames starting with lg:, xl:, and 2xl:.
+export function rewriteBreakpointClasses(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    return extractTailwindClassesByBreakpoint(classes, 'md');
+  });
+}
+
+export function rewriteClassesKeepLastInGroup(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    return filterTailwindClassesByLastInGroup(classes);
+  });
+}
+
 // export function rewriteAlwaysFlexGap(layout: LayoutNode) {
 //   return rewriteClasses(layout, (node, indexPath, classes) => {
 //     if (
@@ -629,6 +656,8 @@ export function rewriteCardPadding(layout: LayoutNode) {
 // }
 
 export function rewriteLayout(layout: LayoutNode) {
+  layout = rewriteBreakpointClasses(layout);
+  layout = rewriteClassesKeepLastInGroup(layout);
   layout = rewriteRemoveHiddenElements(layout);
   layout = rewriteHTMLEntities(layout);
   layout = rewriteImagesWithChildren(layout);
@@ -641,7 +670,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteInlineFlexButtonAndLink(layout);
   layout = rewriteIconSize(layout);
   layout = rewriteCardPadding(layout);
-  layout = rewriteConsistentSpacing(layout);
+  // layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);
   layout = rewriteAbsoluteFill(layout);

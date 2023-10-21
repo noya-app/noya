@@ -161,6 +161,49 @@ export const getTailwindClassesByGroup = memoize((group: ClassGroupKey) => {
   );
 });
 
+export const filterTailwindClassesByLastInGroup = memoize(
+  (hashtags: string[]) => {
+    const byGroup: Partial<Record<ClassGroupKey, string>> = {};
+
+    hashtags.forEach((className) => {
+      const group = getTailwindClassGroup(className);
+      byGroup[group] = className;
+    });
+
+    return Object.values(byGroup);
+  },
+);
+
+const breakpoints = ['sm', 'md', 'lg', 'xl', '2xl'] as const;
+type BreakpointKey = (typeof breakpoints)[number];
+
+export const extractTailwindClassesByBreakpoint = (
+  classes: string[],
+  breakpoint: BreakpointKey,
+) => {
+  const breakpointIndex = breakpoints.indexOf(breakpoint);
+  const included = breakpoints.slice(0, breakpointIndex + 1);
+  const excluded = breakpoints.slice(breakpointIndex + 1);
+
+  return classes.flatMap((className): string[] => {
+    // If the class starts with a breakpoint in the set, return the class without the breakpoint
+    for (const bp of included) {
+      if (className.startsWith(`${bp}:`)) {
+        return [className.substring(bp.length + 1)];
+      }
+    }
+
+    // If the class starts with a breakpoint not in the set, return nothing
+    for (const bp of excluded) {
+      if (className.startsWith(`${bp}:`)) {
+        return [];
+      }
+    }
+
+    return [className];
+  });
+};
+
 function getValue(className: string): string | undefined {
   return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none))$/.exec(
     className,

@@ -30,7 +30,11 @@ import {
   styleItems,
   typeItems,
 } from './completionItems';
-import { exportLayout, parseLayoutWithOptions } from './componentLayout';
+import {
+  exportLayout,
+  parseLayout,
+  parseLayoutWithOptions,
+} from './componentLayout';
 import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
@@ -299,6 +303,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
         title: 'Replace with HTML...',
         value: 'replaceWithHtml',
       },
+      {
+        title: 'Replace with raw HTML...',
+        value: 'replaceWithRawHtml',
+      },
     ],
   );
   type MenuItemType = Exclude<
@@ -309,12 +317,19 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const openInputDialog = useOpenInputDialog();
   const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
-      case 'replaceWithHtml': {
+      case 'replaceWithRawHtml': {
         const text = await openInputDialog('Paste Noya HTML');
         if (!text) return;
         const layout = parseLayoutWithOptions(text, 'geometric', {
           rewrite: false,
         });
+        onChange(createResolvedNode(findComponent, layout));
+        break;
+      }
+      case 'replaceWithHtml': {
+        const text = await openInputDialog('Paste raw HTML');
+        if (!text) return;
+        const layout = parseLayout(text, 'geometric');
         onChange(createResolvedNode(findComponent, layout));
         break;
       }

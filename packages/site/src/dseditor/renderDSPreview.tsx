@@ -22,7 +22,10 @@ import {
   textSymbolId,
   textareaSymbolId,
 } from '../ayon/symbols/symbolIds';
-import { parametersToTailwindStyle } from '../ayon/tailwind/tailwind';
+import {
+  extractTailwindClassesByBreakpoint,
+  parametersToTailwindStyle,
+} from '../ayon/tailwind/tailwind';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import {
   createPatternSVG,
@@ -125,9 +128,13 @@ export function renderResolvedNode({
 
       if (!PrimitiveComponent) return null;
 
-      const classNames = element.classNames.map((className) => {
+      let classNames = element.classNames.map((className) => {
         return className.value.replace(/-primary-/, `-${primary}-`);
       });
+
+      // Keep classNames starting with sm: and md:, but remove the prefixes.
+      // Remove any classNames starting with lg:, xl:, and 2xl:.
+      classNames = extractTailwindClassesByBreakpoint(classNames, 'md');
 
       const style = parametersToTailwindStyle(classNames);
 

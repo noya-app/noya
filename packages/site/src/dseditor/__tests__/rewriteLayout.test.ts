@@ -5,7 +5,9 @@ import {
   replaceHTMLEntities,
   rewriteAbsoluteFill,
   rewriteBoxToCard,
+  rewriteBreakpointClasses,
   rewriteCardPadding,
+  rewriteClassesKeepLastInGroup,
   rewriteConsistentSpacing,
   rewriteFlex1ButtonInColumn,
   rewriteForbiddenClassGroups,
@@ -54,8 +56,11 @@ it('replaces prohibited classes', () => {
 
 it('replaces space-y-5 with gap-5', () => {
   expect(
+    rewriteTailwindClasses(layoutNode('Box', { class: 'space-x-5' })),
+  ).toEqual(layoutNode('Box', { class: 'gap-5 flex flex-row' }));
+  expect(
     rewriteTailwindClasses(layoutNode('Box', { class: 'space-y-5' })),
-  ).toEqual(layoutNode('Box', { class: 'gap-5' }));
+  ).toEqual(layoutNode('Box', { class: 'gap-5 flex flex-col' }));
 });
 
 it('adds flex-1 to root', () => {
@@ -126,6 +131,9 @@ it('removes forbidden classes', () => {
   expect(
     rewriteForbiddenClassGroups(layoutNode('Button', { class: 'p-4' })),
   ).toEqual(layoutNode('Button'));
+  expect(
+    rewriteForbiddenClassGroups(layoutNode('button', { class: 'bg-blue-500' })),
+  ).toEqual(layoutNode('button'));
 });
 
 it('removes flex-1 from button in a flex-col', () => {
@@ -303,4 +311,30 @@ it('converts boxes to cards', () => {
   expect(rewriteBoxToCard(layoutNode('Box', { name: 'Card Title' }))).toEqual(
     layoutNode('Box', { name: 'Card Title' }),
   );
+});
+
+it('keeps last class in group', () => {
+  expect(
+    rewriteClassesKeepLastInGroup(
+      layoutNode('Box', { class: 'absolute relative' }),
+    ),
+  ).toEqual(layoutNode('Box', { class: 'relative' }));
+});
+
+it('rewrites breakpoint classes', () => {
+  expect(
+    rewriteBreakpointClasses(layoutNode('Box', { class: 'sm:p-4' })),
+  ).toEqual(layoutNode('Box', { class: 'p-4' }));
+  expect(
+    rewriteBreakpointClasses(layoutNode('Box', { class: 'md:p-4' })),
+  ).toEqual(layoutNode('Box', { class: 'p-4' }));
+  expect(
+    rewriteBreakpointClasses(layoutNode('Box', { class: 'lg:p-4' })),
+  ).toEqual(layoutNode('Box'));
+  expect(
+    rewriteBreakpointClasses(layoutNode('Box', { class: 'xl:p-4' })),
+  ).toEqual(layoutNode('Box'));
+  expect(
+    rewriteBreakpointClasses(layoutNode('Box', { class: '2xl:p-4' })),
+  ).toEqual(layoutNode('Box'));
 });
