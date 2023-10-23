@@ -24,6 +24,7 @@ import {
 } from '../ayon/symbols/symbolIds';
 import {
   extractTailwindClassesByBreakpoint,
+  extractTailwindClassesByTheme,
   parametersToTailwindStyle,
 } from '../ayon/tailwind/tailwind';
 import { tailwindColors } from '../ayon/tailwind/tailwind.config';
@@ -58,14 +59,14 @@ function getImageFromProp(
 export function renderResolvedNode({
   isEditable,
   resolvedNode,
-  primary,
+  dsConfig,
   selectionOutlineColor,
   highlightedPath,
   system,
 }: {
   isEditable: boolean;
   resolvedNode: NoyaResolvedNode;
-  primary: string;
+  dsConfig: DSConfig;
   selectionOutlineColor: string;
   highlightedPath: string[] | undefined;
   system: DesignSystemDefinition;
@@ -129,8 +130,16 @@ export function renderResolvedNode({
       if (!PrimitiveComponent) return null;
 
       let classNames = element.classNames.map((className) => {
-        return className.value.replace(/-primary-/, `-${primary}-`);
+        return className.value.replace(
+          /-primary-/,
+          `-${dsConfig.colors.primary}-`,
+        );
       });
+
+      classNames = extractTailwindClassesByTheme(
+        classNames,
+        dsConfig.colorMode ?? 'light',
+      );
 
       // Keep classNames starting with sm: and md:, but remove the prefixes.
       // Remove any classNames starting with lg:, xl:, and 2xl:.
@@ -160,7 +169,7 @@ export function renderResolvedNode({
       const placeholderProp = namedProps['placeholder'];
 
       const primaryScale = (tailwindColors as any)[
-        primary
+        dsConfig.colors.primary
       ] as Theme['colors']['primary'];
 
       return (
@@ -242,7 +251,7 @@ export function renderDSPreview({
   const content = renderResolvedNode({
     isEditable: true,
     resolvedNode,
-    primary: dsConfig.colors.primary,
+    dsConfig,
     selectionOutlineColor,
     highlightedPath,
     system: props.system,

@@ -309,7 +309,7 @@ const DOMRendererContent = memo(
                           const content = renderResolvedNode({
                             isEditable: layer.do_objectID === editingLayerId,
                             resolvedNode,
-                            primary: props.primary,
+                            dsConfig: ds.config,
                             system: props.system,
                             highlightedPath:
                               highlightedNodePath &&

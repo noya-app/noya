@@ -204,6 +204,31 @@ export const extractTailwindClassesByBreakpoint = (
   });
 };
 
+const themes = ['light', 'dark'] as const;
+
+/**
+ * Extracts the classes for the given theme. Omits the theme prefix.
+ * Omits that are prefixed with a different theme.
+ */
+export const extractTailwindClassesByTheme = (
+  classes: string[],
+  theme: (typeof themes)[number],
+) => {
+  return classes.flatMap((className): string[] => {
+    if (className.startsWith(`${theme}:`)) {
+      return [className.substring(theme.length + 1)];
+    }
+
+    for (const t of themes) {
+      if (className.startsWith(`${t}:`)) {
+        return [];
+      }
+    }
+
+    return [className];
+  });
+};
+
 function getValue(className: string): string | undefined {
   return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none))$/.exec(
     className,
