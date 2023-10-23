@@ -57,9 +57,11 @@ const InspectorContainer = memo(function InspectorContainer({
             {children}
           </Stack.V>
         </ScrollArea>
-      ) : (
-        fallback
-      )}
+      ) : fallback ? (
+        <Stack.V position="relative" height="100%">
+          {fallback}
+        </Stack.V>
+      ) : null}
     </Stack.V>
   );
 });

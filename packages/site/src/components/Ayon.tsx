@@ -452,10 +452,14 @@ const AyonControlledState = memo(function AyonWithState({
       // draft.preferences.showDotGrid = false;
       // draft.preferences.wireframeMode = true;
 
-      // const artboardId = Layers.find(
-      //   draft.history.present.sketch.pages[0],
-      //   Layers.isArtboard,
-      // )?.do_objectID;
+      const artboardId = Layers.find(
+        draft.history.present.sketch.pages[0],
+        Layers.isArtboard,
+      )?.do_objectID;
+
+      if (artboardId) {
+        draft.history.present.selectedLayerIds = [artboardId];
+      }
 
       // draft.history.present.isolatedLayerId = artboardId;
 

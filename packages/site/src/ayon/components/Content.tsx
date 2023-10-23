@@ -48,7 +48,7 @@ import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
 import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { useManagedLayouts } from './GeneratedLayoutContext';
-import { AyonInspector, AyonSidebar } from './inspector/AyonInspector';
+import { AyonInspector } from './inspector/AyonInspector';
 
 const Overlay = styled.div({
   position: 'absolute',
@@ -386,11 +386,11 @@ export const Content = memo(function Content({
         overflow="hidden"
         separator={<DividerVertical variant="strong" />}
       >
-        <Stack.V flex="0" position="relative">
+        {/* <Stack.V flex="0" position="relative">
           {viewType === 'combined' && (
             <AyonSidebar name={name} onChangeName={onChangeName} />
           )}
-        </Stack.V>
+        </Stack.V> */}
         <Stack.V flex="1" position="relative" overflow="hidden">
           <Stack.V position="absolute" inset="0">
             <Overlay>

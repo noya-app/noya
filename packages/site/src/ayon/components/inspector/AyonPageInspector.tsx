@@ -12,22 +12,20 @@ import {
   createSectionedMenu,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { InspectorPrimitives } from 'noya-inspector';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { uuid } from 'noya-utils';
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
+import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
 import { usePersistentState } from '../../../utils/clientStorage';
 import { useAyonState } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';
 import { AyonListRow, AyonListSectionHeader } from './AyonListPrimitives';
 import { AyonPageSizeInspectorRow } from './AyonPageSizeInspectorRow';
+import { DesignSystemPicker } from './DesignSystemPicker';
 
 interface Props {
   projectName: string;
@@ -38,34 +36,47 @@ export const AyonPageInspector = function AyonPageInspector({
   projectName,
   selectedArtboards,
 }: Props) {
-  const [state] = useAyonState();
-  const client = useNoyaClientOrFallback();
-  const projectDescription = state.sketch.meta.noya?.projectDescription ?? '';
+  const [state, dispatch] = useAyonState();
+  // const client = useNoyaClientOrFallback();
+  // const projectDescription = state.sketch.meta.noya?.projectDescription ?? '';
   const firstArtboard = selectedArtboards[0];
-  const layers = firstArtboard.layers.filter(
-    Layers.isCustomLayer<CustomLayerData>,
-  );
-  const existingComponentNames = layers.map((layer) => layer.name);
+  // const layers = firstArtboard.layers.filter(
+  //   Layers.isCustomLayer<CustomLayerData>,
+  // );
+  // const existingComponentNames = layers.map((layer) => layer.name);
 
-  useEffect(() => {
-    client.generate.pageComponentNames({
-      projectName,
-      projectDescription,
-      existingComponentNames,
-      pageName: firstArtboard.name,
-    });
-  }, [
-    client,
-    existingComponentNames,
-    firstArtboard.name,
-    projectDescription,
-    projectName,
-  ]);
+  // useEffect(() => {
+  //   client.generate.pageComponentNames({
+  //     projectName,
+  //     projectDescription,
+  //     existingComponentNames,
+  //     pageName: firstArtboard.name,
+  //   });
+  // }, [
+  //   client,
+  //   existingComponentNames,
+  //   firstArtboard.name,
+  //   projectDescription,
+  //   projectName,
+  // ]);
 
   return (
     <>
       <InspectorSection title="Page" titleTextStyle="heading3">
         <AyonPageSizeInspectorRow artboard={firstArtboard} />
+      </InspectorSection>
+      <InspectorSection title="Theme" titleTextStyle="heading3">
+        <InspectorPrimitives.LabeledRow label="Design System">
+          <DesignSystemPicker />
+        </InspectorPrimitives.LabeledRow>
+        <DSThemeInspector
+          dsConfig={
+            (state.sketch.document.designSystem ?? DEFAULT_DESIGN_SYSTEM).config
+          }
+          onChangeDSConfig={(config) => {
+            dispatch('setDesignSystemConfig', config);
+          }}
+        />
       </InspectorSection>
       {/* {selectedArtboards.length === 1 && (
         <InspectorSection title="Components" titleTextStyle="heading3">
