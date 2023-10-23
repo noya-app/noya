@@ -17,6 +17,7 @@ import {
   rewriteImagesWithChildren,
   rewriteInferFlex,
   rewriteInlineFlexButtonAndLink,
+  rewriteMarginsInLayoutWithGap,
   rewritePositionedParent,
   rewriteRemoveHiddenElements,
   rewriteRootClasses,
@@ -337,4 +338,20 @@ it('rewrites breakpoint classes', () => {
   expect(
     rewriteBreakpointClasses(layoutNode('Box', { class: '2xl:p-4' })),
   ).toEqual(layoutNode('Box'));
+});
+
+it('removes margin from children of parents with gap', () => {
+  expect(
+    rewriteMarginsInLayoutWithGap(
+      layoutNode('Box', { class: 'flex flex-col gap-4' }, [
+        layoutNode('Box', { class: 'm-4' }),
+        layoutNode('Box', { class: 'mt-4' }),
+      ]),
+    ),
+  ).toEqual(
+    layoutNode('Box', { class: 'flex flex-col gap-4' }, [
+      layoutNode('Box'),
+      layoutNode('Box'),
+    ]),
+  );
 });

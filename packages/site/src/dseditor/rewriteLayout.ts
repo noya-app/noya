@@ -629,6 +629,59 @@ export function rewriteCardPadding(layout: LayoutNode) {
   });
 }
 
+const marginClassGroups = new Set<ClassGroupKey>([
+  'margin',
+  'marginBottom',
+  'marginLeft',
+  'marginRight',
+  'marginTop',
+  'marginX',
+  'marginY',
+]);
+
+/**
+ * If a node has a parent with a gap, remove any margin classes.
+ */
+export function rewriteMarginsInLayoutWithGap(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren, indexPath) => {
+      if (typeof node === 'string') return node;
+
+      const parent =
+        indexPath.length !== 0
+          ? LayoutHierarchy.access(layout, indexPath.slice(0, -1))
+          : undefined;
+
+      if (
+        parent &&
+        typeof parent !== 'string' &&
+        hasClassGroup('gap', parseClasses(parent.attributes.class))
+      ) {
+        const { class: class_, ...attributes } = node.attributes;
+
+        const updated = parseClasses(class_)
+          .filter((name) => !marginClassGroups.has(getTailwindClassGroup(name)))
+          .join(' ');
+
+        return {
+          ...node,
+          attributes: {
+            ...attributes,
+            ...(updated && { class: updated }),
+          },
+          children: transformedChildren,
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
 // Keep classNames starting with sm: and md:, but remove the prefixes.
 // Remove any classNames starting with lg:, xl:, and 2xl:.
 export function rewriteBreakpointClasses(layout: LayoutNode) {
@@ -669,6 +722,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteInlineFlexButtonAndLink(layout);
   layout = rewriteIconSize(layout);
   layout = rewriteCardPadding(layout);
+  layout = rewriteMarginsInLayoutWithGap(layout);
   // layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);
