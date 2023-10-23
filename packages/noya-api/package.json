@@ -7,6 +7,6 @@
   "main": "./src/index.ts",
   "version": "1.0.0",
   "dependencies": {
-    "@legendapp/state": "^0.23.1"
+    "@legendapp/state": "^2.1.1"
   }
 }

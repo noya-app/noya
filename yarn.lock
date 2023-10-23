@@ -2735,10 +2735,12 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@legendapp/state@^0.23.1":
-  version "0.23.1"
-  resolved "https://registry.yarnpkg.com/@legendapp/state/-/state-0.23.1.tgz#404824ee8011c2546ffa09c4d4e438eaa07a2e2f"
-  integrity sha512-gr8L0r6h9zYSy04GIahgsQLpQ4Xkr4K7UW5BKO9H9G8tvH35RHAOH+MHlA1JqUn9HDzJnW4gen93oEXDeB7piA==
+"@legendapp/state@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@legendapp/state/-/state-2.1.1.tgz#e6b1bb8e338f7aaa0d85593bac0a8c9b18cb5a1d"
+  integrity sha512-XURXHEQ/JKtlATaspKOSEWVK5n0oIdCdYoiT7p4kUJsx0XyA1rYl+x9SZ+0h84uDviWD/tbNQmzdddYYchFhRQ==
+  dependencies:
+    use-sync-external-store "^1.2.0"
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
@@ -21167,7 +21169,7 @@ use-subscription@1.5.1:
   dependencies:
     object-assign "^4.1.1"
 
-use-sync-external-store@1.2.0:
+use-sync-external-store@1.2.0, use-sync-external-store@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
   integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==

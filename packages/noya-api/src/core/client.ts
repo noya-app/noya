@@ -176,9 +176,15 @@ export class NoyaClient {
   ) => {
     const key = this.randomImageCacheKey(options);
 
-    if (this.loadingRandomIcons$[key].get()) return;
+    // For some reason .get was crashing. This is a workaround.
+    // It seems like legendapp/state is optimization the getter after
+    // detecting a hot path, but it's not working correctly.
+    const existingLoading = { ...this.loadingRandomIcons$ };
+    const existingIcons = { ...this.randomIcons$ };
 
-    const existing = this.randomIcons$[key].get();
+    if (existingLoading[key]) return;
+
+    const existing = existingIcons[key];
 
     if (existing) return existing;
 
@@ -201,7 +207,7 @@ export class NoyaClient {
     const key = this.randomIconCacheKey(options);
 
     this.randomIcons$[key].delete();
-    this.loadingRandomIcons$[key].delete();
+    // this.loadingRandomIcons$[key].delete();
   };
 
   get generate() {

@@ -392,7 +392,7 @@ export function rewriteImageToIcon(layout: LayoutNode) {
     (node, transformedChildren) => {
       if (typeof node === 'string') return node;
 
-      if (node.tag === 'Image') {
+      if (node.tag === 'Image' || node.tag === 'img') {
         if (
           node.attributes.alt?.match(/icon/i) ||
           node.attributes.name?.match(/icon/i)
