@@ -66,13 +66,19 @@ function findFirstJsxElement(
   return result;
 }
 
-export function parseComponentLayout(source: string): LayoutNode {
-  // The target source may be in a ```lang...``` code block. If so, extract the source from the code block.
-  const codeBlockMatch = source.match(/```.*\n([\s\S]*)\n```/);
+const extractCodeBlock = (str: string) => {
+  // Regex pattern explanation:
+  // ```(?:[a-zA-Z]+\n)? - Match the starting three backticks, optionally followed by a language specifier and a newline.
+  // ([\s\S]*?) - Capture everything following the specifier in a non-greedy way until the ending backticks or the end of the string.
+  // (?:```|$) - Non-capturing group for the ending three backticks or the end of the string.
+  const pattern = /```(?:[a-zA-Z]+\n)?([\s\S]*?)(?:```|$)/;
+  const match = str.match(pattern);
 
-  if (codeBlockMatch) {
-    source = codeBlockMatch[1];
-  }
+  return match ? match[1] : null; // If there's a match, return the first captured group (the code block content).
+};
+
+export function parseComponentLayout(source: string): LayoutNode {
+  source = extractCodeBlock(source) ?? source;
 
   // Replace html-style comments "<!-- ... -->" with an empty string.
   source = source.replace(/<!--.*?-->/gs, '');

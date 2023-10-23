@@ -49,3 +49,33 @@ it('parses data attributes', () => {
     children: ['Content'],
   });
 });
+
+it('parses from code block', () => {
+  expect(
+    parseComponentLayout(`
+    ${'```jsx'}
+    <div name="test">
+      Content
+    </div>
+    ${'```'}
+  `),
+  ).toEqual<LayoutNode>({
+    tag: 'div',
+    attributes: { name: 'test' },
+    children: ['Content'],
+  });
+});
+
+it('parses from unterminated code block', () => {
+  expect(
+    parseComponentLayout(`
+    ${'```jsx'}
+    <div name="test">
+      Content
+    </div>`),
+  ).toEqual<LayoutNode>({
+    tag: 'div',
+    attributes: { name: 'test' },
+    children: ['Content'],
+  });
+});
