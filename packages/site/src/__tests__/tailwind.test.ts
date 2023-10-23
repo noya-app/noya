@@ -107,6 +107,22 @@ describe('resolves styles', () => {
     });
   });
 
+  it('margin', () => {
+    expect(resolveTailwindClass('m-4')).toEqual({
+      margin: '1rem',
+    });
+
+    expect(resolveTailwindClass('mx-4')).toEqual({
+      marginLeft: '1rem',
+      marginRight: '1rem',
+    });
+
+    expect(resolveTailwindClass('mx-auto')).toEqual({
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    });
+  });
+
   it('shadow', () => {
     expect(resolveTailwindClass('shadow')).toEqual({
       boxShadow:

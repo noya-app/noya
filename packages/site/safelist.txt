@@ -1995,6 +1995,8 @@ ml-0.5
 ml-1.5
 ml-2.5
 ml-3.5
+mx-auto
+my-auto
 truncate
 leading-3
 leading-4

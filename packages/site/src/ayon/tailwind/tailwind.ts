@@ -230,7 +230,7 @@ export const extractTailwindClassesByTheme = (
 };
 
 function getValue(className: string): string | undefined {
-  return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none))$/.exec(
+  return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto))$/.exec(
     className,
   )?.[1];
 }
@@ -347,27 +347,39 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       return value ? { paddingLeft: value } : {};
     }
     case 'margin': {
-      const value = getSpacingValue(className);
+      const value = (config.theme as any).margin(themeParameter)[
+        getValue(className) || 'auto'
+      ];
       return value ? { margin: value } : {};
     }
     case 'marginX': {
-      const value = getSpacingValue(className);
+      const value = (config.theme as any).margin(themeParameter)[
+        getValue(className) || 'auto'
+      ];
       return value ? { marginLeft: value, marginRight: value } : {};
     }
     case 'marginY': {
-      const value = getSpacingValue(className);
+      const value = (config.theme as any).margin(themeParameter)[
+        getValue(className) || 'auto'
+      ];
       return value ? { marginTop: value, marginBottom: value } : {};
     }
     case 'marginTop': {
-      const value = getSpacingValue(className);
+      const value = (config.theme as any).margin(themeParameter)[
+        getValue(className) || 'auto'
+      ];
       return value ? { marginTop: value } : {};
     }
     case 'marginRight': {
-      const value = getSpacingValue(className);
+      const value = (config.theme as any).margin(themeParameter)[
+        getValue(className) || 'auto'
+      ];
       return value ? { marginRight: value } : {};
     }
     case 'marginBottom': {
-      const value = getSpacingValue(className);
+      const value = (config.theme as any).margin(themeParameter)[
+        getValue(className) || 'auto'
+      ];
       return value ? { marginBottom: value } : {};
     }
     case 'marginLeft': {

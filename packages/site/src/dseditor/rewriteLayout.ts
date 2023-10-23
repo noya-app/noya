@@ -629,18 +629,20 @@ export function rewriteCardPadding(layout: LayoutNode) {
   });
 }
 
-const marginClassGroups = new Set<ClassGroupKey>([
-  'margin',
-  'marginBottom',
+const marginXClassGroups = new Set<ClassGroupKey>([
   'marginLeft',
   'marginRight',
-  'marginTop',
   'marginX',
+]);
+
+const marginYClassGroups = new Set<ClassGroupKey>([
+  'marginTop',
+  'marginBottom',
   'marginY',
 ]);
 
 /**
- * If a node has a parent with a gap, remove any margin classes.
+ * If a node has a parent with a gap, remove any margin classes along the primary axis.
  */
 export function rewriteMarginsInLayoutWithGap(layout: LayoutNode) {
   return LayoutHierarchy.map<LayoutNode | string>(
@@ -653,11 +655,19 @@ export function rewriteMarginsInLayoutWithGap(layout: LayoutNode) {
           ? LayoutHierarchy.access(layout, indexPath.slice(0, -1))
           : undefined;
 
-      if (
-        parent &&
-        typeof parent !== 'string' &&
-        hasClassGroup('gap', parseClasses(parent.attributes.class))
-      ) {
+      const parentClasses = parseClasses(
+        parent && typeof parent !== 'string'
+          ? parent.attributes.class
+          : undefined,
+      );
+
+      if (hasClassGroup('gap', parentClasses)) {
+        const parentPrimaryAxis = parentClasses.includes('flex-col')
+          ? 'y'
+          : 'x';
+        const marginClassGroups =
+          parentPrimaryAxis === 'x' ? marginXClassGroups : marginYClassGroups;
+
         const { class: class_, ...attributes } = node.attributes;
 
         const updated = parseClasses(class_)
@@ -707,6 +717,66 @@ export function rewriteClassesKeepLastInGroup(layout: LayoutNode) {
 //   });
 // }
 
+// Theme['colors']['primary']
+const colorScaleMapping = {
+  '50': '950',
+  '100': '900',
+  '200': '800',
+  '300': '700',
+  '400': '600',
+  // '500': '500',
+  '600': '400',
+  '700': '300',
+  '800': '200',
+  '900': '100',
+  '950': '50',
+};
+
+const colorClassGroups = new Set<ClassGroupKey>([
+  'textColor',
+  'background',
+  'borderColor',
+  'fill',
+]);
+
+/**
+ * For each color class, add a corresponding :dark class.
+ * E.g "text-white" becomes "text-white dark:text-black".
+ * We'll invert any color scale values.
+ */
+export function rewriteAutoDarkMode(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    return classes.flatMap((name) => {
+      const group = getTailwindClassGroup(name);
+
+      if (colorClassGroups.has(group)) {
+        if (name.match(/black|white/)) {
+          return [
+            name,
+            'dark:' +
+              name.replace(/black|white/, (match) =>
+                match === 'black' ? 'white' : 'black',
+              ),
+          ];
+        }
+
+        const scaleKey = name.match(/-(\d+)/)?.[1] as
+          | keyof typeof colorScaleMapping
+          | undefined;
+
+        if (scaleKey && colorScaleMapping[scaleKey]) {
+          return [
+            name,
+            'dark:' + name.replace(scaleKey, colorScaleMapping[scaleKey]),
+          ];
+        }
+      }
+
+      return name;
+    });
+  });
+}
+
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteBreakpointClasses(layout);
   layout = rewriteClassesKeepLastInGroup(layout);
@@ -723,6 +793,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteIconSize(layout);
   layout = rewriteCardPadding(layout);
   layout = rewriteMarginsInLayoutWithGap(layout);
+  layout = rewriteAutoDarkMode(layout);
   // layout = rewriteConsistentSpacing(layout);
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);

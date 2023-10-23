@@ -4,6 +4,7 @@ import path from 'path';
 import {
   replaceHTMLEntities,
   rewriteAbsoluteFill,
+  rewriteAutoDarkMode,
   rewriteBoxToCard,
   rewriteBreakpointClasses,
   rewriteCardPadding,
@@ -340,7 +341,7 @@ it('rewrites breakpoint classes', () => {
   ).toEqual(layoutNode('Box'));
 });
 
-it('removes margin from children of parents with gap', () => {
+it('removes margin (along primary axis) from children of parents with gap', () => {
   expect(
     rewriteMarginsInLayoutWithGap(
       layoutNode('Box', { class: 'flex flex-col gap-4' }, [
@@ -350,8 +351,17 @@ it('removes margin from children of parents with gap', () => {
     ),
   ).toEqual(
     layoutNode('Box', { class: 'flex flex-col gap-4' }, [
-      layoutNode('Box'),
+      layoutNode('Box', { class: 'm-4' }),
       layoutNode('Box'),
     ]),
   );
+});
+
+it('rewrites colors for dark mode', () => {
+  expect(
+    rewriteAutoDarkMode(layoutNode('Box', { class: 'bg-gray-50' })),
+  ).toEqual(layoutNode('Box', { class: 'bg-gray-50 dark:bg-gray-950' }));
+  expect(
+    rewriteAutoDarkMode(layoutNode('Box', { class: 'text-black' })),
+  ).toEqual(layoutNode('Box', { class: 'text-black dark:text-white' }));
 });

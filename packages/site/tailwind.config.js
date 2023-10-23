@@ -90,6 +90,8 @@ module.exports = {
         'mr-{spacing}',
         'mb-{spacing}',
         'ml-{spacing}',
+        'mx-auto',
+        'my-auto',
         'truncate',
         'leading-{lineHeight}',
         'self-auto',
