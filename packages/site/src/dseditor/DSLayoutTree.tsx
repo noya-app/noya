@@ -632,7 +632,12 @@ export const DSLayoutRow = memo(function DSLayerRow({
           node.props.length > 0 &&
           node.props.map((prop) => {
             return (
-              <InputField.Root labelPosition="end" labelSize={60} size="small">
+              <InputField.Root
+                key={prop.id}
+                labelPosition="end"
+                labelSize={60}
+                size="small"
+              >
                 <InputField.Input
                   value={
                     prop.type === 'generator'

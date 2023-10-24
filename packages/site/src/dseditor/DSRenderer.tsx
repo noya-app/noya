@@ -97,6 +97,8 @@ export const DSRenderer = forwardRef(function DSRenderer(
   }, [onReady]);
 
   useEffect(() => {
+    let mounted = true;
+
     if (!ready) return;
 
     async function fetchLibrary() {
@@ -105,11 +107,17 @@ export const DSRenderer = forwardRef(function DSRenderer(
         enableCache: false,
       });
 
+      if (!mounted) return;
+
       setSystem(system);
     }
 
     setSystem(undefined);
     fetchLibrary();
+
+    return () => {
+      mounted = false;
+    };
   }, [ready, sourceName]);
 
   useEffect(() => {
