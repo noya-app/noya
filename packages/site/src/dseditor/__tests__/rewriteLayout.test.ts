@@ -5,6 +5,7 @@ import {
   replaceHTMLEntities,
   rewriteAbsoluteFill,
   rewriteAutoDarkMode,
+  rewriteBackgroundImageStyleToGradient,
   rewriteBoxToCard,
   rewriteBreakpointClasses,
   rewriteCardPadding,
@@ -24,6 +25,7 @@ import {
   rewriteRemoveUselessClasses,
   rewriteRootClasses,
   rewriteTailwindClasses,
+  rewriteVideoElement,
   unescapeHTML,
 } from '../rewriteLayout';
 
@@ -68,7 +70,7 @@ it('replaces space-y-5 with gap-5', () => {
 
 it('adds flex-1 to root', () => {
   expect(rewriteRootClasses(layoutNode('Box'))).toEqual(
-    layoutNode('Box', { class: 'flex-1' }),
+    layoutNode('Box', { class: 'relative flex-1' }),
   );
 });
 
@@ -374,4 +376,39 @@ it('removes useless classes', () => {
   expect(
     rewriteRemoveUselessClasses(layoutNode('Box', { class: 'foo dark:foo' })),
   ).toEqual(layoutNode('Box'));
+});
+
+it('replaces background image with gradient', () => {
+  expect(
+    rewriteBackgroundImageStyleToGradient(
+      layoutNode('Box', {
+        style: {
+          backgroundImage: 'url("https://example.com/image.png")',
+        },
+      }),
+    ),
+  ).toEqual(
+    layoutNode('Box', {
+      class: 'bg-gradient-to-r from-primary-300 to-primary-700',
+    }),
+  );
+});
+
+it('replaces video element', () => {
+  expect(rewriteVideoElement(layoutNode('video'))).toEqual(
+    layoutNode(
+      'Box',
+      {
+        name: 'Video Container',
+        class: 'bg-black flex flex-col justify-center items-center',
+      },
+      [
+        layoutNode('Icon', {
+          name: 'Play Icon',
+          alt: 'play',
+          class: 'bg-white w-10 h-10 rounded-full',
+        }),
+      ],
+    ),
+  );
 });

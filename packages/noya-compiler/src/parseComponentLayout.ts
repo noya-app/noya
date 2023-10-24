@@ -3,8 +3,33 @@ import ts from 'typescript';
 
 export interface LayoutNode {
   tag: string;
-  attributes: { [name: string]: string };
+  attributes: {
+    name?: string;
+    class?: string;
+    alt?: string;
+    placeholder?: string;
+    style?: Record<string, string>;
+  };
+  // attributes: { [name: string]: string | Record<string, string> };
   children: (LayoutNode | string)[];
+}
+
+export type LayoutNodeAttributes = LayoutNode['attributes'];
+
+function extractObjectLiteralProperties(
+  node: ts.ObjectLiteralExpression,
+): Record<string, string> {
+  const properties: Record<string, string> = {};
+  node.properties.forEach((property) => {
+    if (
+      ts.isPropertyAssignment(property) &&
+      (ts.isStringLiteral(property.initializer) ||
+        ts.isNoSubstitutionTemplateLiteral(property.initializer))
+    ) {
+      properties[property.name.getText()] = property.initializer.text;
+    }
+  });
+  return properties;
 }
 
 function convertJsxElementToLayoutNode(
@@ -14,14 +39,11 @@ function convertJsxElementToLayoutNode(
     // This node represents a JSX element or a self-closing JSX element. Convert it to a LayoutNode.
     const openingElement = ts.isJsxElement(node) ? node.openingElement : node;
     const tag = openingElement.tagName.getText();
-    const attributes: { [name: string]: string } = {};
+    const attributes: LayoutNodeAttributes = {};
+
     // eslint-disable-next-line @shopify/prefer-early-return
     openingElement.attributes.forEachChild((attribute) => {
-      if (
-        ts.isJsxAttribute(attribute) &&
-        attribute.initializer &&
-        ts.isStringLiteral(attribute.initializer)
-      ) {
+      if (ts.isJsxAttribute(attribute) && attribute.initializer) {
         let name = attribute.name.text;
 
         // convert className to class
@@ -29,7 +51,17 @@ function convertJsxElementToLayoutNode(
           name = 'class';
         }
 
-        attributes[name] = attribute.initializer.text;
+        if (ts.isStringLiteral(attribute.initializer)) {
+          attributes[name as 'name'] = attribute.initializer.text;
+        } else if (
+          ts.isJsxExpression(attribute.initializer) &&
+          attribute.initializer.expression &&
+          ts.isObjectLiteralExpression(attribute.initializer.expression)
+        ) {
+          attributes[name as 'style'] = extractObjectLiteralProperties(
+            attribute.initializer.expression,
+          );
+        }
       }
     });
     const children: (LayoutNode | string)[] = [];

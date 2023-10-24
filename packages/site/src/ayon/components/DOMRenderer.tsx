@@ -334,6 +334,7 @@ const DOMRendererContent = memo(
                                 width: layer.frame.width,
                                 height: layer.frame.height,
                                 display: 'flex',
+                                flexDirection: 'column',
                               }}
                             >
                               {content}

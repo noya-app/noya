@@ -228,11 +228,26 @@ export function rewriteConsistentSpacing(layout: LayoutNode) {
 
 export function rewriteRootClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
-    if (indexPath.length === 0) {
-      if (!classes.includes('flex-1')) {
-        classes.push('flex-1');
-      }
+    if (indexPath.length !== 0) return;
+
+    // Remove width/height class group (we don't want to overflow the container)
+    // Remove position class group (we'll add relative back in)
+    classes = classes.filter((name) => {
+      const classGroup = getTailwindClassGroup(name);
+      return (
+        classGroup !== 'width' &&
+        classGroup !== 'height' &&
+        classGroup !== 'position'
+      );
+    });
+
+    classes.push('relative');
+
+    if (!classes.includes('flex-1')) {
+      classes.push('flex-1');
     }
+
+    return classes;
   });
 }
 
@@ -342,6 +357,8 @@ export function rewriteRemoveUselessClasses(layout: LayoutNode) {
     return classes.filter((name) => {
       // Strip off any colon prefix, e.g. "sm:", "dark:"
       name = name.replace(/^[a-z]+:/, '');
+
+      if (name.includes('variant')) return true;
 
       const resolved = resolveTailwindClass(name);
       return resolved && Object.keys(resolved).length > 0;
@@ -800,21 +817,106 @@ export function rewriteAutoDarkMode(layout: LayoutNode) {
   });
 }
 
+export function rewriteBackgroundImageStyleToGradient(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      const { style, ...attributes } = node.attributes;
+
+      if (style && style.backgroundImage) {
+        return {
+          ...node,
+          attributes: {
+            ...attributes,
+            class: [
+              attributes.class,
+              'bg-gradient-to-r',
+              'from-primary-300',
+              'to-primary-700',
+            ]
+              .filter(Boolean)
+              .join(' '),
+          },
+          children: transformedChildren,
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
+/**
+ * <video> tag should become a box with a black background
+ */
+export function rewriteVideoElement(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      if (node.tag === 'video') {
+        return {
+          ...node,
+          tag: 'Box',
+          attributes: {
+            ...node.attributes,
+            name: node.attributes.name ?? 'Video Container',
+            class: [
+              node.attributes.class,
+              'bg-black',
+              'flex',
+              'flex-col',
+              'justify-center',
+              'items-center',
+            ]
+              .filter(Boolean)
+              .join(' '),
+          },
+          children: [
+            {
+              tag: 'Icon',
+              attributes: {
+                class: 'bg-white w-10 h-10 rounded-full',
+                name: 'Play Icon',
+                alt: 'play',
+              },
+              children: [],
+            },
+          ],
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteBreakpointClasses(layout);
   layout = rewriteClassesKeepLastInGroup(layout);
   layout = rewriteRemoveHiddenElements(layout);
   layout = rewriteHTMLEntities(layout);
+  layout = rewriteBackgroundImageStyleToGradient(layout);
   layout = rewriteImagesWithChildren(layout);
   layout = rewriteSvgToIcon(layout);
   layout = rewriteImageToIcon(layout);
-  layout = rewriteBoxToCard(layout);
+  layout = rewriteVideoElement(layout);
+  // layout = rewriteBoxToCard(layout);
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);
   layout = rewriteFlex1ButtonInColumn(layout);
   layout = rewriteInlineFlexButtonAndLink(layout);
   layout = rewriteIconSize(layout);
-  layout = rewriteCardPadding(layout);
+  // layout = rewriteCardPadding(layout);
   layout = rewriteMarginsInLayoutWithGap(layout);
   layout = rewriteAutoDarkMode(layout);
   // layout = rewriteConsistentSpacing(layout);

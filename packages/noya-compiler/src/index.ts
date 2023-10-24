@@ -12,7 +12,7 @@ import prettierTypeScript from 'prettier/parser-typescript';
 import React, { isValidElement } from 'react';
 import { flat, withOptions } from 'tree-visit';
 import ts from 'typescript';
-import { LayoutNode } from './parseComponentLayout';
+import { LayoutNode, LayoutNodeAttributes } from './parseComponentLayout';
 import { removeEmptyStyles } from './removeEmptyStyles';
 import { removeUndefinedStyles } from './removeUndefinedStyles';
 import { escapeHtml, sanitizePackageName } from './validate';
@@ -603,7 +603,7 @@ export const LayoutHierarchy = withOptions<LayoutNode | string>({
 
 export function layoutNode(
   tag: string,
-  attributes: Record<string, string> = {},
+  attributes: LayoutNodeAttributes = {},
   children: (LayoutNode | string)[] = [],
 ): LayoutNode {
   return { tag, attributes, children };

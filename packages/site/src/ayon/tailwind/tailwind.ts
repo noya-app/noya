@@ -58,6 +58,9 @@ export const classGroups = {
   fontWeight:
     /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
   background: /^bg/,
+  backgroundSize: /^bg-(auto|cover|contain)/,
+  backgroundPosition:
+    /^bg-(bottom|center|left|left-bottom|left-top|right|right-bottom|right-top|top)/,
   backdropFilter: /^backdrop-blur/,
   gradientDirection: /^bg-gradient-to-/,
   gradientStopFrom: /^from-/,
@@ -234,7 +237,7 @@ export const extractTailwindClassesByTheme = (
 };
 
 function getValue(className: string): string | undefined {
-  return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto))$/.exec(
+  return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto|screen))$/.exec(
     className,
   )?.[1];
 }
@@ -285,6 +288,16 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'background': {
       return {
         backgroundColor: getColor(className),
+      };
+    }
+    case 'backgroundSize': {
+      return {
+        backgroundSize: className.replace('bg-', ''),
+      };
+    }
+    case 'backgroundPosition': {
+      return {
+        backgroundPosition: className.replace('bg-', '').replace('-', ' '),
       };
     }
     case 'backdropFilter': {

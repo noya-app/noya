@@ -50,6 +50,20 @@ it('parses data attributes', () => {
   });
 });
 
+it('parses object literal attributes', () => {
+  expect(
+    parseComponentLayout(`
+    <div style={{ foo: 'bar', baz: \`baq\` }}>
+      Content
+    </div>
+  `),
+  ).toEqual<LayoutNode>({
+    tag: 'div',
+    attributes: { style: { foo: 'bar', baz: 'baq' } },
+    children: ['Content'],
+  });
+});
+
 it('parses from code block', () => {
   expect(
     parseComponentLayout(`
