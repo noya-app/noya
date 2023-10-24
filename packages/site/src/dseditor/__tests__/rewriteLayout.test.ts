@@ -21,6 +21,7 @@ import {
   rewriteMarginsInLayoutWithGap,
   rewritePositionedParent,
   rewriteRemoveHiddenElements,
+  rewriteRemoveUselessClasses,
   rewriteRootClasses,
   rewriteTailwindClasses,
   unescapeHTML,
@@ -367,4 +368,10 @@ it('rewrites colors for dark mode', () => {
   expect(
     rewriteAutoDarkMode(layoutNode('Box', { class: 'text-black' })),
   ).toEqual(layoutNode('Box', { class: 'text-black dark:text-white' }));
+});
+
+it('removes useless classes', () => {
+  expect(
+    rewriteRemoveUselessClasses(layoutNode('Box', { class: 'foo dark:foo' })),
+  ).toEqual(layoutNode('Box'));
 });

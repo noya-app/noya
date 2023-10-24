@@ -7,6 +7,7 @@ import {
   getTailwindClassGroup,
   hasClassGroup,
   isTailwindClassGroup,
+  resolveTailwindClass,
 } from '../ayon/tailwind/tailwind';
 
 export function rewriteRemoveHiddenElements(layout: LayoutNode) {
@@ -328,6 +329,20 @@ export function rewriteForbiddenClassGroups(layout: LayoutNode) {
     }
 
     return classes;
+  });
+}
+
+/**
+ * Remove classes that don't translate to style properties.
+ */
+export function rewriteRemoveUselessClasses(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    return classes.filter((name) => {
+      // Strip off any colon prefix, e.g. "sm:", "dark:"
+      name = name.replace(/^[a-z]+:/, '');
+      const resolved = resolveTailwindClass(name);
+      return resolved && Object.keys(resolved).length > 0;
+    });
   });
 }
 
@@ -805,5 +820,6 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteAbsoluteFill(layout);
   layout = rewritePositionedParent(layout);
   layout = rewriteRootClasses(layout);
+  layout = rewriteRemoveUselessClasses(layout);
   return layout;
 }
