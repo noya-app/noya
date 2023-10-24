@@ -1,6 +1,7 @@
 import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
 import { ThemeValue, config, tailwindColors } from './tailwind.config';
+import { tailwindToLinearGradient } from './tailwindGradient';
 
 export const allClassNames = (
   require('../../../safelist.txt').default as string
@@ -58,6 +59,9 @@ export const classGroups = {
     /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
   background: /^bg/,
   backdropFilter: /^backdrop-blur/,
+  gradientDirection: /^bg-gradient-to-/,
+  gradientStopFrom: /^from-/,
+  gradientStopTo: /^to-/,
   textAlign: /^(text-left|text-center|text-right)/,
   // From https://github.com/tailwindlabs/tailwindcss/blob/86f9c6f09270a9da6fee77909863444b52e2f9b6/stubs/config.full.js
   textColor:
@@ -647,6 +651,15 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         ],
       };
     }
+    case 'gradientDirection':
+    case 'gradientStopFrom':
+    case 'gradientStopTo': {
+      return {
+        // This will be replaced with a background image later,
+        // but we return something here so that the class is not ignored.
+        backgroundImage: tailwindToLinearGradient([className], getColor),
+      };
+    }
   }
 
   return assertNever(classGroup);
@@ -673,11 +686,11 @@ export function parametersToTailwindStyle(
 ): CSSProperties {
   if (!parameters) return {};
 
-  const hashtags = Array.isArray(parameters)
+  const classNames = Array.isArray(parameters)
     ? parameters
     : Object.keys(parameters);
 
-  return hashtags.reduce((result, className) => {
+  let result: CSSProperties = classNames.reduce((result, className) => {
     let style = resolve?.(className);
 
     if (!style) {
@@ -689,6 +702,14 @@ export function parametersToTailwindStyle(
       ...style,
     };
   }, {});
+
+  if (hasClassGroup('gradientDirection', classNames)) {
+    result.backgroundImage = tailwindToLinearGradient(classNames, (color) =>
+      getColor(`bg-${color}`),
+    );
+  }
+
+  return result;
 }
 
 // assertNever

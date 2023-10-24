@@ -18,11 +18,13 @@ export function rewriteRemoveHiddenElements(layout: LayoutNode) {
 
       return {
         ...node,
-        children: transformedChildren.filter(
-          (child) =>
-            typeof child === 'string' ||
-            !parseClasses(child.attributes.class).includes('hidden'),
-        ),
+        children: transformedChildren.filter((child) => {
+          if (typeof child === 'string') return true;
+
+          const classes = parseClasses(child.attributes.class);
+
+          return !(classes.includes('hidden') || classes.includes('opacity-0'));
+        }),
       };
     },
   ) as LayoutNode;
@@ -340,6 +342,7 @@ export function rewriteRemoveUselessClasses(layout: LayoutNode) {
     return classes.filter((name) => {
       // Strip off any colon prefix, e.g. "sm:", "dark:"
       name = name.replace(/^[a-z]+:/, '');
+
       const resolved = resolveTailwindClass(name);
       return resolved && Object.keys(resolved).length > 0;
     });

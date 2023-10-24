@@ -279,7 +279,19 @@ describe('parameters', () => {
     });
   });
 
-  it('customer resolver', () => {
+  it('creates gradient', () => {
+    expect(
+      parametersToTailwindStyle([
+        'bg-gradient-to-r',
+        'from-red-500',
+        'to-blue-500',
+      ]),
+    ).toEqual({
+      backgroundImage: 'linear-gradient(to right, #ef4444, #3b82f6)',
+    });
+  });
+
+  it('custom resolver', () => {
     expect(
       parametersToTailwindStyle({ center: true }, simpleAlignmentResolver),
     ).toEqual({
