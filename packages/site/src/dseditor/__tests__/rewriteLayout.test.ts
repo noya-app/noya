@@ -136,6 +136,9 @@ it('removes forbidden classes', () => {
   expect(
     rewriteForbiddenClassGroups(layoutNode('button', { class: 'bg-blue-500' })),
   ).toEqual(layoutNode('button'));
+  expect(
+    rewriteForbiddenClassGroups(layoutNode('button', { class: 'border-2' })),
+  ).toEqual(layoutNode('button'));
 });
 
 it('removes flex-1 from button in a flex-col', () => {

@@ -268,6 +268,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'paddingTop',
     'paddingX',
     'paddingY',
+    'borderWidth',
     'borderRadius',
     'fontWeight',
     'fontSize',
@@ -307,6 +308,10 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'paddingTop',
     'paddingX',
     'paddingY',
+    'background',
+    'borderRadius',
+    'borderWidth',
+    'borderColor',
   ],
 };
 

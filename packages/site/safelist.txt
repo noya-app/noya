@@ -1997,6 +1997,10 @@ ml-2.5
 ml-3.5
 mx-auto
 my-auto
+mt-auto
+mr-auto
+mb-auto
+ml-auto
 truncate
 leading-3
 leading-4
