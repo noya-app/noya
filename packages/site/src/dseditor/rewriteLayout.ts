@@ -948,6 +948,66 @@ export function rewriteProgressBar(layout: LayoutNode) {
   ) as LayoutNode;
 }
 
+/**
+ * Detect input elements with type="checkbox" and replace them with a Checkbox.
+ */
+export function rewriteInputToCheckbox(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      if (
+        node.tag.toLowerCase() === 'input' &&
+        node.attributes.type === 'checkbox'
+      ) {
+        return {
+          ...node,
+          tag: 'Checkbox',
+          attributes: {
+            ...node.attributes,
+            name: node.attributes.name ?? 'Checkbox',
+          },
+          children: [],
+        };
+      }
+
+      // If we have a label with a checkbox input, move the label to within the checkbox
+      if (
+        node.tag.toLowerCase() === 'label' ||
+        (node.tag.toLowerCase() === 'div' && node.children.length === 2)
+      ) {
+        const checkboxChild = transformedChildren.find(
+          (child): child is LayoutNode =>
+            typeof child !== 'string' &&
+            child.tag === 'Checkbox' &&
+            child.children.length === 0,
+        );
+
+        const otherChildren = transformedChildren.filter(
+          (child) => child !== checkboxChild,
+        );
+
+        if (checkboxChild) {
+          return {
+            ...checkboxChild,
+            attributes: {
+              ...checkboxChild.attributes,
+              name: node.attributes.name ?? checkboxChild.attributes.name,
+            },
+            children: otherChildren,
+          };
+        }
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteBreakpointClasses(layout);
   layout = rewriteClassesKeepLastInGroup(layout);
@@ -955,6 +1015,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteHTMLEntities(layout);
   layout = rewriteBackgroundImageStyleToGradient(layout);
   layout = rewriteImagesWithChildren(layout);
+  layout = rewriteInputToCheckbox(layout);
   layout = rewriteSvgToIcon(layout);
   layout = rewriteImageToIcon(layout);
   layout = rewriteVideoElement(layout);

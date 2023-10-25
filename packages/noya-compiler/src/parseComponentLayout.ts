@@ -8,6 +8,7 @@ export interface LayoutNode {
     class?: string;
     alt?: string;
     placeholder?: string;
+    type?: string; // For input elements
     style?: Record<string, string>;
   };
   // attributes: { [name: string]: string | Record<string, string> };
