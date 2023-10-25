@@ -277,6 +277,21 @@ export function rewriteInferFlex(layout: LayoutNode) {
   });
 }
 
+const inputForbiddenClassGroups: ClassGroupKey[] = [
+  'padding',
+  'paddingBottom',
+  'paddingLeft',
+  'paddingRight',
+  'paddingTop',
+  'paddingX',
+  'paddingY',
+  'borderRadius',
+  'borderWidth',
+  'borderColor',
+  'background',
+  'boxShadow',
+];
+
 const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
   button: [
     'padding',
@@ -332,6 +347,8 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'borderColor',
   ],
   progress: ['height', 'padding', 'background', 'borderRadius'],
+  input: inputForbiddenClassGroups,
+  textarea: inputForbiddenClassGroups,
 };
 
 export function rewriteForbiddenClassGroups(layout: LayoutNode) {

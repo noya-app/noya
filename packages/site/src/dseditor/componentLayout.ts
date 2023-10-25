@@ -60,7 +60,7 @@ function rewriteImageAlt(string: string) {
   return (
     (string || '')
       .toLowerCase()
-      .split(' ')
+      .split(/\s+|-|_/)
       .filter((word) => !IMAGE_ALT_REWRITE_MAP.has(word.toLowerCase()))
       .join(' ') || 'landscape'
   );
