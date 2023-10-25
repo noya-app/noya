@@ -278,7 +278,7 @@ export function rewriteInferFlex(layout: LayoutNode) {
   });
 }
 
-const inputForbiddenClassGroups: ClassGroupKey[] = [
+const paddingClassGroupKeys: ClassGroupKey[] = [
   'padding',
   'paddingBottom',
   'paddingLeft',
@@ -286,70 +286,52 @@ const inputForbiddenClassGroups: ClassGroupKey[] = [
   'paddingTop',
   'paddingX',
   'paddingY',
+];
+
+const borderClassGroupKeys: ClassGroupKey[] = [
   'borderRadius',
-  'borderWidth',
   'borderColor',
-  'background',
+  'borderWidth',
+  'borderXWidth',
+  'borderYWidth',
+  'borderTopWidth',
+  'borderBottomWidth',
+  'borderLeftWidth',
+  'borderRightWidth',
+];
+
+const paddingBorderShadowBackgroundClassGroups: ClassGroupKey[] = [
+  ...paddingClassGroupKeys,
+  ...borderClassGroupKeys,
   'boxShadow',
+  'background',
+];
+
+const textCustomizationClassGroups: ClassGroupKey[] = [
+  'fontSize',
+  'fontWeight',
+  'lineHeight',
+  'textColor',
+  'textDecoration',
 ];
 
 const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
   button: [
-    'padding',
-    'paddingBottom',
-    'paddingLeft',
-    'paddingRight',
-    'paddingTop',
-    'paddingX',
-    'paddingY',
-    'borderWidth',
-    'borderRadius',
-    'fontWeight',
-    'fontSize',
-    // Consider adding this back in some form when we have color scheme support
-    'background',
-    'textColor',
+    // Consider adding background back in some form when we have color scheme support
+    ...paddingBorderShadowBackgroundClassGroups,
+    ...textCustomizationClassGroups,
   ],
-  card: [
-    'padding',
-    'paddingBottom',
-    'paddingLeft',
-    'paddingRight',
-    'paddingTop',
-    'paddingX',
-    'paddingY',
-    'borderRadius',
-    'borderWidth',
-    'borderColor',
-    'boxShadow',
-    'background',
-  ],
-  select: [
-    'padding',
-    'paddingBottom',
-    'paddingLeft',
-    'paddingRight',
-    'paddingTop',
-    'paddingX',
-    'paddingY',
-  ],
+  card: [...paddingBorderShadowBackgroundClassGroups],
+  select: [...paddingBorderShadowBackgroundClassGroups],
   tag: [
     'flex',
-    'padding',
-    'paddingBottom',
-    'paddingLeft',
-    'paddingRight',
-    'paddingTop',
-    'paddingX',
-    'paddingY',
-    'background',
-    'borderRadius',
-    'borderWidth',
-    'borderColor',
+    ...paddingBorderShadowBackgroundClassGroups,
+    ...textCustomizationClassGroups,
   ],
-  progress: ['height', 'padding', 'background', 'borderRadius'],
-  input: inputForbiddenClassGroups,
-  textarea: inputForbiddenClassGroups,
+  progress: ['height', ...paddingBorderShadowBackgroundClassGroups],
+  input: [...paddingBorderShadowBackgroundClassGroups],
+  textarea: [...paddingBorderShadowBackgroundClassGroups],
+  avatar: [...paddingBorderShadowBackgroundClassGroups],
 };
 
 export function rewriteForbiddenClassGroups(layout: LayoutNode) {
@@ -1010,6 +992,40 @@ export function rewriteInputToCheckbox(layout: LayoutNode) {
 }
 
 /**
+ * If an Image has a name that contains "profile|avatar|user|contact", replace it with an Avatar.
+ */
+export function rewriteImageToAvatar(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      if (
+        /image|img/i.test(node.tag) &&
+        node.attributes.name?.match(
+          /profile|avatar|user|contact|sender|recipient/i,
+        )
+      ) {
+        return {
+          ...node,
+          tag: 'Avatar',
+          attributes: {
+            ...node.attributes,
+            name: node.attributes.name ?? 'Avatar',
+          },
+          children: [],
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
+/**
  * If a Tag component is in a Flex container, add an align-self class
  * based on the parent's flex-direction and align-items.
  */
@@ -1043,6 +1059,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteBackgroundImageStyleToGradient(layout);
   layout = rewriteImagesWithChildren(layout);
   layout = rewriteInputToCheckbox(layout);
+  layout = rewriteImageToAvatar(layout); // Before Image to Icon
   layout = rewriteSvgToIcon(layout);
   layout = rewriteImageToIcon(layout);
   layout = rewriteVideoElement(layout);
