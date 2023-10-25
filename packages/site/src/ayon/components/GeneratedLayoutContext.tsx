@@ -32,7 +32,7 @@ function findAllQueries(root: NoyaNode): Query[] {
 function replaceAllAssets(
   root: NoyaNode,
   images: Record<string, NoyaAPI.RandomImageResponse>,
-  icons: Record<string, NoyaAPI.RandomIconResponse>,
+  icons: Record<string, { data: string }>,
 ) {
   return ElementHierarchy.map<NoyaNode>(root, (node, transformedChildren) => {
     if (node.type !== 'noyaPrimitiveElement') return node;
@@ -51,7 +51,7 @@ function replaceAllAssets(
           } else if (prop.generator === 'random-icon' && icons[prop.query]) {
             return {
               ...prop,
-              result: icons[prop.query].icons[0] ?? '',
+              result: icons[prop.query].data ?? '',
               resolvedQuery: prop.query,
             };
           }

@@ -36,6 +36,7 @@ import {
   parseLayoutWithOptions,
 } from './componentLayout';
 import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
+import { svgToReactElement } from './renderSVGElement';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
 import { NoyaPrimitiveElement, NoyaResolvedNode } from './types';
@@ -834,6 +835,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
                     >
                       {prop.generator === 'geometric' ? (
                         <BoxModelIcon color="#aaa" />
+                      ) : prop.result?.startsWith('<svg') ? (
+                        svgToReactElement(prop.result)
                       ) : (
                         <img
                           src={prop.result}

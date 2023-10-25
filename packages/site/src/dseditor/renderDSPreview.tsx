@@ -36,6 +36,7 @@ import {
 } from '../ayon/utils/patterns';
 import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
+import { svgToReactElement } from './renderSVGElement';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { NoyaNumberProp, NoyaProp, NoyaResolvedNode } from './types';
 
@@ -51,6 +52,9 @@ function getImageFromProp(
     );
   }
   if (prop.result) {
+    if (prop.result.startsWith('<svg')) {
+      return svgToDataUri(prop.result);
+    }
     return prop.result;
   }
   return placeholderImage;
@@ -171,6 +175,32 @@ export function renderResolvedNode({
       const primaryScale = (tailwindColors as any)[
         dsConfig.colors.primary
       ] as Theme['colors']['primary'];
+
+      // If we have an svg src, dangerouslySetInnerHTML is the only way to render it.
+      if (
+        srcProp &&
+        srcProp.type === 'generator' &&
+        srcProp.generator === 'random-icon' &&
+        srcProp.result
+      ) {
+        const rootElement = svgToReactElement(srcProp.result);
+
+        if (!rootElement) return null;
+
+        return {
+          ...rootElement,
+          key: indexPath.join('/'),
+          props: {
+            ...rootElement.props,
+            style: {
+              ...rootElement.props.style,
+              ...style,
+            },
+            'data-path': element.path.join('/'),
+            ...(!isEditable && { tabIndex: -1 }),
+          },
+        };
+      }
 
       return (
         <PrimitiveComponent

@@ -262,6 +262,7 @@ export class NoyaNetworkClient {
 
   #randomIcon = async (options: {
     query: string;
+    preferredCollection?: string;
   }): Promise<NoyaRandomIconResponse> => {
     let response: NoyaResponse;
 
@@ -270,6 +271,9 @@ export class NoyaNetworkClient {
         `https://api.iconify.design/search?${encodeQueryParameters({
           limit: 32, // This is the minimum supported by the API
           query: options.query || 'menu',
+          ...(options.preferredCollection && {
+            prefixes: options.preferredCollection,
+          }),
         })}`,
       );
     } catch (error) {
@@ -278,6 +282,12 @@ export class NoyaNetworkClient {
 
     const json = await response.json();
     const parsed = randomIconResponseSchema.parse(json);
+
+    // If no icons, retry search without preferred collection
+    if (options.preferredCollection && parsed.icons.length === 0) {
+      const { preferredCollection: _, ...rest } = options;
+      return this.#randomIcon(rest);
+    }
 
     const sorted = parsed.icons.sort((a, b) => {
       // If an exact match, order first

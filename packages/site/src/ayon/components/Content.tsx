@@ -230,7 +230,7 @@ export const Content = memo(function Content({
                     prop.name === 'src'
                       ? {
                           ...prop,
-                          result: icons[key].icons[0] ?? '',
+                          result: icons[key].data ?? '',
                           resolvedQuery: src.query,
                         }
                       : prop,

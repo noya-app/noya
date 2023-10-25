@@ -17,7 +17,6 @@ import {
   NoyaGeneratedName,
   NoyaJson,
   NoyaMetadataItem,
-  NoyaRandomIconResponse,
   NoyaRandomImageResponse,
   NoyaSession,
   NoyaUserData,
@@ -88,7 +87,7 @@ export class NoyaClient {
   generatedLayoutIndex: Record<string, number> = {};
   randomImages$ = observable<Record<string, NoyaRandomImageResponse>>({});
   loadingRandomImages$ = observable<Record<string, boolean>>({});
-  randomIcons$ = observable<Record<string, NoyaRandomIconResponse>>({});
+  randomIcons$ = observable<Record<string, { url: string; data: string }>>({});
   loadingRandomIcons$ = observable<Record<string, boolean>>({});
   generatedPageNames$ = observable<(GeneratedPageName | null)[]>([]);
   generatedPageComponentNames$ = observable<(GeneratedPageName | null)[]>([]);
@@ -190,9 +189,24 @@ export class NoyaClient {
 
     this.loadingRandomIcons$.set((prev) => ({ ...prev, [key]: true }));
 
-    const data = await this.networkClient.random.icon(options);
+    const data = await this.networkClient.random.icon({
+      ...options,
+      preferredCollection: 'mdi',
+    });
+    let iconUrl = '';
+    let iconText = '';
 
-    this.randomIcons$.set((prev) => ({ ...prev, [key]: data }));
+    if (data.icons.length > 0) {
+      // Fetch icon
+      iconUrl = data.icons[0];
+      const iconResponse = await fetch(iconUrl);
+      iconText = await iconResponse.text();
+    }
+
+    this.randomIcons$.set((prev) => ({
+      ...prev,
+      [key]: { url: iconUrl, data: iconText },
+    }));
     this.loadingRandomIcons$.set((prev) => ({ ...prev, [key]: false }));
   };
 
