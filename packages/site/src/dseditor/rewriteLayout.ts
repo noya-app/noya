@@ -4,6 +4,7 @@ import {
   ClassGroupKey,
   extractTailwindClassesByBreakpoint,
   filterTailwindClassesByLastInGroup,
+  getLastClassInGroup,
   getTailwindClassGroup,
   hasClassGroup,
   isTailwindClassGroup,
@@ -1008,6 +1009,32 @@ export function rewriteInputToCheckbox(layout: LayoutNode) {
   ) as LayoutNode;
 }
 
+/**
+ * If a Tag component is in a Flex container, add an align-self class
+ * based on the parent's flex-direction and align-items.
+ */
+function rewriteTagAlignment(layout: LayoutNode) {
+  return rewriteClasses(layout, (node, indexPath, classes) => {
+    if (node.tag !== 'Tag') return;
+
+    const parent = LayoutHierarchy.access(layout, indexPath.slice(0, -1));
+
+    if (typeof parent === 'string') return;
+
+    const parentClasses = parseClasses(parent.attributes.class);
+
+    if (parentClasses.includes('flex')) {
+      let alignItems = getLastClassInGroup('items', parentClasses);
+
+      if (!alignItems || alignItems === 'items-stretch') {
+        alignItems = 'items-start';
+      }
+
+      classes.push(`self-${alignItems.replace('items-', '')}`);
+    }
+  });
+}
+
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteBreakpointClasses(layout);
   layout = rewriteClassesKeepLastInGroup(layout);
@@ -1033,6 +1060,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteInferFlex(layout);
   layout = rewriteAlmostAbsoluteFill(layout);
   layout = rewriteAbsoluteFill(layout);
+  layout = rewriteTagAlignment(layout);
   layout = rewritePositionedParent(layout);
   layout = rewriteRootClasses(layout);
   layout = rewriteRemoveUselessClasses(layout);
