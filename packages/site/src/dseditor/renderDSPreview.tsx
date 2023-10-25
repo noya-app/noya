@@ -37,7 +37,7 @@ import {
 import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { ResolvedHierarchy } from './resolvedHierarchy';
-import { NoyaProp, NoyaResolvedNode } from './types';
+import { NoyaNumberProp, NoyaProp, NoyaResolvedNode } from './types';
 
 function getImageFromProp(
   primaryScale: Theme['colors']['primary'],
@@ -183,6 +183,9 @@ export function renderResolvedNode({
             ...(!isEditable && { tabIndex: -1 }),
           }}
           {...(variant && { variant })}
+          {...(element.componentID === component.id.Progress && {
+            value: (namedProps['value'] as NoyaNumberProp)?.value,
+          })}
           {...((element.componentID === textareaSymbolId ||
             element.componentID === inputSymbolId) &&
             element.children[0]?.type === 'noyaString' && {

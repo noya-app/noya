@@ -331,6 +331,7 @@ const forbiddenClassGroups: Record<string, ClassGroupKey[]> = {
     'borderWidth',
     'borderColor',
   ],
+  progress: ['height', 'padding', 'background', 'borderRadius'],
 };
 
 export function rewriteForbiddenClassGroups(layout: LayoutNode) {
@@ -900,6 +901,36 @@ export function rewriteVideoElement(layout: LayoutNode) {
   ) as LayoutNode;
 }
 
+/**
+ * Detect elements with the name "Progress Bar" or "ProgressBar"
+ * and replace them with a Box with a black background.
+ */
+export function rewriteProgressBar(layout: LayoutNode) {
+  return LayoutHierarchy.map<LayoutNode | string>(
+    layout,
+    (node, transformedChildren) => {
+      if (typeof node === 'string') return node;
+
+      if (node.attributes.name?.match(/progress\s*bar/i)) {
+        return {
+          ...node,
+          tag: 'Progress',
+          attributes: {
+            ...node.attributes,
+            name: node.attributes.name ?? 'Progress Bar',
+          },
+          children: [],
+        };
+      }
+
+      return {
+        ...node,
+        children: transformedChildren,
+      };
+    },
+  ) as LayoutNode;
+}
+
 export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteBreakpointClasses(layout);
   layout = rewriteClassesKeepLastInGroup(layout);
@@ -910,6 +941,7 @@ export function rewriteLayout(layout: LayoutNode) {
   layout = rewriteSvgToIcon(layout);
   layout = rewriteImageToIcon(layout);
   layout = rewriteVideoElement(layout);
+  layout = rewriteProgressBar(layout);
   // layout = rewriteBoxToCard(layout);
   layout = rewriteTailwindClasses(layout);
   layout = rewriteForbiddenClassGroups(layout);

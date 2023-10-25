@@ -38,6 +38,8 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
                   value: '',
                 }),
               ];
+            } else if (propSchema === 'number') {
+              props = [...props, Model.numberProp({ name, value: 50 })];
             }
           }
         },

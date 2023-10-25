@@ -5,6 +5,7 @@ import {
   BoxIcon,
   ButtonIcon,
   CheckboxIcon,
+  DividerHorizontalIcon,
   DropdownMenuIcon,
   ImageIcon,
   InputIcon,
@@ -41,7 +42,7 @@ export type PrimitiveElementSchema = {
     | 'stringOrNodes'
     | 'nodes'
     | { type: 'elementOfType'; componentId: string };
-  props?: Record<string, 'image' | 'string'>;
+  props?: Record<string, 'image' | 'string' | 'number'>;
 };
 
 export type PrimitiveElementMetadata = {
@@ -180,6 +181,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Link')],
       }),
+  },
+  {
+    id: component.id.Progress,
+    name: 'Progress',
+    description: 'A progress bar',
+    icon: <DividerHorizontalIcon />,
+    schema: { children: 'none', props: { value: 'number' } },
   },
   {
     id: radioSymbolId,

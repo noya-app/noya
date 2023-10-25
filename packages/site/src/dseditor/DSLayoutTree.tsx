@@ -644,7 +644,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
                       ? prop.generator === 'geometric'
                         ? ''
                         : prop.query
-                      : prop.value
+                      : prop.value.toString()
                   }
                   allowSubmittingWithSameValue
                   disabled={
@@ -679,6 +679,21 @@ export const DSLayoutRow = memo(function DSLayerRow({
                               prop.type === 'string'
                             ) {
                               return { ...p, value };
+                            }
+
+                            if (
+                              p.name === prop.name &&
+                              p.type === 'number' &&
+                              prop.type === 'number'
+                            ) {
+                              const parsed = parseFloat(value);
+
+                              return {
+                                ...p,
+                                value: Number.isFinite(parsed)
+                                  ? parsed
+                                  : p.value,
+                              };
                             }
 
                             return p;

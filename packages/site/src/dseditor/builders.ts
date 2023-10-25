@@ -6,6 +6,7 @@ import {
   NoyaDiff,
   NoyaDiffItem,
   NoyaGeneratorProp,
+  NoyaNumberProp,
   NoyaPrimitiveElement,
   NoyaProp,
   NoyaString,
@@ -141,6 +142,17 @@ function noyaStringProp(
   };
 }
 
+function noyaNumberProp(
+  options: ModelOptions<NoyaNumberProp> &
+    Pick<NoyaNumberProp, 'name' | 'value'>,
+): NoyaNumberProp {
+  return {
+    ...options,
+    id: options.id ?? uuid(),
+    type: 'number',
+  };
+}
+
 function noyaGeneratorProp(
   options: ModelOptions<NoyaProp> &
     Pick<NoyaGeneratorProp, 'name' | 'query' | 'generator'>,
@@ -163,5 +175,6 @@ export namespace Model {
   export const className = noyaClassName;
   export const classNames = noyaClassNames;
   export const stringProp = noyaStringProp;
+  export const numberProp = noyaNumberProp;
   export const generatorProp = noyaGeneratorProp;
 }

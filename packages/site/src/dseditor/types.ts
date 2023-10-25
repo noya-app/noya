@@ -71,6 +71,12 @@ export type NoyaStringProp = {
   name: string;
   value: string;
 };
+export type NoyaNumberProp = {
+  type: 'number';
+  id: string;
+  name: string;
+  value: number;
+};
 export type NoyaGeneratorProp = {
   type: 'generator';
   id: string;
@@ -80,7 +86,7 @@ export type NoyaGeneratorProp = {
   result?: string;
   resolvedQuery?: string;
 };
-export type NoyaProp = NoyaStringProp | NoyaGeneratorProp;
+export type NoyaProp = NoyaStringProp | NoyaNumberProp | NoyaGeneratorProp;
 
 export type NoyaDiffItem = {
   path: string[];
