@@ -1,4 +1,5 @@
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import { assignRef } from 'noya-react-utils';
+import React, { forwardRef, memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 export const DescriptionTextArea = styled.textarea(({ theme }) => ({
@@ -6,12 +7,15 @@ export const DescriptionTextArea = styled.textarea(({ theme }) => ({
   color: theme.colors.text,
   background: theme.colors.inputBackground,
   width: '0px',
-  flex: '1 1 0px',
+  flex: '1 1 auto',
   padding: '4px 6px',
   border: 'none',
   outline: 'none',
   height: 100,
   borderRadius: '4px',
+  '&::placeholder': {
+    color: theme.colors.textDisabled,
+  },
   '&:focus': {
     boxShadow: `0 0 0 2px ${theme.colors.primary}`,
   },
@@ -35,27 +39,40 @@ export const useAutoResize = (value: string) => {
   return textareaRef;
 };
 
-export const AutoResizingTextArea = memo(function AutoResizingTextArea({
-  value,
-  onChangeText,
-  ...rest
-}: Omit<React.ComponentProps<typeof DescriptionTextArea>, 'onChange'> & {
-  onChangeText: (value: string) => void;
-}) {
-  const textareaRef = useAutoResize(value);
+export const AutoResizingTextArea = memo(
+  forwardRef(function AutoResizingTextArea(
+    {
+      value,
+      onChangeText,
+      ...rest
+    }: Omit<React.ComponentProps<typeof DescriptionTextArea>, 'onChange'> & {
+      onChangeText: (value: string) => void;
+    },
+    forwardedRef: React.ForwardedRef<HTMLTextAreaElement>,
+  ) {
+    const ref = useAutoResize(value || rest.placeholder);
 
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>) =>
-      onChangeText(event.target.value),
-    [onChangeText],
-  );
+    const handleChange = useCallback(
+      (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+        onChangeText(event.target.value),
+      [onChangeText],
+    );
 
-  return (
-    <DescriptionTextArea
-      ref={textareaRef}
-      {...rest}
-      onChange={handleChange}
-      value={value}
-    />
-  );
-});
+    const handleRef = useCallback(
+      (value: HTMLTextAreaElement | null) => {
+        ref.current = value;
+        assignRef(forwardedRef, value);
+      },
+      [ref, forwardedRef],
+    );
+
+    return (
+      <DescriptionTextArea
+        ref={handleRef}
+        {...rest}
+        onChange={handleChange}
+        value={value}
+      />
+    );
+  }),
+);

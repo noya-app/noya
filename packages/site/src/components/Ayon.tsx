@@ -65,6 +65,7 @@ import { downloadBlob } from '../utils/download';
 import { AyonProvider } from './AyonContext';
 import { DSProvider, useDS } from './DSContext';
 import { OnboardingAnimation } from './OnboardingAnimation';
+import { PageSetup } from './PageSetup';
 import { ShareMenu } from './ShareMenu';
 
 export type ExportType =
@@ -385,6 +386,12 @@ function Workspace({
     dispatch,
     ds,
   ]);
+
+  const projectDescription = state.sketch.meta.noya?.projectDescription ?? '';
+
+  if (!projectDescription) {
+    return <PageSetup description={projectDescription} />;
+  }
 
   if (!ds) {
     return (

@@ -4,6 +4,8 @@ import styled, { keyframes } from 'styled-components';
 interface Props {
   size?: number;
   opacity?: number;
+  color?: string;
+  trackColor?: string;
 }
 
 const spin = keyframes`
@@ -20,8 +22,8 @@ const Spinner = styled.div`
 
 // Use css syntax to support keyframes
 const SpinnerCircle = styled.div<Props>`
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top: 2px solid black;
+  border: 2px solid ${({ trackColor }) => trackColor};
+  border-top: 2px solid ${({ color }) => color};
   border-radius: 50%;
   width: ${({ size }) => `${size}px`};
   height: ${({ size }) => `${size}px`};
@@ -31,10 +33,12 @@ const SpinnerCircle = styled.div<Props>`
 export const ActivityIndicator = memo(function ActivityIndicator({
   size = 16,
   opacity = 1,
+  color = 'black',
+  trackColor = 'rgba(0, 0, 0, 0.1)',
 }: Props) {
   return (
     <Spinner opacity={opacity}>
-      <SpinnerCircle size={size} />
+      <SpinnerCircle size={size} color={color} trackColor={trackColor} />
     </Spinner>
   );
 });

@@ -3,7 +3,7 @@ import React, { ForwardedRef, forwardRef, memo } from 'react';
 import { useTheme } from 'styled-components';
 import { Button, ButtonRootProps } from './Button';
 
-type Props = Omit<ButtonRootProps, 'children' | 'variant' | 'flex'> & {
+type Props = Omit<ButtonRootProps, 'children' | 'variant' | 'flex' | 'size'> & {
   iconName: keyof typeof Icons;
   selected?: boolean;
   color?: string;

@@ -11,17 +11,19 @@ export function AppLayout({
   children,
   toolbar,
   footer,
+  divider = true,
 }: {
   children: ReactNode;
-  toolbar: ReactNode;
+  toolbar?: ReactNode;
   footer?: ReactNode;
+  divider?: boolean;
 }) {
   const theme = useDesignSystemTheme();
 
   return (
     <Stack.V flex="1" background={theme.colors.canvas.background}>
       {toolbar}
-      {toolbar && <Divider variant="strong" />}
+      {toolbar && divider && <Divider variant="strong" />}
       <ScrollArea>
         <Stack.V flex="1">
           <Spacer.Vertical size={100} />

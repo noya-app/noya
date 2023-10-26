@@ -60,7 +60,7 @@ const CarouselItemComponent = memo(function CarouselItemComponent({
       id={item.id}
       subtitle={item.subtitle}
       loading={item.loading}
-      onClick={() => {
+      onPress={() => {
         onSelectItem(index);
       }}
       onHoverChange={(isHovering) => {

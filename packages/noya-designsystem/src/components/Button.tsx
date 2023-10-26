@@ -12,10 +12,12 @@ type ButtonVariant =
   | 'normal'
   | 'primary'
   | 'secondary'
-  | 'secondaryBrightLarge'
+  | 'secondaryBright'
   | 'thin'
   | 'floating'
   | 'none';
+
+type ButtonSize = 'normal' | 'large';
 
 /* ----------------------------------------------------------------------------
  * Element
@@ -24,8 +26,9 @@ type ButtonVariant =
 export const ButtonElement = styled.button<{
   active: boolean;
   variant: ButtonVariant;
+  size: ButtonSize;
   flex?: CSSProperties['flex'];
-}>(({ theme, active, disabled, variant, flex }) => ({
+}>(({ theme, active, disabled, variant, size, flex }) => ({
   ...theme.textStyles.small,
   textDecoration: 'none',
   lineHeight: '1',
@@ -42,6 +45,12 @@ export const ButtonElement = styled.button<{
   paddingRight: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
   paddingBottom: variant === 'none' ? '0px' : '4px',
   paddingLeft: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
+  ...(size === 'large' && {
+    paddingTop: '12px',
+    paddingRight: '16px',
+    paddingBottom: '12px',
+    paddingLeft: '16px',
+  }),
   background: active
     ? theme.colors.primary
     : variant === 'none' || variant === 'thin'
@@ -78,9 +87,8 @@ export const ButtonElement = styled.button<{
       background: theme.colors.secondary,
     },
   }),
-  ...(variant === 'secondaryBrightLarge' && {
+  ...(variant === 'secondaryBright' && {
     ...theme.textStyles.heading4,
-    padding: '12px 16px',
     background: '#0ab557',
     color: 'white',
     '&:hover': {
@@ -135,6 +143,7 @@ export interface ButtonRootProps {
   active?: boolean;
   disabled?: boolean;
   variant?: ButtonVariant;
+  size?: ButtonSize;
   tooltip?: ReactNode;
   onClick?: (event: React.MouseEvent) => void;
   onPointerDown?: (event: React.PointerEvent) => void;
@@ -154,6 +163,7 @@ export const Button = forwardRef(function Button(
     active = false,
     disabled = false,
     variant = 'normal',
+    size = 'normal',
     contentStyle,
     onClick,
     children,
@@ -170,6 +180,7 @@ export const Button = forwardRef(function Button(
       active={active}
       disabled={disabled}
       variant={variant}
+      size={size}
       onClick={onClick}
       // Prevent double clicking a button from triggering any callbacks in ancestors
       onDoubleClick={useCallback((event: React.MouseEvent) => {

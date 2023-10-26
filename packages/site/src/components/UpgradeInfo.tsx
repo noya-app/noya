@@ -117,8 +117,12 @@ export function UpgradeInfo({
             )}
           />
           <Spacer.Vertical size={30} />
-          <Stack.V pointerEvents={'all'} alignItems="stretch">
-            <Button variant="secondaryBrightLarge" onClick={onClickUpgrade}>
+          <Stack.V pointerEvents="all" alignItems="stretch">
+            <Button
+              variant="secondaryBright"
+              size="large"
+              onClick={onClickUpgrade}
+            >
               Upgrade
             </Button>
           </Stack.V>

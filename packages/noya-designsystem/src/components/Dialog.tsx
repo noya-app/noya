@@ -50,7 +50,7 @@ const StyledDescription = styled(DialogPrimitive.Description)(({ theme }) => ({
   color: theme.colors.textMuted,
 }));
 
-const CloseButtonContainer = styled.div(({ theme }) => ({
+export const CloseButtonContainer = styled.div(({ theme }) => ({
   position: 'absolute',
   top: theme.sizes.dialog.padding,
   right: theme.sizes.dialog.padding,
@@ -58,8 +58,8 @@ const CloseButtonContainer = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.popover.background,
   padding: '4px 6px',
   borderRadius: '2px',
-  boxShadow: '0 0 2px rgba(0, 0, 0, 0.2)',
-  border: `1px solid ${theme.colors.textSubtle}`,
+  // boxShadow: `0 0 2px rgba(0, 0, 0, 0.2)`,
+  border: `1px solid rgba(128,128,128,0.2)`,
 }));
 
 export interface IDialog {

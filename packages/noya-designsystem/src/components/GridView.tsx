@@ -1,3 +1,4 @@
+import { KeyModifiers } from 'noya-keymap';
 import React, {
   createContext,
   CSSProperties,
@@ -84,7 +85,8 @@ const ItemContainer = styled.div<{
   selected?: boolean;
   hovered?: boolean;
   bordered: boolean;
-}>(({ theme, selected, hovered, bordered }) => ({
+  disabled: boolean;
+}>(({ theme, selected, hovered, bordered, disabled }) => ({
   display: 'flex',
   flex: '1',
   backgroundColor: theme.colors.sidebar.background,
@@ -103,12 +105,12 @@ const ItemContainer = styled.div<{
   overflow: 'hidden',
 
   cursor: 'pointer',
-  '&:hover': {
-    opacity: 0.85,
-  },
-  '&:active': {
-    opacity: 0.7,
-  },
+  ...(disabled
+    ? { opacity: 0.5 }
+    : {
+        '&:hover': { opacity: 0.85 },
+        '&:active': { opacity: 0.7 },
+      }),
 }));
 
 const GridContainer = styled.div(({ theme }) => ({
@@ -230,6 +232,7 @@ interface ItemProps<MenuItemType extends string = string> {
   loading?: boolean;
   selected?: boolean;
   onClick?: (event: React.MouseEvent) => void;
+  onPress?: (options: KeyModifiers) => void;
   onDoubleClick?: () => void;
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
@@ -248,6 +251,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     loading,
     selected,
     onClick,
+    onPress,
     onDoubleClick,
     onHoverChange,
     children,
@@ -266,7 +270,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     },
   });
 
-  const { textPosition, bordered } = useContext(GridViewContext);
+  const { textPosition, bordered, disabled } = useContext(GridViewContext);
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -274,16 +278,38 @@ const GridViewItem = forwardRef(function GridViewItem<
       event.preventDefault();
 
       onClick?.(event);
+      onPress?.(event);
     },
-    [onClick],
+    [onClick, onPress],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.stopPropagation();
+        event.preventDefault();
+
+        onPress?.(event);
+      } else {
+        return;
+      }
+    },
+    [onPress],
   );
 
   let element = (
-    <GridContainer id={id} ref={forwardedRef} {...hoverProps} tabIndex={0}>
+    <GridContainer
+      id={id}
+      ref={forwardedRef}
+      {...hoverProps}
+      tabIndex={disabled ? undefined : 0}
+      onKeyDown={handleKeyDown}
+    >
       <ItemContainer
+        disabled={disabled}
         bordered={bordered}
         selected={selected}
-        hovered={hovered}
+        hovered={!disabled && hovered}
         onClick={handleClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
@@ -345,12 +371,14 @@ type GridViewContextValue = {
   size: GridViewSize;
   textPosition: 'overlay' | 'below' | 'toolip';
   bordered: boolean;
+  disabled: boolean;
 };
 
 const GridViewContext = createContext<GridViewContextValue>({
   size: 'small',
   textPosition: 'below',
   bordered: false,
+  disabled: false,
 });
 
 interface GridViewRootProps extends Partial<GridViewContextValue> {
@@ -366,6 +394,7 @@ function GridViewRoot({
   onClick,
   textPosition = 'below',
   bordered = false,
+  disabled = false,
 }: GridViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -382,8 +411,9 @@ function GridViewRoot({
       size,
       textPosition,
       bordered,
+      disabled,
     }),
-    [bordered, size, textPosition],
+    [bordered, disabled, size, textPosition],
   );
 
   return (
