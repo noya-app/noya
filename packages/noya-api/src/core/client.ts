@@ -4,6 +4,7 @@ import { Rect } from 'noya-geometry';
 import { memoizedGetter, range } from 'noya-utils';
 import { z } from 'zod';
 import { fileReducer } from './collection';
+import { findAndParseJSONArray } from './json';
 import {
   INoyaNetworkClient,
   NoyaNetworkClient,
@@ -925,21 +926,6 @@ export class NoyaClient {
 
 function updateIndex<T>(array: T[], index: number, value: T) {
   return [...array.slice(0, index), value, ...array.slice(index + 1)];
-}
-
-// The response is a JSON array, potentially within other text.
-// Slice a substring right before the first "[" and right after the last "]".
-function findAndParseJSONArray(text: string) {
-  const startIndex = text.indexOf('[');
-  const endIndex = text.lastIndexOf(']');
-  const substring = text.slice(startIndex, endIndex + 1);
-  let array: unknown[] = [];
-
-  try {
-    array = JSON.parse(substring) as unknown[];
-  } catch (e) {}
-
-  return array;
 }
 
 function compact<T>(array: (T | null | undefined)[]): T[] {

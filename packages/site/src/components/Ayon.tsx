@@ -1,6 +1,6 @@
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
-import { StateProvider, useApplicationState } from 'noya-app-state-context';
+import { StateProvider } from 'noya-app-state-context';
 import {
   Button,
   Chip,
@@ -57,6 +57,7 @@ import InsertBlockWebp from '../assets/InsertBlock.webp';
 import { Content } from '../ayon/components/Content';
 import { GeneratedLayoutProvider } from '../ayon/components/GeneratedLayoutContext';
 import { ayonReducer } from '../ayon/state/ayonReducer';
+import { useAyonState } from '../ayon/state/ayonState';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
@@ -95,7 +96,7 @@ function Workspace({
   ComponentProps<typeof Content>,
   'uploadAsset' | 'padding' | 'canvasRendererType' | 'isPlayground'
 >): JSX.Element {
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useAyonState();
   const { setRightToolbar, setLeftToolbar } = useProject();
   const { onboardingStep, setOnboardingStep } = useOnboarding();
   const theme = useDesignSystemTheme();
@@ -387,10 +388,17 @@ function Workspace({
     ds,
   ]);
 
-  const projectDescription = state.sketch.meta.noya?.projectDescription ?? '';
+  // const projectDescription = state.sketch.meta.noya?.projectDescription ?? '';
 
-  if (!projectDescription) {
-    return <PageSetup description={projectDescription} />;
+  if (artboard && artboard.layers.length === 0) {
+    return (
+      <PageSetup
+        description={''}
+        onGenerate={({ description, layoutItems }) => {
+          dispatch('setPageLayout', description, layoutItems);
+        }}
+      />
+    );
   }
 
   if (!ds) {

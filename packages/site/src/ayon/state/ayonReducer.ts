@@ -13,6 +13,7 @@ import {
   interactionReducer,
 } from 'noya-state';
 import { findLast, upperFirst, uuid } from 'noya-utils';
+import { FlattenedLayoutItem } from '../../components/PageSetup';
 import { Model } from '../../dseditor/builders';
 import { enforceSchema } from '../../dseditor/layoutSchema';
 import {
@@ -74,7 +75,12 @@ export type AyonAction =
         height: number;
       },
     ]
-  | [type: 'setProjectDescription', description: string];
+  | [type: 'setProjectDescription', description: string]
+  | [
+      type: 'setPageLayout',
+      description: string,
+      layoutItems: FlattenedLayoutItem[],
+    ];
 
 const ayonLayerReducer = (
   layer: Sketch.CustomLayer<CustomLayerData>,
@@ -387,6 +393,60 @@ export const ayonReducer: CustomReducer<AyonAction> = (
         CanvasKit,
         context,
       );
+
+      return state;
+    }
+    case 'setPageLayout': {
+      const [, description, layoutItems] = action;
+
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const page = state.sketch.pages[pageIndex];
+
+      const artboard = page.layers.find(Layers.isArtboard);
+
+      if (!artboard) return;
+
+      const artboardIndexPath = Selectors.getLayerIndexPath(
+        state,
+        artboard.do_objectID,
+      );
+
+      if (!artboardIndexPath) return;
+
+      const layers = layoutItems.map((item) => {
+        const componentName = item.componentNames[0] ?? item.name;
+        const layer = SketchModel.customLayer<CustomLayerData>({
+          name: componentName,
+          frame: SketchModel.rect({
+            x: item.rect.x * artboard.frame.width,
+            y: item.rect.y * artboard.frame.height,
+            width: item.rect.width * artboard.frame.width,
+            height: item.rect.height * artboard.frame.height,
+          }),
+          data: {
+            // description: componentName,
+            // node: primitiveElements
+            //   .find((p) => p.id === boxSymbolId)
+            //   ?.initialValue?.(),
+          },
+        });
+
+        return layer;
+      });
+
+      for (const layer of layers) {
+        state = Selectors.insertLayerAtIndexPath(
+          state,
+          layer,
+          artboardIndexPath.indexPath,
+          'inside',
+        );
+      }
+
+      state = produce(state, (draft) => {
+        draft.sketch.pages[pageIndex].name = description;
+        draft.selectedLayerIds = [];
+      });
 
       return state;
     }

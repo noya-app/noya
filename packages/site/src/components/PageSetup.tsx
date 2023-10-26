@@ -1,4 +1,9 @@
 import {
+  asyncIterableToString,
+  findAndParseJSONObject,
+  useNoyaClientOrFallback,
+} from 'noya-api';
+import {
   LayoutHierarchy,
   LayoutNode,
   LayoutNodeAttributes,
@@ -13,13 +18,36 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { Rect } from 'noya-geometry';
 import { RocketIcon } from 'noya-icons';
-import React, { ReactElement, memo, useReducer, useRef } from 'react';
+import React, {
+  ReactElement,
+  memo,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from 'react';
+import { withOptions } from 'tree-visit';
+import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { AppLayout } from './AppLayout';
 
+type MeasuredLayoutItem = {
+  name: string;
+  rect: Rect; // Percentage between 0 and 1
+  componentNames: string[];
+  children: MeasuredLayoutItem[];
+};
+
+export type FlattenedLayoutItem = Omit<MeasuredLayoutItem, 'children'>;
+
 type Props = {
   description?: string;
+  onGenerate?: (generated: {
+    description: string;
+    layoutItems: FlattenedLayoutItem[];
+  }) => void;
 };
 
 type InternalState = {
@@ -63,7 +91,7 @@ const possibleLayouts: LayoutNode[] = [
     }),
   ]),
   layoutNode(
-    'Left Sidebar with Top Bar',
+    'Left Sidebar with Top Bar Layout',
     { style: { ...layoutParentStyle, flexDirection: 'column' } },
     [
       layoutNode('Top Bar', {
@@ -100,9 +128,51 @@ function renderLayoutNode(root: LayoutNode): ReactElement | null {
   );
 }
 
+function createPrompt(description: string) {
+  function describeLayout(node: LayoutNode): string {
+    const items = LayoutHierarchy.flatMap<string>(node, (node) => {
+      if (typeof node === 'string' || node.children.length > 0) return [];
+
+      return [node.tag];
+    });
+
+    return `The "${node.tag}" layout:
+${items.map((child, index) => `${index + 1}) ${child}`).join('\n')}`;
+  }
+
+  function createExampleResponse(node: LayoutNode): string {
+    return JSON.stringify({
+      [node.tag]: {
+        [(node.children[0] as LayoutNode).tag]: [
+          'User Details Row',
+          'Navigation Menu',
+          'Search Bar',
+        ],
+        '...': '...',
+      },
+      '...': '...',
+    });
+  }
+
+  const prompt = [
+    `I'm creating a webpage with description:`,
+    `\`\`\`\n${description}\n\`\`\``,
+    `I'm considering ${possibleLayouts.length} types of layouts.`,
+    ...possibleLayouts.map(describeLayout),
+    `Respond ONLY with a list of 3 names of possible components that could go in each layout area, in JSON format, e.g. ${createExampleResponse(
+      possibleLayouts[0],
+    )}`,
+  ].join('\n\n');
+
+  return prompt;
+}
+
 export const PageSetup = memo(function PageSetup({
   description: initialDescription,
+  onGenerate,
 }: Props) {
+  const client = useNoyaClientOrFallback();
+
   const theme = useDesignSystemTheme();
 
   const [{ description, layout, step }, dispatch] = useReducer(
@@ -130,6 +200,186 @@ export const PageSetup = memo(function PageSetup({
       step: 'describe',
     },
   );
+
+  const handleGenerate = useCallback(() => {
+    async function main() {
+      const prompt = createPrompt(description);
+
+      console.info('Prompt: ' + prompt);
+
+      const iterator = await client.networkClient.generate.fromPrompt(prompt);
+      const result = await asyncIterableToString(iterator);
+      const json = findAndParseJSONObject(result);
+
+      // const json = {
+      //   'left sidebar layout': {
+      //     'left sidebar': [
+      //       'latest news',
+      //       'trending topics',
+      //       'currency converter',
+      //     ],
+      //     'right content area': [
+      //       'daily articles',
+      //       'video updates',
+      //       'investment insights',
+      //     ],
+      //   },
+      //   'left sidebar with top bar layout': {
+      //     'top bar': [
+      //       'login/signup button',
+      //       'website logo',
+      //       'notifications icon',
+      //     ],
+      //     'left sidebar': [
+      //       'market stats',
+      //       'top cryptocurrencies',
+      //       'investment advice',
+      //     ],
+      //     'right content area': [
+      //       'feature articles',
+      //       'interviews with experts',
+      //       'crypto market analysis',
+      //     ],
+      //   },
+      // };
+
+      console.info('JSON', json);
+
+      const schema = z.record(z.record(z.array(z.string())));
+      const parsed = schema.safeParse(json);
+
+      // debugger;
+
+      if (!parsed.success) {
+        console.error(parsed.error);
+        return;
+      }
+
+      const selectedLayout = possibleLayouts.find(
+        (node) => node.tag.toLowerCase() === layout.toLowerCase(),
+      );
+
+      if (!selectedLayout) return;
+
+      const componentNamesIndex = Object.keys(parsed.data).findIndex(
+        (key) => key.toLowerCase() === selectedLayout?.tag.toLowerCase(),
+      );
+
+      if (componentNamesIndex === -1) return;
+
+      const componentNamesMap = Object.values(parsed.data)[componentNamesIndex];
+
+      let measuredLayout = LayoutHierarchy.map<MeasuredLayoutItem>(
+        selectedLayout,
+        (node, transformedChildren): MeasuredLayoutItem => {
+          if (typeof node === 'string') throw new Error('Impossible');
+
+          const names =
+            Object.entries(componentNamesMap).find(
+              ([key]) => key.toLowerCase() === node.tag.toLowerCase(),
+            )?.[1] ?? [];
+
+          let direction =
+            node.attributes.style?.flexDirection === 'row'
+              ? 'horizontal'
+              : 'vertical';
+
+          // Adjust children dimensions by using their flex values
+          const flexValues = node.children.map((child) =>
+            parseInt((child as LayoutNode).attributes.style?.flex ?? '1'),
+          );
+
+          const properties =
+            direction === 'horizontal'
+              ? ({ size: 'width', offset: 'x' } as const)
+              : ({ size: 'height', offset: 'y' } as const);
+
+          for (let i = 0; i < transformedChildren.length; i++) {
+            const child = transformedChildren[i];
+
+            child.rect[properties.size] =
+              flexValues[i] / flexValues.reduce((a, b) => a + b, 0);
+
+            child.rect[properties.offset] = transformedChildren
+              .slice(0, i)
+              .reduce((a, b) => a + b.rect[properties.size], 0);
+          }
+
+          return {
+            name: node.tag,
+            rect: { x: 0, y: 0, width: 1, height: 1 },
+            componentNames: names,
+            children: transformedChildren,
+          };
+        },
+      );
+
+      const MeasuredHierarchy = withOptions<MeasuredLayoutItem>({
+        getChildren: (node) => node.children ?? [],
+      });
+
+      // Adjust children size and offset according to parent
+      measuredLayout = MeasuredHierarchy.map<MeasuredLayoutItem>(
+        measuredLayout,
+        (node, transformedChildren) => {
+          const result = { ...node, children: transformedChildren };
+
+          const { rect } = node;
+
+          return MeasuredHierarchy.map(
+            result,
+            (node, transformedChildren, indexPath) => {
+              if (indexPath.length === 0) {
+                return { ...node, children: transformedChildren };
+              }
+
+              return {
+                ...node,
+                children: transformedChildren,
+                rect: {
+                  x: node.rect.x + rect.x * node.rect.width,
+                  y: node.rect.y + rect.y * node.rect.height,
+                  width: rect.width * node.rect.width,
+                  height: rect.height * node.rect.height,
+                },
+              };
+            },
+          );
+        },
+      );
+
+      const flattened = MeasuredHierarchy.flatMap<FlattenedLayoutItem>(
+        measuredLayout,
+        (node): FlattenedLayoutItem[] => {
+          const { children, ...rest } = node;
+          if (children.length > 0) return [];
+          return [rest];
+        },
+      );
+
+      const selected = {
+        layout: selectedLayout,
+        componentNames: Object.values(parsed.data)[componentNamesIndex],
+        measuredLayout,
+        flattened,
+      };
+
+      console.info('Layout', selected);
+
+      onGenerate?.({
+        description,
+        layoutItems: selected.flattened,
+      });
+    }
+
+    main();
+  }, [client, description, layout, onGenerate]);
+
+  useEffect(() => {
+    if (step !== 'generate') return;
+
+    handleGenerate();
+  }, [handleGenerate, step]);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 

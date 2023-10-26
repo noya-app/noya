@@ -25,6 +25,8 @@ import {
   NoyaUser,
 } from './core/schema';
 
+export * from './core/json';
+export * from './core/streaming';
 export * from './react/context';
 export * from './react/hooks';
 
