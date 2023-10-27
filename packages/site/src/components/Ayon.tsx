@@ -393,6 +393,7 @@ function Workspace({
   if (artboard && artboard.layers.length === 0) {
     return (
       <PageSetup
+        pageSize={artboard.frame}
         description={''}
         onGenerate={({ description, layoutItems }) => {
           onChangeName?.(description);

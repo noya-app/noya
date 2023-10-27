@@ -18,7 +18,7 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { Rect } from 'noya-geometry';
+import { Rect, Size } from 'noya-geometry';
 import { RocketIcon } from 'noya-icons';
 import { upperFirst } from 'noya-utils';
 import React, {
@@ -44,6 +44,7 @@ export type FlattenedLayoutItem = Omit<MeasuredLayoutItem, 'children'> & {
 };
 
 type Props = {
+  pageSize: Size;
   description?: string;
   onGenerate?: (generated: {
     description: string;
@@ -254,12 +255,22 @@ function renderLayoutNode(root: LayoutNode): ReactElement | null {
   );
 }
 
-function createPrompt(description: string, layout: LayoutNode) {
+function createPrompt(description: string, layout: LayoutNode, pageSize: Size) {
   function describeLayout(node: LayoutNode): string {
     const layoutItems = measureLayout(node);
 
+    const pageRect = (rect: Rect) => ({
+      x: rect.x * pageSize.width,
+      y: rect.y * pageSize.height,
+      width: rect.width * pageSize.width,
+      height: rect.height * pageSize.height,
+    });
+
     return layoutItems
-      .map((child, index) => `${index + 1}) ${child.name}`)
+      .map(
+        (child, index) =>
+          `${index + 1}) ${child.name} ${JSON.stringify(pageRect(child.rect))}`,
+      )
       .join('\n');
   }
 
@@ -288,6 +299,7 @@ function createPrompt(description: string, layout: LayoutNode) {
 }
 
 export const PageSetup = memo(function PageSetup({
+  pageSize,
   description: initialDescription,
   onGenerate,
 }: Props) {
@@ -327,7 +339,7 @@ export const PageSetup = memo(function PageSetup({
 
       if (!inputLayout) return;
 
-      const prompt = createPrompt(description, inputLayout);
+      const prompt = createPrompt(description, inputLayout, pageSize);
 
       console.info('Prompt: ' + prompt);
 
@@ -428,7 +440,7 @@ export const PageSetup = memo(function PageSetup({
     }
 
     main();
-  }, [client, description, layout, onGenerate]);
+  }, [client, description, layout, onGenerate, pageSize]);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
