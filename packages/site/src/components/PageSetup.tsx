@@ -20,11 +20,11 @@ import {
 } from 'noya-designsystem';
 import { Rect } from 'noya-geometry';
 import { RocketIcon } from 'noya-icons';
+import { upperFirst } from 'noya-utils';
 import React, {
   ReactElement,
   memo,
   useCallback,
-  useEffect,
   useReducer,
   useRef,
 } from 'react';
@@ -254,28 +254,22 @@ function renderLayoutNode(root: LayoutNode): ReactElement | null {
   );
 }
 
-function createPrompt(description: string) {
+function createPrompt(description: string, layout: LayoutNode) {
   function describeLayout(node: LayoutNode): string {
-    const items = LayoutHierarchy.flatMap<string>(node, (node) => {
-      if (typeof node === 'string' || node.children.length > 0) return [];
+    const layoutItems = measureLayout(node);
 
-      return [node.tag];
-    });
-
-    return `The "${node.tag}" layout:
-${items.map((child, index) => `${index + 1}) ${child}`).join('\n')}`;
+    return layoutItems
+      .map((child, index) => `${index + 1}) ${child.name}`)
+      .join('\n');
   }
 
   function createExampleResponse(node: LayoutNode): string {
     return JSON.stringify({
-      [node.tag]: {
-        [(node.children[0] as LayoutNode).tag]: [
-          'User Details Row',
-          'Navigation Menu',
-          'Search Bar',
-        ],
-        '...': '...',
-      },
+      [(node.children[0] as LayoutNode).tag]: [
+        'User Details Row',
+        'Navigation Menu',
+        'Search Bar',
+      ],
       '...': '...',
     });
   }
@@ -283,10 +277,10 @@ ${items.map((child, index) => `${index + 1}) ${child}`).join('\n')}`;
   const prompt = [
     `I'm creating a webpage with description:`,
     `\`\`\`\n${description}\n\`\`\``,
-    `I'm considering ${possibleLayouts.length} types of layouts.`,
-    ...possibleLayouts.map(describeLayout),
+    `My layout has the following areas:`,
+    describeLayout(layout),
     `Respond ONLY with a list 3 names of possible components that could fill the entire space of each layout area (for example, Navigation Bar with Logo is more likely to fill a top bar space than Logo), in JSON format, e.g. ${createExampleResponse(
-      possibleLayouts[0],
+      layout,
     )}`,
   ].join('\n\n');
 
@@ -329,7 +323,11 @@ export const PageSetup = memo(function PageSetup({
 
   const handleGenerate = useCallback(() => {
     async function main() {
-      const prompt = createPrompt(description);
+      const inputLayout = possibleLayouts.find((node) => node.tag === layout);
+
+      if (!inputLayout) return;
+
+      const prompt = createPrompt(description, inputLayout);
 
       console.info('Prompt: ' + prompt);
 
@@ -371,7 +369,7 @@ export const PageSetup = memo(function PageSetup({
 
       console.info('JSON', json);
 
-      const schema = z.record(z.record(z.array(z.string())));
+      const schema = z.record(z.array(z.string()));
       const parsed = schema.safeParse(json);
 
       // debugger;
@@ -387,33 +385,39 @@ export const PageSetup = memo(function PageSetup({
 
       if (!selectedLayout) return;
 
-      const componentNamesIndex = Object.keys(parsed.data).findIndex(
-        (key) => key.toLowerCase() === selectedLayout?.tag.toLowerCase(),
-      );
+      // const componentNamesIndex = Object.keys(parsed.data).findIndex(
+      //   (key) => key.toLowerCase() === selectedLayout?.tag.toLowerCase(),
+      // );
 
-      if (componentNamesIndex === -1) return;
+      // if (componentNamesIndex === -1) return;
 
-      const componentNamesMap = Object.values(parsed.data)[componentNamesIndex];
+      // const componentNamesMap = Object.values(parsed.data)[componentNamesIndex];
 
       // Convert keys to lowercase
-      const componentNamesMapLowercase = Object.fromEntries(
-        Object.entries(componentNamesMap).map(([key, value]) => [
-          key.toLowerCase(),
-          value,
-        ]),
-      );
+      const componentNamesMapLowercase: Record<string, string[]> =
+        Object.fromEntries(
+          Object.entries(parsed.data).map(([key, value]) => [
+            key.toLowerCase(),
+            value,
+          ]),
+        );
 
       const layoutItems = measureLayout(selectedLayout);
 
       // Assign component names
       for (let i = 0; i < layoutItems.length; i++) {
-        layoutItems[i].componentNames =
+        let names =
           componentNamesMapLowercase[layoutItems[i].name.toLowerCase()];
+
+        // Title case
+        names = names.map((name) => name.split(' ').map(upperFirst).join(' '));
+
+        layoutItems[i].componentNames = names;
       }
 
       console.info('Layout', {
         selectedLayout,
-        componentNamesMap,
+        componentNamesMapLowercase,
         layoutItems,
       });
 
@@ -425,12 +429,6 @@ export const PageSetup = memo(function PageSetup({
 
     main();
   }, [client, description, layout, onGenerate]);
-
-  useEffect(() => {
-    if (step !== 'generate') return;
-
-    handleGenerate();
-  }, [handleGenerate, step]);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -540,6 +538,10 @@ export const PageSetup = memo(function PageSetup({
               size="large"
               onClick={() => {
                 dispatch({ type: 'submit' });
+
+                if (step === 'layout') {
+                  handleGenerate();
+                }
               }}
             >
               Generate Template

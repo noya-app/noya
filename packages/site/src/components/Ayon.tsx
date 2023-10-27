@@ -395,6 +395,7 @@ function Workspace({
       <PageSetup
         description={''}
         onGenerate={({ description, layoutItems }) => {
+          onChangeName?.(description);
           dispatch('setPageLayout', description, layoutItems);
         }}
       />
