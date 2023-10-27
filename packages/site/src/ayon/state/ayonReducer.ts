@@ -414,9 +414,8 @@ export const ayonReducer: CustomReducer<AyonAction> = (
       if (!artboardIndexPath) return;
 
       const layers = layoutItems.map((item) => {
-        const componentName = item.componentNames[0] ?? item.name;
         const layer = SketchModel.customLayer<CustomLayerData>({
-          name: componentName,
+          name: '',
           frame: SketchModel.rect({
             x: item.rect.x * artboard.frame.width,
             y: item.rect.y * artboard.frame.height,
@@ -424,6 +423,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (
             height: item.rect.height * artboard.frame.height,
           }),
           data: {
+            suggestedNames: item.componentNames,
             // description: componentName,
             // node: primitiveElements
             //   .find((p) => p.id === boxSymbolId)
@@ -444,7 +444,12 @@ export const ayonReducer: CustomReducer<AyonAction> = (
       }
 
       state = produce(state, (draft) => {
-        draft.sketch.pages[pageIndex].name = description;
+        const artboard = Layers.access(
+          draft.sketch.pages[artboardIndexPath.pageIndex],
+          artboardIndexPath.indexPath,
+        );
+        artboard.name = description;
+
         draft.selectedLayerIds = [];
       });
 

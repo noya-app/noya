@@ -275,7 +275,12 @@ const DOMRendererContent = memo(
                                 Model.className('p-4'),
                               ],
                               children: [
-                                layer.data.description === undefined
+                                !layer.name
+                                  ? Model.primitiveElement({
+                                      componentID: boxSymbolId,
+                                      children: [],
+                                    })
+                                  : layer.data.description === undefined
                                   ? Model.primitiveElement({
                                       componentID: textSymbolId,
                                       children: [
@@ -323,7 +328,7 @@ const DOMRendererContent = memo(
                             <div
                               key={layer.do_objectID}
                               className={
-                                !layer.data.node
+                                layer.name && !layer.data.node
                                   ? 'noya-skeleton-shimmer'
                                   : undefined
                               }

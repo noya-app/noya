@@ -36,11 +36,12 @@ import { AppLayout } from './AppLayout';
 type MeasuredLayoutItem = {
   name: string;
   rect: Rect; // Percentage between 0 and 1
-  componentNames: string[];
   children: MeasuredLayoutItem[];
 };
 
-export type FlattenedLayoutItem = Omit<MeasuredLayoutItem, 'children'>;
+export type FlattenedLayoutItem = Omit<MeasuredLayoutItem, 'children'> & {
+  componentNames: string[];
+};
 
 type Props = {
   description?: string;
@@ -111,7 +112,132 @@ const possibleLayouts: LayoutNode[] = [
       ),
     ],
   ),
+  layoutNode(
+    'Left and Right Sidebar with Top Bar Layout',
+    { style: { ...layoutParentStyle, flexDirection: 'column' } },
+    [
+      layoutNode('Top Bar', {
+        style: { ...layoutNodeStyle, flex: '1' },
+      }),
+      layoutNode(
+        'Content',
+        { style: { ...layoutParentStyle, padding: '0', flex: '4' } },
+        [
+          layoutNode('Left Sidebar', {
+            style: { ...layoutNodeStyle, flex: '1' },
+          }),
+          layoutNode('Right Content Area', {
+            style: { ...layoutNodeStyle, flex: '3' },
+          }),
+          layoutNode('Right Sidebar', {
+            style: { ...layoutNodeStyle, flex: '1' },
+          }),
+        ],
+      ),
+    ],
+  ),
+  layoutNode(
+    'Vertical Stack Layout',
+    { style: { ...layoutParentStyle, flexDirection: 'column' } },
+    [
+      layoutNode('Top Content Area', {
+        style: { ...layoutNodeStyle, flex: '1' },
+      }),
+      layoutNode('Middle Content Area', {
+        style: { ...layoutNodeStyle, flex: '1' },
+      }),
+      layoutNode('Bottom Content Area', {
+        style: { ...layoutNodeStyle, flex: '1' },
+      }),
+    ],
+  ),
 ];
+
+const MeasuredHierarchy = withOptions<MeasuredLayoutItem>({
+  getChildren: (node) => node.children ?? [],
+});
+
+function measureLayout(root: LayoutNode) {
+  let measuredLayout = LayoutHierarchy.map<MeasuredLayoutItem>(
+    root,
+    (node, transformedChildren): MeasuredLayoutItem => {
+      if (typeof node === 'string') throw new Error('Impossible');
+
+      let direction =
+        node.attributes.style?.flexDirection === 'row'
+          ? 'horizontal'
+          : 'vertical';
+
+      // Adjust children dimensions by using their flex values
+      const flexValues = node.children.map((child) =>
+        parseInt((child as LayoutNode).attributes.style?.flex ?? '1'),
+      );
+
+      const properties =
+        direction === 'horizontal'
+          ? ({ size: 'width', offset: 'x' } as const)
+          : ({ size: 'height', offset: 'y' } as const);
+
+      for (let i = 0; i < transformedChildren.length; i++) {
+        const child = transformedChildren[i];
+
+        child.rect[properties.size] =
+          flexValues[i] / flexValues.reduce((a, b) => a + b, 0);
+
+        child.rect[properties.offset] = transformedChildren
+          .slice(0, i)
+          .reduce((a, b) => a + b.rect[properties.size], 0);
+      }
+
+      return {
+        name: node.tag,
+        rect: { x: 0, y: 0, width: 1, height: 1 },
+        children: transformedChildren,
+      };
+    },
+  );
+
+  // Adjust children size and offset according to parent
+  measuredLayout = MeasuredHierarchy.map<MeasuredLayoutItem>(
+    measuredLayout,
+    (node, transformedChildren) => {
+      const result = { ...node, children: transformedChildren };
+
+      const { rect } = node;
+
+      return MeasuredHierarchy.map(
+        result,
+        (node, transformedChildren, indexPath) => {
+          if (indexPath.length === 0) {
+            return { ...node, children: transformedChildren };
+          }
+
+          return {
+            ...node,
+            children: transformedChildren,
+            rect: {
+              x: node.rect.x + rect.x * node.rect.width,
+              y: node.rect.y + rect.y * node.rect.height,
+              width: rect.width * node.rect.width,
+              height: rect.height * node.rect.height,
+            },
+          };
+        },
+      );
+    },
+  );
+
+  const flattened = MeasuredHierarchy.flatMap<FlattenedLayoutItem>(
+    measuredLayout,
+    (node): FlattenedLayoutItem[] => {
+      const { children, ...rest } = node;
+      if (children.length > 0) return [];
+      return [{ ...rest, componentNames: [] }];
+    },
+  );
+
+  return flattened;
+}
 
 function renderLayoutNode(root: LayoutNode): ReactElement | null {
   return LayoutHierarchy.map<ReactElement | null>(
@@ -159,7 +285,7 @@ ${items.map((child, index) => `${index + 1}) ${child}`).join('\n')}`;
     `\`\`\`\n${description}\n\`\`\``,
     `I'm considering ${possibleLayouts.length} types of layouts.`,
     ...possibleLayouts.map(describeLayout),
-    `Respond ONLY with a list of 3 names of possible components that could go in each layout area, in JSON format, e.g. ${createExampleResponse(
+    `Respond ONLY with a list 3 names of possible components that could fill the entire space of each layout area (for example, Navigation Bar with Logo is more likely to fill a top bar space than Logo), in JSON format, e.g. ${createExampleResponse(
       possibleLayouts[0],
     )}`,
   ].join('\n\n');
@@ -269,106 +395,31 @@ export const PageSetup = memo(function PageSetup({
 
       const componentNamesMap = Object.values(parsed.data)[componentNamesIndex];
 
-      let measuredLayout = LayoutHierarchy.map<MeasuredLayoutItem>(
+      // Convert keys to lowercase
+      const componentNamesMapLowercase = Object.fromEntries(
+        Object.entries(componentNamesMap).map(([key, value]) => [
+          key.toLowerCase(),
+          value,
+        ]),
+      );
+
+      const layoutItems = measureLayout(selectedLayout);
+
+      // Assign component names
+      for (let i = 0; i < layoutItems.length; i++) {
+        layoutItems[i].componentNames =
+          componentNamesMapLowercase[layoutItems[i].name.toLowerCase()];
+      }
+
+      console.info('Layout', {
         selectedLayout,
-        (node, transformedChildren): MeasuredLayoutItem => {
-          if (typeof node === 'string') throw new Error('Impossible');
-
-          const names =
-            Object.entries(componentNamesMap).find(
-              ([key]) => key.toLowerCase() === node.tag.toLowerCase(),
-            )?.[1] ?? [];
-
-          let direction =
-            node.attributes.style?.flexDirection === 'row'
-              ? 'horizontal'
-              : 'vertical';
-
-          // Adjust children dimensions by using their flex values
-          const flexValues = node.children.map((child) =>
-            parseInt((child as LayoutNode).attributes.style?.flex ?? '1'),
-          );
-
-          const properties =
-            direction === 'horizontal'
-              ? ({ size: 'width', offset: 'x' } as const)
-              : ({ size: 'height', offset: 'y' } as const);
-
-          for (let i = 0; i < transformedChildren.length; i++) {
-            const child = transformedChildren[i];
-
-            child.rect[properties.size] =
-              flexValues[i] / flexValues.reduce((a, b) => a + b, 0);
-
-            child.rect[properties.offset] = transformedChildren
-              .slice(0, i)
-              .reduce((a, b) => a + b.rect[properties.size], 0);
-          }
-
-          return {
-            name: node.tag,
-            rect: { x: 0, y: 0, width: 1, height: 1 },
-            componentNames: names,
-            children: transformedChildren,
-          };
-        },
-      );
-
-      const MeasuredHierarchy = withOptions<MeasuredLayoutItem>({
-        getChildren: (node) => node.children ?? [],
+        componentNamesMap,
+        layoutItems,
       });
-
-      // Adjust children size and offset according to parent
-      measuredLayout = MeasuredHierarchy.map<MeasuredLayoutItem>(
-        measuredLayout,
-        (node, transformedChildren) => {
-          const result = { ...node, children: transformedChildren };
-
-          const { rect } = node;
-
-          return MeasuredHierarchy.map(
-            result,
-            (node, transformedChildren, indexPath) => {
-              if (indexPath.length === 0) {
-                return { ...node, children: transformedChildren };
-              }
-
-              return {
-                ...node,
-                children: transformedChildren,
-                rect: {
-                  x: node.rect.x + rect.x * node.rect.width,
-                  y: node.rect.y + rect.y * node.rect.height,
-                  width: rect.width * node.rect.width,
-                  height: rect.height * node.rect.height,
-                },
-              };
-            },
-          );
-        },
-      );
-
-      const flattened = MeasuredHierarchy.flatMap<FlattenedLayoutItem>(
-        measuredLayout,
-        (node): FlattenedLayoutItem[] => {
-          const { children, ...rest } = node;
-          if (children.length > 0) return [];
-          return [rest];
-        },
-      );
-
-      const selected = {
-        layout: selectedLayout,
-        componentNames: Object.values(parsed.data)[componentNamesIndex],
-        measuredLayout,
-        flattened,
-      };
-
-      console.info('Layout', selected);
 
       onGenerate?.({
         description,
-        layoutItems: selected.flattened,
+        layoutItems,
       });
     }
 

@@ -13,6 +13,7 @@ type ButtonVariant =
   | 'primary'
   | 'secondary'
   | 'secondaryBright'
+  | 'white'
   | 'thin'
   | 'floating'
   | 'none';
@@ -29,7 +30,7 @@ export const ButtonElement = styled.button<{
   size: ButtonSize;
   flex?: CSSProperties['flex'];
 }>(({ theme, active, disabled, variant, size, flex }) => ({
-  ...theme.textStyles.small,
+  ...(size === 'large' ? theme.textStyles.heading4 : theme.textStyles.small),
   textDecoration: 'none',
   lineHeight: '1',
   flex: flex ?? '0 0 auto',
@@ -88,9 +89,17 @@ export const ButtonElement = styled.button<{
     },
   }),
   ...(variant === 'secondaryBright' && {
-    ...theme.textStyles.heading4,
     background: '#0ab557',
     color: 'white',
+    '&:hover': {
+      opacity: 0.8,
+    },
+    '&:active': {
+      opacity: 0.9,
+    },
+  }),
+  ...(variant === 'white' && {
+    background: 'white',
     '&:hover': {
       opacity: 0.8,
     },

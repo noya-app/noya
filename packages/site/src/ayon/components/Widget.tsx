@@ -11,7 +11,7 @@ import {
   Stack,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { AffineTransform, Rect, transformRect } from 'noya-geometry';
+import { transformRect } from 'noya-geometry';
 import { ChevronDownIcon } from 'noya-icons';
 import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
@@ -24,6 +24,7 @@ import { Stacking } from '../stacking';
 import { imageSymbolId } from '../symbols/symbolIds';
 import { getAllInsertableSymbols } from '../symbols/symbols';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
+import { WidgetContainer } from './WidgetContainer';
 
 // function getElementRect(element: HTMLElement) {
 //   const style = window.getComputedStyle(element);
@@ -43,92 +44,6 @@ const ContentElement = styled.div(({ theme }) => ({
   boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
   color: theme.colors.textMuted,
 }));
-
-function WidgetContainer({
-  frame,
-  children,
-  transform,
-  zIndex,
-  footer,
-  label,
-}: {
-  frame: Rect;
-  children?: React.ReactNode;
-  transform?: AffineTransform;
-  zIndex?: number;
-  footer?: React.ReactNode;
-  label?: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        pointerEvents: 'none',
-        transform: transform?.toString(),
-        zIndex,
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          left: frame.x,
-          top: frame.y,
-          width: frame.width,
-          height: frame.height,
-          pointerEvents: 'none',
-        }}
-      >
-        {children}
-        {footer && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100%)',
-              right: 0,
-              pointerEvents: 'all',
-              cursor: 'default',
-              whiteSpace: 'pre',
-              display: 'flex',
-              transformOrigin: 'top right',
-              transform: AffineTransform.scale(
-                transform ? 1 / transform.scaleComponents.x : 1,
-                transform ? 1 / transform.scaleComponents.y : 1,
-              )
-                .translate(0, 6)
-                .toString(),
-            }}
-            onPointerDown={(event) => {
-              event.stopPropagation();
-            }}
-            onPointerMove={(event) => {
-              event.stopPropagation();
-            }}
-          >
-            {footer}
-          </div>
-        )}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            whiteSpace: 'pre',
-            display: 'flex',
-            transformOrigin: 'bottom right',
-            transform: AffineTransform.scale(
-              transform ? 1 / transform.scaleComponents.x : 1,
-              transform ? 1 / transform.scaleComponents.y : 1,
-            )
-              .translate(-8, -4)
-              .toString(),
-          }}
-        >
-          {label}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function BlockTypeOnboardingPopover({
   show,

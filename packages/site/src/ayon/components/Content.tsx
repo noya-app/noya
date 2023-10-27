@@ -12,7 +12,7 @@ import {
   SimpleCanvas,
   convertPoint,
 } from 'noya-canvas';
-import { DividerVertical, Stack, Toast } from 'noya-designsystem';
+import { DividerVertical, Stack } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
 import {
@@ -25,29 +25,19 @@ import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Selectors } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import { debounce } from 'noya-utils';
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { ElementHierarchy } from '../../dseditor/traversal';
 import { NoyaNode } from '../../dseditor/types';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
-import { Attribution } from '../resolve/RandomImageResolver';
-import { resolveLayer } from '../resolve/resolve';
 import { useAyonState } from '../state/ayonState';
 import { CustomLayerData, NodePath, ViewType } from '../types';
 import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
-import { AttributionCard } from './AttributionCard';
 import { DOMRenderer } from './DOMRenderer';
 import { useManagedLayouts } from './GeneratedLayoutContext';
+import { SuggestedNamesWidget } from './SuggestedNamesWidget';
 import { AyonInspector } from './inspector/AyonInspector';
 
 const Overlay = styled.div({
@@ -79,25 +69,20 @@ export const Content = memo(function Content({
   onChangeName?: (name: string) => void;
 }) {
   const client = useNoyaClientOrFallback();
-  const [toastData, setToastData] = useState<
-    { attribution: Attribution; key: string } | undefined
-  >();
-
-  const setToastDataDebounced = useMemo(() => debounce(setToastData, 300), []);
+  // const [toastData, setToastData] = useState<
+  //   { attribution: Attribution; key: string } | undefined
+  // >();
+  // const setToastDataDebounced = useMemo(() => debounce(setToastData, 300), []);
 
   const { canvasSize, startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useAyonState();
   const layers = Layers.flat(Selectors.getCurrentPage(state)).filter(
-    Layers.isSymbolInstance,
+    Layers.isCustomLayer<CustomLayerData>,
   );
   // const { onboardingStep, setOnboardingStep } = useOnboarding();
   const CanvasKit = useCanvasKit();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
-  const getSymbolMaster = useCallback(
-    (symbolId: string) => Selectors.getSymbolMaster(state, symbolId),
-    [state],
-  );
 
   const [overriddenBlock, setOverriddenBlock] = useDeepState<
     NoyaNode | undefined
@@ -318,48 +303,6 @@ export const Content = memo(function Content({
     });
   }, [client, customLayers, dispatch, layouts]);
 
-  useEffect(() => {
-    if (isPlayground) return;
-
-    const subscriptions = layers
-      .filter(Layers.isSymbolInstance)
-      .flatMap((layer) =>
-        resolveLayer({
-          layer,
-          getSymbolMaster,
-          onResolve: (resolved, attribution) => {
-            dispatch('setResolvedBlockData', layer.do_objectID, resolved);
-
-            if (attribution && resolved) {
-              setToastDataDebounced({
-                attribution,
-                key: resolved.resolvedText,
-              });
-            }
-          },
-          onResolveOverride: (overrideName, resolved, attribution) => {
-            dispatch(
-              'setOverrideValue',
-              [layer.do_objectID],
-              overrideName,
-              resolved,
-            );
-
-            if (attribution && resolved) {
-              setToastDataDebounced({
-                attribution,
-                key: resolved.resolvedText,
-              });
-            }
-          },
-        }),
-      );
-
-    return () => {
-      subscriptions.forEach((unsubscribe) => unsubscribe());
-    };
-  }, [dispatch, getSymbolMaster, isPlayground, layers, setToastDataDebounced]);
-
   const InteractiveRenderer =
     canvasRendererType === 'canvas' ? CanvasKitRenderer : SVGRenderer;
 
@@ -373,13 +316,13 @@ export const Content = memo(function Content({
 
   return (
     <>
-      {toastData && (
+      {/* {toastData && (
         <Toast
           key={toastData.key}
           title="Image loaded"
           content={<AttributionCard {...toastData.attribution} />}
         />
-      )}
+      )} */}
       <Stack.H
         flex="1"
         alignItems="stretch"
@@ -504,6 +447,28 @@ export const Content = memo(function Content({
                         }),
                         Interactions.defaultCursor,
                       ]
+                }
+                widgets={
+                  <>
+                    {layers
+                      .filter(Layers.isCustomLayer<CustomLayerData>)
+                      .filter(
+                        (layer) =>
+                          !layer.name &&
+                          !layer.data.description &&
+                          !layer.data.node &&
+                          layer.data.suggestedNames &&
+                          layer.data.suggestedNames.length > 0,
+                      )
+                      .map((layer) => {
+                        return (
+                          <SuggestedNamesWidget
+                            key={layer.do_objectID}
+                            layer={layer}
+                          />
+                        );
+                      })}
+                  </>
                 }
               />
             </FileDropTarget>

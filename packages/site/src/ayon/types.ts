@@ -25,6 +25,7 @@ export type CustomLayerData = {
   activeGenerationIndex?: number;
   layoutGenerationSource?: LayoutGenerationSource;
   preferredImageGenerator?: NoyaAPI.ImageGenerator;
+  suggestedNames?: string[];
 };
 
 export type NodePath = { path: string[]; layerId: string };
