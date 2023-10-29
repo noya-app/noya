@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { RelativeDropPosition } from 'noya-designsystem';
-import { withOptions } from 'tree-visit';
+import { defineTree } from 'tree-visit';
 import { applyArrayDiff, computeArrayDiff, mapArrayDiff } from './arrayDiff';
 import { Model } from './builders';
 import { ResolvedHierarchy } from './resolvedHierarchy';
@@ -20,7 +20,7 @@ import {
 } from './types';
 
 // Doesn't traverse into nested components
-export const ElementHierarchy = withOptions<NoyaNode>({
+export const ElementHierarchy = defineTree<NoyaNode>({
   getChildren: (node) => {
     switch (node.type) {
       case 'noyaString':
@@ -31,6 +31,7 @@ export const ElementHierarchy = withOptions<NoyaNode>({
         return node.children;
     }
   },
+}).withOptions({
   create: (node: NoyaNode, children: NoyaNode[], ip: number[]) => {
     switch (node.type) {
       case 'noyaString':

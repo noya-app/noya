@@ -8,7 +8,7 @@ import {
   InsertOptions,
   MoveOptions,
   RemoveOptions,
-  withOptions,
+  defineTree,
 } from 'tree-visit';
 import { Layers } from '../layer';
 import { PageLayer } from '../layers';
@@ -156,7 +156,7 @@ export const createOverrideHierarchy = (
           layerTextStyles: state.sketch.document.layerTextStyles,
         };
 
-  const Hierarchy = withOptions<Sketch.AnyLayer>({
+  const Hierarchy = defineTree<Sketch.AnyLayer>({
     getChildren: (layer) => {
       if (Layers.isSymbolInstance(layer)) {
         // console.log(

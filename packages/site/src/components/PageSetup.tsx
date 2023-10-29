@@ -28,7 +28,7 @@ import React, {
   useReducer,
   useRef,
 } from 'react';
-import { withOptions } from 'tree-visit';
+import { defineTree } from 'tree-visit';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { AppLayout } from './AppLayout';
@@ -154,7 +154,7 @@ const possibleLayouts: LayoutNode[] = [
   ),
 ];
 
-const MeasuredHierarchy = withOptions<MeasuredLayoutItem>({
+const MeasuredHierarchy = defineTree<MeasuredLayoutItem>({
   getChildren: (node) => node.children ?? [],
 });
 

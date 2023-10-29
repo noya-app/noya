@@ -20415,10 +20415,10 @@ tr46@~0.0.3:
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
 
-tree-visit@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/tree-visit/-/tree-visit-0.3.0.tgz#de5a1188265b8eb7e99b29d2ad3047060f39184b"
-  integrity sha512-EKBKbOxcndO7HGX6JC4M2jg734BpK7jnIJ6cATj51zVvDu6vTyxqDLfdT9SRqz1GA8OW2DED6eMcw6HmAsZYKA==
+tree-visit@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/tree-visit/-/tree-visit-0.4.0.tgz#d8b8fc95cee78cf0324a38dbeaf29fc34822e59c"
+  integrity sha512-CQWIlqNlNN8arNU5EulI1mjANPH6i06PZTnC4VuyFiSXC2nwYzviLrns/YFwrH5LD7elSLhfh+3Nlc/y0U2Zyg==
 
 treeverse@^3.0.0:
   version "3.0.0"

@@ -4,8 +4,8 @@ import {
   IndexPath,
   SKIP,
   STOP,
+  defineTree,
   visit as visitNode,
-  withOptions,
 } from 'tree-visit';
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
@@ -310,7 +310,7 @@ export const {
   map,
   remove,
   insert,
-} = withOptions<Sketch.AnyLayer>({
+} = defineTree<Sketch.AnyLayer>({
   getChildren,
 });
 
@@ -352,7 +352,7 @@ export const {
   visit: visitReversed,
   access: accessReversed,
   accessPath: accessPathReversed,
-} = withOptions<Sketch.AnyLayer>({
+} = defineTree<Sketch.AnyLayer>({
   getChildren: getChildrenReversed,
 });
 

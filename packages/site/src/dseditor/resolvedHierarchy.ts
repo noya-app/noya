@@ -1,8 +1,8 @@
 import { uuid } from 'noya-utils';
-import { withOptions } from 'tree-visit';
+import { defineTree } from 'tree-visit';
 import { NoyaResolvedNode } from './types';
 
-const Hierarchy = withOptions<NoyaResolvedNode>({
+const Hierarchy = defineTree<NoyaResolvedNode>({
   getChildren: (node) => {
     switch (node.type) {
       case 'noyaString':
@@ -13,6 +13,7 @@ const Hierarchy = withOptions<NoyaResolvedNode>({
         return node.children;
     }
   },
+}).withOptions({
   create: (node: NoyaResolvedNode, children: NoyaResolvedNode[]) => {
     switch (node.type) {
       case 'noyaString':

@@ -10,7 +10,7 @@ import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
 import React, { isValidElement } from 'react';
-import { flat, withOptions } from 'tree-visit';
+import { defineTree, flat } from 'tree-visit';
 import ts from 'typescript';
 import { LayoutNode, LayoutNodeAttributes } from './parseComponentLayout';
 import { removeEmptyStyles } from './removeEmptyStyles';
@@ -594,8 +594,9 @@ export function clean(text: string) {
 export * from './codesandbox';
 export * from './parseComponentLayout';
 
-export const LayoutHierarchy = withOptions<LayoutNode | string>({
+export const LayoutHierarchy = defineTree<LayoutNode | string>({
   getChildren: (node) => (typeof node === 'string' ? [] : node.children),
+}).withOptions({
   create: (node: LayoutNode | string, children: (LayoutNode | string)[]) => {
     return typeof node === 'string' ? node : { ...node, children };
   },
