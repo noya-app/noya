@@ -133,6 +133,7 @@ function isEmptyDiff(diff: NoyaDiffItem) {
     diff.name === undefined &&
     diff.componentID === undefined &&
     diff.textValue === undefined &&
+    !diff.props &&
     !diff.classNames &&
     !diff.children
   );
@@ -178,6 +179,14 @@ export function diffResolvedTrees(
 
     if (arrayDiff.length > 0) {
       currentItem.children = mapArrayDiff(arrayDiff, unresolve);
+    }
+
+    const propsDiff = computeArrayDiff(a.props, b.props, (item) =>
+      JSON.stringify(item),
+    );
+
+    if (propsDiff.length > 0) {
+      currentItem.props = propsDiff;
     }
   }
 
@@ -284,6 +293,10 @@ export function applyResolvedDiff(
                     ),
                   ),
                 );
+              }
+
+              if (item.props) {
+                newNode.props = applyArrayDiff(newNode.props, item.props);
               }
 
               if (item.classNames) {

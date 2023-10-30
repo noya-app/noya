@@ -273,6 +273,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
         title: 'Add Child',
         value: 'addChild',
       },
+      node.type === 'noyaCompositeElement' && {
+        title: 'Replace with Contents',
+        value: 'replaceWithContents',
+      },
       depth !== 0 &&
         parent.type === 'noyaPrimitiveElement' && {
           title: 'Duplicate',
@@ -318,6 +322,22 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const openInputDialog = useOpenInputDialog();
   const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
+      case 'replaceWithContents': {
+        if (node.type !== 'noyaCompositeElement') break;
+
+        const child = ResolvedHierarchy.clone(
+          createResolvedNode(findComponent, node.rootElement),
+        );
+
+        onChange(
+          ResolvedHierarchy.replace(resolvedNode, {
+            at: indexPath,
+            node: child,
+          }),
+        );
+
+        break;
+      }
       case 'replaceWithRawHtml': {
         const text = await openInputDialog('Paste Noya HTML');
         if (!text) return;

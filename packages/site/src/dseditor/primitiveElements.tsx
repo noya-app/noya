@@ -259,6 +259,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Tag',
     description: 'A tag with the text "Tag"',
     icon: <BadgeIcon />,
+    variants: ['solid', 'outline'],
     aliases: ['Badge', 'Chip'],
     schema: { children: 'stringOrNodes' },
     initialValue: () =>

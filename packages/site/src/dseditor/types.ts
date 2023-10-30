@@ -90,6 +90,7 @@ export type NoyaProp = NoyaStringProp | NoyaNumberProp | NoyaGeneratorProp;
 
 export type NoyaDiffItem = {
   path: string[];
+  props?: ArrayDiffItem<NoyaProp>[];
   classNames?: ArrayDiffItem<NoyaClassName>[];
   children?: ArrayDiffItem<NoyaNode>[];
   textValue?: string;
