@@ -277,9 +277,9 @@ function createPrompt(description: string, layout: LayoutNode, pageSize: Size) {
   function createExampleResponse(node: LayoutNode): string {
     return JSON.stringify({
       [(node.children[0] as LayoutNode).tag]: [
-        'User Details Row',
-        'Navigation Menu',
-        'Search Bar',
+        'Navigation Sidebar',
+        'Active Users List',
+        'Product Filters',
       ],
       '...': '...',
     });
@@ -290,7 +290,7 @@ function createPrompt(description: string, layout: LayoutNode, pageSize: Size) {
     `\`\`\`\n${description}\n\`\`\``,
     `My layout has the following areas:`,
     describeLayout(layout),
-    `Respond ONLY with a list 3 names of possible components that could fill the entire space of each layout area (for example, Navigation Bar with Logo is more likely to fill a top bar space than Logo), in JSON format, e.g. ${createExampleResponse(
+    `Respond ONLY with a list 3 names of possible components that could fill the entire space of each layout area (for example, "Navigation Bar with Logo" is more likely to fill a top bar space than "Logo", and it's okay to use compound names that have multiple parts, such as "Header Bar with Logo, Navigation Links, and Search"), in JSON format, e.g. ${createExampleResponse(
       layout,
     )}`,
   ].join('\n\n');
