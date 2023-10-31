@@ -2,6 +2,8 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useNoyaClient } from 'noya-api';
 import {
   Chip,
+  CompletionItem,
+  CompletionSectionHeader,
   InputField,
   InputFieldWithCompletions,
   RelativeDropPosition,
@@ -84,6 +86,7 @@ interface Props {
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
   onCreateComponent?: (component: NoyaComponent) => void;
+  components?: NoyaComponent[];
 }
 
 /**
@@ -96,6 +99,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   highlightedPath,
   setHighlightedPath,
   onCreateComponent,
+  components,
 }: Props) {
   const flattened = useMemo(
     () => flattenResolvedNode(resolvedNode),
@@ -198,6 +202,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           isEditing={editingId === key}
           setEditingId={setEditingId}
           onCreateComponent={onCreateComponent}
+          components={components}
         />
       )}
     />
@@ -211,11 +216,30 @@ function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
     case 'noyaPrimitiveElement':
       return node.name ?? PRIMITIVE_ELEMENT_NAMES[node.componentID];
     case 'noyaCompositeElement': {
+      if (node.name) return node.name;
+
+      const component = findComponent(node.componentID);
+
+      return component ? component.name : '<Component Not Found>';
+    }
+  }
+}
+
+function getComponentName(
+  node: NoyaResolvedNode,
+  findComponent: FindComponent,
+): string {
+  switch (node.type) {
+    case 'noyaString':
+      return 'String';
+    case 'noyaPrimitiveElement':
+      return PRIMITIVE_ELEMENT_NAMES[node.componentID];
+    case 'noyaCompositeElement': {
       const component = findComponent(node.componentID);
 
       if (!component) return '<Component Not Found>';
 
-      return node.name ?? component.name ?? '<No Name>';
+      return component.name ?? '<No Name>';
     }
   }
 }
@@ -235,6 +259,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isEditing,
   setEditingId,
   onCreateComponent,
+  components,
 }: {
   id: string;
   onChange: (resolvedNode: NoyaResolvedNode) => void;
@@ -250,7 +275,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isDragging: boolean;
   isEditing: boolean;
   setEditingId: (id: string | undefined) => void;
-} & Pick<Props, 'onCreateComponent'>) {
+} & Pick<Props, 'onCreateComponent' | 'components'>) {
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
@@ -461,6 +486,27 @@ export const DSLayoutRow = memo(function DSLayerRow({
     }
   };
 
+  const componentTypeItems = useMemo(
+    (): (CompletionItem | CompletionSectionHeader)[] => [
+      {
+        type: 'sectionHeader',
+        id: 'primitives',
+        name: 'Primitive Elements',
+      },
+      ...typeItems,
+      {
+        type: 'sectionHeader',
+        id: 'components',
+        name: 'Custom Components',
+      },
+      ...(components ?? []).map((c) => ({
+        id: c.componentID,
+        name: c.name,
+      })),
+    ],
+    [components],
+  );
+
   return (
     <TreeView.Row
       id={id}
@@ -519,25 +565,58 @@ export const DSLayoutRow = memo(function DSLayerRow({
           <InputFieldWithCompletions
             ref={typeSearchInputRef}
             placeholder={'Find component'}
-            items={typeItems}
+            items={componentTypeItems}
             onBlur={() => {
               setIsSearchingTypes(false);
             }}
             onSelectItem={(item) => {
               setIsSearchingTypes(false);
 
-              if (node.type !== 'noyaPrimitiveElement') return;
+              const component = findComponent(item.id);
+              const parentPath = node.path.slice(0, 1);
 
-              onChange(
-                ResolvedHierarchy.replace(resolvedNode, {
-                  at: indexPath,
-                  node: {
-                    ...cloneDeep(node),
-                    componentID: item.id,
-                    id: uuid(), // New id to flag as add/remove change
-                  },
-                }),
-              );
+              if (component) {
+                onChange(
+                  ResolvedHierarchy.replace(resolvedNode, {
+                    at: indexPath,
+                    node: createResolvedNode(
+                      findComponent,
+                      Model.compositeElement({
+                        componentID: item.id,
+                        name: node.name ?? item.name,
+                      }),
+                      parentPath,
+                    ),
+                  }),
+                );
+              } else {
+                if (node.type === 'noyaPrimitiveElement') {
+                  onChange(
+                    ResolvedHierarchy.replace(resolvedNode, {
+                      at: indexPath,
+                      node: {
+                        ...cloneDeep(node),
+                        componentID: item.id,
+                        id: uuid(), // New id to flag as add/remove change
+                      },
+                    }),
+                  );
+                } else {
+                  onChange(
+                    ResolvedHierarchy.replace(resolvedNode, {
+                      at: indexPath,
+                      node: createResolvedNode(
+                        findComponent,
+                        Model.primitiveElement({
+                          componentID: item.id,
+                          name: node.name ?? item.name,
+                        }),
+                        parentPath,
+                      ),
+                    }),
+                  );
+                }
+              }
             }}
             style={{
               zIndex: 1, // Focus outline should appear above chips
@@ -615,18 +694,17 @@ export const DSLayoutRow = memo(function DSLayerRow({
             ) : (
               <TreeView.RowTitle style={{ width: 0 }}>{name}</TreeView.RowTitle>
             )}
-            {node.type === 'noyaPrimitiveElement' ? (
-              <Chip
-                size="small"
-                variant={hovered ? 'outlined' : 'ghost'}
-                monospace
-                onClick={() => {
-                  setIsSearchingTypes(true);
-                }}
-              >
-                {PRIMITIVE_ELEMENT_NAMES[node.componentID]}
-              </Chip>
-            ) : node.type === 'noyaCompositeElement' && node.variantID ? (
+            <Chip
+              size="small"
+              variant={hovered ? 'outlined' : 'ghost'}
+              monospace
+              onClick={() => {
+                setIsSearchingTypes(true);
+              }}
+            >
+              {getComponentName(node, findComponent)}
+            </Chip>
+            {node.type === 'noyaCompositeElement' && node.variantID ? (
               <Text variant="code" fontSize="9px">
                 {findComponent(node.componentID)?.variants?.find(
                   (variant) => variant.id === node.variantID,

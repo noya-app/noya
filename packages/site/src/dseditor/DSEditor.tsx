@@ -278,6 +278,7 @@ export function DSEditor({
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}
           onCreateComponent={handleCreateComponent}
+          components={components}
         />
       )}
     </Stack.H>
