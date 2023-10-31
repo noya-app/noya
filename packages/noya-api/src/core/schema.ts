@@ -55,6 +55,11 @@ export type DS = {
   source: DSSource;
   config: DSConfig;
   components?: unknown[];
+  prompt?: {
+    inputDescription?: string;
+    pickComponent?: string;
+    populateTemplate?: string;
+  };
 };
 
 export const dsDataSchema = z.object({

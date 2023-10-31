@@ -1,6 +1,6 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { produce } from 'immer';
-import { DS } from 'noya-api';
+import { DS, asyncIterableToString, useNoyaClientOrFallback } from 'noya-api';
 import {
   Button,
   InputField,
@@ -15,10 +15,15 @@ import {
 } from 'noya-designsystem';
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
+import { uuid } from 'noya-utils';
 import React from 'react';
 import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
+import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSThemeInspector } from './DSThemeInspector';
+import { Model } from './builders';
+import { exportLayout, parseLayout } from './componentLayout';
+import { FindComponent, instantiateResolvedComponent } from './traversal';
 import { NoyaComponent } from './types';
 
 const designSystems = {
@@ -40,7 +45,20 @@ interface Props {
   onDeleteComponent: (componentID: string) => void;
   onSelectComponent: (componentID: string) => void;
   onMoveComponent: (componentID: string, index: number) => void;
+  findComponent: FindComponent;
 }
+
+const DEFAULT_PROMPTS = {
+  pickComponent: `Given this list of component: {{componentNames}}, pick the one that matches this description: {{inputDescription}}. Answer with ONLY the string name of the component.`,
+  populateTemplate: `I have the following JSX + tailwind v3 template snippet:
+
+\`\`\`jsx
+{{componentTemplate}}
+\`\`\`
+
+Update this template's content to match the component description: {{inputDescription}}. If the template contains a repeated elements, you may modify the number of elements. You may remove elements that aren't needed. Do not change the visual style of the component.`,
+  inputDescription: `Order History Sidebar`,
+};
 
 export function DSProjectInspector({
   name: fileName,
@@ -54,11 +72,124 @@ export function DSProjectInspector({
   onDeleteComponent,
   onSelectComponent,
   onMoveComponent,
+  findComponent,
 }: Props) {
+  const client = useNoyaClientOrFallback();
   const theme = useDesignSystemTheme();
   const {
     source: { name: sourceName },
   } = ds;
+
+  const createAIComponent = async () => {
+    const componentNames = components.map((c) => c.name);
+
+    function getComponentTemplateCode(componentName: string) {
+      const component = components.find(
+        (c) => c.name.toLowerCase() === componentName.toLowerCase(),
+      );
+
+      if (!component) {
+        console.error(`component not found: ${componentName}`);
+        return;
+      }
+
+      const resolvedNode = instantiateResolvedComponent(findComponent, {
+        componentID: component.componentID,
+      });
+
+      return exportLayout(resolvedNode);
+    }
+
+    function insertDataIntoTemplate(
+      template: string,
+      {
+        componentName,
+        inputDescription,
+      }: { componentName?: string; inputDescription?: string },
+    ) {
+      template = template.replace(
+        '{{componentNames}}',
+        componentNames.join(', '),
+      );
+      if (componentName) {
+        template = template.replace(
+          '{{componentTemplate}}',
+          getComponentTemplateCode(componentName) ?? '',
+        );
+      }
+      template = template.replace(
+        '{{inputDescription}}',
+        inputDescription ?? '',
+      );
+      return template;
+    }
+
+    console.info('component names', componentNames);
+    console.info(
+      'component template',
+      getComponentTemplateCode(components[0].name),
+    );
+
+    const pickComponentPrompt = insertDataIntoTemplate(
+      ds.prompt?.pickComponent || DEFAULT_PROMPTS.pickComponent,
+      {
+        inputDescription:
+          ds.prompt?.inputDescription || DEFAULT_PROMPTS.inputDescription,
+      },
+    );
+
+    console.info('pick component prompt', pickComponentPrompt);
+
+    const chooseComponentIterator =
+      await client.networkClient.generate.fromPrompt(pickComponentPrompt);
+
+    const chosenComponentName = await asyncIterableToString(
+      chooseComponentIterator,
+    );
+
+    console.info('chosen component name', chosenComponentName);
+
+    const component = components.find(
+      (c) => c.name.toLowerCase() === chosenComponentName.toLowerCase(),
+    );
+
+    if (!component) {
+      console.error(`component not found: ${chosenComponentName}`);
+      return;
+    }
+
+    const populateTemplatePrompt = insertDataIntoTemplate(
+      ds.prompt?.populateTemplate || DEFAULT_PROMPTS.populateTemplate,
+      {
+        componentName: chosenComponentName,
+        inputDescription:
+          ds.prompt?.inputDescription || DEFAULT_PROMPTS.inputDescription,
+      },
+    );
+
+    console.info('populate template prompt', populateTemplatePrompt);
+
+    const iterator = await client.networkClient.generate.fromPrompt(
+      populateTemplatePrompt,
+    );
+
+    const result = await asyncIterableToString(iterator);
+
+    console.info('result', result);
+
+    const noyaNode = parseLayout(result, 'geometric');
+    const newComponent = Model.component({
+      name: ds.prompt?.inputDescription ?? DEFAULT_PROMPTS.inputDescription,
+      componentID: uuid(),
+      rootElement: noyaNode,
+    });
+
+    setDS((state) =>
+      produce(state, (draft) => {
+        draft.components?.push(newComponent);
+      }),
+    );
+  };
 
   return (
     <Stack.V width="300px" background="white">
@@ -74,6 +205,56 @@ export function DSProjectInspector({
                 />
               </InputField.Root>
             </InspectorPrimitives.LabeledRow>
+          </InspectorSection>
+          <InspectorSection title="Prompt" titleTextStyle="heading4">
+            <InspectorPrimitives.LabeledRow label="Input Description">
+              <AutoResizingTextArea
+                value={
+                  ds.prompt?.inputDescription ||
+                  DEFAULT_PROMPTS.inputDescription
+                }
+                onChangeText={(prompt) =>
+                  setDS((state) =>
+                    produce(state, (draft) => {
+                      if (!draft.prompt) draft.prompt = {};
+                      draft.prompt.inputDescription = prompt;
+                    }),
+                  )
+                }
+              />
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Pick Component Prompt">
+              <AutoResizingTextArea
+                value={
+                  ds.prompt?.pickComponent || DEFAULT_PROMPTS.pickComponent
+                }
+                onChangeText={(prompt) =>
+                  setDS((state) =>
+                    produce(state, (draft) => {
+                      if (!draft.prompt) draft.prompt = {};
+                      draft.prompt.pickComponent = prompt;
+                    }),
+                  )
+                }
+              />
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Populate Template Prompt">
+              <AutoResizingTextArea
+                value={
+                  ds.prompt?.populateTemplate ||
+                  DEFAULT_PROMPTS.populateTemplate
+                }
+                onChangeText={(prompt) =>
+                  setDS((state) =>
+                    produce(state, (draft) => {
+                      if (!draft.prompt) draft.prompt = {};
+                      draft.prompt.populateTemplate = prompt;
+                    }),
+                  )
+                }
+              />
+            </InspectorPrimitives.LabeledRow>
+            <Button onClick={createAIComponent}>Create AI Component</Button>
           </InspectorSection>
           <InspectorSection title="Theme" titleTextStyle="heading4">
             <InspectorPrimitives.LabeledRow label="Base Library">

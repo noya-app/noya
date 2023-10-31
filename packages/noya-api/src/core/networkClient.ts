@@ -389,7 +389,7 @@ export class NoyaNetworkClient {
   #generateFromPrompt = async (
     prompt: string,
     options: {
-      rect?: Rect;
+      // rect?: Rect;
       abortSignal?: AbortSignal;
     } = {},
   ): Promise<AsyncIterable<string>> => {

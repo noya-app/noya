@@ -207,6 +207,7 @@ export function DSEditor({
       {viewType !== 'preview' && (
         <DSProjectInspector
           name={fileName}
+          findComponent={findComponent}
           onChangeName={onChangeName}
           system={system}
           ds={ds}
