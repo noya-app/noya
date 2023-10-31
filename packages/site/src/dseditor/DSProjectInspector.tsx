@@ -3,6 +3,7 @@ import { produce } from 'immer';
 import { DS, asyncIterableToString, useNoyaClientOrFallback } from 'noya-api';
 import {
   Button,
+  IconButton,
   InputField,
   ListView,
   RelativeDropPosition,
@@ -97,7 +98,7 @@ export function DSProjectInspector({
         componentID: component.componentID,
       });
 
-      return exportLayout(resolvedNode);
+      return exportLayout(resolvedNode, findComponent);
     }
 
     function insertDataIntoTemplate(
@@ -291,7 +292,11 @@ export function DSProjectInspector({
               }}
             />
           </InspectorSection>
-          <InspectorSection title="Components" titleTextStyle="heading4">
+          <InspectorSection
+            title="Components"
+            titleTextStyle="heading4"
+            right={<IconButton iconName="PlusIcon" onClick={onNewComponent} />}
+          >
             <ListView.Root
               variant="bare"
               sortable

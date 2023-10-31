@@ -98,7 +98,17 @@ export function DSEditor({
     });
 
     setComponents([...components, newComponent]);
+    setSelection({
+      componentID: newComponent.componentID,
+    });
   }, [components, setComponents]);
+
+  const handleCreateComponent = useCallback(
+    (component: NoyaComponent) => {
+      setComponents([...components, component]);
+    },
+    [components, setComponents],
+  );
 
   const handleDeleteComponent = useCallback(
     (componentID: string) => {
@@ -267,6 +277,7 @@ export function DSEditor({
           resolvedNode={resolvedNode}
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}
+          onCreateComponent={handleCreateComponent}
         />
       )}
     </Stack.H>

@@ -11,7 +11,7 @@ import { Model } from './builders';
 import { enforceSchema } from './layoutSchema';
 import { PRIMITIVE_ELEMENT_MAP, PRIMITIVE_TAG_MAP } from './primitiveElements';
 import { rewriteLayout } from './rewriteLayout';
-import { ElementHierarchy } from './traversal';
+import { ElementHierarchy, FindComponent } from './traversal';
 import { NoyaNode } from './types';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([
@@ -168,44 +168,57 @@ export function parseLayoutWithOptions(
   return enforceSchema(convertLayoutToComponent(layout, imageGenerator));
 }
 
-export function exportLayout(layout: NoyaNode): string {
-  const layoutNode = noyaNodeToLayoutNode(layout);
+export function exportLayout(
+  layout: NoyaNode,
+  findComponent: FindComponent,
+): string {
+  const layoutNode = noyaNodeToLayoutNode(layout, findComponent);
   return stringifyLayoutNode(layoutNode);
 }
 
-function noyaNodeToLayoutNode(layout: NoyaNode): string | LayoutNode {
+function noyaNodeToLayoutNode(
+  layout: NoyaNode,
+  findComponent: FindComponent,
+): string | LayoutNode {
   return ElementHierarchy.map<LayoutNode | string>(
     layout,
     (node, children): LayoutNode | string => {
-      if (node.type === 'noyaString') {
-        return node.value;
-      } else if (node.type === 'noyaPrimitiveElement') {
-        return {
-          tag: PRIMITIVE_ELEMENT_MAP[node.componentID].name,
-          attributes: {
-            ...(node.name && { name: node.name }),
-            ...Object.fromEntries(
-              node.props
-                .map((prop) => [
-                  prop.name,
-                  prop.type === 'string' ? prop.value : '',
-                ])
-                .filter(([_, value]) => value),
-            ),
-            ...(node.classNames.length > 0 && {
-              class: node.classNames
-                .map((className) => className.value)
-                .join(' '),
-            }),
-          },
-          children,
-        };
-      } else {
-        return {
-          tag: 'div',
-          attributes: {},
-          children,
-        };
+      switch (node.type) {
+        case 'noyaString':
+          return node.value;
+        case 'noyaPrimitiveElement':
+          return {
+            tag: PRIMITIVE_ELEMENT_MAP[node.componentID].name,
+            attributes: {
+              ...(node.name && { name: node.name }),
+              ...Object.fromEntries(
+                node.props
+                  .map((prop) => [
+                    prop.name,
+                    prop.type === 'string' ? prop.value : '',
+                  ])
+                  .filter(([_, value]) => value),
+              ),
+              ...(node.classNames.length > 0 && {
+                class: node.classNames
+                  .map((className) => className.value)
+                  .join(' '),
+              }),
+            },
+            children,
+          };
+        case 'noyaCompositeElement':
+          const component = findComponent(node.componentID);
+
+          if (!component) {
+            return {
+              tag: 'div',
+              attributes: {},
+              children,
+            };
+          }
+
+          return noyaNodeToLayoutNode(component.rootElement, findComponent);
       }
     },
   );

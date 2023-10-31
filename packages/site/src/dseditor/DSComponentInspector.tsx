@@ -35,6 +35,7 @@ interface Props {
   resolvedNode: NoyaResolvedNode;
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
+  onCreateComponent: (component: NoyaComponent) => void;
 }
 
 export function DSComponentInspector({
@@ -45,6 +46,7 @@ export function DSComponentInspector({
   resolvedNode,
   highlightedPath,
   setHighlightedPath,
+  onCreateComponent,
 }: Props) {
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
@@ -179,6 +181,7 @@ export function DSComponentInspector({
               setHighlightedPath={setHighlightedPath}
               highlightedPath={highlightedPath}
               resolvedNode={resolvedNode}
+              onCreateComponent={onCreateComponent}
             />
           </InspectorSection>
         </Stack.V>

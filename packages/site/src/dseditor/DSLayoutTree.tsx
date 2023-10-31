@@ -38,8 +38,13 @@ import {
 import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import { svgToReactElement } from './renderSVGElement';
 import { ResolvedHierarchy } from './resolvedHierarchy';
-import { FindComponent, createResolvedNode, handleMoveItem } from './traversal';
-import { NoyaPrimitiveElement, NoyaResolvedNode } from './types';
+import {
+  FindComponent,
+  createResolvedNode,
+  handleMoveItem,
+  unresolve,
+} from './traversal';
+import { NoyaComponent, NoyaPrimitiveElement, NoyaResolvedNode } from './types';
 
 type LayoutTreeItem = {
   depth: number;
@@ -78,6 +83,7 @@ interface Props {
   resolvedNode: NoyaResolvedNode;
   highlightedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
+  onCreateComponent?: (component: NoyaComponent) => void;
 }
 
 /**
@@ -89,6 +95,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   resolvedNode,
   highlightedPath,
   setHighlightedPath,
+  onCreateComponent,
 }: Props) {
   const flattened = useMemo(
     () => flattenResolvedNode(resolvedNode),
@@ -190,6 +197,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           isDragging={isDragging}
           isEditing={editingId === key}
           setEditingId={setEditingId}
+          onCreateComponent={onCreateComponent}
         />
       )}
     />
@@ -226,6 +234,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isDragging,
   isEditing,
   setEditingId,
+  onCreateComponent,
 }: {
   id: string;
   onChange: (resolvedNode: NoyaResolvedNode) => void;
@@ -241,7 +250,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isDragging: boolean;
   isEditing: boolean;
   setEditingId: (id: string | undefined) => void;
-}) {
+} & Pick<Props, 'onCreateComponent'>) {
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
@@ -273,10 +282,6 @@ export const DSLayoutRow = memo(function DSLayerRow({
         title: 'Add Child',
         value: 'addChild',
       },
-      node.type === 'noyaCompositeElement' && {
-        title: 'Replace with Contents',
-        value: 'replaceWithContents',
-      },
       depth !== 0 &&
         parent.type === 'noyaPrimitiveElement' && {
           title: 'Duplicate',
@@ -303,6 +308,16 @@ export const DSLayoutRow = memo(function DSLayerRow({
       },
     ],
     [
+      node.type === 'noyaCompositeElement' && {
+        title: 'Replace with Contents',
+        value: 'replaceWithContents',
+      },
+      {
+        title: 'Extract to New Component',
+        value: 'extractToComponent',
+      },
+    ],
+    [
       { title: 'Copy HTML to Clipboard', value: 'copyHtml' },
       {
         title: 'Replace with HTML...',
@@ -322,6 +337,39 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const openInputDialog = useOpenInputDialog();
   const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
+      case 'extractToComponent': {
+        const name = getName(node, findComponent);
+
+        const text = await openInputDialog('Component Name', name);
+
+        if (!text) return;
+
+        const newComponent = Model.component({
+          name: text,
+          componentID: uuid(),
+          rootElement: unresolve(node),
+        });
+
+        onCreateComponent?.(newComponent);
+
+        const instance = Model.compositeElement({
+          componentID: newComponent.componentID,
+        });
+
+        const findComponentPlusNewComponent: FindComponent = (componentID) =>
+          componentID === newComponent.componentID
+            ? newComponent
+            : findComponent(componentID);
+
+        onChange(
+          ResolvedHierarchy.replace(resolvedNode, {
+            at: indexPath,
+            node: createResolvedNode(findComponentPlusNewComponent, instance),
+          }),
+        );
+
+        break;
+      }
       case 'replaceWithContents': {
         if (node.type !== 'noyaCompositeElement') break;
 
@@ -355,7 +403,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
         break;
       }
       case 'copyHtml': {
-        navigator.clipboard.writeText(exportLayout(resolvedNode));
+        navigator.clipboard.writeText(
+          exportLayout(resolvedNode, findComponent),
+        );
         break;
       }
       case 'rename': {
