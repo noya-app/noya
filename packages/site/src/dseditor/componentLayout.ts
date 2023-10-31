@@ -10,9 +10,9 @@ import { createSeed } from '../ayon/utils/patterns';
 import { Model } from './builders';
 import { enforceSchema } from './layoutSchema';
 import { PRIMITIVE_ELEMENT_MAP, PRIMITIVE_TAG_MAP } from './primitiveElements';
+import { ResolvedHierarchy } from './resolvedHierarchy';
 import { rewriteLayout } from './rewriteLayout';
-import { ElementHierarchy, FindComponent } from './traversal';
-import { NoyaNode } from './types';
+import { NoyaNode, NoyaResolvedNode } from './types';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([
   'related',
@@ -168,19 +168,13 @@ export function parseLayoutWithOptions(
   return enforceSchema(convertLayoutToComponent(layout, imageGenerator));
 }
 
-export function exportLayout(
-  layout: NoyaNode,
-  findComponent: FindComponent,
-): string {
-  const layoutNode = noyaNodeToLayoutNode(layout, findComponent);
+export function exportLayout(layout: NoyaResolvedNode): string {
+  const layoutNode = noyaNodeToLayoutNode(layout);
   return stringifyLayoutNode(layoutNode);
 }
 
-function noyaNodeToLayoutNode(
-  layout: NoyaNode,
-  findComponent: FindComponent,
-): string | LayoutNode {
-  return ElementHierarchy.map<LayoutNode | string>(
+function noyaNodeToLayoutNode(layout: NoyaResolvedNode): string | LayoutNode {
+  return ResolvedHierarchy.map<LayoutNode | string>(
     layout,
     (node, children): LayoutNode | string => {
       switch (node.type) {
@@ -208,17 +202,7 @@ function noyaNodeToLayoutNode(
             children,
           };
         case 'noyaCompositeElement':
-          const component = findComponent(node.componentID);
-
-          if (!component) {
-            return {
-              tag: 'div',
-              attributes: {},
-              children,
-            };
-          }
-
-          return noyaNodeToLayoutNode(component.rootElement, findComponent);
+          return noyaNodeToLayoutNode(node.rootElement);
       }
     },
   );

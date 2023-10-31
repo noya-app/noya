@@ -403,9 +403,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
         break;
       }
       case 'copyHtml': {
-        navigator.clipboard.writeText(
-          exportLayout(resolvedNode, findComponent),
-        );
+        navigator.clipboard.writeText(exportLayout(resolvedNode));
         break;
       }
       case 'rename': {

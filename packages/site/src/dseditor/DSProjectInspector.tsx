@@ -98,7 +98,7 @@ export function DSProjectInspector({
         componentID: component.componentID,
       });
 
-      return exportLayout(resolvedNode, findComponent);
+      return exportLayout(resolvedNode);
     }
 
     function insertDataIntoTemplate(
