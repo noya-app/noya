@@ -4,6 +4,7 @@ import {
   Chip,
   CompletionItem,
   CompletionSectionHeader,
+  IconButton,
   InputField,
   InputFieldWithCompletions,
   RelativeDropPosition,
@@ -22,7 +23,7 @@ import {
   VercelLogoIcon,
 } from 'noya-icons';
 import { isDeepEqual, uuid } from 'noya-utils';
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { randomSeed } from '../ayon/utils/patterns';
@@ -54,29 +55,39 @@ type LayoutTreeItem = {
   key: string;
   node: NoyaResolvedNode;
   path: string[];
+  expanded?: boolean;
 };
 
-function flattenResolvedNode(resolvedNode: NoyaResolvedNode): LayoutTreeItem[] {
-  return ResolvedHierarchy.flatMap(
-    resolvedNode,
-    (node, indexPath): LayoutTreeItem[] => {
-      const depth = indexPath.length;
+function flattenResolvedNode(
+  resolvedNode: NoyaResolvedNode,
+  expanded: Record<string, boolean>,
+): LayoutTreeItem[] {
+  let result: LayoutTreeItem[] = [];
 
-      if (node.type === 'noyaString') return [];
+  ResolvedHierarchy.visit(resolvedNode, (node, indexPath) => {
+    const depth = indexPath.length;
 
-      const key = node.path.join('/');
+    if (node.type === 'noyaString') return;
 
-      return [
-        {
-          node,
-          depth,
-          indexPath: indexPath.slice(),
-          key,
-          path: node.path,
-        },
-      ];
-    },
-  );
+    const key = node.path.join('/');
+
+    const item = {
+      node,
+      depth,
+      indexPath: indexPath.slice(),
+      key,
+      path: node.path,
+      expanded: expanded[key] ?? node.type !== 'noyaCompositeElement',
+    };
+
+    result.push(item);
+
+    if (item.expanded === false) {
+      return 'skip';
+    }
+  });
+
+  return result;
 }
 
 interface Props {
@@ -101,9 +112,14 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   onCreateComponent,
   components,
 }: Props) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const handleSetExpanded = useCallback((id: string, expanded: boolean) => {
+    setExpanded((prev) => ({ ...prev, [id]: expanded }));
+  }, []);
+
   const flattened = useMemo(
-    () => flattenResolvedNode(resolvedNode),
-    [resolvedNode],
+    () => flattenResolvedNode(resolvedNode, expanded),
+    [expanded, resolvedNode],
   );
 
   const [editingId, setEditingId] = useState<string | undefined>();
@@ -182,13 +198,14 @@ export const DSLayoutTree = memo(function DSLayoutTree({
         onChange(updated);
       }}
       renderItem={(
-        { depth, key, indexPath, node, path },
+        { depth, key, indexPath, node, path, expanded },
         index,
         { isDragging },
       ) => (
         <DSLayoutRow
           id={key}
           key={key}
+          expanded={expanded}
           onChange={onChange}
           resolvedNode={resolvedNode}
           findComponent={findComponent}
@@ -203,6 +220,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           setEditingId={setEditingId}
           onCreateComponent={onCreateComponent}
           components={components}
+          onSetExpanded={handleSetExpanded}
         />
       )}
     />
@@ -260,6 +278,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
   setEditingId,
   onCreateComponent,
   components,
+  expanded,
+  onSetExpanded,
 }: {
   id: string;
   onChange: (resolvedNode: NoyaResolvedNode) => void;
@@ -275,6 +295,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
   isDragging: boolean;
   isEditing: boolean;
   setEditingId: (id: string | undefined) => void;
+  expanded?: boolean;
+  onSetExpanded: (id: string, expanded: boolean) => void;
 } & Pick<Props, 'onCreateComponent' | 'components'>) {
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
@@ -676,6 +698,15 @@ export const DSLayoutRow = memo(function DSLayerRow({
             zIndex={isEditing ? 1 : undefined}
             gap="4px"
           >
+            {node.type === 'noyaCompositeElement' && (
+              <IconButton
+                iconName={expanded ? 'CaretDownIcon' : 'CaretRightIcon'}
+                color={theme.colors.primary}
+                onClick={() => {
+                  onSetExpanded(id, !expanded);
+                }}
+              />
+            )}
             {isEditing ? (
               <TreeView.EditableRowTitle
                 value={name}
