@@ -81,7 +81,10 @@ export function handleMoveItem(
   return inner();
 }
 
-export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
+export function unresolve(
+  resolvedNode: NoyaResolvedNode,
+  diffParam: NoyaDiff = { items: [] },
+): NoyaNode {
   switch (resolvedNode.type) {
     case 'noyaString': {
       const { id, value, type, name } = resolvedNode;
@@ -104,7 +107,19 @@ export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
         type,
         componentID,
         variantID,
-        diff,
+        diff:
+          diffParam.items.length > 0
+            ? {
+                ...diff,
+                items: [
+                  ...(diff?.items ?? []),
+                  ...diffParam.items.map((item) => ({
+                    ...item,
+                    path: item.path.slice(1),
+                  })),
+                ],
+              }
+            : diff,
       };
 
       return node;
@@ -113,6 +128,10 @@ export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
       const { id, name, classNames, props, children, componentID, type } =
         resolvedNode;
 
+      const nestedDiffItems = diffParam.items
+        .filter((item) => item.path[0] === id)
+        .map((item) => ({ ...item, path: item.path.slice(1) }));
+
       const node: NoyaPrimitiveElement = {
         id,
         name,
@@ -120,7 +139,11 @@ export function unresolve(resolvedNode: NoyaResolvedNode): NoyaNode {
         componentID,
         props,
         classNames,
-        children: children.map((child) => unresolve(child)),
+        children: children.map((child) =>
+          unresolve(child, {
+            items: nestedDiffItems.filter((item) => item.path[0] === child.id),
+          }),
+        ),
       };
 
       return node;

@@ -9,11 +9,13 @@ import {
 } from 'noya-designsystem';
 import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
+import { isDeepEqual, partition } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSLayoutTree } from './DSLayoutTree';
 import { enforceSchema } from './layoutSchema';
+import { ResolvedHierarchy } from './resolvedHierarchy';
 import {
   FindComponent,
   diffResolvedTrees,
@@ -138,16 +140,43 @@ export function DSComponentInspector({
                         return;
                       }
 
+                      // Partition diff into nodes that apply to a primitive element and nodes that apply
+                      // to a composite element. If a diff path is within a composite element, that should
+                      // be applied to the composite element, not the primitive element.
+                      const [primitivesDiff, compositesDiff] = partition(
+                        selection.diff.items || [],
+                        (item) => {
+                          const indexPath = ResolvedHierarchy.findIndexPath(
+                            resolvedNode,
+                            (n) => isDeepEqual(n.path, item.path),
+                          );
+                          if (!indexPath) return false;
+                          const nodePath = ResolvedHierarchy.accessPath(
+                            resolvedNode,
+                            indexPath,
+                          );
+                          // Remove the root node which is the component itself
+                          const indexOfFirstComposite = nodePath
+                            .slice(1)
+                            .findIndex(
+                              (node) => node.type === 'noyaCompositeElement',
+                            );
+                          return indexOfFirstComposite === -1;
+                        },
+                      );
+
                       const instance = instantiateResolvedComponent(
                         findComponent,
                         {
                           componentID: selection.componentID,
                           variantID: selection.variantID,
-                          diff: selection.diff,
+                          diff: { items: primitivesDiff },
                         },
                       );
 
-                      const newRootElement = enforceSchema(unresolve(instance));
+                      const newRootElement = enforceSchema(
+                        unresolve(instance, { items: compositesDiff }),
+                      );
 
                       onChangeComponent({
                         ...component,
