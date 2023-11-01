@@ -1,8 +1,11 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { fileOpen } from 'browser-fs-access';
 import { produce } from 'immer';
 import { DS, asyncIterableToString, useNoyaClientOrFallback } from 'noya-api';
 import {
   Button,
+  DropdownMenu,
+  ExtractMenuItemType,
   IconButton,
   InputField,
   ListView,
@@ -12,6 +15,7 @@ import {
   Spacer,
   Stack,
   Text,
+  createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { ChevronDownIcon } from 'noya-icons';
@@ -21,6 +25,7 @@ import React from 'react';
 import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
+import { downloadBlob } from '../utils/download';
 import { DSThemeInspector } from './DSThemeInspector';
 import { Model } from './builders';
 import { exportLayout, parseLayout } from './componentLayout';
@@ -192,6 +197,50 @@ export function DSProjectInspector({
     );
   };
 
+  const componentsMenuItems = createSectionedMenu([
+    { value: 'export', title: 'Export All' },
+    { value: 'import', title: 'Import All...' },
+    {
+      value: 'importAndDelete',
+      title: 'Import All and Delete Existing...',
+    },
+  ]);
+
+  const handleSelectComponentsMenuItem = async (
+    value: ExtractMenuItemType<(typeof componentsMenuItems)[number]>,
+  ) => {
+    switch (value) {
+      case 'export': {
+        const data = JSON.stringify(components);
+        const file = new File([data], 'components.json', {
+          type: 'application/json',
+        });
+        downloadBlob(file);
+        break;
+      }
+      case 'importAndDelete':
+      case 'import': {
+        const file = await fileOpen({
+          extensions: ['.json'],
+          mimeTypes: ['application/json'],
+        });
+        if (file) {
+          const data = await file.text();
+          const components = JSON.parse(data);
+          setDS((state) =>
+            produce(state, (draft) => {
+              if (value === 'importAndDelete') {
+                draft.components = [];
+              }
+              draft.components = components;
+            }),
+          );
+        }
+        break;
+      }
+    }
+  };
+
   return (
     <Stack.V width="300px" background="white">
       <ScrollArea>
@@ -295,7 +344,18 @@ export function DSProjectInspector({
           <InspectorSection
             title="Components"
             titleTextStyle="heading4"
-            right={<IconButton iconName="PlusIcon" onClick={onNewComponent} />}
+            right={
+              <>
+                <IconButton iconName="PlusIcon" onClick={onNewComponent} />
+                <Spacer.Horizontal size={12} />
+                <DropdownMenu
+                  items={componentsMenuItems}
+                  onSelect={handleSelectComponentsMenuItem}
+                >
+                  <IconButton iconName="DotsVerticalIcon"></IconButton>
+                </DropdownMenu>
+              </>
+            }
           >
             <ListView.Root
               variant="bare"

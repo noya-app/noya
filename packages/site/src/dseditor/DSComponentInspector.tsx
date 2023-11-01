@@ -134,7 +134,12 @@ export function DSComponentInspector({
                   <Button
                     variant="primary"
                     onClick={() => {
-                      if (!selection.diff) return;
+                      if (
+                        !selection.diff ||
+                        selection.diff.items.length === 0
+                      ) {
+                        return;
+                      }
 
                       if (selection.variantID) {
                         // TODO: Merge variant and diff
