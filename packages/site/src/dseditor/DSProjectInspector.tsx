@@ -347,7 +347,7 @@ export function DSProjectInspector({
             right={
               <>
                 <IconButton iconName="PlusIcon" onClick={onNewComponent} />
-                <Spacer.Horizontal size={12} />
+                <Spacer.Horizontal size={8} />
                 <DropdownMenu
                   items={componentsMenuItems}
                   onSelect={handleSelectComponentsMenuItem}

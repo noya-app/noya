@@ -1,5 +1,11 @@
 import * as Icons from 'noya-icons';
-import React, { ForwardedRef, forwardRef, memo } from 'react';
+import React, {
+  CSSProperties,
+  ForwardedRef,
+  forwardRef,
+  memo,
+  useMemo,
+} from 'react';
 import { useTheme } from 'styled-components';
 import { Button, ButtonRootProps } from './Button';
 
@@ -12,7 +18,7 @@ type Props = Omit<ButtonRootProps, 'children' | 'variant' | 'flex' | 'size'> & {
 
 export const IconButton = memo(
   forwardRef(function IconButton(
-    { selected, iconName, color, size, ...props }: Props,
+    { selected, iconName, color, size, contentStyle, ...props }: Props,
     forwardedRef: ForwardedRef<HTMLButtonElement>,
   ) {
     const { icon: iconColor, iconSelected: iconSelectedColor } =
@@ -20,15 +26,16 @@ export const IconButton = memo(
 
     const Icon = Icons[iconName];
 
+    const style = useMemo((): CSSProperties => {
+      return {
+        padding: '0 2px',
+        ...(size && { minHeight: size }),
+        ...contentStyle,
+      };
+    }, [contentStyle, size]);
+
     return (
-      <Button
-        ref={forwardedRef}
-        {...props}
-        variant="none"
-        {...(size && {
-          contentStyle: { minHeight: size },
-        })}
-      >
+      <Button ref={forwardedRef} {...props} variant="none" contentStyle={style}>
         <Icon
           color={color ?? (selected ? iconSelectedColor : iconColor)}
           {...(size && { width: size, height: size })}

@@ -228,10 +228,10 @@ const LayerRow = memo(
                   onClick={handleSetHidden}
                 />
               ) : isLocked ? (
-                <Spacer.Horizontal size={15} />
+                <Spacer.Horizontal size={19} />
               ) : null,
             ],
-            <Spacer.Horizontal size={8} />,
+            <Spacer.Horizontal size={4} />,
           )
         )}
       </TreeView.Row>

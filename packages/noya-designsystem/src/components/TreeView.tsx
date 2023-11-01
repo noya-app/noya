@@ -48,7 +48,7 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
       {expandable && (
         <>
           {expanded === undefined ? (
-            <Spacer.Horizontal size={15} />
+            <Spacer.Horizontal size={19} />
           ) : (
             <IconButton
               iconName={expanded ? 'ChevronDownIcon' : 'ChevronRightIcon'}

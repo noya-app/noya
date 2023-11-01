@@ -131,7 +131,7 @@ export const ArrayController = memo(function ArrayController<Item>({
               />
             ),
           ],
-          <Spacer.Horizontal size={12} />,
+          <Spacer.Horizontal size={8} />,
         )}
       </InspectorPrimitives.SectionHeader>
       {sortable ? (
