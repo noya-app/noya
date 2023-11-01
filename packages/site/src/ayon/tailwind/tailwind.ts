@@ -603,7 +603,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       };
     }
     case 'lineHeight': {
-      const value = getValue(className);
+      const [, value] = className.split('-');
       return {
         lineHeight: (config.theme as any).lineHeight[value || 'DEFAULT'],
       };

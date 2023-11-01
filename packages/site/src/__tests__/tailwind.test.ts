@@ -247,6 +247,20 @@ describe('resolves styles', () => {
       maxHeight: '100%',
     });
   });
+
+  it('lineHeight', () => {
+    expect(resolveTailwindClass('leading-4')).toEqual({
+      lineHeight: '1rem',
+    });
+
+    expect(resolveTailwindClass('leading-none')).toEqual({
+      lineHeight: '1',
+    });
+
+    expect(resolveTailwindClass('leading-relaxed')).toEqual({
+      lineHeight: '1.625',
+    });
+  });
 });
 
 describe('parameters', () => {
