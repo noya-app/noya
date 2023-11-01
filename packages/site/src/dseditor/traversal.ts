@@ -99,14 +99,14 @@ export function unresolve(
       return node;
     }
     case 'noyaCompositeElement': {
-      const { id, name, type, componentID, diff, variantID } = resolvedNode;
+      const { id, name, type, componentID, diff, variantNames } = resolvedNode;
 
       const node: NoyaCompositeElement = {
         id,
         name,
         type,
         componentID,
-        variantID,
+        variantNames,
         diff:
           diffParam.items.length > 0
             ? {
@@ -377,14 +377,14 @@ export function createResolvedNode(
         level - 1,
       );
 
-      if (node.variantID) {
+      for (let variantName of node.variantNames ?? []) {
         const variant = component.variants?.find(
-          (variant) => variant.id === node.variantID,
+          (variant) => variant.id === variantName.variantID,
         );
 
         if (!variant) {
           console.info(
-            `Failed to resolve variant ${node.variantID} for component ${component.name}`,
+            `Failed to resolve variant ${variantName.variantID} for component ${component.name}`,
           );
         }
 
@@ -425,7 +425,9 @@ export function instantiateResolvedComponent(
   const instance = Model.compositeElement({
     id: 'root',
     componentID: selection.componentID,
-    variantID: selection.variantID,
+    ...(selection.variantID && {
+      variantNames: [Model.variantName(selection.variantID)],
+    }),
     diff: selection.diff,
   });
 

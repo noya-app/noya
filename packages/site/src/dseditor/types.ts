@@ -34,7 +34,7 @@ export type NoyaCompositeElement = NoyaElementBase & {
   type: 'noyaCompositeElement';
   // Props
   diff?: NoyaDiff;
-  variantID?: string;
+  variantNames?: NoyaVariantName[];
 };
 
 export type NoyaNode = NoyaElement | NoyaString;
@@ -64,6 +64,10 @@ export type NoyaResolvedString = NoyaString & {
 export type NoyaClassName = {
   id: string;
   value: string;
+};
+export type NoyaVariantName = {
+  id: string;
+  variantID: string;
 };
 export type NoyaStringProp = {
   type: 'string';

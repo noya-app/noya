@@ -9,7 +9,6 @@ import {
   InputFieldWithCompletions,
   RelativeDropPosition,
   Stack,
-  Text,
   TreeView,
   createSectionedMenu,
   useDesignSystemTheme,
@@ -567,7 +566,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
         gap="2px"
         border={
           node.type === 'noyaCompositeElement'
-            ? undefined
+            ? `1px solid transparent`
             : `1px solid ${theme.colors.divider}`
         }
         background={
@@ -705,6 +704,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 onClick={() => {
                   onSetExpanded(id, !expanded);
                 }}
+                contentStyle={{
+                  marginLeft: '-2px',
+                }}
               />
             )}
             {isEditing ? (
@@ -735,15 +737,47 @@ export const DSLayoutRow = memo(function DSLayerRow({
             >
               {getComponentName(node, findComponent)}
             </Chip>
-            {node.type === 'noyaCompositeElement' && node.variantID ? (
-              <Text variant="code" fontSize="9px">
-                {findComponent(node.componentID)?.variants?.find(
-                  (variant) => variant.id === node.variantID,
-                )?.name ?? 'Default'}
-              </Text>
-            ) : null}
           </Stack.H>
         )}
+        {node.type === 'noyaCompositeElement' &&
+          (findComponent(node.componentID)?.variants?.length ?? 0) > 0 && (
+            <Stack.H flexWrap="wrap" gap="2px" margin={'-2px 0 0 0'}>
+              {node.variantNames?.map(({ variantID, id }) => {
+                return (
+                  <Chip
+                    key={id}
+                    size={'small'}
+                    monospace
+                    deletable
+                    style={{
+                      color: theme.colors.primary,
+                      background: 'rgb(226, 211, 255)',
+                    }}
+                  >
+                    {findComponent(node.componentID)?.variants?.find(
+                      (variant) => variant.id === variantID,
+                    )?.name ?? 'Default'}
+                  </Chip>
+                );
+              })}
+              <Chip
+                size={'small'}
+                addable
+                monospace
+                style={{
+                  color: theme.colors.primary,
+                  background: 'rgb(226, 211, 255)',
+                }}
+                // onAdd={() => {
+                //   if (isSearchingStyles) {
+                //     setIsSearchingStyles(false);
+                //   } else {
+                //     setIsSearchingStyles(true);
+                //   }
+                // }}
+              />
+            </Stack.H>
+          )}
         {node.type === 'noyaPrimitiveElement' && (
           <Stack.H flexWrap="wrap" gap="2px" margin={'-2px 0 0 0'}>
             {node.classNames.map(({ value, id }) => {

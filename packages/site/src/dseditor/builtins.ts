@@ -97,7 +97,7 @@ export const initialComponents: NoyaComponent[] = [
         Model.compositeElement({
           id: '1',
           componentID: sidebarItemSymbolId,
-          variantID: sidebarItemActiveVariantId,
+          variantNames: [Model.variantName(sidebarItemActiveVariantId)],
         }),
         Model.compositeElement({
           id: '2',

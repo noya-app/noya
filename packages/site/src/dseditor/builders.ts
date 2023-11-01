@@ -12,6 +12,7 @@ import {
   NoyaString,
   NoyaStringProp,
   NoyaVariant,
+  NoyaVariantName,
 } from './types';
 
 type ModelOptions<T> = Partial<Omit<T, 'type'>>;
@@ -126,6 +127,21 @@ function noyaClassName(
   };
 }
 
+function noyaVariantName(
+  options:
+    | (ModelOptions<NoyaVariantName> & Pick<NoyaVariantName, 'variantID'>)
+    | string,
+): NoyaVariantName {
+  if (typeof options === 'string') {
+    options = { variantID: options };
+  }
+
+  return {
+    ...options,
+    id: options.id ?? uuid(),
+  };
+}
+
 function noyaClassNames(
   options: Parameters<typeof noyaClassName>[0][],
 ): NoyaClassName[] {
@@ -172,6 +188,7 @@ export namespace Model {
   export const variant = noyaVariant;
   export const diffItem = noyaDiffItem;
   export const diff = noyaDiff;
+  export const variantName = noyaVariantName;
   export const className = noyaClassName;
   export const classNames = noyaClassNames;
   export const stringProp = noyaStringProp;
