@@ -291,6 +291,44 @@ Props) {
                             ))}
                           </Stack.H>
                         )}
+                        {item.children && item.children.length > 0 && (
+                          <Stack.H flexWrap="wrap" gap="8px">
+                            <Text variant="code">children: </Text>
+                            {item.children.map((arrayDiffItem, j) => (
+                              <Text variant="code">
+                                {describeDiffItem(
+                                  arrayDiffItem,
+                                  (child) => child.name || child.id,
+                                )}
+                              </Text>
+                            ))}
+                          </Stack.H>
+                        )}
+                        {item.name && (
+                          <Stack.H flexWrap="wrap" gap="8px">
+                            <Text variant="code">name: </Text>
+                            <Text variant="code">{item.name}</Text>
+                          </Stack.H>
+                        )}
+                        {item.textValue && (
+                          <Stack.H flexWrap="wrap" gap="8px">
+                            <Text variant="code">textValue: </Text>
+                            <Text variant="code">{item.textValue}</Text>
+                          </Stack.H>
+                        )}
+                        {item.props && item.props.length > 0 && (
+                          <Stack.H flexWrap="wrap" gap="8px">
+                            <Text variant="code">props: </Text>
+                            {item.props.map((arrayDiffItem, j) => (
+                              <Text variant="code">
+                                {describeDiffItem(
+                                  arrayDiffItem,
+                                  (prop) => prop.name,
+                                )}
+                              </Text>
+                            ))}
+                          </Stack.H>
+                        )}
                       </Stack.V>
                     </ListView.Row>
                   ))}
