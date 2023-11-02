@@ -258,7 +258,7 @@ export const initialComponents: NoyaComponent[] = [
     name: 'Hero with Image',
     componentID: heroWithImageSymbolId,
     rootElement: Model.primitiveElement({
-      id: 'root',
+      id: 'hwiroot',
       name: 'Root',
       componentID: boxSymbolId,
       classNames: Model.classNames([

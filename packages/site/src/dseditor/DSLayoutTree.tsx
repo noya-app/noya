@@ -287,6 +287,15 @@ export const DSLayoutRow = memo(function DSLayerRow({
     }
   }, [isSearchingTypes]);
 
+  const variantInputRef = React.useRef<HTMLInputElement>(null);
+  const [isSearchingVariants, setIsSearchingVariants] = React.useState(false);
+
+  useEffect(() => {
+    if (isSearchingVariants) {
+      variantInputRef.current?.focus();
+    }
+  }, [isSearchingVariants]);
+
   const menu = createSectionedMenu(
     [
       node.type === 'noyaPrimitiveElement' && {
@@ -610,6 +619,42 @@ export const DSLayoutRow = memo(function DSLayerRow({
               background: 'transparent',
             }}
           />
+        ) : isSearchingVariants && node.type === 'noyaCompositeElement' ? (
+          <InputFieldWithCompletions
+            ref={variantInputRef}
+            placeholder={'Find variant'}
+            items={
+              findComponent(node.componentID)?.variants?.map(
+                (variant): CompletionItem => ({
+                  id: variant.id,
+                  name: variant.name || '',
+                }),
+              ) ?? []
+            }
+            onBlur={() => {
+              setIsSearchingVariants(false);
+            }}
+            onSelectItem={(item) => {
+              setIsSearchingVariants(false);
+
+              onChange(
+                ResolvedHierarchy.replace(resolvedNode, {
+                  at: indexPath,
+                  node: {
+                    ...cloneDeep(node),
+                    variantNames: [
+                      ...(node.variantNames ?? []),
+                      Model.variantName(item.id),
+                    ],
+                  },
+                }),
+              );
+            }}
+            style={{
+              zIndex: 1, // Focus outline should appear above chips
+              background: 'transparent',
+            }}
+          />
         ) : isSearchingStyles ? (
           <InputFieldWithCompletions
             ref={styleSearchInputRef}
@@ -719,6 +764,19 @@ export const DSLayoutRow = memo(function DSLayerRow({
                       color: theme.colors.primary,
                       background: 'rgb(226, 211, 255)',
                     }}
+                    onDelete={() => {
+                      onChange(
+                        ResolvedHierarchy.replace(resolvedNode, {
+                          at: indexPath,
+                          node: {
+                            ...node,
+                            variantNames: node.variantNames?.filter(
+                              (variantName) => variantName.id !== id,
+                            ),
+                          },
+                        }),
+                      );
+                    }}
                   >
                     {findComponent(node.componentID)?.variants?.find(
                       (variant) => variant.id === variantID,
@@ -734,13 +792,13 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   color: theme.colors.primary,
                   background: 'rgb(226, 211, 255)',
                 }}
-                // onAdd={() => {
-                //   if (isSearchingStyles) {
-                //     setIsSearchingStyles(false);
-                //   } else {
-                //     setIsSearchingStyles(true);
-                //   }
-                // }}
+                onAdd={() => {
+                  if (isSearchingVariants) {
+                    setIsSearchingVariants(false);
+                  } else {
+                    setIsSearchingVariants(true);
+                  }
+                }}
               />
             </Stack.H>
           )}

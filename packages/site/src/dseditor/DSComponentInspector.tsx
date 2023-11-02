@@ -15,7 +15,6 @@ import {
 } from 'noya-designsystem';
 import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
-import { isDeepEqual, partition } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
@@ -32,12 +31,14 @@ import {
 } from './traversal';
 import {
   NoyaComponent,
+  NoyaDiffItem,
   NoyaNode,
   NoyaResolvedNode,
   NoyaVariant,
   SelectedComponent,
 } from './types';
 import { getNodeName } from './utils/nodeUtils';
+import { partitionDiff } from './utils/partitionDiff';
 
 interface Props {
   selection: SelectedComponent;
@@ -76,17 +77,40 @@ Props) {
     [component.variants],
   );
 
-  const activeDiff = selection.diff;
+  type DiffItemWithSource = NoyaDiffItem & { source: 'current' | 'variant' };
+
+  const allDiffItems = useMemo((): DiffItemWithSource[] => {
+    const variant = component.variants?.find(
+      (variant) => variant.id === selection.variantID,
+    );
+
+    const variantDiffItems =
+      variant?.diff?.items.map(
+        (item): DiffItemWithSource => ({ ...item, source: 'variant' }),
+      ) ?? [];
+
+    const currentDiffItems =
+      selection.diff?.items.map(
+        (item): DiffItemWithSource => ({ ...item, source: 'current' }),
+      ) ?? [];
+
+    return [...variantDiffItems, ...currentDiffItems];
+  }, [component.variants, selection.diff, selection.variantID]);
 
   const metadataMap = useMemo(() => {
     return ResolvedHierarchy.reduce<
-      Record<string, { name: string; type: NoyaNode['type'] }>
+      Record<
+        string,
+        { name: string; type: NoyaNode['type']; componentID?: string }
+      >
     >(
       resolvedNode,
       (result, node) => {
         result[node.id] = {
           name: getNodeName(node, findComponent),
           type: node.type,
+          componentID:
+            node.type !== 'noyaString' ? node.componentID : undefined,
         };
         return result;
       },
@@ -177,34 +201,45 @@ Props) {
                       if (!selection.diff) return;
 
                       if (selection.variantID) {
-                        // TODO: Merge variant and diff
-                        alert('Not implemented');
+                        // Merge the diff into the variant's diff
+                        const variant = component.variants?.find(
+                          (variant) => variant.id === selection.variantID,
+                        );
+
+                        if (!variant) return;
+
+                        const newVariant = {
+                          ...variant,
+                          diff: {
+                            items: [
+                              ...(variant.diff?.items ?? []),
+                              ...selection.diff.items,
+                            ],
+                          },
+                        };
+
+                        onChangeComponent({
+                          ...component,
+                          variants: component.variants?.map((variant) =>
+                            variant.id === selection.variantID
+                              ? newVariant
+                              : variant,
+                          ),
+                        });
+
+                        setSelection({
+                          ...selection,
+                          diff: undefined,
+                        });
+
                         return;
                       }
 
-                      // Partition diff into nodes that apply to a primitive element and nodes that apply
-                      // to a composite element. If a diff path is within a composite element, that should
-                      // be applied to the composite element, not the primitive element.
-                      const [primitivesDiff, compositesDiff] = partition(
+                      debugger;
+
+                      const [primitivesDiff, compositesDiff] = partitionDiff(
+                        resolvedNode,
                         selection.diff.items || [],
-                        (item) => {
-                          const indexPath = ResolvedHierarchy.findIndexPath(
-                            resolvedNode,
-                            (n) => isDeepEqual(n.path, item.path),
-                          );
-                          if (!indexPath) return false;
-                          const nodePath = ResolvedHierarchy.accessPath(
-                            resolvedNode,
-                            indexPath,
-                          );
-                          // Remove the root node which is the component itself
-                          const indexOfFirstComposite = nodePath
-                            .slice(1)
-                            .findIndex(
-                              (node) => node.type === 'noyaCompositeElement',
-                            );
-                          return indexOfFirstComposite === -1;
-                        },
                       );
 
                       const instance = instantiateResolvedComponent(
@@ -257,11 +292,11 @@ Props) {
             />
           </InspectorSection>
         </Stack.V>
-        {activeDiff && (
+        {allDiffItems.length > 0 && (
           <InspectorSection title="Diff" titleTextStyle="heading4">
             <Stack.V>
               <ListView.Root variant="bare" gap={4}>
-                {activeDiff.items.map((item, i, list) => (
+                {allDiffItems.map((item, i) => (
                   <ListView.Row key={i}>
                     <Stack.V
                       border={`1px solid ${theme.colors.divider}`}
@@ -270,6 +305,11 @@ Props) {
                       flex="1"
                       borderRadius="4px"
                       separator={<Divider />}
+                      background={
+                        item.source === 'variant'
+                          ? 'rgb(238, 229, 255)'
+                          : 'transparent'
+                      }
                     >
                       <Stack.H alignItems="center">
                         {withSeparatorElements(
@@ -295,9 +335,10 @@ Props) {
                             setSelection({
                               ...selection,
                               diff: {
-                                items: activeDiff.items.filter(
-                                  (item, j) => j !== i,
-                                ),
+                                // items: activeDiff.items.filter(
+                                //   (item, j) => j !== i,
+                                // ),
+                                items: [],
                               },
                             });
                           }}
@@ -307,10 +348,29 @@ Props) {
                         <Stack.H flexWrap="wrap" gap="8px">
                           <Text variant="code">classes: </Text>
                           {item.classNames.map((arrayDiffItem, j) => (
-                            <Text variant="code">
+                            <Text key={j} variant="code">
                               {describeDiffItem(
                                 arrayDiffItem,
                                 (className) => className.value,
+                              )}
+                            </Text>
+                          ))}
+                        </Stack.H>
+                      )}
+                      {item.variantNames && item.variantNames.length > 0 && (
+                        <Stack.H flexWrap="wrap" gap="8px">
+                          <Text variant="code">variants: </Text>
+                          {item.variantNames.map((arrayDiffItem, j) => (
+                            <Text key={j} variant="code">
+                              {describeDiffItem(
+                                arrayDiffItem,
+                                (variantName) =>
+                                  findComponent(
+                                    item.componentID ?? '',
+                                  )?.variants?.find(
+                                    (variant) =>
+                                      variant.id === variantName.variantID,
+                                  )?.name ?? '',
                               )}
                             </Text>
                           ))}
@@ -320,7 +380,7 @@ Props) {
                         <Stack.H flexWrap="wrap" gap="8px">
                           <Text variant="code">children: </Text>
                           {item.children.map((arrayDiffItem, j) => (
-                            <Text variant="code">
+                            <Text key={j} variant="code">
                               {describeDiffItem(
                                 arrayDiffItem,
                                 (child) => child.name || child.id,
@@ -345,7 +405,7 @@ Props) {
                         <Stack.H flexWrap="wrap" gap="8px">
                           <Text variant="code">props: </Text>
                           {item.props.map((arrayDiffItem, j) => (
-                            <Text variant="code">
+                            <Text key={j} variant="code">
                               {describeDiffItem(
                                 arrayDiffItem,
                                 (prop) => prop.name,

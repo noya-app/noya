@@ -1,5 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { RelativeDropPosition } from 'noya-designsystem';
+import { isDeepEqual } from 'noya-utils';
 import { defineTree } from 'tree-visit';
 import { applyArrayDiff, computeArrayDiff, mapArrayDiff } from './arrayDiff';
 import { Model } from './builders';
@@ -158,6 +159,7 @@ function isEmptyDiff(diff: NoyaDiffItem) {
     diff.textValue === undefined &&
     !diff.props &&
     !diff.classNames &&
+    !diff.variantNames &&
     !diff.children
   );
 }
@@ -211,6 +213,20 @@ export function diffResolvedTrees(
     if (propsDiff.length > 0) {
       currentItem.props = propsDiff;
     }
+  } else if (
+    a.type === 'noyaCompositeElement' &&
+    b.type === 'noyaCompositeElement'
+  ) {
+    // Diff variantNames
+    const variantNamesDiff = computeArrayDiff(
+      a.variantNames ?? [],
+      b.variantNames ?? [],
+      (item) => item.id,
+    );
+
+    if (variantNamesDiff.length > 0) {
+      currentItem.variantNames = variantNamesDiff;
+    }
   }
 
   const items: NoyaDiffItem[] = isEmptyDiff(currentItem) ? [] : [currentItem];
@@ -249,7 +265,6 @@ export function applyResolvedDiff(
   rootNode: NoyaResolvedNode,
   diff: NoyaDiff,
   path: string[],
-  level: number,
 ) {
   return ResolvedHierarchy.map<NoyaResolvedNode>(
     cloneDeep(rootNode),
@@ -262,6 +277,24 @@ export function applyResolvedDiff(
             ...node,
             rootElement: transformedChildren[0],
           };
+
+          diff.items
+            .filter((item) => {
+              const itemKey = [...path, ...item.path].join('/');
+              return itemKey === nodeKey;
+            })
+            .forEach((item) => {
+              if (item.name !== undefined) {
+                newNode.name = item.name;
+              }
+
+              if (item.variantNames) {
+                newNode.variantNames = applyArrayDiff(
+                  newNode.variantNames ?? [],
+                  item.variantNames,
+                );
+              }
+            });
 
           return newNode;
         }
@@ -308,12 +341,10 @@ export function applyResolvedDiff(
                 newNode.children = applyArrayDiff(
                   newNode.children,
                   mapArrayDiff(item.children, (addedNode) =>
-                    createResolvedNode(
-                      findComponent,
-                      addedNode,
-                      [...path, ...item.path],
-                      level,
-                    ),
+                    createResolvedNode(findComponent, addedNode, [
+                      ...path,
+                      ...item.path,
+                    ]),
                   ),
                 );
               }
@@ -341,7 +372,6 @@ export function createResolvedNode(
   findComponent: FindComponent,
   node: NoyaNode,
   parentPath: string[] = [],
-  level: number = 2,
 ): NoyaResolvedNode {
   const path = [...parentPath, node.id];
 
@@ -350,7 +380,7 @@ export function createResolvedNode(
       return { ...node, path };
     case 'noyaPrimitiveElement': {
       const children = node.children.map<NoyaResolvedNode>((child) =>
-        createResolvedNode(findComponent, child, path, level),
+        createResolvedNode(findComponent, child, path),
       );
 
       const result: NoyaResolvedPrimitiveElement = {
@@ -374,10 +404,18 @@ export function createResolvedNode(
         findComponent,
         component.rootElement,
         path,
-        level - 1,
       );
 
-      for (let variantName of node.variantNames ?? []) {
+      const variantDiffItems = node.diff?.items.flatMap((item) =>
+        isDeepEqual(item.path, path) ? item.variantNames ?? [] : [],
+      );
+
+      const variantNames = applyArrayDiff(
+        node.variantNames ?? [],
+        variantDiffItems ?? [],
+      );
+
+      for (let variantName of variantNames) {
         const variant = component.variants?.find(
           (variant) => variant.id === variantName.variantID,
         );
@@ -394,7 +432,6 @@ export function createResolvedNode(
             resolvedNode,
             variant.diff,
             path,
-            level - 1,
           );
         }
       }
@@ -405,7 +442,6 @@ export function createResolvedNode(
           resolvedNode,
           node.diff,
           path,
-          level,
         );
       }
 
