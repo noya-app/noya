@@ -1,6 +1,5 @@
 import {
   Button,
-  InputField,
   ScrollArea,
   Select,
   Spacer,
@@ -68,20 +67,6 @@ export function DSComponentInspector({
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
           <InspectorSection title="Component" titleTextStyle="heading3">
-            <InspectorPrimitives.LabeledRow label="Name">
-              <InputField.Root>
-                <InputField.Label>Name</InputField.Label>
-                <InputField.Input
-                  value={component.name}
-                  onChange={(value) => {
-                    onChangeComponent({
-                      ...component,
-                      name: value,
-                    });
-                  }}
-                />
-              </InputField.Root>
-            </InspectorPrimitives.LabeledRow>
             <InspectorPrimitives.LabeledRow label="Variant">
               <Select
                 value={selection.variantID ?? 'default'}

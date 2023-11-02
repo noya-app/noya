@@ -21,7 +21,7 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { uuid } from 'noya-utils';
-import React from 'react';
+import React, { useState } from 'react';
 import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
@@ -47,7 +47,7 @@ interface Props {
   setDS: React.Dispatch<React.SetStateAction<DS>>;
   selectedComponentID?: string;
   components: NoyaComponent[];
-  onNewComponent: () => void;
+  onNewComponent: (componentID?: string) => void;
   onDeleteComponent: (componentID: string) => void;
   onSelectComponent: (componentID: string) => void;
   onMoveComponent: (componentID: string, index: number) => void;
@@ -85,6 +85,9 @@ export function DSProjectInspector({
   const {
     source: { name: sourceName },
   } = ds;
+  const [renamingComponent, setRenamingComponent] = useState<
+    string | undefined
+  >();
 
   const createAIComponent = async () => {
     const componentNames = components.map((c) => c.name);
@@ -346,7 +349,14 @@ export function DSProjectInspector({
             titleTextStyle="heading4"
             right={
               <>
-                <IconButton iconName="PlusIcon" onClick={onNewComponent} />
+                <IconButton
+                  iconName="PlusIcon"
+                  onClick={() => {
+                    const componentID = uuid();
+                    onNewComponent(componentID);
+                    setRenamingComponent(componentID);
+                  }}
+                />
                 <Spacer.Horizontal size={8} />
                 <DropdownMenu
                   items={componentsMenuItems}
@@ -382,16 +392,37 @@ export function DSProjectInspector({
                     name={component.name || 'Unnamed'}
                     selected={component.componentID === selectedComponentID}
                     onPress={() => onSelectComponent(component.componentID)}
-                    menuItems={[{ value: 'delete', title: 'Delete' }]}
+                    menuItems={[
+                      { value: 'rename', title: 'Rename' },
+                      { value: 'delete', title: 'Delete' },
+                    ]}
                     isLoading={false}
                     isDragging={false}
-                    isEditing={false}
+                    isEditing={renamingComponent === component.componentID}
                     isSuggestedPage={false}
-                    handleSubmitEditing={() => {}}
+                    handleSubmitEditing={(newName) => {
+                      setRenamingComponent(undefined);
+                      setDS((state) =>
+                        produce(state, (draft) => {
+                          const components =
+                            (draft.components as NoyaComponent[]) ?? [];
+                          const found = components.find(
+                            (c) => c.componentID === component.componentID,
+                          );
+                          if (found) found.name = newName;
+                        }),
+                      );
+                    }}
+                    onDoubleClick={() => {
+                      setRenamingComponent(component.componentID);
+                    }}
                     onSelectMenuItem={(value) => {
                       switch (value) {
                         case 'delete':
                           onDeleteComponent(component.componentID);
+                          break;
+                        case 'rename':
+                          setRenamingComponent(component.componentID);
                           break;
                       }
                     }}

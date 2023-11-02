@@ -89,19 +89,22 @@ export function DSEditor({
     [components],
   );
 
-  const handleNewComponent = useCallback(() => {
-    const newComponent = Model.component({
-      componentID: uuid(),
-      rootElement: Model.primitiveElement({
-        componentID: boxSymbolId,
-      }),
-    });
+  const handleNewComponent = useCallback(
+    (componentID?: string) => {
+      const newComponent = Model.component({
+        componentID: componentID ?? uuid(),
+        rootElement: Model.primitiveElement({
+          componentID: boxSymbolId,
+        }),
+      });
 
-    setComponents([...components, newComponent]);
-    setSelection({
-      componentID: newComponent.componentID,
-    });
-  }, [components, setComponents]);
+      setComponents([...components, newComponent]);
+      setSelection({
+        componentID: newComponent.componentID,
+      });
+    },
+    [components, setComponents],
+  );
 
   const handleCreateComponent = useCallback(
     (component: NoyaComponent) => {
