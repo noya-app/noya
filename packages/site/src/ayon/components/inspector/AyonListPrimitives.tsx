@@ -91,6 +91,13 @@ export const AyonListRow = memo(function AyonListRow<
   const [isHovered, setIsHovered] = React.useState(false);
   const hovered = props.hovered ?? isHovered;
 
+  const borderColor =
+    props.selected && hovered
+      ? theme.colors.primaryLight
+      : hovered
+      ? theme.colors.primary
+      : theme.colors.divider;
+
   return (
     <ListView.Row
       {...props}
@@ -111,20 +118,15 @@ export const AyonListRow = memo(function AyonListRow<
         flex="1 1 0%"
         padding="1px"
         borderRadius="4px"
-        margin="2px 0"
         gap="2px"
-        border={`1px solid ${theme.colors.divider}`}
+        border={`1px solid ${borderColor}`}
         color={'inherit'}
         minWidth="0"
         background={
           isDragging
             ? 'transparent'
-            : props.selected && hovered
-            ? theme.colors.primaryLight
             : props.selected
             ? theme.colors.primary
-            : hovered
-            ? theme.colors.inputBackground
             : 'transparent'
         }
       >

@@ -119,7 +119,7 @@ const NetworkDebugger = memo(function NetworkDebugger() {
               attempt,
             }) => (
               <ListView.Row
-                gap="4px"
+                gap={4}
                 backgroundColor={
                   completed && !isStreaming
                     ? theme.colors.dividerSubtle

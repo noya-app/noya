@@ -181,6 +181,7 @@ export function DSProjectInspector({
             <ListView.Root
               variant="bare"
               sortable
+              gap={4}
               keyExtractor={(component) => component.componentID}
               data={components}
               onMoveItem={(

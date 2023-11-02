@@ -130,6 +130,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       expandable={false}
       variant="bare"
       indentation={24}
+      gap={4}
       sortable
       pressEventName="onPointerDown"
       acceptsDrop={(sourceIndex, destinationIndex, relationDropPosition) => {
@@ -492,18 +493,18 @@ export const DSLayoutRow = memo(function DSLayerRow({
     [components],
   );
 
+  const showHoverRing =
+    (hovered || isMenuOpen) &&
+    !isDragging &&
+    !isSearchingStyles &&
+    !isSearchingTypes;
+
   return (
     <TreeView.Row
       id={id}
       depth={depth - 1}
       menuItems={menu}
       onSelectMenuItem={onSelectMenuItem}
-      hovered={
-        (hovered || isMenuOpen) &&
-        !isDragging &&
-        !isSearchingStyles &&
-        !isSearchingTypes
-      }
       sortable
       onMenuOpenChange={setIsMenuOpen}
       onHoverChange={(hovered) => {
@@ -526,10 +527,11 @@ export const DSLayoutRow = memo(function DSLayerRow({
         flex="1 1 0%"
         padding="1px"
         borderRadius="4px"
-        margin="2px 0"
         gap="2px"
         border={
-          node.type === 'noyaCompositeElement'
+          showHoverRing
+            ? `1px solid ${theme.colors.primary}`
+            : node.type === 'noyaCompositeElement'
             ? `1px solid transparent`
             : `1px solid ${theme.colors.divider}`
         }

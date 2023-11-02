@@ -53,6 +53,7 @@ type ListRowContextValue = {
   sortable: boolean;
   expandable: boolean;
   divider: boolean;
+  gap: number;
   variant: ListViewVariant;
   sectionHeaderVariant: ListViewSectionHeaderVariant;
   indentation: number;
@@ -67,6 +68,7 @@ const ListRowContext = createContext<ListRowContextValue>({
   sortable: false,
   expandable: true,
   divider: true,
+  gap: 0,
   variant: 'normal',
   sectionHeaderVariant: 'normal',
   indentation: 12,
@@ -160,7 +162,7 @@ const RowContainer = styled.div<{
   showsActiveState: boolean;
   sectionHeaderVariant: ListViewSectionHeaderVariant;
   colorScheme: ListColorScheme;
-  gap: CSSProperties['gap'];
+  gap: number;
   backgroundColor?: CSSProperties['backgroundColor'];
 }>(
   ({
@@ -262,9 +264,10 @@ const RowContainer = styled.div<{
 
 const ListViewDragIndicatorElement = styled.div<{
   relativeDropPosition: RelativeDropPosition;
+  gap: number;
   offsetLeft: number;
   colorScheme: ListColorScheme;
-}>(({ theme, relativeDropPosition, offsetLeft, colorScheme }) => ({
+}>(({ theme, relativeDropPosition, offsetLeft, colorScheme, gap }) => ({
   zIndex: 1,
   position: 'absolute',
   borderRadius: '3px',
@@ -278,8 +281,8 @@ const ListViewDragIndicatorElement = styled.div<{
         }`,
       }
     : {
-        top: relativeDropPosition === 'above' ? -3 : undefined,
-        bottom: relativeDropPosition === 'below' ? -3 : undefined,
+        top: relativeDropPosition === 'above' ? -(3 + gap / 2) : undefined,
+        bottom: relativeDropPosition === 'below' ? -(3 + gap / 2) : undefined,
         left: offsetLeft,
         right: 0,
         height: 6,
@@ -305,7 +308,7 @@ interface ListViewRowProps<MenuItemType extends string = string> {
   draggable?: boolean;
   hovered?: boolean;
   sortable?: boolean;
-  gap?: CSSProperties['gap'];
+  gap?: number;
   backgroundColor?: CSSProperties['backgroundColor'];
   onPress?: (info: ListViewClickInfo) => void;
   onDoubleClick?: () => void;
@@ -352,6 +355,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     variant,
     sectionHeaderVariant,
     divider,
+    gap: listGap,
     colorScheme,
   } = useContext(ListRowContext);
   const { hoverProps } = useHover({
@@ -423,6 +427,7 @@ const ListViewRow = forwardRef(function ListViewRow<
             colorScheme={colorScheme}
             relativeDropPosition={relativeDropPosition}
             offsetLeft={33 + depth * indentation}
+            gap={listGap}
           />
         )}
         {depth > 0 && <Spacer.Horizontal size={depth * indentation} />}
@@ -586,15 +591,17 @@ const VirtualizedList = memo(
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.div<{ scrollable?: boolean }>(
-  ({ theme, scrollable }) => ({
-    flex: scrollable ? '1 0 0' : '0 0 auto',
-    display: 'flex',
-    flexDirection: 'column',
-    flexWrap: 'nowrap',
-    color: theme.colors.textMuted,
-  }),
-);
+const RootContainer = styled.div<{
+  scrollable?: boolean;
+  gap?: number;
+}>(({ theme, scrollable, gap }) => ({
+  flex: scrollable ? '1 0 0' : '0 0 auto',
+  display: 'flex',
+  flexDirection: 'column',
+  flexWrap: 'nowrap',
+  color: theme.colors.textMuted,
+  gap,
+}));
 
 type ListViewItemInfo = {
   isDragging: boolean;
@@ -634,6 +641,7 @@ type ListViewRootProps = {
   variant?: ListViewVariant;
   sectionHeaderVariant?: ListViewSectionHeaderVariant;
   divider?: boolean;
+  gap?: number;
   colorScheme?: ListColorScheme;
 };
 
@@ -655,6 +663,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     sectionHeaderVariant = 'normal',
     pressEventName = 'onClick',
     colorScheme = 'primary',
+    gap = 0,
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
 ) {
@@ -748,6 +757,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
         variant,
         sectionHeaderVariant,
         isSectionHeader: current.props.isSectionHeader,
+        gap,
       };
     },
     [
@@ -761,6 +771,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       pressEventName,
       variant,
       sectionHeaderVariant,
+      gap,
     ],
   );
 
@@ -826,6 +837,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       {...{
         [pressEventName]: handleClick,
       }}
+      gap={gap}
       scrollable={scrollable}
     >
       {withScrollable((scrollElementRef: HTMLDivElement | null) =>

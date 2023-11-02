@@ -32,6 +32,7 @@ import {
 } from './traversal';
 import {
   NoyaComponent,
+  NoyaNode,
   NoyaResolvedNode,
   NoyaVariant,
   SelectedComponent,
@@ -77,11 +78,16 @@ Props) {
 
   const activeDiff = selection.diff;
 
-  const nameMap = useMemo(() => {
-    return ResolvedHierarchy.reduce<Record<string, string>>(
+  const metadataMap = useMemo(() => {
+    return ResolvedHierarchy.reduce<
+      Record<string, { name: string; type: NoyaNode['type'] }>
+    >(
       resolvedNode,
       (result, node) => {
-        result[node.id] = getNodeName(node, findComponent);
+        result[node.id] = {
+          name: getNodeName(node, findComponent),
+          type: node.type,
+        };
         return result;
       },
       {},
@@ -149,7 +155,8 @@ Props) {
             title="Elements"
             titleTextStyle="heading4"
             right={
-              selection.diff && (
+              selection.diff &&
+              selection.diff.items.length > 0 && (
                 <>
                   <Button
                     onClick={() => {
@@ -167,12 +174,7 @@ Props) {
                   <Button
                     variant="primary"
                     onClick={() => {
-                      if (
-                        !selection.diff ||
-                        selection.diff.items.length === 0
-                      ) {
-                        return;
-                      }
+                      if (!selection.diff) return;
 
                       if (selection.variantID) {
                         // TODO: Merge variant and diff
@@ -258,82 +260,104 @@ Props) {
         {activeDiff && (
           <InspectorSection title="Diff" titleTextStyle="heading4">
             <Stack.V>
-              <Stack.V background={theme.colors.codeBackground}>
-                <ListView.Root>
-                  {activeDiff.items.map((item, i) => (
-                    <ListView.Row key={i}>
-                      <Stack.V
-                        margin="0 -6px"
-                        gap="6px"
-                        flex="1"
-                        separator={<Divider />}
-                      >
-                        <Stack.H alignItems="center">
-                          {withSeparatorElements(
-                            item.path.map((id) => (
-                              <Chip key={id} variant="outlined">
-                                {nameMap[id]}
-                              </Chip>
-                            )),
-                            <CaretRightIcon />,
-                          )}
+              <ListView.Root variant="bare" gap={4}>
+                {activeDiff.items.map((item, i, list) => (
+                  <ListView.Row key={i}>
+                    <Stack.V
+                      border={`1px solid ${theme.colors.divider}`}
+                      padding="6px"
+                      gap="6px"
+                      flex="1"
+                      borderRadius="4px"
+                      separator={<Divider />}
+                    >
+                      <Stack.H alignItems="center">
+                        {withSeparatorElements(
+                          item.path.map((id) => (
+                            <Chip
+                              key={id}
+                              colorScheme={
+                                metadataMap[id].type === 'noyaCompositeElement'
+                                  ? 'primary'
+                                  : undefined
+                              }
+                            >
+                              {metadataMap[id].name}
+                            </Chip>
+                          )),
+                          <CaretRightIcon />,
+                        )}
+                        <Spacer.Horizontal />
+                        <Spacer.Horizontal size={8} />
+                        <IconButton
+                          iconName="Cross1Icon"
+                          onClick={() => {
+                            setSelection({
+                              ...selection,
+                              diff: {
+                                items: activeDiff.items.filter(
+                                  (item, j) => j !== i,
+                                ),
+                              },
+                            });
+                          }}
+                        />
+                      </Stack.H>
+                      {item.classNames && item.classNames.length > 0 && (
+                        <Stack.H flexWrap="wrap" gap="8px">
+                          <Text variant="code">classes: </Text>
+                          {item.classNames.map((arrayDiffItem, j) => (
+                            <Text variant="code">
+                              {describeDiffItem(
+                                arrayDiffItem,
+                                (className) => className.value,
+                              )}
+                            </Text>
+                          ))}
                         </Stack.H>
-                        {item.classNames && item.classNames.length > 0 && (
-                          <Stack.H flexWrap="wrap" gap="8px">
-                            <Text variant="code">classes: </Text>
-                            {item.classNames.map((arrayDiffItem, j) => (
-                              <Text variant="code">
-                                {describeDiffItem(
-                                  arrayDiffItem,
-                                  (className) => className.value,
-                                )}
-                              </Text>
-                            ))}
-                          </Stack.H>
-                        )}
-                        {item.children && item.children.length > 0 && (
-                          <Stack.H flexWrap="wrap" gap="8px">
-                            <Text variant="code">children: </Text>
-                            {item.children.map((arrayDiffItem, j) => (
-                              <Text variant="code">
-                                {describeDiffItem(
-                                  arrayDiffItem,
-                                  (child) => child.name || child.id,
-                                )}
-                              </Text>
-                            ))}
-                          </Stack.H>
-                        )}
-                        {item.name && (
-                          <Stack.H flexWrap="wrap" gap="8px">
-                            <Text variant="code">name: </Text>
-                            <Text variant="code">{item.name}</Text>
-                          </Stack.H>
-                        )}
-                        {item.textValue && (
-                          <Stack.H flexWrap="wrap" gap="8px">
-                            <Text variant="code">textValue: </Text>
-                            <Text variant="code">{item.textValue}</Text>
-                          </Stack.H>
-                        )}
-                        {item.props && item.props.length > 0 && (
-                          <Stack.H flexWrap="wrap" gap="8px">
-                            <Text variant="code">props: </Text>
-                            {item.props.map((arrayDiffItem, j) => (
-                              <Text variant="code">
-                                {describeDiffItem(
-                                  arrayDiffItem,
-                                  (prop) => prop.name,
-                                )}
-                              </Text>
-                            ))}
-                          </Stack.H>
-                        )}
-                      </Stack.V>
-                    </ListView.Row>
-                  ))}
-                </ListView.Root>
-              </Stack.V>
+                      )}
+                      {item.children && item.children.length > 0 && (
+                        <Stack.H flexWrap="wrap" gap="8px">
+                          <Text variant="code">children: </Text>
+                          {item.children.map((arrayDiffItem, j) => (
+                            <Text variant="code">
+                              {describeDiffItem(
+                                arrayDiffItem,
+                                (child) => child.name || child.id,
+                              )}
+                            </Text>
+                          ))}
+                        </Stack.H>
+                      )}
+                      {item.name && (
+                        <Stack.H flexWrap="wrap" gap="8px">
+                          <Text variant="code">name: </Text>
+                          <Text variant="code">{item.name}</Text>
+                        </Stack.H>
+                      )}
+                      {item.textValue && (
+                        <Stack.H flexWrap="wrap" gap="8px">
+                          <Text variant="code">textValue: </Text>
+                          <Text variant="code">{item.textValue}</Text>
+                        </Stack.H>
+                      )}
+                      {item.props && item.props.length > 0 && (
+                        <Stack.H flexWrap="wrap" gap="8px">
+                          <Text variant="code">props: </Text>
+                          {item.props.map((arrayDiffItem, j) => (
+                            <Text variant="code">
+                              {describeDiffItem(
+                                arrayDiffItem,
+                                (prop) => prop.name,
+                              )}
+                            </Text>
+                          ))}
+                        </Stack.H>
+                      )}
+                    </Stack.V>
+                  </ListView.Row>
+                ))}
+              </ListView.Root>
             </Stack.V>
           </InspectorSection>
         )}

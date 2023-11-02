@@ -60,7 +60,7 @@ const ChipElement = styled.span<{
     }),
     ...(variant === 'solid'
       ? {
-          color: theme.colors.text,
+          color,
           backgroundColor,
         }
       : variant === 'outlined'
