@@ -296,9 +296,14 @@ export function renderDSPreview({
   const dotColor =
     colorMode === 'light' ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.15)';
 
-  const computedBackgroundColor = props.iframe.contentWindow?.getComputedStyle(
+  let computedBackgroundColor = props.iframe.contentWindow?.getComputedStyle(
     props.iframe.contentDocument!.body,
   ).backgroundColor;
+
+  // if computedBackgroundColor is transparent, set it to either white or dark gray
+  if (computedBackgroundColor === 'rgba(0, 0, 0, 0)') {
+    computedBackgroundColor = colorMode === 'light' ? '#fff' : '#111';
+  }
 
   return (
     <div
