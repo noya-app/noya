@@ -37,7 +37,6 @@ import {
   parseLayout,
   parseLayoutWithOptions,
 } from './componentLayout';
-import { PRIMITIVE_ELEMENT_NAMES } from './primitiveElements';
 import { svgToReactElement } from './renderSVGElement';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import {
@@ -47,6 +46,7 @@ import {
   unresolve,
 } from './traversal';
 import { NoyaComponent, NoyaPrimitiveElement, NoyaResolvedNode } from './types';
+import { getComponentName, getNodeName } from './utils/nodeUtils';
 
 type LayoutTreeItem = {
   depth: number;
@@ -129,7 +129,6 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       data={flattened}
       expandable={false}
       variant="bare"
-      colorScheme="secondary"
       indentation={24}
       sortable
       pressEventName="onPointerDown"
@@ -226,41 +225,6 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   );
 });
 
-function getName(node: NoyaResolvedNode, findComponent: FindComponent): string {
-  switch (node.type) {
-    case 'noyaString':
-      return node.value;
-    case 'noyaPrimitiveElement':
-      return node.name ?? PRIMITIVE_ELEMENT_NAMES[node.componentID];
-    case 'noyaCompositeElement': {
-      if (node.name) return node.name;
-
-      const component = findComponent(node.componentID);
-
-      return component ? component.name : '<Component Not Found>';
-    }
-  }
-}
-
-function getComponentName(
-  node: NoyaResolvedNode,
-  findComponent: FindComponent,
-): string {
-  switch (node.type) {
-    case 'noyaString':
-      return 'String';
-    case 'noyaPrimitiveElement':
-      return PRIMITIVE_ELEMENT_NAMES[node.componentID];
-    case 'noyaCompositeElement': {
-      const component = findComponent(node.componentID);
-
-      if (!component) return '<Component Not Found>';
-
-      return component.name ?? '<No Name>';
-    }
-  }
-}
-
 export const DSLayoutRow = memo(function DSLayerRow({
   id,
   onChange,
@@ -300,7 +264,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const client = useNoyaClient();
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
-  const name = getName(node, findComponent);
+  const name = getNodeName(node, findComponent);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -384,7 +348,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
       case 'extractToComponent': {
-        const name = getName(node, findComponent);
+        const name = getNodeName(node, findComponent);
 
         const text = await openInputDialog('Component Name', name);
 

@@ -119,3 +119,17 @@ export function mapArrayDiff<T, K>(
     }
   });
 }
+
+export function describeDiffItem<T>(
+  item: ArrayDiffItem<T>,
+  getLabel: (item: T) => string,
+): string {
+  switch (item[0]) {
+    case 'a':
+      return `+${getLabel(item[1])}`;
+    case 'r':
+      return `-${item[1]}`;
+    case 'm':
+      return `-${item[1]} -> +${item[2]}`;
+  }
+}

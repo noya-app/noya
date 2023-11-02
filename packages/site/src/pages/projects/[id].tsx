@@ -17,7 +17,7 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
-import { ChevronDownIcon, DotFilledIcon, StarFilledIcon } from 'noya-icons';
+import { ChevronDownIcon, SlashIcon, StarFilledIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
@@ -280,7 +280,10 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
                     All Projects
                   </Text>
                 </Link>
-                <DotFilledIcon width="9px" style={{ margin: '0 3px' }} />
+                <SlashIcon
+                  opacity={0.5}
+                  style={{ margin: '0 2px', transform: 'scale(0.9, 1.25)' }}
+                />
                 <FileTitle fileId={fileId} />
                 <DropdownMenu items={fileMenu} onSelect={handleSelect}>
                   <IconButton iconName="CaretDownIcon" />

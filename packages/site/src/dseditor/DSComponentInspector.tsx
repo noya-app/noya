@@ -1,18 +1,27 @@
 import {
   Button,
+  Chip,
+  Divider,
+  IconButton,
+  ListView,
   ScrollArea,
   Select,
   Spacer,
   Stack,
+  Text,
   useDesignSystemTheme,
+  useOpenInputDialog,
+  withSeparatorElements,
 } from 'noya-designsystem';
-import { CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
+import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { isDeepEqual, partition } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
 import { DSLayoutTree } from './DSLayoutTree';
+import { describeDiffItem } from './arrayDiff';
+import { Model } from './builders';
 import { enforceSchema } from './layoutSchema';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import {
@@ -27,6 +36,7 @@ import {
   NoyaVariant,
   SelectedComponent,
 } from './types';
+import { getNodeName } from './utils/nodeUtils';
 
 interface Props {
   selection: SelectedComponent;
@@ -38,6 +48,7 @@ interface Props {
   setHighlightedPath: (path: string[] | undefined) => void;
   onCreateComponent: (component: NoyaComponent) => void;
   components: NoyaComponent[];
+  // activeDiff?: NoyaDiff;
 }
 
 export function DSComponentInspector({
@@ -50,7 +61,9 @@ export function DSComponentInspector({
   setHighlightedPath,
   onCreateComponent,
   components,
-}: Props) {
+}: // activeDiff,
+Props) {
+  const openInputDialog = useOpenInputDialog();
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
 
@@ -62,12 +75,25 @@ export function DSComponentInspector({
     [component.variants],
   );
 
+  const activeDiff = selection.diff;
+
+  const nameMap = useMemo(() => {
+    return ResolvedHierarchy.reduce<Record<string, string>>(
+      resolvedNode,
+      (result, node) => {
+        result[node.id] = getNodeName(node, findComponent);
+        return result;
+      },
+      {},
+    );
+  }, [findComponent, resolvedNode]);
+
   return (
     <Stack.V width="400px" background="white">
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
           <InspectorSection title="Component" titleTextStyle="heading3">
-            <InspectorPrimitives.LabeledRow label="Variant">
+            <InspectorPrimitives.LabeledRow label="Variant" gap="8px">
               <Select
                 value={selection.variantID ?? 'default'}
                 id="variant-input"
@@ -84,6 +110,28 @@ export function DSComponentInspector({
                   setSelection({
                     ...selection,
                     variantID: id === 'default' ? undefined : id,
+                  });
+                }}
+              />
+              <IconButton
+                iconName="PlusIcon"
+                onClick={async () => {
+                  const name = await openInputDialog('Variant Name');
+
+                  if (!name) return;
+
+                  const variant = Model.variant({
+                    name,
+                  });
+
+                  onChangeComponent({
+                    ...component,
+                    variants: [...(component.variants ?? []), variant],
+                  });
+
+                  setSelection({
+                    ...selection,
+                    variantID: variant.id,
                   });
                 }}
               />
@@ -207,6 +255,50 @@ export function DSComponentInspector({
             />
           </InspectorSection>
         </Stack.V>
+        {activeDiff && (
+          <InspectorSection title="Diff" titleTextStyle="heading4">
+            <Stack.V>
+              <Stack.V background={theme.colors.codeBackground}>
+                <ListView.Root>
+                  {activeDiff.items.map((item, i) => (
+                    <ListView.Row key={i}>
+                      <Stack.V
+                        margin="0 -6px"
+                        gap="6px"
+                        flex="1"
+                        separator={<Divider />}
+                      >
+                        <Stack.H alignItems="center">
+                          {withSeparatorElements(
+                            item.path.map((id) => (
+                              <Chip key={id} variant="outlined">
+                                {nameMap[id]}
+                              </Chip>
+                            )),
+                            <CaretRightIcon />,
+                          )}
+                        </Stack.H>
+                        {item.classNames && item.classNames.length > 0 && (
+                          <Stack.H flexWrap="wrap" gap="8px">
+                            <Text variant="code">classes: </Text>
+                            {item.classNames.map((arrayDiffItem, j) => (
+                              <Text variant="code">
+                                {describeDiffItem(
+                                  arrayDiffItem,
+                                  (className) => className.value,
+                                )}
+                              </Text>
+                            ))}
+                          </Stack.H>
+                        )}
+                      </Stack.V>
+                    </ListView.Row>
+                  ))}
+                </ListView.Root>
+              </Stack.V>
+            </Stack.V>
+          </InspectorSection>
+        )}
       </ScrollArea>
     </Stack.V>
   );

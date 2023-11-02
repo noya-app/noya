@@ -1,5 +1,5 @@
 import { Spacer } from 'noya-designsystem';
-import React, { memo, ReactNode } from 'react';
+import React, { CSSProperties, memo, ReactNode } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 export const Section = styled.div(({ theme }) => ({
@@ -32,12 +32,15 @@ export const Title = styled.div<{
       }),
 }));
 
-export const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+export const Row = styled.div<{ gap?: CSSProperties['gap'] }>(
+  ({ theme, gap }) => ({
+    flex: '1',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap,
+  }),
+);
 
 export const Column = styled.div(({ theme }) => ({
   flex: '1',
@@ -87,11 +90,13 @@ export const LabeledRow = memo(function LabeledRow({
   children,
   label,
   labelTextStyle,
+  gap,
   right,
 }: {
   children: ReactNode;
   label: string;
   labelTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
+  gap?: CSSProperties['gap'];
   right?: ReactNode;
 }) {
   return (
@@ -102,7 +107,7 @@ export const LabeledRow = memo(function LabeledRow({
           {right && <Spacer.Horizontal />}
           {right}
         </RowLabel>
-        <Row>{children}</Row>
+        <Row gap={gap}>{children}</Row>
       </Column>
     </Row>
   );
