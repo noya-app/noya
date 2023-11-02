@@ -360,20 +360,29 @@ Props) {
                       {item.variantNames && item.variantNames.length > 0 && (
                         <Stack.H flexWrap="wrap" gap="8px">
                           <Text variant="code">variants: </Text>
-                          {item.variantNames.map((arrayDiffItem, j) => (
-                            <Text key={j} variant="code">
-                              {describeDiffItem(
-                                arrayDiffItem,
-                                (variantName) =>
-                                  findComponent(
-                                    item.componentID ?? '',
-                                  )?.variants?.find(
-                                    (variant) =>
-                                      variant.id === variantName.variantID,
-                                  )?.name ?? '',
-                              )}
-                            </Text>
-                          ))}
+                          {item.variantNames.map((arrayDiffItem, j) => {
+                            const elementId = item.path[item.path.length - 1];
+                            const targetComponent = findComponent(
+                              metadataMap[elementId].componentID ?? '',
+                            );
+                            const variants = targetComponent?.variants ?? [];
+                            const findVariantName = (id: string): string => {
+                              const variant = variants.find(
+                                (variant) => variant.id === id,
+                              );
+                              return variant?.name ?? '';
+                            };
+
+                            return (
+                              <Text key={j} variant="code">
+                                {describeDiffItem(
+                                  arrayDiffItem,
+                                  (variantName) =>
+                                    findVariantName(variantName.variantID),
+                                )}
+                              </Text>
+                            );
+                          })}
                         </Stack.H>
                       )}
                       {item.children && item.children.length > 0 && (
