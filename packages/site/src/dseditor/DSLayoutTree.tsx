@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { useNoyaClient } from 'noya-api';
+import { useNoyaClientOrFallback } from 'noya-api';
 import {
   Chip,
   CompletionItem,
@@ -262,7 +262,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
   expanded?: boolean;
   onSetExpanded: (id: string, expanded: boolean) => void;
 } & Pick<Props, 'onCreateComponent' | 'components'>) {
-  const client = useNoyaClient();
+  const client = useNoyaClientOrFallback();
   const theme = useDesignSystemTheme();
   const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
   const name = getNodeName(node, findComponent);
