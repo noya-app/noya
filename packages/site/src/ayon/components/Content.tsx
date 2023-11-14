@@ -59,7 +59,7 @@ export const Content = memo(function Content({
   name,
   onChangeName,
 }: {
-  uploadAsset: (file: ArrayBuffer) => Promise<string>;
+  uploadAsset?: (file: ArrayBuffer) => Promise<string>;
   viewType: ViewType;
   padding?: number;
   canvasRendererType?: CanvasRendererType;
@@ -92,6 +92,8 @@ export const Content = memo(function Content({
   >();
 
   const addImageFiles = async (files: File[], offsetPoint: OffsetPoint) => {
+    if (!uploadAsset) return;
+
     const images = await Promise.all(
       files.map(async (file) => {
         const data = await file.arrayBuffer();
@@ -349,9 +351,7 @@ export const Content = memo(function Content({
             </Overlay>
             <Overlay
               style={
-                viewType === 'previewOnly'
-                  ? { pointerEvents: 'all' }
-                  : undefined
+                viewType === 'preview' ? { pointerEvents: 'all' } : undefined
               }
             >
               <DOMRenderer
@@ -475,7 +475,7 @@ export const Content = memo(function Content({
           </Stack.V>
         </Stack.V>
         <Stack.V flex="0" position="relative">
-          {viewType === 'combined' && (
+          {viewType === 'editable' && (
             <AyonInspector
               name={name}
               onChangeName={onChangeName}

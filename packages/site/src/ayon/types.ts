@@ -7,7 +7,7 @@ export type InferredBlockTypeResult = {
   score: number;
 };
 
-export type ViewType = 'combined' | 'previewOnly';
+export type ViewType = 'editable' | 'readOnly' | 'preview';
 
 export type LayoutGenerationSource = {
   name: string;

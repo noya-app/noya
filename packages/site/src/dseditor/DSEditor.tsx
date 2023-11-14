@@ -9,6 +9,7 @@ import { loadDesignSystem } from 'noya-module-loader';
 import { uuid } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
+import { ViewType } from '../ayon/types';
 import { DSComponentInspector } from './DSComponentInspector';
 import { DSControlledRenderer } from './DSControlledRenderer';
 import { DSProjectInspector } from './DSProjectInspector';
@@ -29,7 +30,8 @@ interface Props {
   initialDocument: DS;
   onChangeDocument?: (document: DS) => void;
   onChangeName?: (name: string) => void;
-  viewType?: 'preview';
+  viewType?: ViewType;
+  initialComponentId?: string;
 }
 export function DSEditor({
   initialDocument,
@@ -37,6 +39,7 @@ export function DSEditor({
   name: fileName,
   onChangeName = noop,
   viewType,
+  initialComponentId,
 }: Props) {
   const theme = useDesignSystemTheme();
   const [ds, setDS] = React.useState(initialDocument);
@@ -77,7 +80,7 @@ export function DSEditor({
 
   const [selection, setSelection] = React.useState<
     SelectedComponent | undefined
-  >();
+  >(initialComponentId ? { componentID: initialComponentId } : undefined);
 
   const [highlightedPath, setHighlightedPath] = React.useState<
     string[] | undefined
@@ -188,6 +191,7 @@ export function DSEditor({
           resolvedNode,
           canvasBackgroundColor: theme.colors.canvas.background,
           selectionOutlineColor: theme.colors.primary,
+          padding: viewType === 'preview' ? 0 : 20,
         });
       }
 
@@ -197,12 +201,13 @@ export function DSEditor({
       });
     },
     [
-      highlightedPath,
-      config,
-      resolvedNode,
       selection,
+      resolvedNode,
       theme.colors.canvas.background,
       theme.colors.primary,
+      highlightedPath,
+      config,
+      viewType,
     ],
   );
 

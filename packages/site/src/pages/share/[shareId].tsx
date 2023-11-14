@@ -1,5 +1,4 @@
 import { GetServerSidePropsContext } from 'next';
-import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { NoyaAPI } from 'noya-api';
@@ -18,19 +17,10 @@ import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';
 import { Interstitial } from '../../components/Interstitial';
+import { ProjectEditor } from '../../components/ProjectEditor';
 import { Toolbar } from '../../components/Toolbar';
 import { addShareCookie } from '../../utils/cookies';
 import { networkClientThatThrows, NOYA_HOST } from '../../utils/noyaClient';
-
-const Ayon = dynamic(
-  () => import('../../components/Ayon').then((mod) => mod.Ayon),
-  { ssr: false },
-);
-
-const DSEditorDynamic = dynamic(
-  () => import('../../dseditor/DSEditor').then((mod) => mod.DSEditor),
-  { ssr: false },
-);
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (!networkClientThatThrows) return;
@@ -208,22 +198,7 @@ function Content({
         )}
       </Toolbar>
       <Divider variant="strong" />
-      {initialFile.data.type === 'io.noya.ayon' ? (
-        <Ayon
-          padding={20}
-          fileId={shareId}
-          canvasRendererType="svg"
-          initialDocument={initialFile.data.document}
-          name={initialFile.data.name}
-          uploadAsset={async () => ''}
-          viewType="previewOnly"
-        />
-      ) : initialFile.data.type === 'io.noya.ds' ? (
-        <DSEditorDynamic
-          name={initialFile.data.name}
-          initialDocument={initialFile.data.document}
-        />
-      ) : null}
+      <ProjectEditor initialFile={initialFile} viewType="readOnly" />
     </Stack.V>
   );
 }

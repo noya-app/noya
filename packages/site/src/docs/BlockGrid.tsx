@@ -56,7 +56,7 @@ export function BlockGrid({
                     getSymbolMaster={getSymbolMaster}
                     symbolId={blockId}
                     height="100%"
-                    viewType="previewOnly"
+                    viewType="preview"
                   />
                   {/* Block pointer events */}
                   <Stack.V width="100%" height="100%" position="absolute" />

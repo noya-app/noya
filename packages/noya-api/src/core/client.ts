@@ -12,6 +12,7 @@ import {
 } from './networkClient';
 import {
   NoyaBilling,
+  NoyaDocument,
   NoyaEmailList,
   NoyaFile,
   NoyaFileData,
@@ -867,10 +868,7 @@ export class NoyaClient {
     return this.#updateFile(id, { ...file.data, name });
   };
 
-  #updateFileDocument = async (
-    id: string,
-    document: NoyaFileData['document'],
-  ) => {
+  #updateFileDocument = async (id: string, document: NoyaDocument) => {
     const file = this.#getLocalFile(id);
 
     return this.#updateFile(id, { ...file.data, document } as NoyaFileData);

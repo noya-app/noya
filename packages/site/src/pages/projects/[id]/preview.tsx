@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
@@ -6,13 +5,8 @@ import {
   lightTheme,
 } from 'noya-designsystem';
 import React, { useEffect, useMemo, useState } from 'react';
-import { DSEditor } from '../../../dseditor/DSEditor';
+import { ProjectEditor } from '../../../components/ProjectEditor';
 import { localStorageClient } from '../../../utils/noyaClient';
-
-const Ayon = dynamic(
-  () => import('../../../components/Ayon').then((mod) => mod.Ayon),
-  { ssr: false },
-);
 
 function Content({ id }: { id: string }) {
   const client = useNoyaClient();
@@ -25,26 +19,7 @@ function Content({ id }: { id: string }) {
 
   if (!initialFile) return null;
 
-  if (initialFile.data.type === 'io.noya.ds') {
-    return (
-      <DSEditor
-        initialDocument={initialFile.data.document}
-        name={initialFile.data.name}
-        viewType="preview"
-      />
-    );
-  }
-
-  return (
-    <Ayon
-      fileId={id}
-      canvasRendererType="svg"
-      initialDocument={initialFile.data.document}
-      name={initialFile.data.name}
-      uploadAsset={async () => ''}
-      viewType="previewOnly"
-    />
-  );
+  return <ProjectEditor initialFile={initialFile} viewType="preview" />;
 }
 
 export default function Preview() {

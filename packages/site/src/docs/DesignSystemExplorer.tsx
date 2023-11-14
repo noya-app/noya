@@ -21,7 +21,7 @@ import { BlockExample, createBlockExample } from './InteractiveBlockPreview';
 
 function Content({
   fileId,
-  viewType = 'combined',
+  viewType = 'editable',
 }: {
   fileId: string;
   viewType?: ViewType;

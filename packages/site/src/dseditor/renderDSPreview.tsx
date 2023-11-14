@@ -265,6 +265,7 @@ export function renderDSPreview({
   resolvedNode,
   canvasBackgroundColor,
   selectionOutlineColor,
+  padding,
 }: {
   renderProps: DSRenderProps;
   highlightedPath: string[] | undefined;
@@ -272,6 +273,7 @@ export function renderDSPreview({
   resolvedNode: NoyaResolvedNode;
   canvasBackgroundColor: string;
   selectionOutlineColor: string;
+  padding?: number;
 }) {
   // console.info(
   //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
@@ -314,7 +316,7 @@ export function renderDSPreview({
         display: 'flex',
         alignItems: 'stretch',
         flexDirection: 'column',
-        padding: '20px',
+        padding,
         position: 'relative',
       }}
     >

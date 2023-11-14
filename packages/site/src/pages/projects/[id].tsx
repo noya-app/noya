@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
@@ -40,6 +39,7 @@ import {
 import Link from 'next/link';
 import { Debugger } from '../../components/Debugger';
 import { EditableText } from '../../components/EditableText';
+import { ProjectEditor } from '../../components/ProjectEditor';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { ShareMenu } from '../../components/ShareMenu';
 import { Toolbar } from '../../components/Toolbar';
@@ -49,17 +49,11 @@ import {
   ProjectContextValue,
   ProjectProvider,
 } from '../../contexts/ProjectContext';
-import { DSEditor } from '../../dseditor/DSEditor';
 import {
   useIsSubscribed,
   useOnboardingUpsell,
 } from '../../hooks/useOnboardingUpsellExperiment';
 import { downloadUrl } from '../../utils/download';
-
-const Ayon = dynamic(
-  () => import('../../components/Ayon').then((mod) => mod.Ayon),
-  { ssr: false },
-);
 
 const FileTitle = memo(function FileTitle({ fileId }: { fileId: string }) {
   const client = useNoyaClient();
@@ -177,28 +171,15 @@ const FileEditor = memo(
 
     if (!initialFile || !cachedFile) return null;
 
-    if (initialFile.data.type === 'io.noya.ds') {
-      return (
-        <DSEditor
-          name={cachedFile.data.name}
-          onChangeName={updateName}
-          initialDocument={initialFile.data.document}
-          onChangeDocument={onChangeDocument}
-        />
-      );
-    }
-
     return (
-      <Ayon
-        fileId={fileId}
-        canvasRendererType="svg"
-        padding={20}
-        uploadAsset={uploadAsset}
-        name={cachedFile.data.name}
-        initialDocument={initialFile.data.document}
-        onChangeDocument={onChangeDocument}
+      <ProjectEditor
+        nameOverride={cachedFile.data.name}
         onChangeName={updateName}
+        initialFile={initialFile}
+        onChangeDocument={onChangeDocument}
+        uploadAsset={uploadAsset}
         downloadFile={downloadFile}
+        viewType="editable"
       />
     );
   }),

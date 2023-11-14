@@ -16,7 +16,7 @@ import { useAyon } from '../components/AyonContext';
 
 function Content({
   symbolId,
-  viewType = 'combined',
+  viewType = 'editable',
 }: {
   symbolId: string;
   viewType?: ViewType;
@@ -39,7 +39,6 @@ function Content({
       canvasRendererType="svg"
       initialDocument={initialFile.data.document}
       name={initialFile.data.name}
-      uploadAsset={async () => ''}
       viewType={viewType}
       isPlayground
     />

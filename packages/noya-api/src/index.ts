@@ -7,6 +7,7 @@ import {
   DS,
   DSConfig,
   DSSource,
+  NoyaDocument,
   NoyaExportFormat,
   NoyaFile,
   NoyaFileData,
@@ -49,6 +50,7 @@ export namespace NoyaAPI {
   export type Json = NoyaJson;
   export type File = NoyaFile;
   export type FileData = NoyaFileData;
+  export type Document = NoyaDocument;
   export type FileList = NoyaFileList;
   export type User = NoyaUser;
   export type Session = NoyaSession;

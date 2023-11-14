@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { NoyaAPI } from 'noya-api';
 import {
@@ -7,13 +6,9 @@ import {
 } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
 import { Interstitial } from '../../../components/Interstitial';
+import { ProjectEditor } from '../../../components/ProjectEditor';
 import { addShareCookie } from '../../../utils/cookies';
 import { networkClientThatThrows } from '../../../utils/noyaClient';
-
-const Ayon = dynamic(
-  () => import('../../../components/Ayon').then((mod) => mod.Ayon),
-  { ssr: false },
-);
 
 function Content({ shareId }: { shareId: string }) {
   const [initialFile, setInitialFile] = useState<
@@ -50,18 +45,9 @@ function Content({ shareId }: { shareId: string }) {
     );
   }
 
-  if (!initialFile || initialFile.data.type !== 'io.noya.ayon') return null;
+  if (!initialFile) return null;
 
-  return (
-    <Ayon
-      fileId={shareId}
-      canvasRendererType="svg"
-      initialDocument={initialFile.data.document}
-      name={initialFile.data.name}
-      uploadAsset={async () => ''}
-      viewType="previewOnly"
-    />
-  );
+  return <ProjectEditor initialFile={initialFile} viewType="preview" />;
 }
 
 export default function Preview() {

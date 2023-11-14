@@ -81,7 +81,7 @@ function Workspace({
   uploadAsset,
   name,
   onChangeName,
-  viewType = 'combined',
+  viewType = 'editable',
   padding,
   canvasRendererType,
   downloadFile,
