@@ -1,4 +1,4 @@
-import { IconButton, Spacer, Stack } from 'noya-designsystem';
+import { Button, IconButton, Spacer, Stack } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo } from 'react';
 import { ClientStorageKey, usePersistentState } from '../utils/clientStorage';
@@ -6,6 +6,7 @@ import { ClientStorageKey, usePersistentState } from '../utils/clientStorage';
 type Props = {
   children: React.ReactNode;
   title?: React.ReactNode;
+  onClickTitle?: () => void;
   titleTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
   right?: React.ReactNode;
 };
@@ -13,6 +14,7 @@ type Props = {
 const InspectorSectionInternal = ({
   children,
   title,
+  onClickTitle,
   titleTextStyle,
   right,
 }: Props) => (
@@ -23,9 +25,17 @@ const InspectorSectionInternal = ({
   >
     {title && (
       <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title textStyle={titleTextStyle}>
-          {title}
-        </InspectorPrimitives.Title>
+        {onClickTitle ? (
+          <Button variant="none" onClick={onClickTitle}>
+            <InspectorPrimitives.Title textStyle={titleTextStyle}>
+              {title}
+            </InspectorPrimitives.Title>
+          </Button>
+        ) : (
+          <InspectorPrimitives.Title textStyle={titleTextStyle}>
+            {title}
+          </InspectorPrimitives.Title>
+        )}
         <Spacer.Horizontal />
         {right}
       </InspectorPrimitives.SectionHeader>

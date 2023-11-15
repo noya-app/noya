@@ -1,5 +1,10 @@
 import { useRouter } from 'next/router';
 import {
+  asyncIterableToString,
+  findAndParseJSONArray,
+  useNoyaClientOrFallback,
+} from 'noya-api';
+import {
   Button,
   Chip,
   Divider,
@@ -17,13 +22,16 @@ import {
 } from 'noya-designsystem';
 import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
+import { useIsMounted } from 'noya-react-utils';
 import React, { useMemo } from 'react';
+import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
 import { NOYA_HOST } from '../utils/noyaClient';
 import { DSLayoutTree } from './DSLayoutTree';
 import { describeDiffItem } from './arrayDiff';
 import { Model } from './builders';
+import { exportLayout } from './componentLayout';
 import { enforceSchema } from './layoutSchema';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import {
@@ -70,6 +78,7 @@ export function DSComponentInspector({
   const openInputDialog = useOpenInputDialog();
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
+  const client = useNoyaClientOrFallback();
 
   const variantsWithDefault = useMemo(
     (): (NoyaVariant | undefined)[] => [
@@ -121,6 +130,8 @@ export function DSComponentInspector({
   }, [findComponent, resolvedNode]);
 
   const [currentTagValue, setCurrentTagValue] = React.useState('');
+
+  const isMounted = useIsMounted();
 
   return (
     <Stack.V width="400px" background="white">
@@ -176,7 +187,35 @@ export function DSComponentInspector({
             titleTextStyle="heading4"
             storageKey="dsShowMetadata"
           >
-            <InspectorPrimitives.LabeledRow label="Description">
+            <InspectorPrimitives.LabeledRow
+              label="Description"
+              right={
+                <IconButton
+                  iconName="MagicWandIcon"
+                  onClick={async () => {
+                    const prompt = createDescriptionPrompt(
+                      component,
+                      resolvedNode,
+                    );
+
+                    console.info('Prompt: ', prompt);
+
+                    const iterator =
+                      await client.networkClient.generate.fromPrompt(prompt);
+
+                    let result = '';
+
+                    for await (const chunk of iterator) {
+                      result += chunk;
+
+                      if (!isMounted.current) return;
+
+                      onChangeComponent({ ...component, description: result });
+                    }
+                  }}
+                />
+              }
+            >
               <AutoResizingTextArea
                 value={component.description || ''}
                 onChangeText={(description) =>
@@ -184,7 +223,32 @@ export function DSComponentInspector({
                 }
               />
             </InspectorPrimitives.LabeledRow>
-            <InspectorPrimitives.LabeledRow label="Tags">
+            <InspectorPrimitives.LabeledRow
+              label="Tags"
+              right={
+                <IconButton
+                  iconName="MagicWandIcon"
+                  onClick={async () => {
+                    const prompt = createTagsPrompt(component, resolvedNode);
+
+                    console.info('Prompt: ', prompt);
+
+                    const iterator =
+                      await client.networkClient.generate.fromPrompt(prompt);
+                    let result = await asyncIterableToString(iterator);
+                    const json = findAndParseJSONArray(result);
+                    const safe = z.array(z.string()).safeParse(json);
+
+                    if (!safe.success) return;
+
+                    onChangeComponent({
+                      ...component,
+                      tags: safe.data,
+                    });
+                  }}
+                />
+              }
+            >
               <Stack.V flex="1" gap="4px">
                 <InputField.Root labelPosition="start">
                   <InputField.Input
@@ -203,7 +267,7 @@ export function DSComponentInspector({
                   <InputField.Label>#</InputField.Label>
                 </InputField.Root>
                 {component.tags && component.tags.length > 0 && (
-                  <Stack.H gap="4px">
+                  <Stack.H gap="4px" flexWrap="wrap">
                     {component.tags.map((tag, i) => (
                       <Chip
                         key={i}
@@ -306,7 +370,7 @@ export function DSComponentInspector({
                         return;
                       }
 
-                      debugger;
+                      // debugger;
 
                       const [primitivesDiff, compositesDiff] = partitionDiff(
                         resolvedNode,
@@ -504,4 +568,34 @@ export function DSComponentInspector({
       </ScrollArea>
     </Stack.V>
   );
+}
+
+function createDescriptionPrompt(
+  component: NoyaComponent,
+  resolvedNode: NoyaResolvedNode,
+) {
+  return `You are a professional UI designer helping me write documentation. I will provide the name and code of a UI component. Respond with ONLY a short summary of the component that I can use as the intro section for this component on its documentation page. Focus on the purpose of the component rather than its implementation details or individual elements, as these may be customized by the designer. Use simple, easy-to-understand language. Response with no more than a few lines of text.
+
+\`\`\`
+Component Name: "${component.name}"
+Component Code:
+${exportLayout(resolvedNode)}
+\`\`\`
+
+Your response should begin with: The **${component.name}**...`;
+}
+
+function createTagsPrompt(
+  component: NoyaComponent,
+  resolvedNode: NoyaResolvedNode,
+) {
+  return `You are a professional UI designer helping me write documentation. I will provide the name, description, and code of a UI component. Respond with a JSON array of keywords that can be used to categorize and search for thsi component. These tags should be short and lowercase. E.g. ["marketing", "application", "e-commerce", ...]
+
+\`\`\`
+Component Name: "${component.name}"
+Component Description: "${component.description}"
+Component Code:
+${exportLayout(resolvedNode)}
+\`\`\`  
+`;
 }

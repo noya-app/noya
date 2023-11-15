@@ -214,8 +214,8 @@ export function DSEditor({
   const rendererRef = React.useRef<IDSRenderer>(null);
 
   const handleSelectComponent = useCallback(
-    (componentId: string) => {
-      setSelection({ componentID: componentId });
+    (componentId?: string) => {
+      setSelection(componentId ? { componentID: componentId } : undefined);
     },
     [setSelection],
   );

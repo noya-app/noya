@@ -46,6 +46,7 @@ export const Column = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
   flexDirection: 'column',
+  gap: '4px',
 }));
 
 export const Checkbox = styled.input(({ theme }) => ({
@@ -70,10 +71,10 @@ const SliderRowLabel = styled.span(({ theme }) => ({
   marginBottom: '-6px',
 }));
 
-const RowLabel = styled.span<{
+export const RowLabel = styled.span<{
   textStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
 }>(({ theme, textStyle }) => ({
-  marginBottom: '6px',
+  // marginBottom: '6px',
   display: 'flex',
   ...(textStyle
     ? {
@@ -84,6 +85,7 @@ const RowLabel = styled.span<{
         color: theme.colors.textSubtle,
         fontWeight: 'bold',
       }),
+  lineHeight: '19px', // Button height
 }));
 
 export const LabeledRow = memo(function LabeledRow({

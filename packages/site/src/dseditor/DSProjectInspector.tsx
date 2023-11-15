@@ -45,7 +45,7 @@ interface Props {
   components: NoyaComponent[];
   onNewComponent: (componentID?: string) => void;
   onDeleteComponent: (componentID: string) => void;
-  onSelectComponent: (componentID: string) => void;
+  onSelectComponent: (componentID?: string) => void;
   onMoveComponent: (componentID: string, index: number) => void;
   findComponent: FindComponent;
 }
@@ -158,6 +158,9 @@ export function DSProjectInspector({
           <InspectorSection
             title="Components"
             titleTextStyle="heading4"
+            onClickTitle={() => {
+              onSelectComponent(undefined);
+            }}
             right={
               <>
                 <IconButton
