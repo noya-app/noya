@@ -1,18 +1,21 @@
-import { Spacer, Stack } from 'noya-designsystem';
+import { IconButton, Spacer, Stack } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
-import React from 'react';
+import React, { memo } from 'react';
+import { ClientStorageKey, usePersistentState } from '../utils/clientStorage';
 
-export const InspectorSection = ({
+type Props = {
+  children: React.ReactNode;
+  title?: React.ReactNode;
+  titleTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
+  right?: React.ReactNode;
+};
+
+const InspectorSectionInternal = ({
   children,
   title,
   titleTextStyle,
   right,
-}: {
-  children: React.ReactNode;
-  title?: string;
-  titleTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
-  right?: React.ReactNode;
-}) => (
+}: Props) => (
   <Stack.V
     padding={titleTextStyle === 'heading3' ? '12px' : '24px 12px 12px'}
     gap="12px"
@@ -30,3 +33,44 @@ export const InspectorSection = ({
     {children}
   </Stack.V>
 );
+
+const ExpandableInspectorSection = ({
+  storageKey,
+  ...props
+}: Props & {
+  storageKey: ClientStorageKey;
+}) => {
+  const [visibility, setVisibility] = usePersistentState<'show' | 'hide'>(
+    storageKey,
+    'show',
+  );
+  const expanded = visibility === 'show';
+
+  return (
+    <InspectorSectionInternal
+      {...props}
+      title={
+        <Stack.H gap="4px" alignItems="center">
+          {props.title}
+          <IconButton
+            iconName={expanded ? 'ChevronDownIcon' : 'ChevronRightIcon'}
+            onClick={() => setVisibility(expanded ? 'hide' : 'show')}
+          />
+        </Stack.H>
+      }
+    >
+      {expanded && props.children}
+    </InspectorSectionInternal>
+  );
+};
+
+export const InspectorSection = memo(function InspectorSection({
+  storageKey,
+  ...props
+}: Props & { storageKey?: ClientStorageKey }) {
+  return storageKey ? (
+    <ExpandableInspectorSection {...props} storageKey={storageKey} />
+  ) : (
+    <InspectorSectionInternal {...props} />
+  );
+});

@@ -93,7 +93,7 @@ const DeleteElement = styled(Cross1Icon)<{
   ...(size === 'medium'
     ? {
         marginLeft: '2px',
-        top: '-1px',
+        // top: '-1px',
         transform: 'scale(0.75)',
       }
     : {

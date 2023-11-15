@@ -118,6 +118,7 @@ export type NoyaComponent = {
   type: 'noyaComponent';
   name: string;
   description?: string;
+  tags?: string[];
   componentID: string;
   rootElement: NoyaNode;
   variants?: NoyaVariant[];

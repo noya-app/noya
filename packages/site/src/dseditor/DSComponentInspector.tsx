@@ -1,8 +1,10 @@
+import { useRouter } from 'next/router';
 import {
   Button,
   Chip,
   Divider,
   IconButton,
+  InputField,
   ListView,
   ScrollArea,
   Select,
@@ -18,6 +20,7 @@ import { InspectorPrimitives } from 'noya-inspector';
 import React, { useMemo } from 'react';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
+import { NOYA_HOST } from '../utils/noyaClient';
 import { DSLayoutTree } from './DSLayoutTree';
 import { describeDiffItem } from './arrayDiff';
 import { Model } from './builders';
@@ -50,7 +53,6 @@ interface Props {
   setHighlightedPath: (path: string[] | undefined) => void;
   onCreateComponent: (component: NoyaComponent) => void;
   components: NoyaComponent[];
-  // activeDiff?: NoyaDiff;
 }
 
 export function DSComponentInspector({
@@ -63,8 +65,8 @@ export function DSComponentInspector({
   setHighlightedPath,
   onCreateComponent,
   components,
-}: // activeDiff,
-Props) {
+}: Props) {
+  const { query } = useRouter();
   const openInputDialog = useOpenInputDialog();
   const theme = useDesignSystemTheme();
   const component = findComponent(selection.componentID)!;
@@ -118,6 +120,8 @@ Props) {
     );
   }, [findComponent, resolvedNode]);
 
+  const [currentTagValue, setCurrentTagValue] = React.useState('');
+
   return (
     <Stack.V width="400px" background="white">
       <ScrollArea>
@@ -166,6 +170,12 @@ Props) {
                 }}
               />
             </InspectorPrimitives.LabeledRow>
+          </InspectorSection>
+          <InspectorSection
+            title="Metadata"
+            titleTextStyle="heading4"
+            storageKey="dsShowMetadata"
+          >
             <InspectorPrimitives.LabeledRow label="Description">
               <AutoResizingTextArea
                 value={component.description || ''}
@@ -173,6 +183,67 @@ Props) {
                   onChangeComponent({ ...component, description })
                 }
               />
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Tags">
+              <Stack.V flex="1" gap="4px">
+                <InputField.Root labelPosition="start">
+                  <InputField.Input
+                    value={currentTagValue}
+                    onSubmit={(value) => {
+                      onChangeComponent({
+                        ...component,
+                        tags: [
+                          ...(component.tags ?? []),
+                          value.trim().toLowerCase(),
+                        ],
+                      });
+                      setCurrentTagValue('');
+                    }}
+                  />
+                  <InputField.Label>#</InputField.Label>
+                </InputField.Root>
+                {component.tags && component.tags.length > 0 && (
+                  <Stack.H gap="4px">
+                    {component.tags.map((tag, i) => (
+                      <Chip
+                        key={i}
+                        deletable
+                        onDelete={() => {
+                          onChangeComponent({
+                            ...component,
+                            tags: component.tags?.filter((t) => t !== tag),
+                          });
+                        }}
+                      >
+                        {tag}
+                      </Chip>
+                    ))}
+                  </Stack.H>
+                )}
+              </Stack.V>
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Thumbnail">
+              <Stack.H
+                alignItems="center"
+                justifyContent="center"
+                borderRadius="4px"
+                background={theme.colors.inputBackground}
+                flex="1"
+                padding="20px"
+              >
+                <img
+                  style={{
+                    width: '256px',
+                    aspectRatio: '16/9',
+                    objectFit: 'contain',
+                  }}
+                  srcSet={[
+                    `${NOYA_HOST}/api/files/${query.id}/thumbnail.png?width=256&height=144&deviceScaleFactor=1 256w`,
+                    `${NOYA_HOST}/api/files/${query.id}/thumbnail.png?width=512&height=288&deviceScaleFactor=1 512w`,
+                  ].join(', ')}
+                  alt="thumbnail"
+                />
+              </Stack.H>
             </InspectorPrimitives.LabeledRow>
           </InspectorSection>
           <InspectorSection

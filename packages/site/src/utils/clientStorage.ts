@@ -10,6 +10,7 @@ const ClientStorageDefinitions = {
   networkDebuggerStreamingFilter: 'noya-ayon-network-debugger-streaming-filter',
   ayonShowPageSuggestions: 'noya-ayon-show-page-suggestions',
   ayonShowComponentSuggestions: 'noya-ayon-show-component-suggestions',
+  dsShowMetadata: 'noya-ds-show-metadata',
 };
 
 export const ayonOnboardingStep = [
@@ -22,7 +23,7 @@ export const ayonOnboardingStep = [
 
 export type AyonOnboardingStep = (typeof ayonOnboardingStep)[number];
 
-type ClientStorageKey = keyof typeof ClientStorageDefinitions;
+export type ClientStorageKey = keyof typeof ClientStorageDefinitions;
 
 export const ClientStorage = {
   getItem(storageKey: ClientStorageKey): string | null {
