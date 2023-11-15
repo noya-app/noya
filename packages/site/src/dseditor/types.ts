@@ -113,12 +113,21 @@ export type NoyaVariant = {
   diff: NoyaDiff;
 };
 
+export type ComponentThumbnailSource = {
+  url?: string;
+  size?: {
+    width: number;
+    height: number;
+  };
+};
+
 export type NoyaComponent = {
   id: string;
   type: 'noyaComponent';
   name: string;
   description?: string;
   tags?: string[];
+  thumbnail?: ComponentThumbnailSource;
   componentID: string;
   rootElement: NoyaNode;
   variants?: NoyaVariant[];

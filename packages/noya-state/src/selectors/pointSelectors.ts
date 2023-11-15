@@ -2,33 +2,33 @@ import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
 import Sketch from 'noya-file-format';
 import {
-  createRectFromBounds,
-  distance,
   Point,
   Rect,
+  createRectFromBounds,
+  distance,
   toDegrees,
 } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import {
-  decodeCurvePoint,
   DecodedCurvePoint,
+  Primitives,
+  SetNumberMode,
+  decodeCurvePoint,
   encodeCurvePoint,
   parsePoint,
   path,
-  Primitives,
-  SetNumberMode,
   stringifyPoint,
 } from 'noya-state';
 import { range, windowsOf } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import type {
-  ApplicationState,
-  SelectedPointLists,
-  SelectedControlPoint,
-} from '../reducers/applicationReducer';
-import type { InteractionState } from '../reducers/interactionReducer';
 import { Layers } from '../layer';
 import { PointsLayer, visit } from '../layers';
+import type {
+  ApplicationState,
+  SelectedControlPoint,
+  SelectedPointLists,
+} from '../reducers/applicationReducer';
+import type { InteractionState } from '../reducers/interactionReducer';
 import { getBoundingRectMap } from './geometrySelectors';
 import { getCurrentPage } from './pageSelectors';
 
@@ -241,7 +241,11 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
   );
 };
 
-function getNewValue(value: number, mode: SetNumberMode, delta?: number) {
+export function getNewValue(
+  value: number,
+  mode: SetNumberMode,
+  delta?: number,
+) {
   return delta === undefined
     ? value
     : mode === 'replace'

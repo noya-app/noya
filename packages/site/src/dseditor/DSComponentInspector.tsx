@@ -21,8 +21,9 @@ import {
   withSeparatorElements,
 } from 'noya-designsystem';
 import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
-import { InspectorPrimitives } from 'noya-inspector';
+import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { useIsMounted } from 'noya-react-utils';
+import { getNewValue } from 'noya-state';
 import React, { useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
@@ -50,6 +51,8 @@ import {
 } from './types';
 import { getNodeName } from './utils/nodeUtils';
 import { partitionDiff } from './utils/partitionDiff';
+
+const defaultThumbnailSize = { width: 512, height: 288 };
 
 interface Props {
   selection: SelectedComponent;
@@ -132,6 +135,8 @@ export function DSComponentInspector({
   const [currentTagValue, setCurrentTagValue] = React.useState('');
 
   const isMounted = useIsMounted();
+
+  const thumbnailSize = component.thumbnail?.size ?? defaultThumbnailSize;
 
   return (
     <Stack.V width="400px" background="white">
@@ -286,7 +291,41 @@ export function DSComponentInspector({
                 )}
               </Stack.V>
             </InspectorPrimitives.LabeledRow>
-            <InspectorPrimitives.LabeledRow label="Thumbnail">
+            <InspectorPrimitives.LabeledRow label="Thumbnail Size" gap="8px">
+              <DimensionInput
+                value={thumbnailSize.width}
+                label="W"
+                onSetValue={(value, mode) => {
+                  onChangeComponent({
+                    ...component,
+                    thumbnail: {
+                      ...component.thumbnail,
+                      size: {
+                        ...thumbnailSize,
+                        width: getNewValue(thumbnailSize.width, mode, value),
+                      },
+                    },
+                  });
+                }}
+              />
+              <DimensionInput
+                value={thumbnailSize.height}
+                label="H"
+                onSetValue={(value, mode) => {
+                  onChangeComponent({
+                    ...component,
+                    thumbnail: {
+                      ...component.thumbnail,
+                      size: {
+                        ...thumbnailSize,
+                        height: getNewValue(thumbnailSize.height, mode, value),
+                      },
+                    },
+                  });
+                }}
+              />
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Thumbnail Preview">
               <Stack.H
                 alignItems="center"
                 justifyContent="center"
@@ -296,14 +335,20 @@ export function DSComponentInspector({
                 padding="20px"
               >
                 <img
+                  key={`${component.id}-${thumbnailSize.width}-${thumbnailSize.height}`}
                   style={{
                     width: '256px',
                     aspectRatio: '16/9',
                     objectFit: 'contain',
                   }}
                   srcSet={[
-                    `${NOYA_HOST}/api/files/${query.id}/thumbnail.png?width=256&height=144&deviceScaleFactor=1 256w`,
-                    `${NOYA_HOST}/api/files/${query.id}/thumbnail.png?width=512&height=288&deviceScaleFactor=1 512w`,
+                    `${NOYA_HOST}/api/files/${
+                      query.id
+                    }/thumbnail.png?params[component]=${encodeURIComponent(
+                      component.componentID,
+                    )}&width=${thumbnailSize.width}&height=${
+                      thumbnailSize.height
+                    }&deviceScaleFactor=1 ${thumbnailSize.width}w`,
                   ].join(', ')}
                   alt="thumbnail"
                 />
