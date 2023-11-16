@@ -24,11 +24,15 @@ import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
+import { upperFirst } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
-import { NOYA_HOST } from '../utils/noyaClient';
+import {
+  DSComponentThumbnail,
+  defaultThumbnailSize,
+} from './DSComponentThumbnail';
 import { DSLayoutTree } from './DSLayoutTree';
 import { describeDiffItem } from './arrayDiff';
 import { Model } from './builders';
@@ -42,6 +46,7 @@ import {
   unresolve,
 } from './traversal';
 import {
+  NoyaAccessModifier,
   NoyaComponent,
   NoyaDiffItem,
   NoyaNode,
@@ -51,8 +56,6 @@ import {
 } from './types';
 import { getNodeName } from './utils/nodeUtils';
 import { partitionDiff } from './utils/partitionDiff';
-
-const defaultThumbnailSize = { width: 512, height: 288 };
 
 interface Props {
   selection: SelectedComponent;
@@ -192,6 +195,17 @@ export function DSComponentInspector({
             titleTextStyle="heading4"
             storageKey="dsShowMetadata"
           >
+            <InspectorPrimitives.LabeledRow label="Access">
+              <Select<NoyaAccessModifier>
+                value={component.accessModifier ?? 'public'}
+                id="access-input"
+                options={['public', 'internal']}
+                getTitle={upperFirst}
+                onChange={(accessModifier) =>
+                  onChangeComponent({ ...component, accessModifier })
+                }
+              />
+            </InspectorPrimitives.LabeledRow>
             <InspectorPrimitives.LabeledRow
               label="Description"
               right={
@@ -295,6 +309,7 @@ export function DSComponentInspector({
               <DimensionInput
                 value={thumbnailSize.width}
                 label="W"
+                trigger="change"
                 onSetValue={(value, mode) => {
                   onChangeComponent({
                     ...component,
@@ -311,6 +326,7 @@ export function DSComponentInspector({
               <DimensionInput
                 value={thumbnailSize.height}
                 label="H"
+                trigger="change"
                 onSetValue={(value, mode) => {
                   onChangeComponent({
                     ...component,
@@ -332,28 +348,13 @@ export function DSComponentInspector({
                 borderRadius="4px"
                 background={theme.colors.inputBackground}
                 flex="1"
-                // padding="20px"
+                aspectRatio="16/9"
                 border={`1px solid ${theme.colors.divider}`}
               >
-                <img
-                  key={`${component.id}-${thumbnailSize.width}-${thumbnailSize.height}`}
-                  style={{
-                    width: '256px',
-                    aspectRatio: '16/9',
-                    objectFit: 'contain',
-                  }}
-                  srcSet={[
-                    `${NOYA_HOST}/api/files/${
-                      query.id
-                    }.png?params[component]=${encodeURIComponent(
-                      component.componentID,
-                    )}&params[library]=thumbnail&width=${
-                      thumbnailSize.width
-                    }&height=${thumbnailSize.height}&deviceScaleFactor=1 ${
-                      thumbnailSize.width
-                    }w`,
-                  ].join(', ')}
-                  alt="thumbnail"
+                <DSComponentThumbnail
+                  component={component}
+                  size={thumbnailSize}
+                  fileId={query.id as string}
                 />
               </Stack.H>
             </InspectorPrimitives.LabeledRow>

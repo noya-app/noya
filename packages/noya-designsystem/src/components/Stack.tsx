@@ -34,6 +34,7 @@ interface StyleProps {
   width?: CSSProperties['width'];
   minWidth?: CSSProperties['minWidth'];
   maxWidth?: CSSProperties['maxWidth'];
+  aspectRatio?: CSSProperties['aspectRatio'];
   padding?: CSSProperties['padding'];
   paddingVertical?: string | number;
   paddingHorizontal?: string | number;
@@ -45,6 +46,7 @@ interface StyleProps {
   overflowX?: CSSProperties['overflowX'];
   overflowY?: CSSProperties['overflowY'];
   overflow?: CSSProperties['overflow'];
+  textOverflow?: CSSProperties['textOverflow'];
   boxShadow?: CSSProperties['boxShadow'];
   outline?: CSSProperties['outline'];
   border?: CSSProperties['border'];

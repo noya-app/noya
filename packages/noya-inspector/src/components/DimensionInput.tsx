@@ -13,6 +13,7 @@ interface Props {
   size?: number;
   placeholder?: string;
   disabled?: boolean;
+  trigger?: 'change' | 'submit';
 }
 
 export const DimensionInput = memo(function DimensionInput({
@@ -23,6 +24,7 @@ export const DimensionInput = memo(function DimensionInput({
   size,
   placeholder = 'multi',
   disabled,
+  trigger = 'submit',
 }: Props) {
   const handleNudgeValue = useCallback(
     (value: number) => onSetValue(value, 'adjust'),
@@ -40,8 +42,10 @@ export const DimensionInput = memo(function DimensionInput({
         value={value === undefined ? value : round(value, 2)}
         placeholder={value === undefined ? placeholder : undefined}
         onNudge={handleNudgeValue}
-        onSubmit={handleSetValue}
         disabled={disabled}
+        {...(trigger === 'change'
+          ? { onChange: handleSetValue }
+          : { onSubmit: handleSetValue })}
       />
       {label && <InputField.Label>{label}</InputField.Label>}
     </InputField.Root>

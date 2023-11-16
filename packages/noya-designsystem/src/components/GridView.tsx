@@ -61,7 +61,7 @@ const Grid = styled.div<{
     color: theme.colors.text,
     display: 'grid',
     gridTemplateColumns: `repeat(auto-fill, minmax(${sizes[size].itemWidth}px, 1fr))`,
-    gridAutoRows: `${sizes[size].itemHeight}px`,
+    // gridAutoRows: `${sizes[size].itemHeight}px`,
     gap: `${sizes[size].gap}px`,
     // gridTemplateColumns: `repeat(auto-fill, minmax(
     //   ${size === 'large' ? '280px' : size === 'small' ? '160px' : '116px'}
@@ -175,6 +175,7 @@ const SectionTitle = styled.span<{ last?: boolean }>(
     whiteSpace: 'pre',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    lineHeight: '1',
   }),
 );
 
@@ -446,7 +447,7 @@ function GridViewSectionHeader({ title }: { title: string }) {
 
   return (
     <SectionHeaderContainer>
-      <Spacer.Vertical size={12} />
+      <Spacer.Vertical size={24} />
       {withSeparatorElements(
         grouped.map((title, index) => (
           <SectionTitle last={index === grouped.length - 1}>
@@ -455,7 +456,6 @@ function GridViewSectionHeader({ title }: { title: string }) {
         )),
         <SectionTitle> / </SectionTitle>,
       )}
-      <Spacer.Vertical size={8} />
     </SectionHeaderContainer>
   );
 }

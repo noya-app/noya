@@ -121,6 +121,8 @@ export type ComponentThumbnailSource = {
   };
 };
 
+export type NoyaAccessModifier = 'public' | 'internal';
+
 export type NoyaComponent = {
   id: string;
   type: 'noyaComponent';
@@ -131,6 +133,7 @@ export type NoyaComponent = {
   componentID: string;
   rootElement: NoyaNode;
   variants?: NoyaVariant[];
+  accessModifier?: NoyaAccessModifier;
 };
 
 export type SelectedComponent = {
