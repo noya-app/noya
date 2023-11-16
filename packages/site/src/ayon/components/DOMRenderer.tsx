@@ -322,6 +322,7 @@ const DOMRendererContent = memo(
                                 ? highlightedNodePath.path
                                 : undefined,
                             selectionOutlineColor: lightTheme.colors.secondary,
+                            theme: undefined,
                           });
 
                           return (

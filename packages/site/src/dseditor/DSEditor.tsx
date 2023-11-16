@@ -1,4 +1,5 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { useRouter } from 'next/router';
 import { DS } from 'noya-api';
 import {
   DividerVertical,
@@ -31,7 +32,6 @@ interface Props {
   onChangeDocument?: (document: DS) => void;
   onChangeName?: (name: string) => void;
   viewType?: ViewType;
-  initialComponentId?: string;
 }
 export function DSEditor({
   initialDocument,
@@ -39,18 +39,26 @@ export function DSEditor({
   name: fileName,
   onChangeName = noop,
   viewType,
-  initialComponentId,
 }: Props) {
+  const { query } = useRouter();
+  const initialComponentId = query.component as string | undefined;
+  const library = query.library as string | undefined;
+  const isThumbnail = library === 'thumbnail';
+
   const theme = useDesignSystemTheme();
   const [ds, setDS] = React.useState(initialDocument);
 
-  const {
+  let {
     source: { name: sourceName },
     config,
     components = initialComponents,
   } = ds as DS & {
     components: NoyaComponent[];
   };
+
+  if (library) {
+    sourceName = library;
+  }
 
   const setComponents = useCallback((components: NoyaComponent[]) => {
     setDS((ds) => ({
@@ -63,7 +71,7 @@ export function DSEditor({
     onChangeDocument(ds);
   }, [onChangeDocument, ds]);
 
-  const [system, setSystem] = React.useState<
+  let [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
   >();
 
@@ -192,6 +200,7 @@ export function DSEditor({
           canvasBackgroundColor: theme.colors.canvas.background,
           selectionOutlineColor: theme.colors.primary,
           padding: viewType === 'preview' ? 0 : 20,
+          isThumbnail,
         });
       }
 
@@ -208,6 +217,7 @@ export function DSEditor({
       highlightedPath,
       config,
       viewType,
+      isThumbnail,
     ],
   );
 

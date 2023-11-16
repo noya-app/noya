@@ -1,6 +1,7 @@
 import fetch from 'cross-fetch';
 
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { ThumbnailDesignSystem } from './ThumbnailDesignSystem';
 import { DesignSystemCache } from './cache';
 
 const requireModule = () => {};
@@ -31,7 +32,9 @@ export async function loadDesignSystem(
     Function?: typeof window.Function;
     enableCache?: boolean;
   } = {},
-) {
+): Promise<DesignSystemDefinition> {
+  if (name === 'thumbnail') return ThumbnailDesignSystem;
+
   const { Function = window.Function, enableCache = true } = options;
 
   if (enableCache && DesignSystemCache.has(name)) {

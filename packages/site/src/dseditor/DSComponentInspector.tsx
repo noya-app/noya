@@ -332,7 +332,8 @@ export function DSComponentInspector({
                 borderRadius="4px"
                 background={theme.colors.inputBackground}
                 flex="1"
-                padding="20px"
+                // padding="20px"
+                border={`1px solid ${theme.colors.divider}`}
               >
                 <img
                   key={`${component.id}-${thumbnailSize.width}-${thumbnailSize.height}`}
@@ -344,11 +345,13 @@ export function DSComponentInspector({
                   srcSet={[
                     `${NOYA_HOST}/api/files/${
                       query.id
-                    }/thumbnail.png?params[component]=${encodeURIComponent(
+                    }.png?params[component]=${encodeURIComponent(
                       component.componentID,
-                    )}&width=${thumbnailSize.width}&height=${
-                      thumbnailSize.height
-                    }&deviceScaleFactor=1 ${thumbnailSize.width}w`,
+                    )}&params[library]=thumbnail&width=${
+                      thumbnailSize.width
+                    }&height=${thumbnailSize.height}&deviceScaleFactor=1 ${
+                      thumbnailSize.width
+                    }w`,
                   ].join(', ')}
                   alt="thumbnail"
                 />

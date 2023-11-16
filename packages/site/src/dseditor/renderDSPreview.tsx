@@ -67,6 +67,7 @@ export function renderResolvedNode({
   selectionOutlineColor,
   highlightedPath,
   system,
+  theme,
 }: {
   isEditable: boolean;
   resolvedNode: NoyaResolvedNode;
@@ -74,6 +75,7 @@ export function renderResolvedNode({
   selectionOutlineColor: string;
   highlightedPath: string[] | undefined;
   system: DesignSystemDefinition;
+  theme: any;
 }) {
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
@@ -252,6 +254,7 @@ export function renderResolvedNode({
             element.componentID === radioSymbolId) && {
             label: transformedChildren,
           })}
+          {...(theme && { _theme: theme })}
         />
       );
     },
@@ -266,6 +269,7 @@ export function renderDSPreview({
   canvasBackgroundColor,
   selectionOutlineColor,
   padding,
+  isThumbnail,
 }: {
   renderProps: DSRenderProps;
   highlightedPath: string[] | undefined;
@@ -274,6 +278,7 @@ export function renderDSPreview({
   canvasBackgroundColor: string;
   selectionOutlineColor: string;
   padding?: number;
+  isThumbnail?: boolean;
 }) {
   // console.info(
   //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
@@ -283,6 +288,8 @@ export function renderDSPreview({
   //   }),
   // );
 
+  // const system = isThumbnail ? ThumbnailDesignSystem : props.system;
+
   const content = renderResolvedNode({
     isEditable: true,
     resolvedNode,
@@ -290,6 +297,7 @@ export function renderDSPreview({
     selectionOutlineColor,
     highlightedPath,
     system: props.system,
+    theme: isThumbnail ? props.theme : undefined,
   });
 
   const colorMode = dsConfig.colorMode ?? 'light';
@@ -318,6 +326,12 @@ export function renderDSPreview({
         flexDirection: 'column',
         padding,
         position: 'relative',
+        ...(isThumbnail && {
+          padding: '5vh 5vw',
+          backgroundImage: undefined,
+          background: 'rgb(240, 240, 242)',
+          justifyContent: 'center',
+        }),
       }}
     >
       <div
@@ -327,6 +341,11 @@ export function renderDSPreview({
           overflow: 'hidden',
           position: 'relative',
           transition: 'background 0.2s',
+          ...(isThumbnail && {
+            borderRadius: '16px',
+            border: '2px solid rgba(0,0,0,0.15)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+          }),
         }}
       >
         {content}

@@ -87,7 +87,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
   const [ready, setReady] = React.useState(false);
   const ref = useRef<HTMLIFrameElement>(null);
   const [root, setRoot] = React.useState<RenderableRoot | undefined>();
-  const [system, setSystem] = React.useState<
+  let [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
   >();
 
@@ -130,10 +130,14 @@ export const DSRenderer = forwardRef(function DSRenderer(
       return;
     }
 
-    if (!root) {
-      setRoot(system.createRoot(ref.current!.contentDocument!.body));
+    if (!root && ready) {
+      setRoot(
+        system.createRoot(
+          ref.current!.contentDocument!.getElementById('noya-preview-root')!,
+        ),
+      );
     }
-  }, [root, system]);
+  }, [ready, root, system]);
 
   const theme = useMemo(() => {
     if (!system || !system.themeTransformer) return undefined;

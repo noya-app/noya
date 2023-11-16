@@ -1,5 +1,4 @@
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 import { NoyaAPI } from 'noya-api';
 import { Size } from 'noya-geometry';
 import React, { memo } from 'react';
@@ -29,8 +28,6 @@ export const ProjectEditor = memo(function ProjectEditor({
   nameOverride,
   ...props
 }: Props) {
-  const { query } = useRouter();
-
   switch (initialFile.data.type) {
     case 'io.noya.ayon':
       return (
@@ -48,7 +45,6 @@ export const ProjectEditor = memo(function ProjectEditor({
         <DSEditorDynamic
           name={nameOverride ?? initialFile.data.name}
           initialDocument={initialFile.data.document}
-          initialComponentId={query.component as string | undefined}
           {...props}
         />
       );

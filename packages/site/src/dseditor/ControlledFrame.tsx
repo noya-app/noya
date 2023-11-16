@@ -84,87 +84,90 @@ export const ControlledFrame = memo(
         // Ensure html5 doctype for proper styling
         srcDoc={`<!DOCTYPE html>
 <head>
-<style>
-  html, body { height: 100%; overflow: hidden; }
+  <style>
+    html, body, #noya-preview-root { height: 100%; overflow: hidden; margin: 0; padding: 0; }
 
-  * {
-    /* antd doesn't set a border-style or width, so we set these for convenience */
-    border-width: 0;
-    border-style: solid;
-  }
- 
-  *::selection {
-    background-color: rgb(179,215,254);
-  }
-
-  @keyframes noya-shimmer {
-    0% {
-      background-position: -200% 0;
+    * {
+      /* antd doesn't set a border-style or width, so we set these for convenience */
+      border-width: 0;
+      border-style: solid;
     }
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  .noya-skeleton-shimmer {
-    animation: noya-shimmer 6s infinite linear;
-    background: linear-gradient(90deg, #ffffff00, #e2e8f0dd, #ffffff00);
-    background-size: 200% 100%;
-  }
-</style>
-<script>
-  const id = ${JSON.stringify(id)};
-
-  const callback = () => {
-    parent.postMessage({ id, type: 'ready' }, '*');
-  }
-
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    callback();
-  } else {
-    document.addEventListener('DOMContentLoaded', callback);
-  }
-
-  // Propagate keyboard shortcuts (keydown events) to the parent window
-  window.addEventListener('keydown', function(event) {
-    // Check if Cmd (for Mac) or Ctrl (for other OS) is pressed
-    // Also handle Escape for exiting editing mode
-    if (event.metaKey || event.ctrlKey || event.key === 'Escape') {
-      // If the key pressed is an arrow key or other key used during text editing
-      // allow the default behavior and return.
-      if (
-        event.key === 'ArrowLeft' || 
-        event.key === 'ArrowRight' || 
-        event.key === 'ArrowUp' || 
-        event.key === 'ArrowDown' ||
-        event.key === 'Backspace' ||
-        event.key === 'Delete' ||
-        event.key === 'a' ||
-        event.key === 'c' ||
-        event.key === 'v' ||
-        event.key === 'x' ||
-        event.key === 'z' ||
-        event.key === 'y'
-      ) {
-        return;
-      }
-
-      event.preventDefault();  // Prevent the default behavior (zoom)
-
-      const command = {
-        key: event.key,
-        keyCode: event.keyCode,
-        altKey: event.altKey,
-        shiftKey: event.shiftKey,
-        ctrlKey: event.ctrlKey,
-        metaKey: event.metaKey,
-      }
   
-      parent.postMessage({ id, type: 'keydown', command }, '*');
+    *::selection {
+      background-color: rgb(179,215,254);
     }
-  });
-</script>
+
+    @keyframes noya-shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .noya-skeleton-shimmer {
+      animation: noya-shimmer 6s infinite linear;
+      background: linear-gradient(90deg, #ffffff00, #e2e8f0dd, #ffffff00);
+      background-size: 200% 100%;
+    }
+  </style>
 </head>
+<body>
+  <div id="noya-preview-root"></div>
+  <script>
+    const id = ${JSON.stringify(id)};
+
+    const callback = () => {
+      parent.postMessage({ id, type: 'ready' }, '*');
+    }
+
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      callback();
+    } else {
+      document.addEventListener('DOMContentLoaded', callback);
+    }
+
+    // Propagate keyboard shortcuts (keydown events) to the parent window
+    window.addEventListener('keydown', function(event) {
+      // Check if Cmd (for Mac) or Ctrl (for other OS) is pressed
+      // Also handle Escape for exiting editing mode
+      if (event.metaKey || event.ctrlKey || event.key === 'Escape') {
+        // If the key pressed is an arrow key or other key used during text editing
+        // allow the default behavior and return.
+        if (
+          event.key === 'ArrowLeft' || 
+          event.key === 'ArrowRight' || 
+          event.key === 'ArrowUp' || 
+          event.key === 'ArrowDown' ||
+          event.key === 'Backspace' ||
+          event.key === 'Delete' ||
+          event.key === 'a' ||
+          event.key === 'c' ||
+          event.key === 'v' ||
+          event.key === 'x' ||
+          event.key === 'z' ||
+          event.key === 'y'
+        ) {
+          return;
+        }
+
+        event.preventDefault();  // Prevent the default behavior (zoom)
+
+        const command = {
+          key: event.key,
+          keyCode: event.keyCode,
+          altKey: event.altKey,
+          shiftKey: event.shiftKey,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+        }
+    
+        parent.postMessage({ id, type: 'keydown', command }, '*');
+      }
+    });
+  </script>
+</body>
 `}
       />
     );
