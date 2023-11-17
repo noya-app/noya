@@ -96,9 +96,9 @@ const ItemContainer = styled.div<{
   border: `1px solid ${
     selected
       ? theme.colors.primary
-      : hovered
-      ? `rgb(132, 63, 255, 0.5)`
-      : bordered
+      : // : hovered
+      // ? `rgb(132, 63, 255, 0.5)`
+      bordered
       ? theme.colors.divider
       : 'transparent'
   }`,
