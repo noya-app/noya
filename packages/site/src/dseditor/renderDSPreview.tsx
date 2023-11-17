@@ -362,7 +362,7 @@ export function renderDSPreview({
             flex: '1',
           }}
         >
-          {chrome === 'window' && (
+          {isThumbnail && chrome === 'window' && (
             <div
               style={{
                 height: '52px',
@@ -370,7 +370,10 @@ export function renderDSPreview({
                 alignItems: 'center',
                 padding: '0 24px',
                 gap: '12px',
-                borderBottom: '4px solid rgba(0,0,0,0.1)',
+                borderBottom:
+                  colorMode === 'light'
+                    ? '4px solid rgba(0,0,0,0.1)'
+                    : '4px solid rgba(255,255,255,0.1)',
               }}
             >
               <div
