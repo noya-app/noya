@@ -118,11 +118,14 @@ const TextComponent = (
 const proxyObject = new Proxy(
   {
     [component.id.Box]: (props: any) => {
+      const theme = getTheme(props);
+
       return (
         <div
           {...applyCommonProps(props)}
           style={{
-            borderColor: 'rgb(221,221,221)',
+            borderColor:
+              theme?.colorMode === 'light' ? 'rgb(221,221,221)' : '#222',
             ...props.style,
           }}
         />
@@ -206,14 +209,19 @@ const proxyObject = new Proxy(
       });
     },
     [component.id.Input]: (props: any) => {
+      const theme = getTheme(props);
+
       return (
         <input
           {...applyCommonProps(props)}
           style={{
             appearance: 'none',
             ...props.style,
-            background: 'white',
-            border: '4px solid rgb(221,221,221)',
+            background: theme?.colorMode === 'light' ? '#fff' : '#333',
+            border:
+              theme?.colorMode === 'light'
+                ? '4px solid rgb(221,221,221)'
+                : '4px solid #666',
             padding: '0',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             borderRadius: tokens.borderRadius,
