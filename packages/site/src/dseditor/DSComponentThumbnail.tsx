@@ -9,7 +9,7 @@ type Props = {
   size?: Size;
 };
 
-export const defaultThumbnailSize = { width: 512, height: 288 };
+export const defaultThumbnailSize = { width: 800, height: 450 };
 
 export const DSComponentThumbnail = memo(function DSComponentThumbnail({
   fileId,

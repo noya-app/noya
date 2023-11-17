@@ -76,16 +76,20 @@ const TextComponent = (props: any, { color }: { color: string }) => {
     }
 
     return (
-      <span
-        style={{
-          ...props.style,
-          background: color,
-          borderRadius: tokens.borderRadius,
-          height: '12px',
-        }}
-      >
-        <span style={{ color: 'transparent' }}>{child}</span>
-      </span>
+      <div style={props.style}>
+        <span
+          style={{
+            display: 'inline-block',
+            background: color,
+            // background: 'currentColor',
+            borderRadius: tokens.borderRadius,
+            height: '12px',
+            lineHeight: '12px',
+          }}
+        >
+          <span style={{ color: 'transparent' }}>{child}</span>
+        </span>
+      </div>
     );
   }
 
@@ -95,7 +99,28 @@ const TextComponent = (props: any, { color }: { color: string }) => {
 const proxyObject = new Proxy(
   {
     [component.id.Box]: (props: any) => {
-      return <div {...applyCommonProps(props)} />;
+      return (
+        <div
+          {...applyCommonProps(props)}
+          style={{
+            borderColor: 'rgb(221,221,221)',
+            ...props.style,
+          }}
+        />
+      );
+    },
+    [component.id.Card]: (props: any) => {
+      return (
+        <div
+          {...applyCommonProps(props)}
+          style={{
+            ...props.style,
+            borderRadius: tokens.borderRadius,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            padding: '16px',
+          }}
+        />
+      );
     },
     [component.id.Button]: (props: any) => {
       const theme = getTheme(props);
