@@ -46,7 +46,11 @@ const tokens = {
 
 const TextComponent = (
   props: any,
-  { color, titleColor }: { color: string; titleColor: string },
+  {
+    color,
+    titleColor,
+    opacity,
+  }: { color: string; titleColor: string; opacity?: number },
 ) => {
   const child = getStringChild(props);
 
@@ -85,7 +89,13 @@ const TextComponent = (
     }
 
     return (
-      <div style={props.style}>
+      <div
+        style={{
+          ...props.style,
+          background: 'transparent',
+          backgroundColor: 'transparent',
+        }}
+      >
         <span
           style={{
             display: 'inline-block',
@@ -93,6 +103,7 @@ const TextComponent = (
             borderRadius: tokens.borderRadius,
             height: '12px',
             lineHeight: '12px',
+            opacity: opacity ?? undefined,
           }}
         >
           <span style={{ color: 'transparent' }}>{child}</span>
@@ -189,8 +200,9 @@ const proxyObject = new Proxy(
       const theme = getTheme(props);
 
       return TextComponent(props, {
-        color: theme?.colors.primary[200] || '#ccc',
+        color: theme?.colors.primary[500] || '#ccc',
         titleColor: theme?.colors.primary[500] || '#ccc',
+        opacity: 0.3,
       });
     },
     [component.id.Input]: (props: any) => {
@@ -222,6 +234,20 @@ const proxyObject = new Proxy(
               borderRadius: tokens.borderRadius,
             }),
             background: `linear-gradient(135deg, ${theme?.colors.primary[300]} 0%, ${theme?.colors.primary[500]} 100%)`,
+          }}
+        />
+      );
+    },
+    [component.id.Avatar]: (props: any) => {
+      const theme = getTheme(props);
+
+      return (
+        <div
+          {...applyCommonProps(props)}
+          style={{
+            ...props.style,
+            borderRadius: '1000px',
+            background: theme?.colors.primary[500],
           }}
         />
       );

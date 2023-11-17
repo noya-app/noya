@@ -403,6 +403,7 @@ export function renderDSPreview({
             style={{
               display: 'flex',
               flex: '1',
+              flexDirection: 'column',
             }}
           >
             {content}
