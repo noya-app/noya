@@ -113,12 +113,18 @@ export type NoyaVariant = {
   diff: NoyaDiff;
 };
 
+export type ComponentThumbnailPosition = 'top' | 'center' | 'bottom';
+
+export type ComponentThumbnailChrome = 'window' | 'none';
+
 export type ComponentThumbnailSource = {
   url?: string;
   size?: {
     width: number;
     height: number;
   };
+  position?: ComponentThumbnailPosition;
+  chrome?: ComponentThumbnailChrome;
 };
 
 export type NoyaAccessModifier = 'public' | 'internal';

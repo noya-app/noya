@@ -38,7 +38,12 @@ import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { svgToReactElement } from './renderSVGElement';
 import { ResolvedHierarchy } from './resolvedHierarchy';
-import { NoyaNumberProp, NoyaProp, NoyaResolvedNode } from './types';
+import {
+  ComponentThumbnailChrome,
+  NoyaNumberProp,
+  NoyaProp,
+  NoyaResolvedNode,
+} from './types';
 
 function getImageFromProp(
   primaryScale: Theme['colors']['primary'],
@@ -270,6 +275,7 @@ export function renderDSPreview({
   selectionOutlineColor,
   padding,
   isThumbnail,
+  chrome = 'none',
 }: {
   renderProps: DSRenderProps;
   highlightedPath: string[] | undefined;
@@ -279,6 +285,7 @@ export function renderDSPreview({
   selectionOutlineColor: string;
   padding?: number;
   isThumbnail?: boolean;
+  chrome?: ComponentThumbnailChrome;
 }) {
   // console.info(
   //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
@@ -348,7 +355,59 @@ export function renderDSPreview({
           }),
         }}
       >
-        {content}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: '1',
+          }}
+        >
+          {chrome === 'window' && (
+            <div
+              style={{
+                height: '52px',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 24px',
+                gap: '12px',
+                borderBottom: '4px solid rgba(0,0,0,0.1)',
+              }}
+            >
+              <div
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: '#f44',
+                }}
+              />
+              <div
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: '#fc0',
+                }}
+              />
+              <div
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: '#4c4',
+                }}
+              />
+            </div>
+          )}
+          <div
+            style={{
+              display: 'flex',
+              flex: '1',
+            }}
+          >
+            {content}
+          </div>
+        </div>
       </div>
     </div>
   );

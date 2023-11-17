@@ -191,6 +191,13 @@ export function DSEditor({
     return instantiateResolvedComponent(findComponent, selection);
   }, [findComponent, selection]);
 
+  const currentComponent = useMemo(() => {
+    if (!selection) return undefined;
+    return findComponent(selection.componentID);
+  }, [findComponent, selection]);
+
+  const chrome = currentComponent?.thumbnail?.chrome;
+
   const handleRenderContent = React.useCallback(
     (props: DSRenderProps) => {
       if (selection && resolvedNode) {
@@ -203,6 +210,7 @@ export function DSEditor({
           selectionOutlineColor: theme.colors.primary,
           padding: viewType === 'preview' ? 0 : 20,
           isThumbnail,
+          chrome,
         });
       }
       return null;
@@ -216,6 +224,7 @@ export function DSEditor({
       config,
       viewType,
       isThumbnail,
+      chrome,
     ],
   );
 

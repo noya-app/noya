@@ -9,13 +9,14 @@ type Props = {
   size?: Size;
 };
 
-export const defaultThumbnailSize = { width: 800, height: 450 };
+export const defaultThumbnailSize = { width: 832, height: 468 };
 
 export const DSComponentThumbnail = memo(function DSComponentThumbnail({
   fileId,
   component,
 }: Props) {
   const size = component.thumbnail?.size ?? defaultThumbnailSize;
+  const position = component.thumbnail?.position ?? 'center';
 
   return (
     <div
@@ -23,8 +24,10 @@ export const DSComponentThumbnail = memo(function DSComponentThumbnail({
       style={{
         width: '100%',
         height: '100%',
-        backgroundSize: `${size.width / 4}px ${size.height / 4}px`,
-        backgroundPosition: 'center',
+        backgroundSize: `${Math.round(size.width / 4)}px ${Math.round(
+          size.height / 4,
+        )}px`,
+        backgroundPosition: position,
         backgroundRepeat: 'no-repeat',
         backgroundImage: `url(${NOYA_HOST}/api/files/${fileId}.png?params[component]=${encodeURIComponent(
           component.componentID,
@@ -32,6 +35,19 @@ export const DSComponentThumbnail = memo(function DSComponentThumbnail({
           size.height
         }&deviceScaleFactor=1)`,
       }}
-    />
+    >
+      {(position === 'top' || position === 'bottom') && (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            background:
+              position === 'top'
+                ? 'linear-gradient(rgba(240, 240, 242, 0) 80%, rgb(240, 240, 242) 98%)'
+                : 'linear-gradient(rgb(240, 240, 242) 2%, rgba(240, 240, 242, 0) 20%)',
+          }}
+        />
+      )}
+    </div>
   );
 });

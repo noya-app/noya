@@ -11,8 +11,10 @@ import {
   IconButton,
   InputField,
   ListView,
+  Popover,
   ScrollArea,
   Select,
+  Small,
   Spacer,
   Stack,
   Text,
@@ -46,6 +48,8 @@ import {
   unresolve,
 } from './traversal';
 import {
+  ComponentThumbnailChrome,
+  ComponentThumbnailPosition,
   NoyaAccessModifier,
   NoyaComponent,
   NoyaDiffItem,
@@ -305,58 +309,155 @@ export function DSComponentInspector({
                 )}
               </Stack.V>
             </InspectorPrimitives.LabeledRow>
-            <InspectorPrimitives.LabeledRow label="Thumbnail Size" gap="8px">
-              <DimensionInput
-                value={thumbnailSize.width}
-                label="W"
-                trigger="change"
-                onSetValue={(value, mode) => {
-                  onChangeComponent({
-                    ...component,
-                    thumbnail: {
-                      ...component.thumbnail,
-                      size: {
-                        ...thumbnailSize,
-                        width: getNewValue(thumbnailSize.width, mode, value),
-                      },
-                    },
-                  });
-                }}
-              />
-              <DimensionInput
-                value={thumbnailSize.height}
-                label="H"
-                trigger="change"
-                onSetValue={(value, mode) => {
-                  onChangeComponent({
-                    ...component,
-                    thumbnail: {
-                      ...component.thumbnail,
-                      size: {
-                        ...thumbnailSize,
-                        height: getNewValue(thumbnailSize.height, mode, value),
-                      },
-                    },
-                  });
-                }}
-              />
-            </InspectorPrimitives.LabeledRow>
-            <InspectorPrimitives.LabeledRow label="Thumbnail Preview">
-              <Stack.H
-                alignItems="center"
-                justifyContent="center"
-                borderRadius="4px"
-                background={theme.colors.inputBackground}
-                flex="1"
-                aspectRatio="16/9"
-                border={`1px solid ${theme.colors.divider}`}
-              >
-                <DSComponentThumbnail
-                  component={component}
-                  size={thumbnailSize}
-                  fileId={query.id as string}
-                />
-              </Stack.H>
+            <InspectorPrimitives.LabeledRow
+              label="Thumbnail"
+              right={
+                // Warn if width or height aren't divisible by 4
+                thumbnailSize.width % 4 !== 0 ||
+                thumbnailSize.height % 4 !== 0 ? (
+                  <Popover
+                    trigger={
+                      <IconButton
+                        iconName="ExclamationTriangleIcon"
+                        color="orange"
+                      />
+                    }
+                  >
+                    <Stack.V gap="4px" padding="16px">
+                      <Small>Thumbnail sizes should be divisible by 4</Small>
+                      {/* Suggest the closest value above and below */}
+                      <Stack.V gap="4px">
+                        {thumbnailSize.width % 4 !== 0 && (
+                          <Text variant="code">
+                            Width: {Math.floor(thumbnailSize.width / 4) * 4} or{' '}
+                            {Math.ceil(thumbnailSize.width / 4) * 4}
+                          </Text>
+                        )}
+                        {thumbnailSize.height % 4 !== 0 && (
+                          <Text variant="code">
+                            Height: {Math.floor(thumbnailSize.height / 4) * 4}{' '}
+                            or {Math.ceil(thumbnailSize.height / 4) * 4}
+                          </Text>
+                        )}
+                      </Stack.V>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          onChangeComponent({
+                            ...component,
+                            thumbnail: {
+                              ...component.thumbnail,
+                              size: {
+                                width: Math.floor(thumbnailSize.width / 4) * 4,
+                                height:
+                                  Math.floor(thumbnailSize.height / 4) * 4,
+                              },
+                            },
+                          });
+                        }}
+                      >
+                        Fix
+                      </Button>
+                    </Stack.V>
+                  </Popover>
+                ) : undefined
+              }
+            >
+              <InspectorPrimitives.Column>
+                <InspectorPrimitives.Row gap="8px">
+                  <DimensionInput
+                    value={thumbnailSize.width}
+                    label="W"
+                    trigger="change"
+                    onSetValue={(value, mode) => {
+                      onChangeComponent({
+                        ...component,
+                        thumbnail: {
+                          ...component.thumbnail,
+                          size: {
+                            ...thumbnailSize,
+                            width: getNewValue(
+                              thumbnailSize.width,
+                              mode,
+                              value,
+                            ),
+                          },
+                        },
+                      });
+                    }}
+                  />
+                  <DimensionInput
+                    value={thumbnailSize.height}
+                    label="H"
+                    trigger="change"
+                    onSetValue={(value, mode) => {
+                      onChangeComponent({
+                        ...component,
+                        thumbnail: {
+                          ...component.thumbnail,
+                          size: {
+                            ...thumbnailSize,
+                            height: getNewValue(
+                              thumbnailSize.height,
+                              mode,
+                              value,
+                            ),
+                          },
+                        },
+                      });
+                    }}
+                  />
+                  <Stack.H flex="1">
+                    <Select<ComponentThumbnailPosition>
+                      value={component.thumbnail?.position ?? 'center'}
+                      id="position-input"
+                      options={['top', 'center', 'bottom']}
+                      getTitle={upperFirst}
+                      onChange={(position) =>
+                        onChangeComponent({
+                          ...component,
+                          thumbnail: {
+                            ...component.thumbnail,
+                            position,
+                          },
+                        })
+                      }
+                    />
+                  </Stack.H>
+                  <Stack.H flex="1">
+                    <Select<ComponentThumbnailChrome>
+                      value={component.thumbnail?.chrome ?? 'none'}
+                      id="chrome-input"
+                      options={['none', 'window']}
+                      getTitle={upperFirst}
+                      onChange={(chrome) =>
+                        onChangeComponent({
+                          ...component,
+                          thumbnail: {
+                            ...component.thumbnail,
+                            chrome,
+                          },
+                        })
+                      }
+                    />
+                  </Stack.H>
+                </InspectorPrimitives.Row>
+                <Stack.H
+                  alignItems="center"
+                  justifyContent="center"
+                  borderRadius="4px"
+                  background={theme.colors.inputBackground}
+                  flex="1"
+                  aspectRatio="16/9"
+                  border={`1px solid ${theme.colors.divider}`}
+                >
+                  <DSComponentThumbnail
+                    component={component}
+                    size={thumbnailSize}
+                    fileId={query.id as string}
+                  />
+                </Stack.H>
+              </InspectorPrimitives.Column>
             </InspectorPrimitives.LabeledRow>
           </InspectorSection>
           <InspectorSection
