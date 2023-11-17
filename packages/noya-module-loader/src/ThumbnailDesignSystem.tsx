@@ -44,7 +44,10 @@ const tokens = {
   borderRadius: '16px',
 };
 
-const TextComponent = (props: any, { color }: { color: string }) => {
+const TextComponent = (
+  props: any,
+  { color, titleColor }: { color: string; titleColor: string },
+) => {
   const child = getStringChild(props);
 
   if (child) {
@@ -61,16 +64,22 @@ const TextComponent = (props: any, { color }: { color: string }) => {
           ? '40px'
           : '32px';
 
+      const childWithStyle = React.cloneElement(child, {
+        style: {
+          color: props.style?.color ?? titleColor,
+        },
+      });
+
       return (
         <span
           style={{
             ...props.style,
             fontFamily: 'sans-serif',
             fontSize,
-            color: 'rgb(48,58,71)',
+            color: titleColor,
           }}
         >
-          {child}
+          {childWithStyle}
         </span>
       );
     }
@@ -80,8 +89,7 @@ const TextComponent = (props: any, { color }: { color: string }) => {
         <span
           style={{
             display: 'inline-block',
-            background: color,
-            // background: 'currentColor',
+            background: props.style?.color ?? color,
             borderRadius: tokens.borderRadius,
             height: '12px',
             lineHeight: '12px',
@@ -131,7 +139,9 @@ const proxyObject = new Proxy(
           style={{
             appearance: 'none',
             ...props.style,
-            background: theme?.colors.primary[500],
+            background: props.style.backgroundColor
+              ? props.style.backgroundColor
+              : theme?.colors.primary[500],
             height: '64px',
             borderRadius: tokens.borderRadius,
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
@@ -144,7 +154,7 @@ const proxyObject = new Proxy(
           <span
             style={{
               ...props.style,
-              background: 'white',
+              background: props.style?.color ?? 'white',
               borderRadius: tokens.borderRadius,
               height: '8px',
               minWidth: '33%',
@@ -159,13 +169,20 @@ const proxyObject = new Proxy(
         </button>
       );
     },
-    [component.id.Text]: (props: any) =>
-      TextComponent(props, { color: '#ccc' }),
+    [component.id.Text]: (props: any) => {
+      const theme = getTheme(props);
+      const colorMode = theme?.colorMode || 'light';
+      return TextComponent(props, {
+        color: colorMode === 'light' ? '#ccc' : '#333',
+        titleColor: colorMode === 'light' ? 'rgb(48,58,71)' : '#fff',
+      });
+    },
     [component.id.Link]: (props: any) => {
       const theme = getTheme(props);
 
       return TextComponent(props, {
         color: theme?.colors.primary[500] || '#ccc',
+        titleColor: theme?.colors.primary[500] || '#ccc',
       });
     },
     [component.id.Tag]: (props: any) => {
@@ -173,6 +190,7 @@ const proxyObject = new Proxy(
 
       return TextComponent(props, {
         color: theme?.colors.primary[200] || '#ccc',
+        titleColor: theme?.colors.primary[500] || '#ccc',
       });
     },
     [component.id.Input]: (props: any) => {
