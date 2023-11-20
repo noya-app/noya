@@ -1,4 +1,4 @@
-import { added } from '../arrayDiff';
+import { added } from 'noya-component';
 import { Model } from '../builders';
 import { createResolvedNode, unresolve } from '../traversal';
 

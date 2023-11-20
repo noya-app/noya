@@ -5,6 +5,18 @@ import {
   useNoyaClientOrFallback,
 } from 'noya-api';
 import {
+  ComponentThumbnailChrome,
+  ComponentThumbnailPosition,
+  NoyaAccessModifier,
+  NoyaComponent,
+  NoyaDiffItem,
+  NoyaNode,
+  NoyaResolvedNode,
+  NoyaVariant,
+  SelectedComponent,
+  describeDiffItem,
+} from 'noya-component';
+import {
   Button,
   Chip,
   Divider,
@@ -36,7 +48,6 @@ import {
   defaultThumbnailSize,
 } from './DSComponentThumbnail';
 import { DSLayoutTree } from './DSLayoutTree';
-import { describeDiffItem } from './arrayDiff';
 import { Model } from './builders';
 import { exportLayout } from './componentLayout';
 import { enforceSchema } from './layoutSchema';
@@ -47,17 +58,6 @@ import {
   instantiateResolvedComponent,
   unresolve,
 } from './traversal';
-import {
-  ComponentThumbnailChrome,
-  ComponentThumbnailPosition,
-  NoyaAccessModifier,
-  NoyaComponent,
-  NoyaDiffItem,
-  NoyaNode,
-  NoyaResolvedNode,
-  NoyaVariant,
-  SelectedComponent,
-} from './types';
 import { getNodeName } from './utils/nodeUtils';
 import { partitionDiff } from './utils/partitionDiff';
 

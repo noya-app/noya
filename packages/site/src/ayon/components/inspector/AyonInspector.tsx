@@ -1,4 +1,5 @@
 import { useApplicationState } from 'noya-app-state-context';
+import { NoyaNode } from 'noya-component';
 import {
   RadioGroup,
   ScrollArea,
@@ -13,7 +14,6 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSThemeInspector } from '../../../dseditor/DSThemeInspector';
-import { NoyaNode } from '../../../dseditor/types';
 import { useAyonState } from '../../state/ayonState';
 import { CustomLayerData, NodePath } from '../../types';
 import { AyonElementsInspector } from './AyonElementsInspector';

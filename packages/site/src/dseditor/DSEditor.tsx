@@ -2,6 +2,11 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { useRouter } from 'next/router';
 import { DS } from 'noya-api';
 import {
+  NoyaComponent,
+  NoyaResolvedString,
+  SelectedComponent,
+} from 'noya-component';
+import {
   Chip,
   DividerVertical,
   GridView,
@@ -24,7 +29,6 @@ import { initialComponents } from './builtins';
 import { renderDSPreview } from './renderDSPreview';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { diffResolvedTrees, instantiateResolvedComponent } from './traversal';
-import { NoyaComponent, NoyaResolvedString, SelectedComponent } from './types';
 
 const noop = () => {};
 

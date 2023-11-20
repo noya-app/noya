@@ -1,3 +1,4 @@
+import { NoyaComponent } from 'noya-component';
 import Sketch from 'noya-file-format';
 import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
@@ -54,7 +55,7 @@ export type DSConfig = Sketch.DesignSystemThemeConfig;
 export type DS = {
   source: DSSource;
   config: DSConfig;
-  components?: unknown[];
+  components?: NoyaComponent[];
   prompt?: {
     inputDescription?: string;
     pickComponent?: string;

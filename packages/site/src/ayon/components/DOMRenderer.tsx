@@ -1,5 +1,6 @@
 import { DS, useNoyaClientOrFallback } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
+import { NoyaNode, NoyaResolvedString } from 'noya-component';
 import { lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Size, createResizeTransform } from 'noya-geometry';
@@ -22,7 +23,6 @@ import { initialComponents } from '../../dseditor/builtins';
 import { renderResolvedNode } from '../../dseditor/renderDSPreview';
 import { ResolvedHierarchy } from '../../dseditor/resolvedHierarchy';
 import { createResolvedNode, unresolve } from '../../dseditor/traversal';
-import { NoyaNode, NoyaResolvedString } from '../../dseditor/types';
 import { useAyonState } from '../state/ayonState';
 import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData, NodePath } from '../types';

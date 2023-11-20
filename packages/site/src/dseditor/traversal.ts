@@ -1,10 +1,4 @@
 import cloneDeep from 'lodash/cloneDeep';
-import { RelativeDropPosition } from 'noya-designsystem';
-import { isDeepEqual } from 'noya-utils';
-import { defineTree } from 'tree-visit';
-import { applyArrayDiff, computeArrayDiff, mapArrayDiff } from './arrayDiff';
-import { Model } from './builders';
-import { ResolvedHierarchy } from './resolvedHierarchy';
 import {
   NoyaComponent,
   NoyaCompositeElement,
@@ -18,7 +12,15 @@ import {
   NoyaResolvedString,
   NoyaString,
   SelectedComponent,
-} from './types';
+  applyArrayDiff,
+  computeArrayDiff,
+  mapArrayDiff,
+} from 'noya-component';
+import { RelativeDropPosition } from 'noya-designsystem';
+import { isDeepEqual } from 'noya-utils';
+import { defineTree } from 'tree-visit';
+import { Model } from './builders';
+import { ResolvedHierarchy } from './resolvedHierarchy';
 
 // Doesn't traverse into nested components
 export const ElementHierarchy = defineTree<NoyaNode>({

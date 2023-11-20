@@ -1,10 +1,10 @@
 import { computed, observe } from '@legendapp/state';
 import { useSelector } from '@legendapp/state/react';
 import { NoyaAPI, useNoyaClient, useOptionalNoyaClient } from 'noya-api';
+import { NoyaGeneratorProp, NoyaNode } from 'noya-component';
 import React, { memo } from 'react';
 import { parseLayout } from '../../dseditor/componentLayout';
 import { ElementHierarchy } from '../../dseditor/traversal';
-import { NoyaGeneratorProp, NoyaNode } from '../../dseditor/types';
 
 type Query = {
   query: string;

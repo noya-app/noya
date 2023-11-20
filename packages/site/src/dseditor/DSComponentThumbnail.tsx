@@ -1,7 +1,7 @@
+import { NoyaComponent } from 'noya-component';
 import { Size } from 'noya-geometry';
 import React, { memo } from 'react';
 import { NOYA_HOST } from '../utils/noyaClient';
-import { NoyaComponent } from './types';
 
 type Props = {
   fileId: string;

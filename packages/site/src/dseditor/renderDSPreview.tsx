@@ -4,6 +4,12 @@ import {
   component,
 } from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
+import {
+  ComponentThumbnailChrome,
+  NoyaNumberProp,
+  NoyaProp,
+  NoyaResolvedNode,
+} from 'noya-component';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { findLast, unique } from 'noya-utils';
 import React, { ReactNode } from 'react';
@@ -38,12 +44,6 @@ import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { svgToReactElement } from './renderSVGElement';
 import { ResolvedHierarchy } from './resolvedHierarchy';
-import {
-  ComponentThumbnailChrome,
-  NoyaNumberProp,
-  NoyaProp,
-  NoyaResolvedNode,
-} from './types';
 
 function getImageFromProp(
   primaryScale: Theme['colors']['primary'],

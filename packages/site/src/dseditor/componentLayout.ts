@@ -4,6 +4,7 @@ import {
   LayoutNode,
   parseComponentLayout,
 } from 'noya-compiler';
+import { NoyaNode, NoyaResolvedNode } from 'noya-component';
 import { memoize } from 'noya-utils';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { createSeed } from '../ayon/utils/patterns';
@@ -12,7 +13,6 @@ import { enforceSchema } from './layoutSchema';
 import { PRIMITIVE_ELEMENT_MAP, PRIMITIVE_TAG_MAP } from './primitiveElements';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { rewriteLayout } from './rewriteLayout';
-import { NoyaNode, NoyaResolvedNode } from './types';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([
   'related',

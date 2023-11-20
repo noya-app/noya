@@ -1,6 +1,6 @@
+import { NoyaResolvedNode } from 'noya-component';
 import { uuid } from 'noya-utils';
 import { defineTree } from 'tree-visit';
-import { NoyaResolvedNode } from './types';
 
 const Hierarchy = defineTree<NoyaResolvedNode>({
   getChildren: (node) => {

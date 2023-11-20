@@ -1,3 +1,4 @@
+import { NoyaComponent, NoyaPrimitiveElement } from 'noya-component';
 import {
   Chip,
   InputField,
@@ -13,7 +14,6 @@ import {
 import { InspectorSection } from '../components/InspectorSection';
 import { Model } from './builders';
 import { primitiveElementStyleItems, styleItems } from './completionItems';
-import { NoyaComponent, NoyaPrimitiveElement } from './types';
 
 type Props = {
   component: NoyaComponent;

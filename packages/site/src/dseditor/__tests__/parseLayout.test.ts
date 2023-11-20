@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
+import { NoyaGeneratorProp, NoyaPrimitiveElement } from 'noya-component';
 import path from 'path';
 import { parseLayout } from '../componentLayout';
-import { NoyaGeneratorProp, NoyaPrimitiveElement } from '../types';
 
 // Jest doesn't know how to import a text file, so we mock it
 jest.mock('../../../safelist.txt', () => {

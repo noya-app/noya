@@ -1,6 +1,11 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { useNoyaClientOrFallback } from 'noya-api';
 import {
+  NoyaComponent,
+  NoyaPrimitiveElement,
+  NoyaResolvedNode,
+} from 'noya-component';
+import {
   Chip,
   CompletionItem,
   CompletionSectionHeader,
@@ -45,7 +50,6 @@ import {
   handleMoveItem,
   unresolve,
 } from './traversal';
-import { NoyaComponent, NoyaPrimitiveElement, NoyaResolvedNode } from './types';
 import { getComponentName, getNodeName } from './utils/nodeUtils';
 
 type LayoutTreeItem = {

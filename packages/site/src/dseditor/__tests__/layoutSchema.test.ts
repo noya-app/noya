@@ -1,3 +1,4 @@
+import { NoyaPrimitiveElement, NoyaString } from 'noya-component';
 import {
   boxSymbolId,
   buttonSymbolId,
@@ -8,7 +9,6 @@ import {
 } from '../../ayon/symbols/symbolIds';
 import { Model } from '../builders';
 import { enforceSchema } from '../layoutSchema';
-import { NoyaPrimitiveElement, NoyaString } from '../types';
 
 describe('none', () => {
   test('removes children', () => {

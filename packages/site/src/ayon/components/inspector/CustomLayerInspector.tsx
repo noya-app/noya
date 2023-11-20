@@ -1,7 +1,7 @@
+import { NoyaNode } from 'noya-component';
 import Sketch from 'noya-file-format';
 import React, { memo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
-import { NoyaNode } from '../../../dseditor/types';
 import { CustomLayerData } from '../../types';
 import { ComponentDescriptionInspector } from './ComponentDescriptionInspector';
 import { ComponentLayoutInspector } from './ComponentLayoutInspector';

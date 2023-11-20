@@ -13,7 +13,6 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { toZipFile } from 'noya-filesystem';
 import { Size } from 'noya-geometry';
 import {
   ChevronDownIcon,
@@ -43,7 +42,6 @@ import {
   createInitialWorkspaceState,
   workspaceReducer,
 } from 'noya-state';
-import { UTF16 } from 'noya-utils';
 import React, {
   ComponentProps,
   Suspense,
@@ -62,7 +60,6 @@ import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
-import { downloadBlob } from '../utils/download';
 import { AyonProvider } from './AyonContext';
 import { DSProvider, useDS } from './DSContext';
 import { OnboardingAnimation } from './OnboardingAnimation';
@@ -305,45 +302,9 @@ function Workspace({
                 amplitude.logEvent('Project - Export - Exported Sketch');
                 downloadFile?.('pdf', artboard.frame, `Drag into Sketch.pdf`);
                 return;
-              case 'react': {
-                if (!ds) return;
-
-                amplitude.logEvent('Project - Export - Exported React Code');
-                const { compile } = await import('noya-compiler');
-                const result = await compile({
-                  name,
-                  artboard,
-                  getSymbolMaster,
-                  DesignSystem: ds,
-                  target: 'standalone',
-                });
-                const zipFile = await toZipFile(
-                  Object.fromEntries(
-                    Object.entries(result).map(
-                      ([name, content]) =>
-                        [name, UTF16.toUTF8(content)] as const,
-                    ),
-                  ),
-                  'App.zip',
-                );
-                downloadBlob(zipFile);
-                return;
-              }
+              case 'react':
               case 'codesandbox': {
-                if (!ds) return;
-
-                const { compile, openInCodesandbox } = await import(
-                  'noya-compiler'
-                );
-                const result = await compile({
-                  name,
-                  artboard,
-                  getSymbolMaster,
-                  DesignSystem: ds,
-                  target: 'codesandbox',
-                });
-                openInCodesandbox({ files: result });
-                // amplitude.logEvent('Project - Export - Exported CodeSandbox');
+                return;
               }
             }
           }}

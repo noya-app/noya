@@ -2,6 +2,7 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import { produce } from 'immer';
 import { DS } from 'noya-api';
+import { NoyaComponent } from 'noya-component';
 import {
   Button,
   DropdownMenu,
@@ -26,7 +27,6 @@ import { InspectorSection } from '../components/InspectorSection';
 import { downloadBlob } from '../utils/download';
 import { DSThemeInspector } from './DSThemeInspector';
 import { FindComponent } from './traversal';
-import { NoyaComponent } from './types';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',

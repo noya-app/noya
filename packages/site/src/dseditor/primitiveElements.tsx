@@ -1,4 +1,5 @@
 import { component } from '@noya-design-system/protocol';
+import { NoyaPrimitiveElement } from 'noya-component';
 import {
   AvatarIcon,
   BadgeIcon,
@@ -34,7 +35,6 @@ import {
   textareaSymbolId,
 } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
-import { NoyaPrimitiveElement } from './types';
 
 export type PrimitiveElementSchema = {
   children:

@@ -1,6 +1,6 @@
 import { NoyaAPI } from 'noya-api';
+import { NoyaGeneratorProp, NoyaNode } from 'noya-component';
 import { DrawableLayerType } from 'noya-state';
-import { NoyaGeneratorProp, NoyaNode } from '../dseditor/types';
 
 export type InferredBlockTypeResult = {
   type: DrawableLayerType;

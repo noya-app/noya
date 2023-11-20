@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { DS, NoyaAPI, asyncIterableToString } from 'noya-api';
+import { NoyaComponent } from 'noya-component';
 import { uuid } from 'noya-utils';
 import { Model } from '../dseditor/builders';
 import { exportLayout, parseLayout } from '../dseditor/componentLayout';
@@ -7,7 +8,6 @@ import {
   FindComponent,
   instantiateResolvedComponent,
 } from '../dseditor/traversal';
-import { NoyaComponent } from '../dseditor/types';
 
 const DEFAULT_PROMPTS = {
   pickComponent: `Given this list of component: {{componentNames}}, pick the one that matches this description: {{inputDescription}}. Answer with ONLY the string name of the component.`,

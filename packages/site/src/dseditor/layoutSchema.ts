@@ -1,9 +1,9 @@
+import { NoyaNode, NoyaString } from 'noya-component';
 import { partition } from 'noya-utils';
 import { textSymbolId } from '../ayon/symbols/symbolIds';
 import { Model } from './builders';
 import { PRIMITIVE_ELEMENT_MAP } from './primitiveElements';
 import { ElementHierarchy } from './traversal';
-import { NoyaNode, NoyaString } from './types';
 
 export function enforceSchema(root: NoyaNode): NoyaNode {
   return ElementHierarchy.map(root, (node, transformedChildren) => {

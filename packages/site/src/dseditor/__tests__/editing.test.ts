@@ -1,12 +1,13 @@
 /* eslint-disable jest/no-commented-out-tests */
-import { added, removed } from '../arrayDiff';
-import { Model } from '../builders';
-import { createResolvedNode } from '../traversal';
 import {
   NoyaPrimitiveElement,
   NoyaResolvedCompositeElement,
   NoyaResolvedPrimitiveElement,
-} from '../types';
+  added,
+  removed,
+} from 'noya-component';
+import { Model } from '../builders';
+import { createResolvedNode } from '../traversal';
 
 const PRIMITIVE_ID = 'p';
 

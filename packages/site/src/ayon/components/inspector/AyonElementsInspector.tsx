@@ -1,10 +1,10 @@
+import { NoyaComponent, NoyaResolvedNode } from 'noya-component';
 import { ActivityIndicator } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';
 import { createResolvedNode, unresolve } from '../../../dseditor/traversal';
-import { NoyaComponent, NoyaResolvedNode } from '../../../dseditor/types';
 import { useCurrentGeneratedLayout } from '../../hooks/useCurrentGeneratedLayout';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';

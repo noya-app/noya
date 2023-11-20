@@ -1,11 +1,11 @@
 import { useNoyaClient } from 'noya-api';
+import { NoyaNode } from 'noya-component';
 import { Button, Spacer, lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
-import { NoyaNode } from '../../../dseditor/types';
 import { useCurrentGeneratedLayout } from '../../hooks/useCurrentGeneratedLayout';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData } from '../../types';

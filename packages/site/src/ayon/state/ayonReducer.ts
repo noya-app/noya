@@ -1,5 +1,6 @@
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
+import { NoyaNode } from 'noya-component';
 import Sketch from 'noya-file-format';
 import { Rect, createBounds } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
@@ -20,7 +21,6 @@ import {
   PRIMITIVE_ELEMENT_NAMES,
   primitiveElements,
 } from '../../dseditor/primitiveElements';
-import { NoyaNode } from '../../dseditor/types';
 import { boxSymbolId } from '../symbols/symbolIds';
 import {
   CustomLayerData,

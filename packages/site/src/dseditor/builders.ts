@@ -1,4 +1,3 @@
-import { uuid } from 'noya-utils';
 import {
   NoyaClassName,
   NoyaComponent,
@@ -13,7 +12,8 @@ import {
   NoyaStringProp,
   NoyaVariant,
   NoyaVariantName,
-} from './types';
+} from 'noya-component';
+import { uuid } from 'noya-utils';
 
 type ModelOptions<T> = Partial<Omit<T, 'type'>>;
 
