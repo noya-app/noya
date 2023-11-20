@@ -1,5 +1,4 @@
-import { added } from 'noya-component';
-import { Model } from '../builders';
+import { Model, added } from 'noya-component';
 import { createResolvedNode, unresolve } from '../traversal';
 
 it('unresolves string', () => {

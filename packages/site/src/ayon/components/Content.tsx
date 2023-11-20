@@ -12,7 +12,7 @@ import {
   SimpleCanvas,
   convertPoint,
 } from 'noya-canvas';
-import { NoyaNode } from 'noya-component';
+import { ElementHierarchy, NoyaNode } from 'noya-component';
 import { DividerVertical, Stack } from 'noya-designsystem';
 import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
@@ -29,7 +29,6 @@ import { SVGRenderer } from 'noya-svg-renderer';
 import React, { memo, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
-import { ElementHierarchy } from '../../dseditor/traversal';
 import { measureImage } from '../../utils/measureImage';
 import { inferBlockType } from '../infer/inferBlock';
 import { useAyonState } from '../state/ayonState';

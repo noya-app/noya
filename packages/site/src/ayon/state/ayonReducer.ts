@@ -1,6 +1,6 @@
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
-import { NoyaNode } from 'noya-component';
+import { Model, NoyaNode } from 'noya-component';
 import Sketch from 'noya-file-format';
 import { Rect, createBounds } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
@@ -15,7 +15,6 @@ import {
 } from 'noya-state';
 import { findLast, upperFirst, uuid } from 'noya-utils';
 import { FlattenedLayoutItem } from '../../components/PageSetup';
-import { Model } from '../../dseditor/builders';
 import { enforceSchema } from '../../dseditor/layoutSchema';
 import {
   PRIMITIVE_ELEMENT_NAMES,

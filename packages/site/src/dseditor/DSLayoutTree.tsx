@@ -1,9 +1,14 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { useNoyaClientOrFallback } from 'noya-api';
 import {
+  FindComponent,
+  Model,
   NoyaComponent,
   NoyaPrimitiveElement,
   NoyaResolvedNode,
+  ResolvedHierarchy,
+  createResolvedNode,
+  unresolve,
 } from 'noya-component';
 import {
   Chip,
@@ -31,7 +36,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { randomSeed } from '../ayon/utils/patterns';
-import { Model } from './builders';
 import {
   primitiveElementStyleItems,
   styleItems,
@@ -43,13 +47,6 @@ import {
   parseLayoutWithOptions,
 } from './componentLayout';
 import { svgToReactElement } from './renderSVGElement';
-import { ResolvedHierarchy } from './resolvedHierarchy';
-import {
-  FindComponent,
-  createResolvedNode,
-  handleMoveItem,
-  unresolve,
-} from './traversal';
 import { getComponentName, getNodeName } from './utils/nodeUtils';
 
 type LayoutTreeItem = {
@@ -1120,3 +1117,38 @@ export const DSLayoutRow = memo(function DSLayerRow({
     </TreeView.Row>
   );
 });
+
+function handleMoveItem(
+  root: NoyaResolvedNode,
+  position: RelativeDropPosition,
+  sourceIndexPath: number[],
+  destinationIndexPath: number[],
+) {
+  function inner() {
+    switch (position) {
+      case 'above': {
+        return ResolvedHierarchy.move(root, {
+          indexPaths: [sourceIndexPath],
+          to: destinationIndexPath,
+        });
+      }
+      case 'below': {
+        return ResolvedHierarchy.move(root, {
+          indexPaths: [sourceIndexPath],
+          to: [
+            ...destinationIndexPath.slice(0, -1),
+            destinationIndexPath.at(-1)! + 1,
+          ],
+        });
+      }
+      case 'inside': {
+        return ResolvedHierarchy.move(root, {
+          indexPaths: [sourceIndexPath],
+          to: [...destinationIndexPath, 0],
+        });
+      }
+    }
+  }
+
+  return inner();
+}

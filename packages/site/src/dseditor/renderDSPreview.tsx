@@ -9,6 +9,7 @@ import {
   NoyaNumberProp,
   NoyaProp,
   NoyaResolvedNode,
+  ResolvedHierarchy,
 } from 'noya-component';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { findLast, unique } from 'noya-utils';
@@ -43,7 +44,6 @@ import {
 import { DSRenderProps } from './DSRenderer';
 import { ZERO_WIDTH_SPACE, closest } from './dom';
 import { svgToReactElement } from './renderSVGElement';
-import { ResolvedHierarchy } from './resolvedHierarchy';
 
 function getImageFromProp(
   primaryScale: Theme['colors']['primary'],

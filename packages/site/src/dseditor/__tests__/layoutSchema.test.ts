@@ -1,4 +1,4 @@
-import { NoyaPrimitiveElement, NoyaString } from 'noya-component';
+import { Model, NoyaPrimitiveElement, NoyaString } from 'noya-component';
 import {
   boxSymbolId,
   buttonSymbolId,
@@ -7,7 +7,6 @@ import {
   selectSymbolId,
   textSymbolId,
 } from '../../ayon/symbols/symbolIds';
-import { Model } from '../builders';
 import { enforceSchema } from '../layoutSchema';
 
 describe('none', () => {

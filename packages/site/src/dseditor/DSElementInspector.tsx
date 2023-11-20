@@ -1,4 +1,4 @@
-import { NoyaComponent, NoyaPrimitiveElement } from 'noya-component';
+import { Model, NoyaComponent, NoyaPrimitiveElement } from 'noya-component';
 import {
   Chip,
   InputField,
@@ -12,7 +12,6 @@ import {
   useAutoResize,
 } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
-import { Model } from './builders';
 import { primitiveElementStyleItems, styleItems } from './completionItems';
 
 type Props = {

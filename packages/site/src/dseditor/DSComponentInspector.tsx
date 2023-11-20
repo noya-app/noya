@@ -7,14 +7,20 @@ import {
 import {
   ComponentThumbnailChrome,
   ComponentThumbnailPosition,
+  FindComponent,
+  Model,
   NoyaAccessModifier,
   NoyaComponent,
   NoyaDiffItem,
   NoyaNode,
   NoyaResolvedNode,
   NoyaVariant,
+  ResolvedHierarchy,
   SelectedComponent,
   describeDiffItem,
+  diffResolvedTrees,
+  instantiateResolvedComponent,
+  unresolve,
 } from 'noya-component';
 import {
   Button,
@@ -48,16 +54,8 @@ import {
   defaultThumbnailSize,
 } from './DSComponentThumbnail';
 import { DSLayoutTree } from './DSLayoutTree';
-import { Model } from './builders';
 import { exportLayout } from './componentLayout';
 import { enforceSchema } from './layoutSchema';
-import { ResolvedHierarchy } from './resolvedHierarchy';
-import {
-  FindComponent,
-  diffResolvedTrees,
-  instantiateResolvedComponent,
-  unresolve,
-} from './traversal';
 import { getNodeName } from './utils/nodeUtils';
 import { partitionDiff } from './utils/partitionDiff';
 

@@ -2,9 +2,13 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { useRouter } from 'next/router';
 import { DS } from 'noya-api';
 import {
+  Model,
   NoyaComponent,
   NoyaResolvedString,
+  ResolvedHierarchy,
   SelectedComponent,
+  diffResolvedTrees,
+  instantiateResolvedComponent,
 } from 'noya-component';
 import {
   Chip,
@@ -24,11 +28,8 @@ import { DSControlledRenderer } from './DSControlledRenderer';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, IDSRenderer } from './DSRenderer';
 import { DSRendererOverlay } from './DSRendererOverlay';
-import { Model } from './builders';
 import { initialComponents } from './builtins';
 import { renderDSPreview } from './renderDSPreview';
-import { ResolvedHierarchy } from './resolvedHierarchy';
-import { diffResolvedTrees, instantiateResolvedComponent } from './traversal';
 
 const noop = () => {};
 

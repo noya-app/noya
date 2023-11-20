@@ -1,6 +1,6 @@
 import { useGeneratedComponentNames, useNoyaClient } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
-import { NoyaNode } from 'noya-component';
+import { Model, NoyaNode } from 'noya-component';
 import {
   CompletionItem,
   CompletionSectionHeader,
@@ -13,7 +13,6 @@ import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Model } from '../../../dseditor/builders';
 import { primitiveElements } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';
 import { boxSymbolId } from '../../symbols/symbolIds';

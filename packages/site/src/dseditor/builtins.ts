@@ -1,4 +1,4 @@
-import { NoyaComponent, added, removed } from 'noya-component';
+import { Model, NoyaComponent, added, removed } from 'noya-component';
 import { uuid } from 'noya-utils';
 import {
   boxSymbolId,
@@ -9,7 +9,6 @@ import {
   tagSymbolId,
   textSymbolId,
 } from '../ayon/symbols/symbolIds';
-import { Model } from './builders';
 
 const sidebarItemSymbolId = uuid();
 const sidebarItemActiveVariantId = uuid();

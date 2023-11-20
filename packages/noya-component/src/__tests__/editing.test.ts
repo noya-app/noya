@@ -1,13 +1,13 @@
 /* eslint-disable jest/no-commented-out-tests */
 import {
+  Model,
   NoyaPrimitiveElement,
   NoyaResolvedCompositeElement,
   NoyaResolvedPrimitiveElement,
   added,
+  createResolvedNode,
   removed,
 } from 'noya-component';
-import { Model } from '../builders';
-import { createResolvedNode } from '../traversal';
 
 const PRIMITIVE_ID = 'p';
 

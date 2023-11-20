@@ -1,5 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import {
+  Model,
   NoyaComponent,
   NoyaCompositeElement,
   NoyaDiff,
@@ -11,16 +12,14 @@ import {
   NoyaResolvedPrimitiveElement,
   NoyaResolvedString,
   NoyaString,
+  ResolvedHierarchy,
   SelectedComponent,
   applyArrayDiff,
   computeArrayDiff,
   mapArrayDiff,
 } from 'noya-component';
-import { RelativeDropPosition } from 'noya-designsystem';
 import { isDeepEqual } from 'noya-utils';
 import { defineTree } from 'tree-visit';
-import { Model } from './builders';
-import { ResolvedHierarchy } from './resolvedHierarchy';
 
 // Doesn't traverse into nested components
 export const ElementHierarchy = defineTree<NoyaNode>({
@@ -48,41 +47,6 @@ export const ElementHierarchy = defineTree<NoyaNode>({
 });
 
 export type FindComponent = (id: string) => NoyaComponent | undefined;
-
-export function handleMoveItem(
-  root: NoyaResolvedNode,
-  position: RelativeDropPosition,
-  sourceIndexPath: number[],
-  destinationIndexPath: number[],
-) {
-  function inner() {
-    switch (position) {
-      case 'above': {
-        return ResolvedHierarchy.move(root, {
-          indexPaths: [sourceIndexPath],
-          to: destinationIndexPath,
-        });
-      }
-      case 'below': {
-        return ResolvedHierarchy.move(root, {
-          indexPaths: [sourceIndexPath],
-          to: [
-            ...destinationIndexPath.slice(0, -1),
-            destinationIndexPath.at(-1)! + 1,
-          ],
-        });
-      }
-      case 'inside': {
-        return ResolvedHierarchy.move(root, {
-          indexPaths: [sourceIndexPath],
-          to: [...destinationIndexPath, 0],
-        });
-      }
-    }
-  }
-
-  return inner();
-}
 
 export function unresolve(
   resolvedNode: NoyaResolvedNode,

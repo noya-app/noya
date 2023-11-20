@@ -1,6 +1,5 @@
-import { NoyaResolvedNode } from 'noya-component';
+import { FindComponent, NoyaResolvedNode } from 'noya-component';
 import { PRIMITIVE_ELEMENT_NAMES } from '../primitiveElements';
-import { FindComponent } from '../traversal';
 
 export function getNodeName(
   node: NoyaResolvedNode,

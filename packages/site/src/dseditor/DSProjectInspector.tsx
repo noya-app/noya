@@ -2,7 +2,7 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import { produce } from 'immer';
 import { DS } from 'noya-api';
-import { NoyaComponent } from 'noya-component';
+import { FindComponent, NoyaComponent } from 'noya-component';
 import {
   Button,
   DropdownMenu,
@@ -26,7 +26,6 @@ import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
 import { InspectorSection } from '../components/InspectorSection';
 import { downloadBlob } from '../utils/download';
 import { DSThemeInspector } from './DSThemeInspector';
-import { FindComponent } from './traversal';
 
 const designSystems = {
   '@noya-design-system/mui': 'Material Design',
