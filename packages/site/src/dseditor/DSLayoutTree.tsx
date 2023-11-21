@@ -8,6 +8,8 @@ import {
   NoyaResolvedNode,
   ResolvedHierarchy,
   createResolvedNode,
+  randomSeed,
+  svgToReactElement,
   unresolve,
 } from 'noya-component';
 import {
@@ -35,7 +37,6 @@ import { isDeepEqual, uuid } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
-import { randomSeed } from '../ayon/utils/patterns';
 import {
   primitiveElementStyleItems,
   styleItems,
@@ -46,7 +47,6 @@ import {
   parseLayout,
   parseLayoutWithOptions,
 } from './componentLayout';
-import { svgToReactElement } from './renderSVGElement';
 import { getComponentName, getNodeName } from './utils/nodeUtils';
 
 type LayoutTreeItem = {

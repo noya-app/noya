@@ -8,5 +8,8 @@
   "version": "1.0.0",
   "dependencies": {
     "codesandbox": "^2.2.3"
+  },
+  "optionalDependencies": {
+    "@dabbott/patterns": "^0.0.4"
   }
 }

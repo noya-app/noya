@@ -6,6 +6,7 @@ import {
   NoyaResolvedString,
   ResolvedHierarchy,
   createResolvedNode,
+  renderResolvedNode,
   unresolve,
 } from 'noya-component';
 import { lightTheme } from 'noya-designsystem';
@@ -26,7 +27,6 @@ import styled from 'styled-components';
 import { DSControlledRenderer } from '../../dseditor/DSControlledRenderer';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { initialComponents } from '../../dseditor/builtins';
-import { renderResolvedNode } from '../../dseditor/renderDSPreview';
 import { useAyonState } from '../state/ayonState';
 import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData, NodePath } from '../types';
