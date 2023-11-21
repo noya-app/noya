@@ -1,6 +1,5 @@
 /* eslint-disable jest/no-commented-out-tests */
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import { readFileSync } from 'fs';
 import {
   clean,
   compile,
@@ -11,7 +10,6 @@ import {
 import Sketch from 'noya-file-format';
 import { loadDesignSystem } from 'noya-module-loader';
 import { SketchModel } from 'noya-sketch-model';
-import path from 'path';
 import {
   buttonSymbolId,
   checkboxSymbolId,
@@ -21,13 +19,6 @@ import {
 import { librarySymbolMap } from '../ayon/symbols/symbols';
 
 jest.setTimeout(20000);
-
-// Jest doesn't know how to import a text file, so we mock it
-jest.mock('../../safelist.txt', () => {
-  return {
-    default: readFileSync(path.join(__dirname, '../../safelist.txt'), 'utf8'),
-  };
-});
 
 let ChakraDesignSystem: DesignSystemDefinition;
 let MaterialDesignSystem: DesignSystemDefinition;

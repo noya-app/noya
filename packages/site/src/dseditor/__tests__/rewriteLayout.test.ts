@@ -1,6 +1,4 @@
-import { readFileSync } from 'fs';
 import { layoutNode } from 'noya-compiler';
-import path from 'path';
 import {
   replaceHTMLEntities,
   rewriteAbsoluteFill,
@@ -28,16 +26,6 @@ import {
   rewriteVideoElement,
   unescapeHTML,
 } from '../rewriteLayout';
-
-// Jest doesn't know how to import a text file, so we mock it
-jest.mock('../../../safelist.txt', () => {
-  return {
-    default: readFileSync(
-      path.join(__dirname, '../../../safelist.txt'),
-      'utf8',
-    ),
-  };
-});
 
 it('replaces grow with flex-1', () => {
   expect(rewriteTailwindClasses(layoutNode('Box', { class: 'grow' }))).toEqual(

@@ -43,10 +43,6 @@ const withConfig = (nextConfig) => ({
           test: /\.svg$/,
           use: 'url-loader',
         },
-        {
-          test: /\.txt$/,
-          use: 'raw-loader',
-        },
       ],
     };
 

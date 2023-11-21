@@ -1,17 +1,5 @@
-import { readFileSync } from 'fs';
 import { NoyaGeneratorProp, NoyaPrimitiveElement } from 'noya-component';
-import path from 'path';
 import { parseLayout } from '../componentLayout';
-
-// Jest doesn't know how to import a text file, so we mock it
-jest.mock('../../../safelist.txt', () => {
-  return {
-    default: readFileSync(
-      path.join(__dirname, '../../../safelist.txt'),
-      'utf8',
-    ),
-  };
-});
 
 // Sometimes generated layouts will have references to images that don't exist
 // e.g. logo.png, so we ignore any generated image srcs

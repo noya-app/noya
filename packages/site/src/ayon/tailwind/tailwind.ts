@@ -1,11 +1,14 @@
-import { ThemeValue, config, tailwindColors } from 'noya-tailwind';
+import {
+  ThemeValue,
+  config,
+  suggestedTailwindClasses,
+  tailwindColors,
+} from 'noya-tailwind';
 import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
 import { tailwindToLinearGradient } from './tailwindGradient';
 
-export const allClassNames = (
-  require('../../../safelist.txt').default as string
-).split('\n');
+export const allClassNames = suggestedTailwindClasses;
 
 const allClassNamesSet = new Set(allClassNames);
 
