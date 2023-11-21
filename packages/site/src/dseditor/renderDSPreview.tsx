@@ -12,7 +12,12 @@ import {
   ResolvedHierarchy,
 } from 'noya-component';
 import { darkTheme, lightTheme } from 'noya-designsystem';
-import { tailwindColors } from 'noya-tailwind';
+import {
+  extractTailwindClassesByBreakpoint,
+  extractTailwindClassesByTheme,
+  parametersToTailwindStyle,
+  tailwindColors,
+} from 'noya-tailwind';
 import { findLast, unique } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
@@ -30,11 +35,6 @@ import {
   textSymbolId,
   textareaSymbolId,
 } from '../ayon/symbols/symbolIds';
-import {
-  extractTailwindClassesByBreakpoint,
-  extractTailwindClassesByTheme,
-  parametersToTailwindStyle,
-} from '../ayon/tailwind/tailwind';
 import {
   createPatternSVG,
   placeholderImage,

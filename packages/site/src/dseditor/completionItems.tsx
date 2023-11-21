@@ -1,10 +1,10 @@
-import { range } from 'noya-utils';
-import { allClassNames } from '../ayon/tailwind/tailwind';
 import { CompletionItem } from 'noya-designsystem';
-import { PRIMITIVE_ELEMENT_MAP, primitiveElements } from './primitiveElements';
-import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
-import React from 'react';
 import { StarIcon } from 'noya-icons';
+import { allClassNames } from 'noya-tailwind';
+import { range } from 'noya-utils';
+import React from 'react';
+import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
+import { PRIMITIVE_ELEMENT_MAP, primitiveElements } from './primitiveElements';
 
 const colorScale = [50, ...range(100, 1000, 100)];
 

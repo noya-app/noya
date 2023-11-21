@@ -1,8 +1,8 @@
 import { CheckboxProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
+import { parametersToTailwindStyle } from 'noya-tailwind';
 import React from 'react';
 import { isWithinRectRange } from '../../infer/score';
-import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { checkboxSymbolId } from '../symbolIds';
 import { RenderProps } from '../types';

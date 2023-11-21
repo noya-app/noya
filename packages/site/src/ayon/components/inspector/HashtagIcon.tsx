@@ -1,5 +1,5 @@
+import { resolveTailwindClass } from 'noya-tailwind';
 import React from 'react';
-import { resolveTailwindClass } from '../../tailwind/tailwind';
 
 export function HashtagIcon({ item }: { item: string }) {
   let resolvedStyle = resolveTailwindClass(item.replace('fill', 'bg'));

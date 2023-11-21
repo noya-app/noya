@@ -1,10 +1,7 @@
 import { TextProps, TextVariant } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
+import { parametersToTailwindStyle, tailwindTextClasses } from 'noya-tailwind';
 import React from 'react';
-import {
-  parametersToTailwindStyle,
-  tailwindTextClasses,
-} from '../../tailwind/tailwind';
 import { getMappedParameters } from '../../utils/getMappedParameters';
 import { textSymbolId } from '../symbolIds';
 import { RenderProps } from '../types';

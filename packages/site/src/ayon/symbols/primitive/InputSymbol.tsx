@@ -1,11 +1,11 @@
 import { InputProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
-import React from 'react';
-import { isWithinRectRange } from '../../infer/score';
 import {
   getTailwindClassesByGroup,
   parametersToTailwindStyle,
-} from '../../tailwind/tailwind';
+} from 'noya-tailwind';
+import React from 'react';
+import { isWithinRectRange } from '../../infer/score';
 import { getParameters } from '../../utils/getMappedParameters';
 import { inputSymbolId } from '../symbolIds';
 import { getBlockThemeColors } from '../symbolTheme';

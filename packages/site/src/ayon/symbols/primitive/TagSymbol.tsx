@@ -1,7 +1,7 @@
 import { TagProps, TagSize, TagVariant } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
+import { parametersToTailwindStyle } from 'noya-tailwind';
 import React from 'react';
-import { parametersToTailwindStyle } from '../../tailwind/tailwind';
 import { getMappedParameters } from '../../utils/getMappedParameters';
 import { tagSymbolId } from '../symbolIds';
 import { buttonColors } from '../symbolTheme';

@@ -1,11 +1,8 @@
 import { ImageProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
+import { parametersToTailwindStyle, tailwindBlockClasses } from 'noya-tailwind';
 import { isExternalUrl } from 'noya-utils';
 import React from 'react';
-import {
-  parametersToTailwindStyle,
-  tailwindBlockClasses,
-} from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { boxSymbolId, imageSymbolId } from '../symbolIds';
 import { RenderProps } from '../types';

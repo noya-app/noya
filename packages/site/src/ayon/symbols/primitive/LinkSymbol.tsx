@@ -1,10 +1,7 @@
 import { IconProps, LinkProps, component } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
+import { parametersToTailwindStyle, tailwindTextClasses } from 'noya-tailwind';
 import React from 'react';
-import {
-  parametersToTailwindStyle,
-  tailwindTextClasses,
-} from '../../tailwind/tailwind';
 import { getParameters } from '../../utils/getMappedParameters';
 import { linkSymbolId } from '../symbolIds';
 import { RenderProps } from '../types';

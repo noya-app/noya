@@ -4,7 +4,7 @@ import {
   parametersToTailwindStyle,
   resolveTailwindClass,
   simpleAlignmentResolver,
-} from '../ayon/tailwind/tailwind';
+} from '../tailwind';
 
 it('only applies last class within a group', () => {
   expect(getBlockClassName(['bg-red-500', 'bg-blue-500'])).toEqual(

@@ -13,11 +13,11 @@ import Sketch from 'noya-file-format';
 import { Component1Icon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
+import { allClassNames } from 'noya-tailwind';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';
 import { getAllInsertableSymbols } from '../../symbols/symbols';
-import { allClassNames } from '../../tailwind/tailwind';
 import { DraggableMenuButton } from './DraggableMenuButton';
 import { HashtagIcon } from './HashtagIcon';
 

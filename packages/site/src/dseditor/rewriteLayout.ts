@@ -1,5 +1,4 @@
 import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
-import { memoize, partition } from 'noya-utils';
 import {
   ClassGroupKey,
   extractTailwindClassesByBreakpoint,
@@ -9,7 +8,8 @@ import {
   hasClassGroup,
   isTailwindClassGroup,
   resolveTailwindClass,
-} from '../ayon/tailwind/tailwind';
+} from 'noya-tailwind';
+import { memoize, partition } from 'noya-utils';
 
 export function rewriteRemoveHiddenElements(layout: LayoutNode) {
   return LayoutHierarchy.map<LayoutNode | string>(
