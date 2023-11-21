@@ -1,19 +1,29 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import JavascriptPlayground from 'javascript-playgrounds';
 import { useRouter } from 'next/router';
 import { DS } from 'noya-api';
 import {
+  clean,
+  createElementCode,
+  createSimpleElement,
+  print,
+} from 'noya-compiler';
+import {
   Model,
   NoyaComponent,
+  NoyaResolvedNode,
   NoyaResolvedString,
   ResolvedHierarchy,
   SelectedComponent,
   diffResolvedTrees,
   instantiateResolvedComponent,
+  renderResolvedNode,
 } from 'noya-component';
 import {
   Chip,
   DividerVertical,
   GridView,
+  RadioGroup,
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -22,6 +32,8 @@ import { uuid } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
+import { ShareProjectButton } from '../components/ShareMenu';
+import { useProject } from '../contexts/ProjectContext';
 import { DSComponentInspector } from './DSComponentInspector';
 import { DSComponentThumbnail } from './DSComponentThumbnail';
 import { DSControlledRenderer } from './DSControlledRenderer';
@@ -48,12 +60,14 @@ export function DSEditor({
   viewType,
 }: Props) {
   const { query } = useRouter();
+  const fileId = query.id as string;
   const initialComponentId = query.component as string | undefined;
   const library = query.library as string | undefined;
   const isThumbnail = library === 'thumbnail';
 
   const theme = useDesignSystemTheme();
   const [ds, setDS] = React.useState(initialDocument);
+  const project = useProject();
 
   let {
     source: { name: sourceName },
@@ -243,6 +257,28 @@ export function DSEditor({
     [setSelection],
   );
 
+  type ContentTabName = 'preview' | 'code';
+
+  const [contentTab, setContentTab] = React.useState<ContentTabName>('preview');
+
+  useEffect(() => {
+    project.setRightToolbar(
+      <>
+        <Stack.H width="160px">
+          <RadioGroup.Root
+            id="content-tab"
+            value={contentTab}
+            onValueChange={setContentTab}
+          >
+            <RadioGroup.Item value="preview">Preview</RadioGroup.Item>
+            <RadioGroup.Item value="code">Code</RadioGroup.Item>
+          </RadioGroup.Root>
+        </Stack.H>
+        <ShareProjectButton fileId={fileId} />
+      </>,
+    );
+  }, [contentTab, fileId, project]);
+
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
       {viewType !== 'preview' && (
@@ -279,28 +315,39 @@ export function DSEditor({
           }}
         />
       )}
-      <Stack.V flex="1" overflow="hidden" position="relative">
+      <Stack.V flex="1">
         {selection ? (
-          <>
-            <DSControlledRenderer
-              ref={rendererRef}
-              sourceName={sourceName}
-              config={config}
-              renderContent={handleRenderContent}
-              getStringValueAtPath={(path) => {
-                if (!resolvedNode) return undefined;
+          <Stack.V flex="1">
+            {contentTab === 'preview' && (
+              <Stack.V flex="1" overflow="hidden" position="relative">
+                <DSControlledRenderer
+                  ref={rendererRef}
+                  sourceName={sourceName}
+                  config={config}
+                  renderContent={handleRenderContent}
+                  getStringValueAtPath={(path) => {
+                    if (!resolvedNode) return undefined;
 
-                return ResolvedHierarchy.find<NoyaResolvedString>(
-                  resolvedNode,
-                  (node): node is NoyaResolvedString =>
-                    node.type === 'noyaString' &&
-                    node.path.join('/') === path.join('/'),
-                )?.value;
-              }}
-              onChangeTextAtPath={handleSetTextAtPath}
-            />
-            <DSRendererOverlay rendererRef={rendererRef} />
-          </>
+                    return ResolvedHierarchy.find<NoyaResolvedString>(
+                      resolvedNode,
+                      (node): node is NoyaResolvedString =>
+                        node.type === 'noyaString' &&
+                        node.path.join('/') === path.join('/'),
+                    )?.value;
+                  }}
+                  onChangeTextAtPath={handleSetTextAtPath}
+                />
+                <DSRendererOverlay rendererRef={rendererRef} />
+              </Stack.V>
+            )}
+            {contentTab === 'code' && resolvedNode && system && (
+              <DSComponentCode
+                resolvedNode={resolvedNode}
+                system={system}
+                dsConfig={config}
+              />
+            )}
+          </Stack.V>
         ) : (
           <GridView.Root size="large" textPosition="below">
             <GridView.SectionHeader title="Components" />
@@ -353,7 +400,7 @@ export function DSEditor({
                       >
                         <DSComponentThumbnail
                           component={component}
-                          fileId={query.id as string}
+                          fileId={fileId}
                         />
                       </Stack.H>
                     </GridView.Item>
@@ -377,5 +424,62 @@ export function DSEditor({
         />
       )}
     </Stack.H>
+  );
+}
+
+function DSComponentCode({
+  resolvedNode,
+  system,
+  dsConfig,
+}: {
+  resolvedNode: NoyaResolvedNode;
+  system: DesignSystemDefinition;
+  dsConfig: DS['config'];
+}) {
+  const [code, setCode] = React.useState<string>();
+
+  useEffect(() => {
+    const reactNode = renderResolvedNode({
+      contentEditable: false,
+      disableTabNavigation: false,
+      includeDataProps: true,
+      system,
+      dsConfig,
+      resolvedNode,
+    });
+
+    const code = createElementCode(createSimpleElement(reactNode, system)!);
+
+    const out = clean(print(code));
+
+    setCode(out);
+  }, [dsConfig, resolvedNode, system]);
+
+  return (
+    <Stack.V flex="1" background="white">
+      {code !== undefined && (
+        <JavascriptPlayground
+          key={code}
+          files={{
+            'index.tsx': code,
+          }}
+          panes={['editor']}
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+          styles={{
+            status: {
+              display: 'none',
+            },
+          }}
+          _css={`
+            .cm-s-react .CodeMirror-gutters {
+              border-left: 0;
+            }
+          `}
+        />
+      )}
+    </Stack.V>
   );
 }

@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   ExtractMenuItemType,
   IconButton,
-  Popover,
   Spacer,
   Stack,
   Text,
@@ -16,7 +15,7 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
-import { ChevronDownIcon, SlashIcon, StarFilledIcon } from 'noya-icons';
+import { SlashIcon, StarFilledIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
@@ -41,7 +40,7 @@ import { Debugger } from '../../components/Debugger';
 import { EditableText } from '../../components/EditableText';
 import { ProjectEditor } from '../../components/ProjectEditor';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
-import { ShareMenu } from '../../components/ShareMenu';
+import { ShareProjectButton } from '../../components/ShareMenu';
 import { Toolbar } from '../../components/Toolbar';
 import { UpgradeDialog } from '../../components/UpgradeDialog';
 import { OnboardingProvider } from '../../contexts/OnboardingContext';
@@ -218,23 +217,7 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
       <ProjectProvider value={project}>
         <Stack.V flex="1" background={theme.colors.canvas.background}>
           <Toolbar
-            right={
-              rightToolbar || (
-                <Popover
-                  trigger={
-                    <Button>
-                      Share
-                      <Spacer.Horizontal size={4} />
-                      <ChevronDownIcon />
-                    </Button>
-                  }
-                >
-                  <Stack.V width={240}>
-                    <ShareMenu fileId={fileId} />
-                  </Stack.V>
-                </Popover>
-              )
-            }
+            right={rightToolbar || <ShareProjectButton fileId={fileId} />}
             left={
               leftToolbar
               // billing.hasOverage ? (

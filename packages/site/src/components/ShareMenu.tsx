@@ -4,16 +4,17 @@ import {
   Divider,
   IconButton,
   InputField,
+  Popover,
   Small,
   Spacer,
   Stack,
   Switch,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { OpenInNewWindowIcon } from 'noya-icons';
+import { ChevronDownIcon, OpenInNewWindowIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { amplitude } from 'noya-log';
-import React, { useEffect, useReducer } from 'react';
+import React, { memo, useEffect, useReducer } from 'react';
 import { useToggleTimer } from '../hooks/useToggleTimer';
 import { NOYA_HOST } from '../utils/noyaClient';
 
@@ -212,3 +213,28 @@ export function ShareMenu({ fileId }: { fileId: string }) {
     </>
   );
 }
+
+export const ShareProjectButton = memo(function ShareProjectButton({
+  fileId,
+  onOpenChange,
+}: {
+  fileId: string;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  return (
+    <Popover
+      onOpenChange={onOpenChange}
+      trigger={
+        <Button>
+          Share
+          <Spacer.Horizontal size={4} />
+          <ChevronDownIcon />
+        </Button>
+      }
+    >
+      <Stack.V width={240}>
+        <ShareMenu fileId={fileId} />
+      </Stack.V>
+    </Popover>
+  );
+});

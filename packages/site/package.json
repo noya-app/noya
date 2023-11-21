@@ -21,6 +21,7 @@
     "date-fns": "^2.29.3",
     "flexsearch": "^0.6.32",
     "framer-motion": "^6",
+    "javascript-playgrounds": "^1.2.3",
     "lodash.debounce": "^4.0.8",
     "logrocket": "^3.0.1",
     "logrocket-react": "^5.0.1",

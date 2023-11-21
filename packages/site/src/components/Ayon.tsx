@@ -64,7 +64,7 @@ import { AyonProvider } from './AyonContext';
 import { DSProvider, useDS } from './DSContext';
 import { OnboardingAnimation } from './OnboardingAnimation';
 import { PageSetup } from './PageSetup';
-import { ShareMenu } from './ShareMenu';
+import { ShareProjectButton } from './ShareMenu';
 
 export type ExportType =
   | NoyaAPI.ExportFormat
@@ -318,22 +318,12 @@ function Workspace({
             <ChevronDownIcon />
           </Button>
         </DropdownMenu>
-        <Popover
-          trigger={
-            <Button>
-              Share
-              <Spacer.Horizontal size={4} />
-              <ChevronDownIcon />
-            </Button>
-          }
+        <ShareProjectButton
+          fileId={fileId}
           onOpenChange={() => {
             dispatch('selectLayer', []);
           }}
-        >
-          <Stack.V width={240}>
-            <ShareMenu fileId={fileId} />
-          </Stack.V>
-        </Popover>
+        />
       </Stack.H>,
     );
   }, [
