@@ -17,7 +17,6 @@ import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
 import { ChevronDownIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
-import { castHashParameter, useUrlHashParameters } from 'noya-react-utils';
 import { Layers } from 'noya-state';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createAyonDocument } from '../ayon/utils/createAyonDocument';
@@ -27,13 +26,14 @@ import { ProjectTypeIcon } from './ProjectTypeIcon';
 import { Card } from './Subscription';
 
 const thumbnailSize = { width: 64, height: 64 };
+const isExperimental = true;
 
 export function Projects() {
-  const urlHashParameters = useUrlHashParameters();
-  const isExperimental = castHashParameter(
-    urlHashParameters.experimental,
-    'boolean',
-  );
+  // const urlHashParameters = useUrlHashParameters();
+  // const isExperimental = castHashParameter(
+  //   urlHashParameters.experimental,
+  //   'boolean',
+  // );
 
   const { push } = useRouter();
   const { files, loading } = useNoyaFiles();
