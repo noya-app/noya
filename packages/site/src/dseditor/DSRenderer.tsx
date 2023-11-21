@@ -10,6 +10,7 @@ import { DSConfig } from 'noya-api';
 import { Stack } from 'noya-designsystem';
 import { loadDesignSystem } from 'noya-module-loader';
 import { useStableCallback } from 'noya-react-utils';
+import { tailwindColors } from 'noya-tailwind';
 import React, {
   forwardRef,
   useCallback,
@@ -20,7 +21,6 @@ import React, {
   useRef,
 } from 'react';
 import styled from 'styled-components';
-import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { ControlledFrame } from './ControlledFrame';
 import {
   ProxyEvent,

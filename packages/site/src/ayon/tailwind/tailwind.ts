@@ -1,6 +1,6 @@
+import { ThemeValue, config, tailwindColors } from 'noya-tailwind';
 import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
-import { ThemeValue, config, tailwindColors } from './tailwind.config';
 import { tailwindToLinearGradient } from './tailwindGradient';
 
 export const allClassNames = (

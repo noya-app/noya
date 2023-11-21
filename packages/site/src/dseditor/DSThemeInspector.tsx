@@ -8,10 +8,10 @@ import {
 } from 'noya-designsystem';
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
+import { tailwindColors } from 'noya-tailwind';
 import { upperFirst } from 'noya-utils';
 import React from 'react';
 import styled from 'styled-components';
-import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import { ColorModeInput } from './ColorModeInput';
 
 export const colorGroups = Object.entries(tailwindColors).flatMap(

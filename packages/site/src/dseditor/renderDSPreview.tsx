@@ -12,6 +12,7 @@ import {
   ResolvedHierarchy,
 } from 'noya-component';
 import { darkTheme, lightTheme } from 'noya-designsystem';
+import { tailwindColors } from 'noya-tailwind';
 import { findLast, unique } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import {
@@ -34,7 +35,6 @@ import {
   extractTailwindClassesByTheme,
   parametersToTailwindStyle,
 } from '../ayon/tailwind/tailwind';
-import { tailwindColors } from '../ayon/tailwind/tailwind.config';
 import {
   createPatternSVG,
   placeholderImage,

@@ -1,4 +1,4 @@
-import { tailwindColors } from '../tailwind/tailwind.config';
+import { tailwindColors } from 'noya-tailwind';
 
 export const accentColor = tailwindColors.blue;
 export const neutralColor = tailwindColors.slate;
