@@ -47,22 +47,29 @@ export function getImageFromProp(
   return placeholderImage;
 }
 
+export type RenderHighlightOptions = {
+  path: string[];
+  color: string;
+};
+
 export function renderResolvedNode({
-  isEditable,
+  contentEditable,
+  disableTabNavigation,
+  includeDataProps,
   resolvedNode,
   dsConfig,
-  selectionOutlineColor,
-  highlightedPath,
   system,
   theme,
+  highlight,
 }: {
-  isEditable: boolean;
+  contentEditable: boolean;
+  disableTabNavigation: boolean;
+  includeDataProps: boolean;
   resolvedNode: NoyaResolvedNode;
   dsConfig: DSConfig;
-  selectionOutlineColor: string;
-  highlightedPath: string[] | undefined;
   system: DesignSystemDefinition;
-  theme: any;
+  theme?: any; // Passed into components as _theme
+  highlight?: RenderHighlightOptions;
 }) {
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
@@ -72,6 +79,8 @@ export function renderResolvedNode({
       }
 
       if (element.type === 'noyaString') {
+        if (!contentEditable) return element.value;
+
         const string = (element.value || ZERO_WIDTH_SPACE)
           // Typing a space in contentEditable will insert a non-breaking space
           // instead of a regular space. We want to replace it with a regular space.
@@ -85,11 +94,13 @@ export function renderResolvedNode({
 
         return (
           <span
-            contentEditable={isEditable}
+            contentEditable
             key="editable-span"
-            data-path={element.path.slice(0, -1).join('/')}
-            data-stringpath={element.path.join('/')}
-            tabIndex={isEditable ? 1 : -1}
+            {...(includeDataProps && {
+              'data-path': element.path.slice(0, -1).join('/'),
+              'data-stringpath': element.path.join('/'),
+            })}
+            tabIndex={disableTabNavigation ? -1 : 1}
             style={{
               fontFamily: 'inherit',
               fontSize: 'inherit',
@@ -115,7 +126,7 @@ export function renderResolvedNode({
         return element.name ?? '';
       }
 
-      const isHighlighted = element.path.join() === highlightedPath?.join();
+      const isHighlighted = element.path.join() === highlight?.path.join();
 
       const PrimitiveComponent: React.FC<any> =
         system.components[element.componentID];
@@ -140,9 +151,9 @@ export function renderResolvedNode({
 
       const style = parametersToTailwindStyle(classNames);
 
-      if (isHighlighted) {
+      if (isHighlighted && highlight) {
         Object.assign(style, {
-          outline: `1px solid ${selectionOutlineColor}`,
+          outline: `1px solid ${highlight.color}`,
         });
       }
 
@@ -165,7 +176,7 @@ export function renderResolvedNode({
         dsConfig.colors.primary
       ] as Theme['colors']['primary'];
 
-      // If we have an svg src, dangerouslySetInnerHTML is the only way to render it.
+      // Render SVGs as React elements
       if (
         srcProp &&
         srcProp.type === 'generator' &&
@@ -185,8 +196,10 @@ export function renderResolvedNode({
               ...rootElement.props.style,
               ...style,
             },
-            'data-path': element.path.join('/'),
-            ...(!isEditable && { tabIndex: -1 }),
+            ...(!includeDataProps && {
+              'data-path': element.path.join('/'),
+            }),
+            ...(disableTabNavigation && { tabIndex: -1 }),
           },
         };
       }
@@ -198,8 +211,10 @@ export function renderResolvedNode({
           // the layout is being generated.
           key={indexPath.join('/')}
           _passthrough={{
-            'data-path': element.path.join('/'),
-            ...(!isEditable && { tabIndex: -1 }),
+            ...(!includeDataProps && {
+              'data-path': element.path.join('/'),
+            }),
+            ...(disableTabNavigation && { tabIndex: -1 }),
           }}
           {...(variant && { variant })}
           {...(element.componentID === component.id.Progress && {

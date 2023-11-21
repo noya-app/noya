@@ -118,7 +118,7 @@ export const suggestionPatterns = [
   'inline-flex',
 ];
 
-const context = {
+export const context = {
   theme: (key: string) => {
     const result = config.theme[key];
     if (typeof result === 'function') {

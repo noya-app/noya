@@ -2,6 +2,7 @@ import { DSConfig } from 'noya-api';
 import {
   ComponentThumbnailChrome,
   NoyaResolvedNode,
+  RenderHighlightOptions,
   renderResolvedNode,
 } from 'noya-component';
 import { darkTheme, lightTheme } from 'noya-designsystem';
@@ -11,24 +12,22 @@ import { closest } from './dom';
 
 export function renderDSPreview({
   renderProps: props,
-  highlightedPath,
   dsConfig,
   resolvedNode,
   canvasBackgroundColor,
-  selectionOutlineColor,
   padding,
   isThumbnail,
   chrome = 'none',
+  highlight,
 }: {
   renderProps: DSRenderProps;
-  highlightedPath: string[] | undefined;
   dsConfig: DSConfig;
   resolvedNode: NoyaResolvedNode;
   canvasBackgroundColor: string;
-  selectionOutlineColor: string;
   padding?: number;
   isThumbnail?: boolean;
   chrome?: ComponentThumbnailChrome;
+  highlight?: RenderHighlightOptions;
 }) {
   // console.info(
   //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
@@ -41,13 +40,14 @@ export function renderDSPreview({
   // const system = isThumbnail ? ThumbnailDesignSystem : props.system;
 
   const content = renderResolvedNode({
-    isEditable: true,
+    contentEditable: true,
+    disableTabNavigation: false,
+    includeDataProps: true,
     resolvedNode,
     dsConfig,
-    selectionOutlineColor,
-    highlightedPath,
     system: props.system,
     theme: isThumbnail ? props.theme : undefined,
+    highlight,
   });
 
   const colorMode = dsConfig.colorMode ?? 'light';

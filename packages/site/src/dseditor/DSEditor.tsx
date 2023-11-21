@@ -208,14 +208,15 @@ export function DSEditor({
       if (selection && resolvedNode) {
         return renderDSPreview({
           renderProps: props,
-          highlightedPath,
           dsConfig: config,
           resolvedNode,
           canvasBackgroundColor: theme.colors.canvas.background,
-          selectionOutlineColor: theme.colors.primary,
           padding: viewType === 'preview' ? 0 : 20,
           isThumbnail,
           chrome,
+          highlight: highlightedPath
+            ? { path: highlightedPath, color: theme.colors.primary }
+            : undefined,
         });
       }
       return null;

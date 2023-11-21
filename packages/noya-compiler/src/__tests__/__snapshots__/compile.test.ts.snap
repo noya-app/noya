@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders default 1`] = `
+"<Box
+  display=\\"flex\\"
+  flexDirection=\\"column\\"
+  alignItems=\\"center\\"
+  justifyContent=\\"center\\"
+  p=\\"2.5rem\\"
+  flex=\\"1\\"
+  gap=\\"1rem\\"
+>
+  <Tag>New</Tag>
+  <Text fontSize=\\"5xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+    Create, iterate, inspire.
+  </Text>
+  <Text fontSize=\\"2xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+    Turn great ideas into new possibilities.
+  </Text>
+  <Box display=\\"flex\\" alignItems=\\"center\\" gap=\\"1rem\\" mt=\\"0.5rem\\">
+    <Button>Get Started</Button>
+    <Link>Learn More</Link>
+  </Box>
+</Box>;
+"
+`;

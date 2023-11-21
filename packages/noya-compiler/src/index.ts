@@ -1,11 +1,11 @@
-import {
-  component,
-  DesignSystemDefinition,
-} from '@noya-design-system/protocol';
+import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
-import Sketch from 'noya-file-format';
+import {
+  createResolvedNode,
+  FindComponent,
+  renderResolvedNode,
+} from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
-import { Layers } from 'noya-state';
 import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
@@ -139,14 +139,14 @@ function isSafeForJsxText(text: string) {
 
 export interface CompilerConfiguration {
   name: string;
-  artboard: Sketch.Artboard;
-  getSymbolMaster: (symbolId: string) => Sketch.SymbolMaster;
-  DesignSystem: DS | DesignSystemDefinition;
+  componentID: string;
+  ds: DS;
+  designSystemDefinition?: DesignSystemDefinition;
   target: 'standalone' | 'codesandbox';
 }
 
 function findElementNameAndSource(
-  element: React.ReactElement,
+  element: React.ReactNode,
   DesignSystem: DesignSystemDefinition,
   Components: Map<React.ComponentType, { name: string; source?: string }>,
 ):
@@ -156,6 +156,8 @@ function findElementNameAndSource(
       source?: string;
     }
   | undefined {
+  if (!React.isValidElement(element)) return;
+
   // This is a DOM element
   if (typeof element.type === 'string') {
     return { name: element.type, element };
@@ -180,8 +182,8 @@ function findElementNameAndSource(
   return findElementNameAndSource(libraryElement, DesignSystem, Components);
 }
 
-function createSimpleElement(
-  originalElement: React.ReactElement,
+export function createSimpleElement(
+  originalElement: React.ReactNode,
   DesignSystem: DesignSystemDefinition,
 ): SimpleElement | undefined {
   const Components = buildComponentMap(DesignSystem.imports);
@@ -228,46 +230,6 @@ function createSimpleElement(
   };
 }
 
-export function mapBlockToElement(
-  {
-    getSymbolMaster,
-    DesignSystem,
-  }: {
-    getSymbolMaster: CompilerConfiguration['getSymbolMaster'];
-    DesignSystem: DesignSystemDefinition;
-  },
-  layer: Sketch.SymbolInstance,
-): SimpleElement | undefined {
-  const block = getSymbolMaster(layer.symbolID);
-
-  if (!block || !block.blockDefinition?.render) return;
-
-  const element = block.blockDefinition.render({
-    passthrough: {},
-    Components: DesignSystem.components,
-    getSymbolMaster,
-    instance: layer,
-  });
-
-  if (!element || !isValidElement(element)) return;
-
-  const root = createSimpleElement(element, DesignSystem);
-
-  if (!root) return;
-
-  return {
-    [simpleElementSymbol]: true,
-    name: 'Frame',
-    props: {
-      ...(layer.frame.x !== 0 && { left: layer.frame.x }),
-      ...(layer.frame.y !== 0 && { top: layer.frame.y }),
-      width: layer.frame.width,
-      height: layer.frame.height,
-    },
-    children: [root],
-  };
-}
-
 function buildComponentMap(imports: DesignSystemDefinition['imports']) {
   const Components = new Map<any, { name: string; source: string }>();
 
@@ -297,24 +259,66 @@ function findSourceByName(
   };
 }
 
+export function createReactComponentDeclaration(
+  resolvedElement: SimpleElement,
+) {
+  return ts.factory.createFunctionDeclaration(
+    [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+    undefined,
+    'App',
+    undefined,
+    [],
+    undefined,
+    ts.factory.createBlock([
+      ts.factory.createReturnStatement(
+        // providerElement
+        //   ? createElementCode(providerElement)
+        // :
+        createElementCode(resolvedElement),
+      ),
+    ]),
+  );
+}
+
 export async function compile(configuration: CompilerConfiguration) {
-  const { artboard, getSymbolMaster } = configuration;
-
   const DesignSystem =
-    'source' in configuration.DesignSystem
-      ? await loadDesignSystem(configuration.DesignSystem.source.name)
-      : configuration.DesignSystem;
+    configuration.designSystemDefinition ??
+    (await loadDesignSystem(configuration.ds.source.name));
 
-  const components = artboard.layers
-    .filter(Layers.isSymbolInstance)
-    .flatMap((layer) => {
-      const element = mapBlockToElement(
-        { getSymbolMaster, DesignSystem },
-        layer,
-      );
+  const findComponent: FindComponent = (componentID) => {
+    return configuration.ds.components?.find(
+      (component) => component.id === componentID,
+    );
+  };
 
-      return element ? [element] : [];
-    });
+  const noyaComponent = findComponent(configuration.componentID);
+
+  if (!noyaComponent) {
+    throw new Error(
+      `Could not find component with id ${configuration.componentID}`,
+    );
+  }
+
+  const resolvedNode = createResolvedNode(
+    findComponent,
+    noyaComponent.rootElement,
+  );
+
+  const resolvedElement = createSimpleElement(
+    renderResolvedNode({
+      contentEditable: false,
+      disableTabNavigation: false,
+      includeDataProps: true,
+      system: DesignSystem,
+      dsConfig: configuration.ds.config,
+      resolvedNode,
+    }),
+    DesignSystem,
+  );
+
+  if (!resolvedElement) {
+    throw new Error('Could not create resolved element');
+  }
 
   const getChildren = (
     element: SimpleElement | string,
@@ -327,30 +331,30 @@ export async function compile(configuration: CompilerConfiguration) {
     ];
   };
 
-  const ProviderComponent = DesignSystem.components[component.id.Provider];
+  // const ProviderComponent = DesignSystem.components[component.id.Provider];
 
-  const providerElement = createSimpleElement(
-    DesignSystem.createElement(ProviderComponent),
-    DesignSystem,
-  );
+  // const providerElement = createSimpleElement(
+  //   DesignSystem.createElement(ProviderComponent),
+  //   DesignSystem,
+  // );
 
-  if (providerElement) {
-    providerElement.children = components;
-  }
+  // if (providerElement) {
+  //   providerElement.children = components;
+  // }
 
-  const fakeRoot: SimpleElement = providerElement ?? {
-    [simpleElementSymbol]: true,
-    name: 'Frame',
-    children: components,
-    props: {},
-  };
+  // const fakeRoot: SimpleElement = providerElement ?? {
+  //   [simpleElementSymbol]: true,
+  //   name: 'Frame',
+  //   children: components,
+  //   props: {},
+  // };
 
   const boxSource = findSourceByName(DesignSystem, 'Box');
 
   const imports = (DesignSystem.imports ?? []).flatMap(
     ({ source, alwaysInclude }) => {
       const names = unique([
-        ...flat(fakeRoot, { getChildren }).flatMap((element) =>
+        ...flat(resolvedElement, { getChildren }).flatMap((element) =>
           typeof element !== 'string' && element.source === source
             ? [element.name]
             : [],
@@ -384,25 +388,7 @@ export async function compile(configuration: CompilerConfiguration) {
     },
   );
 
-  const func = ts.factory.createFunctionDeclaration(
-    [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-    undefined,
-    'App',
-    undefined,
-    [],
-    undefined,
-    ts.factory.createBlock([
-      ts.factory.createReturnStatement(
-        providerElement
-          ? createElementCode(providerElement)
-          : ts.factory.createJsxFragment(
-              ts.factory.createJsxOpeningFragment(),
-              components.map(createElementCode),
-              ts.factory.createJsxJsxClosingFragment(),
-            ),
-      ),
-    ]),
-  );
+  const func = createReactComponentDeclaration(resolvedElement);
 
   const allDependencies = (DesignSystem.imports ?? []).reduce(
     (result, importDeclaration) => ({

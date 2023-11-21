@@ -1,8 +1,8 @@
 import {
   ThemeValue,
   config,
+  context,
   suggestedTailwindClasses,
-  tailwindColors,
 } from 'noya-tailwind';
 import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
@@ -257,16 +257,6 @@ function getSpacingValue(className: string): string | undefined {
 
 const customValueRE = /[A-Za-z0-9-]*(?:\[(.*)\])?/;
 
-function configSelector(...keyPath: string[]) {
-  return get(config.theme as any, keyPath);
-}
-
-const themeParameter = {
-  theme: configSelector,
-  colors: tailwindColors,
-  breakpoints: () => {},
-};
-
 export function getColor(className: string) {
   const custom = customValueRE.exec(className)?.[1];
 
@@ -276,7 +266,7 @@ export function getColor(className: string) {
 
   const value = className.split('-').slice(1);
 
-  return get((config.theme as any).colors(themeParameter), value);
+  return get(context.theme('colors'), value);
 }
 
 export const resolveTailwindClass = memoize(function resolveTailwindClass(
@@ -367,37 +357,37 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       return value ? { paddingLeft: value } : {};
     }
     case 'margin': {
-      const value = (config.theme as any).margin(themeParameter)[
+      const value = (config.theme as any).margin(context)[
         getValue(className) || 'auto'
       ];
       return value ? { margin: value } : {};
     }
     case 'marginX': {
-      const value = (config.theme as any).margin(themeParameter)[
+      const value = (config.theme as any).margin(context)[
         getValue(className) || 'auto'
       ];
       return value ? { marginLeft: value, marginRight: value } : {};
     }
     case 'marginY': {
-      const value = (config.theme as any).margin(themeParameter)[
+      const value = (config.theme as any).margin(context)[
         getValue(className) || 'auto'
       ];
       return value ? { marginTop: value, marginBottom: value } : {};
     }
     case 'marginTop': {
-      const value = (config.theme as any).margin(themeParameter)[
+      const value = (config.theme as any).margin(context)[
         getValue(className) || 'auto'
       ];
       return value ? { marginTop: value } : {};
     }
     case 'marginRight': {
-      const value = (config.theme as any).margin(themeParameter)[
+      const value = (config.theme as any).margin(context)[
         getValue(className) || 'auto'
       ];
       return value ? { marginRight: value } : {};
     }
     case 'marginBottom': {
-      const value = (config.theme as any).margin(themeParameter)[
+      const value = (config.theme as any).margin(context)[
         getValue(className) || 'auto'
       ];
       return value ? { marginBottom: value } : {};
@@ -557,15 +547,13 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'width': {
       const value = getValue(className);
       return {
-        width: (config.theme as any).width(themeParameter)[value || 'auto'],
+        width: (config.theme as any).width(context)[value || 'auto'],
       };
     }
     case 'maxWidth': {
       const value = getValue(className);
       return {
-        maxWidth: (config.theme as any).maxWidth(themeParameter)[
-          value || 'none'
-        ],
+        maxWidth: (config.theme as any).maxWidth(context)[value || 'none'],
       };
     }
     case 'minWidth': {
@@ -577,9 +565,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'maxHeight': {
       const value = getValue(className);
       return {
-        maxHeight: (config.theme as any).maxHeight(themeParameter)[
-          value || 'none'
-        ],
+        maxHeight: (config.theme as any).maxHeight(context)[value || 'none'],
       };
     }
     case 'minHeight': {
@@ -594,15 +580,13 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'left': {
       const value = getValue(className);
       return {
-        [classGroup]: (config.theme as any).inset(themeParameter)[
-          value || 'auto'
-        ],
+        [classGroup]: (config.theme as any).inset(context)[value || 'auto'],
       };
     }
     case 'height': {
       const value = getValue(className);
       return {
-        height: (config.theme as any).height(themeParameter)[value || 'auto'],
+        height: (config.theme as any).height(context)[value || 'auto'],
       };
     }
     case 'lineHeight': {
@@ -620,7 +604,7 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'inset': {
       const value = getValue(className);
       return {
-        inset: (config.theme as any).inset(themeParameter)[value || 'auto'],
+        inset: (config.theme as any).inset(context)[value || 'auto'],
       };
     }
     case 'objectFit': {

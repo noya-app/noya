@@ -316,17 +316,20 @@ const DOMRendererContent = memo(
                           );
 
                           const content = renderResolvedNode({
-                            isEditable: layer.do_objectID === editingLayerId,
+                            contentEditable:
+                              layer.do_objectID === editingLayerId,
+                            disableTabNavigation: false,
+                            includeDataProps: true,
                             resolvedNode,
                             dsConfig: ds.config,
                             system: props.system,
-                            highlightedPath:
-                              highlightedNodePath &&
-                              layer.do_objectID === highlightedNodePath.layerId
-                                ? highlightedNodePath.path
+                            highlight:
+                              layer.do_objectID === highlightedNodePath?.layerId
+                                ? {
+                                    path: highlightedNodePath.path,
+                                    color: lightTheme.colors.secondary,
+                                  }
                                 : undefined,
-                            selectionOutlineColor: lightTheme.colors.secondary,
-                            theme: undefined,
                           });
 
                           return (

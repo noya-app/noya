@@ -65,4 +65,4 @@ export async function loadDesignSystem(
   return designSystem;
 }
 
-export { DesignSystemCache };
+export { DesignSystemCache, ThumbnailDesignSystem };

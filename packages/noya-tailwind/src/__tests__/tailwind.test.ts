@@ -20,6 +20,7 @@ it('applies one class within every group', () => {
 
 it('gets color', () => {
   expect(getColor('text-red-500')).toEqual('#ef4444');
+  expect(getColor('text-white')).toEqual('#fff');
 });
 
 describe('resolves styles', () => {
