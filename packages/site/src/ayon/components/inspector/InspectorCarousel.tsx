@@ -72,7 +72,7 @@ const CarouselItemComponent = memo(function CarouselItemComponent({
         tabIndex={-1}
         background={'white'}
         width="100%"
-        height="100%"
+        aspectRatio="1"
         color="black"
       >
         <StateProvider state={customState}>

@@ -139,9 +139,8 @@ function isSafeForJsxText(text: string) {
 
 export interface CompilerConfiguration {
   name: string;
-  componentID: string;
   ds: DS;
-  designSystemDefinition?: DesignSystemDefinition;
+  designSystemDefinition: DesignSystemDefinition;
   target: 'standalone' | 'codesandbox';
 }
 
@@ -243,29 +242,30 @@ function buildComponentMap(imports: DesignSystemDefinition['imports']) {
 }
 
 // We should look this up more dynamically the same way we do for blocks
-function findSourceByName(
-  DesignSystem: DesignSystemDefinition,
-  name: string,
-): { source: string; name: string } | undefined {
-  const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
-    Object.keys(namespace).includes(name),
-  );
+// function findSourceByName(
+//   DesignSystem: DesignSystemDefinition,
+//   name: string,
+// ): { source: string; name: string } | undefined {
+//   const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
+//     Object.keys(namespace).includes(name),
+//   );
 
-  if (!importDeclaration) return;
+//   if (!importDeclaration) return;
 
-  return {
-    source: importDeclaration.source,
-    name,
-  };
-}
+//   return {
+//     source: importDeclaration.source,
+//     name,
+//   };
+// }
 
 export function createReactComponentDeclaration(
+  name: string,
   resolvedElement: SimpleElement,
 ) {
   return ts.factory.createFunctionDeclaration(
     [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
     undefined,
-    'App',
+    name,
     undefined,
     [],
     undefined,
@@ -280,56 +280,154 @@ export function createReactComponentDeclaration(
   );
 }
 
-export async function compile(configuration: CompilerConfiguration) {
+const getChildren = (
+  element: SimpleElement | string,
+): (string | SimpleElement)[] => {
+  if (typeof element === 'string') return [];
+
+  return [
+    ...element.children,
+    ...Object.values(element.props).filter(isSimpleElement),
+  ];
+};
+
+// Convert from a human-readable name like "Hero with Image" to pascal case "HeroWithImage"
+function getComponentNameIdentifier(name: string) {
+  return name
+    .split(' ')
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join('')
+    .replace(/[^a-zA-Z0-9]/g, '');
+}
+
+export async function compileAsync(
+  configuration: Omit<CompilerConfiguration, 'designSystemDefinition'> & {
+    designSystemDefinition?: DesignSystemDefinition;
+  },
+) {
   const DesignSystem =
     configuration.designSystemDefinition ??
     (await loadDesignSystem(configuration.ds.source.name));
 
+  return compile({
+    ...configuration,
+    designSystemDefinition: DesignSystem,
+  });
+}
+
+export function compile(configuration: CompilerConfiguration) {
+  const DesignSystem = configuration.designSystemDefinition;
+
   const findComponent: FindComponent = (componentID) => {
     return configuration.ds.components?.find(
-      (component) => component.id === componentID,
+      (component) => component.componentID === componentID,
     );
   };
 
-  const noyaComponent = findComponent(configuration.componentID);
+  const componentElements = (configuration.ds.components ?? []).map(
+    (component) => {
+      const noyaComponent = findComponent(component.componentID);
 
-  if (!noyaComponent) {
-    throw new Error(
-      `Could not find component with id ${configuration.componentID}`,
-    );
-  }
+      if (!noyaComponent) {
+        throw new Error(
+          `Could not find component with id ${component.componentID}`,
+        );
+      }
 
-  const resolvedNode = createResolvedNode(
-    findComponent,
-    noyaComponent.rootElement,
+      const resolvedNode = createResolvedNode(
+        findComponent,
+        noyaComponent.rootElement,
+      );
+
+      const resolvedElement = createSimpleElement(
+        renderResolvedNode({
+          contentEditable: false,
+          disableTabNavigation: false,
+          includeDataProps: true,
+          system: DesignSystem,
+          dsConfig: configuration.ds.config,
+          resolvedNode,
+        }),
+        DesignSystem,
+      );
+
+      if (!resolvedElement) {
+        throw new Error('Could not create resolved element');
+      }
+
+      const imports = (DesignSystem.imports ?? []).flatMap(
+        ({ source, alwaysInclude }) => {
+          const names = unique(
+            flat(resolvedElement, { getChildren }).flatMap((element) =>
+              typeof element !== 'string' && element.source === source
+                ? [element.name]
+                : [],
+            ),
+          );
+
+          if (names.length === 0 && !alwaysInclude) return [];
+
+          return [
+            ts.factory.createImportDeclaration(
+              undefined,
+              names.length === 0
+                ? undefined
+                : ts.factory.createImportClause(
+                    false,
+                    undefined,
+                    ts.factory.createNamedImports(
+                      names.map((name) =>
+                        ts.factory.createImportSpecifier(
+                          false,
+                          undefined,
+                          ts.factory.createIdentifier(name),
+                        ),
+                      ),
+                    ),
+                  ),
+              ts.factory.createStringLiteral(source),
+            ),
+          ];
+        },
+      );
+
+      const func = createReactComponentDeclaration(
+        getComponentNameIdentifier(component.name),
+        resolvedElement,
+      );
+
+      const dependencies = (DesignSystem.imports ?? []).reduce(
+        (result, importDeclaration) => ({
+          ...result,
+          ...importDeclaration.dependencies,
+        }),
+        DesignSystem.dependencies ?? {},
+      );
+
+      const devDependencies = (DesignSystem.imports ?? []).reduce(
+        (result, importDeclaration) => ({
+          ...result,
+          ...importDeclaration.devDependencies,
+        }),
+        DesignSystem.devDependencies ?? {},
+      );
+
+      const source = [
+        [print(imports), `import * as React from "react";`]
+          .map((s) => s.trim())
+          .join('\n'),
+        clean(print(func)),
+      ].join('\n\n');
+
+      return {
+        component,
+        resolvedElement,
+        source,
+        dependencies,
+        devDependencies,
+      };
+    },
   );
-
-  const resolvedElement = createSimpleElement(
-    renderResolvedNode({
-      contentEditable: false,
-      disableTabNavigation: false,
-      includeDataProps: true,
-      system: DesignSystem,
-      dsConfig: configuration.ds.config,
-      resolvedNode,
-    }),
-    DesignSystem,
-  );
-
-  if (!resolvedElement) {
-    throw new Error('Could not create resolved element');
-  }
-
-  const getChildren = (
-    element: SimpleElement | string,
-  ): (string | SimpleElement)[] => {
-    if (typeof element === 'string') return [];
-
-    return [
-      ...element.children,
-      ...Object.values(element.props).filter(isSimpleElement),
-    ];
-  };
 
   // const ProviderComponent = DesignSystem.components[component.id.Provider];
 
@@ -349,95 +447,12 @@ export async function compile(configuration: CompilerConfiguration) {
   //   props: {},
   // };
 
-  const boxSource = findSourceByName(DesignSystem, 'Box');
-
-  const imports = (DesignSystem.imports ?? []).flatMap(
-    ({ source, alwaysInclude }) => {
-      const names = unique([
-        ...flat(resolvedElement, { getChildren }).flatMap((element) =>
-          typeof element !== 'string' && element.source === source
-            ? [element.name]
-            : [],
-        ),
-        ...(boxSource?.source === source ? [boxSource.name] : []),
-      ]);
-
-      if (names.length === 0 && !alwaysInclude) return [];
-
-      return [
-        ts.factory.createImportDeclaration(
-          undefined,
-          names.length === 0
-            ? undefined
-            : ts.factory.createImportClause(
-                false,
-                undefined,
-                ts.factory.createNamedImports(
-                  names.map((name) =>
-                    ts.factory.createImportSpecifier(
-                      false,
-                      undefined,
-                      ts.factory.createIdentifier(name),
-                    ),
-                  ),
-                ),
-              ),
-          ts.factory.createStringLiteral(source),
-        ),
-      ];
-    },
-  );
-
-  const func = createReactComponentDeclaration(resolvedElement);
-
-  const allDependencies = (DesignSystem.imports ?? []).reduce(
-    (result, importDeclaration) => ({
-      ...result,
-      ...importDeclaration.dependencies,
-    }),
-    DesignSystem.dependencies ?? {},
-  );
-
-  const allDevDependencies = (DesignSystem.imports ?? []).reduce(
-    (result, importDeclaration) => ({
-      ...result,
-      ...importDeclaration.devDependencies,
-    }),
-    DesignSystem.devDependencies ?? {},
-  );
-
-  const frameComponent = `/**
- * To make your layout responsive, delete this Frame component and replace any
- * instance of it with your own layout components that use e.g. flexbox.
- */
-function Frame(
-  props: React.PropsWithChildren<
-    Pick<React.CSSProperties, "left" | "top" | "width" | "height">
-  >
-) {
-  return (
-    <${boxSource?.name} 
-      style={{
-        position: 'absolute',
-        left: props.left,
-        top: props.top,
-        width: props.width,
-        height: props.height,
-      }}
-    >
-      {props.children}
-    </${boxSource?.name}>
-  )
-}`;
-
   const files = {
-    'App.tsx': clean(
-      [
-        print(imports),
-        `import * as React from "react";`,
-        frameComponent,
-        print(func),
-      ].join('\n\n'),
+    ...Object.fromEntries(
+      componentElements.map(({ component, source }) => [
+        `${getComponentNameIdentifier(component.name)}.tsx`,
+        source,
+      ]),
     ),
     '.postcssrc': `{
   "plugins": {
@@ -497,14 +512,14 @@ root.render(<App />);`,
           dev: 'parcel index.html --open',
           build: 'parcel build index.html',
         },
-        dependencies: allDependencies,
+        // dependencies: allDependencies,
         devDependencies: {
           autoprefixer: '10.4.14',
           parcel: '^2.8.3',
           postcss: '8.4.21',
           tailwindcss: '3.2.7',
           process: '^0.11.10',
-          ...allDevDependencies,
+          // ...allDevDependencies,
         },
       },
       null,

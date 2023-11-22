@@ -528,7 +528,7 @@ export const PageSetup = memo(function PageSetup({
                           selected ? theme.colors.primaryLight : '#D9D9D9'
                         }
                         width="100%"
-                        height="100%"
+                        aspectRatio="1"
                       >
                         {renderLayoutNode(layoutNode)}
                       </Stack.V>

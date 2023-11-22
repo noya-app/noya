@@ -1,9 +1,10 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import JavascriptPlayground from 'javascript-playgrounds';
+import JavascriptPlayground, { PlaygroundProps } from 'javascript-playgrounds';
 import { useRouter } from 'next/router';
 import { DS } from 'noya-api';
 import {
   clean,
+  compile,
   createElementCode,
   createSimpleElement,
   print,
@@ -349,65 +350,78 @@ export function DSEditor({
             )}
           </Stack.V>
         ) : (
-          <GridView.Root size="large" textPosition="below">
-            <GridView.SectionHeader title="Components" />
-            <GridView.Section>
-              {components
-                .filter((component) => component.accessModifier !== 'internal')
-                .map((component) => {
-                  return (
-                    <GridView.Item
-                      id={component.id}
-                      key={component.id}
-                      title={component.name}
-                      subtitle={
-                        <Stack.H
-                          as="span"
-                          display="inline-flex"
-                          gap="4px"
-                          overflow="hidden"
-                          textOverflow="ellipsis"
-                          margin={'6px 0 0 0'}
-                        >
-                          {(component.tags ?? ['no tags']).map((tag) => (
-                            <Chip
-                              size="small"
-                              key={tag}
-                              style={{ fontFamily: 'monospace' }}
-                              variant={tag === 'no tags' ? 'outlined' : 'solid'}
+          <Stack.V flex="1">
+            {contentTab === 'preview' && (
+              <GridView.Root size="large" textPosition="below">
+                <GridView.SectionHeader title="Components" />
+                <GridView.Section>
+                  {components
+                    .filter(
+                      (component) => component.accessModifier !== 'internal',
+                    )
+                    .map((component) => {
+                      return (
+                        <GridView.Item
+                          id={component.id}
+                          key={component.id}
+                          title={component.name}
+                          subtitle={
+                            <Stack.H
+                              as="span"
+                              display="inline-flex"
+                              gap="4px"
+                              overflow="hidden"
+                              textOverflow="ellipsis"
+                              margin={'6px 0 0 0'}
                             >
-                              {tag}
-                            </Chip>
-                          ))}
-                        </Stack.H>
-                      }
-                      // menuItems={menuItems}
-                      // selected={item.do_objectID === state.selectedPage}
-                      // onSelectMenuItem={handleSelectMenuItem}
-                      // onContextMenu={() => dispatch('selectPage', item.do_objectID)}
-                      onClick={() => {
-                        setSelection({ componentID: component.componentID });
-                      }}
-                    >
-                      <Stack.H
-                        width="100%"
-                        aspectRatio="16/9"
-                        alignItems="center"
-                        justifyContent="center"
-                        borderRadius="4px"
-                        background={theme.colors.inputBackground}
-                        border={`1px solid ${theme.colors.divider}`}
-                      >
-                        <DSComponentThumbnail
-                          component={component}
-                          fileId={fileId}
-                        />
-                      </Stack.H>
-                    </GridView.Item>
-                  );
-                })}
-            </GridView.Section>
-          </GridView.Root>
+                              {(component.tags ?? ['no tags']).map((tag) => (
+                                <Chip
+                                  size="small"
+                                  key={tag}
+                                  style={{ fontFamily: 'monospace' }}
+                                  variant={
+                                    tag === 'no tags' ? 'outlined' : 'solid'
+                                  }
+                                >
+                                  {tag}
+                                </Chip>
+                              ))}
+                            </Stack.H>
+                          }
+                          // menuItems={menuItems}
+                          // selected={item.do_objectID === state.selectedPage}
+                          // onSelectMenuItem={handleSelectMenuItem}
+                          // onContextMenu={() => dispatch('selectPage', item.do_objectID)}
+                          onClick={() => {
+                            setSelection({
+                              componentID: component.componentID,
+                            });
+                          }}
+                        >
+                          <Stack.H
+                            width="100%"
+                            aspectRatio="16/9"
+                            alignItems="center"
+                            justifyContent="center"
+                            borderRadius="4px"
+                            background={theme.colors.inputBackground}
+                            border={`1px solid ${theme.colors.divider}`}
+                          >
+                            <DSComponentThumbnail
+                              component={component}
+                              fileId={fileId}
+                            />
+                          </Stack.H>
+                        </GridView.Item>
+                      );
+                    })}
+                </GridView.Section>
+              </GridView.Root>
+            )}
+            {contentTab === 'code' && system && (
+              <DSGalleryCode system={system} ds={ds} />
+            )}
+          </Stack.V>
         )}
       </Stack.V>
       {viewType !== 'preview' && selection && resolvedNode && (
@@ -457,29 +471,71 @@ function DSComponentCode({
 
   return (
     <Stack.V flex="1" background="white">
-      {code !== undefined && (
-        <JavascriptPlayground
-          key={code}
-          files={{
-            'index.tsx': code,
-          }}
-          panes={['editor']}
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-          styles={{
-            status: {
-              display: 'none',
-            },
-          }}
-          _css={`
-            .cm-s-react .CodeMirror-gutters {
-              border-left: 0;
-            }
-          `}
-        />
-      )}
+      {code !== undefined && <Playground files={{ 'index.tsx': code }} />}
     </Stack.V>
+  );
+}
+
+function DSGalleryCode({
+  system,
+  ds,
+}: {
+  system: DesignSystemDefinition;
+  ds: DS;
+}) {
+  const [files, setFiles] = React.useState<Record<string, string>>();
+
+  useEffect(() => {
+    const output = compile({
+      name: 'Gallery',
+      ds,
+      target: 'standalone',
+      designSystemDefinition: system,
+    });
+
+    setFiles(output);
+  }, [ds, system]);
+
+  return (
+    <Stack.V flex="1" background="white">
+      {files !== undefined && <Playground files={files} />}
+    </Stack.V>
+  );
+}
+
+function Playground(props: Pick<PlaygroundProps, 'files'>) {
+  const theme = useDesignSystemTheme();
+
+  return (
+    <JavascriptPlayground
+      key={JSON.stringify(props.files)}
+      files={props.files}
+      panes={['editor']}
+      style={{
+        width: '100%',
+        height: '100%',
+      }}
+      styles={{
+        tab: {
+          backgroundColor: 'white',
+        },
+        tabText: {
+          color: theme.colors.textMuted,
+          whiteSpace: 'nowrap',
+        },
+        tabTextActive: {
+          borderBottom: `3px solid ${theme.colors.primary}`,
+          fontWeight: 500,
+        },
+        status: {
+          display: 'none',
+        },
+      }}
+      _css={`
+        .cm-s-react .CodeMirror-gutters {
+          border-left: 0;
+        }
+      `}
+    />
   );
 }

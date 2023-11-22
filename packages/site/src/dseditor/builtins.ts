@@ -1,5 +1,4 @@
 import { Model, NoyaComponent, added, removed } from 'noya-component';
-import { uuid } from 'noya-utils';
 import {
   boxSymbolId,
   buttonSymbolId,
@@ -10,183 +9,183 @@ import {
   textSymbolId,
 } from '../ayon/symbols/symbolIds';
 
-const sidebarItemSymbolId = uuid();
-const sidebarItemActiveVariantId = uuid();
-const sidebarItemStringId = uuid();
-const sidebarSymbolId = uuid();
+// const sidebarItemSymbolId = uuid();
+// const sidebarItemActiveVariantId = uuid();
+// const sidebarItemStringId = uuid();
+// const sidebarSymbolId = uuid();
 
 export const initialComponents: NoyaComponent[] = [
-  Model.component({
-    name: 'Sidebar Item',
-    componentID: sidebarItemSymbolId,
-    rootElement: Model.primitiveElement({
-      id: 'b',
-      componentID: buttonSymbolId,
-      children: [
-        Model.string({
-          id: sidebarItemStringId,
-          value: 'Home',
-        }),
-      ],
-      classNames: Model.classNames([
-        'text-left',
-        'justify-start',
-        'variant-text',
-      ]),
-    }),
-    variants: [
-      Model.variant({
-        id: sidebarItemActiveVariantId,
-        name: 'Active',
-        diff: {
-          items: [
-            {
-              path: ['b'],
-              classNames: [
-                added(Model.className('bg-primary-900'), 0),
-                added(Model.className('text-white'), 1),
-              ],
-            },
-          ],
-        },
-      }),
-      Model.variant({
-        name: 'With Icon',
-        diff: {
-          items: [
-            {
-              path: ['b'],
-              children: [
-                added(
-                  Model.primitiveElement({
-                    id: 'icon',
-                    componentID: buttonSymbolId,
-                    classNames: Model.classNames([
-                      'w-4',
-                      'h-4',
-                      'bg-primary-500',
-                    ]),
-                    children: [Model.string('+')],
-                  }),
-                  1,
-                ),
-              ],
-            },
-          ],
-        },
-      }),
-    ],
-  }),
-  Model.component({
-    name: 'Sidebar',
-    componentID: sidebarSymbolId,
-    rootElement: Model.primitiveElement({
-      id: 'sidebar',
-      componentID: boxSymbolId,
-      classNames: Model.classNames([
-        'flex-1',
-        'flex',
-        'flex-col',
-        'gap-4',
-        'bg-white',
-        'p-4',
-      ]),
-      children: [
-        Model.compositeElement({
-          id: '1',
-          componentID: sidebarItemSymbolId,
-          variantNames: [Model.variantName(sidebarItemActiveVariantId)],
-        }),
-        Model.compositeElement({
-          id: '2',
-          componentID: sidebarItemSymbolId,
-          diff: {
-            items: [
-              {
-                path: ['b'],
-                classNames: [
-                  added(Model.className('bg-primary-900'), 0),
-                  added(Model.className('text-white'), 1),
-                ],
-              },
-              {
-                path: ['b', sidebarItemStringId],
-                textValue: 'Dashboard',
-              },
-            ],
-          },
-        }),
-        Model.compositeElement({
-          id: '3',
-          componentID: sidebarItemSymbolId,
-        }),
-        Model.compositeElement({
-          id: '4',
-          componentID: sidebarItemSymbolId,
-        }),
-      ],
-    }),
-    variants: [
-      Model.variant({
-        name: 'With Title',
-        diff: {
-          items: [
-            {
-              path: ['sidebar'],
-              // children: {
-              //   add: [
-              //     {
-              //       node: Model.primitiveElement({
-              //         id: 'title',
-              //         componentID: textSymbolId,
-              //         children: [Model.string('Title')],
-              //         classNames: Model.classNames(['variant-h4']),
-              //       }),
-              //       index: 0,
-              //     },
-              //     {
-              //       node: Model.compositeElement({
-              //         id: 'extra',
-              //         componentID: sidebarItemSymbolId,
-              //       }),
-              //       index: 1,
-              //     },
-              //   ],
-              // },
-            },
-            {
-              path: ['sidebar', '1', 'b'],
-              classNames: [added(Model.className('bg-blue-500'), 0)],
-            },
-          ],
-        },
-      }),
-    ],
-  }),
-  Model.component({
-    name: 'Super Sidebar',
-    componentID: uuid(),
-    rootElement: Model.primitiveElement({
-      componentID: boxSymbolId,
-      children: [
-        Model.compositeElement({
-          componentID: sidebarSymbolId,
-          diff: {
-            items: [
-              {
-                path: ['sidebar', '3', 'b', sidebarItemStringId],
-                textValue: 'yoo',
-              },
-              {
-                path: ['sidebar', '3', 'b'],
-                classNames: [added(Model.className('bg-orange-500'), 0)],
-              },
-            ],
-          },
-        }),
-      ],
-    }),
-  }),
+  // Model.component({
+  //   name: 'Sidebar Item',
+  //   componentID: sidebarItemSymbolId,
+  //   rootElement: Model.primitiveElement({
+  //     id: 'b',
+  //     componentID: buttonSymbolId,
+  //     children: [
+  //       Model.string({
+  //         id: sidebarItemStringId,
+  //         value: 'Home',
+  //       }),
+  //     ],
+  //     classNames: Model.classNames([
+  //       'text-left',
+  //       'justify-start',
+  //       'variant-text',
+  //     ]),
+  //   }),
+  //   variants: [
+  //     Model.variant({
+  //       id: sidebarItemActiveVariantId,
+  //       name: 'Active',
+  //       diff: {
+  //         items: [
+  //           {
+  //             path: ['b'],
+  //             classNames: [
+  //               added(Model.className('bg-primary-900'), 0),
+  //               added(Model.className('text-white'), 1),
+  //             ],
+  //           },
+  //         ],
+  //       },
+  //     }),
+  //     Model.variant({
+  //       name: 'With Icon',
+  //       diff: {
+  //         items: [
+  //           {
+  //             path: ['b'],
+  //             children: [
+  //               added(
+  //                 Model.primitiveElement({
+  //                   id: 'icon',
+  //                   componentID: buttonSymbolId,
+  //                   classNames: Model.classNames([
+  //                     'w-4',
+  //                     'h-4',
+  //                     'bg-primary-500',
+  //                   ]),
+  //                   children: [Model.string('+')],
+  //                 }),
+  //                 1,
+  //               ),
+  //             ],
+  //           },
+  //         ],
+  //       },
+  //     }),
+  //   ],
+  // }),
+  // Model.component({
+  //   name: 'Sidebar',
+  //   componentID: sidebarSymbolId,
+  //   rootElement: Model.primitiveElement({
+  //     id: 'sidebar',
+  //     componentID: boxSymbolId,
+  //     classNames: Model.classNames([
+  //       'flex-1',
+  //       'flex',
+  //       'flex-col',
+  //       'gap-4',
+  //       'bg-white',
+  //       'p-4',
+  //     ]),
+  //     children: [
+  //       Model.compositeElement({
+  //         id: '1',
+  //         componentID: sidebarItemSymbolId,
+  //         variantNames: [Model.variantName(sidebarItemActiveVariantId)],
+  //       }),
+  //       Model.compositeElement({
+  //         id: '2',
+  //         componentID: sidebarItemSymbolId,
+  //         diff: {
+  //           items: [
+  //             {
+  //               path: ['b'],
+  //               classNames: [
+  //                 added(Model.className('bg-primary-900'), 0),
+  //                 added(Model.className('text-white'), 1),
+  //               ],
+  //             },
+  //             {
+  //               path: ['b', sidebarItemStringId],
+  //               textValue: 'Dashboard',
+  //             },
+  //           ],
+  //         },
+  //       }),
+  //       Model.compositeElement({
+  //         id: '3',
+  //         componentID: sidebarItemSymbolId,
+  //       }),
+  //       Model.compositeElement({
+  //         id: '4',
+  //         componentID: sidebarItemSymbolId,
+  //       }),
+  //     ],
+  //   }),
+  //   variants: [
+  //     Model.variant({
+  //       name: 'With Title',
+  //       diff: {
+  //         items: [
+  //           {
+  //             path: ['sidebar'],
+  //             // children: {
+  //             //   add: [
+  //             //     {
+  //             //       node: Model.primitiveElement({
+  //             //         id: 'title',
+  //             //         componentID: textSymbolId,
+  //             //         children: [Model.string('Title')],
+  //             //         classNames: Model.classNames(['variant-h4']),
+  //             //       }),
+  //             //       index: 0,
+  //             //     },
+  //             //     {
+  //             //       node: Model.compositeElement({
+  //             //         id: 'extra',
+  //             //         componentID: sidebarItemSymbolId,
+  //             //       }),
+  //             //       index: 1,
+  //             //     },
+  //             //   ],
+  //             // },
+  //           },
+  //           {
+  //             path: ['sidebar', '1', 'b'],
+  //             classNames: [added(Model.className('bg-blue-500'), 0)],
+  //           },
+  //         ],
+  //       },
+  //     }),
+  //   ],
+  // }),
+  // Model.component({
+  //   name: 'Super Sidebar',
+  //   componentID: uuid(),
+  //   rootElement: Model.primitiveElement({
+  //     componentID: boxSymbolId,
+  //     children: [
+  //       Model.compositeElement({
+  //         componentID: sidebarSymbolId,
+  //         diff: {
+  //           items: [
+  //             {
+  //               path: ['sidebar', '3', 'b', sidebarItemStringId],
+  //               textValue: 'yoo',
+  //             },
+  //             {
+  //               path: ['sidebar', '3', 'b'],
+  //               classNames: [added(Model.className('bg-orange-500'), 0)],
+  //             },
+  //           ],
+  //         },
+  //       }),
+  //     ],
+  //   }),
+  // }),
   Model.component({
     name: 'Hero',
     componentID: heroSymbolId,

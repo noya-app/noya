@@ -81,7 +81,7 @@ const Container = styled.div<{ scrollable: boolean }>(
   }),
 );
 
-const ItemContainer = styled.div<{
+const ContentContainer = styled.div<{
   selected?: boolean;
   hovered?: boolean;
   bordered: boolean;
@@ -113,7 +113,7 @@ const ItemContainer = styled.div<{
       }),
 }));
 
-const GridContainer = styled.div(({ theme }) => ({
+const ItemContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
@@ -299,14 +299,14 @@ const GridViewItem = forwardRef(function GridViewItem<
   );
 
   let element = (
-    <GridContainer
+    <ItemContainer
       id={id}
       ref={forwardedRef}
       {...hoverProps}
       tabIndex={disabled ? undefined : 0}
       onKeyDown={handleKeyDown}
     >
-      <ItemContainer
+      <ContentContainer
         disabled={disabled}
         bordered={bordered}
         selected={selected}
@@ -316,7 +316,7 @@ const GridViewItem = forwardRef(function GridViewItem<
         onContextMenu={onContextMenu}
       >
         {children}
-      </ItemContainer>
+      </ContentContainer>
       {textPosition === 'below' && (
         <>
           <Spacer.Vertical size={8} />
@@ -339,7 +339,7 @@ const GridViewItem = forwardRef(function GridViewItem<
           <ActivityIndicator opacity={0.5} size={13} />
         </Shimmer>
       )}
-    </GridContainer>
+    </ItemContainer>
   );
 
   if (menuItems && onSelectMenuItem) {
