@@ -510,7 +510,14 @@ function Playground(props: Pick<PlaygroundProps, 'files'>) {
     <JavascriptPlayground
       key={JSON.stringify(props.files)}
       files={props.files}
-      panes={['editor']}
+      panes={[
+        {
+          id: 'editor',
+          type: 'editor',
+          fileList:
+            Object.keys(props.files ?? {}).length > 1 ? 'sidebar' : undefined,
+        },
+      ]}
       style={{
         width: '100%',
         height: '100%',
@@ -529,6 +536,20 @@ function Playground(props: Pick<PlaygroundProps, 'files'>) {
         },
         status: {
           display: 'none',
+        },
+        workspacesList: {
+          borderRight: `1px solid ${theme.colors.divider}`,
+        },
+        workspacesRow: {
+          backgroundColor: 'white',
+          borderLeftWidth: 0,
+        },
+        workspacesRowActive: {
+          backgroundColor: theme.colors.primary,
+        },
+        workspacesDivider: {
+          backgroundColor: theme.colors.divider,
+          flex: '0 0 1px',
         },
       }}
       _css={`
