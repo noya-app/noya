@@ -539,17 +539,26 @@ function Playground(props: Pick<PlaygroundProps, 'files'>) {
         },
         workspacesList: {
           borderRight: `1px solid ${theme.colors.divider}`,
+          padding: '4px',
+          backgroundColor: 'white',
         },
         workspacesRow: {
           backgroundColor: 'white',
           borderLeftWidth: 0,
+          // padding: '0px 4px',
+        },
+        workspacesRowTitle: {
+          padding: '9px 12px',
+        },
+        workspacesRowTitleActive: {
+          backgroundColor: theme.colors.primary,
+          borderRadius: '4px',
         },
         workspacesRowActive: {
-          backgroundColor: theme.colors.primary,
+          backgroundColor: 'white',
         },
         workspacesDivider: {
-          backgroundColor: theme.colors.divider,
-          flex: '0 0 1px',
+          flex: '0 0 2px',
         },
       }}
       _css={`

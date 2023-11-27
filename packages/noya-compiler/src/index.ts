@@ -447,6 +447,16 @@ export function compile(configuration: CompilerConfiguration) {
   //   props: {},
   // };
 
+  const allDependencies = componentElements.reduce(
+    (result, { dependencies }) => ({ ...result, ...dependencies }),
+    {},
+  );
+
+  const allDevDependencies = componentElements.reduce(
+    (result, { devDependencies }) => ({ ...result, ...devDependencies }),
+    {},
+  );
+
   const files = {
     ...Object.fromEntries(
       componentElements.map(({ component, source }) => [
@@ -512,14 +522,14 @@ root.render(<App />);`,
           dev: 'parcel index.html --open',
           build: 'parcel build index.html',
         },
-        // dependencies: allDependencies,
+        dependencies: allDependencies,
         devDependencies: {
           autoprefixer: '10.4.14',
           parcel: '^2.8.3',
           postcss: '8.4.21',
           tailwindcss: '3.2.7',
           process: '^0.11.10',
-          // ...allDevDependencies,
+          ...allDevDependencies,
         },
       },
       null,

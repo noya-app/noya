@@ -147,7 +147,7 @@ export function DSComponentInspector({
     <Stack.V width="400px" background="white">
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
-          <InspectorSection title="Component" titleTextStyle="heading3">
+          <InspectorSection title="Component" titleTextStyle="heading4">
             <InspectorPrimitives.LabeledRow label="Variant" gap="8px">
               <Select
                 value={selection.variantID ?? 'default'}
