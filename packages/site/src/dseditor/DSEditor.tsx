@@ -21,20 +21,25 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import {
+  Button,
   Chip,
   DividerVertical,
   GridView,
   RadioGroup,
+  Spacer,
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
+import { toZipFile } from 'noya-filesystem';
+import { DownloadIcon } from 'noya-icons';
 import { loadDesignSystem } from 'noya-module-loader';
-import { uuid } from 'noya-utils';
+import { UTF16, uuid } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { ShareProjectButton } from '../components/ShareMenu';
 import { useProject } from '../contexts/ProjectContext';
+import { downloadBlob } from '../utils/download';
 import { DSComponentInspector } from './DSComponentInspector';
 import { DSComponentThumbnail } from './DSComponentThumbnail';
 import { DSControlledRenderer } from './DSControlledRenderer';
@@ -507,65 +512,88 @@ function Playground(props: Pick<PlaygroundProps, 'files'>) {
   const theme = useDesignSystemTheme();
 
   return (
-    <JavascriptPlayground
-      key={JSON.stringify(props.files)}
-      files={props.files}
-      panes={[
-        {
-          id: 'editor',
-          type: 'editor',
-          fileList:
-            Object.keys(props.files ?? {}).length > 1 ? 'sidebar' : undefined,
-        },
-      ]}
-      style={{
-        width: '100%',
-        height: '100%',
-      }}
-      styles={{
-        tab: {
-          backgroundColor: 'white',
-        },
-        tabText: {
-          color: theme.colors.textMuted,
-          whiteSpace: 'nowrap',
-        },
-        tabTextActive: {
-          borderBottom: `3px solid ${theme.colors.primary}`,
-          fontWeight: 500,
-        },
-        status: {
-          display: 'none',
-        },
-        workspacesList: {
-          borderRight: `1px solid ${theme.colors.divider}`,
-          padding: '4px',
-          backgroundColor: 'white',
-        },
-        workspacesRow: {
-          backgroundColor: 'white',
-          borderLeftWidth: 0,
-          // padding: '0px 4px',
-        },
-        workspacesRowTitle: {
-          padding: '9px 12px',
-        },
-        workspacesRowTitleActive: {
-          backgroundColor: theme.colors.primary,
-          borderRadius: '4px',
-        },
-        workspacesRowActive: {
-          backgroundColor: 'white',
-        },
-        workspacesDivider: {
-          flex: '0 0 2px',
-        },
-      }}
-      _css={`
+    <>
+      <JavascriptPlayground
+        key={JSON.stringify(props.files)}
+        files={props.files}
+        panes={[
+          {
+            id: 'editor',
+            type: 'editor',
+            fileList:
+              Object.keys(props.files ?? {}).length > 1 ? 'sidebar' : undefined,
+          },
+        ]}
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
+        styles={{
+          tab: {
+            backgroundColor: 'white',
+          },
+          tabText: {
+            color: theme.colors.textMuted,
+            whiteSpace: 'nowrap',
+          },
+          tabTextActive: {
+            borderBottom: `3px solid ${theme.colors.primary}`,
+            fontWeight: 500,
+          },
+          status: {
+            display: 'none',
+          },
+          workspacesList: {
+            borderRight: `1px solid ${theme.colors.divider}`,
+            padding: '4px',
+            backgroundColor: 'white',
+          },
+          workspacesRow: {
+            backgroundColor: 'white',
+            borderLeftWidth: 0,
+            // padding: '0px 4px',
+          },
+          workspacesRowTitle: {
+            padding: '9px 12px',
+          },
+          workspacesRowTitleActive: {
+            backgroundColor: theme.colors.primary,
+            borderRadius: '4px',
+          },
+          workspacesRowActive: {
+            backgroundColor: 'white',
+          },
+          workspacesDivider: {
+            flex: '0 0 2px',
+          },
+        }}
+        _css={`
         .cm-s-react .CodeMirror-gutters {
           border-left: 0;
         }
       `}
-    />
+      />
+      <Stack.V position="absolute" top="10px" right="20px">
+        <Button
+          onClick={async () => {
+            const zipFile = await toZipFile(
+              Object.fromEntries(
+                Object.entries(props.files ?? {}).map(([name, content]) => [
+                  name,
+                  UTF16.toUTF8(content),
+                ]),
+              ),
+              'App.zip',
+            );
+
+            downloadBlob(zipFile);
+          }}
+        >
+          Download ZIP
+          <Spacer.Horizontal size={6} inline />
+          <DownloadIcon />
+        </Button>
+      </Stack.V>
+    </>
   );
 }

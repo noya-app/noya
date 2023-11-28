@@ -11,10 +11,11 @@ function evaluateModule(content: string, Function: FunctionConstructor) {
   const module = { exports };
 
   // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  new Function('exports', 'module', 'require', `{\n${content};\n}`)(
+  new Function('exports', 'module', 'require', 'process', `{\n${content};\n}`)(
     exports,
     module,
     requireModule,
+    process,
   );
 
   return module.exports;

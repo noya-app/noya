@@ -1,23 +1,30 @@
-import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import {
+  DesignSystemDefinition,
+  component,
+} from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
 import {
-  createResolvedNode,
   FindComponent,
+  createResolvedNode,
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
 import { unique } from 'noya-utils';
 import prettier from 'prettier';
 import prettierTypeScript from 'prettier/parser-typescript';
-import React, { isValidElement } from 'react';
+import React, { ReactNode, isValidElement } from 'react';
 import { defineTree, flat } from 'tree-visit';
 import ts from 'typescript';
 import { LayoutNode, LayoutNodeAttributes } from './parseComponentLayout';
 import { removeEmptyStyles } from './removeEmptyStyles';
 import { removeUndefinedStyles } from './removeUndefinedStyles';
-import { escapeHtml, sanitizePackageName } from './validate';
+import { sanitizePackageName } from './validate';
 
 function createExpressionCode(value: unknown): ts.Expression {
+  if (isPassthrough(value)) {
+    return value as any;
+  }
+
   if (isSimpleElement(value)) {
     return createElementCode(value);
   }
@@ -76,7 +83,23 @@ function createJsxElement(
   );
 }
 
+const passthroughSymbol = Symbol('passthrough');
 const simpleElementSymbol = Symbol('simpleElement');
+
+type Passthrough = { [passthroughSymbol]: true };
+
+function isPassthrough(value: unknown): value is { [passthroughSymbol]: true } {
+  return (
+    typeof value === 'object' && value !== null && passthroughSymbol in value
+  );
+}
+
+function createPassthrough<T extends object>(value: T) {
+  return {
+    [passthroughSymbol]: true,
+    ...value,
+  };
+}
 
 function isSimpleElement(value: unknown): value is SimpleElement {
   return (
@@ -89,7 +112,7 @@ type SimpleElement = {
   name: string;
   source?: string;
   props: Record<string, unknown>;
-  children: (SimpleElement | string)[];
+  children: (SimpleElement | string | Passthrough)[];
 };
 
 export function createElementCode({
@@ -121,7 +144,9 @@ export function createElementCode({
       ),
     ),
     children.map((child) =>
-      typeof child === 'string'
+      isPassthrough(child)
+        ? (child as any)
+        : typeof child === 'string'
         ? isSafeForJsxText(child)
           ? ts.factory.createJsxText(child, false)
           : ts.factory.createJsxExpression(
@@ -197,6 +222,21 @@ export function createSimpleElement(
 
   const { element, name, source } = elementType;
 
+  function toReactArray(children: ReactNode): ReactNode[] {
+    const result: ReactNode[] = [];
+
+    const addChildren = (child: ReactNode) => {
+      if (Array.isArray(child)) {
+        child.forEach((c) => addChildren(c));
+      } else if (child != null && child !== false) {
+        result.push(child);
+      }
+    };
+
+    addChildren(children);
+    return result;
+  }
+
   return {
     [simpleElementSymbol]: true,
     name,
@@ -217,8 +257,9 @@ export function createSimpleElement(
           return [key, value];
         }),
     ),
-    children: React.Children.toArray(element.props.children).flatMap(
-      (element): (SimpleElement | string)[] => {
+    children: toReactArray(element.props.children).flatMap(
+      (element): SimpleElement['children'] => {
+        if (isPassthrough(element)) return [element];
         if (typeof element === 'string' && element !== '') return [element];
         const validElement = React.isValidElement(element);
         if (!validElement) return [];
@@ -241,49 +282,31 @@ function buildComponentMap(imports: DesignSystemDefinition['imports']) {
   return Components;
 }
 
-// We should look this up more dynamically the same way we do for blocks
-// function findSourceByName(
-//   DesignSystem: DesignSystemDefinition,
-//   name: string,
-// ): { source: string; name: string } | undefined {
-//   const importDeclaration = DesignSystem.imports?.find(({ namespace }) =>
-//     Object.keys(namespace).includes(name),
-//   );
-
-//   if (!importDeclaration) return;
-
-//   return {
-//     source: importDeclaration.source,
-//     name,
-//   };
-// }
-
 export function createReactComponentDeclaration(
   name: string,
   resolvedElement: SimpleElement,
+  params: ts.ParameterDeclaration[] = [],
 ) {
   return ts.factory.createFunctionDeclaration(
-    [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+    [
+      ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
+      ts.factory.createModifier(ts.SyntaxKind.DefaultKeyword),
+    ],
     undefined,
     name,
     undefined,
-    [],
+    params,
     undefined,
     ts.factory.createBlock([
-      ts.factory.createReturnStatement(
-        // providerElement
-        //   ? createElementCode(providerElement)
-        // :
-        createElementCode(resolvedElement),
-      ),
+      ts.factory.createReturnStatement(createElementCode(resolvedElement)),
     ]),
   );
 }
 
 const getChildren = (
-  element: SimpleElement | string,
-): (string | SimpleElement)[] => {
-  if (typeof element === 'string') return [];
+  element: SimpleElement['children'][number],
+): SimpleElement['children'] => {
+  if (isPassthrough(element) || typeof element === 'string') return [];
 
   return [
     ...element.children,
@@ -292,12 +315,18 @@ const getChildren = (
 };
 
 // Convert from a human-readable name like "Hero with Image" to pascal case "HeroWithImage"
-function getComponentNameIdentifier(name: string) {
+function getComponentNameIdentifier(
+  name: string,
+  format: 'pascal' | 'kebab' = 'pascal',
+) {
   return name
     .split(' ')
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join('')
-    .replace(/[^a-zA-Z0-9]/g, '');
+    .map((word) => {
+      if (format === 'kebab') return word.toLowerCase();
+      return word[0].toUpperCase() + word.slice(1);
+    })
+    .join(format === 'kebab' ? '-' : '')
+    .replace(/[^a-zA-Z0-9\-_]/g, '');
 }
 
 export async function compileAsync(
@@ -315,6 +344,47 @@ export async function compileAsync(
   });
 }
 
+function extractImports(
+  simpleElement: SimpleElement,
+  DesignSystem: DesignSystemDefinition,
+) {
+  return (DesignSystem.imports ?? []).flatMap(({ source, alwaysInclude }) => {
+    const names = unique(
+      flat(simpleElement, { getChildren }).flatMap((element) =>
+        typeof element !== 'string' &&
+        !isPassthrough(element) &&
+        element.source === source
+          ? [element.name]
+          : [],
+      ),
+    );
+
+    if (names.length === 0 && !alwaysInclude) return [];
+
+    return [
+      ts.factory.createImportDeclaration(
+        undefined,
+        names.length === 0
+          ? undefined
+          : ts.factory.createImportClause(
+              false,
+              undefined,
+              ts.factory.createNamedImports(
+                names.map((name) =>
+                  ts.factory.createImportSpecifier(
+                    false,
+                    undefined,
+                    ts.factory.createIdentifier(name),
+                  ),
+                ),
+              ),
+            ),
+        ts.factory.createStringLiteral(source),
+      ),
+    ];
+  });
+}
+
 export function compile(configuration: CompilerConfiguration) {
   const DesignSystem = configuration.designSystemDefinition;
 
@@ -324,7 +394,7 @@ export function compile(configuration: CompilerConfiguration) {
     );
   };
 
-  const componentElements = (configuration.ds.components ?? []).map(
+  const componentPageItems = (configuration.ds.components ?? []).map(
     (component) => {
       const noyaComponent = findComponent(component.componentID);
 
@@ -339,7 +409,7 @@ export function compile(configuration: CompilerConfiguration) {
         noyaComponent.rootElement,
       );
 
-      const resolvedElement = createSimpleElement(
+      const simpleElement = createSimpleElement(
         renderResolvedNode({
           contentEditable: false,
           disableTabNavigation: false,
@@ -351,49 +421,13 @@ export function compile(configuration: CompilerConfiguration) {
         DesignSystem,
       );
 
-      if (!resolvedElement) {
-        throw new Error('Could not create resolved element');
+      if (!simpleElement) {
+        throw new Error('Could not create simple element');
       }
-
-      const imports = (DesignSystem.imports ?? []).flatMap(
-        ({ source, alwaysInclude }) => {
-          const names = unique(
-            flat(resolvedElement, { getChildren }).flatMap((element) =>
-              typeof element !== 'string' && element.source === source
-                ? [element.name]
-                : [],
-            ),
-          );
-
-          if (names.length === 0 && !alwaysInclude) return [];
-
-          return [
-            ts.factory.createImportDeclaration(
-              undefined,
-              names.length === 0
-                ? undefined
-                : ts.factory.createImportClause(
-                    false,
-                    undefined,
-                    ts.factory.createNamedImports(
-                      names.map((name) =>
-                        ts.factory.createImportSpecifier(
-                          false,
-                          undefined,
-                          ts.factory.createIdentifier(name),
-                        ),
-                      ),
-                    ),
-                  ),
-              ts.factory.createStringLiteral(source),
-            ),
-          ];
-        },
-      );
 
       const func = createReactComponentDeclaration(
         getComponentNameIdentifier(component.name),
-        resolvedElement,
+        simpleElement,
       );
 
       const dependencies = (DesignSystem.imports ?? []).reduce(
@@ -412,16 +446,14 @@ export function compile(configuration: CompilerConfiguration) {
         DesignSystem.devDependencies ?? {},
       );
 
-      const source = [
-        [print(imports), `import * as React from "react";`]
-          .map((s) => s.trim())
-          .join('\n'),
-        clean(print(func)),
-      ].join('\n\n');
+      const imports = extractImports(simpleElement, DesignSystem);
+
+      const source = ["'use client'", print(imports), print(func)]
+        .map(clean)
+        .join('\n');
 
       return {
-        component,
-        resolvedElement,
+        name: component.name,
         source,
         dependencies,
         devDependencies,
@@ -429,127 +461,90 @@ export function compile(configuration: CompilerConfiguration) {
     },
   );
 
-  // const ProviderComponent = DesignSystem.components[component.id.Provider];
-
-  // const providerElement = createSimpleElement(
-  //   DesignSystem.createElement(ProviderComponent),
-  //   DesignSystem,
-  // );
-
-  // if (providerElement) {
-  //   providerElement.children = components;
-  // }
-
-  // const fakeRoot: SimpleElement = providerElement ?? {
-  //   [simpleElementSymbol]: true,
-  //   name: 'Frame',
-  //   children: components,
-  //   props: {},
-  // };
-
-  const allDependencies = componentElements.reduce(
+  const allDependencies = componentPageItems.reduce(
     (result, { dependencies }) => ({ ...result, ...dependencies }),
     {},
   );
 
-  const allDevDependencies = componentElements.reduce(
+  const allDevDependencies = componentPageItems.reduce(
     (result, { devDependencies }) => ({ ...result, ...devDependencies }),
     {},
   );
 
+  const layoutElement = createSimpleElement(
+    DesignSystem.createElement(
+      DesignSystem.components[component.id.NextProvider],
+      {},
+      DesignSystem.createElement(
+        DesignSystem.components[component.id.Provider],
+        {},
+        createPassthrough(
+          ts.factory.createJsxExpression(
+            undefined,
+            ts.factory.createPropertyAccessExpression(
+              ts.factory.createIdentifier('props'),
+              ts.factory.createIdentifier('children'),
+            ),
+          ),
+        ),
+      ),
+    ),
+    DesignSystem,
+  );
+  const layoutComponentFunc = createReactComponentDeclaration(
+    'NextProvider',
+    layoutElement!,
+    [
+      ts.factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        ts.factory.createIdentifier('props'),
+        undefined,
+        // Type React.PropsWithChildren<{}>
+        ts.factory.createTypeReferenceNode(
+          ts.factory.createIdentifier('React.PropsWithChildren'),
+          [
+            // Empty object type
+            ts.factory.createTypeLiteralNode([]),
+          ],
+        ),
+        undefined,
+      ),
+    ],
+  );
+
+  const layoutImports = extractImports(layoutElement!, DesignSystem);
+
+  const layoutSource = [
+    "'use client'",
+    "import React from 'react'\n" + print(layoutImports),
+    print(layoutComponentFunc),
+  ]
+    .map(clean)
+    .join('\n');
+
   const files = {
     ...Object.fromEntries(
-      componentElements.map(({ component, source }) => [
-        `${getComponentNameIdentifier(component.name)}.tsx`,
+      componentPageItems.map(({ name, source }) => [
+        `src/app/component/${getComponentNameIdentifier(
+          name,
+          'kebab',
+        )}/page.tsx`,
         source,
       ]),
     ),
-    '.postcssrc': `{
-  "plugins": {
-    "tailwindcss": {}
-  }
-}`,
-    'tailwind.config.js': `module.exports = {
-  content: ["./*.{html,js,jsx,ts,tsx}"],
-  theme: {
-    extend: {},
-  },
-  variants: {},
-  plugins: [],
-};`,
-    'index.css': `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-`,
-    'index.html': `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>${escapeHtml(configuration.name)}</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <link href="./index.css" rel="stylesheet" />
-    ${
-      configuration.target === 'codesandbox'
-        ? '<script src="https://cdn.tailwindcss.com"></script>'
-        : ''
-    }
-    <script type="module" src="index.tsx"></script>
-  </body>
-</html>`,
-    'index.tsx': `import { createRoot } from "react-dom/client";
-import * as React from 'react';
-
-import { App } from "./App";
-
-const rootElement = document.getElementById("root");
-const root = createRoot(rootElement!);
-
-root.render(<App />);`,
+    'src/app/component/layout.tsx': layoutSource,
     'package.json': JSON.stringify(
       {
         name: sanitizePackageName(configuration.name),
         version: '0.0.1',
-        scripts: {
-          dev: 'parcel index.html --open',
-          build: 'parcel build index.html',
-        },
+        scripts: {},
         dependencies: allDependencies,
-        devDependencies: {
-          autoprefixer: '10.4.14',
-          parcel: '^2.8.3',
-          postcss: '8.4.21',
-          tailwindcss: '3.2.7',
-          process: '^0.11.10',
-          ...allDevDependencies,
-        },
+        devDependencies: allDevDependencies,
       },
       null,
       2,
     ),
-    'README.md': `# ${configuration.name}
-
-## Local Development
-
-\`\`\`
-npm install
-npm run dev
-\`\`\`
-
-## Production Build
-
-\`\`\`
-npm run build
-\`\`\`
-`,
   };
 
   return files;
