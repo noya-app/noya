@@ -26,7 +26,7 @@ const Hierarchy = defineTree<NoyaResolvedNode>({
   },
 });
 
-function clone(node: NoyaResolvedNode): NoyaResolvedNode {
+function clone<T extends NoyaResolvedNode>(node: T): T {
   return Hierarchy.map<NoyaResolvedNode>(node, (node, transformedChildren) => {
     switch (node.type) {
       case 'noyaString': {
@@ -50,7 +50,7 @@ function clone(node: NoyaResolvedNode): NoyaResolvedNode {
         };
       }
     }
-  });
+  }) as T;
 }
 
 export const ResolvedHierarchy = { ...Hierarchy, clone };

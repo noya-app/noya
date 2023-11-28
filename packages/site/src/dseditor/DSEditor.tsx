@@ -13,6 +13,7 @@ import {
   Model,
   NoyaComponent,
   NoyaResolvedNode,
+  NoyaResolvedPrimitiveElement,
   NoyaResolvedString,
   ResolvedHierarchy,
   SelectedComponent,
@@ -33,7 +34,7 @@ import {
 import { toZipFile } from 'noya-filesystem';
 import { DownloadIcon } from 'noya-icons';
 import { loadDesignSystem } from 'noya-module-loader';
-import { UTF16, uuid } from 'noya-utils';
+import { UTF16, findLast, uuid } from 'noya-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
@@ -211,6 +212,92 @@ export function DSEditor({
     [findComponent],
   );
 
+  const handleSplitNodeAtPath = useCallback(
+    ({ path, range }: { path: string[]; range: [number, number] }) => {
+      setSelection((selection) => {
+        if (!selection) return selection;
+
+        const instance = instantiateResolvedComponent(findComponent, {
+          componentID: selection.componentID,
+          variantID: selection.variantID,
+          diff: selection.diff,
+        });
+
+        const indexPath = ResolvedHierarchy.findIndexPath(
+          instance,
+          (node) => node.path.join('/') === path.join('/'),
+        );
+
+        if (!indexPath) return selection;
+
+        const stringNode = ResolvedHierarchy.access(
+          instance,
+          indexPath,
+        ) as NoyaResolvedString;
+
+        // Last primitive ancestor
+        const primitive = findLast(
+          ResolvedHierarchy.accessPath(instance, indexPath),
+          (n) => n.type === 'noyaPrimitiveElement',
+        ) as NoyaResolvedPrimitiveElement | undefined;
+
+        if (!primitive) return selection;
+
+        const childIndex = indexPath[indexPath.length - 1];
+        const beforeChildren = primitive.children.slice(0, childIndex);
+        const afterChildren = primitive.children.slice(childIndex + 1);
+
+        const beforeText = stringNode.value.slice(0, range[0]);
+        const afterText = stringNode.value.slice(range[1]);
+
+        const newNodes: NoyaResolvedPrimitiveElement[] = [
+          {
+            ...ResolvedHierarchy.clone(primitive),
+            children: [
+              ...beforeChildren,
+              {
+                ...ResolvedHierarchy.clone(stringNode),
+                value: beforeText.trimEnd(),
+              },
+            ],
+          },
+          {
+            ...ResolvedHierarchy.clone(primitive),
+            children: [
+              {
+                ...ResolvedHierarchy.clone(stringNode),
+                value: afterText.trimStart(),
+              },
+              ...afterChildren,
+            ],
+          },
+        ];
+
+        const primitiveIndexPath = indexPath.slice(0, -1);
+
+        let newResolvedNode = ResolvedHierarchy.remove(instance, {
+          indexPaths: [primitiveIndexPath],
+        });
+
+        // insert
+        newResolvedNode = ResolvedHierarchy.insert(newResolvedNode, {
+          at: primitiveIndexPath,
+          nodes: newNodes,
+        });
+
+        const initialInstance = instantiateResolvedComponent(findComponent, {
+          componentID: selection.componentID,
+          variantID: selection.variantID,
+        });
+
+        const diff = diffResolvedTrees(initialInstance, newResolvedNode);
+
+        return { ...selection, diff };
+      });
+    },
+    [findComponent],
+  );
+
   const resolvedNode = useMemo(() => {
     if (!selection) return undefined;
     return instantiateResolvedComponent(findComponent, selection);
@@ -342,6 +429,7 @@ export function DSEditor({
                     )?.value;
                   }}
                   onChangeTextAtPath={handleSetTextAtPath}
+                  onSplitNodeAtPath={handleSplitNodeAtPath}
                 />
                 <DSRendererOverlay rendererRef={rendererRef} />
               </Stack.V>

@@ -10,6 +10,10 @@ type Props = Pick<
   'config' | 'sourceName' | 'renderContent' | 'setHighlightedPath' | 'sync'
 > & {
   onChangeTextAtPath?: (args: { path: string[]; value: string }) => void;
+  onSplitNodeAtPath?: (args: {
+    path: string[];
+    range: [number, number];
+  }) => void;
   getStringValueAtPath: (path: string[]) => string | undefined;
 };
 
@@ -18,6 +22,7 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
     renderContent,
     setHighlightedPath,
     onChangeTextAtPath,
+    onSplitNodeAtPath,
     getStringValueAtPath,
     ...rest
   }: Props,
@@ -42,8 +47,21 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
 
       if (!path) return;
 
+      if (event.inputType === 'insertParagraph') {
+        onSplitNodeAtPath?.({
+          path,
+          range: [range.startOffset, range.endOffset],
+        });
+        return;
+      }
+
+      const data =
+        event.inputType === 'insertFromPaste'
+          ? event.dataTransfer?.getData('text/plain') ?? ''
+          : event.data;
+
       const content = contentReducer(range.startContainer.textContent, {
-        insertText: event.data,
+        insertText: data,
         range: [range.startOffset, range.endOffset],
       });
 
@@ -57,7 +75,12 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
         });
       }
     },
-    [onChangeTextAtPath, serializedSelection, setSerializedSelection],
+    [
+      onChangeTextAtPath,
+      onSplitNodeAtPath,
+      serializedSelection,
+      setSerializedSelection,
+    ],
   );
 
   const handleRenderContent = useCallback(
