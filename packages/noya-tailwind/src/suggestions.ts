@@ -47,6 +47,7 @@ export const suggestionPatterns = [
   'items-center',
   'items-end',
   'items-stretch',
+  'items-baseline',
   'justify-normal',
   'justify-start',
   'justify-center',

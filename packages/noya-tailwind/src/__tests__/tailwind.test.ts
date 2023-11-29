@@ -68,6 +68,9 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('items-start')).toEqual({
       alignItems: 'start',
     });
+    expect(resolveTailwindClass('items-baseline')).toEqual({
+      alignItems: 'baseline',
+    });
   });
 
   it('gap', () => {

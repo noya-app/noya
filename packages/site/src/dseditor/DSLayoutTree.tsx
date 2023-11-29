@@ -29,6 +29,7 @@ import {
 import {
   BoxModelIcon,
   CaretDownIcon,
+  GlobeIcon,
   ImageIcon,
   ShuffleIcon,
   VercelLogoIcon,
@@ -979,9 +980,58 @@ export const DSLayoutRow = memo(function DSLayerRow({
                           icon: <BoxModelIcon />,
                         },
                       ],
+                      [
+                        prop.generator !== 'geometric' && {
+                          value: 'fetch',
+                          title: 'Fetch',
+                          icon: <GlobeIcon />,
+                        },
+                      ],
                     )}
-                    onSelect={(value) => {
+                    onSelect={async (value) => {
                       switch (value) {
+                        case 'fetch': {
+                          switch (prop.generator) {
+                            case 'random-image':
+                              break;
+                            case 'random-icon':
+                              const data =
+                                await client.networkClient.random.icon({
+                                  query: prop.query,
+                                  preferredCollection: 'heroicons',
+                                });
+
+                              if (data.icons.length === 0) return;
+
+                              const icon = data.icons[0];
+
+                              const iconResponse = await fetch(icon);
+                              const svg = await iconResponse.text();
+
+                              onChange(
+                                ResolvedHierarchy.replace(resolvedNode, {
+                                  at: indexPath,
+                                  node: {
+                                    ...node,
+                                    props: node.props.map((p) =>
+                                      p.name === prop.name &&
+                                      p.type === 'generator' &&
+                                      p.generator === prop.generator
+                                        ? {
+                                            ...p,
+                                            result: svg,
+                                            resolvedQuery: prop.query,
+                                          }
+                                        : p,
+                                    ),
+                                  },
+                                }),
+                              );
+                              break;
+                          }
+
+                          break;
+                        }
                         case 'geometric':
                         case 'random-image':
                         case 'random-icon': {
