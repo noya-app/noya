@@ -2170,5 +2170,7 @@ Array [
   "shrink-0",
   "flex",
   "inline-flex",
+  "isolate",
+  "isolation-auto",
 ]
 `;

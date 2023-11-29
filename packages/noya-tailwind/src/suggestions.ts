@@ -117,6 +117,8 @@ export const suggestionPatterns = [
   'shrink-0',
   'flex',
   'inline-flex',
+  'isolate',
+  'isolation-auto',
 ];
 
 export const context = {

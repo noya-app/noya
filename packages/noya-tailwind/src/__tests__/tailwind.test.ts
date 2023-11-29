@@ -256,6 +256,12 @@ describe('resolves styles', () => {
       lineHeight: '1.625',
     });
   });
+
+  it('isolates', () => {
+    expect(resolveTailwindClass('isolate')).toEqual({
+      isolation: 'isolate',
+    });
+  });
 });
 
 describe('parameters', () => {

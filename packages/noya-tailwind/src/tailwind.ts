@@ -130,6 +130,7 @@ export const classGroups = {
   objectFit:
     /^(object-contain|object-cover|object-fill|object-none|object-scale-down)/,
   objectPosition: /^object-/,
+  isolate: /^(isolate|isolation-auto)/,
   display:
     /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
   // Must be last!
@@ -660,6 +661,10 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         backgroundImage: tailwindToLinearGradient([className], getColor),
       };
     }
+    case 'isolate':
+      return {
+        isolation: className === 'isolate' ? 'isolate' : 'auto',
+      };
   }
 
   return assertNever(classGroup);
