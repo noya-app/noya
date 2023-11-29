@@ -41,6 +41,18 @@ export const DSRendererOverlay = memo(function DSRendererOverlay({
           },
         });
       }}
+      onWheel={(event) => {
+        rendererRef.current?.mouseWheel({
+          delta: {
+            x: event.deltaX,
+            y: event.deltaY,
+          },
+          point: {
+            x: event.nativeEvent.offsetX,
+            y: event.nativeEvent.offsetY,
+          },
+        });
+      }}
     />
   );
 });

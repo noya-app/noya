@@ -85,7 +85,18 @@ export const ControlledFrame = memo(
         srcDoc={`<!DOCTYPE html>
 <head>
   <style>
-    html, body, #noya-preview-root { height: 100%; overflow: hidden; margin: 0; padding: 0; }
+    html, body, #noya-preview-root { height: 100%; margin: 0; padding: 0; }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge, and Firefox */
+    body {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
 
     * {
       /* antd doesn't set a border-style or width, so we set these for convenience */

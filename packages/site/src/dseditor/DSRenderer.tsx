@@ -23,8 +23,10 @@ import React, {
 import styled from 'styled-components';
 import { ControlledFrame } from './ControlledFrame';
 import {
-  ProxyEvent,
-  ProxyEventHandler,
+  ProxyMouseEvent,
+  ProxyMouseEventHandler,
+  ProxyWheelEvent,
+  ProxyWheelEventHandler,
   SerializedSelection,
   createSelectionHandlers,
   serializeSelection,
@@ -53,9 +55,10 @@ export type DSRenderContext = {
 };
 
 export interface IDSRenderer {
-  mouseDown: ProxyEventHandler;
-  mouseMove: ProxyEventHandler;
-  mouseUp: ProxyEventHandler;
+  mouseDown: ProxyMouseEventHandler;
+  mouseMove: ProxyMouseEventHandler;
+  mouseUp: ProxyMouseEventHandler;
+  mouseWheel: ProxyWheelEventHandler;
 }
 
 type Props = {
@@ -247,9 +250,11 @@ export const DSRenderer = forwardRef(function DSRenderer(
   useImperativeHandle(
     forwardedRef,
     () => ({
-      mouseDown: (event: ProxyEvent) => eventHandlers?.onMouseDown(event),
-      mouseMove: (event: ProxyEvent) => eventHandlers?.onMouseMove(event),
-      mouseUp: (event: ProxyEvent) => eventHandlers?.onMouseUp(event),
+      mouseDown: (event: ProxyMouseEvent) => eventHandlers?.onMouseDown(event),
+      mouseMove: (event: ProxyMouseEvent) => eventHandlers?.onMouseMove(event),
+      mouseUp: (event: ProxyMouseEvent) => eventHandlers?.onMouseUp(event),
+      mouseWheel: (event: ProxyWheelEvent) =>
+        eventHandlers?.onMouseWheel(event),
     }),
     [eventHandlers],
   );

@@ -214,11 +214,16 @@ export function isTextNode(node: Node): node is Text {
   return node && node.nodeType === Node.TEXT_NODE;
 }
 
-export type ProxyEvent = {
+export type ProxyMouseEvent = {
   point: Point;
 };
 
-export type ProxyEventHandler = (event: ProxyEvent) => void;
+export type ProxyWheelEvent = ProxyMouseEvent & {
+  delta: Point;
+};
+
+export type ProxyMouseEventHandler = (event: ProxyMouseEvent) => void;
+export type ProxyWheelEventHandler = (event: ProxyWheelEvent) => void;
 
 export function createSelectionHandlers(
   document: Document,
@@ -233,7 +238,7 @@ export function createSelectionHandlers(
   let initialPosition: Point | null = null;
   let firstClickPosition: Point | null = null;
 
-  const handleMouseDown: ProxyEventHandler = ({ point }) => {
+  const handleMouseDown: ProxyMouseEventHandler = ({ point }) => {
     // Reset click count if the user has moved the mouse.
     // We don't want to accidentally trigger a selection just because a user clicks fast.
     if (!firstClickPosition || clickCount === 0) {
@@ -329,7 +334,7 @@ export function createSelectionHandlers(
     );
   }
 
-  const handleMouseMove: ProxyEventHandler = ({ point }) => {
+  const handleMouseMove: ProxyMouseEventHandler = ({ point }) => {
     if (!initialPosition || !isMoving(point, initialPosition)) {
       handleHighlightPath(point);
       return;
@@ -374,14 +379,30 @@ export function createSelectionHandlers(
     // }
   };
 
-  const handleMouseUp: ProxyEventHandler = () => {
+  const handleMouseUp: ProxyMouseEventHandler = () => {
     initialPosition = null;
+  };
+
+  const handleMouseWheel: ProxyWheelEventHandler = ({ point, delta }) => {
+    const element = document.elementFromPoint(point.x, point.y);
+
+    if (!element) return;
+
+    const scrollable = closest(element as HTMLElement, (el) =>
+      isScrollable(document, el),
+    );
+
+    if (!scrollable) return;
+
+    scrollable.scrollTop += delta.y;
+    scrollable.scrollLeft += delta.x;
   };
 
   return {
     onMouseDown: handleMouseDown,
     onMouseMove: handleMouseMove,
     onMouseUp: handleMouseUp,
+    onMouseWheel: handleMouseWheel,
   };
 }
 
@@ -396,3 +417,16 @@ function rangeToSerializedSelection(
     focusOffset: range.endOffset,
   };
 }
+
+const isScrollable = (document: Document, element: Element): boolean => {
+  // if element is html return the html element
+  if (element === document.documentElement) return true;
+
+  // This hasn't been tested and may not work (it's not using the iframe's `window` object)
+  // const overflowY = window.getComputedStyle(element).overflowY;
+  // const overflowX = window.getComputedStyle(element).overflowX;
+  // const isScrollableY = overflowY === 'scroll' || overflowY === 'auto';
+  // const isScrollableX = overflowX === 'scroll' || overflowX === 'auto';
+  // return isScrollableY || isScrollableX;
+  return false;
+};

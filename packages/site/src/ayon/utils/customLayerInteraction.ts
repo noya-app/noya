@@ -2,16 +2,16 @@ import { InteractionAPI } from 'noya-canvas';
 import { ReactEventHandlers } from 'noya-designsystem';
 import { handleActionType, InteractionState } from 'noya-state';
 import { CSSProperties } from 'react';
-import { ProxyEventHandler } from '../../dseditor/dom';
+import { ProxyMouseEventHandler } from '../../dseditor/dom';
 
 interface CustomActions {
   setCursor: (cursor: CSSProperties['cursor'] | undefined) => void;
 }
 
 interface Props {
-  onPointerDown?: ProxyEventHandler;
-  onPointerMove?: ProxyEventHandler;
-  onPointerUp?: ProxyEventHandler;
+  onPointerDown?: ProxyMouseEventHandler;
+  onPointerMove?: ProxyMouseEventHandler;
+  onPointerUp?: ProxyMouseEventHandler;
 }
 
 export function createCustomLayerInteraction({
