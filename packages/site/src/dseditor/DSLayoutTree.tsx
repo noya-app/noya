@@ -6,6 +6,7 @@ import {
   NoyaComponent,
   NoyaPrimitiveElement,
   NoyaResolvedNode,
+  NoyaResolvedPrimitiveElement,
   ResolvedHierarchy,
   createResolvedNode,
   randomSeed,
@@ -34,6 +35,7 @@ import {
   ShuffleIcon,
   VercelLogoIcon,
 } from 'noya-icons';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { isDeepEqual, uuid } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
@@ -124,6 +126,38 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   );
 
   const [editingId, setEditingId] = useState<string | undefined>();
+
+  useKeyboardShortcuts({
+    // Add a box into the first primitive element
+    '+': () => {
+      const primitive = ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
+        resolvedNode,
+        (n): n is NoyaResolvedPrimitiveElement =>
+          n.type === 'noyaPrimitiveElement',
+      );
+
+      if (!primitive) return;
+
+      const child = createResolvedNode(
+        findComponent,
+        Model.primitiveElement(boxSymbolId),
+      );
+
+      const indexPath = ResolvedHierarchy.findIndexPath(
+        resolvedNode,
+        (n) => n === primitive,
+      );
+
+      if (!indexPath) return;
+
+      onChange(
+        ResolvedHierarchy.insert(resolvedNode, {
+          at: [...indexPath, primitive.children.length],
+          nodes: [child],
+        }),
+      );
+    },
+  });
 
   return (
     <TreeView.Root
