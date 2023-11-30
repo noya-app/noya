@@ -119,6 +119,8 @@ export const suggestionPatterns = [
   'inline-flex',
   'isolate',
   'isolation-auto',
+  'z-{zIndex}',
+  '-z-{zIndex}',
 ];
 
 export const context = {

@@ -33,6 +33,15 @@ describe('resolves styles', () => {
     });
   });
 
+  it('blur', () => {
+    expect(resolveTailwindClass('blur')).toEqual({
+      filter: 'blur(8px)',
+    });
+    expect(resolveTailwindClass('blur-sm')).toEqual({
+      filter: 'blur(4px)',
+    });
+  });
+
   it('backdrop-blur', () => {
     expect(resolveTailwindClass('backdrop-blur')).toEqual({
       backdropFilter: 'blur(8px)',
@@ -260,6 +269,17 @@ describe('resolves styles', () => {
   it('isolates', () => {
     expect(resolveTailwindClass('isolate')).toEqual({
       isolation: 'isolate',
+    });
+  });
+
+  it('zIndex', () => {
+    expect(resolveTailwindClass('z-10')).toEqual({
+      zIndex: '10',
+    });
+
+    // negative
+    expect(resolveTailwindClass('-z-10')).toEqual({
+      zIndex: '-10',
     });
   });
 });

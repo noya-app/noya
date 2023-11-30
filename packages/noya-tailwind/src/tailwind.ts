@@ -64,6 +64,7 @@ export const classGroups = {
   backgroundSize: /^bg-(auto|cover|contain)/,
   backgroundPosition:
     /^bg-(bottom|center|left|left-bottom|left-top|right|right-bottom|right-top|top)/,
+  blur: /^blur/,
   backdropFilter: /^backdrop-blur/,
   gradientDirection: /^bg-gradient-to-/,
   gradientStopFrom: /^from-/,
@@ -131,6 +132,7 @@ export const classGroups = {
     /^(object-contain|object-cover|object-fill|object-none|object-scale-down)/,
   objectPosition: /^object-/,
   isolate: /^(isolate|isolation-auto)/,
+  zIndex: /^-?z-/,
   display:
     /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
   // Must be last!
@@ -241,9 +243,17 @@ export const extractTailwindClassesByTheme = (
 };
 
 function getValue(className: string): string | undefined {
-  return /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto|screen))$/.exec(
-    className,
-  )?.[1];
+  let value =
+    /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto|screen))$/.exec(
+      className,
+    )?.[1];
+
+  // if className starts with "-", add a "-" to the start of the value
+  if (value && className.startsWith('-')) {
+    value = `-${value}`;
+  }
+
+  return value;
 }
 
 function getSpacingValue(className: string): string | undefined {
@@ -664,6 +674,16 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
     case 'isolate':
       return {
         isolation: className === 'isolate' ? 'isolate' : 'auto',
+      };
+    case 'zIndex':
+      return {
+        zIndex: (getValue(className) as any) ?? undefined,
+      };
+    case 'blur':
+      return {
+        filter: `blur(${
+          (context.theme('blur') as any)[getValue(className) || 'DEFAULT']
+        })`,
       };
   }
 
