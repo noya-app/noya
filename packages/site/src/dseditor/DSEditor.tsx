@@ -35,7 +35,13 @@ import { toZipFile } from 'noya-filesystem';
 import { DownloadIcon } from 'noya-icons';
 import { loadDesignSystem } from 'noya-module-loader';
 import { UTF16, findLast, uuid } from 'noya-utils';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { ShareProjectButton } from '../components/ShareMenu';
@@ -68,7 +74,8 @@ export function DSEditor({
   uploadAsset,
   viewType,
 }: Props) {
-  const { query } = useRouter();
+  const router = useRouter();
+  const { query } = router;
   const fileId = query.id as string;
   const initialComponentId = query.component as string | undefined;
   const library = query.library as string | undefined;
@@ -116,9 +123,52 @@ export function DSEditor({
     fetchLibrary();
   }, [sourceName]);
 
-  const [selection, setSelection] = React.useState<
-    SelectedComponent | undefined
-  >(initialComponentId ? { componentID: initialComponentId } : undefined);
+  const [_selection, _setSelection] = React.useState<
+    Pick<SelectedComponent, 'diff' | 'variantID'>
+  >({});
+
+  const selection: SelectedComponent | undefined = useMemo(
+    () =>
+      initialComponentId
+        ? { ..._selection, componentID: initialComponentId }
+        : undefined,
+    [_selection, initialComponentId],
+  );
+
+  /**
+   * Sync selection with route
+   */
+  const setSelection: Dispatch<SetStateAction<SelectedComponent | undefined>> =
+    useCallback(
+      (selection) => {
+        const newSelection =
+          typeof selection === 'function'
+            ? selection(
+                initialComponentId
+                  ? { ..._selection, componentID: initialComponentId }
+                  : undefined,
+              )
+            : selection;
+
+        _setSelection(newSelection || {});
+
+        // Set route 'component' param using next router
+        if (newSelection?.componentID !== initialComponentId) {
+          const { component, ...rest } = router.query;
+
+          router.push({
+            pathname: router.pathname,
+            query: {
+              ...rest,
+              ...(newSelection?.componentID && {
+                component: newSelection.componentID,
+              }),
+            },
+          });
+        }
+      },
+      [_selection, initialComponentId, router],
+    );
 
   const [highlightedPath, setHighlightedPath] = React.useState<
     string[] | undefined
@@ -144,7 +194,7 @@ export function DSEditor({
         componentID: newComponent.componentID,
       });
     },
-    [components, setComponents],
+    [components, setComponents, setSelection],
   );
 
   const handleCreateComponent = useCallback(
@@ -159,7 +209,7 @@ export function DSEditor({
       setSelection(undefined);
       setComponents(components.filter((c) => c.componentID !== componentID));
     },
-    [components, setComponents],
+    [components, setComponents, setSelection],
   );
 
   const handleChangeComponent = useCallback(
@@ -211,7 +261,7 @@ export function DSEditor({
         return { ...selection, diff };
       });
     },
-    [findComponent],
+    [findComponent, setSelection],
   );
 
   const handleSplitNodeAtPath = useCallback(
@@ -297,7 +347,7 @@ export function DSEditor({
         return { ...selection, diff };
       });
     },
-    [findComponent],
+    [findComponent, setSelection],
   );
 
   const resolvedNode = useMemo(() => {
