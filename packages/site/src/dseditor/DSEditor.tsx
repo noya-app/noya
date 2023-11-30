@@ -57,6 +57,7 @@ interface Props {
   initialDocument: DS;
   onChangeDocument?: (document: DS) => void;
   onChangeName?: (name: string) => void;
+  uploadAsset?: (file: ArrayBuffer) => Promise<string>;
   viewType?: ViewType;
 }
 export function DSEditor({
@@ -64,6 +65,7 @@ export function DSEditor({
   onChangeDocument = noop,
   name: fileName,
   onChangeName = noop,
+  uploadAsset,
   viewType,
 }: Props) {
   const { query } = useRouter();
@@ -512,7 +514,11 @@ export function DSEditor({
               </GridView.Root>
             )}
             {contentTab === 'code' && system && (
-              <DSGalleryCode system={system} ds={ds} />
+              <DSGalleryCode
+                system={system}
+                ds={ds}
+                uploadAsset={uploadAsset}
+              />
             )}
           </Stack.V>
         )}
@@ -572,9 +578,11 @@ function DSComponentCode({
 function DSGalleryCode({
   system,
   ds,
+  uploadAsset,
 }: {
   system: DesignSystemDefinition;
   ds: DS;
+  uploadAsset?: (file: ArrayBuffer) => Promise<string>;
 }) {
   const [files, setFiles] = React.useState<Record<string, string>>();
 
@@ -591,13 +599,31 @@ function DSGalleryCode({
 
   return (
     <Stack.V flex="1" background="white">
-      {files !== undefined && <Playground files={files} />}
+      {files !== undefined && (
+        <Playground uploadAsset={uploadAsset} files={files} />
+      )}
     </Stack.V>
   );
 }
 
-function Playground(props: Pick<PlaygroundProps, 'files'>) {
+function Playground(
+  props: Pick<PlaygroundProps, 'files'> & {
+    uploadAsset?: (file: ArrayBuffer) => Promise<string>;
+  },
+) {
   const theme = useDesignSystemTheme();
+
+  async function createZip() {
+    return await toZipFile(
+      Object.fromEntries(
+        Object.entries(props.files ?? {}).map(([name, content]) => [
+          name,
+          UTF16.toUTF8(content),
+        ]),
+      ),
+      'App.zip',
+    );
+  }
 
   return (
     <>
@@ -661,19 +687,10 @@ function Playground(props: Pick<PlaygroundProps, 'files'>) {
         }
       `}
       />
-      <Stack.V position="absolute" top="10px" right="20px">
+      <Stack.H position="absolute" top="10px" right="20px" gap="20px">
         <Button
           onClick={async () => {
-            const zipFile = await toZipFile(
-              Object.fromEntries(
-                Object.entries(props.files ?? {}).map(([name, content]) => [
-                  name,
-                  UTF16.toUTF8(content),
-                ]),
-              ),
-              'App.zip',
-            );
-
+            const zipFile = await createZip();
             downloadBlob(zipFile);
           }}
         >
@@ -681,7 +698,33 @@ function Playground(props: Pick<PlaygroundProps, 'files'>) {
           <Spacer.Horizontal size={6} inline />
           <DownloadIcon />
         </Button>
-      </Stack.V>
+        <Button
+          onClick={async () => {
+            if (!props.uploadAsset) return;
+
+            const zipFile = await createZip();
+            const bytes = await zipFile.arrayBuffer();
+
+            const build = await fetch('http://localhost:31114/build', {
+              method: 'POST',
+              body: bytes,
+              headers: {
+                'Content-Type': 'application/zip',
+              },
+            });
+
+            const binary = await build.arrayBuffer();
+
+            const assetUrl = await props.uploadAsset(binary);
+
+            window.open(`${assetUrl}/index.html`, '_blank')?.focus();
+          }}
+        >
+          Upload ZIP
+          <Spacer.Horizontal size={6} inline />
+          <DownloadIcon />
+        </Button>
+      </Stack.H>
     </>
   );
 }
