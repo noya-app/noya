@@ -116,6 +116,8 @@ export const suggestionPatterns = [
   'shrink',
   'shrink-0',
   'flex',
+  'inline',
+  'inline-block',
   'inline-flex',
   'isolate',
   'isolation-auto',
