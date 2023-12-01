@@ -45,7 +45,7 @@ import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
 import { upperFirst } from 'noya-utils';
-import React, { useMemo } from 'react';
+import React, { ComponentProps, useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
@@ -59,17 +59,18 @@ import { enforceSchema } from './layoutSchema';
 import { getNodeName } from './utils/nodeUtils';
 import { partitionDiff } from './utils/partitionDiff';
 
-interface Props {
+type Props = Pick<
+  ComponentProps<typeof DSLayoutTree>,
+  'highlightedPath' | 'setHighlightedPath' | 'selectedPath' | 'setSelectedPath'
+> & {
   selection: SelectedComponent;
   setSelection: (selection: SelectedComponent) => void;
   findComponent: FindComponent;
   onChangeComponent: (component: NoyaComponent) => void;
   resolvedNode: NoyaResolvedNode;
-  highlightedPath?: string[];
-  setHighlightedPath: (path: string[] | undefined) => void;
   onCreateComponent: (component: NoyaComponent) => void;
   components: NoyaComponent[];
-}
+};
 
 export function DSComponentInspector({
   selection,
@@ -79,6 +80,8 @@ export function DSComponentInspector({
   resolvedNode,
   highlightedPath,
   setHighlightedPath,
+  selectedPath,
+  setSelectedPath,
   onCreateComponent,
   components,
 }: Props) {
@@ -567,8 +570,10 @@ export function DSComponentInspector({
                 setSelection({ ...selection, diff });
               }}
               findComponent={findComponent}
-              setHighlightedPath={setHighlightedPath}
               highlightedPath={highlightedPath}
+              setHighlightedPath={setHighlightedPath}
+              selectedPath={selectedPath}
+              setSelectedPath={setSelectedPath}
               resolvedNode={resolvedNode}
               onCreateComponent={onCreateComponent}
               components={components}

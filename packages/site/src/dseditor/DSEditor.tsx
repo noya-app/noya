@@ -174,6 +174,10 @@ export function DSEditor({
     string[] | undefined
   >();
 
+  const [selectionPath, setSelectionPath] = React.useState<
+    string[] | undefined
+  >(undefined);
+
   const findComponent = useCallback(
     (id: string) =>
       components.find((component) => component.componentID === id),
@@ -582,6 +586,8 @@ export function DSEditor({
           resolvedNode={resolvedNode}
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}
+          selectedPath={selectionPath}
+          setSelectedPath={setSelectionPath}
           onCreateComponent={handleCreateComponent}
           components={components}
         />

@@ -1,6 +1,7 @@
 import { Cross1Icon, PlusIcon } from 'noya-icons';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { useDesignSystemTheme } from '../contexts/DesignSystemConfiguration';
 import { useHover } from '../hooks/useHover';
 
 type ChipColorScheme = 'primary' | 'secondary' | 'error';
@@ -165,11 +166,20 @@ export const Chip = memo(function Chip({
   onAdd,
   onHoverDeleteChange,
 }: ChipProps) {
+  const theme = useDesignSystemTheme();
+
   const { hoverProps: hoverDeleteProps } = useHover({
     onHoverChange: onHoverDeleteChange,
   });
 
   const handleClick = !children && !deletable && addable ? onAdd : onClick;
+
+  const color =
+    colorScheme === 'primary'
+      ? theme.colors.primary
+      : colorScheme === 'secondary'
+      ? theme.colors.secondary
+      : theme.colors.text;
 
   return (
     <ChipElement
@@ -188,6 +198,7 @@ export const Chip = memo(function Chip({
           size={size}
           {...(hoverDeleteProps as any)}
           onClick={onDelete}
+          color={color}
         />
       )}
       {addable && (
@@ -195,6 +206,7 @@ export const Chip = memo(function Chip({
           size={size}
           isOnlyChild={!children && !deletable}
           onClick={onAdd}
+          color={color}
         />
       )}
     </ChipElement>

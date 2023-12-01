@@ -50,6 +50,9 @@ export const AyonElementsInspector = memo(function AyonElementsInspector({
     [dispatch, node, selectedLayer.do_objectID],
   );
 
+  const selectedPath = useMemo(() => [], []);
+  const setSelectedPath = useCallback(() => {}, []);
+
   return (
     <InspectorSection
       title="UI Elements"
@@ -66,6 +69,8 @@ export const AyonElementsInspector = memo(function AyonElementsInspector({
           findComponent={findComponent}
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}
+          selectedPath={selectedPath}
+          setSelectedPath={setSelectedPath}
         />
       )}
     </InspectorSection>

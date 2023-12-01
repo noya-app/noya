@@ -98,7 +98,9 @@ interface Props {
   findComponent: FindComponent;
   resolvedNode: NoyaResolvedNode;
   highlightedPath?: string[];
+  selectedPath?: string[];
   setHighlightedPath: (path: string[] | undefined) => void;
+  setSelectedPath: (path: string[] | undefined) => void;
   onCreateComponent?: (component: NoyaComponent) => void;
   components?: NoyaComponent[];
 }
@@ -112,6 +114,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   resolvedNode,
   highlightedPath,
   setHighlightedPath,
+  selectedPath,
+  setSelectedPath,
   onCreateComponent,
   components,
 }: Props) {
@@ -128,15 +132,26 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   const [editingId, setEditingId] = useState<string | undefined>();
 
   useKeyboardShortcuts({
-    // Add a box into the first primitive element
+    // Add a box into either the selected element or the first primitive element
     '+': () => {
-      const primitive = ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
-        resolvedNode,
-        (n): n is NoyaResolvedPrimitiveElement =>
-          n.type === 'noyaPrimitiveElement',
-      );
+      const selectedElement =
+        ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
+          resolvedNode,
+          (n): n is NoyaResolvedPrimitiveElement =>
+            n.type === 'noyaPrimitiveElement' &&
+            selectedPath?.join('/') === n.path.join('/'),
+        );
 
-      if (!primitive) return;
+      const primitiveElement =
+        ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
+          resolvedNode,
+          (n): n is NoyaResolvedPrimitiveElement =>
+            n.type === 'noyaPrimitiveElement',
+        );
+
+      const target = selectedElement ?? primitiveElement;
+
+      if (!target) return;
 
       const child = createResolvedNode(
         findComponent,
@@ -145,14 +160,14 @@ export const DSLayoutTree = memo(function DSLayoutTree({
 
       const indexPath = ResolvedHierarchy.findIndexPath(
         resolvedNode,
-        (n) => n === primitive,
+        (n) => n === target,
       );
 
       if (!indexPath) return;
 
       onChange(
         ResolvedHierarchy.insert(resolvedNode, {
-          at: [...indexPath, primitive.children.length],
+          at: [...indexPath, target.children.length],
           nodes: [child],
         }),
       );
@@ -169,6 +184,9 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       gap={4}
       sortable
       pressEventName="onPointerDown"
+      onPress={() => {
+        setSelectedPath(undefined);
+      }}
       acceptsDrop={(sourceIndex, destinationIndex, relationDropPosition) => {
         const sourceItem = flattened[sourceIndex];
         const destinationItem = flattened[destinationIndex];
@@ -246,6 +264,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           findComponent={findComponent}
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}
+          selectedPath={selectedPath}
+          setSelectedPath={setSelectedPath}
           depth={depth}
           indexPath={indexPath}
           node={node}
@@ -269,6 +289,8 @@ export const DSLayoutRow = memo(function DSLayerRow({
   findComponent,
   highlightedPath,
   setHighlightedPath,
+  selectedPath,
+  setSelectedPath,
   depth,
   indexPath,
   node,
@@ -280,13 +302,14 @@ export const DSLayoutRow = memo(function DSLayerRow({
   components,
   expanded,
   onSetExpanded,
-}: {
+}: Pick<
+  Props,
+  'highlightedPath' | 'setHighlightedPath' | 'selectedPath' | 'setSelectedPath'
+> & {
   id: string;
   onChange: (resolvedNode: NoyaResolvedNode) => void;
   resolvedNode: NoyaResolvedNode;
   findComponent: FindComponent;
-  highlightedPath?: string[];
-  setHighlightedPath: (path: string[] | undefined) => void;
   depth: number;
   key: string;
   indexPath: number[];
@@ -390,6 +413,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
     undefined
   >;
   const hovered = highlightedPath?.join('/') === path.join('/');
+  const selected = selectedPath?.join('/') === path.join('/');
   const openInputDialog = useOpenInputDialog();
   const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
@@ -544,8 +568,11 @@ export const DSLayoutRow = memo(function DSLayerRow({
     !isSearchingStyles &&
     !isSearchingTypes;
 
+  const ref = React.useRef<HTMLLIElement>(null);
+
   return (
     <TreeView.Row
+      ref={ref}
       id={id}
       depth={depth - 1}
       menuItems={menu}
@@ -554,6 +581,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
       onMenuOpenChange={setIsMenuOpen}
       onHoverChange={(hovered) => {
         setHighlightedPath(hovered ? path : undefined);
+      }}
+      onPress={() => {
+        setSelectedPath(path);
+        ref.current?.focus();
       }}
       icon={
         depth !== 0 && (
@@ -581,13 +612,15 @@ export const DSLayoutRow = memo(function DSLayerRow({
             : `1px solid ${theme.colors.divider}`
         }
         background={
-          node.type === 'noyaCompositeElement'
+          selected
+            ? theme.colors.primary
+            : node.type === 'noyaCompositeElement'
             ? 'rgb(238, 229, 255)'
             : undefined
         }
         color={
-          node.type === 'noyaString'
-            ? 'dodgerblue'
+          selected
+            ? 'white'
             : node.type === 'noyaCompositeElement'
             ? theme.colors.primary
             : 'inherit'
@@ -777,7 +810,13 @@ export const DSLayoutRow = memo(function DSLayerRow({
             <Chip
               size="small"
               variant={hovered ? 'outlined' : 'ghost'}
+              colorScheme={selected ? 'primary' : undefined}
               monospace
+              style={{
+                ...(selected && {
+                  color: 'white',
+                }),
+              }}
               onClick={() => {
                 setIsSearchingTypes(true);
               }}
@@ -850,7 +889,13 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   deletable={status !== 'removed'}
                   addable={status === 'removed'}
                   monospace
-                  colorScheme={status === 'added' ? 'secondary' : undefined}
+                  colorScheme={
+                    selected
+                      ? 'primary'
+                      : status === 'added'
+                      ? 'secondary'
+                      : undefined
+                  }
                   style={{
                     opacity: status === 'removed' ? 0.5 : 1,
                   }}
@@ -890,6 +935,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
               size={'small'}
               addable
               monospace
+              colorScheme={selected ? 'primary' : undefined}
               onAdd={() => {
                 if (isSearchingStyles) {
                   setIsSearchingStyles(false);
