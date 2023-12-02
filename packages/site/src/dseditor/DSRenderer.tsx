@@ -50,15 +50,12 @@ export type DSRenderProps = {
   iframe: HTMLIFrameElement;
 };
 
-export type DSRenderContext = {
-  iframe: HTMLIFrameElement;
-};
-
 export interface IDSRenderer {
   mouseDown: ProxyMouseEventHandler;
   mouseMove: ProxyMouseEventHandler;
   mouseUp: ProxyMouseEventHandler;
   mouseWheel: ProxyWheelEventHandler;
+  getIframe: () => HTMLIFrameElement | null;
 }
 
 type Props = {
@@ -71,6 +68,7 @@ type Props = {
   setSelectedPath?: (path: string[] | undefined) => void;
   onBeforeInput?: (event: InputEvent) => void;
   onReady?: () => void;
+  onContentDidChange?: () => void;
   sync?: boolean;
 };
 
@@ -85,6 +83,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     setSelectedPath,
     onBeforeInput,
     onReady,
+    onContentDidChange,
     sync = true,
   }: Props,
   forwardedRef: React.ForwardedRef<IDSRenderer>,
@@ -195,6 +194,8 @@ export const DSRenderer = forwardRef(function DSRenderer(
     );
 
     lock.current = false;
+
+    onContentDidChange?.();
   }, [
     theme,
     renderContent,
@@ -204,6 +205,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     ready,
     sync,
     config.colors.primary,
+    onContentDidChange,
   ]);
 
   useEffect(() => {
@@ -259,6 +261,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
       mouseUp: (event: ProxyMouseEvent) => eventHandlers?.onMouseUp(event),
       mouseWheel: (event: ProxyWheelEvent) =>
         eventHandlers?.onMouseWheel(event),
+      getIframe: () => ref.current,
     }),
     [eventHandlers],
   );

@@ -9,7 +9,6 @@ import {
   renderResolvedNode,
   unresolve,
 } from 'noya-component';
-import { lightTheme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Size, createResizeTransform } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
@@ -323,13 +322,13 @@ const DOMRendererContent = memo(
                             resolvedNode,
                             dsConfig: ds.config,
                             system: props.system,
-                            highlight:
-                              layer.do_objectID === highlightedNodePath?.layerId
-                                ? {
-                                    path: highlightedNodePath.path,
-                                    color: lightTheme.colors.secondary,
-                                  }
-                                : undefined,
+                            // highlight:
+                            //   layer.do_objectID === highlightedNodePath?.layerId
+                            //     ? {
+                            //         path: highlightedNodePath.path,
+                            //         color: lightTheme.colors.secondary,
+                            //       }
+                            //     : undefined,
                           });
 
                           return (

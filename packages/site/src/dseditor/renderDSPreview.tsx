@@ -2,7 +2,6 @@ import { DSConfig } from 'noya-api';
 import {
   ComponentThumbnailChrome,
   NoyaResolvedNode,
-  RenderHighlightOptions,
   renderResolvedNode,
 } from 'noya-component';
 import { darkTheme, lightTheme } from 'noya-designsystem';
@@ -18,7 +17,6 @@ export function renderDSPreview({
   padding,
   isThumbnail,
   chrome = 'none',
-  highlight,
 }: {
   renderProps: DSRenderProps;
   dsConfig: DSConfig;
@@ -27,16 +25,7 @@ export function renderDSPreview({
   padding?: number;
   isThumbnail?: boolean;
   chrome?: ComponentThumbnailChrome;
-  highlight?: RenderHighlightOptions;
 }) {
-  // console.info(
-  //   ResolvedHierarchy.diagram(resolvedNode, (node, indexPath) => {
-  //     if (!node) return '()';
-  //     if (node.type === 'noyaString') return `"${node.value}"`;
-  //     return [node.name, `(${node.path.join('/')})`].filter(Boolean).join(' ');
-  //   }),
-  // );
-
   // const system = isThumbnail ? ThumbnailDesignSystem : props.system;
 
   const content = renderResolvedNode({
@@ -47,7 +36,6 @@ export function renderDSPreview({
     dsConfig,
     system: props.system,
     theme: isThumbnail ? props.theme : undefined,
-    highlight,
   });
 
   const colorMode = dsConfig.colorMode ?? 'light';

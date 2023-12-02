@@ -47,11 +47,6 @@ export function getImageFromProp(
   return placeholderImage;
 }
 
-export type RenderHighlightOptions = {
-  path: string[];
-  color: string;
-};
-
 export function renderResolvedNode({
   contentEditable,
   disableTabNavigation,
@@ -60,7 +55,6 @@ export function renderResolvedNode({
   dsConfig,
   system,
   theme,
-  highlight,
 }: {
   contentEditable: boolean;
   disableTabNavigation: boolean;
@@ -69,7 +63,6 @@ export function renderResolvedNode({
   dsConfig: DSConfig;
   system: DesignSystemDefinition;
   theme?: any; // Passed into components as _theme
-  highlight?: RenderHighlightOptions;
 }) {
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
@@ -126,8 +119,6 @@ export function renderResolvedNode({
         return element.name ?? '';
       }
 
-      const isHighlighted = element.path.join() === highlight?.path.join();
-
       const PrimitiveComponent: React.FC<any> =
         system.components[element.componentID];
 
@@ -150,12 +141,6 @@ export function renderResolvedNode({
       classNames = extractTailwindClassesByBreakpoint(classNames, 'md');
 
       const style = parametersToTailwindStyle(classNames);
-
-      if (isHighlighted && highlight) {
-        Object.assign(style, {
-          outline: `1px solid ${highlight.color}`,
-        });
-      }
 
       const variantClassName = findLast(classNames, (className) =>
         className.startsWith('variant-'),

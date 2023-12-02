@@ -34,6 +34,7 @@ import {
 import { toZipFile } from 'noya-filesystem';
 import { DownloadIcon } from 'noya-icons';
 import { loadDesignSystem } from 'noya-module-loader';
+import { useDeepState } from 'noya-react-utils';
 import { UTF16, findLast, uuid } from 'noya-utils';
 import React, {
   Dispatch,
@@ -52,7 +53,7 @@ import { DSComponentThumbnail } from './DSComponentThumbnail';
 import { DSControlledRenderer } from './DSControlledRenderer';
 import { DSProjectInspector } from './DSProjectInspector';
 import { DSRenderProps, IDSRenderer } from './DSRenderer';
-import { DSRendererOverlay } from './DSRendererOverlay';
+import { DSRendererOverlay, IRendererOverlay } from './DSRendererOverlay';
 import { initialComponents } from './builtins';
 import { renderDSPreview } from './renderDSPreview';
 
@@ -178,7 +179,7 @@ export function DSEditor({
       [_selection, initialComponentId, router],
     );
 
-  const [highlightedPath, setHighlightedPath] = React.useState<
+  const [highlightedPath, setHighlightedPath] = useDeepState<
     string[] | undefined
   >();
 
@@ -385,9 +386,6 @@ export function DSEditor({
           padding: viewType === 'preview' ? 0 : 20,
           isThumbnail,
           chrome,
-          highlight: highlightedPath
-            ? { path: highlightedPath, color: theme.colors.primary }
-            : undefined,
         });
       }
       return null;
@@ -396,8 +394,6 @@ export function DSEditor({
       selection,
       resolvedNode,
       theme.colors.canvas.background,
-      theme.colors.primary,
-      highlightedPath,
       config,
       viewType,
       isThumbnail,
@@ -406,6 +402,11 @@ export function DSEditor({
   );
 
   const rendererRef = React.useRef<IDSRenderer>(null);
+  const overlayRef = React.useRef<IRendererOverlay>(null);
+
+  const handleContentDidChange = useCallback(() => {
+    overlayRef.current?.update();
+  }, []);
 
   const handleSelectComponent = useCallback(
     (componentId?: string) => {
@@ -435,6 +436,19 @@ export function DSEditor({
       </>,
     );
   }, [contentTab, fileId, project]);
+
+  const getStringValueAtPath = useCallback(
+    (path) => {
+      if (!resolvedNode) return undefined;
+
+      return ResolvedHierarchy.find<NoyaResolvedString>(
+        resolvedNode,
+        (node): node is NoyaResolvedString =>
+          node.type === 'noyaString' && node.path.join('/') === path.join('/'),
+      )?.value;
+    },
+    [resolvedNode],
+  );
 
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
@@ -482,22 +496,18 @@ export function DSEditor({
                   sourceName={sourceName}
                   config={config}
                   renderContent={handleRenderContent}
-                  getStringValueAtPath={(path) => {
-                    if (!resolvedNode) return undefined;
-
-                    return ResolvedHierarchy.find<NoyaResolvedString>(
-                      resolvedNode,
-                      (node): node is NoyaResolvedString =>
-                        node.type === 'noyaString' &&
-                        node.path.join('/') === path.join('/'),
-                    )?.value;
-                  }}
+                  getStringValueAtPath={getStringValueAtPath}
                   onChangeTextAtPath={handleSetTextAtPath}
                   onSplitNodeAtPath={handleSplitNodeAtPath}
                   setHighlightedPath={setHighlightedPath}
                   setSelectedPath={setSelectedPath}
+                  onContentDidChange={handleContentDidChange}
                 />
-                <DSRendererOverlay rendererRef={rendererRef} />
+                <DSRendererOverlay
+                  ref={overlayRef}
+                  rendererRef={rendererRef}
+                  highlightedPath={highlightedPath}
+                />
               </Stack.V>
             )}
             {contentTab === 'code' && resolvedNode && system && (

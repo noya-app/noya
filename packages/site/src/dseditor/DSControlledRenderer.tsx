@@ -13,6 +13,7 @@ type Props = Pick<
   | 'setHighlightedPath'
   | 'setSelectedPath'
   | 'sync'
+  | 'onContentDidChange'
 > & {
   onChangeTextAtPath?: (args: { path: string[]; value: string }) => void;
   onSplitNodeAtPath?: (args: {
