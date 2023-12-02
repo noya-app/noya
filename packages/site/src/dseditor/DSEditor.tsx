@@ -1,7 +1,7 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import JavascriptPlayground, { PlaygroundProps } from 'javascript-playgrounds';
 import { useRouter } from 'next/router';
-import { DS } from 'noya-api';
+import { DS, useNoyaClientOrFallback } from 'noya-api';
 import {
   clean,
   compile,
@@ -82,16 +82,14 @@ export function DSEditor({
   const isThumbnail = library === 'thumbnail';
 
   const theme = useDesignSystemTheme();
-  const [ds, setDS] = React.useState(initialDocument);
+  const [ds, setDS] = React.useState<DS>(initialDocument);
   const project = useProject();
 
   let {
     source: { name: sourceName },
     config,
     components = initialComponents,
-  } = ds as DS & {
-    components: NoyaComponent[];
-  };
+  } = ds;
 
   if (library) {
     sourceName = library;
@@ -103,6 +101,16 @@ export function DSEditor({
       components,
     }));
   }, []);
+
+  const setLatestBuildAssetId = useCallback(
+    (latestBuildAssetId: string | undefined) => {
+      setDS((ds) => ({
+        ...ds,
+        latestBuildAssetId: latestBuildAssetId,
+      }));
+    },
+    [],
+  );
 
   useEffect(() => {
     onChangeDocument(ds);
@@ -574,6 +582,7 @@ export function DSEditor({
                 system={system}
                 ds={ds}
                 uploadAsset={uploadAsset}
+                setLatestBuildAssetId={setLatestBuildAssetId}
               />
             )}
           </Stack.V>
@@ -637,10 +646,12 @@ function DSGalleryCode({
   system,
   ds,
   uploadAsset,
+  setLatestBuildAssetId,
 }: {
   system: DesignSystemDefinition;
   ds: DS;
   uploadAsset?: (file: ArrayBuffer) => Promise<string>;
+  setLatestBuildAssetId?: (latestBuildAssetId: string | undefined) => void;
 }) {
   const [files, setFiles] = React.useState<Record<string, string>>();
 
@@ -658,7 +669,11 @@ function DSGalleryCode({
   return (
     <Stack.V flex="1" background="white">
       {files !== undefined && (
-        <Playground uploadAsset={uploadAsset} files={files} />
+        <Playground
+          uploadAsset={uploadAsset}
+          files={files}
+          setLatestBuildAssetId={setLatestBuildAssetId}
+        />
       )}
     </Stack.V>
   );
@@ -667,9 +682,14 @@ function DSGalleryCode({
 function Playground(
   props: Pick<PlaygroundProps, 'files'> & {
     uploadAsset?: (file: ArrayBuffer) => Promise<string>;
+    setLatestBuildAssetId?: (latestBuildAssetId: string | undefined) => void;
   },
 ) {
   const theme = useDesignSystemTheme();
+  const client = useNoyaClientOrFallback();
+  const router = useRouter();
+  const { query } = router;
+  const fileId = query.id as string;
 
   async function createZip() {
     return await toZipFile(
@@ -773,9 +793,15 @@ function Playground(
 
             const binary = await build.arrayBuffer();
 
-            const assetUrl = await props.uploadAsset(binary);
+            const assetId = await client.assets.create(binary, fileId);
 
-            window.open(`${assetUrl}/index.html`, '_blank')?.focus();
+            // const assetUrl = await props.uploadAsset(binary);
+
+            props.setLatestBuildAssetId?.(assetId);
+
+            window
+              .open(`${client.assets.url(assetId)}/index.html`, '_blank')
+              ?.focus();
           }}
         >
           Upload ZIP

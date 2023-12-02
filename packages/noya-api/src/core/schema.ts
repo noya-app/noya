@@ -56,6 +56,7 @@ export type DS = {
   source: DSSource;
   config: DSConfig;
   components?: NoyaComponent[];
+  latestBuildAssetId?: string;
   prompt?: {
     inputDescription?: string;
     pickComponent?: string;
