@@ -7,7 +7,12 @@ import { SerializedSelection, closest } from './dom';
 
 type Props = Pick<
   ComponentProps<typeof DSRenderer>,
-  'config' | 'sourceName' | 'renderContent' | 'setHighlightedPath' | 'sync'
+  | 'config'
+  | 'sourceName'
+  | 'renderContent'
+  | 'setHighlightedPath'
+  | 'setSelectedPath'
+  | 'sync'
 > & {
   onChangeTextAtPath?: (args: { path: string[]; value: string }) => void;
   onSplitNodeAtPath?: (args: {
@@ -20,7 +25,6 @@ type Props = Pick<
 export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
   {
     renderContent,
-    setHighlightedPath,
     onChangeTextAtPath,
     onSplitNodeAtPath,
     getStringValueAtPath,
@@ -151,7 +155,6 @@ export const DSControlledRenderer = forwardRef(function DSControlledRenderer(
       ref={forwardedRef}
       serializedSelection={serializedSelection}
       setSerializedSelection={setSerializedSelection}
-      setHighlightedPath={setHighlightedPath}
       onBeforeInput={onBeforeInput}
       renderContent={handleRenderContent}
       {...rest}

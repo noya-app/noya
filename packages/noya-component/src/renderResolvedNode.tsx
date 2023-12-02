@@ -196,7 +196,7 @@ export function renderResolvedNode({
               ...rootElement.props.style,
               ...style,
             },
-            ...(!includeDataProps && {
+            ...(includeDataProps && {
               'data-path': element.path.join('/'),
             }),
             ...(disableTabNavigation && { tabIndex: -1 }),
@@ -211,7 +211,7 @@ export function renderResolvedNode({
           // the layout is being generated.
           key={indexPath.join('/')}
           _passthrough={{
-            ...(!includeDataProps && {
+            ...(includeDataProps && {
               'data-path': element.path.join('/'),
             }),
             ...(disableTabNavigation && { tabIndex: -1 }),

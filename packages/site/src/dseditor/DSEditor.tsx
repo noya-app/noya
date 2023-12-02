@@ -174,9 +174,9 @@ export function DSEditor({
     string[] | undefined
   >();
 
-  const [selectionPath, setSelectionPath] = React.useState<
-    string[] | undefined
-  >(undefined);
+  const [selectedPath, setSelectedPath] = React.useState<string[] | undefined>(
+    undefined,
+  );
 
   const findComponent = useCallback(
     (id: string) =>
@@ -486,6 +486,8 @@ export function DSEditor({
                   }}
                   onChangeTextAtPath={handleSetTextAtPath}
                   onSplitNodeAtPath={handleSplitNodeAtPath}
+                  setHighlightedPath={setHighlightedPath}
+                  setSelectedPath={setSelectedPath}
                 />
                 <DSRendererOverlay rendererRef={rendererRef} />
               </Stack.V>
@@ -586,8 +588,8 @@ export function DSEditor({
           resolvedNode={resolvedNode}
           highlightedPath={highlightedPath}
           setHighlightedPath={setHighlightedPath}
-          selectedPath={selectionPath}
-          setSelectedPath={setSelectionPath}
+          selectedPath={selectedPath}
+          setSelectedPath={setSelectedPath}
           onCreateComponent={handleCreateComponent}
           components={components}
         />

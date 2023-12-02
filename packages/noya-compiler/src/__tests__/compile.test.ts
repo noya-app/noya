@@ -129,7 +129,7 @@ describe('renders', () => {
     const reactNode = renderResolvedNode({
       contentEditable: false,
       disableTabNavigation: false,
-      includeDataProps: true,
+      includeDataProps: false,
       system: ChakraDesignSystem,
       dsConfig: ds.config,
       resolvedNode,

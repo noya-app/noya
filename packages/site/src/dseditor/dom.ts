@@ -231,6 +231,7 @@ export function createSelectionHandlers(
     serializedSelection: SerializedSelection | undefined,
   ) => void,
   setHighlightedPath: (highlightedPath: string[] | undefined) => void,
+  setSelectedPath: (selectedPath: string[] | undefined) => void,
 ) {
   let range: Range | null = null;
   let clickCount = 0;
@@ -305,8 +306,14 @@ export function createSelectionHandlers(
     }
 
     // Focus the element within the iframe
-    if ('focus' in startElement && typeof startElement.focus === 'function') {
+    if (
+      'focus' in startElement &&
+      typeof startElement.focus === 'function' &&
+      canElementAcceptFocus(startElement as HTMLElement)
+    ) {
       startElement.focus();
+    } else {
+      (document.activeElement as HTMLElement)?.blur();
     }
 
     setSerializedSelection(rangeToSerializedSelection(document, range));
@@ -321,7 +328,7 @@ export function createSelectionHandlers(
     );
   }
 
-  function handleHighlightPath(point: Point) {
+  function findElementPath(point: Point) {
     const elements = document.elementsFromPoint(point.x, point.y);
 
     const element = elements.find(
@@ -329,14 +336,12 @@ export function createSelectionHandlers(
         'dataset' in element && !!(element as HTMLElement).dataset.path,
     );
 
-    setHighlightedPath?.(
-      element ? element.dataset.path?.split('/') : undefined,
-    );
+    return element ? element.dataset.path?.split('/') : undefined;
   }
 
   const handleMouseMove: ProxyMouseEventHandler = ({ point }) => {
     if (!initialPosition || !isMoving(point, initialPosition)) {
-      handleHighlightPath(point);
+      setHighlightedPath(findElementPath(point));
       return;
     }
 
@@ -379,8 +384,16 @@ export function createSelectionHandlers(
     // }
   };
 
-  const handleMouseUp: ProxyMouseEventHandler = () => {
+  const handleMouseUp: ProxyMouseEventHandler = ({ point }) => {
     initialPosition = null;
+
+    // console.log(
+    //   'up',
+    //   findElementPath(point),
+    //   document.elementsFromPoint(point.x, point.y),
+    // );
+
+    setSelectedPath(findElementPath(point));
   };
 
   const handleMouseWheel: ProxyWheelEventHandler = ({ point, delta }) => {
@@ -430,3 +443,16 @@ const isScrollable = (document: Document, element: Element): boolean => {
   // return isScrollableY || isScrollableX;
   return false;
 };
+
+function canElementAcceptFocus(element: HTMLElement) {
+  // Check if the element has a tabIndex attribute and it's >= 0
+  const tabIndex = element.tabIndex;
+  const hasValidTabIndex = tabIndex !== undefined && tabIndex >= 0;
+
+  // Check if the element has the disabled attribute and it's not set to true
+  const disabled = element.getAttribute('disabled');
+  const isNotDisabled = disabled === null || disabled === 'false';
+
+  // Return true if both conditions are met
+  return hasValidTabIndex && isNotDisabled;
+}

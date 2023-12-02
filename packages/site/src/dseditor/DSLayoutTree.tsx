@@ -586,6 +586,50 @@ export const DSLayoutRow = memo(function DSLayerRow({
         setSelectedPath(path);
         ref.current?.focus();
       }}
+      onKeyDown={(event) => {
+        // Double check that the element is still focused.
+        // This is necessary because menus contained within this view will
+        // otherwise receive the keydown event.
+        if (document.activeElement !== ref.current) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        switch (event.key) {
+          case '+': {
+            onSelectMenuItem('addChild');
+            break;
+          }
+          case '#': {
+            if (node.type === 'noyaPrimitiveElement') {
+              setIsSearchingStyles(true);
+            } else if (node.type === 'noyaCompositeElement') {
+              setIsSearchingVariants(true);
+            }
+            break;
+          }
+          case '/': {
+            setIsSearchingTypes(true);
+            break;
+          }
+          case 'Enter': {
+            setEditingId(id);
+            break;
+          }
+          case 'Delete':
+          case 'Backspace': {
+            // Prevent deleting the root
+            if (depth === 0) return;
+
+            onSelectMenuItem('delete');
+            break;
+          }
+          case 'Escape': {
+            setSelectedPath(undefined);
+            break;
+          }
+        }
+      }}
       icon={
         depth !== 0 && (
           <DraggableMenuButton
@@ -735,9 +779,11 @@ export const DSLayoutRow = memo(function DSLayerRow({
             }
             onBlur={() => {
               setIsSearchingStyles(false);
+              ref.current?.focus();
             }}
             onSelectItem={(item) => {
               setIsSearchingStyles(false);
+              ref.current?.focus();
 
               if (node.type !== 'noyaPrimitiveElement') return;
 

@@ -68,6 +68,7 @@ type Props = {
   serializedSelection?: SerializedSelection;
   setSerializedSelection?: (value: SerializedSelection | undefined) => void;
   setHighlightedPath?: (path: string[] | undefined) => void;
+  setSelectedPath?: (path: string[] | undefined) => void;
   onBeforeInput?: (event: InputEvent) => void;
   onReady?: () => void;
   sync?: boolean;
@@ -81,6 +82,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     serializedSelection,
     setSerializedSelection,
     setHighlightedPath,
+    setSelectedPath,
     onBeforeInput,
     onReady,
     sync = true,
@@ -234,6 +236,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
   // Add indirection so we don't recreate the handlers (which have an internal timer)
   const _setSerializedSelection = useStableCallback(setSerializedSelection);
   const _setHighlightedPath = useStableCallback(setHighlightedPath);
+  const _setSelectedPath = useStableCallback(setSelectedPath);
 
   const eventHandlers = useMemo(
     () =>
@@ -242,9 +245,10 @@ export const DSRenderer = forwardRef(function DSRenderer(
             ref.current.contentDocument,
             _setSerializedSelection,
             _setHighlightedPath,
+            _setSelectedPath,
           )
         : undefined,
-    [_setHighlightedPath, _setSerializedSelection, ready],
+    [_setHighlightedPath, _setSelectedPath, _setSerializedSelection, ready],
   );
 
   useImperativeHandle(

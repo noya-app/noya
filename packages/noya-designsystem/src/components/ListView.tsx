@@ -319,6 +319,7 @@ interface ListViewRowProps<MenuItemType extends string = string> {
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
   onMenuOpenChange?: (isOpen: boolean) => void;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
 }
 
 const ListViewRow = forwardRef(function ListViewRow<
@@ -343,6 +344,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     onContextMenu,
     onSelectMenuItem,
     onMenuOpenChange,
+    onKeyDown,
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
@@ -415,6 +417,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
         divider={divider}
+        onKeyDown={onKeyDown}
         {...renderProps}
         {...mergeEventHandlers(
           { onPointerDown: renderProps.onPointerDown },

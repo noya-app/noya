@@ -319,6 +319,8 @@ export const InputFieldWithCompletions = memo(
 
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
+        let handled = false;
+
         switch (event.key) {
           case 'ArrowDown':
           case 'ArrowUp':
@@ -331,23 +333,34 @@ export const InputFieldWithCompletions = memo(
               ),
             );
 
-            event.preventDefault();
-            event.stopPropagation();
+            handled = true;
             break;
           case 'Enter':
             const item = filteredItems[selectedIndex];
             selectItem(item);
+
+            handled = true;
             break;
           case 'Escape':
             if (ref && typeof ref === 'object') {
               ref.current?.blur();
             }
+
+            handled = true;
             break;
           case 'Backspace':
-          case 'Delete':
+          case 'Delete': {
             if (filter === '') {
               onDeleteWhenEmpty?.();
             }
+
+            break;
+          }
+        }
+
+        if (handled) {
+          event.preventDefault();
+          event.stopPropagation();
         }
       },
       [
