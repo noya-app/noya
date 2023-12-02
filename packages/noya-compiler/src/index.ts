@@ -526,14 +526,14 @@ export function compile(configuration: CompilerConfiguration) {
   const files = {
     ...Object.fromEntries(
       componentPageItems.map(({ name, source }) => [
-        `src/app/component/${getComponentNameIdentifier(
+        `src/app/components/${getComponentNameIdentifier(
           name,
           'kebab',
         )}/page.tsx`,
         source,
       ]),
     ),
-    'src/app/component/layout.tsx': layoutSource,
+    'src/app/components/layout.tsx': layoutSource,
     'package.json': JSON.stringify(
       {
         name: sanitizePackageName(configuration.name),
