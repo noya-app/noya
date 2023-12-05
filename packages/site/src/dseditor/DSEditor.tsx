@@ -600,6 +600,7 @@ export function DSEditor({
       </Stack.V>
       {viewType !== 'preview' && selection && resolvedNode && (
         <DSComponentInspector
+          key={selection.componentID} // Use key to reset any navigation state
           selection={selection}
           setSelection={setSelection}
           findComponent={findComponent}

@@ -48,6 +48,7 @@ type CreatePatternSVG = (options: {
 
 type Mod = {
   createPatternSVG: CreatePatternSVG;
+  createSVG: any;
   schema: any;
 };
 
@@ -55,8 +56,18 @@ const loadModule = (): Mod => {
   try {
     return require('@dabbott/patterns');
   } catch {
-    return { createPatternSVG: () => placeholderSVG, schema: {} };
+    return {
+      createSVG: () => placeholderSVG,
+      createPatternSVG: () => placeholderSVG,
+      schema: {},
+    };
   }
+};
+
+export const createSVG = (data: any): string => {
+  const { createSVG } = loadModule();
+
+  return createSVG(data);
 };
 
 export const createPatternSVG = memoize((seed: string): string => {

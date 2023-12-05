@@ -10,6 +10,7 @@ import {
   NoyaResolvedNode,
   ResolvedHierarchy,
   createPatternSVG,
+  createSVG,
   placeholderImage,
   replaceColorPalette,
   svgToDataUri,
@@ -35,7 +36,10 @@ export function getImageFromProp(
   if (prop.type !== 'generator') return placeholderImage;
   if (prop.generator === 'geometric') {
     return svgToDataUri(
-      replaceColorPalette(createPatternSVG(prop.query), primaryScale),
+      replaceColorPalette(
+        prop.data ? createSVG(prop.data) : createPatternSVG(prop.query),
+        primaryScale,
+      ),
     );
   }
   if (prop.result) {

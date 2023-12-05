@@ -1,3 +1,5 @@
+// https://github.com/eclipsesource/jsonforms (MIT License)
+
 import {
   CombinatorRendererProps,
   createCombinatorRenderInfos,

@@ -89,6 +89,7 @@ export type NoyaGeneratorProp = {
   query: string;
   result?: string;
   resolvedQuery?: string;
+  data?: any;
 };
 export type NoyaProp = NoyaStringProp | NoyaNumberProp | NoyaGeneratorProp;
 

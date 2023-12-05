@@ -1,4 +1,5 @@
 // import { createAjv } from '@jsonforms/core';
+import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import {
   ArrayControl,
@@ -6,6 +7,7 @@ import {
   Categorization,
   DateCell,
   DateTimeCell,
+  GroupLayout,
   HorizontalLayout,
   OneOfRadioGroupControl,
   RadioGroupControl,
@@ -18,6 +20,7 @@ import {
   dateCellTester,
   dateTimeCellTester,
   enumCellTester,
+  groupTester,
   horizontalLayoutTester,
   inputControlTester,
   integerCellTester,
@@ -30,21 +33,22 @@ import {
   timeCellTester,
 } from '@jsonforms/vanilla-renderers';
 import { getSchema } from 'noya-component';
-import React, { ComponentProps } from 'react';
+import React, { ComponentProps, memo, useCallback } from 'react';
 import { AnyOfRenderer, anyOfTester } from './AnyOfRenderer';
 import { enumCellRenderer } from './EnumCell';
 import { inputControlRenderer } from './InputControl';
 import { numberCell, numberCellTester } from './NumberCell';
+import { objectControlTester, objectRenderer } from './ObjectControl';
 import { tableArrayRenderer } from './TableArrayControl';
 import { textCellRenderer } from './TextCell';
-import { VerticalLayoutRenderer, verticalLayoutTester } from './VerticalLayout';
+import { verticalLayoutRenderer, verticalLayoutTester } from './VerticalLayout';
 
-// const handleDefaultsAjv = createAjv({
-//   useDefaults: true,
-//   formats: {
-//     color: true,
-//   },
-// });
+const handleDefaultsAjv = createAjv({
+  // useDefaults: true,
+  formats: {
+    color: true,
+  },
+});
 
 const customRenderers: ComponentProps<typeof JsonForms>['renderers'] = [
   { tester: inputControlTester, renderer: inputControlRenderer },
@@ -54,10 +58,12 @@ const customRenderers: ComponentProps<typeof JsonForms>['renderers'] = [
   // { tester: labelRendererTester, renderer: LabelRenderer },
   { tester: categorizationTester, renderer: Categorization },
   { tester: tableArrayControlTester, renderer: tableArrayRenderer },
-  // { tester: groupTester, renderer: GroupLayout },
-  { tester: verticalLayoutTester, renderer: VerticalLayoutRenderer },
+  { tester: groupTester, renderer: verticalLayoutRenderer },
+  { tester: groupTester, renderer: GroupLayout },
+  { tester: verticalLayoutTester, renderer: verticalLayoutRenderer },
   { tester: horizontalLayoutTester, renderer: HorizontalLayout },
   { tester: anyOfTester, renderer: AnyOfRenderer },
+  { tester: objectControlTester, renderer: objectRenderer },
   // ...vanillaRenderers,
 ];
 const customCells: ComponentProps<typeof JsonForms>['cells'] = [
@@ -73,7 +79,7 @@ const customCells: ComponentProps<typeof JsonForms>['cells'] = [
   { tester: timeCellTester, cell: TimeCell },
 ];
 
-export function JSONForm<T>({
+export const JSONForm = memo(function JSONForm<T>({
   data,
   setData,
 }: {
@@ -82,44 +88,48 @@ export function JSONForm<T>({
 }) {
   const schema = getSchema();
 
-  // console.log('schema', schema);
+  const handleChange: ComponentProps<typeof JsonForms>['onChange'] =
+    useCallback(
+      ({ data, errors }) => {
+        // recursively remove undefined values
+        // const cleanData = removeUndefined(data);
+
+        // console.log('new data', data, cleanData);
+
+        setData(data);
+      },
+      [setData],
+    );
 
   return (
     <JsonForms
       schema={schema}
-      // uischema={uischema}
       data={data}
       renderers={customRenderers}
       cells={customCells}
-      onChange={({ data, errors }) => {
-        // recursively remove undefined values
-        const cleanData = removeUndefined(data);
-
-        // console.log('new data', data, cleanData);
-
-        setData(cleanData);
-      }}
-      // ajv={handleDefaultsAjv}
+      onChange={handleChange}
+      // uischema={uischema}
+      ajv={handleDefaultsAjv}
     />
   );
-}
+});
 
-function removeUndefined(data: any): any {
-  if (Array.isArray(data)) {
-    return data.map(removeUndefined);
-  } else if (typeof data === 'object') {
-    const cleanData: any = {};
+// function removeUndefined(data: any): any {
+//   if (Array.isArray(data)) {
+//     return data.map(removeUndefined);
+//   } else if (typeof data === 'object') {
+//     const cleanData: any = {};
 
-    for (const key in data) {
-      const value = data[key];
+//     for (const key in data) {
+//       const value = data[key];
 
-      if (value !== undefined) {
-        cleanData[key] = removeUndefined(value);
-      }
-    }
+//       if (value !== undefined) {
+//         cleanData[key] = removeUndefined(value);
+//       }
+//     }
 
-    return cleanData;
-  } else {
-    return data;
-  }
-}
+//     return cleanData;
+//   } else {
+//     return data;
+//   }
+// }

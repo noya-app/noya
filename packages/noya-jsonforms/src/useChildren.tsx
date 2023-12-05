@@ -1,3 +1,5 @@
+// https://github.com/eclipsesource/jsonforms (MIT License)
+
 import { JsonSchema, Layout } from '@jsonforms/core';
 import { JsonFormsDispatch, useJsonForms } from '@jsonforms/react';
 import isEmpty from 'lodash/isEmpty';

@@ -32,6 +32,7 @@ import {
   CaretDownIcon,
   GlobeIcon,
   ImageIcon,
+  MixerHorizontalIcon,
   ShuffleIcon,
   VercelLogoIcon,
 } from 'noya-icons';
@@ -103,6 +104,9 @@ interface Props {
   setSelectedPath: (path: string[] | undefined) => void;
   onCreateComponent?: (component: NoyaComponent) => void;
   components?: NoyaComponent[];
+  onConfigureProp?: (
+    options: { path: string[]; prop: string } | undefined,
+  ) => void;
 }
 
 /**
@@ -118,6 +122,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   setSelectedPath,
   onCreateComponent,
   components,
+  onConfigureProp,
 }: Props) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const handleSetExpanded = useCallback((id: string, expanded: boolean) => {
@@ -276,6 +281,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           onCreateComponent={onCreateComponent}
           components={components}
           onSetExpanded={handleSetExpanded}
+          onConfigureProp={onConfigureProp}
         />
       )}
     />
@@ -302,9 +308,14 @@ export const DSLayoutRow = memo(function DSLayerRow({
   components,
   expanded,
   onSetExpanded,
+  onConfigureProp,
 }: Pick<
   Props,
-  'highlightedPath' | 'setHighlightedPath' | 'selectedPath' | 'setSelectedPath'
+  | 'highlightedPath'
+  | 'setHighlightedPath'
+  | 'selectedPath'
+  | 'setSelectedPath'
+  | 'onConfigureProp'
 > & {
   id: string;
   onChange: (resolvedNode: NoyaResolvedNode) => void;
@@ -1088,6 +1099,11 @@ export const DSLayoutRow = memo(function DSLayerRow({
                           title: 'Shuffle',
                           icon: <ShuffleIcon />,
                         },
+                        prop.generator === 'geometric' && {
+                          value: 'configure',
+                          title: 'Configure',
+                          icon: <MixerHorizontalIcon />,
+                        },
                       ],
                       [
                         prop.generator !== 'random-icon' && {
@@ -1116,6 +1132,12 @@ export const DSLayoutRow = memo(function DSLayerRow({
                     )}
                     onSelect={async (value) => {
                       switch (value) {
+                        case 'configure':
+                          onConfigureProp?.({
+                            path,
+                            prop: prop.name,
+                          });
+                          break;
                         case 'fetch': {
                           switch (prop.generator) {
                             case 'random-image':
@@ -1217,6 +1239,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
                                             : p.query,
                                         result: undefined,
                                         resolvedQuery: undefined,
+                                        data: undefined,
                                       }
                                     : p,
                                 ),

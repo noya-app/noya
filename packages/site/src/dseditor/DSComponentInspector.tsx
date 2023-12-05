@@ -14,6 +14,7 @@ import {
   NoyaDiffItem,
   NoyaNode,
   NoyaResolvedNode,
+  NoyaResolvedPrimitiveElement,
   NoyaVariant,
   ResolvedHierarchy,
   SelectedComponent,
@@ -42,10 +43,11 @@ import {
 } from 'noya-designsystem';
 import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
+import { JSONForm } from 'noya-jsonforms';
 import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
 import { upperFirst } from 'noya-utils';
-import React, { ComponentProps, useMemo } from 'react';
+import React, { ComponentProps, memo, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
 import { InspectorSection } from '../components/InspectorSection';
@@ -145,6 +147,38 @@ export function DSComponentInspector({
   const isMounted = useIsMounted();
 
   const thumbnailSize = component.thumbnail?.size ?? defaultThumbnailSize;
+
+  const [configureProp, setConfigureProp] = React.useState<
+    { path: string[]; prop: string } | undefined
+  >(undefined);
+
+  const handleCloseConfigureProp = React.useCallback(() => {
+    setConfigureProp(undefined);
+  }, []);
+
+  const handlePendingChange = useCallback(
+    (newResolvedNode: NoyaResolvedNode) => {
+      const instance = instantiateResolvedComponent(findComponent, {
+        componentID: selection.componentID,
+        variantID: selection.variantID,
+      });
+      const diff = diffResolvedTrees(instance, newResolvedNode);
+      setSelection({ ...selection, diff });
+    },
+    [findComponent, selection, setSelection],
+  );
+
+  if (configureProp) {
+    return (
+      <PropEditor
+        component={component}
+        onChangeNode={handlePendingChange}
+        resolvedNode={resolvedNode}
+        configureProp={configureProp}
+        onClose={handleCloseConfigureProp}
+      />
+    );
+  }
 
   return (
     <Stack.V width="400px" background="white">
@@ -561,14 +595,7 @@ export function DSComponentInspector({
             }
           >
             <DSLayoutTree
-              onChange={(newResolvedNode) => {
-                const instance = instantiateResolvedComponent(findComponent, {
-                  componentID: selection.componentID,
-                  variantID: selection.variantID,
-                });
-                const diff = diffResolvedTrees(instance, newResolvedNode);
-                setSelection({ ...selection, diff });
-              }}
+              onChange={handlePendingChange}
               findComponent={findComponent}
               highlightedPath={highlightedPath}
               setHighlightedPath={setHighlightedPath}
@@ -577,6 +604,7 @@ export function DSComponentInspector({
               resolvedNode={resolvedNode}
               onCreateComponent={onCreateComponent}
               components={components}
+              onConfigureProp={setConfigureProp}
             />
           </InspectorSection>
         </Stack.V>
@@ -752,3 +780,91 @@ ${exportLayout(resolvedNode)}
 \`\`\`  
 `;
 }
+
+const PropEditor = memo(function PropEditor({
+  component,
+  onChangeNode,
+  resolvedNode,
+  configureProp,
+  onClose,
+}: {
+  component: NoyaComponent;
+  onChangeNode: (newResolvedNode: NoyaResolvedNode) => void;
+  resolvedNode: NoyaResolvedNode;
+  configureProp: { path: string[]; prop: string };
+  onClose: () => void;
+}) {
+  const theme = useDesignSystemTheme();
+
+  const element = ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
+    resolvedNode,
+    (el): el is NoyaResolvedPrimitiveElement => {
+      return (
+        el.type === 'noyaPrimitiveElement' &&
+        el.path.join('/') === configureProp.path.join('/')
+      );
+    },
+  );
+
+  const handleSetData = useCallback(
+    (newData: any) => {
+      if (!element) return;
+
+      const newProps = element.props.map((prop) => {
+        if (prop.name !== configureProp.prop) return prop;
+        return { ...prop, data: newData };
+      });
+
+      const indexPath = ResolvedHierarchy.findIndexPath(
+        resolvedNode,
+        (el) => el.path.join('/') === element.path.join('/'),
+      );
+
+      if (!indexPath) return;
+
+      const newResolvedNode = ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: { ...element, props: newProps },
+      });
+
+      onChangeNode(newResolvedNode);
+    },
+    [configureProp.prop, element, onChangeNode, resolvedNode],
+  );
+
+  if (!element) return null;
+
+  const prop = element.props.find((prop) => prop.name === configureProp.prop);
+
+  if (!prop || prop.type !== 'generator') return null;
+
+  return (
+    <Stack.V width="400px" background="white">
+      <ScrollArea>
+        <Stack.V gap="1px" background={theme.colors.canvas.background}>
+          <InspectorSection
+            title={
+              <>
+                <IconButton
+                  iconName="ChevronLeftIcon"
+                  size={20}
+                  color={theme.colors.textMuted}
+                  onClick={onClose}
+                />
+                <Spacer.Horizontal size={2} inline />
+                Configure
+                <Spacer.Horizontal size={8} inline />
+                <Chip size="medium" monospace style={{ alignSelf: 'center' }}>
+                  {prop.name}
+                </Chip>
+              </>
+            }
+            titleTextStyle="heading4"
+          >
+            <JSONForm data={prop.data} setData={handleSetData} />
+          </InspectorSection>
+        </Stack.V>
+      </ScrollArea>
+    </Stack.V>
+  );
+});
