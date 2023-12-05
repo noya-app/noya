@@ -34,7 +34,8 @@ import { InputField } from 'noya-designsystem';
 import React from 'react';
 
 export const TextCell = (props: CellProps) => {
-  const { config, data, id, enabled, uischema, path, handleChange } = props;
+  const { config, data, id, enabled, schema, uischema, path, handleChange } =
+    props;
   // const maxLength = schema.maxLength;
   const appliedUiSchemaOptions = merge({}, config, uischema.options);
 
@@ -49,7 +50,7 @@ export const TextCell = (props: CellProps) => {
         id={id}
         disabled={!enabled}
         autoFocus={appliedUiSchemaOptions.focus}
-        placeholder={appliedUiSchemaOptions.placeholder}
+        placeholder={schema.default}
         // maxLength={appliedUiSchemaOptions.restrict ? maxLength : undefined}
         // size={appliedUiSchemaOptions.trim ? maxLength : undefined}
       />

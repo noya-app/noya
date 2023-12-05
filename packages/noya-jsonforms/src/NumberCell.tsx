@@ -33,29 +33,23 @@ import { InputField } from 'noya-designsystem';
 import { round } from 'noya-utils';
 import React from 'react';
 
+const toNumber = (value: number, defaultValue: number | undefined) =>
+  value === undefined || isNaN(value) ? defaultValue : Number(value);
+
 export const NumberCell = (props: CellProps) => {
-  const { data, id, enabled, path, handleChange } = props;
-
-  // console.log('render number', data);
-
-  // <input
-  //   type='number'
-  //   step='0.1'
-  //   value={data ?? ''}
-  //   onChange={(ev) => handleChange(path, toNumber(ev.target.value))}
-  //   id={id}
-  //   disabled={!enabled}
-  //   autoFocus={uischema.options && uischema.options.focus}
-  // />
+  const { data, id, enabled, path, handleChange, schema, uischema } = props;
 
   return (
     <InputField.Root id={id}>
       <InputField.NumberInput
         value={data === undefined ? data : round(data, 2)}
-        placeholder={data === undefined ? data : undefined}
-        onNudge={(value) => handleChange(path, data + value)}
+        placeholder={schema.default}
+        onChange={(value) => handleChange(path, toNumber(value, undefined))}
+        onNudge={(value) =>
+          handleChange(path, toNumber(data + value, undefined))
+        }
         disabled={!enabled}
-        onChange={(value) => handleChange(path, value)}
+        autoFocus={uischema.options && uischema.options.focus}
       />
     </InputField.Root>
   );

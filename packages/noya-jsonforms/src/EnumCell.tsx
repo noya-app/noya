@@ -44,8 +44,8 @@ export const EnumCell = (props: EnumCellProps) => {
     >
       {[
         <SelectOption
-          value="none"
-          title="None"
+          value=""
+          title="No Value"
           key="jsonforms.enum.none"
           onSelect={() => handleChange(path, undefined)}
         />,

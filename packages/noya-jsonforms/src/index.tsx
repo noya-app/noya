@@ -1,4 +1,4 @@
-import { createAjv } from '@jsonforms/core';
+// import { createAjv } from '@jsonforms/core';
 import { JsonForms } from '@jsonforms/react';
 import {
   ArrayControl,
@@ -39,12 +39,12 @@ import { tableArrayRenderer } from './TableArrayControl';
 import { textCellRenderer } from './TextCell';
 import { VerticalLayoutRenderer, verticalLayoutTester } from './VerticalLayout';
 
-const handleDefaultsAjv = createAjv({
-  useDefaults: true,
-  formats: {
-    color: true,
-  },
-});
+// const handleDefaultsAjv = createAjv({
+//   useDefaults: true,
+//   formats: {
+//     color: true,
+//   },
+// });
 
 const customRenderers: ComponentProps<typeof JsonForms>['renderers'] = [
   { tester: inputControlTester, renderer: inputControlRenderer },
@@ -91,8 +91,35 @@ export function JSONForm<T>({
       data={data}
       renderers={customRenderers}
       cells={customCells}
-      onChange={({ data, errors }) => setData(data)}
-      ajv={handleDefaultsAjv}
+      onChange={({ data, errors }) => {
+        // recursively remove undefined values
+        const cleanData = removeUndefined(data);
+
+        // console.log('new data', data, cleanData);
+
+        setData(cleanData);
+      }}
+      // ajv={handleDefaultsAjv}
     />
   );
+}
+
+function removeUndefined(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map(removeUndefined);
+  } else if (typeof data === 'object') {
+    const cleanData: any = {};
+
+    for (const key in data) {
+      const value = data[key];
+
+      if (value !== undefined) {
+        cleanData[key] = removeUndefined(value);
+      }
+    }
+
+    return cleanData;
+  } else {
+    return data;
+  }
 }
