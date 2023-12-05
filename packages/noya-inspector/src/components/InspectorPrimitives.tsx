@@ -2,11 +2,15 @@ import { Spacer } from 'noya-designsystem';
 import React, { CSSProperties, memo, ReactNode } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-export const Section = styled.div(({ theme }) => ({
+export const Section = styled.div<{
+  padding?: CSSProperties['padding'];
+  gap?: CSSProperties['gap'];
+}>(({ theme, padding = '10px', gap }) => ({
   flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'column',
-  padding: '10px',
+  padding,
+  gap,
 }));
 
 export const SectionHeader = styled.div(({ theme }) => ({
@@ -46,7 +50,7 @@ export const Column = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
+  gap: '2px',
 }));
 
 export const Checkbox = styled.input(({ theme }) => ({
@@ -89,12 +93,14 @@ export const RowLabel = styled.span<{
 }));
 
 export const LabeledRow = memo(function LabeledRow({
+  id,
   children,
   label,
   labelTextStyle,
   gap,
   right,
 }: {
+  id?: string;
   children: ReactNode;
   label: string;
   labelTextStyle?: 'small' | 'heading5' | 'heading4' | 'heading3';
@@ -102,7 +108,7 @@ export const LabeledRow = memo(function LabeledRow({
   right?: ReactNode;
 }) {
   return (
-    <Row>
+    <Row id={id}>
       <Column>
         <RowLabel textStyle={labelTextStyle}>
           {label}

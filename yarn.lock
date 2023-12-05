@@ -1686,6 +1686,13 @@
   resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.0.4.tgz#a7952ddc723e2438536198c248b4651a5af908ef"
   integrity sha512-LKw4wPl6aTayyqVk81eSUUq5JeFIpsgggGoEu9KaI8rDEO/ZxeiRk42AdHqYlCWg6I3WqkAJcz2pAKJxZ6uftA==
 
+"@dabbott/patterns@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.1.0.tgz#f00faa2c804a86348b3e65302b0c9fb61051c710"
+  integrity sha512-tag9Vbh+yw5S4oxkobAvbiFk1Irpyc6q0pwGnq3LsyVcLO7n6G+Y+sVDxQIbJ2E+k/ALS/Phcmxa4/NkWOGK3A==
+  dependencies:
+    "@sinclair/typebox" "^0.31.28"
+
 "@discoveryjs/json-ext@^0.5.0":
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.3.tgz#90420f9f9c6d3987f176a19a7d8e764271a2f55d"
@@ -2734,6 +2741,28 @@
   dependencies:
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
+
+"@jsonforms/core@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@jsonforms/core/-/core-3.1.0.tgz#1eff4404584d7049103c00f7ce85d549603e124b"
+  integrity sha512-Whs6+VBNhQyMFoPjLCltS4KzcRskayBPYkj7zZaPgA/piPLQXAglAsz5jd5SK7bncYy+dGQSB/6LPzP1QhRxqw==
+  dependencies:
+    "@types/json-schema" "^7.0.3"
+    ajv "^8.6.1"
+    ajv-formats "^2.1.0"
+    lodash "^4.17.15"
+
+"@jsonforms/react@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@jsonforms/react/-/react-3.1.0.tgz#a9d8dd19d5913c1fcfd73470c7b86049c71b8b18"
+  integrity sha512-amgCdopa9SEes/gl/6MjQkSPq+rUZ+aEBx+bWlTc6dWgaNR0i/efIBFl/2o+fCyJAHFpTEsLzSfjzaPjUFVIxQ==
+  dependencies:
+    lodash "^4.17.15"
+
+"@jsonforms/vanilla-renderers@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@jsonforms/vanilla-renderers/-/vanilla-renderers-3.1.0.tgz#7d3a0ab0fa80bcb6ac0a74d7ef5fab553d719ac8"
+  integrity sha512-hUjHPfNdA/UQhmBrNtlXCU7nWYu+9RCKm0gTG4gt8D7sh/boXDpibdy8Y918zpduif5ZCQsO8TeEQJ5Wv/m7qQ==
 
 "@legendapp/state@^2.1.1":
   version "2.1.1"
@@ -4088,6 +4117,11 @@
     pkg-dir "^5.0.0"
     pluralize "^8.0.0"
 
+"@sinclair/typebox@^0.31.28":
+  version "0.31.28"
+  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.31.28.tgz#b68831e7bc7d09daac26968ea32f42bedc968ede"
+  integrity sha512-/s55Jujywdw/Jpan+vsy6JZs1z2ZTGxTmbZTPiuSL2wz9mfzA2gN1zzaqmvfi4pq+uOt7Du85fkiwv5ymW84aQ==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -4688,6 +4722,11 @@
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==
+
+"@types/json-schema@^7.0.3":
+  version "7.0.15"
+  resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
+  integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
 "@types/json-schema@^7.0.9":
   version "7.0.11"
@@ -5636,7 +5675,7 @@ aggregate-error@^3.0.0:
     clean-stack "^2.0.0"
     indent-string "^4.0.0"
 
-ajv-formats@^2.1.1:
+ajv-formats@^2.1.0, ajv-formats@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-2.1.1.tgz#6e669400659eb74973bbf2e33327180a0996b520"
   integrity sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==
@@ -5679,6 +5718,16 @@ ajv@^8.0.1:
   version "8.6.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.6.2.tgz#2fb45e0e5fcbc0813326c1c3da535d1881bb0571"
   integrity sha512-9807RlWAgT564wT+DjeyU5OFMPjmzxVobvDFmNAhY+5zD6A2ly3jDp6sgnfyDtlIQ+7H97oc/DGCzzfu9rjw9w==
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    json-schema-traverse "^1.0.0"
+    require-from-string "^2.0.2"
+    uri-js "^4.2.2"
+
+ajv@^8.6.1:
+  version "8.12.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
+  integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
   dependencies:
     fast-deep-equal "^3.1.1"
     json-schema-traverse "^1.0.0"

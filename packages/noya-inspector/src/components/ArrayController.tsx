@@ -5,6 +5,7 @@ import {
   RelativeDropPosition,
   Sortable,
   Spacer,
+  Stack,
   withSeparatorElements,
 } from 'noya-designsystem';
 import { range } from 'noya-utils';
@@ -17,14 +18,13 @@ const ElementRow = styled.div({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  marginTop: '10px',
 });
 
 const ItemContainer = styled.div({
   position: 'relative',
 });
 
-interface ArrayControllerProps<Item> {
+export interface ArrayControllerProps<Item> {
   id: string;
   items: Item[];
   title: ReactNode;
@@ -38,6 +38,7 @@ interface ArrayControllerProps<Item> {
   onClickExpand?: () => void;
   renderItem: (props: { item: Item; index: number }) => ReactNode;
   renderExpandedContent?: () => ReactNode;
+  padding?: number;
 }
 
 export const ArrayController = memo(function ArrayController<Item>({
@@ -54,6 +55,7 @@ export const ArrayController = memo(function ArrayController<Item>({
   onClickExpand,
   renderItem,
   renderExpandedContent,
+  padding = 10,
 }: ArrayControllerProps<Item>) {
   const iconColor = useTheme().colors.icon;
   const primaryLightColor = useTheme().colors.primaryLight;
@@ -98,7 +100,7 @@ export const ArrayController = memo(function ArrayController<Item>({
   };
 
   return (
-    <InspectorPrimitives.Section id={id}>
+    <InspectorPrimitives.Section id={id} padding={padding} gap="2px">
       <InspectorPrimitives.SectionHeader>
         <Button variant="none" onClick={onClickPlus}>
           <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
@@ -134,33 +136,35 @@ export const ArrayController = memo(function ArrayController<Item>({
           <Spacer.Horizontal size={8} />,
         )}
       </InspectorPrimitives.SectionHeader>
-      {sortable ? (
-        <Sortable.Root
-          keys={keys}
-          renderOverlay={renderRow}
-          onMoveItem={handleMoveItem}
-        >
-          {indexes.map((index) => (
-            <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
-              {({ relativeDropPosition, ...sortableProps }) => (
-                <ItemContainer {...sortableProps}>
-                  {renderRow(index)}
-                  {relativeDropPosition && (
-                    <ListView.DragIndicator
-                      gap={0}
-                      colorScheme="primary"
-                      relativeDropPosition={relativeDropPosition}
-                      offsetLeft={0}
-                    />
-                  )}
-                </ItemContainer>
-              )}
-            </Sortable.Item>
-          ))}
-        </Sortable.Root>
-      ) : (
-        indexes.map(renderRow)
-      )}
+      <Stack.V gap="4px">
+        {sortable ? (
+          <Sortable.Root
+            keys={keys}
+            renderOverlay={renderRow}
+            onMoveItem={handleMoveItem}
+          >
+            {indexes.map((index) => (
+              <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
+                {({ relativeDropPosition, ...sortableProps }) => (
+                  <ItemContainer {...sortableProps}>
+                    {renderRow(index)}
+                    {relativeDropPosition && (
+                      <ListView.DragIndicator
+                        gap={0}
+                        colorScheme="primary"
+                        relativeDropPosition={relativeDropPosition}
+                        offsetLeft={0}
+                      />
+                    )}
+                  </ItemContainer>
+                )}
+              </Sortable.Item>
+            ))}
+          </Sortable.Root>
+        ) : (
+          indexes.map(renderRow)
+        )}
+      </Stack.V>
       {expanded && renderExpandedContent?.()}
     </InspectorPrimitives.Section>
   );

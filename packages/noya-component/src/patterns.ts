@@ -48,13 +48,14 @@ type CreatePatternSVG = (options: {
 
 type Mod = {
   createPatternSVG: CreatePatternSVG;
+  schema: any;
 };
 
 const loadModule = (): Mod => {
   try {
     return require('@dabbott/patterns');
   } catch {
-    return { createPatternSVG: () => placeholderSVG };
+    return { createPatternSVG: () => placeholderSVG, schema: {} };
   }
 };
 
@@ -94,4 +95,9 @@ export function randomSeed() {
 
 export function createSeed(string: string) {
   return `v1/${string}`;
+}
+
+export function getSchema() {
+  const mod = loadModule();
+  return mod.schema;
 }

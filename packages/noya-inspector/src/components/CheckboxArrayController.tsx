@@ -8,7 +8,7 @@ const Checkbox = styled.input({
   margin: 0,
 });
 
-interface CheckboxArrayControllerProps<Item> {
+type CheckboxArrayControllerProps<Item> = {
   id: string;
   value: Item[];
   title: ReactNode;
@@ -26,7 +26,7 @@ interface CheckboxArrayControllerProps<Item> {
     checkbox: ReactNode;
   }) => ReactNode;
   renderExpandedContent?: () => ReactNode;
-}
+};
 
 export const CheckboxArrayController = memo(function CheckboxArrayController<
   Item extends BaseArrayItem,
