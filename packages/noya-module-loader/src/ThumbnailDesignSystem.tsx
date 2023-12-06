@@ -88,6 +88,37 @@ const TextComponent = (
       );
     }
 
+    const stringValue: string | undefined =
+      typeof child.props.children === 'string'
+        ? child.props.children
+        : undefined;
+
+    function renderInlineBlock(
+      value: React.ReactNode,
+      index: number = 0,
+      list: React.ReactNode[] = [],
+    ) {
+      return (
+        <span
+          key={index}
+          style={{
+            display: 'inline-block',
+            background: props.style?.color ?? color,
+            borderRadius: tokens.borderRadius,
+            height: '12px',
+            lineHeight: '12px',
+            opacity: opacity ?? undefined,
+            marginRight:
+              list.length > 0 && index === list.length - 1 ? undefined : '6px',
+          }}
+        >
+          <span style={{ color: 'transparent' }}>{value}</span>
+        </span>
+      );
+    }
+
+    // TODO: We could consider not limiting the number of chunks here and instead
+    // have a configurable limit for a given thumbnail
     return (
       <div
         style={{
@@ -96,18 +127,11 @@ const TextComponent = (
           backgroundColor: 'transparent',
         }}
       >
-        <span
-          style={{
-            display: 'inline-block',
-            background: props.style?.color ?? color,
-            borderRadius: tokens.borderRadius,
-            height: '12px',
-            lineHeight: '12px',
-            opacity: opacity ?? undefined,
-          }}
-        >
-          <span style={{ color: 'transparent' }}>{child}</span>
-        </span>
+        {stringValue && stringValue.length > 80
+          ? splitStringIntoRandomChunks(stringValue, 8, 36)
+              .slice(0, 8)
+              .map(renderInlineBlock)
+          : renderInlineBlock(child)}
       </div>
     );
   }
@@ -283,3 +307,47 @@ export const ThumbnailDesignSystem: DesignSystemDefinition = {
   },
   buildType: 'react',
 };
+
+function simpleHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+function simplePRNG(seed: number): () => number {
+  return () => {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  };
+}
+
+function splitStringIntoRandomChunks(
+  input: string,
+  minChunk: number,
+  maxChunk: number,
+): string[] {
+  const seed = simpleHash(input);
+  const rand = simplePRNG(seed);
+  let currentIndex = 0;
+  const chunks: string[] = [];
+
+  while (currentIndex < input.length) {
+    let remaining = input.length - currentIndex;
+    let chunkSize = minChunk + Math.floor(rand() * (maxChunk - minChunk + 1));
+
+    // Adjust chunk size to avoid too small last chunk
+    if (remaining - chunkSize < minChunk && remaining > chunkSize) {
+      chunkSize = remaining - minChunk;
+    }
+
+    const chunk = input.substring(currentIndex, currentIndex + chunkSize);
+    chunks.push(chunk);
+    currentIndex += chunkSize;
+  }
+
+  return chunks;
+}
