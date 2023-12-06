@@ -1,5 +1,6 @@
 import {
   DesignSystemDefinition,
+  Transformer,
   component,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
@@ -247,7 +248,7 @@ export function createSimpleElement(
         .filter(
           ([key, value]) =>
             key !== 'children' &&
-            !key.startsWith('data-noya-') &&
+            !key.startsWith('data-') &&
             value !== undefined,
         )
         .map(([key, value]) => {
@@ -383,6 +384,121 @@ function extractImports(
       ),
     ];
   });
+}
+
+function isTransformer(value: unknown): value is Transformer {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    '__transformer' in value &&
+    (value.__transformer === 'function' || value.__transformer === 'access')
+  );
+}
+
+function accessPath(data: any, path: string): any {
+  if (path === '.') return data;
+  const parts = path.split('.');
+  let currentValue = data;
+  for (let part of parts) {
+    currentValue = currentValue[part];
+  }
+  return currentValue;
+}
+
+/**
+ * Takes an input like:
+ *
+ * ```ts
+ * const themeTransformer = x.f(extendTheme, [
+ *   x.a("theme"),
+ *   x.f(withDefaultColorScheme, [{ colorScheme: "primary" }]),
+ *   { config: { initialColorMode: x.a("theme.colorMode") } },
+ * ])
+ * ```
+ *
+ * And returns:
+ *
+ * ```ts
+ * import { extendTheme } from "@chakra-ui/react";
+ *
+ * export const theme = extendTheme({
+ *   config: {
+ *     initialColorMode: "dark",
+ *     useSystemColorMode: false,
+ *   },
+ * });
+ * ```
+ */
+export function generateThemeTransformer(
+  config: DS['config'],
+  DesignSystem: DesignSystemDefinition,
+  themeValue: any,
+) {
+  if (!DesignSystem.themeTransformer) return {};
+
+  const Components = buildComponentMap(DesignSystem.imports);
+
+  function convert(transformer: any): ts.Expression {
+    if (isTransformer(transformer)) {
+      switch (transformer.__transformer) {
+        case 'access': {
+          return createExpressionCode(
+            accessPath(
+              transformer.value ?? themeValue,
+              transformer.path as string,
+            ),
+          );
+        }
+        case 'function': {
+          const func = Components.get(transformer.value);
+
+          if (!func) return ts.factory.createNull();
+
+          // Return ts call expression using func.name as the function name
+          return ts.factory.createCallExpression(
+            ts.factory.createIdentifier(func.name),
+            undefined,
+            transformer.args.map(convert),
+          );
+        }
+      }
+    }
+
+    if (Array.isArray(transformer)) {
+      // return transformer.map((t) => transform(data, t));
+      return ts.factory.createArrayLiteralExpression(
+        transformer.map((item) => convert(item)),
+      );
+    }
+
+    if (typeof transformer === 'object' && transformer !== null) {
+      // return Object.fromEntries(
+      //   Object.entries(transformer).map(([key, value]) => [
+      //     key,
+      //     transform(data, value),
+      //   ])
+      // );
+
+      return ts.factory.createObjectLiteralExpression(
+        Object.entries(transformer).flatMap(([key, value]) => {
+          const expression = convert(value);
+
+          return [
+            ts.factory.createPropertyAssignment(
+              ts.factory.createIdentifier(key),
+              expression,
+            ),
+          ];
+        }),
+      );
+    }
+
+    return createExpressionCode(transformer);
+  }
+
+  const ast = convert(DesignSystem.themeTransformer);
+
+  return format(print(ast));
 }
 
 export function compile(configuration: CompilerConfiguration) {

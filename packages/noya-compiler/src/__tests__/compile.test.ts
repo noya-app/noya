@@ -2,12 +2,14 @@
 import {
   component,
   DesignSystemDefinition,
+  Theme,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
 import {
   clean,
   createElementCode,
   createSimpleElement,
+  generateThemeTransformer,
   print,
 } from 'noya-compiler';
 import {
@@ -17,6 +19,7 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
+import { tailwindColors } from 'noya-tailwind';
 import { uuid } from 'noya-utils';
 
 const HeroComponent = Model.component({
@@ -95,7 +98,7 @@ const ds: DS = {
   config: {
     colorMode: 'light',
     colors: {
-      primary: 'blue',
+      primary: 'violet',
     },
   },
   source: {
@@ -142,5 +145,25 @@ describe('renders', () => {
     const out = clean(print(code));
 
     expect(out).toMatchSnapshot();
+  });
+});
+
+describe('theme', () => {
+  it('generates transformer', () => {
+    const config = ds.config;
+
+    const theme: Theme = {
+      colorMode: config.colorMode ?? 'light',
+      colors: {
+        primary: (tailwindColors as any)[config.colors.primary],
+        neutral: tailwindColors.slate,
+      },
+    };
+
+    const transformer = generateThemeTransformer(config, ChakraDesignSystem, {
+      theme,
+    });
+
+    expect(transformer).toMatchSnapshot();
   });
 });
