@@ -205,6 +205,32 @@ export function DSComponentInspector({
                   });
                 }}
               />
+              {selection.variantID && (
+                <IconButton
+                  iconName="InputIcon"
+                  onClick={async () => {
+                    const variant = component.variants?.find(
+                      (variant) => variant.id === selection.variantID,
+                    );
+
+                    if (!variant) return;
+
+                    const name = variant.name;
+                    const newName = await openInputDialog('Variant Name', name);
+
+                    if (!newName) return;
+
+                    onChangeComponent({
+                      ...component,
+                      variants: component.variants?.map((variant) =>
+                        variant.id === selection.variantID
+                          ? { ...variant, name: newName }
+                          : variant,
+                      ),
+                    });
+                  }}
+                />
+              )}
               <IconButton
                 iconName="PlusIcon"
                 onClick={async () => {
