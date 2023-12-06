@@ -1,6 +1,5 @@
 import {
   DesignSystemDefinition,
-  Transformer,
   component,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
@@ -10,60 +9,25 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
-import { unique } from 'noya-utils';
-import prettier from 'prettier';
-import prettierTypeScript from 'prettier/parser-typescript';
+import { groupBy, unique } from 'noya-utils';
 import React, { ReactNode, isValidElement } from 'react';
 import { defineTree, flat } from 'tree-visit';
 import ts from 'typescript';
+import {
+  SimpleElement,
+  buildNamespaceMap,
+  createExpressionCode,
+  createPassthrough,
+  getComponentNameIdentifier,
+  isPassthrough,
+  isSimpleElement,
+  simpleElement,
+} from './common';
 import { LayoutNode, LayoutNodeAttributes } from './parseComponentLayout';
-import { removeEmptyStyles } from './removeEmptyStyles';
-import { removeUndefinedStyles } from './removeUndefinedStyles';
+import { removeEmptyStyles } from './passes/removeEmptyStyles';
+import { removeUndefinedStyles } from './passes/removeUndefinedStyles';
+import { format, print } from './print';
 import { sanitizePackageName } from './validate';
-
-function createExpressionCode(value: unknown): ts.Expression {
-  if (isPassthrough(value)) {
-    return value as any;
-  }
-
-  if (isSimpleElement(value)) {
-    return createElementCode(value);
-  }
-
-  switch (typeof value) {
-    case 'string':
-      return ts.factory.createStringLiteral(value);
-    case 'number':
-      return ts.factory.createNumericLiteral(value);
-    case 'boolean':
-      return value ? ts.factory.createTrue() : ts.factory.createFalse();
-    case 'object':
-      if (value === null) return ts.factory.createNull();
-
-      if (Array.isArray(value)) {
-        return ts.factory.createArrayLiteralExpression(
-          value.map((item) => createExpressionCode(item)),
-        );
-      }
-
-      return ts.factory.createObjectLiteralExpression(
-        Object.entries(value).flatMap(([key, value]) => {
-          const expression = createExpressionCode(value);
-
-          return [
-            ts.factory.createPropertyAssignment(
-              ts.factory.createIdentifier(key),
-              expression,
-            ),
-          ];
-        }),
-      );
-    case 'undefined':
-      return ts.factory.createIdentifier('undefined');
-    default:
-      return ts.factory.createNull();
-  }
-}
 
 function createJsxElement(
   openingElement: ts.JsxOpeningElement,
@@ -83,38 +47,6 @@ function createJsxElement(
     ts.factory.createJsxClosingElement(openingElement.tagName),
   );
 }
-
-const passthroughSymbol = Symbol('passthrough');
-const simpleElementSymbol = Symbol('simpleElement');
-
-type Passthrough = { [passthroughSymbol]: true };
-
-function isPassthrough(value: unknown): value is { [passthroughSymbol]: true } {
-  return (
-    typeof value === 'object' && value !== null && passthroughSymbol in value
-  );
-}
-
-function createPassthrough<T extends object>(value: T) {
-  return {
-    [passthroughSymbol]: true,
-    ...value,
-  };
-}
-
-function isSimpleElement(value: unknown): value is SimpleElement {
-  return (
-    typeof value === 'object' && value !== null && simpleElementSymbol in value
-  );
-}
-
-type SimpleElement = {
-  [simpleElementSymbol]: true;
-  name: string;
-  source?: string;
-  props: Record<string, unknown>;
-  children: (SimpleElement | string | Passthrough)[];
-};
 
 export function createElementCode({
   name,
@@ -211,7 +143,7 @@ export function createSimpleElement(
   originalElement: React.ReactNode,
   DesignSystem: DesignSystemDefinition,
 ): SimpleElement | undefined {
-  const Components = buildComponentMap(DesignSystem.imports);
+  const Components = buildNamespaceMap(DesignSystem.imports);
 
   const elementType = findElementNameAndSource(
     originalElement,
@@ -238,8 +170,7 @@ export function createSimpleElement(
     return result;
   }
 
-  return {
-    [simpleElementSymbol]: true,
+  return simpleElement({
     name,
     source,
     // Filter out children prop and undefined props
@@ -268,19 +199,7 @@ export function createSimpleElement(
         return mapped ? [mapped] : [];
       },
     ),
-  };
-}
-
-function buildComponentMap(imports: DesignSystemDefinition['imports']) {
-  const Components = new Map<any, { name: string; source: string }>();
-
-  for (const declaration of imports ?? []) {
-    for (let [name, value] of Object.entries(declaration.namespace)) {
-      Components.set(value, { name, source: declaration.source });
-    }
-  }
-
-  return Components;
+  });
 }
 
 export function createReactComponentDeclaration(
@@ -315,21 +234,6 @@ const getChildren = (
   ];
 };
 
-// Convert from a human-readable name like "Hero with Image" to pascal case "HeroWithImage"
-function getComponentNameIdentifier(
-  name: string,
-  format: 'pascal' | 'kebab' = 'pascal',
-) {
-  return name
-    .split(' ')
-    .map((word) => {
-      if (format === 'kebab') return word.toLowerCase();
-      return word[0].toUpperCase() + word.slice(1);
-    })
-    .join(format === 'kebab' ? '-' : '')
-    .replace(/[^a-zA-Z0-9\-_]/g, '');
-}
-
 export async function compileAsync(
   configuration: Omit<CompilerConfiguration, 'designSystemDefinition'> & {
     designSystemDefinition?: DesignSystemDefinition;
@@ -342,6 +246,37 @@ export async function compileAsync(
   return compile({
     ...configuration,
     designSystemDefinition: DesignSystem,
+  });
+}
+
+export function generateImportDeclarations(
+  imports: { name: string; source: string }[],
+): ts.ImportDeclaration[] {
+  const groups = groupBy(
+    imports,
+    (importDeclaration) => importDeclaration.source,
+  );
+
+  return Object.entries(groups).map(([source, imports]) => {
+    const importClause = ts.factory.createImportClause(
+      false,
+      undefined,
+      ts.factory.createNamedImports(
+        imports.map((importDeclaration) =>
+          ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier(importDeclaration.name),
+          ),
+        ),
+      ),
+    );
+
+    return ts.factory.createImportDeclaration(
+      undefined,
+      importClause,
+      ts.factory.createStringLiteral(source),
+    );
   });
 }
 
@@ -384,121 +319,6 @@ function extractImports(
       ),
     ];
   });
-}
-
-function isTransformer(value: unknown): value is Transformer {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    '__transformer' in value &&
-    (value.__transformer === 'function' || value.__transformer === 'access')
-  );
-}
-
-function accessPath(data: any, path: string): any {
-  if (path === '.') return data;
-  const parts = path.split('.');
-  let currentValue = data;
-  for (let part of parts) {
-    currentValue = currentValue[part];
-  }
-  return currentValue;
-}
-
-/**
- * Takes an input like:
- *
- * ```ts
- * const themeTransformer = x.f(extendTheme, [
- *   x.a("theme"),
- *   x.f(withDefaultColorScheme, [{ colorScheme: "primary" }]),
- *   { config: { initialColorMode: x.a("theme.colorMode") } },
- * ])
- * ```
- *
- * And returns:
- *
- * ```ts
- * import { extendTheme } from "@chakra-ui/react";
- *
- * export const theme = extendTheme({
- *   config: {
- *     initialColorMode: "dark",
- *     useSystemColorMode: false,
- *   },
- * });
- * ```
- */
-export function generateThemeTransformer(
-  config: DS['config'],
-  DesignSystem: DesignSystemDefinition,
-  themeValue: any,
-) {
-  if (!DesignSystem.themeTransformer) return {};
-
-  const Components = buildComponentMap(DesignSystem.imports);
-
-  function convert(transformer: any): ts.Expression {
-    if (isTransformer(transformer)) {
-      switch (transformer.__transformer) {
-        case 'access': {
-          return createExpressionCode(
-            accessPath(
-              transformer.value ?? themeValue,
-              transformer.path as string,
-            ),
-          );
-        }
-        case 'function': {
-          const func = Components.get(transformer.value);
-
-          if (!func) return ts.factory.createNull();
-
-          // Return ts call expression using func.name as the function name
-          return ts.factory.createCallExpression(
-            ts.factory.createIdentifier(func.name),
-            undefined,
-            transformer.args.map(convert),
-          );
-        }
-      }
-    }
-
-    if (Array.isArray(transformer)) {
-      // return transformer.map((t) => transform(data, t));
-      return ts.factory.createArrayLiteralExpression(
-        transformer.map((item) => convert(item)),
-      );
-    }
-
-    if (typeof transformer === 'object' && transformer !== null) {
-      // return Object.fromEntries(
-      //   Object.entries(transformer).map(([key, value]) => [
-      //     key,
-      //     transform(data, value),
-      //   ])
-      // );
-
-      return ts.factory.createObjectLiteralExpression(
-        Object.entries(transformer).flatMap(([key, value]) => {
-          const expression = convert(value);
-
-          return [
-            ts.factory.createPropertyAssignment(
-              ts.factory.createIdentifier(key),
-              expression,
-            ),
-          ];
-        }),
-      );
-    }
-
-    return createExpressionCode(transformer);
-  }
-
-  const ast = convert(DesignSystem.themeTransformer);
-
-  return format(print(ast));
 }
 
 export function compile(configuration: CompilerConfiguration) {
@@ -666,39 +486,6 @@ export function compile(configuration: CompilerConfiguration) {
   return files;
 }
 
-export function print(nodes: ts.Node | ts.Node[]) {
-  const sourceFile = ts.createSourceFile(
-    'App.tsx',
-    '',
-    ts.ScriptTarget.Latest,
-    false,
-    ts.ScriptKind.TSX,
-  );
-
-  const printer = ts.createPrinter();
-
-  const source = Array.isArray(nodes)
-    ? printer.printList(
-        ts.ListFormat.MultiLine,
-        ts.factory.createNodeArray(nodes),
-        sourceFile,
-      )
-    : printer.printNode(ts.EmitHint.Unspecified, nodes, sourceFile);
-
-  return source;
-}
-
-export function format(text: string) {
-  return prettier.format(text, {
-    singleQuote: true,
-    trailingComma: 'es5',
-    printWidth: 80,
-    proseWrap: 'always',
-    parser: 'typescript',
-    plugins: [prettierTypeScript],
-  });
-}
-
 export function clean(text: string) {
   const sourceFile = ts.createSourceFile(
     'temp.tsx',
@@ -715,6 +502,7 @@ export function clean(text: string) {
 
 export * from './codesandbox';
 export * from './parseComponentLayout';
+export * from './print';
 
 export const LayoutHierarchy = defineTree<LayoutNode | string>({
   getChildren: (node) => (typeof node === 'string' ? [] : node.children),

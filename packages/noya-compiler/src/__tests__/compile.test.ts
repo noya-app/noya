@@ -5,13 +5,7 @@ import {
   Theme,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
-import {
-  clean,
-  createElementCode,
-  createSimpleElement,
-  generateThemeTransformer,
-  print,
-} from 'noya-compiler';
+import { clean, createElementCode, createSimpleElement } from 'noya-compiler';
 import {
   createResolvedNode,
   FindComponent,
@@ -21,6 +15,8 @@ import {
 import { loadDesignSystem } from 'noya-module-loader';
 import { tailwindColors } from 'noya-tailwind';
 import { uuid } from 'noya-utils';
+import { generateThemeTransformer } from '../compileTheme';
+import { print } from '../print';
 
 const HeroComponent = Model.component({
   name: 'Hero',
@@ -160,9 +156,7 @@ describe('theme', () => {
       },
     };
 
-    const transformer = generateThemeTransformer(config, ChakraDesignSystem, {
-      theme,
-    });
+    const transformer = generateThemeTransformer(ChakraDesignSystem, { theme });
 
     expect(transformer).toMatchSnapshot();
   });
