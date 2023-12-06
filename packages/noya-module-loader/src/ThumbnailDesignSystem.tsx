@@ -93,32 +93,6 @@ const TextComponent = (
         ? child.props.children
         : undefined;
 
-    function renderInlineBlock(
-      value: React.ReactNode,
-      index: number = 0,
-      list: React.ReactNode[] = [],
-    ) {
-      return (
-        <span
-          key={index}
-          style={{
-            display: 'inline-block',
-            background: props.style?.color ?? color,
-            borderRadius: tokens.borderRadius,
-            height: '12px',
-            lineHeight: '12px',
-            opacity: opacity ?? undefined,
-            marginRight:
-              list.length > 0 && index === list.length - 1 ? undefined : '6px',
-          }}
-        >
-          <span style={{ color: 'transparent' }}>{value}</span>
-        </span>
-      );
-    }
-
-    // TODO: We could consider not limiting the number of chunks here and instead
-    // have a configurable limit for a given thumbnail
     return (
       <div
         style={{
@@ -127,11 +101,24 @@ const TextComponent = (
           backgroundColor: 'transparent',
         }}
       >
-        {stringValue && stringValue.length > 80
-          ? splitStringIntoRandomChunks(stringValue, 8, 36)
-              .slice(0, 8)
-              .map(renderInlineBlock)
-          : renderInlineBlock(child)}
+        <span
+          style={{
+            background: props.style?.color ?? color,
+            lineHeight: '12px',
+            opacity: opacity ?? undefined,
+            ...(stringValue && stringValue.length > 80
+              ? {
+                  fontSize: '8px',
+                }
+              : {
+                  height: '12px',
+                  borderRadius: tokens.borderRadius,
+                  display: 'inline-block',
+                }),
+          }}
+        >
+          <span style={{ color: 'transparent' }}>{child}</span>
+        </span>
       </div>
     );
   }
@@ -171,18 +158,29 @@ const proxyObject = new Proxy(
     [component.id.Button]: (props: any) => {
       const theme = getTheme(props);
 
+      const backgroundColor =
+        props.style.backgroundColor ?? theme?.colors.primary[500];
+      const foregroundColor = props.style?.color ?? 'white';
+
       return (
         <button
           {...applyCommonProps(props)}
           style={{
             appearance: 'none',
             ...props.style,
-            background: props.style.backgroundColor
-              ? props.style.backgroundColor
-              : theme?.colors.primary[500],
+            background:
+              props.variant === 'text' ? foregroundColor : backgroundColor,
             height: '64px',
             borderRadius: tokens.borderRadius,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            ...(props.variant === 'text'
+              ? {
+                  border: `4px solid ${
+                    theme?.colorMode === 'light' ? 'rgb(221,221,221)' : '#222'
+                  }`,
+                }
+              : {
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                }),
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -192,7 +190,8 @@ const proxyObject = new Proxy(
           <span
             style={{
               ...props.style,
-              background: props.style?.color ?? 'white',
+              background:
+                props.variant === 'text' ? backgroundColor : foregroundColor,
               borderRadius: tokens.borderRadius,
               height: '8px',
               minWidth: '33%',
@@ -257,6 +256,8 @@ const proxyObject = new Proxy(
     [component.id.Image]: (props: any) => {
       const theme = getTheme(props);
 
+      const isBackgroundImage = props.style?.zIndex?.toString().startsWith('-');
+
       return (
         <div
           {...applyCommonProps(props)}
@@ -265,7 +266,9 @@ const proxyObject = new Proxy(
             ...(props.style.borderRadius && {
               borderRadius: tokens.borderRadius,
             }),
-            background: `linear-gradient(135deg, ${theme?.colors.primary[300]} 0%, ${theme?.colors.primary[500]} 100%)`,
+            background: isBackgroundImage
+              ? 'white'
+              : `linear-gradient(135deg, ${theme?.colors.primary[300]} 0%, ${theme?.colors.primary[500]} 100%)`,
           }}
         />
       );
@@ -307,47 +310,3 @@ export const ThumbnailDesignSystem: DesignSystemDefinition = {
   },
   buildType: 'react',
 };
-
-function simpleHash(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-}
-
-function simplePRNG(seed: number): () => number {
-  return () => {
-    const x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  };
-}
-
-function splitStringIntoRandomChunks(
-  input: string,
-  minChunk: number,
-  maxChunk: number,
-): string[] {
-  const seed = simpleHash(input);
-  const rand = simplePRNG(seed);
-  let currentIndex = 0;
-  const chunks: string[] = [];
-
-  while (currentIndex < input.length) {
-    let remaining = input.length - currentIndex;
-    let chunkSize = minChunk + Math.floor(rand() * (maxChunk - minChunk + 1));
-
-    // Adjust chunk size to avoid too small last chunk
-    if (remaining - chunkSize < minChunk && remaining > chunkSize) {
-      chunkSize = remaining - minChunk;
-    }
-
-    const chunk = input.substring(currentIndex, currentIndex + chunkSize);
-    chunks.push(chunk);
-    currentIndex += chunkSize;
-  }
-
-  return chunks;
-}
