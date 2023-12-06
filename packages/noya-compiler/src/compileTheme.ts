@@ -30,13 +30,13 @@ import { format, print } from './print';
  * });
  * ```
  */
-export function generateThemeTransformer(
+export function generateThemeFile(
   DesignSystem: DesignSystemDefinition,
   themeValue: any,
 ): string {
   if (!DesignSystem.themeTransformer) return '';
 
-  const Components = buildNamespaceMap(DesignSystem.imports);
+  const namespaceMap = buildNamespaceMap(DesignSystem.imports);
   const imports: { name: string; source: string }[] = [];
 
   function convert(transformer: any): ts.Expression {
@@ -51,7 +51,7 @@ export function generateThemeTransformer(
           );
         }
         case 'function': {
-          const func = Components.get(transformer.value);
+          const func = namespaceMap.get(transformer.value);
 
           if (!func) return ts.factory.createNull();
 
@@ -112,7 +112,7 @@ export function generateThemeTransformer(
   return format([print(importsAst), print(themeExportAst)].join('\n\n'));
 }
 
-export function accessPath(data: any, path: string): any {
+function accessPath(data: any, path: string): any {
   if (path === '.') return data;
   const parts = path.split('.');
   let currentValue = data;
@@ -122,7 +122,7 @@ export function accessPath(data: any, path: string): any {
   return currentValue;
 }
 
-export function isTransformer(value: unknown): value is Transformer {
+function isTransformer(value: unknown): value is Transformer {
   return (
     typeof value === 'object' &&
     value !== null &&

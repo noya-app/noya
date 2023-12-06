@@ -1,5 +1,6 @@
 import {
   DesignSystemDefinition,
+  Theme,
   component,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
@@ -9,6 +10,7 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
+import { tailwindColors } from 'noya-tailwind';
 import { groupBy, unique } from 'noya-utils';
 import React, { ReactNode, isValidElement } from 'react';
 import { defineTree, flat } from 'tree-visit';
@@ -23,6 +25,7 @@ import {
   isSimpleElement,
   simpleElement,
 } from './common';
+import { generateThemeFile } from './compileTheme';
 import { LayoutNode, LayoutNodeAttributes } from './parseComponentLayout';
 import { removeEmptyStyles } from './passes/removeEmptyStyles';
 import { removeUndefinedStyles } from './passes/removeUndefinedStyles';
@@ -413,7 +416,9 @@ export function compile(configuration: CompilerConfiguration) {
       {},
       DesignSystem.createElement(
         DesignSystem.components[component.id.Provider],
-        {},
+        {
+          theme: createPassthrough(ts.factory.createIdentifier('theme')),
+        },
         createPassthrough(
           ts.factory.createJsxExpression(
             undefined,
@@ -453,11 +458,25 @@ export function compile(configuration: CompilerConfiguration) {
 
   const layoutSource = [
     "'use client'",
-    "import React from 'react'\n" + print(layoutImports),
+    [
+      "import React from 'react'",
+      print(layoutImports),
+      'import { theme } from "./theme"',
+    ].join('\n'),
     print(layoutComponentFunc),
   ]
     .map(clean)
     .join('\n');
+
+  const theme: Theme = {
+    colorMode: configuration.ds.config.colorMode ?? 'light',
+    colors: {
+      primary: (tailwindColors as any)[configuration.ds.config.colors.primary],
+      neutral: tailwindColors.slate,
+    },
+  };
+
+  const themeFile = generateThemeFile(DesignSystem, { theme });
 
   const files = {
     ...Object.fromEntries(
@@ -469,6 +488,7 @@ export function compile(configuration: CompilerConfiguration) {
         source,
       ]),
     ),
+    'src/app/components/theme.ts': themeFile,
     'src/app/components/layout.tsx': layoutSource,
     'package.json': JSON.stringify(
       {

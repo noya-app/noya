@@ -15,7 +15,7 @@ import {
 import { loadDesignSystem } from 'noya-module-loader';
 import { tailwindColors } from 'noya-tailwind';
 import { uuid } from 'noya-utils';
-import { generateThemeTransformer } from '../compileTheme';
+import { generateThemeFile } from '../compileTheme';
 import { print } from '../print';
 
 const HeroComponent = Model.component({
@@ -156,7 +156,7 @@ describe('theme', () => {
       },
     };
 
-    const transformer = generateThemeTransformer(ChakraDesignSystem, { theme });
+    const transformer = generateThemeFile(ChakraDesignSystem, { theme });
 
     expect(transformer).toMatchSnapshot();
   });
