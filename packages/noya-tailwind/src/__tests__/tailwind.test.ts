@@ -180,6 +180,14 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('h-full')).toEqual({
       height: '100%',
     });
+
+    expect(resolveTailwindClass('h-1/2')).toEqual({
+      height: '50%',
+    });
+
+    expect(resolveTailwindClass('h-0.5')).toEqual({
+      height: '0.125rem',
+    });
   });
 
   it('borderWidth', () => {

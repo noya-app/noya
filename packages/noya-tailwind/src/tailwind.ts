@@ -244,7 +244,7 @@ export const extractTailwindClassesByTheme = (
 
 function getValue(className: string): string | undefined {
   let value =
-    /-((\d+)(\/\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto|screen))$/.exec(
+    /-((\d+)((\/|\.)\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto|screen))$/.exec(
       className,
     )?.[1];
 
