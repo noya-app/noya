@@ -210,6 +210,11 @@ export function DSProjectInspector({
                       { value: 'rename', title: 'Rename' },
                       { value: 'delete', title: 'Delete' },
                     ]}
+                    backgroundColor={
+                      component.accessModifier === 'internal'
+                        ? theme.colors.listView.raisedBackground
+                        : undefined
+                    }
                     isLoading={false}
                     isDragging={false}
                     isEditing={renamingComponent === component.componentID}

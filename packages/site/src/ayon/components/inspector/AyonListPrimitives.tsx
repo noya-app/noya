@@ -69,7 +69,7 @@ type RowProps<MenuItemType extends string> = {
   onClickTrash?: () => void;
 } & Omit<
   React.ComponentProps<typeof ListView.Row<MenuItemType>>,
-  'backgroundColor' | 'depth' | 'disabled' | 'children'
+  'depth' | 'disabled' | 'children'
 >;
 
 export const AyonListRow = memo(function AyonListRow<
@@ -84,6 +84,7 @@ export const AyonListRow = memo(function AyonListRow<
   handleSubmitEditing,
   onClickPlus,
   onClickTrash,
+  backgroundColor = 'transparent',
   ...props
 }: RowProps<MenuItemType>) {
   const theme = useDesignSystemTheme();
@@ -124,10 +125,10 @@ export const AyonListRow = memo(function AyonListRow<
         minWidth="0"
         background={
           isDragging
-            ? 'transparent'
+            ? backgroundColor
             : props.selected
             ? theme.colors.primary
-            : 'transparent'
+            : backgroundColor
         }
       >
         <Stack.H padding="4px 6px" alignItems="center" gap="4px">
