@@ -187,8 +187,24 @@ export const filterTailwindClassesByLastInGroup = memoize(
   },
 );
 
-const breakpoints = ['sm', 'md', 'lg', 'xl', '2xl'] as const;
-type BreakpointKey = (typeof breakpoints)[number];
+export const breakpoints = [
+  'sm' as const,
+  'md' as const,
+  'lg' as const,
+  'xl' as const,
+  '2xl' as const,
+];
+
+export type BreakpointKey = (typeof breakpoints)[number];
+
+export function matchBreakpoint(width: number): BreakpointKey {
+  if (width < 640) return 'sm';
+  if (width < 768) return 'md';
+  if (width < 1024) return 'lg';
+  if (width < 1280) return 'xl';
+  if (width < 1536) return '2xl';
+  return '2xl';
+}
 
 export const extractTailwindClassesByBreakpoint = (
   classes: string[],
@@ -244,7 +260,7 @@ export const extractTailwindClassesByTheme = (
 
 function getValue(className: string): string | undefined {
   let value =
-    /-((\d+)((\/|\.)\d+)?|(sm|md|lg|xl|2xl|3xl|full|none|auto|screen))$/.exec(
+    /-((\d+)((\/|\.)\d+)?|(sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
       className,
     )?.[1];
 

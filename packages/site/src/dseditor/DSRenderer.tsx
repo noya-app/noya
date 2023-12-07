@@ -8,8 +8,9 @@ import {
 } from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
 import { Stack } from 'noya-designsystem';
+import { Size } from 'noya-geometry';
 import { loadDesignSystem } from 'noya-module-loader';
-import { useStableCallback } from 'noya-react-utils';
+import { useDeepState, useStableCallback } from 'noya-react-utils';
 import { tailwindColors } from 'noya-tailwind';
 import React, {
   forwardRef,
@@ -48,6 +49,7 @@ export type DSRenderProps = {
   theme: any;
   primary: string;
   iframe: HTMLIFrameElement;
+  size: Size;
 };
 
 export interface IDSRenderer {
@@ -94,6 +96,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
   let [system, setSystem] = React.useState<
     DesignSystemDefinition | undefined
   >();
+  const [iframeSize, setIframeSize] = useDeepState<Size | undefined>();
 
   const handleReady = useCallback(() => {
     setReady(true);
@@ -174,6 +177,10 @@ export const DSRenderer = forwardRef(function DSRenderer(
       theme,
       primary: config.colors.primary,
       iframe,
+      size: iframeSize ?? {
+        width: iframe.clientWidth,
+        height: iframe.clientHeight,
+      },
     });
 
     const withProvider = Provider ? (
@@ -206,6 +213,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     sync,
     config.colors.primary,
     onContentDidChange,
+    iframeSize,
   ]);
 
   useEffect(() => {
@@ -272,6 +280,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
         ref={ref}
         title="Design System Preview"
         onReady={handleReady}
+        onResize={setIframeSize}
       />
       {!system && <Loading>Loading design system...</Loading>}
     </Stack.V>

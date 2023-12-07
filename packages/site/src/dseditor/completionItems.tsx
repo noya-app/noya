@@ -1,7 +1,7 @@
 import { CompletionItem } from 'noya-designsystem';
 import { StarIcon } from 'noya-icons';
-import { allClassNames } from 'noya-tailwind';
-import { range } from 'noya-utils';
+import { allClassNames, breakpoints } from 'noya-tailwind';
+import { cartesianProduct, range } from 'noya-utils';
 import React from 'react';
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 import { PRIMITIVE_ELEMENT_MAP, primitiveElements } from './primitiveElements';
@@ -15,23 +15,32 @@ const primaryStyles = [
   ...colorScale.map((value) => `border-primary-${value}`),
 ];
 
-export const styleItems = allClassNames
-  .map(
+const baseStyleItems = [
+  ...allClassNames.map(
     (item): CompletionItem => ({
       name: item,
       id: item,
       icon: <HashtagIcon item={item} />,
     }),
-  )
-  .concat(
-    primaryStyles.map(
-      (item): CompletionItem => ({
-        name: item,
-        id: item,
-        icon: <HashtagIcon item={item} />,
-      }),
-    ),
-  );
+  ),
+  ...primaryStyles.map(
+    (item): CompletionItem => ({
+      name: item,
+      id: item,
+      icon: <HashtagIcon item={item} />,
+    }),
+  ),
+];
+
+const breakpointStyleItems = cartesianProduct(baseStyleItems, breakpoints).map(
+  ([item, breakpoint]): CompletionItem => ({
+    name: `${breakpoint}:${item.name}`,
+    id: `${breakpoint}:${item.id}`,
+    icon: item.icon,
+  }),
+);
+
+export const styleItems = [...baseStyleItems, ...breakpointStyleItems];
 
 export const primitiveElementStyleItems = Object.fromEntries(
   Object.entries(PRIMITIVE_ELEMENT_MAP).map(([id, metadata]) => [

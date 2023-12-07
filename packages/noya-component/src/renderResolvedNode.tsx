@@ -16,8 +16,10 @@ import {
   svgToDataUri,
 } from 'noya-component';
 import {
+  BreakpointKey,
   extractTailwindClassesByBreakpoint,
   extractTailwindClassesByTheme,
+  matchBreakpoint,
   parametersToTailwindStyle,
   tailwindColors,
 } from 'noya-tailwind';
@@ -52,6 +54,7 @@ export function getImageFromProp(
 }
 
 export function renderResolvedNode({
+  containerWidth,
   contentEditable,
   disableTabNavigation,
   includeDataProps,
@@ -60,6 +63,7 @@ export function renderResolvedNode({
   system,
   theme,
 }: {
+  containerWidth?: number;
   contentEditable: boolean;
   disableTabNavigation: boolean;
   includeDataProps: boolean;
@@ -140,9 +144,15 @@ export function renderResolvedNode({
         dsConfig.colorMode ?? 'light',
       );
 
+      let breakpoint: BreakpointKey = 'md';
+
+      if (containerWidth) {
+        breakpoint = matchBreakpoint(containerWidth);
+      }
+
       // Keep classNames starting with sm: and md:, but remove the prefixes.
       // Remove any classNames starting with lg:, xl:, and 2xl:.
-      classNames = extractTailwindClassesByBreakpoint(classNames, 'md');
+      classNames = extractTailwindClassesByBreakpoint(classNames, breakpoint);
 
       const style = parametersToTailwindStyle(classNames);
 

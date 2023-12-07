@@ -1,22 +1,24 @@
+import { Size } from 'noya-geometry';
 import { assignRef } from 'noya-react-utils';
 import React, {
-  HTMLProps,
   forwardRef,
   memo,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 
-interface Props extends HTMLProps<HTMLIFrameElement> {
+interface Props {
   onReady?: () => void;
+  onResize?: (size: Size) => void;
   title: string;
 }
 
 export const ControlledFrame = memo(
   forwardRef(function ControlledFrame(
-    { onReady, ...props }: Props,
+    { onReady, onResize, title }: Props,
     forwardedRef: React.ForwardedRef<HTMLIFrameElement>,
   ) {
     const ref = useRef<HTMLIFrameElement | null>(null);
@@ -32,6 +34,10 @@ export const ControlledFrame = memo(
             switch (event.data.type) {
               case 'ready': {
                 ok = true;
+                break;
+              }
+              case 'resize': {
+                onResize?.(event.data.size);
                 break;
               }
               case 'keydown': {
@@ -61,7 +67,7 @@ export const ControlledFrame = memo(
       return () => {
         window.removeEventListener('message', listener);
       };
-    }, [id, onReady]);
+    }, [id, onReady, onResize]);
 
     const handleRef = useCallback(
       (value: HTMLIFrameElement | null) => {
@@ -71,16 +77,14 @@ export const ControlledFrame = memo(
       [forwardedRef],
     );
 
+    const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
+
     return (
       <iframe
         ref={handleRef}
         tabIndex={-1}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-        {...props}
-        title={props.title}
+        title={title}
+        style={style}
         // Ensure html5 doctype for proper styling
         srcDoc={`<!DOCTYPE html>
 <head>
@@ -138,6 +142,15 @@ export const ControlledFrame = memo(
     } else {
       document.addEventListener('DOMContentLoaded', callback);
     }
+
+    // Handle window resize events
+    window.addEventListener('resize', function(event) {
+      parent.postMessage({ 
+        id, 
+        type: 'resize', 
+        size: { width: window.innerWidth, height: window.innerHeight } 
+      }, '*');
+    });
 
     // Propagate keyboard shortcuts (keydown events) to the parent window
     window.addEventListener('keydown', function(event) {

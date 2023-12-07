@@ -29,6 +29,7 @@ export function renderDSPreview({
   // const system = isThumbnail ? ThumbnailDesignSystem : props.system;
 
   const content = renderResolvedNode({
+    containerWidth: props.size.width,
     contentEditable: true,
     disableTabNavigation: false,
     includeDataProps: true,

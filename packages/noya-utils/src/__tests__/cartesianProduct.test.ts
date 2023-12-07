@@ -86,3 +86,22 @@ test('product 3x3', () => {
     ],
   );
 });
+
+test('array of arrays', () => {
+  expect(
+    cartesianProduct(
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      ['sm', 'md', 'lg'],
+    ),
+  ).toEqual([
+    [[1, 2], 'sm'],
+    [[1, 2], 'md'],
+    [[1, 2], 'lg'],
+    [[3, 4], 'sm'],
+    [[3, 4], 'md'],
+    [[3, 4], 'lg'],
+  ]);
+});
