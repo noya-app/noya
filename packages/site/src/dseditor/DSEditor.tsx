@@ -645,6 +645,7 @@ function DSComponentCode({
       system,
       dsConfig,
       resolvedNode,
+      stylingMode: 'tailwind',
     });
 
     const code = createElementCode(createSimpleElement(reactNode, system)!);

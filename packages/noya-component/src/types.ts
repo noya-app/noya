@@ -148,3 +148,5 @@ export type SelectedComponent = {
   variantID?: string;
   diff?: NoyaDiff;
 };
+
+export type StylingMode = 'inline' | 'tailwind';

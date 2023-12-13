@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`renders classnames 1`] = `
+"<Box className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+  <Tag>New</Tag>
+  <Text fontSize=\\"5xl\\" className=\\"variant-h1 leading-none text-center\\">
+    Create, iterate, inspire.
+  </Text>
+  <Text fontSize=\\"2xl\\" className=\\"variant-h4 leading-none text-center\\">
+    Turn great ideas into new possibilities.
+  </Text>
+  <Box className=\\"flex items-center gap-4 mt-2\\">
+    <Button>Get Started</Button>
+    <Link>Learn More</Link>
+  </Box>
+</Box>;
+"
+`;
+
 exports[`renders default 1`] = `
 "<Box
   display=\\"flex\\"

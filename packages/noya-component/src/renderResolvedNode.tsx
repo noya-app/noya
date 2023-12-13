@@ -9,6 +9,7 @@ import {
   NoyaProp,
   NoyaResolvedNode,
   ResolvedHierarchy,
+  StylingMode,
   createPatternSVG,
   createSVG,
   placeholderImage,
@@ -61,6 +62,7 @@ export function renderResolvedNode({
   resolvedNode,
   dsConfig,
   system,
+  stylingMode = 'inline',
   theme,
 }: {
   containerWidth?: number;
@@ -70,6 +72,7 @@ export function renderResolvedNode({
   resolvedNode: NoyaResolvedNode;
   dsConfig: DSConfig;
   system: DesignSystemDefinition;
+  stylingMode?: StylingMode;
   theme?: any; // Passed into components as _theme
 }) {
   return ResolvedHierarchy.map<ReactNode>(
@@ -139,7 +142,7 @@ export function renderResolvedNode({
         );
       });
 
-      classNames = extractTailwindClassesByTheme(
+      let classNamesForRendering = extractTailwindClassesByTheme(
         classNames,
         dsConfig.colorMode ?? 'light',
       );
@@ -152,11 +155,14 @@ export function renderResolvedNode({
 
       // Keep classNames starting with sm: and md:, but remove the prefixes.
       // Remove any classNames starting with lg:, xl:, and 2xl:.
-      classNames = extractTailwindClassesByBreakpoint(classNames, breakpoint);
+      classNamesForRendering = extractTailwindClassesByBreakpoint(
+        classNamesForRendering,
+        breakpoint,
+      );
 
-      const style = parametersToTailwindStyle(classNames);
+      const style = parametersToTailwindStyle(classNamesForRendering);
 
-      const variantClassName = findLast(classNames, (className) =>
+      const variantClassName = findLast(classNamesForRendering, (className) =>
         className.startsWith('variant-'),
       );
       const variant = variantClassName
@@ -175,6 +181,14 @@ export function renderResolvedNode({
         dsConfig.colors.primary
       ] as Theme['colors']['primary'];
 
+      const stylingProps = {
+        ...(stylingMode === 'tailwind' &&
+          classNames.length > 0 && {
+            className: classNames.join(' '),
+          }),
+        ...(stylingMode === 'inline' && { style }),
+      };
+
       // Render SVGs as React elements
       if (
         srcProp &&
@@ -191,10 +205,7 @@ export function renderResolvedNode({
           key: indexPath.join('/'),
           props: {
             ...rootElement.props,
-            style: {
-              ...rootElement.props.style,
-              ...style,
-            },
+            ...stylingProps,
             ...(includeDataProps && {
               'data-path': element.path.join('/'),
             }),
@@ -205,10 +216,10 @@ export function renderResolvedNode({
 
       return (
         <PrimitiveComponent
-          style={style}
           // We use the indexPath as the key, since the element ids aren't stable while
           // the layout is being generated.
           key={indexPath.join('/')}
+          {...stylingProps}
           _passthrough={{
             ...(includeDataProps && {
               'data-path': element.path.join('/'),

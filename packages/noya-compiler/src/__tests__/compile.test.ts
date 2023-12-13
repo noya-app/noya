@@ -105,26 +105,26 @@ const ds: DS = {
 };
 
 describe('renders', () => {
-  test('default', () => {
-    const findComponent: FindComponent = (componentID) => {
-      return ds.components?.find(
-        (component) => component.componentID === componentID,
-      );
-    };
-
-    const noyaComponent = findComponent(HeroComponent.componentID);
-
-    if (!noyaComponent) {
-      throw new Error(
-        `Could not find component with id ${HeroComponent.componentID}`,
-      );
-    }
-
-    const resolvedNode = createResolvedNode(
-      findComponent,
-      noyaComponent.rootElement,
+  const findComponent: FindComponent = (componentID) => {
+    return ds.components?.find(
+      (component) => component.componentID === componentID,
     );
+  };
 
+  const noyaComponent = findComponent(HeroComponent.componentID);
+
+  if (!noyaComponent) {
+    throw new Error(
+      `Could not find component with id ${HeroComponent.componentID}`,
+    );
+  }
+
+  const resolvedNode = createResolvedNode(
+    findComponent,
+    noyaComponent.rootElement,
+  );
+
+  test('default', () => {
     const reactNode = renderResolvedNode({
       contentEditable: false,
       disableTabNavigation: false,
@@ -132,6 +132,26 @@ describe('renders', () => {
       system: ChakraDesignSystem,
       dsConfig: ds.config,
       resolvedNode,
+    });
+
+    const code = createElementCode(
+      createSimpleElement(reactNode, ChakraDesignSystem)!,
+    );
+
+    const out = clean(print(code));
+
+    expect(out).toMatchSnapshot();
+  });
+
+  test('classnames', () => {
+    const reactNode = renderResolvedNode({
+      contentEditable: false,
+      disableTabNavigation: false,
+      includeDataProps: false,
+      system: ChakraDesignSystem,
+      dsConfig: ds.config,
+      resolvedNode,
+      stylingMode: 'tailwind',
     });
 
     const code = createElementCode(

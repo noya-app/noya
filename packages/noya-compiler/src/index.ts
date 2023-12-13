@@ -27,6 +27,7 @@ import {
 } from './common';
 import { generateThemeFile } from './compileTheme';
 import { LayoutNode, LayoutNodeAttributes } from './parseComponentLayout';
+import { removeEmptyClassNames } from './passes/removeEmptyClassNames';
 import { removeEmptyStyles } from './passes/removeEmptyStyles';
 import { removeUndefinedStyles } from './passes/removeUndefinedStyles';
 import { format, print } from './print';
@@ -356,6 +357,7 @@ export function compile(configuration: CompilerConfiguration) {
           system: DesignSystem,
           dsConfig: configuration.ds.config,
           resolvedNode,
+          stylingMode: 'tailwind',
         }),
         DesignSystem,
       );
@@ -479,6 +481,24 @@ export function compile(configuration: CompilerConfiguration) {
   const themeFile = generateThemeFile(DesignSystem, { theme });
 
   const files = {
+    'src/app/layout.tsx': `import './globals.css'
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+`,
+    'src/app/globals.css': `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+`,
     ...Object.fromEntries(
       componentPageItems.map(({ name, source }) => [
         `src/app/components/${getComponentNameIdentifier(
@@ -515,7 +535,9 @@ export function clean(text: string) {
     ts.ScriptKind.TSX,
   );
 
-  const updated = removeEmptyStyles(removeUndefinedStyles(sourceFile));
+  const updated = removeEmptyClassNames(
+    removeEmptyStyles(removeUndefinedStyles(sourceFile)),
+  );
 
   return format(print(updated));
 }

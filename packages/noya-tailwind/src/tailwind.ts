@@ -106,6 +106,7 @@ export const classGroups = {
   flexDirection: /^(flex-row|flex-col)/,
   flex: /^(flex-1|flex-auto|flex-none)/,
   flexBasis: /^basis-/,
+  flexWrap: /^(flex-wrap|flex-nowrap)/,
   grow: /^grow/,
   shrink: /^shrink/,
   alignSelf: /^self/,
@@ -645,6 +646,10 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         objectPosition: className.replace('object-', ''),
       };
     }
+    case 'flexWrap':
+      return {
+        flexWrap: className === 'flex-nowrap' ? 'nowrap' : 'wrap',
+      };
     case 'grow': {
       const value = getValue(className);
       return {
