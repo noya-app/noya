@@ -437,6 +437,14 @@ export function DSEditor({
     );
   }, [contentTab, fileId, project]);
 
+  useEffect(() => {
+    const componentName = components.find(
+      (component) => component.componentID === selection?.componentID,
+    )?.name;
+
+    project.setProjectPath(componentName);
+  }, [components, project, selection?.componentID]);
+
   const getStringValueAtPath = useCallback(
     (path) => {
       if (!resolvedNode) return undefined;

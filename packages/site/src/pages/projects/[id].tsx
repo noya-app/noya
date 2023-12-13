@@ -9,13 +9,12 @@ import {
   IconButton,
   Spacer,
   Stack,
-  Text,
   createSectionedMenu,
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
-import { SlashIcon, StarFilledIcon } from 'noya-icons';
+import { StarFilledIcon } from 'noya-icons';
 import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { debounce } from 'noya-utils';
@@ -35,9 +34,13 @@ import {
   usageMeterThreshold,
 } from '../../components/Subscription';
 
-import Link from 'next/link';
+import {
+  BreadcrumbLink,
+  BreadcrumbSlash,
+  BreadcrumbText,
+} from '../../components/Breadcrumbs';
 import { Debugger } from '../../components/Debugger';
-import { EditableText } from '../../components/EditableText';
+import { EditableText, IEditableText } from '../../components/EditableText';
 import { ProjectEditor } from '../../components/ProjectEditor';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { ShareProjectButton } from '../../components/ShareMenu';
@@ -54,31 +57,38 @@ import {
 } from '../../hooks/useOnboardingUpsellExperiment';
 import { downloadUrl } from '../../utils/download';
 
-const FileTitle = memo(function FileTitle({ fileId }: { fileId: string }) {
-  const client = useNoyaClient();
-  const { files } = useNoyaFiles();
-  const cachedFile = files.find((file) => file.id === fileId);
-  const handleChange = useCallback(
-    (value: string) => client.files.updateFileName(fileId, value),
-    [client.files, fileId],
-  );
+const FileTitle = memo(
+  forwardRef(function FileTitle(
+    { fileId, href }: { fileId: string; href: string },
+    forwardedRef: React.ForwardedRef<IEditableText>,
+  ) {
+    const client = useNoyaClient();
+    const { files } = useNoyaFiles();
+    const cachedFile = files.find((file) => file.id === fileId);
+    const handleChange = useCallback(
+      (value: string) => client.files.updateFileName(fileId, value),
+      [client.files, fileId],
+    );
 
-  if (!cachedFile) return null;
+    if (!cachedFile) return null;
 
-  return (
-    <Stack.H lineHeight="1" alignItems="center" justifyContent="center">
-      <ProjectTypeIcon type={cachedFile.data.type} />
-      <Spacer.Horizontal size={6} />
-      <Stack.H position="relative" top="1px">
-        <EditableText
-          value={cachedFile.data.name}
-          placeholder="Untitled"
-          onChange={handleChange}
-        />
+    return (
+      <Stack.H lineHeight="1" alignItems="center" justifyContent="center">
+        <ProjectTypeIcon type={cachedFile.data.type} />
+        <Spacer.Horizontal size={6} />
+        <Stack.H position="relative">
+          <EditableText
+            ref={forwardedRef}
+            value={cachedFile.data.name}
+            placeholder="Untitled"
+            onChange={handleChange}
+            href={href}
+          />
+        </Stack.H>
       </Stack.H>
-    </Stack.H>
-  );
-});
+    );
+  }),
+);
 
 type IFileEditor = {
   duplicateFile: () => void;
@@ -189,21 +199,38 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
   const [leftToolbar, setLeftToolbar] = useState<ReactNode>(null);
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
   const [centerToolbar, setCenterToolbar] = useState<ReactNode>(null);
+  const [projectPath, setProjectPath] = useState<string | undefined>(undefined);
 
   const project: ProjectContextValue = useMemo(
-    () => ({ setLeftToolbar, setCenterToolbar, setRightToolbar }),
+    () => ({
+      setLeftToolbar,
+      setCenterToolbar,
+      setRightToolbar,
+      setProjectPath,
+    }),
     [],
   );
 
+  const fileNameRef = React.useRef<IEditableText>(null);
   const fileEditorRef = React.useRef<IFileEditor>(null);
   const fileMenu = useMemo(
     () =>
-      createSectionedMenu([{ value: 'duplicate', title: 'Duplicate Project' }]),
+      createSectionedMenu([
+        { value: 'rename', title: 'Rename' },
+        { value: 'duplicate', title: 'Duplicate Project' },
+      ]),
     [],
   );
+
+  const willRenameRef = React.useRef(false);
+
   const handleSelect = useCallback(
     (value: ExtractMenuItemType<(typeof fileMenu)[number]>) => {
       switch (value) {
+        case 'rename':
+          willRenameRef.current = true;
+          fileNameRef.current?.startEditing();
+          break;
         case 'duplicate':
           fileEditorRef.current?.duplicateFile();
           break;
@@ -233,25 +260,31 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
           >
             {centerToolbar || (
               <Stack.H gap="4px" alignItems="center">
-                <Link href="/" passHref>
-                  <Text
-                    color="textMuted"
-                    variant="small"
-                    as="a"
-                    textDecoration="underline"
-                    lineHeight="15px"
-                  >
-                    All Projects
-                  </Text>
-                </Link>
-                <SlashIcon
-                  opacity={0.5}
-                  style={{ margin: '0 2px', transform: 'scale(0.9, 1.25)' }}
+                <BreadcrumbLink href="/">All Projects</BreadcrumbLink>
+                <BreadcrumbSlash />
+                <FileTitle
+                  ref={fileNameRef}
+                  fileId={fileId}
+                  href={`/projects/${fileId}`}
                 />
-                <FileTitle fileId={fileId} />
-                <DropdownMenu items={fileMenu} onSelect={handleSelect}>
+                <DropdownMenu
+                  items={fileMenu}
+                  onSelect={handleSelect}
+                  onCloseAutoFocus={(event) => {
+                    if (!willRenameRef.current) return;
+
+                    event.preventDefault();
+                    willRenameRef.current = false;
+                  }}
+                >
                   <IconButton iconName="CaretDownIcon" />
                 </DropdownMenu>
+                {projectPath && (
+                  <Stack.H gap="4px" alignItems="center" margin="0 0 0 -4px">
+                    <BreadcrumbSlash />
+                    <BreadcrumbText>{projectPath}</BreadcrumbText>
+                  </Stack.H>
+                )}
               </Stack.H>
             )}
           </Toolbar>

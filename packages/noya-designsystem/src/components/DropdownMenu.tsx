@@ -3,6 +3,7 @@ import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {
   ForwardedRef,
+  SyntheticEvent,
   forwardRef,
   memo,
   useCallback,
@@ -136,7 +137,11 @@ const DropdownMenuRoot = forwardRef(function DropdownMenuRoot<T extends string>(
     shouldBindKeyboardShortcuts,
     onOpenChange,
     open,
-  }: MenuProps<T> & { open?: boolean },
+    onCloseAutoFocus,
+  }: MenuProps<T> & {
+    open?: boolean;
+    onCloseAutoFocus?: React.EventHandler<SyntheticEvent<unknown>>;
+  },
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
   const hasCheckedItem = items.some(
@@ -173,6 +178,7 @@ const DropdownMenuRoot = forwardRef(function DropdownMenuRoot<T extends string>(
           sideOffset={4}
           style={contentStyle}
           collisionPadding={8}
+          {...{ onCloseAutoFocus }}
         >
           {items.map((item, index) =>
             item === SEPARATOR_ITEM ? (

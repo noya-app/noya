@@ -42,6 +42,7 @@ type StyleProps = {
   right?: CSSProperties['right'];
   bottom?: CSSProperties['bottom'];
   left?: CSSProperties['left'];
+  userSelect?: CSSProperties['userSelect'];
 };
 
 export type TextBreakpointList = BreakpointCollection<StyleProps>;
@@ -54,6 +55,7 @@ interface Props extends StyleProps {
   breakpoints?: BreakpointCollection<StyleProps> | null | false;
   color?: ThemeColorName;
   children: ReactNode;
+  onClick?: () => void;
 }
 
 const StyledElement = styled.span<
@@ -77,6 +79,7 @@ export const Text = forwardRef(function Text(
     className,
     color,
     href,
+    onClick,
     ...rest
   }: Props,
   forwardedRef: ForwardedRef<HTMLElement>,
@@ -92,6 +95,7 @@ export const Text = forwardRef(function Text(
       breakpoints={breakpoints}
       styleProps={rest}
       color={color}
+      onClick={onClick}
       {...(href && { href })}
     >
       {children}
