@@ -1,13 +1,13 @@
 import { groupBy } from 'noya-utils';
 import ts from 'typescript';
 import { SimpleElement, isPassthrough, isSimpleElement } from './common';
-import { isSafeForJsxText } from './validate';
+import { isSafeForJsxText, isValidPropertyKey } from './validate';
 
 export function createJsxElement(
   openingElement: ts.JsxOpeningElement,
-  children: readonly ts.JsxChild[],
+  children?: readonly ts.JsxChild[],
 ) {
-  if (children.length === 0) {
+  if (!children || children.length === 0) {
     return ts.factory.createJsxSelfClosingElement(
       openingElement.tagName,
       openingElement.typeArguments,
@@ -20,6 +20,14 @@ export function createJsxElement(
     children,
     ts.factory.createJsxClosingElement(openingElement.tagName),
   );
+}
+
+function createPropertyKey(key: string): ts.Identifier | ts.StringLiteral {
+  if (isValidPropertyKey(key)) {
+    return ts.factory.createIdentifier(key);
+  } else {
+    return ts.factory.createStringLiteral(key);
+  }
 }
 
 export function createExpressionCode(value: unknown): ts.Expression {
@@ -53,7 +61,7 @@ export function createExpressionCode(value: unknown): ts.Expression {
 
           return [
             ts.factory.createPropertyAssignment(
-              ts.factory.createIdentifier(key),
+              createPropertyKey(key),
               expression,
             ),
           ];

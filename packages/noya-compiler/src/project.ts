@@ -3,6 +3,7 @@ import {
   Theme,
   component,
 } from '@noya-design-system/protocol';
+import { path } from 'imfs';
 import { DS } from 'noya-api';
 import {
   FindComponent,
@@ -36,8 +37,12 @@ import { sanitizePackageName } from './validate';
 export interface CompilerConfiguration {
   name: string;
   ds: DS;
-  designSystemDefinition: DesignSystemDefinition;
+  resolvedDefinitions: Record<string, DesignSystemDefinition>;
 }
+
+type ResolvedCompilerConfiguration = CompilerConfiguration & {
+  designSystemDefinition: DesignSystemDefinition;
+};
 
 function findElementNameAndSource(
   element: React.ReactNode,
@@ -107,6 +112,28 @@ export function createSimpleElement(
     return result;
   }
 
+  function deepConvertElementProp(value: unknown): unknown {
+    if (isPassthrough(value)) return value;
+
+    if (typeof value === 'object') {
+      if (value === null) return value;
+      if (Array.isArray(value)) {
+        return value.map(deepConvertElementProp);
+      }
+      if (React.isValidElement(value)) {
+        return createSimpleElement(value, DesignSystem);
+      }
+      return Object.fromEntries(
+        Object.entries(value).map(([key, value]) => [
+          key,
+          deepConvertElementProp(value),
+        ]),
+      );
+    }
+
+    return value;
+  }
+
   return simpleElement({
     name,
     source,
@@ -119,12 +146,7 @@ export function createSimpleElement(
             !key.startsWith('data-') &&
             value !== undefined,
         )
-        .map(([key, value]) => {
-          if (React.isValidElement(value)) {
-            return [key, createSimpleElement(value, DesignSystem)];
-          }
-          return [key, value];
-        }),
+        .map(([key, value]) => [key, deepConvertElementProp(value)]),
     ),
     children: toReactArray(element.props.children).flatMap(
       (element): SimpleElement['children'] => {
@@ -277,7 +299,11 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
   };
 }
 
-export function compileDesignSystem(configuration: CompilerConfiguration): {
+export function compileDesignSystem(
+  configuration: ResolvedCompilerConfiguration & {
+    includeTailwindBase: boolean;
+  },
+): {
   files: Record<string, string>;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -380,10 +406,8 @@ export function compileDesignSystem(configuration: CompilerConfiguration): {
 
   const themeFile = generateThemeFile(DesignSystem, { theme });
 
-  const includeTailwindBase = configuration.ds.source.name === 'vanilla';
-
   const tailwindLayers = [
-    ...(includeTailwindBase ? ['base'] : []),
+    ...(configuration.includeTailwindBase ? ['base'] : []),
     'components',
     'utilities',
   ];
@@ -410,16 +434,35 @@ export function compileDesignSystem(configuration: CompilerConfiguration): {
 }
 
 export function compile(configuration: CompilerConfiguration) {
-  const {
-    files: dsFiles,
-    dependencies,
-    devDependencies,
-  } = compileDesignSystem(configuration);
+  const allDefinitions = Object.keys(configuration.resolvedDefinitions);
 
-  const prefixedFiles = addPathPrefix(dsFiles, 'src/app/components/');
+  const allDSFiles: Record<string, string> = {};
+  const allDependencies: Record<string, string> = {};
+  const allDevDependencies: Record<string, string> = {};
+
+  for (const name of allDefinitions) {
+    const {
+      files: dsFiles,
+      dependencies,
+      devDependencies,
+    } = compileDesignSystem({
+      ...configuration,
+      designSystemDefinition: configuration.resolvedDefinitions[name],
+      includeTailwindBase: name === 'vanilla',
+    });
+
+    const basename = path.basename(name);
+
+    Object.assign(
+      allDSFiles,
+      addPathPrefix(dsFiles, `src/app/${basename}/components/`),
+    );
+    Object.assign(allDependencies, dependencies);
+    Object.assign(allDevDependencies, devDependencies);
+  }
 
   const files = {
-    ...prefixedFiles,
+    ...allDSFiles,
     'src/app/layout.tsx': `export default function RootLayout({
   children,
 }: {
@@ -432,32 +475,31 @@ export function compile(configuration: CompilerConfiguration) {
   )
 }
 `,
-    'src/app/page.tsx': `export default function Page() {
+    'src/app/page.tsx': clean(`import Link from 'next/link'
+
+export default function Page() {
   return (
     <div>
       <h1 className="text-4xl">Components</h1>
       <ul>
-        ${Object.keys(dsFiles)
+        ${Object.keys(allDSFiles)
           .filter((path) => path.endsWith('/page.tsx'))
-          .map(
-            (path) =>
-              `<li><a href="/__NOYA_REPLACE_BASE_PATH__/components/${path.replace(
-                '/page.tsx',
-                '.html',
-              )}">${path.replace('/page.tsx', '')}</a></li>`,
-          )
+          .map((p) => {
+            const url = p.replace('src/app', '').replace('/page.tsx', '');
+            return `<li><Link href="${url}">${url}</Link></li>`;
+          })
           .join('\n')}
       </ul>
     </div>
   )
-}`,
+}`),
     'package.json': JSON.stringify(
       {
         name: sanitizePackageName(configuration.name),
         version: '0.0.1',
         scripts: {},
-        dependencies,
-        devDependencies,
+        dependencies: allDependencies,
+        devDependencies: allDevDependencies,
       },
       null,
       2,
@@ -468,17 +510,22 @@ export function compile(configuration: CompilerConfiguration) {
 }
 
 export async function compileAsync(
-  configuration: Omit<CompilerConfiguration, 'designSystemDefinition'> & {
-    designSystemDefinition?: DesignSystemDefinition;
+  configuration: Omit<CompilerConfiguration, 'resolvedDefinitions'> & {
+    definitions: string[];
   },
 ) {
-  const DesignSystem =
-    configuration.designSystemDefinition ??
-    (await loadDesignSystem(configuration.ds.source.name));
+  const resolvedDefinitions = Object.fromEntries(
+    await Promise.all(
+      configuration.definitions.map(async (name) => [
+        name,
+        await loadDesignSystem(name),
+      ]),
+    ),
+  );
 
   return compile({
     ...configuration,
-    designSystemDefinition: DesignSystem,
+    resolvedDefinitions,
   });
 }
 

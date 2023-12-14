@@ -23,6 +23,7 @@ export function print(nodes: ts.Node | ts.Node[]) {
 
   return source;
 }
+
 export function format(text: string) {
   return prettier.format(text, {
     singleQuote: true,

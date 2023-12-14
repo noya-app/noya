@@ -1,3 +1,5 @@
+import ts from 'typescript';
+
 export function sanitizePackageName(input: string): string {
   let sanitized = input;
 
@@ -41,4 +43,26 @@ export function escapeHtml(unsafe: string) {
 }
 export function isSafeForJsxText(text: string) {
   return !/[{}<>]/.test(text);
+}
+
+export function isValidIdentifier(string: string): boolean {
+  if (string.length === 0) return false;
+
+  for (let i = 0; i < string.length; i += 1) {
+    if (i === 0) {
+      if (!ts.isIdentifierStart(string.charCodeAt(i), ts.ScriptTarget.ESNext)) {
+        return false;
+      }
+    } else {
+      if (!ts.isIdentifierPart(string.charCodeAt(i), ts.ScriptTarget.ESNext)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+export function isValidPropertyKey(key: string): boolean {
+  return isValidIdentifier(key) || /^\d+(\.\d+)?$/.test(key);
 }

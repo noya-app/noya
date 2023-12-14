@@ -14,7 +14,9 @@ const SVGComponent = ({ node }: SVGComponentProps): ReactElement | null => {
   // Convert attributes to props
   const props: { [key: string]: string } = Array.from(node.attributes).reduce(
     (acc, attr) => {
-      acc[attr.name] = attr.value;
+      // Convert attribute names to camelCase
+      const name = attr.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+      acc[name] = attr.value;
       return acc;
     },
     {} as { [key: string]: string },

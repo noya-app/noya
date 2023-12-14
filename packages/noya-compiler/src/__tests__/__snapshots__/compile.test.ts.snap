@@ -5,10 +5,10 @@ Array [
   "package.json",
   "src/app/layout.tsx",
   "src/app/page.tsx",
-  "src/app/components/globals.css",
-  "src/app/components/layout.tsx",
-  "src/app/components/theme.ts",
-  "src/app/components/hero/page.tsx",
+  "src/app/chakra/components/globals.css",
+  "src/app/chakra/components/layout.tsx",
+  "src/app/chakra/components/theme.ts",
+  "src/app/chakra/components/hero/page.tsx",
 ]
 `;
 
@@ -56,7 +56,6 @@ exports[`renders default 1`] = `
 
 exports[`theme generates transformer 1`] = `
 "import { extendTheme, withDefaultColorScheme } from '@chakra-ui/react';
-
 export const theme = extendTheme(
   {
     colorMode: 'light',

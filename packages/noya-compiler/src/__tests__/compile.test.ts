@@ -3,9 +3,15 @@ import {
   component,
   DesignSystemDefinition,
   Theme,
+  x,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
-import { compile, createElementCode, createSimpleElement } from 'noya-compiler';
+import {
+  compile,
+  createElementCode,
+  createExpressionCode,
+  createSimpleElement,
+} from 'noya-compiler';
 import {
   createResolvedNode,
   FindComponent,
@@ -15,8 +21,14 @@ import {
 import { loadDesignSystem } from 'noya-module-loader';
 import { tailwindColors } from 'noya-tailwind';
 import { uuid } from 'noya-utils';
+import ts from 'typescript';
 import { clean } from '../clean';
-import { generateThemeFile } from '../compileTheme';
+import { createPassthrough, simpleElement } from '../common';
+import {
+  convertTransformer,
+  ConvertTransformerContext,
+  generateThemeFile,
+} from '../compileTheme';
 import { print } from '../print';
 
 const HeroComponent = Model.component({
@@ -99,11 +111,119 @@ const ds: DS = {
     },
   },
   source: {
-    name: 'chakra',
+    name: '@noya-design-system/chakra',
     type: 'npm',
     version: '0.0.1',
   },
 };
+
+describe('builders', () => {
+  it('empty object', () => {
+    expect(print(createExpressionCode({}))).toEqual('{}');
+  });
+
+  it('object with key', () => {
+    expect(print(createExpressionCode({ foo: 'bar' }))).toEqual(
+      '{ foo: "bar" }',
+    );
+  });
+
+  it('object with hypenated key', () => {
+    expect(print(createExpressionCode({ 'foo-bar': 'bar' }))).toEqual(
+      '{ "foo-bar": "bar" }',
+    );
+  });
+
+  it('converts empty element', () => {
+    const expression = createElementCode(
+      simpleElement({
+        name: 'Box',
+        props: {},
+        children: [],
+      }),
+    );
+
+    expect(print(expression)).toEqual('<Box />');
+  });
+
+  it('converts element with props', () => {
+    const expression = createElementCode(
+      simpleElement({
+        name: 'Box',
+        props: { foo: 'bar' },
+        children: [],
+      }),
+    );
+
+    expect(print(expression)).toEqual('<Box foo="bar"/>');
+  });
+
+  it('converts element with array with one child', () => {
+    const expression = createElementCode(
+      simpleElement({
+        name: 'Box',
+        props: {},
+        children: ['foo'],
+      }),
+    );
+
+    expect(print(expression)).toEqual('<Box>foo</Box>');
+  });
+
+  it('converts element with element prop', () => {
+    const expression = createElementCode(
+      simpleElement({
+        name: 'Box',
+        props: {
+          foo: simpleElement({
+            name: 'Box',
+            props: {},
+            children: [],
+          }),
+        },
+        children: [],
+      }),
+    );
+
+    expect(print(expression)).toEqual('<Box foo={<Box />}/>');
+  });
+
+  it('converts element with element array prop', () => {
+    const expression = createElementCode(
+      simpleElement({
+        name: 'Box',
+        props: {
+          foo: [
+            simpleElement({
+              name: 'Box',
+              props: {},
+              children: [],
+            }),
+          ],
+        },
+        children: [],
+      }),
+    );
+
+    expect(print(expression)).toEqual('<Box foo={[<Box />]}/>');
+  });
+
+  it('passes through prop', () => {
+    const passthrough = ts.factory.createIdentifier('passthrough');
+
+    const expression = createElementCode(
+      simpleElement({
+        name: 'Box',
+        props: {
+          foo: createPassthrough(passthrough),
+        },
+        children: [],
+      }),
+    );
+
+    expect(print(expression)).toEqual('<Box foo={passthrough}/>');
+  });
+});
 
 describe('renders', () => {
   const findComponent: FindComponent = (componentID) => {
@@ -166,6 +286,68 @@ describe('renders', () => {
 });
 
 describe('theme', () => {
+  const emptyContext: ConvertTransformerContext = {
+    namespaceMap: new Map(),
+    imports: [],
+  };
+
+  it('access key', () => {
+    const result = convertTransformer(
+      { theme: 'foo' },
+      x.a('theme'),
+      emptyContext,
+    );
+
+    expect(print(result)).toEqual(`"foo"`);
+  });
+
+  it('access path', () => {
+    const result = convertTransformer(
+      { theme: { a: 'foo', b: 'bar' } },
+      x.a('theme.b'),
+      emptyContext,
+    );
+
+    expect(print(result)).toEqual(`"bar"`);
+  });
+
+  it('access indirection', () => {
+    const result = convertTransformer(
+      { theme: { a: 'foo', b: 'bar' }, key: 'theme.b' },
+      x.a(x.a('key')),
+      emptyContext,
+    );
+
+    expect(print(result)).toEqual(`"bar"`);
+  });
+
+  it('access inline data', () => {
+    const result = convertTransformer(
+      { key: 'theme.b' },
+      x.a(x.a('key'), { theme: { a: 'foo', b: 'bar' } }),
+      emptyContext,
+    );
+
+    expect(print(result)).toEqual(`"bar"`);
+  });
+
+  it('access inline data function', () => {
+    const f = () => {};
+
+    const context = {
+      imports: [],
+      namespaceMap: new Map([[f, { name: 'fn', source: 'foo' }]]),
+    };
+
+    const result = convertTransformer(
+      { key: 'theme.b' },
+      x.a(x.a('key'), { theme: { a: 'foo', b: f } }),
+      context,
+    );
+
+    expect(print(result)).toEqual(`fn`);
+  });
+
   it('generates transformer', () => {
     const config = ds.config;
 
@@ -186,9 +368,11 @@ describe('theme', () => {
 describe('project', () => {
   it('generates project', () => {
     const files = compile({
-      designSystemDefinition: ChakraDesignSystem,
       ds,
       name: 'Chakra',
+      resolvedDefinitions: {
+        '@noya-design-system/chakra': ChakraDesignSystem,
+      },
     });
 
     expect(Object.keys(files)).toMatchSnapshot();

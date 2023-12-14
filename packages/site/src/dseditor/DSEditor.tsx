@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { DS, useNoyaClientOrFallback } from 'noya-api';
 import {
   clean,
-  compile,
+  compileAsync,
   createElementCode,
   createSimpleElement,
   print,
@@ -676,13 +676,22 @@ function DSGalleryCode({
   const [files, setFiles] = React.useState<Record<string, string>>();
 
   useEffect(() => {
-    const output = compile({
-      name: 'Gallery',
-      ds,
-      designSystemDefinition: system,
-    });
+    async function main() {
+      const output = await compileAsync({
+        name: 'Gallery',
+        ds,
+        definitions: [
+          'vanilla',
+          '@noya-design-system/chakra',
+          // '@noya-design-system/antd',
+          '@noya-design-system/mui',
+        ],
+      });
 
-    setFiles(output);
+      setFiles(output);
+    }
+
+    main();
   }, [ds, system]);
 
   return (
