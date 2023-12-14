@@ -103,7 +103,6 @@ export interface CompilerConfiguration {
   name: string;
   ds: DS;
   designSystemDefinition: DesignSystemDefinition;
-  target: 'standalone' | 'codesandbox';
 }
 
 function findElementNameAndSource(
@@ -208,7 +207,7 @@ export function createSimpleElement(
 
 export function createReactComponentDeclaration(
   name: string,
-  resolvedElement: SimpleElement,
+  returnValue: ts.Expression,
   params: ts.ParameterDeclaration[] = [],
 ) {
   return ts.factory.createFunctionDeclaration(
@@ -221,9 +220,7 @@ export function createReactComponentDeclaration(
     undefined,
     params,
     undefined,
-    ts.factory.createBlock([
-      ts.factory.createReturnStatement(createElementCode(resolvedElement)),
-    ]),
+    ts.factory.createBlock([ts.factory.createReturnStatement(returnValue)]),
   );
 }
 
@@ -325,6 +322,80 @@ function extractImports(
   });
 }
 
+function createLayoutSource(DesignSystem: DesignSystemDefinition) {
+  const providerElement = DesignSystem.components[component.id.Provider]
+    ? DesignSystem.createElement(
+        DesignSystem.components[component.id.Provider],
+        {
+          theme: createPassthrough(ts.factory.createIdentifier('theme')),
+        },
+        createPassthrough(
+          ts.factory.createJsxExpression(
+            undefined,
+            ts.factory.createPropertyAccessExpression(
+              ts.factory.createIdentifier('props'),
+              ts.factory.createIdentifier('children'),
+            ),
+          ),
+        ),
+      )
+    : null;
+
+  const nextProviderElement = DesignSystem.components[component.id.NextProvider]
+    ? DesignSystem.createElement(
+        DesignSystem.components[component.id.NextProvider],
+        {},
+        providerElement,
+      )
+    : providerElement;
+
+  if (!nextProviderElement) return;
+
+  const layoutElement = createSimpleElement(nextProviderElement, DesignSystem);
+
+  if (!layoutElement) return;
+
+  const layoutComponentFunc = createReactComponentDeclaration(
+    'NextProvider',
+    createElementCode(layoutElement),
+    [
+      ts.factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        ts.factory.createIdentifier('props'),
+        undefined,
+        // Type React.PropsWithChildren<{}>
+        ts.factory.createTypeReferenceNode(
+          ts.factory.createIdentifier('React.PropsWithChildren'),
+          [
+            // Empty object type
+            ts.factory.createTypeLiteralNode([]),
+          ],
+        ),
+        undefined,
+      ),
+    ],
+  );
+
+  const layoutImports = extractImports(layoutElement, DesignSystem);
+
+  const layoutSource = [
+    "'use client'",
+    [
+      "import React from 'react'",
+      print(layoutImports),
+      'import { theme } from "./theme"',
+    ].join('\n'),
+    print(layoutComponentFunc),
+  ]
+    .map(clean)
+    .join('\n');
+
+  return {
+    source: layoutSource,
+  };
+}
+
 export function compile(configuration: CompilerConfiguration) {
   const DesignSystem = configuration.designSystemDefinition;
 
@@ -368,7 +439,7 @@ export function compile(configuration: CompilerConfiguration) {
 
       const func = createReactComponentDeclaration(
         getComponentNameIdentifier(component.name),
-        simpleElement,
+        createElementCode(simpleElement),
       );
 
       const dependencies = (DesignSystem.imports ?? []).reduce(
@@ -412,63 +483,7 @@ export function compile(configuration: CompilerConfiguration) {
     {},
   );
 
-  const layoutElement = createSimpleElement(
-    DesignSystem.createElement(
-      DesignSystem.components[component.id.NextProvider],
-      {},
-      DesignSystem.createElement(
-        DesignSystem.components[component.id.Provider],
-        {
-          theme: createPassthrough(ts.factory.createIdentifier('theme')),
-        },
-        createPassthrough(
-          ts.factory.createJsxExpression(
-            undefined,
-            ts.factory.createPropertyAccessExpression(
-              ts.factory.createIdentifier('props'),
-              ts.factory.createIdentifier('children'),
-            ),
-          ),
-        ),
-      ),
-    ),
-    DesignSystem,
-  );
-  const layoutComponentFunc = createReactComponentDeclaration(
-    'NextProvider',
-    layoutElement!,
-    [
-      ts.factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        ts.factory.createIdentifier('props'),
-        undefined,
-        // Type React.PropsWithChildren<{}>
-        ts.factory.createTypeReferenceNode(
-          ts.factory.createIdentifier('React.PropsWithChildren'),
-          [
-            // Empty object type
-            ts.factory.createTypeLiteralNode([]),
-          ],
-        ),
-        undefined,
-      ),
-    ],
-  );
-
-  const layoutImports = extractImports(layoutElement!, DesignSystem);
-
-  const layoutSource = [
-    "'use client'",
-    [
-      "import React from 'react'",
-      print(layoutImports),
-      'import { theme } from "./theme"',
-    ].join('\n'),
-    print(layoutComponentFunc),
-  ]
-    .map(clean)
-    .join('\n');
+  const layoutSource = createLayoutSource(DesignSystem);
 
   const theme: Theme = {
     colorMode: configuration.ds.config.colorMode ?? 'light',
@@ -479,6 +494,14 @@ export function compile(configuration: CompilerConfiguration) {
   };
 
   const themeFile = generateThemeFile(DesignSystem, { theme });
+
+  const includeTailwindBase = configuration.ds.source.name === 'vanilla';
+
+  const tailwindLayers = [
+    ...(includeTailwindBase ? ['base'] : []),
+    'components',
+    'utilities',
+  ];
 
   const files = {
     'src/app/layout.tsx': `import './globals.css'
@@ -495,10 +518,9 @@ export default function RootLayout({
   )
 }
 `,
-    'src/app/globals.css': `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-`,
+    'src/app/globals.css': tailwindLayers
+      .map((layer) => `@tailwind ${layer};`)
+      .join('\n'),
     ...Object.fromEntries(
       componentPageItems.map(({ name, source }) => [
         `src/app/components/${getComponentNameIdentifier(
@@ -509,7 +531,9 @@ export default function RootLayout({
       ]),
     ),
     'src/app/components/theme.ts': themeFile,
-    'src/app/components/layout.tsx': layoutSource,
+    ...(layoutSource
+      ? { 'src/app/components/layout.tsx': layoutSource.source }
+      : {}),
     'package.json': JSON.stringify(
       {
         name: sanitizePackageName(configuration.name),

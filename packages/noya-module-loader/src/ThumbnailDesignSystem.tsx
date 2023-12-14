@@ -19,7 +19,7 @@ const handler = {
 };
 
 function getTheme(props: any) {
-  if (props._theme) return props._theme as Theme;
+  if (props._noya && props._noya.theme) return props._noya.theme as Theme;
 
   return undefined;
 }

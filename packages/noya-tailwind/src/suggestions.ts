@@ -123,6 +123,7 @@ export const suggestionPatterns = [
   'isolation-auto',
   'z-{zIndex}',
   '-z-{zIndex}',
+  'appearance-none',
 ];
 
 export const context = {

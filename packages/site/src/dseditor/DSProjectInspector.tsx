@@ -28,9 +28,10 @@ import { downloadBlob } from '../utils/download';
 import { DSThemeInspector } from './DSThemeInspector';
 
 const designSystems = {
-  '@noya-design-system/mui': 'Material Design',
-  '@noya-design-system/antd': 'Ant Design',
+  vanilla: 'None',
   '@noya-design-system/chakra': 'Chakra UI',
+  '@noya-design-system/antd': 'Ant Design',
+  '@noya-design-system/mui': 'Material Design',
 };
 const noop = () => {};
 

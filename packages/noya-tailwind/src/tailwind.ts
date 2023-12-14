@@ -57,6 +57,7 @@ export function getTextAlign(hashtags: string[]) {
 }
 
 export const classGroups = {
+  appearance: /^appearance-none/,
   fontSize: /^(text-base|text-sm|text-xs)/,
   fontWeight:
     /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
@@ -87,6 +88,7 @@ export const classGroups = {
   right: /^right-/,
   bottom: /^bottom-/,
   left: /^left-/,
+  // translate: /^translate-/,
   // Only handle gap for now. Space-x and space-y are converted to gap.
   gap: /^(gap-|space-y|space-x)/,
   padding: /^p-/,
@@ -303,6 +305,10 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
   const classGroup = getTailwindClassGroup(className);
 
   switch (classGroup) {
+    case 'appearance':
+      return {
+        appearance: 'none',
+      };
     case 'fontSize':
       // Not used?
       return {};

@@ -679,7 +679,6 @@ function DSGalleryCode({
     const output = compile({
       name: 'Gallery',
       ds,
-      target: 'standalone',
       designSystemDefinition: system,
     });
 

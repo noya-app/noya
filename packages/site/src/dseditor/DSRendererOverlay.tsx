@@ -103,6 +103,8 @@ export const DSRendererOverlay = memo(
           });
         }}
         onWheel={(event) => {
+          setHighlightRect(undefined);
+
           rendererRef.current?.mouseWheel({
             delta: {
               x: event.deltaX,

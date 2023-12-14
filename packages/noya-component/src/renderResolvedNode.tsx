@@ -63,7 +63,7 @@ export function renderResolvedNode({
   dsConfig,
   system,
   stylingMode = 'inline',
-  theme,
+  noya,
 }: {
   containerWidth?: number;
   contentEditable: boolean;
@@ -73,7 +73,7 @@ export function renderResolvedNode({
   dsConfig: DSConfig;
   system: DesignSystemDefinition;
   stylingMode?: StylingMode;
-  theme?: any; // Passed into components as _theme
+  noya?: any; // Passed into components as _noya
 }) {
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
@@ -266,7 +266,7 @@ export function renderResolvedNode({
             element.componentID === component.id.Radio) && {
             label: transformedChildren,
           })}
-          {...(theme && { _theme: theme })}
+          {...(noya && { _noya: noya })}
         />
       );
     },

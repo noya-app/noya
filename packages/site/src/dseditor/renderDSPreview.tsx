@@ -26,8 +26,6 @@ export function renderDSPreview({
   isThumbnail?: boolean;
   chrome?: ComponentThumbnailChrome;
 }) {
-  // const system = isThumbnail ? ThumbnailDesignSystem : props.system;
-
   const content = renderResolvedNode({
     containerWidth: props.size.width,
     contentEditable: true,
@@ -36,7 +34,7 @@ export function renderDSPreview({
     resolvedNode,
     dsConfig,
     system: props.system,
-    theme: isThumbnail ? props.theme : undefined,
+    noya: { theme: props.theme, dsConfig },
   });
 
   const colorMode = dsConfig.colorMode ?? 'light';

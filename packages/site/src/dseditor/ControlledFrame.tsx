@@ -79,14 +79,8 @@ export const ControlledFrame = memo(
 
     const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
-    return (
-      <iframe
-        ref={handleRef}
-        tabIndex={-1}
-        title={title}
-        style={style}
-        // Ensure html5 doctype for proper styling
-        srcDoc={`<!DOCTYPE html>
+    // Ensure html5 doctype for proper styling
+    const srcDoc = `<!DOCTYPE html>
 <head>
   <style>
     html, body, #noya-preview-root { height: 100%; margin: 0; padding: 0; }
@@ -191,8 +185,17 @@ export const ControlledFrame = memo(
       }
     });
   </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </body>
-`}
+`;
+
+    return (
+      <iframe
+        ref={handleRef}
+        tabIndex={-1}
+        title={title}
+        style={style}
+        srcDoc={srcDoc}
       />
     );
   }),
