@@ -2188,5 +2188,6 @@ Array [
   "-z-40",
   "-z-50",
   "-z-auto",
+  "appearance-none",
 ]
 `;
