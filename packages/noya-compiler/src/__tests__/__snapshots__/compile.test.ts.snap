@@ -1,5 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`project generates project 1`] = `
+Array [
+  "package.json",
+  "src/app/globals.css",
+  "src/app/layout.tsx",
+  "src/app/page.tsx",
+  "src/app/components/layout.tsx",
+  "src/app/components/theme.ts",
+  "src/app/components/hero/page.tsx",
+]
+`;
+
 exports[`renders classnames 1`] = `
 "<Box className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
   <Tag>New</Tag>

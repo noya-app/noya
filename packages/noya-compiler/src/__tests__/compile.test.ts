@@ -5,7 +5,7 @@ import {
   Theme,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
-import { createElementCode, createSimpleElement } from 'noya-compiler';
+import { compile, createElementCode, createSimpleElement } from 'noya-compiler';
 import {
   createResolvedNode,
   FindComponent,
@@ -180,5 +180,17 @@ describe('theme', () => {
     const transformer = generateThemeFile(ChakraDesignSystem, { theme });
 
     expect(transformer).toMatchSnapshot();
+  });
+});
+
+describe('project', () => {
+  it('generates project', () => {
+    const files = compile({
+      designSystemDefinition: ChakraDesignSystem,
+      ds,
+      name: 'Chakra',
+    });
+
+    expect(Object.keys(files)).toMatchSnapshot();
   });
 });

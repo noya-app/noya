@@ -399,6 +399,24 @@ export default function RootLayout({
         source,
       ]),
     ),
+    'src/app/page.tsx': `export default function Page() {
+  return (
+    <div>
+      <h1 className="text-4xl">Components</h1>
+      <ul>
+        ${componentPageItems
+          .map(
+            ({ name }) =>
+              `<li><a href="/__NOYA_REPLACE_BASE_PATH__/components/${getComponentNameIdentifier(
+                name,
+                'kebab',
+              )}.html">${name}</a></li>`,
+          )
+          .join('\n')}
+      </ul>
+    </div>
+  )
+}`,
     'src/app/components/theme.ts': themeFile,
     ...(layoutSource
       ? { 'src/app/components/layout.tsx': layoutSource.source }
@@ -416,7 +434,19 @@ export default function RootLayout({
     ),
   };
 
-  return files;
+  const sortedFiles = Object.fromEntries(
+    Object.entries(files).sort(([a], [b]) => {
+      // First compare the directory depth
+      const depthA = a.split('/').length;
+      const depthB = b.split('/').length;
+
+      if (depthA !== depthB) return depthA - depthB;
+
+      return a.localeCompare(b);
+    }),
+  );
+
+  return sortedFiles;
 }
 
 export async function compileAsync(
