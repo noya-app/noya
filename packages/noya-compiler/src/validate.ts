@@ -39,3 +39,6 @@ export function escapeHtml(unsafe: string) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+export function isSafeForJsxText(text: string) {
+  return !/[{}<>]/.test(text);
+}

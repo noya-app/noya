@@ -1,6 +1,4 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import { createElementCode } from 'noya-compiler';
-import ts from 'typescript';
 
 const passthroughSymbol = Symbol('passthrough');
 const simpleElementSymbol = Symbol('simpleElement');
@@ -45,50 +43,7 @@ export function simpleElement<
   };
 }
 
-export function createExpressionCode(value: unknown): ts.Expression {
-  if (isPassthrough(value)) {
-    return value as any;
-  }
-
-  if (isSimpleElement(value)) {
-    return createElementCode(value);
-  }
-
-  switch (typeof value) {
-    case 'string':
-      return ts.factory.createStringLiteral(value);
-    case 'number':
-      return ts.factory.createNumericLiteral(value);
-    case 'boolean':
-      return value ? ts.factory.createTrue() : ts.factory.createFalse();
-    case 'object':
-      if (value === null) return ts.factory.createNull();
-
-      if (Array.isArray(value)) {
-        return ts.factory.createArrayLiteralExpression(
-          value.map((item) => createExpressionCode(item)),
-        );
-      }
-
-      return ts.factory.createObjectLiteralExpression(
-        Object.entries(value).flatMap(([key, value]) => {
-          const expression = createExpressionCode(value);
-
-          return [
-            ts.factory.createPropertyAssignment(
-              ts.factory.createIdentifier(key),
-              expression,
-            ),
-          ];
-        }),
-      );
-    case 'undefined':
-      return ts.factory.createIdentifier('undefined');
-    default:
-      return ts.factory.createNull();
-  }
-} // Convert from a human-readable name like "Hero with Image" to pascal case "HeroWithImage"
-
+// Convert from a human-readable name like "Hero with Image" to pascal case "HeroWithImage"
 export function getComponentNameIdentifier(
   name: string,
   format: 'pascal' | 'kebab' = 'pascal',

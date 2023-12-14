@@ -2,9 +2,12 @@ import {
   DesignSystemDefinition,
   Transformer,
 } from '@noya-design-system/protocol';
-import { generateImportDeclarations } from 'noya-compiler';
 import ts from 'typescript';
-import { buildNamespaceMap, createExpressionCode } from './common';
+import {
+  createExpressionCode,
+  generateImportDeclarations,
+} from './astBuilders';
+import { buildNamespaceMap } from './common';
 import { format, print } from './print';
 
 /**

@@ -5,7 +5,7 @@ import {
   Theme,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
-import { clean, createElementCode, createSimpleElement } from 'noya-compiler';
+import { createElementCode, createSimpleElement } from 'noya-compiler';
 import {
   createResolvedNode,
   FindComponent,
@@ -15,6 +15,7 @@ import {
 import { loadDesignSystem } from 'noya-module-loader';
 import { tailwindColors } from 'noya-tailwind';
 import { uuid } from 'noya-utils';
+import { clean } from '../clean';
 import { generateThemeFile } from '../compileTheme';
 import { print } from '../print';
 
