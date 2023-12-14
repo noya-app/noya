@@ -120,9 +120,8 @@ export function renderResolvedNode({
                   }
                 : undefined),
             }}
-          >
-            {string}
-          </span>
+            dangerouslySetInnerHTML={{ __html: string }}
+          />
         );
       }
 
