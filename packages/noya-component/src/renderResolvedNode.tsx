@@ -63,7 +63,7 @@ export function renderResolvedNode({
   dsConfig,
   system,
   stylingMode = 'inline',
-  noya,
+  theme,
 }: {
   containerWidth?: number;
   contentEditable: boolean;
@@ -73,8 +73,10 @@ export function renderResolvedNode({
   dsConfig: DSConfig;
   system: DesignSystemDefinition;
   stylingMode?: StylingMode;
-  noya?: any; // Passed into components as _noya
+  theme?: any;
 }) {
+  const noya = { theme, dsConfig };
+
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
     (element, transformedChildren, indexPath) => {

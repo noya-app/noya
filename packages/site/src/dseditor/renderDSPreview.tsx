@@ -34,7 +34,7 @@ export function renderDSPreview({
     resolvedNode,
     dsConfig,
     system: props.system,
-    noya: { theme: props.theme, dsConfig },
+    theme: props.theme,
   });
 
   const colorMode = dsConfig.colorMode ?? 'light';

@@ -3,7 +3,6 @@
 import {
   ButtonVariant,
   DesignSystemDefinition,
-  Theme,
   applyCommonProps,
   component,
   x,
@@ -22,11 +21,6 @@ const handler = {
     };
   },
 };
-
-function getTheme(props: any) {
-  if (props._noya && props._noya.theme) return props._noya.theme as Theme;
-  return undefined;
-}
 
 function getDSConfig(props: any): DSConfig {
   if (props._noya && props._noya.dsConfig) return props._noya.dsConfig;
@@ -104,8 +98,7 @@ const proxyObject = new Proxy(
       return <button {...applyCommonProps({ ...props, className })} />;
     },
     [component.id.Text]: (props: any) => {
-      const theme = getTheme(props);
-      const colorMode = theme?.colorMode || 'light';
+      const colorMode = getDSConfig(props).colorMode ?? 'light';
 
       const className = [
         `text-${colorMode === 'light' ? 'black' : 'white'}`,
@@ -189,7 +182,7 @@ const proxyObject = new Proxy(
       return <img {...applyCommonProps(props)} src={props.src} />;
     },
     [component.id.Avatar]: (props: any) => {
-      const theme = getTheme(props);
+      const colorMode = getDSConfig(props).colorMode ?? 'light';
 
       const className = mergeClasses(
         [
@@ -198,8 +191,8 @@ const proxyObject = new Proxy(
           `items-center`,
           `justify-center`,
           'overflow-hidden',
-          `bg-${theme?.colorMode === 'light' ? 'gray-100' : 'gray-800'}`,
-          `text-${theme?.colorMode === 'light' ? 'gray-300' : 'gray-600'}`,
+          `bg-${colorMode === 'light' ? 'gray-100' : 'gray-800'}`,
+          `text-${colorMode === 'light' ? 'gray-300' : 'gray-600'}`,
         ],
         props.className,
       );
