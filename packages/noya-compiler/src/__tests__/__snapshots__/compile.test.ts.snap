@@ -3,9 +3,9 @@
 exports[`project generates project 1`] = `
 Array [
   "package.json",
-  "src/app/globals.css",
   "src/app/layout.tsx",
   "src/app/page.tsx",
+  "src/app/components/globals.css",
   "src/app/components/layout.tsx",
   "src/app/components/theme.ts",
   "src/app/components/hero/page.tsx",

@@ -191,7 +191,18 @@ function extractImports(
   });
 }
 
-function createLayoutSource(DesignSystem: DesignSystemDefinition) {
+function createLayoutSource(DesignSystem: DesignSystemDefinition): {
+  source: string;
+} {
+  const cssImport = "import './globals.css'";
+
+  const defaultLayout = `${cssImport}
+
+export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
+  return children;
+}
+`;
+
   const providerElement = DesignSystem.components[component.id.Provider]
     ? DesignSystem.createElement(
         DesignSystem.components[component.id.Provider],
@@ -218,11 +229,11 @@ function createLayoutSource(DesignSystem: DesignSystemDefinition) {
       )
     : providerElement;
 
-  if (!nextProviderElement) return;
+  if (!nextProviderElement) return { source: defaultLayout };
 
   const layoutElement = createSimpleElement(nextProviderElement, DesignSystem);
 
-  if (!layoutElement) return;
+  if (!layoutElement) return { source: defaultLayout };
 
   const layoutComponentFunc = createReactComponentDeclaration(
     'NextProvider',
@@ -251,6 +262,7 @@ function createLayoutSource(DesignSystem: DesignSystemDefinition) {
   const layoutSource = [
     "'use client'",
     [
+      cssImport,
       "import React from 'react'",
       print(layoutImports),
       'import { theme } from "./theme"',
@@ -265,7 +277,11 @@ function createLayoutSource(DesignSystem: DesignSystemDefinition) {
   };
 }
 
-export function compile(configuration: CompilerConfiguration) {
+export function compileDesignSystem(configuration: CompilerConfiguration): {
+  files: Record<string, string>;
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+} {
   const DesignSystem = configuration.designSystemDefinition;
 
   const findComponent: FindComponent = (componentID) => {
@@ -373,9 +389,38 @@ export function compile(configuration: CompilerConfiguration) {
   ];
 
   const files = {
-    'src/app/layout.tsx': `import './globals.css'
+    'globals.css': tailwindLayers
+      .map((layer) => `@tailwind ${layer};`)
+      .join('\n'),
+    ...Object.fromEntries(
+      componentPageItems.map(({ name, source }) => [
+        `${getComponentNameIdentifier(name, 'kebab')}/page.tsx`,
+        source,
+      ]),
+    ),
+    'theme.ts': themeFile,
+    ...(layoutSource ? { 'layout.tsx': layoutSource.source } : {}),
+  };
 
-export default function RootLayout({
+  return {
+    files: sortFiles(files),
+    dependencies: allDependencies,
+    devDependencies: allDevDependencies,
+  };
+}
+
+export function compile(configuration: CompilerConfiguration) {
+  const {
+    files: dsFiles,
+    dependencies,
+    devDependencies,
+  } = compileDesignSystem(configuration);
+
+  const prefixedFiles = addPathPrefix(dsFiles, 'src/app/components/');
+
+  const files = {
+    ...prefixedFiles,
+    'src/app/layout.tsx': `export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
@@ -387,66 +432,39 @@ export default function RootLayout({
   )
 }
 `,
-    'src/app/globals.css': tailwindLayers
-      .map((layer) => `@tailwind ${layer};`)
-      .join('\n'),
-    ...Object.fromEntries(
-      componentPageItems.map(({ name, source }) => [
-        `src/app/components/${getComponentNameIdentifier(
-          name,
-          'kebab',
-        )}/page.tsx`,
-        source,
-      ]),
-    ),
     'src/app/page.tsx': `export default function Page() {
   return (
     <div>
       <h1 className="text-4xl">Components</h1>
       <ul>
-        ${componentPageItems
+        ${Object.keys(dsFiles)
+          .filter((path) => path.endsWith('/page.tsx'))
           .map(
-            ({ name }) =>
-              `<li><a href="/__NOYA_REPLACE_BASE_PATH__/components/${getComponentNameIdentifier(
-                name,
-                'kebab',
-              )}.html">${name}</a></li>`,
+            (path) =>
+              `<li><a href="/__NOYA_REPLACE_BASE_PATH__/components/${path.replace(
+                '/page.tsx',
+                '.html',
+              )}">${path.replace('/page.tsx', '')}</a></li>`,
           )
           .join('\n')}
       </ul>
     </div>
   )
 }`,
-    'src/app/components/theme.ts': themeFile,
-    ...(layoutSource
-      ? { 'src/app/components/layout.tsx': layoutSource.source }
-      : {}),
     'package.json': JSON.stringify(
       {
         name: sanitizePackageName(configuration.name),
         version: '0.0.1',
         scripts: {},
-        dependencies: allDependencies,
-        devDependencies: allDevDependencies,
+        dependencies,
+        devDependencies,
       },
       null,
       2,
     ),
   };
 
-  const sortedFiles = Object.fromEntries(
-    Object.entries(files).sort(([a], [b]) => {
-      // First compare the directory depth
-      const depthA = a.split('/').length;
-      const depthB = b.split('/').length;
-
-      if (depthA !== depthB) return depthA - depthB;
-
-      return a.localeCompare(b);
-    }),
-  );
-
-  return sortedFiles;
+  return sortFiles(files);
 }
 
 export async function compileAsync(
@@ -462,4 +480,27 @@ export async function compileAsync(
     ...configuration,
     designSystemDefinition: DesignSystem,
   });
+}
+
+function sortFiles(files: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(files).sort(([a], [b]) => {
+      // First compare the directory depth
+      const depthA = a.split('/').length;
+      const depthB = b.split('/').length;
+
+      if (depthA !== depthB) return depthA - depthB;
+
+      return a.localeCompare(b);
+    }),
+  );
+}
+
+function addPathPrefix(
+  files: Record<string, string>,
+  prefix: string,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(files).map(([key, value]) => [prefix + key, value]),
+  );
 }
