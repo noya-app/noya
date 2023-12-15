@@ -1,4 +1,5 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import { memoize } from 'noya-utils';
 
 const passthroughSymbol = Symbol('passthrough');
 const simpleElementSymbol = Symbol('simpleElement');
@@ -65,7 +66,9 @@ export type NamespaceItem = {
   accessPath?: string[];
 };
 
-export function buildNamespaceMap(imports: DesignSystemDefinition['imports']) {
+export const buildNamespaceMap = memoize(function buildNamespaceMap(
+  imports: DesignSystemDefinition['imports'],
+) {
   const namespaceMap = new Map<unknown, NamespaceItem>();
 
   for (const declaration of imports ?? []) {
@@ -85,4 +88,4 @@ export function buildNamespaceMap(imports: DesignSystemDefinition['imports']) {
   }
 
   return namespaceMap;
-}
+});
