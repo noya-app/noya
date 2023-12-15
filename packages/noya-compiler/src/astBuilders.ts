@@ -137,7 +137,7 @@ export function createReactComponentDeclaration(
 }
 
 export function generateImportDeclarations(
-  imports: { name: string; source: string }[],
+  imports: { name: string; source: string; as?: string }[],
 ): ts.ImportDeclaration[] {
   const groups = groupBy(
     imports,
@@ -150,11 +150,17 @@ export function generateImportDeclarations(
       undefined,
       ts.factory.createNamedImports(
         imports.map((importDeclaration) =>
-          ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier(importDeclaration.name),
-          ),
+          importDeclaration.as
+            ? ts.factory.createImportSpecifier(
+                false,
+                ts.factory.createIdentifier(importDeclaration.name),
+                ts.factory.createIdentifier(importDeclaration.as),
+              )
+            : ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier(importDeclaration.name),
+              ),
         ),
       ),
     );

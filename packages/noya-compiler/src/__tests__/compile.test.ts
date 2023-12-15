@@ -348,6 +348,38 @@ describe('theme', () => {
     expect(print(result)).toEqual(`fn`);
   });
 
+  it('nested namespace', () => {
+    const ref = {};
+
+    const context: ConvertTransformerContext = {
+      imports: [],
+      namespaceMap: new Map([
+        [ref, { name: 'ref', source: 'foo', accessPath: ['member'] }],
+      ]),
+    };
+
+    const result = convertTransformer(
+      { theme: { a: 'foo', b: ref } },
+      x.a('theme.b'),
+      context,
+    );
+
+    expect(print(result)).toEqual(`ref.member`);
+  });
+
+  it('namespace reserved word', () => {
+    const ref = {};
+
+    const context: ConvertTransformerContext = {
+      imports: [],
+      namespaceMap: new Map([[ref, { name: 'theme', source: 'foo' }]]),
+    };
+
+    const result = convertTransformer({ theme: ref }, x.a('theme'), context);
+
+    expect(print(result)).toEqual(`_theme`);
+  });
+
   it('generates transformer', () => {
     const config = ds.config;
 

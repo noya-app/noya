@@ -22,6 +22,7 @@ import {
 } from './astBuilders';
 import { clean } from './clean';
 import {
+  NamespaceItem,
   SimpleElement,
   buildNamespaceMap,
   createPassthrough,
@@ -47,7 +48,7 @@ type ResolvedCompilerConfiguration = CompilerConfiguration & {
 function findElementNameAndSource(
   element: React.ReactNode,
   DesignSystem: DesignSystemDefinition,
-  Components: Map<React.ComponentType, { name: string; source?: string }>,
+  Components: Map<unknown, NamespaceItem>,
 ):
   | {
       name: string;
@@ -85,12 +86,12 @@ export function createSimpleElement(
   originalElement: React.ReactNode,
   DesignSystem: DesignSystemDefinition,
 ): SimpleElement | undefined {
-  const Components = buildNamespaceMap(DesignSystem.imports);
+  const namespaceMap = buildNamespaceMap(DesignSystem.imports);
 
   const elementType = findElementNameAndSource(
     originalElement,
     DesignSystem,
-    Components,
+    namespaceMap,
   );
 
   if (!elementType) return;

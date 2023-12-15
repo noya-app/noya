@@ -57,12 +57,29 @@ export function getComponentNameIdentifier(
     .join(format === 'kebab' ? '-' : '')
     .replace(/[^a-zA-Z0-9\-_]/g, '');
 }
+
+export type NamespaceItem = {
+  name: string;
+  source: string;
+  accessPath?: string[];
+};
+
 export function buildNamespaceMap(imports: DesignSystemDefinition['imports']) {
-  const namespaceMap = new Map<any, { name: string; source: string }>();
+  const namespaceMap = new Map<unknown, NamespaceItem>();
 
   for (const declaration of imports ?? []) {
     for (let [name, value] of Object.entries(declaration.namespace)) {
       namespaceMap.set(value, { name, source: declaration.source });
+
+      if (typeof value === 'object' && value !== null) {
+        for (let [nestedName, nestedValue] of Object.entries(value)) {
+          namespaceMap.set(nestedValue, {
+            name: name,
+            source: declaration.source,
+            accessPath: [nestedName],
+          });
+        }
+      }
     }
   }
 

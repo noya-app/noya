@@ -9,13 +9,15 @@ import {
   generateImportDeclarations,
 } from './astBuilders';
 import { clean } from './clean';
-import { buildNamespaceMap } from './common';
+import { NamespaceItem, buildNamespaceMap } from './common';
 import { format, print } from './print';
 
 export type ConvertTransformerContext = {
-  namespaceMap: Map<unknown, { name: string; source: string }>;
-  imports: { name: string; source: string }[];
+  namespaceMap: Map<unknown, NamespaceItem>;
+  imports: { name: string; source: string; as?: string }[];
 };
+
+const reservedNames = new Set(['theme']);
 
 export function convertTransformer(
   data: any,
@@ -27,9 +29,26 @@ export function convertTransformer(
 
     if (!result) return createExpressionCode(value);
 
-    context.imports.push(result);
+    let as = result.name;
 
-    return ts.factory.createIdentifier(result.name);
+    if (reservedNames.has(result.name)) {
+      as = `_${result.name}`;
+    }
+
+    context.imports.push({
+      name: result.name,
+      source: result.source,
+      as,
+    });
+
+    if (result.accessPath && result.accessPath.length > 0) {
+      return ts.factory.createPropertyAccessExpression(
+        ts.factory.createIdentifier(as),
+        ts.factory.createIdentifier(result.accessPath[0]),
+      );
+    }
+
+    return ts.factory.createIdentifier(as);
   }
 
   if (isTransformer(transformer)) {
@@ -117,7 +136,7 @@ export function generateThemeFile(
   if (!DesignSystem.themeTransformer) return '';
 
   const namespaceMap = buildNamespaceMap(DesignSystem.imports);
-  const imports: { name: string; source: string }[] = [];
+  const imports: ConvertTransformerContext['imports'] = [];
 
   const ast = convertTransformer(themeValue, DesignSystem.themeTransformer, {
     namespaceMap,
