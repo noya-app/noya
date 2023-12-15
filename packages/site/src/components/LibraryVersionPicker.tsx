@@ -15,10 +15,17 @@ export function LibraryVersionPicker({
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
 
   const options = useMemo(() => {
-    return [
-      ...(!availableVersions.includes(version) ? [version] : []),
-      ...availableVersions,
-    ];
+    let versions = [...availableVersions];
+
+    if (!versions.includes(version)) {
+      versions.unshift(version);
+    }
+
+    if (!versions.includes('latest')) {
+      versions.unshift('latest');
+    }
+
+    return versions;
   }, [availableVersions, version]);
 
   useMemo(() => {
@@ -31,11 +38,20 @@ export function LibraryVersionPicker({
       value={version}
       onChange={onChange}
       options={options}
+      getTitle={(version) => {
+        if (version !== 'latest' && !availableVersions.includes(version)) {
+          return `${version}*`;
+        }
+
+        return version;
+      }}
     />
   );
 }
 
 async function fetchAvailableVersions(libraryName: string) {
+  if (libraryName === 'vanilla' || libraryName === 'thumbnail') return [];
+
   const response = await fetch(`https://registry.npmjs.org/${libraryName}`);
   const data = await response.json();
   const versions = Object.keys(data.versions);

@@ -145,21 +145,19 @@ export function DSProjectInspector({
                 </Button>
               </Select>
             </InspectorPrimitives.LabeledRow>
-            {sourceName !== 'vanilla' && sourceName !== 'thumbnail' && (
-              <InspectorPrimitives.LabeledRow label="Library Version">
-                <LibraryVersionPicker
-                  libraryName={sourceName}
-                  version={sourceVersion}
-                  onChange={(newVersion) => {
-                    setDS((state) =>
-                      produce(state, (draft) => {
-                        draft.source.version = newVersion;
-                      }),
-                    );
-                  }}
-                />
-              </InspectorPrimitives.LabeledRow>
-            )}
+            <InspectorPrimitives.LabeledRow label="Library Version">
+              <LibraryVersionPicker
+                libraryName={sourceName}
+                version={sourceVersion}
+                onChange={(newVersion) => {
+                  setDS((state) =>
+                    produce(state, (draft) => {
+                      draft.source.version = newVersion;
+                    }),
+                  );
+                }}
+              />
+            </InspectorPrimitives.LabeledRow>
             <DSThemeInspector
               dsConfig={ds.config}
               onChangeDSConfig={(config) => {
