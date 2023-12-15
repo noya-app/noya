@@ -24,6 +24,7 @@ import { uuid } from 'noya-utils';
 import React, { useState } from 'react';
 import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
 import { InspectorSection } from '../components/InspectorSection';
+import { LibraryVersionPicker } from '../components/LibraryVersionPicker';
 import { downloadBlob } from '../utils/download';
 import { DSThemeInspector } from './DSThemeInspector';
 
@@ -66,7 +67,7 @@ export function DSProjectInspector({
 }: Props) {
   const theme = useDesignSystemTheme();
   const {
-    source: { name: sourceName },
+    source: { name: sourceName, version: sourceVersion },
   } = ds;
   const [renamingComponent, setRenamingComponent] = useState<
     string | undefined
@@ -144,6 +145,21 @@ export function DSProjectInspector({
                 </Button>
               </Select>
             </InspectorPrimitives.LabeledRow>
+            {sourceName !== 'vanilla' && sourceName !== 'thumbnail' && (
+              <InspectorPrimitives.LabeledRow label="Library Version">
+                <LibraryVersionPicker
+                  libraryName={sourceName}
+                  version={sourceVersion}
+                  onChange={(newVersion) => {
+                    setDS((state) =>
+                      produce(state, (draft) => {
+                        draft.source.version = newVersion;
+                      }),
+                    );
+                  }}
+                />
+              </InspectorPrimitives.LabeledRow>
+            )}
             <DSThemeInspector
               dsConfig={ds.config}
               onChangeDSConfig={(config) => {

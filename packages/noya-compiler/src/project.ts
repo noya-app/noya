@@ -571,7 +571,7 @@ export async function compileAsync(
     await Promise.all(
       configuration.definitions.map(async (name) => [
         name,
-        await loadDesignSystem(name),
+        await loadDesignSystem(name, configuration.ds.source.version),
       ]),
     ),
   );

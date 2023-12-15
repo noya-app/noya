@@ -6,7 +6,7 @@ import {
   component,
   transform,
 } from '@noya-design-system/protocol';
-import { DSConfig } from 'noya-api';
+import { DSConfig, DSSource } from 'noya-api';
 import { Stack } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { loadDesignSystem } from 'noya-module-loader';
@@ -61,7 +61,7 @@ export interface IDSRenderer {
 }
 
 type Props = {
-  sourceName: string;
+  librarySource: DSSource;
   config: DSConfig;
   renderContent: (options: DSRenderProps) => React.ReactNode;
   serializedSelection?: SerializedSelection;
@@ -76,7 +76,7 @@ type Props = {
 
 export const DSRenderer = forwardRef(function DSRenderer(
   {
-    sourceName,
+    librarySource,
     config,
     renderContent,
     serializedSelection,
@@ -109,10 +109,14 @@ export const DSRenderer = forwardRef(function DSRenderer(
     if (!ready) return;
 
     async function fetchLibrary() {
-      const system = await loadDesignSystem(sourceName, {
-        Function: ref.current!.contentWindow!['Function' as any] as any,
-        enableCache: false,
-      });
+      const system = await loadDesignSystem(
+        librarySource.name,
+        librarySource.version,
+        {
+          Function: ref.current!.contentWindow!['Function' as any] as any,
+          enableCache: false,
+        },
+      );
 
       if (!mounted) return;
 
@@ -125,7 +129,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     return () => {
       mounted = false;
     };
-  }, [ready, sourceName]);
+  }, [ready, librarySource]);
 
   useEffect(() => {
     if (!system) {

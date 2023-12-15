@@ -86,15 +86,18 @@ export function DSEditor({
   const [ds, setDS] = React.useState<DS>(initialDocument);
   const project = useProject();
 
-  let {
-    source: { name: sourceName },
-    config,
-    components = initialComponents,
-  } = ds;
+  let { source, config, components = initialComponents } = ds;
 
-  if (library) {
-    sourceName = library;
-  }
+  const librarySource = useMemo(() => {
+    if (library) {
+      return {
+        ...source,
+        name: library,
+      };
+    }
+
+    return source;
+  }, [library, source]);
 
   const setComponents = useCallback((components: NoyaComponent[]) => {
     setDS((ds) => ({
@@ -123,14 +126,17 @@ export function DSEditor({
 
   useEffect(() => {
     async function fetchLibrary() {
-      const system = await loadDesignSystem(sourceName);
+      const system = await loadDesignSystem(
+        librarySource.name,
+        librarySource.version,
+      );
 
       setSystem(system);
     }
 
     setSystem(undefined);
     fetchLibrary();
-  }, [sourceName]);
+  }, [librarySource]);
 
   const [_selection, _setSelection] = React.useState<
     Pick<SelectedComponent, 'diff' | 'variantID'>
@@ -501,7 +507,7 @@ export function DSEditor({
               <Stack.V flex="1" overflow="hidden" position="relative">
                 <DSControlledRenderer
                   ref={rendererRef}
-                  sourceName={sourceName}
+                  librarySource={librarySource}
                   config={config}
                   renderContent={handleRenderContent}
                   getStringValueAtPath={getStringValueAtPath}

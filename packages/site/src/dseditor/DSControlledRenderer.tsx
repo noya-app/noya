@@ -8,7 +8,7 @@ import { SerializedSelection, closest } from './dom';
 type Props = Pick<
   ComponentProps<typeof DSRenderer>,
   | 'config'
-  | 'sourceName'
+  | 'librarySource'
   | 'renderContent'
   | 'setHighlightedPath'
   | 'setSelectedPath'

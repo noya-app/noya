@@ -28,6 +28,7 @@
     "next": "^12",
     "react-guidebook": "^0.13.0",
     "react-resizable-panels": "^0.0.33",
+    "simple-kvs": "^0.1.2",
     "vscode-fuzzy-scorer": "^0.0.4"
   },
   "devDependencies": {

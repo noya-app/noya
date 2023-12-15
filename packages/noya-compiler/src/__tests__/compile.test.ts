@@ -98,7 +98,10 @@ let ChakraDesignSystem: DesignSystemDefinition;
 // let MaterialDesignSystem: DesignSystemDefinition;
 
 beforeAll(async () => {
-  ChakraDesignSystem = await loadDesignSystem('chakra');
+  ChakraDesignSystem = await loadDesignSystem(
+    '@noya-design-system/chakra',
+    'latest',
+  );
   // MaterialDesignSystem = await loadDesignSystem('mui');
 });
 

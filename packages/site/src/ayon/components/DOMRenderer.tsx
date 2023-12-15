@@ -163,7 +163,7 @@ const DOMRendererContent = memo(
                   <ErrorBoundary>
                     <DSControlledRenderer
                       ref={editingRef}
-                      sourceName={ds.source.name}
+                      librarySource={ds.source}
                       config={ds.config}
                       sync={sync}
                       setHighlightedPath={(path) => {

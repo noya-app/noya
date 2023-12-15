@@ -1,6 +1,6 @@
-import fetch from 'cross-fetch';
-
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import fetch from 'cross-fetch';
+import { getKeyValueStore } from 'simple-kvs';
 import { ThumbnailDesignSystem } from './ThumbnailDesignSystem';
 import { VanillaDesignSystem } from './VanillaDesignSystem';
 import { DesignSystemCache } from './cache';
@@ -22,14 +22,34 @@ function evaluateModule(content: string, Function: FunctionConstructor) {
   return module.exports;
 }
 
-export async function loadModule(url: string, Function = window.Function) {
+async function fetchModule(url: string) {
   const response = await fetch(url);
   const text = await response.text();
-  return evaluateModule(text, Function);
+  return text;
 }
+
+const UnpkgCache = {
+  getValue: async (key: string) => {
+    try {
+      const store = await getKeyValueStore('unpkg');
+      return await store.get<string>(key);
+    } catch (error) {
+      // ignore indexdb errors
+    }
+  },
+  setValue: async (key: string, value: string) => {
+    try {
+      const store = await getKeyValueStore('unpkg');
+      await store.set(key, value);
+    } catch (error) {
+      // ignore indexdb errors
+    }
+  },
+};
 
 export async function loadDesignSystem(
   name: string,
+  version: string,
   options: {
     Function?: typeof window.Function;
     enableCache?: boolean;
@@ -40,15 +60,27 @@ export async function loadDesignSystem(
 
   const { Function = window.Function, enableCache = true } = options;
 
-  if (enableCache && DesignSystemCache.has(name)) {
-    return DesignSystemCache.get(name)!;
+  const key = `${name}@${version}`;
+
+  if (enableCache && DesignSystemCache.has(key)) {
+    return DesignSystemCache.get(key)!;
   }
 
   const url = name.includes('@')
-    ? `https://www.unpkg.com/${name}/dist/standalone`
-    : `https://www.unpkg.com/@noya-design-system/${name}/dist/standalone`;
+    ? `https://www.unpkg.com/${key}/dist/standalone`
+    : `https://www.unpkg.com/@noya-design-system/${key}/dist/standalone`;
 
-  const exports = await loadModule(url, Function);
+  let source = await UnpkgCache.getValue(url);
+
+  if (source === undefined) {
+    source = await fetchModule(url);
+
+    if (version !== 'latest') {
+      UnpkgCache.setValue(url, source);
+    }
+  }
+
+  const exports = evaluateModule(source, Function);
 
   if (!(exports as any).DesignSystem) {
     throw new Error('No DesignSystem exported');
