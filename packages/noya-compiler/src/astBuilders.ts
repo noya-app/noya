@@ -76,12 +76,17 @@ export function createExpressionCode(value: unknown): ts.Expression {
 
 export function createElementCode({
   name,
+  accessPath,
   props,
   children,
 }: SimpleElement): ts.JsxElement | ts.JsxSelfClosingElement {
   return createJsxElement(
     ts.factory.createJsxOpeningElement(
-      ts.factory.createIdentifier(name),
+      accessPath && accessPath.length > 0
+        ? // When we update typescript we can probably used JsxNamespacedName
+          // https://github.com/microsoft/TypeScript/blob/2c7162143bbbf567ccecc64105010699fa7a2128/src/compiler/factory/nodeFactory.ts#L5802
+          ts.factory.createIdentifier(`${name}.${accessPath[0]}`)
+        : ts.factory.createIdentifier(name),
       undefined,
       ts.factory.createJsxAttributes(
         Object.entries(props).flatMap(([key, value]) => {

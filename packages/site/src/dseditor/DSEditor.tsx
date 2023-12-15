@@ -683,7 +683,7 @@ function DSGalleryCode({
         definitions: [
           'vanilla',
           '@noya-design-system/chakra',
-          // '@noya-design-system/antd',
+          '@noya-design-system/antd',
           '@noya-design-system/mui',
         ],
       });

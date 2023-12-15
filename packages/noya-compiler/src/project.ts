@@ -48,12 +48,13 @@ type ResolvedCompilerConfiguration = CompilerConfiguration & {
 function findElementNameAndSource(
   element: React.ReactNode,
   DesignSystem: DesignSystemDefinition,
-  Components: Map<unknown, NamespaceItem>,
+  namespaceMap: Map<unknown, NamespaceItem>,
 ):
   | {
       name: string;
       element: React.ReactElement;
       source?: string;
+      accessPath?: string[];
     }
   | undefined {
   if (!React.isValidElement(element)) return;
@@ -64,10 +65,10 @@ function findElementNameAndSource(
   }
 
   // This is a component exported directly from the design system
-  const component = Components.get(element.type);
+  const namespaceItem = namespaceMap.get(element.type);
 
-  if (component) {
-    return { ...component, element };
+  if (namespaceItem) {
+    return { ...namespaceItem, element };
   }
 
   const protocolComponent = Object.values(DesignSystem.components).find(
@@ -79,7 +80,7 @@ function findElementNameAndSource(
 
   if (!isValidElement(libraryElement)) return;
 
-  return findElementNameAndSource(libraryElement, DesignSystem, Components);
+  return findElementNameAndSource(libraryElement, DesignSystem, namespaceMap);
 }
 
 export function createSimpleElement(
@@ -96,7 +97,7 @@ export function createSimpleElement(
 
   if (!elementType) return;
 
-  const { element, name, source } = elementType;
+  const { element, name, source, accessPath } = elementType;
 
   function toReactArray(children: ReactNode): ReactNode[] {
     const result: ReactNode[] = [];
@@ -137,6 +138,7 @@ export function createSimpleElement(
 
   return simpleElement({
     name,
+    accessPath,
     source,
     // Filter out children prop and undefined props
     props: Object.fromEntries(
