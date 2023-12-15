@@ -5,10 +5,14 @@ Array [
   "package.json",
   "src/app/layout.tsx",
   "src/app/page.tsx",
-  "src/app/chakra/components/globals.css",
-  "src/app/chakra/components/layout.tsx",
-  "src/app/chakra/components/theme.ts",
-  "src/app/chakra/components/hero/page.tsx",
+  "src/app/chakra/blue/light/components/globals.css",
+  "src/app/chakra/blue/light/components/layout.tsx",
+  "src/app/chakra/blue/light/components/theme.ts",
+  "src/app/chakra/teal/light/components/globals.css",
+  "src/app/chakra/teal/light/components/layout.tsx",
+  "src/app/chakra/teal/light/components/theme.ts",
+  "src/app/chakra/blue/light/components/hero/page.tsx",
+  "src/app/chakra/teal/light/components/hero/page.tsx",
 ]
 `;
 

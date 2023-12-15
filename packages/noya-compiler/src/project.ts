@@ -436,6 +436,36 @@ export function compileDesignSystem(
   };
 }
 
+const colorNames = [
+  // 'slate',
+  // 'gray',
+  // 'zinc',
+  // 'neutral',
+  // 'stone',
+  // 'red',
+  // 'orange',
+  // 'amber',
+  // 'yellow',
+  // 'lime',
+  // 'green',
+  // 'emerald',
+  'teal',
+  // 'cyan',
+  // 'sky',
+  'blue',
+  // 'indigo',
+  // 'violet',
+  // 'purple',
+  // 'fuchsia',
+  // 'pink',
+  // 'rose',
+];
+
+const colorModes = [
+  'light' as const,
+  // 'dark'
+];
+
 export function compile(configuration: CompilerConfiguration) {
   const allDefinitions = Object.keys(configuration.resolvedDefinitions);
 
@@ -443,25 +473,45 @@ export function compile(configuration: CompilerConfiguration) {
   const allDependencies: Record<string, string> = {};
   const allDevDependencies: Record<string, string> = {};
 
-  for (const name of allDefinitions) {
-    const {
-      files: dsFiles,
-      dependencies,
-      devDependencies,
-    } = compileDesignSystem({
-      ...configuration,
-      designSystemDefinition: configuration.resolvedDefinitions[name],
-      includeTailwindBase: name === 'vanilla',
-    });
+  for (const libraryName of allDefinitions) {
+    for (const colorMode of colorModes) {
+      for (const colorName of colorNames) {
+        const {
+          files: dsFiles,
+          dependencies,
+          devDependencies,
+        } = compileDesignSystem({
+          ...configuration,
+          ds: {
+            ...configuration.ds,
+            config: {
+              ...configuration.ds.config,
+              colorMode,
+              colors: {
+                ...configuration.ds.config.colors,
+                primary: colorName,
+              },
+            },
+          },
+          designSystemDefinition:
+            configuration.resolvedDefinitions[libraryName],
+          includeTailwindBase: libraryName === 'vanilla',
+        });
 
-    const basename = path.basename(name);
+        Object.assign(allDependencies, dependencies);
+        Object.assign(allDevDependencies, devDependencies);
 
-    Object.assign(
-      allDSFiles,
-      addPathPrefix(dsFiles, `src/app/${basename}/components/`),
-    );
-    Object.assign(allDependencies, dependencies);
-    Object.assign(allDevDependencies, devDependencies);
+        const basename = path.basename(libraryName);
+
+        Object.assign(
+          allDSFiles,
+          addPathPrefix(
+            dsFiles,
+            `src/app/${basename}/${colorName}/${colorMode}/components/`,
+          ),
+        );
+      }
+    }
   }
 
   const files = {

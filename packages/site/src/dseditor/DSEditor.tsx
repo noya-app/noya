@@ -827,9 +827,11 @@ function Playground(
 
             props.setLatestBuildAssetId?.(assetId);
 
-            window
-              .open(`${client.assets.url(assetId)}/index.html`, '_blank')
-              ?.focus();
+            const url = `${client.assets.url(assetId)}/index.html`;
+
+            console.info('Uploaded to', assetId, url);
+
+            window.open(url, '_blank')?.focus();
           }}
         >
           Upload ZIP
