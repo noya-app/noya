@@ -433,12 +433,12 @@ export const DSLayoutRow = memo(function DSLayerRow({
         icon: <ClipboardCopyIcon />,
       },
       {
-        title: 'Paste JSX...',
+        title: 'Paste JSX',
         value: 'replaceWithRawJsx',
         icon: <ClipboardIcon />,
       },
       {
-        title: 'Paste cleaned JSX...',
+        title: 'Paste and clean JSX',
         value: 'replaceWithJsx',
         icon: <ClipboardIcon />,
       },
@@ -504,7 +504,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
       }
       case 'replaceWithJsx':
       case 'replaceWithRawJsx': {
-        const text = await openInputDialog('Paste JSX');
+        const text = await navigator.clipboard.readText();
         if (!text) return;
         const layout = parseLayoutWithOptions(text, 'geometric', {
           rewrite: value === 'replaceWithJsx',
