@@ -30,15 +30,26 @@ import {
 import {
   BoxModelIcon,
   CaretDownIcon,
+  ClipboardCopyIcon,
+  ClipboardIcon,
+  CopyIcon,
+  DropdownMenuIcon,
+  EnterIcon,
+  ExitIcon,
+  FontStyleIcon,
   GlobeIcon,
   ImageIcon,
+  InputIcon,
   MixerHorizontalIcon,
+  PlusCircledIcon,
   ShuffleIcon,
+  TrashIcon,
   VercelLogoIcon,
 } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { isDeepEqual, uuid } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { z } from 'zod';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import {
@@ -46,11 +57,7 @@ import {
   styleItems,
   typeItems,
 } from './completionItems';
-import {
-  exportLayout,
-  parseLayout,
-  parseLayoutWithOptions,
-} from './componentLayout';
+import { exportLayout, parseLayoutWithOptions } from './componentLayout';
 import { getComponentName, getNodeName } from './utils/nodeUtils';
 
 type LayoutTreeItem = {
@@ -371,51 +378,69 @@ export const DSLayoutRow = memo(function DSLayerRow({
       node.type === 'noyaPrimitiveElement' && {
         title: 'Add Child',
         value: 'addChild',
+        icon: <PlusCircledIcon />,
       },
       depth !== 0 &&
         parent.type === 'noyaPrimitiveElement' && {
           title: 'Duplicate',
           value: 'duplicate',
+          icon: <CopyIcon />,
         },
       depth !== 0 &&
         parent.type === 'noyaPrimitiveElement' && {
           title: 'Delete',
           value: 'delete',
+          icon: <TrashIcon />,
         },
     ],
     [
       {
         title: 'Rename',
         value: 'rename',
+        icon: <InputIcon />,
       },
       node.type === 'noyaPrimitiveElement' && {
         title: 'Add Style',
         value: 'addStyle',
+        icon: <FontStyleIcon />,
       },
       node.type === 'noyaPrimitiveElement' && {
         title: 'Pick Component',
         value: 'addType',
+        icon: <DropdownMenuIcon />,
       },
     ],
     [
-      node.type === 'noyaCompositeElement' && {
-        title: 'Replace with Contents',
-        value: 'replaceWithContents',
-      },
       {
         title: 'Extract to New Component',
         value: 'extractToComponent',
+        icon: <EnterIcon />,
+      },
+      node.type === 'noyaCompositeElement' && {
+        title: 'Replace with Contents',
+        value: 'replaceWithContents',
+        icon: <ExitIcon />,
       },
     ],
     [
-      { title: 'Copy HTML to Clipboard', value: 'copyHtml' },
+      { title: 'Copy Style', value: 'copyStyle', icon: <ClipboardCopyIcon /> },
+      { title: 'Paste Style', value: 'pasteStyle', icon: <ClipboardIcon /> },
+    ],
+    [
       {
-        title: 'Replace with HTML...',
-        value: 'replaceWithHtml',
+        title: 'Copy JSX',
+        value: 'copyJsx',
+        icon: <ClipboardCopyIcon />,
       },
       {
-        title: 'Replace with raw HTML...',
-        value: 'replaceWithRawHtml',
+        title: 'Paste JSX...',
+        value: 'replaceWithRawJsx',
+        icon: <ClipboardIcon />,
+      },
+      {
+        title: 'Paste cleaned JSX...',
+        value: 'replaceWithJsx',
+        icon: <ClipboardIcon />,
       },
     ],
   );
@@ -477,24 +502,59 @@ export const DSLayoutRow = memo(function DSLayerRow({
 
         break;
       }
-      case 'replaceWithRawHtml': {
-        const text = await openInputDialog('Paste Noya HTML');
+      case 'replaceWithJsx':
+      case 'replaceWithRawJsx': {
+        const text = await openInputDialog('Paste JSX');
         if (!text) return;
         const layout = parseLayoutWithOptions(text, 'geometric', {
-          rewrite: false,
+          rewrite: value === 'replaceWithJsx',
         });
-        onChange(createResolvedNode(findComponent, layout));
+        onChange(
+          ResolvedHierarchy.replace(resolvedNode, {
+            at: indexPath,
+            node: createResolvedNode(findComponent, layout),
+          }),
+        );
         break;
       }
-      case 'replaceWithHtml': {
-        const text = await openInputDialog('Paste raw HTML');
-        if (!text) return;
-        const layout = parseLayout(text, 'geometric');
-        onChange(createResolvedNode(findComponent, layout));
+      case 'copyStyle': {
+        if (node.type !== 'noyaPrimitiveElement') break;
+        navigator.clipboard.writeText(
+          JSON.stringify(node.classNames.map((c) => c.value)),
+        );
         break;
       }
-      case 'copyHtml': {
-        navigator.clipboard.writeText(exportLayout(resolvedNode));
+      case 'pasteStyle': {
+        if (node.type !== 'noyaPrimitiveElement') break;
+        const text = await navigator.clipboard.readText();
+        let classNames: string[] = [];
+
+        try {
+          const json = JSON.parse(text);
+          classNames = z.array(z.string()).parse(json);
+        } catch (e) {
+          console.error(e);
+          return;
+        }
+
+        onChange(
+          ResolvedHierarchy.replace(resolvedNode, {
+            at: indexPath,
+            node: {
+              ...cloneDeep(node),
+              classNames: [
+                ...node.classNames,
+                ...classNames.map((className: string) =>
+                  Model.className(className),
+                ),
+              ],
+            },
+          }),
+        );
+        break;
+      }
+      case 'copyJsx': {
+        navigator.clipboard.writeText(exportLayout(node));
         break;
       }
       case 'rename': {
@@ -693,20 +753,22 @@ export const DSLayoutRow = memo(function DSLayerRow({
               setIsSearchingTypes(false);
 
               const component = findComponent(item.id);
-              const parentPath = node.path.slice(0, 1);
+              const parentPath = node.path.slice(0, -1);
 
               if (component) {
+                const newNode = createResolvedNode(
+                  findComponent,
+                  Model.compositeElement({
+                    componentID: item.id,
+                    name: node.name ?? item.name,
+                  }),
+                  parentPath,
+                );
+
                 onChange(
                   ResolvedHierarchy.replace(resolvedNode, {
                     at: indexPath,
-                    node: createResolvedNode(
-                      findComponent,
-                      Model.compositeElement({
-                        componentID: item.id,
-                        name: node.name ?? item.name,
-                      }),
-                      parentPath,
-                    ),
+                    node: newNode,
                   }),
                 );
               } else {
