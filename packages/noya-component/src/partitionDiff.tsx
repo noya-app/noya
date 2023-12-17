@@ -1,9 +1,6 @@
-import {
-  NoyaDiffItem,
-  NoyaResolvedNode,
-  ResolvedHierarchy,
-} from 'noya-component';
 import { isDeepEqual, partition } from 'noya-utils';
+import { ResolvedHierarchy } from './resolvedHierarchy';
+import { NoyaDiffItem, NoyaResolvedNode } from './types';
 
 /**
  * Partition diff into nodes that apply to a primitive element and nodes that apply

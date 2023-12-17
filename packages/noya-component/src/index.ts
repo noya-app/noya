@@ -1,5 +1,7 @@
+export * from './applyDiff';
 export * from './arrayDiff';
 export * from './builders';
+export * from './partitionDiff';
 export * from './patterns';
 export * from './renderResolvedNode';
 export * from './renderSVGElement';

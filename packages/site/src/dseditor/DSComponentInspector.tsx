@@ -18,10 +18,10 @@ import {
   NoyaVariant,
   ResolvedHierarchy,
   SelectedComponent,
+  applyDiff,
   describeDiffItem,
   diffResolvedTrees,
   instantiateResolvedComponent,
-  unresolve,
 } from 'noya-component';
 import {
   Button,
@@ -59,7 +59,6 @@ import { DSLayoutTree } from './DSLayoutTree';
 import { exportLayout } from './componentLayout';
 import { enforceSchema } from './layoutSchema';
 import { getNodeName } from './utils/nodeUtils';
-import { partitionDiff } from './utils/partitionDiff';
 
 type Props = Pick<
   ComponentProps<typeof DSLayoutTree>,
@@ -557,70 +556,23 @@ export function DSComponentInspector({
                   <Button
                     variant="primary"
                     onClick={() => {
-                      if (!selection.diff) return;
+                      const {
+                        component: newComponent,
+                        selection: newSelection,
+                      } = applyDiff({
+                        selection,
+                        component,
+                        findComponent,
+                        enforceSchema,
+                      });
 
-                      if (selection.variantID) {
-                        // Merge the diff into the variant's diff
-                        const variant = component.variants?.find(
-                          (variant) => variant.id === selection.variantID,
-                        );
-
-                        if (!variant) return;
-
-                        const newVariant = {
-                          ...variant,
-                          diff: {
-                            items: [
-                              ...(variant.diff?.items ?? []),
-                              ...selection.diff.items,
-                            ],
-                          },
-                        };
-
-                        onChangeComponent({
-                          ...component,
-                          variants: component.variants?.map((variant) =>
-                            variant.id === selection.variantID
-                              ? newVariant
-                              : variant,
-                          ),
-                        });
-
-                        setSelection({
-                          ...selection,
-                          diff: undefined,
-                        });
-
-                        return;
+                      if (newComponent !== component) {
+                        onChangeComponent(newComponent);
                       }
 
-                      const [primitivesDiff, compositesDiff] = partitionDiff(
-                        resolvedNode,
-                        selection.diff.items || [],
-                      );
-
-                      const instance = instantiateResolvedComponent(
-                        findComponent,
-                        {
-                          componentID: selection.componentID,
-                          variantID: selection.variantID,
-                          diff: { items: primitivesDiff },
-                        },
-                      );
-
-                      const newRootElement = enforceSchema(
-                        unresolve(instance, { items: compositesDiff }),
-                      );
-
-                      onChangeComponent({
-                        ...component,
-                        rootElement: newRootElement,
-                      });
-
-                      setSelection({
-                        ...selection,
-                        diff: undefined,
-                      });
+                      if (newSelection !== selection) {
+                        setSelection(newSelection);
+                      }
                     }}
                   >
                     Save{selection.variantID ? ' Variant' : ''}

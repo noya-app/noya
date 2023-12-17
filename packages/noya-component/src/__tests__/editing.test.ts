@@ -1,10 +1,14 @@
 /* eslint-disable jest/no-commented-out-tests */
 import {
+  ElementHierarchy,
   Model,
+  NoyaNode,
   NoyaPrimitiveElement,
   NoyaResolvedCompositeElement,
   NoyaResolvedPrimitiveElement,
+  ResolvedHierarchy,
   added,
+  applyDiff,
   createResolvedNode,
   removed,
 } from 'noya-component';
@@ -155,75 +159,6 @@ describe('diffing', () => {
 
     expect(resolvedChild.classNames).toEqual([]);
   });
-
-  // it('embeds class names in primitive', () => {
-  //   const primitive = Model.primitiveElement({
-  //     componentID: PRIMITIVE_ID,
-  //     classNames: ['bg-red-500'],
-  //   });
-
-  //   const updated = embedRootLevelDiff(
-  //     primitive,
-  //     Model.diff([
-  //       Model.diffItem({
-  //         path: [primitive.id],
-  //         classNames: {
-  //           add: ['bg-green-500'],
-  //         },
-  //       }),
-  //     ]),
-  //   ) as NoyaPrimitiveElement;
-
-  //   expect(updated.classNames).toEqual(['bg-red-500', 'bg-green-500']);
-  // });
-
-  // it('embeds nested diff in composite element', () => {
-  //   const element = Model.compositeElement({
-  //     componentID: wrapperComponent.componentID,
-  //     diff: Model.diff([
-  //       Model.diffItem({
-  //         path: [wrapperComponent.rootElement.id, redComponent.rootElement.id],
-  //         classNames: {
-  //           add: ['bg-blue-500'],
-  //         },
-  //       }),
-  //     ]),
-  //   });
-
-  //   const updated = embedRootLevelDiff(
-  //     element,
-  //     Model.diff([
-  //       Model.diffItem({
-  //         path: [
-  //           element.id,
-  //           wrapperComponent.rootElement.id,
-  //           redComponent.rootElement.id,
-  //         ],
-  //         classNames: {
-  //           add: ['bg-green-500'],
-  //         },
-  //       }),
-  //     ]),
-  //   ) as NoyaCompositeElement;
-
-  //   expect(updated.diff?.items).toEqual([
-  //     {
-  //       path: [wrapperComponent.rootElement.id, redComponent.rootElement.id],
-  //       classNames: {
-  //         add: ['bg-blue-500', 'bg-green-500'],
-  //       },
-  //     },
-  //   ]);
-
-  //   // const updatedChild = updated.rootElement as NoyaResolvedPrimitiveElement;
-
-  //   // expect(updatedChild.classNames).toEqual([
-  //   //   { value: 'bg-red-500' },
-  //   //   { value: 'bg-blue-500', status: 'added' },
-  //   //   { value: 'bg-green-500', status: 'added' },
-  //   // ]);
-  // });
-
   // it('embeds string value', () => {
   //   const string = Model.string('hello');
 
@@ -447,4 +382,121 @@ describe('diffing', () => {
 
   //     expect(found?.id).toEqual('d');
   //   });
+});
+
+describe('apply diff', () => {
+  const enforceSchema = (node: NoyaNode) => node;
+
+  it('embeds class names in primitive', () => {
+    const primitive = Model.primitiveElement({
+      componentID: PRIMITIVE_ID,
+      classNames: [Model.className('bg-red-500')],
+    });
+
+    const component = Model.component({
+      componentID: 'a',
+      rootElement: primitive,
+    });
+
+    const components = {
+      [component.componentID]: component,
+    };
+
+    const diff = Model.diff([
+      Model.diffItem({
+        path: [primitive.id],
+        classNames: [added(Model.className('bg-green-500'), 1)],
+      }),
+    ]);
+
+    const findComponent = (componentID: string) => components[componentID];
+
+    const updated = applyDiff({
+      selection: { componentID: component.componentID, diff },
+      component,
+      findComponent,
+      enforceSchema,
+    });
+
+    const element = ElementHierarchy.find(
+      updated.component.rootElement,
+      (node) => node.id === primitive.id,
+    ) as NoyaPrimitiveElement;
+
+    expect(element.classNames.map((c) => c.value)).toEqual([
+      'bg-red-500',
+      'bg-green-500',
+    ]);
+  });
+
+  it('embeds nested diff in composite element', () => {
+    const redComponent = Model.component({
+      componentID: 'a',
+      rootElement: Model.primitiveElement({
+        componentID: PRIMITIVE_ID,
+        classNames: [Model.className('bg-red-500')],
+      }),
+    });
+
+    const wrapperComponent = Model.component({
+      componentID: 'b',
+      rootElement: Model.compositeElement({
+        componentID: redComponent.componentID,
+        diff: Model.diff([
+          Model.diffItem({
+            path: [redComponent.rootElement.id],
+            classNames: [added(Model.className('bg-pink-500'), 1)],
+          }),
+        ]),
+      }),
+    });
+
+    const element = Model.compositeElement({
+      componentID: wrapperComponent.componentID,
+      diff: Model.diff([
+        Model.diffItem({
+          path: [wrapperComponent.rootElement.id, redComponent.rootElement.id],
+          classNames: [added(Model.className('bg-blue-500'), 2)],
+        }),
+      ]),
+    });
+
+    const component = Model.component({
+      componentID: 'c',
+      rootElement: element,
+    });
+
+    const components = {
+      [redComponent.componentID]: redComponent,
+      [wrapperComponent.componentID]: wrapperComponent,
+      [component.componentID]: component,
+    };
+
+    const findComponent = (componentID: string) => components[componentID];
+
+    const updated = applyDiff({
+      selection: { componentID: component.componentID, diff: element.diff },
+      component,
+      findComponent,
+      enforceSchema,
+    });
+
+    const resolved = createResolvedNode(
+      findComponent,
+      updated.component.rootElement,
+    );
+
+    const resolvedPrimitive = ResolvedHierarchy.find(
+      resolved,
+      (node) =>
+        node.type === 'noyaPrimitiveElement' &&
+        node.componentID === PRIMITIVE_ID,
+    ) as NoyaResolvedPrimitiveElement;
+
+    expect(resolvedPrimitive.classNames.map((c) => c.value)).toEqual([
+      'bg-red-500',
+      'bg-pink-500',
+      'bg-blue-500',
+    ]);
+  });
 });
