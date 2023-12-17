@@ -18,10 +18,14 @@ export function partitionDiff(
     const indexPath = ResolvedHierarchy.findIndexPath(resolvedNode, (n) =>
       isDeepEqual(n.path, item.path),
     );
+
     if (!indexPath) return false;
+
     let nodePath = ResolvedHierarchy.accessPath(resolvedNode, indexPath);
+
     // Remove the root node which is the component itself
-    nodePath = nodePath.slice(1);
+    // nodePath = nodePath.slice(1);
+
     const indexOfFirstComposite = nodePath.findIndex(
       (node) => node.type === 'noyaCompositeElement',
     );

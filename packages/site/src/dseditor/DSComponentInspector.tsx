@@ -162,8 +162,21 @@ export function DSComponentInspector({
         componentID: selection.componentID,
         variantID: selection.variantID,
       });
-      const diff = diffResolvedTrees(instance, newResolvedNode);
-      setSelection({ ...selection, diff });
+
+      if (instance.id !== newResolvedNode.id) {
+        setSelection({
+          ...selection,
+          diff: Model.diff([
+            Model.diffItem({
+              path: [instance.id],
+              newRootNode: newResolvedNode,
+            }),
+          ]),
+        });
+      } else {
+        const diff = diffResolvedTrees(instance, newResolvedNode);
+        setSelection({ ...selection, diff });
+      }
     },
     [findComponent, selection, setSelection],
   );
@@ -581,8 +594,6 @@ export function DSComponentInspector({
                         return;
                       }
 
-                      // debugger;
-
                       const [primitivesDiff, compositesDiff] = partitionDiff(
                         resolvedNode,
                         selection.diff.items || [],
@@ -659,12 +670,12 @@ export function DSComponentInspector({
                             <Chip
                               key={id}
                               colorScheme={
-                                metadataMap[id].type === 'noyaCompositeElement'
+                                metadataMap[id]?.type === 'noyaCompositeElement'
                                   ? 'primary'
                                   : undefined
                               }
                             >
-                              {metadataMap[id].name}
+                              {metadataMap[id]?.name ?? '?'}
                             </Chip>
                           )),
                           <CaretRightIcon />,
@@ -705,7 +716,7 @@ export function DSComponentInspector({
                           {item.variantNames.map((arrayDiffItem, j) => {
                             const elementId = item.path[item.path.length - 1];
                             const targetComponent = findComponent(
-                              metadataMap[elementId].componentID ?? '',
+                              metadataMap[elementId]?.componentID ?? '',
                             );
                             const variants = targetComponent?.variants ?? [];
                             const findVariantName = (id: string): string => {

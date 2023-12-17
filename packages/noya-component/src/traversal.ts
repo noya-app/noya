@@ -52,6 +52,14 @@ export function unresolve(
   resolvedNode: NoyaResolvedNode,
   diffParam: NoyaDiff = { items: [] },
 ): NoyaNode {
+  for (const item of diffParam.items) {
+    if (isDeepEqual(item.path, resolvedNode.path)) {
+      if (item.newRootNode) {
+        return item.newRootNode;
+      }
+    }
+  }
+
   switch (resolvedNode.type) {
     case 'noyaString': {
       const { id, value, type, name } = resolvedNode;
@@ -126,7 +134,8 @@ function isEmptyDiff(diff: NoyaDiffItem) {
     !diff.props &&
     !diff.classNames &&
     !diff.variantNames &&
-    !diff.children
+    !diff.children &&
+    !diff.newRootNode
   );
 }
 
@@ -236,6 +245,19 @@ export function applyResolvedDiff(
     cloneDeep(rootNode),
     (node, transformedChildren) => {
       const nodeKey = node.path.join('/');
+
+      for (const item of diff.items) {
+        const itemKey = [...path, ...item.path].join('/');
+        if (itemKey === nodeKey) {
+          if (item.newRootNode) {
+            return createResolvedNode(
+              findComponent,
+              item.newRootNode,
+              item.path,
+            );
+          }
+        }
+      }
 
       switch (node.type) {
         case 'noyaCompositeElement': {

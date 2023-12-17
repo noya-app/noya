@@ -102,6 +102,7 @@ export type NoyaDiffItem = {
   textValue?: string;
   name?: string;
   componentID?: string;
+  newRootNode?: NoyaNode;
 };
 
 export type NoyaDiff = {
