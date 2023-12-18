@@ -153,7 +153,7 @@ it('sets name', () => {
   expect(ResolvedHierarchy.access(resolvedNode, [0]).name).toEqual('foo');
 });
 
-it('creates nested layout and adds classname', () => {
+describe('nested layout', () => {
   const state = new MockState();
 
   const component2 = state.addComponent({
@@ -184,38 +184,99 @@ it('creates nested layout and adds classname', () => {
     componentID: component1.componentID,
   });
 
-  // Classnames of Primimitive2 should be empty
-  const primitive2 = ResolvedHierarchy.find(
+  const resolvedPrimitive2 = ResolvedHierarchy.find(
     root,
     (node) => node.name === 'Primitive2',
   ) as NoyaResolvedPrimitiveElement;
-  expect(primitive2.classNames).toEqual([]);
 
-  const updated = resolvedNodeReducer(root, {
-    type: 'addClassNames',
-    indexPath: ResolvedHierarchy.indexPathOfNode(root, primitive2)!,
-    classNames: ['foo'],
+  const primitive2IndexPath = ResolvedHierarchy.indexPathOfNode(
+    root,
+    resolvedPrimitive2,
+  )!;
+
+  it('adds classname', () => {
+    expect(classNamesAtIndexPath(root, primitive2IndexPath)).toEqual([]);
+
+    const updated = resolvedNodeReducer(root, {
+      type: 'addClassNames',
+      indexPath: ResolvedHierarchy.indexPathOfNode(root, resolvedPrimitive2)!,
+      classNames: ['foo'],
+    });
+
+    expect(classNamesAtIndexPath(updated, primitive2IndexPath)).toEqual([
+      'foo',
+    ]);
+
+    const { newRoot } = updateStateWithNewResolvedNode({
+      state,
+      componentID: component1.componentID,
+      newResolvedNode: updated,
+    });
+
+    expect(classNamesAtIndexPath(newRoot, primitive2IndexPath)).toEqual([
+      'foo',
+    ]);
   });
 
-  expect(
-    classNamesAtIndexPath(
-      updated,
-      ResolvedHierarchy.indexPathOfNode(root, primitive2)!,
-    ),
-  ).toEqual(['foo']);
+  it('adds child', () => {
+    expect(
+      (
+        ResolvedHierarchy.access(
+          root,
+          primitive2IndexPath,
+        ) as NoyaResolvedPrimitiveElement
+      ).children,
+    ).toHaveLength(0);
 
-  const { newRoot } = updateStateWithNewResolvedNode({
-    state,
-    componentID: component1.componentID,
-    newResolvedNode: updated,
-  });
+    const updated = resolvedNodeReducer(root, {
+      type: 'insertNode',
+      indexPath: primitive2IndexPath,
+      node: createResolvedNode(
+        state.findComponent,
+        Model.primitiveElement({ name: 'Avatar', componentID: 'avatar' }),
+      ),
+    });
 
-  expect(
-    classNamesAtIndexPath(
+    expect(
+      (
+        ResolvedHierarchy.access(
+          updated,
+          primitive2IndexPath,
+        ) as NoyaResolvedPrimitiveElement
+      ).children,
+    ).toHaveLength(1);
+
+    const { newRoot } = updateStateWithNewResolvedNode({
+      state,
+      componentID: component1.componentID,
+      newResolvedNode: updated,
+    });
+
+    expect(
+      (
+        ResolvedHierarchy.access(
+          newRoot,
+          primitive2IndexPath,
+        ) as NoyaResolvedPrimitiveElement
+      ).children,
+    ).toHaveLength(1);
+
+    // Now add a classname to the new avatar child
+    const avatarIndexPath = ResolvedHierarchy.findIndexPath(
       newRoot,
-      ResolvedHierarchy.indexPathOfNode(root, primitive2)!,
-    ),
-  ).toEqual(['foo']);
+      (node) => node.name === 'Avatar',
+    )!;
+
+    expect(classNamesAtIndexPath(updated, avatarIndexPath)).toEqual([]);
+
+    const updated2 = resolvedNodeReducer(newRoot, {
+      type: 'addClassNames',
+      indexPath: avatarIndexPath,
+      classNames: ['foo'],
+    });
+
+    expect(classNamesAtIndexPath(updated2, avatarIndexPath)).toEqual(['foo']);
+  });
 });
 
 it('creates doubly nested layout and adds classname', () => {
