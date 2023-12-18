@@ -1,6 +1,7 @@
 export * from './applyDiff';
 export * from './arrayDiff';
 export * from './builders';
+export * from './nodeReducer';
 export * from './partitionDiff';
 export * from './patterns';
 export * from './renderResolvedNode';

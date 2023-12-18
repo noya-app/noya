@@ -10,6 +10,7 @@ import {
   ResolvedHierarchy,
   createResolvedNode,
   randomSeed,
+  resolvedNodeReducer,
   svgToReactElement,
   unresolve,
 } from 'noya-component';
@@ -146,13 +147,11 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   useKeyboardShortcuts({
     // Add a box into either the selected element or the first primitive element
     '+': () => {
-      const selectedElement =
-        ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
-          resolvedNode,
-          (n): n is NoyaResolvedPrimitiveElement =>
-            n.type === 'noyaPrimitiveElement' &&
-            selectedPath?.join('/') === n.path.join('/'),
-        );
+      const selectedElement = ResolvedHierarchy.findTypeByPath(
+        resolvedNode,
+        selectedPath,
+        'noyaPrimitiveElement',
+      );
 
       const primitiveElement =
         ResolvedHierarchy.find<NoyaResolvedPrimitiveElement>(
@@ -178,9 +177,10 @@ export const DSLayoutTree = memo(function DSLayoutTree({
       if (!indexPath) return;
 
       onChange(
-        ResolvedHierarchy.insert(resolvedNode, {
-          at: [...indexPath, target.children.length],
-          nodes: [child],
+        resolvedNodeReducer(resolvedNode, {
+          type: 'insertNode',
+          indexPath,
+          node: child,
         }),
       );
     },
@@ -538,17 +538,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
         }
 
         onChange(
-          ResolvedHierarchy.replace(resolvedNode, {
-            at: indexPath,
-            node: {
-              ...cloneDeep(node),
-              classNames: [
-                ...node.classNames,
-                ...classNames.map((className: string) =>
-                  Model.className(className),
-                ),
-              ],
-            },
+          resolvedNodeReducer(resolvedNode, {
+            type: 'addClassNames',
+            indexPath,
+            classNames,
           }),
         );
         break;
@@ -577,9 +570,9 @@ export const DSLayoutRow = memo(function DSLayerRow({
       }
       case 'duplicate': {
         onChange(
-          ResolvedHierarchy.insert(resolvedNode, {
-            at: [...indexPath.slice(0, -1), indexPath.at(-1)! + 1],
-            nodes: [ResolvedHierarchy.clone(node)],
+          resolvedNodeReducer(resolvedNode, {
+            type: 'duplicateNode',
+            indexPath,
           }),
         );
 
@@ -587,24 +580,24 @@ export const DSLayoutRow = memo(function DSLayerRow({
       }
       case 'delete': {
         onChange(
-          ResolvedHierarchy.remove(resolvedNode, {
-            indexPaths: [indexPath],
+          resolvedNodeReducer(resolvedNode, {
+            type: 'removeNode',
+            indexPath,
           }),
         );
         break;
       }
       case 'addChild': {
-        if (node.type !== 'noyaPrimitiveElement') break;
-
         const child = createResolvedNode(
           findComponent,
           Model.primitiveElement(boxSymbolId),
         );
 
         onChange(
-          ResolvedHierarchy.insert(resolvedNode, {
-            at: [...indexPath, node.children.length],
-            nodes: [child],
+          resolvedNodeReducer(resolvedNode, {
+            type: 'insertNode',
+            indexPath,
+            node: child,
           }),
         );
         break;
@@ -861,15 +854,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
               if (node.type !== 'noyaPrimitiveElement') return;
 
               onChange(
-                ResolvedHierarchy.replace(resolvedNode, {
-                  at: indexPath,
-                  node: {
-                    ...cloneDeep(node),
-                    classNames: [
-                      ...node.classNames,
-                      Model.className(item.name),
-                    ],
-                  },
+                resolvedNodeReducer(resolvedNode, {
+                  type: 'addClassNames',
+                  indexPath,
+                  classNames: [item.name],
                 }),
               );
             }}
@@ -915,9 +903,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   setEditingId(undefined);
 
                   onChange(
-                    ResolvedHierarchy.replace(resolvedNode, {
-                      at: indexPath,
-                      node: { ...cloneDeep(node), name: value },
+                    resolvedNodeReducer(resolvedNode, {
+                      type: 'setName',
+                      indexPath,
+                      name: value,
                     }),
                   );
                 }}
@@ -1020,14 +1009,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   }}
                   onDelete={() => {
                     onChange(
-                      ResolvedHierarchy.replace(resolvedNode, {
-                        at: indexPath,
-                        node: {
-                          ...node,
-                          classNames: node.classNames.filter(
-                            (className) => className.value !== value,
-                          ),
-                        },
+                      resolvedNodeReducer(resolvedNode, {
+                        type: 'removeClassNames',
+                        indexPath,
+                        classNames: [value],
                       }),
                     );
                   }}

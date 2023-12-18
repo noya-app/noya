@@ -1,4 +1,4 @@
-import { uuid } from 'noya-utils';
+import { isDeepEqual, uuid } from 'noya-utils';
 import { defineTree } from 'tree-visit';
 import { NoyaResolvedNode } from './types';
 
@@ -84,4 +84,27 @@ function clone<T extends NoyaResolvedNode>(node: T): T {
   }) as T;
 }
 
-export const ResolvedHierarchy = { ...Hierarchy, clone };
+function findByPath(
+  node: NoyaResolvedNode,
+  path: string[] | undefined,
+): NoyaResolvedNode | undefined {
+  return ResolvedHierarchy.find(node, (n) => isDeepEqual(n.path, path));
+}
+
+function findTypeByPath<T extends NoyaResolvedNode['type']>(
+  node: NoyaResolvedNode,
+  path: string[] | undefined,
+  type: T,
+) {
+  return ResolvedHierarchy.find(
+    node,
+    (n) => n.type === type && isDeepEqual(n.path, path),
+  ) as Extract<NoyaResolvedNode, { type: T }> | undefined;
+}
+
+export const ResolvedHierarchy = {
+  ...Hierarchy,
+  clone,
+  findByPath,
+  findTypeByPath,
+};
