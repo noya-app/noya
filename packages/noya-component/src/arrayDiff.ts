@@ -37,6 +37,15 @@ function computeFirstArrayMove<T>(
   }
 }
 
+function filterDuplicates<T>(
+  a: T[],
+  identity: (item: T) => unknown = (item) => item,
+): T[] {
+  const map = new Map(a.map((item, index) => [identity(item), index]));
+
+  return [...map.values()].map((index) => a[index]);
+}
+
 export function computeArrayDiff<T>(a: T[], b: T[]): ArrayDiffItem<T>[];
 export function computeArrayDiff<T, K>(
   a: T[],
@@ -51,6 +60,14 @@ export function computeArrayDiff<T>(
   const items: ArrayDiffItem<T>[] = [];
   const aMap = new Map(a.map((item, index) => [identity(item), index]));
   const bMap = new Map(b.map((item, index) => [identity(item), index]));
+
+  // Detect duplicates by comparing array length vs map size.
+  if (aMap.size !== a.length || bMap.size !== b.length) {
+    return computeArrayDiff(
+      filterDuplicates(a, identity),
+      filterDuplicates(b, identity),
+    );
+  }
 
   // Check for removed items.
   let removalOffset = 0;

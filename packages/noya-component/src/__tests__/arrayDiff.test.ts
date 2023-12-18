@@ -137,3 +137,13 @@ test('swaps multiple pairs', () => {
   expect(applied).toEqual(b);
   expect(diff).toEqual([moved(0, 1), moved(4, 5)]);
 });
+
+test('filter duplicates', () => {
+  let a = ['a'];
+  let b = ['a', 'a', 'b'];
+
+  const diff = computeArrayDiff(a, b);
+  const applied = applyArrayDiff(a, diff);
+
+  expect(applied).toEqual(['a', 'b']);
+});
