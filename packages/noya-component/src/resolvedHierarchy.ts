@@ -42,10 +42,11 @@ const Hierarchy = defineTree<NoyaResolvedNode>({
           ]
             .filter(Boolean)
             .join(' '),
-          node.diff?.items.map((item) => JSON.stringify(item)),
+          node.diff && node.diff?.items.length > 0
+            ? `diff:${node.diff.items.map((item) => JSON.stringify(item))}`
+            : '',
         ]
           .filter(Boolean)
-          .map((v, i) => (i > 0 ? '  ' + v : v))
           .join('\n');
       case 'noyaPrimitiveElement':
         const classNames = node.classNames.map((c) => c.value).join(' ');
@@ -59,10 +60,9 @@ const Hierarchy = defineTree<NoyaResolvedNode>({
           ]
             .filter(Boolean)
             .join(' '),
-          classNames,
+          classNames.length > 0 ? `class:${classNames}` : '',
         ]
           .filter(Boolean)
-          .map((v, i) => (i > 0 ? '  ' + v : v))
           .join('\n');
     }
   },
