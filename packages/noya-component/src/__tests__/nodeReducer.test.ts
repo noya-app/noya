@@ -276,6 +276,14 @@ describe('nested layout', () => {
     });
 
     expect(classNamesAtIndexPath(updated2, avatarIndexPath)).toEqual(['foo']);
+
+    const { newRoot: newRoot2 } = updateStateWithNewResolvedNode({
+      state,
+      componentID: component1.componentID,
+      newResolvedNode: updated2,
+    });
+
+    expect(classNamesAtIndexPath(newRoot2, avatarIndexPath)).toEqual(['foo']);
   });
 });
 
@@ -417,5 +425,13 @@ describe('doubly nested layout', () => {
     });
 
     expect(classNamesAtIndexPath(updated2, avatarIndexPath)).toEqual(['foo']);
+
+    const { newRoot: newRoot2 } = updateStateWithNewResolvedNode({
+      state,
+      componentID: component1.componentID,
+      newResolvedNode: updated2,
+    });
+
+    expect(classNamesAtIndexPath(newRoot2, avatarIndexPath)).toEqual(['foo']);
   });
 });
