@@ -1,5 +1,5 @@
 import { isDeepEqual, uuid } from 'noya-utils';
-import { defineTree } from 'tree-visit';
+import { IndexPath, defineTree } from 'tree-visit';
 import { NoyaResolvedNode } from './types';
 
 const Hierarchy = defineTree<NoyaResolvedNode>({
@@ -33,12 +33,32 @@ const Hierarchy = defineTree<NoyaResolvedNode>({
       case 'noyaString':
         return [JSON.stringify(node.value), pathString].join(' ');
       case 'noyaCompositeElement':
-        return [node.name || node.componentID, '<comp>', pathString].join(' ');
+        return [
+          [
+            node.name ? node.name : '',
+            `comp:${node.componentID}`,
+            `id:${ellipsisMiddle(node.id, 8)}`,
+            pathString,
+          ]
+            .filter(Boolean)
+            .join(' '),
+          node.diff?.items.map((item) => JSON.stringify(item)),
+        ]
+          .filter(Boolean)
+          .map((v, i) => (i > 0 ? '  ' + v : v))
+          .join('\n');
       case 'noyaPrimitiveElement':
         const classNames = node.classNames.map((c) => c.value).join(' ');
 
         return [
-          [node.name || node.componentID, '<prim>', pathString].join(' '),
+          [
+            node.name ? node.name : '',
+            `prim:${node.componentID}`,
+            `id:${ellipsisMiddle(node.id, 8)}`,
+            pathString,
+          ]
+            .filter(Boolean)
+            .join(' '),
           classNames,
         ]
           .filter(Boolean)
@@ -102,9 +122,31 @@ function findTypeByPath<T extends NoyaResolvedNode['type']>(
   ) as Extract<NoyaResolvedNode, { type: T }> | undefined;
 }
 
+function indexPathOfNode(
+  node: NoyaResolvedNode,
+  target: NoyaResolvedNode,
+): IndexPath | undefined {
+  return ResolvedHierarchy.findIndexPath(node, (n) => n === target);
+}
+
+function keyPathOfNode(
+  node: NoyaResolvedNode,
+  target: NoyaResolvedNode,
+): string[] | undefined {
+  const indexPath = indexPathOfNode(node, target);
+
+  if (!indexPath) return undefined;
+
+  const nodePath = ResolvedHierarchy.accessPath(node, indexPath);
+
+  return nodePath.map((n) => n.id);
+}
+
 export const ResolvedHierarchy = {
   ...Hierarchy,
   clone,
   findByPath,
   findTypeByPath,
+  indexPathOfNode,
+  keyPathOfNode,
 };

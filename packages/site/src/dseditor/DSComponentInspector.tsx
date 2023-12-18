@@ -20,8 +20,7 @@ import {
   SelectedComponent,
   applyDiff,
   describeDiffItem,
-  diffResolvedTrees,
-  instantiateResolvedComponent,
+  updateSelection,
 } from 'noya-component';
 import {
   Button,
@@ -157,25 +156,13 @@ export function DSComponentInspector({
 
   const handlePendingChange = useCallback(
     (newResolvedNode: NoyaResolvedNode) => {
-      const instance = instantiateResolvedComponent(findComponent, {
-        componentID: selection.componentID,
-        variantID: selection.variantID,
-      });
-
-      if (instance.id !== newResolvedNode.id) {
-        setSelection({
-          ...selection,
-          diff: Model.diff([
-            Model.diffItem({
-              path: [instance.id],
-              newRootNode: newResolvedNode,
-            }),
-          ]),
-        });
-      } else {
-        const diff = diffResolvedTrees(instance, newResolvedNode);
-        setSelection({ ...selection, diff });
-      }
+      setSelection(
+        updateSelection({
+          selection,
+          newResolvedNode,
+          findComponent,
+        }),
+      );
     },
     [findComponent, selection, setSelection],
   );

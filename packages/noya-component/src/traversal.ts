@@ -468,3 +468,33 @@ export function instantiateResolvedComponent(
 
   return resolvedNode.rootElement;
 }
+
+export function updateSelection({
+  selection,
+  newResolvedNode,
+  findComponent,
+}: {
+  selection: SelectedComponent;
+  newResolvedNode: NoyaResolvedNode;
+  findComponent: FindComponent;
+}): SelectedComponent {
+  const instance = instantiateResolvedComponent(findComponent, {
+    componentID: selection.componentID,
+    variantID: selection.variantID,
+  });
+
+  if (instance.id !== newResolvedNode.id) {
+    return {
+      ...selection,
+      diff: Model.diff([
+        Model.diffItem({
+          path: [instance.id],
+          newRootNode: newResolvedNode,
+        }),
+      ]),
+    };
+  } else {
+    const diff = diffResolvedTrees(instance, newResolvedNode);
+    return { ...selection, diff };
+  }
+}
