@@ -442,6 +442,12 @@ describe('add component within layout', () => {
       rootElement: Model.primitiveElement({
         name: 'GridPrimitive',
         componentID: 'box',
+        children: [
+          Model.primitiveElement({
+            name: 'Avatar',
+            componentID: 'avatar',
+          }),
+        ],
       }),
     });
 
@@ -581,14 +587,14 @@ describe('add component within layout', () => {
 
     // Save change to state
     const {
-      // newState: newState3,
+      newState: newState3,
       newRoot: newRoot3,
       // selectionWithDiff: selectionWithDiff3,
     } = updateStateWithNewResolvedNode({
       state: newState2,
       componentID: section.componentID,
       newResolvedNode: rootWithClassName,
-      debug: true,
+      // debug: true,
     });
 
     // console.log(JSON.stringify(selectionWithDiff3.diff, null, 2));
@@ -605,5 +611,35 @@ describe('add component within layout', () => {
         )!,
       ),
     ).toEqual(['foo']);
+
+    // Add classname to avatar
+    const rootWithAvatarClassName = resolvedNodeReducer(newRoot3, {
+      type: 'addClassNames',
+      indexPath: ResolvedHierarchy.findIndexPath(
+        newRoot3,
+        (n) => n.name === 'Avatar',
+      )!,
+      classNames: ['bar'],
+    });
+
+    // Save change to state
+    const {
+      // newState: newState4,
+      newRoot: newRoot4,
+      // selectionWithDiff: selectionWithDiff4,
+    } = updateStateWithNewResolvedNode({
+      state: newState3,
+      componentID: section.componentID,
+      newResolvedNode: rootWithAvatarClassName,
+      // debug: true,
+    });
+
+    // Test that class name was added
+    expect(
+      classNamesAtIndexPath(
+        newRoot4,
+        ResolvedHierarchy.findIndexPath(newRoot4, (n) => n.name === 'Avatar')!,
+      ),
+    ).toEqual(['bar']);
   });
 });
