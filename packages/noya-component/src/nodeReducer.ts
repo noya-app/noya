@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
+// import cloneDeep from 'lodash/cloneDeep';
 import { IndexPath } from 'tree-visit';
 import { Model } from './builders';
 import { ResolvedHierarchy } from './resolvedHierarchy';
@@ -9,6 +9,10 @@ import {
   NoyaResolvedNode,
   NoyaVariantName,
 } from './types';
+
+// noop - for performance we don't clone. But if we need to check for
+// mutation bugs, we can swap this out for lodash's cloneDeep
+const cloneDeep = <T>(node: T): T => node;
 
 type Action =
   | {
