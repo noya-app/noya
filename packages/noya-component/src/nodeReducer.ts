@@ -2,6 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { IndexPath } from 'tree-visit';
 import { Model } from './builders';
 import { ResolvedHierarchy } from './resolvedHierarchy';
+import { FindComponent, createResolvedNode } from './traversal';
 import { NoyaResolvedNode } from './types';
 
 type Action =
@@ -28,6 +29,16 @@ type Action =
   | {
       type: 'removeNode';
       indexPath: IndexPath;
+    }
+  | {
+      type: 'replaceNodeWithFirstChild';
+      indexPath: IndexPath;
+    }
+  | {
+      type: 'wrapNode';
+      indexPath: IndexPath;
+      primitiveType: string;
+      findComponent: FindComponent;
     }
   | {
       type: 'duplicateNode';
@@ -116,6 +127,38 @@ export function resolvedNodeReducer(
       return ResolvedHierarchy.insert(resolvedNode, {
         at: [...indexPath.slice(0, -1), indexPath.at(-1)! + 1],
         nodes: [ResolvedHierarchy.clone(node)],
+      });
+    }
+    case 'replaceNodeWithFirstChild': {
+      const { indexPath } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (node?.type !== 'noyaPrimitiveElement') return resolvedNode;
+
+      if (node.children.length === 0) return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: cloneDeep(node.children[0]),
+      });
+    }
+    case 'wrapNode': {
+      const { indexPath, primitiveType, findComponent } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      const wrappedNode = createResolvedNode({
+        findComponent,
+        node: Model.primitiveElement({
+          componentID: primitiveType,
+          children: [node],
+        }),
+      });
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: wrappedNode,
       });
     }
   }

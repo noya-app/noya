@@ -44,6 +44,8 @@ import {
   MixerHorizontalIcon,
   PlusCircledIcon,
   ShuffleIcon,
+  ThickArrowDownIcon,
+  ThickArrowUpIcon,
   TrashIcon,
   VercelLogoIcon,
 } from 'noya-icons';
@@ -395,6 +397,19 @@ export const DSLayoutRow = memo(function DSLayerRow({
     ],
     [
       {
+        title: 'Wrap within Box',
+        value: 'wrapWithinBox',
+        icon: <ThickArrowUpIcon />,
+      },
+      node.type === 'noyaPrimitiveElement' &&
+        node.children.length > 0 && {
+          title: 'Replace with First Child',
+          value: 'replaceWithFirstChild',
+          icon: <ThickArrowDownIcon />,
+        },
+    ],
+    [
+      {
         title: 'Rename',
         value: 'rename',
         icon: <InputIcon />,
@@ -453,6 +468,26 @@ export const DSLayoutRow = memo(function DSLayerRow({
   const openInputDialog = useOpenInputDialog();
   const onSelectMenuItem = async (value: MenuItemType) => {
     switch (value) {
+      case 'replaceWithFirstChild': {
+        onChange(
+          resolvedNodeReducer(resolvedNode, {
+            type: 'replaceNodeWithFirstChild',
+            indexPath,
+          }),
+        );
+        break;
+      }
+      case 'wrapWithinBox': {
+        onChange(
+          resolvedNodeReducer(resolvedNode, {
+            type: 'wrapNode',
+            indexPath,
+            primitiveType: boxSymbolId,
+            findComponent,
+          }),
+        );
+        break;
+      }
       case 'extractToComponent': {
         const name = getNodeName(node, findComponent);
 
