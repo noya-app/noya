@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import {
   Model,
   NoyaComponent,
@@ -7,16 +6,15 @@ import {
   NoyaDiffItem,
   NoyaNode,
   NoyaPrimitiveElement,
-  NoyaResolvedCompositeElement,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
-  NoyaResolvedString,
   NoyaString,
   ResolvedHierarchy,
   SelectedComponent,
   applyArrayDiff,
   computeArrayDiff,
   mapArrayDiff,
+  resolvedNodeReducer,
 } from 'noya-component';
 import { isDeepEqual } from 'noya-utils';
 import { defineTree } from 'tree-visit';
@@ -240,138 +238,110 @@ export function applyResolvedDiff(
   findComponent: FindComponent,
   rootNode: NoyaResolvedNode,
   diff: NoyaDiff,
-  path: string[],
+  parentPath: string[],
   debug: boolean = false,
 ) {
-  return ResolvedHierarchy.map<NoyaResolvedNode>(
-    cloneDeep(rootNode),
-    (node, transformedChildren) => {
-      const nodeKey = node.path.join('/');
+  for (const item of diff.items) {
+    const path = [...parentPath, ...item.path];
+    const node = ResolvedHierarchy.findByPath(rootNode, path);
 
-      for (const item of diff.items) {
-        const itemKey = [...path, ...item.path].join('/');
+    if (!node) continue;
 
-        if (itemKey === nodeKey) {
-          if (item.newRootNode) {
-            return createResolvedNode({
+    const indexPath = ResolvedHierarchy.indexPathOfNode(rootNode, node);
+
+    if (!indexPath) {
+      throw new Error(
+        `Failed to find index path of node: ${node.name ?? node.id}`,
+      );
+    }
+
+    if (item.newRootNode) {
+      rootNode = createResolvedNode({
+        findComponent,
+        node: item.newRootNode,
+        parentPath: item.path,
+        debug,
+      });
+
+      continue;
+    }
+
+    if (item.name !== undefined) {
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setName',
+        indexPath,
+        name: item.name,
+      });
+    }
+
+    if (item.textValue !== undefined) {
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setTextValue',
+        indexPath,
+        textValue: item.textValue,
+      });
+    }
+
+    if (item.componentID !== undefined) {
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setComponentID',
+        indexPath,
+        componentID: item.componentID,
+      });
+    }
+
+    if (item.props && node.type === 'noyaPrimitiveElement') {
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setProps',
+        indexPath,
+        props: applyArrayDiff(node.props, item.props),
+      });
+    }
+
+    if (item.classNames && node.type === 'noyaPrimitiveElement') {
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setClassNames',
+        indexPath,
+        classNames: applyArrayDiff(node.classNames, item.classNames),
+      });
+    }
+
+    if (item.variantNames && node.type === 'noyaCompositeElement') {
+      // TODO: Need to actually apply the variant diff, but maybe not here.
+      // If a variant name is added we could apply it here, but how would we
+      // apply a removed variant name?
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setVariantNames',
+        indexPath,
+        variantNames: applyArrayDiff(
+          node.variantNames ?? [],
+          item.variantNames,
+        ),
+      });
+    }
+
+    if (item.children && node.type === 'noyaPrimitiveElement') {
+      rootNode = resolvedNodeReducer(rootNode, {
+        type: 'setChildren',
+        indexPath,
+        children: applyArrayDiff(
+          node.children,
+          mapArrayDiff(item.children, (addedNode) => {
+            const result = createResolvedNode({
               findComponent,
-              node: item.newRootNode,
-              parentPath: item.path,
+              node: addedNode,
+              parentPath: [...parentPath, ...item.path],
               debug,
             });
-          }
-        }
-      }
 
-      switch (node.type) {
-        case 'noyaCompositeElement': {
-          const newNode: NoyaResolvedCompositeElement = {
-            ...node,
-            rootElement: transformedChildren[0],
-          };
+            return result;
+          }),
+        ),
+      });
+    }
+  }
 
-          diff.items
-            .filter((item) => {
-              const itemKey = [...path, ...item.path].join('/');
-              return itemKey === nodeKey;
-            })
-            .forEach((item) => {
-              if (item.name !== undefined) {
-                newNode.name = item.name;
-              }
-
-              if (item.variantNames) {
-                newNode.variantNames = applyArrayDiff(
-                  newNode.variantNames ?? [],
-                  item.variantNames,
-                );
-              }
-            });
-
-          return newNode;
-        }
-        case 'noyaString': {
-          const newNode: NoyaResolvedString = {
-            ...node,
-          };
-
-          diff.items
-            .filter((item) => {
-              const itemKey = [...path, ...item.path].join('/');
-
-              return itemKey === nodeKey;
-            })
-            .forEach((item) => {
-              if (item.textValue !== undefined) {
-                newNode.value = item.textValue;
-              }
-            });
-
-          return newNode;
-        }
-        case 'noyaPrimitiveElement': {
-          const newNode: NoyaResolvedPrimitiveElement = {
-            ...node,
-            children: transformedChildren,
-          };
-
-          diff.items
-            .filter((item) => {
-              const itemKey = [...path, ...item.path].join('/');
-              return itemKey === nodeKey;
-            })
-            .forEach((item) => {
-              if (item.name !== undefined) {
-                newNode.name = item.name;
-              }
-
-              if (item.componentID !== undefined) {
-                newNode.componentID = item.componentID;
-              }
-
-              if (item.children) {
-                newNode.children = applyArrayDiff(
-                  newNode.children,
-                  mapArrayDiff(item.children, (addedNode) => {
-                    const result = createResolvedNode({
-                      findComponent,
-                      node: addedNode,
-                      parentPath: [...path, ...item.path],
-                      debug,
-                    });
-
-                    const parentPath = [...path, ...item.path.slice(0, -1)];
-
-                    const withDiff = applyResolvedDiff(
-                      findComponent,
-                      result,
-                      diff,
-                      parentPath,
-                      debug,
-                    );
-
-                    return withDiff;
-                  }),
-                );
-              }
-
-              if (item.props) {
-                newNode.props = applyArrayDiff(newNode.props, item.props);
-              }
-
-              if (item.classNames) {
-                newNode.classNames = applyArrayDiff(
-                  newNode.classNames,
-                  item.classNames,
-                );
-              }
-            });
-
-          return newNode;
-        }
-      }
-    },
-  );
+  return rootNode;
 }
 
 export function createResolvedNode({

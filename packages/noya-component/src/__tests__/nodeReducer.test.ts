@@ -14,6 +14,7 @@ import {
   NoyaResolvedCompositeElement,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
+  NoyaResolvedString,
 } from '../types';
 import { MockState } from './MockState';
 
@@ -138,6 +139,34 @@ it('sets name', () => {
   });
 
   expect(ResolvedHierarchy.access(resolvedNode, [0]).name).toEqual('foo');
+});
+
+it('sets text value', () => {
+  const state = new MockState();
+
+  const component = state.addComponent({
+    componentID: 'custom',
+    rootElement: Model.primitiveElement({
+      componentID: 'text',
+      children: [Model.string({ name: 'String', value: 'Hello' })],
+    }),
+  });
+
+  let resolvedNode = state.instantiateComponent(component.componentID);
+
+  resolvedNode = resolvedNodeReducer(resolvedNode, {
+    type: 'setTextValue',
+    indexPath: [0],
+    textValue: 'World',
+  });
+
+  expect(
+    ResolvedHierarchy.find<NoyaResolvedString>(
+      resolvedNode,
+      (node): node is NoyaResolvedString =>
+        node.type === 'noyaString' && node.name === 'String',
+    )?.value,
+  ).toEqual('World');
 });
 
 describe('nested layout', () => {

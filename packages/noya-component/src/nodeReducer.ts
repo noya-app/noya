@@ -3,13 +3,38 @@ import { IndexPath } from 'tree-visit';
 import { Model } from './builders';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { FindComponent, createResolvedNode } from './traversal';
-import { NoyaResolvedNode } from './types';
+import {
+  NoyaClassName,
+  NoyaProp,
+  NoyaResolvedNode,
+  NoyaVariantName,
+} from './types';
 
 type Action =
   | {
       type: 'setName';
       indexPath: IndexPath;
       name: string;
+    }
+  | {
+      type: 'setTextValue';
+      indexPath: IndexPath;
+      textValue: string;
+    }
+  | {
+      type: 'setComponentID';
+      indexPath: IndexPath;
+      componentID: string;
+    }
+  | {
+      type: 'setProps';
+      indexPath: IndexPath;
+      props: NoyaProp[];
+    }
+  | {
+      type: 'setChildren';
+      indexPath: IndexPath;
+      children: NoyaResolvedNode[];
     }
   | {
       type: 'addClassNames';
@@ -20,6 +45,16 @@ type Action =
       type: 'removeClassNames';
       indexPath: IndexPath;
       classNames: string[];
+    }
+  | {
+      type: 'setClassNames';
+      indexPath: IndexPath;
+      classNames: NoyaClassName[];
+    }
+  | {
+      type: 'setVariantNames';
+      indexPath: IndexPath;
+      variantNames: NoyaVariantName[];
     }
   | {
       type: 'insertNode';
@@ -159,6 +194,96 @@ export function resolvedNodeReducer(
       return ResolvedHierarchy.replace(resolvedNode, {
         at: indexPath,
         node: wrappedNode,
+      });
+    }
+    case 'setTextValue': {
+      const { indexPath, textValue } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (node?.type !== 'noyaString') return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: {
+          ...cloneDeep(node),
+          value: textValue,
+        },
+      });
+    }
+    case 'setComponentID': {
+      const { indexPath, componentID } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (!node || node.type === 'noyaString') return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: {
+          ...cloneDeep(node),
+          componentID,
+        },
+      });
+    }
+    case 'setClassNames': {
+      const { indexPath, classNames } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (node?.type !== 'noyaPrimitiveElement') return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: {
+          ...cloneDeep(node),
+          classNames: cloneDeep(classNames),
+        },
+      });
+    }
+    case 'setProps': {
+      const { indexPath, props } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (node?.type !== 'noyaPrimitiveElement') return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: {
+          ...cloneDeep(node),
+          props: cloneDeep(props),
+        },
+      });
+    }
+    case 'setVariantNames': {
+      const { indexPath, variantNames } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (node?.type !== 'noyaCompositeElement') return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: {
+          ...cloneDeep(node),
+          variantNames: cloneDeep(variantNames),
+        },
+      });
+    }
+    case 'setChildren': {
+      const { indexPath, children } = action;
+
+      const node = ResolvedHierarchy.access(resolvedNode, indexPath);
+
+      if (node?.type !== 'noyaPrimitiveElement') return resolvedNode;
+
+      return ResolvedHierarchy.replace(resolvedNode, {
+        at: indexPath,
+        node: {
+          ...cloneDeep(node),
+          children: cloneDeep(children),
+        },
       });
     }
   }

@@ -1,6 +1,6 @@
 import { Model } from '../builders';
-import { createResolvedNode } from '../traversal';
-import { NoyaComponent, NoyaNode } from '../types';
+import { createResolvedNode, instantiateResolvedComponent } from '../traversal';
+import { NoyaComponent, NoyaNode, SelectedComponent } from '../types';
 
 export class MockState {
   components: Record<string, NoyaComponent> = {};
@@ -20,6 +20,14 @@ export class MockState {
     const component = Model.component(options);
     this.components[component.componentID] = component;
     return component;
+  }
+
+  instantiateComponent(selection: string | SelectedComponent) {
+    if (typeof selection === 'string') {
+      selection = { componentID: selection };
+    }
+
+    return instantiateResolvedComponent(this.findComponent, selection);
   }
 
   clonedStateWithComponent(component: NoyaComponent) {
