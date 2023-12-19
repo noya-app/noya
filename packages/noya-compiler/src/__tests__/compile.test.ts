@@ -243,10 +243,10 @@ describe('renders', () => {
     );
   }
 
-  const resolvedNode = createResolvedNode(
+  const resolvedNode = createResolvedNode({
     findComponent,
-    noyaComponent.rootElement,
-  );
+    node: noyaComponent.rootElement,
+  });
 
   test('default', () => {
     const reactNode = renderResolvedNode({

@@ -1,75 +1,62 @@
 import { IndexPath } from 'tree-visit';
-import { applyDiff } from '../applyDiff';
+import { applySelectionDiff } from '../applyDiff';
+import { added } from '../arrayDiff';
 import { Model } from '../builders';
 import { resolvedNodeReducer } from '../nodeReducer';
 import { ResolvedHierarchy } from '../resolvedHierarchy';
 import {
   createResolvedNode,
+  createSelectionWithDiff,
   instantiateResolvedComponent,
-  updateSelection,
+  unresolve,
 } from '../traversal';
 import {
-  NoyaComponent,
-  NoyaNode,
+  NoyaResolvedCompositeElement,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
 } from '../types';
-
-class MockState {
-  components: Record<string, NoyaComponent> = {};
-
-  findComponent = (componentID: string) => {
-    return this.components[componentID];
-  };
-
-  createResolvedNode(element: NoyaNode) {
-    return createResolvedNode(this.findComponent, element);
-  }
-
-  addComponent(options: Parameters<typeof Model.component>[0]) {
-    const component = Model.component(options);
-    this.components[component.componentID] = component;
-    return component;
-  }
-
-  clonedStateWithComponent(component: NoyaComponent) {
-    const state = new MockState();
-    state.components = {
-      ...this.components,
-      [component.componentID]: component,
-    };
-    return state;
-  }
-}
+import { MockState } from './MockState';
 
 function updateStateWithNewResolvedNode({
   state,
   componentID,
   newResolvedNode,
+  debug,
 }: {
   state: MockState;
   componentID: string;
   newResolvedNode: NoyaResolvedNode;
+  debug?: boolean;
 }) {
-  const updatedSelection = updateSelection({
+  const selectionWithDiff = createSelectionWithDiff({
     selection: { componentID },
     findComponent: state.findComponent,
     newResolvedNode: newResolvedNode,
+    debug,
   });
 
-  const appliedSelection = applyDiff({
-    selection: updatedSelection,
+  const newSelection = applySelectionDiff({
+    selection: selectionWithDiff,
     component: state.findComponent(componentID)!,
     enforceSchema: (node) => node,
     findComponent: state.findComponent,
+    debug,
   });
 
-  const newState = state.clonedStateWithComponent(appliedSelection.component);
-  const newRoot = instantiateResolvedComponent(newState.findComponent, {
-    componentID,
-  });
+  const newState = state.clonedStateWithComponent(newSelection.component);
+  const newRoot = instantiateResolvedComponent(
+    newState.findComponent,
+    { componentID },
+    debug,
+  );
+
+  if (debug) {
+    // console.log(ResolvedHierarchy.diagram(newRoot));
+  }
 
   return {
+    selectionWithDiff,
+    newSelection,
     newRoot,
     newState,
   };
@@ -231,10 +218,10 @@ describe('nested layout', () => {
     const updated = resolvedNodeReducer(root, {
       type: 'insertNode',
       indexPath: primitive2IndexPath,
-      node: createResolvedNode(
-        state.findComponent,
-        Model.primitiveElement({ name: 'Avatar', componentID: 'avatar' }),
-      ),
+      node: createResolvedNode({
+        findComponent: state.findComponent,
+        node: Model.primitiveElement({ name: 'Avatar', componentID: 'avatar' }),
+      }),
     });
 
     expect(
@@ -380,10 +367,10 @@ describe('doubly nested layout', () => {
     const updated = resolvedNodeReducer(root, {
       type: 'insertNode',
       indexPath: primitive3IndexPath,
-      node: createResolvedNode(
-        state.findComponent,
-        Model.primitiveElement({ name: 'Avatar', componentID: 'avatar' }),
-      ),
+      node: createResolvedNode({
+        findComponent: state.findComponent,
+        node: Model.primitiveElement({ name: 'Avatar', componentID: 'avatar' }),
+      }),
     });
 
     expect(
@@ -433,5 +420,190 @@ describe('doubly nested layout', () => {
     });
 
     expect(classNamesAtIndexPath(newRoot2, avatarIndexPath)).toEqual(['foo']);
+  });
+});
+
+describe('add component within layout', () => {
+  it('adds component within layout', () => {
+    const state = new MockState();
+
+    const flexLayout = state.addComponent({
+      name: 'FlexLayout',
+      componentID: 'f',
+      rootElement: Model.primitiveElement({
+        name: 'FlexPrimitive',
+        componentID: 'box',
+      }),
+    });
+
+    const gridLayout = state.addComponent({
+      name: 'GridLayout',
+      componentID: 'g',
+      rootElement: Model.primitiveElement({
+        name: 'GridPrimitive',
+        componentID: 'box',
+      }),
+    });
+
+    const section = state.addComponent({
+      name: 'SectionLayout',
+      componentID: 's',
+      rootElement: Model.primitiveElement({
+        name: 'SectionPrimitive',
+        componentID: 'box',
+      }),
+    });
+
+    const root = instantiateResolvedComponent(state.findComponent, {
+      componentID: section.componentID,
+    });
+
+    const resolvedSection = ResolvedHierarchy.find(
+      root,
+      (node) => node.name === 'SectionPrimitive',
+    ) as NoyaResolvedPrimitiveElement;
+
+    const flexLayoutInstance = createResolvedNode({
+      findComponent: state.findComponent,
+      node: Model.compositeElement({
+        name: 'InsertedFlexLayout',
+        componentID: flexLayout.componentID,
+      }),
+    });
+
+    // Add a flex layout to the section
+    const rootWithFlex = resolvedNodeReducer(root, {
+      type: 'insertNode',
+      indexPath: ResolvedHierarchy.indexPathOfNode(root, resolvedSection)!,
+      node: flexLayoutInstance,
+    });
+
+    // Save change to state
+    const { newRoot, newState, selectionWithDiff } =
+      updateStateWithNewResolvedNode({
+        state,
+        componentID: section.componentID,
+        newResolvedNode: rootWithFlex,
+      });
+
+    // Diff should add the flex layout
+    expect(selectionWithDiff.diff?.items).toEqual([
+      Model.diffItem({
+        path: [root.id],
+        children: [added(unresolve(flexLayoutInstance), 0)],
+      }),
+    ]);
+
+    // Test that the flex layout was added
+    const resolvedFlex = ResolvedHierarchy.find(
+      newRoot,
+      (node) => node.name === 'FlexPrimitive',
+    ) as NoyaResolvedPrimitiveElement;
+    expect(resolvedFlex).toBeTruthy();
+
+    // Add a grid layout within the flex layout
+    const rootWithGrid = resolvedNodeReducer(newRoot, {
+      type: 'insertNode',
+      indexPath: ResolvedHierarchy.indexPathOfNode(newRoot, resolvedFlex)!,
+      node: createResolvedNode({
+        findComponent: state.findComponent,
+        node: Model.compositeElement({
+          name: 'InsertedGridLayout',
+          componentID: gridLayout.componentID,
+        }),
+      }),
+    });
+
+    // Test that the grid layout was added
+    expect(
+      ResolvedHierarchy.find(
+        rootWithGrid,
+        (node) => node.name === 'InsertedGridLayout',
+      ),
+    ).toBeTruthy();
+
+    // Save change to state
+    const {
+      newState: newState2,
+      newRoot: newRoot2,
+      selectionWithDiff: selectionWithDiff2,
+    } = updateStateWithNewResolvedNode({
+      state: newState,
+      componentID: section.componentID,
+      newResolvedNode: rootWithGrid,
+    });
+
+    // Test that the grid layout was added
+    const resolvedGrid = ResolvedHierarchy.find(
+      newRoot2,
+      (node) => node.name === 'InsertedGridLayout',
+    )!;
+    expect(resolvedGrid).toBeTruthy();
+
+    // Diff should add the grid layout
+    expect(selectionWithDiff2.diff?.items).toEqual([
+      Model.diffItem({
+        path: ResolvedHierarchy.keyPathOfNode(
+          newRoot2,
+          ResolvedHierarchy.find(
+            newRoot2,
+            (node) => node.name === 'FlexPrimitive',
+          )!,
+        )!,
+        children: [added(unresolve(resolvedGrid), 0)],
+      }),
+    ]);
+
+    // Diff path should collapse into the flex layout
+    expect(
+      (
+        ResolvedHierarchy.find(
+          newRoot2,
+          (node) => node.name === 'InsertedFlexLayout',
+        ) as NoyaResolvedCompositeElement
+      ).diff?.items,
+    ).toEqual([
+      Model.diffItem({
+        path: [resolvedFlex.id],
+        children: [added(unresolve(resolvedGrid), 0)],
+      }),
+    ]);
+
+    // Add a class name to the grid layout
+    const rootWithClassName = resolvedNodeReducer(newRoot2, {
+      type: 'addClassNames',
+      indexPath: ResolvedHierarchy.findIndexPath(
+        newRoot2,
+        (n) => n.name === 'GridPrimitive',
+      )!,
+      classNames: ['foo'],
+    });
+
+    // Save change to state
+    const {
+      // newState: newState3,
+      newRoot: newRoot3,
+      // selectionWithDiff: selectionWithDiff3,
+    } = updateStateWithNewResolvedNode({
+      state: newState2,
+      componentID: section.componentID,
+      newResolvedNode: rootWithClassName,
+      debug: true,
+    });
+
+    // console.log(JSON.stringify(selectionWithDiff3.diff, null, 2));
+    // console.log(ResolvedHierarchy.diagram(rootWithClassName));
+    // console.log(ResolvedHierarchy.diagram(newRoot3));
+
+    // Test that class name was added
+    expect(
+      classNamesAtIndexPath(
+        newRoot3,
+        ResolvedHierarchy.findIndexPath(
+          newRoot3,
+          (n) => n.name === 'GridPrimitive',
+        )!,
+      ),
+    ).toEqual(['foo']);
   });
 });

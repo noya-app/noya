@@ -51,6 +51,7 @@ export type FindComponent = (id: string) => NoyaComponent | undefined;
 export function unresolve(
   resolvedNode: NoyaResolvedNode,
   diffParam: NoyaDiff = { items: [] },
+  debug = false,
 ): NoyaNode {
   for (const item of diffParam.items) {
     if (isDeepEqual(item.path, resolvedNode.path)) {
@@ -90,12 +91,14 @@ export function unresolve(
                   ...(diff?.items ?? []),
                   ...diffParam.items.map((item) => ({
                     ...item,
-                    path: item.path.slice(1),
+                    path: item.path.slice(resolvedNode.path.length),
                   })),
                 ],
               }
             : diff,
       };
+
+      // console.log('result', JSON.stringify(node.diff, null, 2));
 
       return node;
     }
@@ -103,9 +106,9 @@ export function unresolve(
       const { id, name, classNames, props, children, componentID, type } =
         resolvedNode;
 
-      const nestedDiffItems = diffParam.items
-        .filter((item) => item.path[0] === id)
-        .map((item) => ({ ...item, path: item.path.slice(1) }));
+      const nestedDiffItems = diffParam.items.filter((item) =>
+        item.path.join('/').startsWith(resolvedNode.path.join('/')),
+      );
 
       const node: NoyaPrimitiveElement = {
         id,
@@ -115,9 +118,7 @@ export function unresolve(
         props,
         classNames,
         children: children.map((child) =>
-          unresolve(child, {
-            items: nestedDiffItems.filter((item) => item.path[0] === child.id),
-          }),
+          unresolve(child, { items: nestedDiffItems }, debug),
         ),
       };
 
@@ -240,6 +241,7 @@ export function applyResolvedDiff(
   rootNode: NoyaResolvedNode,
   diff: NoyaDiff,
   path: string[],
+  debug: boolean = false,
 ) {
   return ResolvedHierarchy.map<NoyaResolvedNode>(
     cloneDeep(rootNode),
@@ -248,13 +250,15 @@ export function applyResolvedDiff(
 
       for (const item of diff.items) {
         const itemKey = [...path, ...item.path].join('/');
+
         if (itemKey === nodeKey) {
           if (item.newRootNode) {
-            return createResolvedNode(
+            return createResolvedNode({
               findComponent,
-              item.newRootNode,
-              item.path,
-            );
+              node: item.newRootNode,
+              parentPath: item.path,
+              debug,
+            });
           }
         }
       }
@@ -328,12 +332,26 @@ export function applyResolvedDiff(
               if (item.children) {
                 newNode.children = applyArrayDiff(
                   newNode.children,
-                  mapArrayDiff(item.children, (addedNode) =>
-                    createResolvedNode(findComponent, addedNode, [
-                      ...path,
-                      ...item.path,
-                    ]),
-                  ),
+                  mapArrayDiff(item.children, (addedNode) => {
+                    const result = createResolvedNode({
+                      findComponent,
+                      node: addedNode,
+                      parentPath: [...path, ...item.path],
+                      debug,
+                    });
+
+                    const parentPath = [...path, ...item.path.slice(0, -1)];
+
+                    const withDiff = applyResolvedDiff(
+                      findComponent,
+                      result,
+                      diff,
+                      parentPath,
+                      debug,
+                    );
+
+                    return withDiff;
+                  }),
                 );
               }
 
@@ -356,11 +374,17 @@ export function applyResolvedDiff(
   );
 }
 
-export function createResolvedNode(
-  findComponent: FindComponent,
-  node: NoyaNode,
-  parentPath: string[] = [],
-): NoyaResolvedNode {
+export function createResolvedNode({
+  findComponent,
+  node,
+  parentPath = [],
+  debug = false,
+}: {
+  findComponent: FindComponent;
+  node: NoyaNode;
+  parentPath?: string[];
+  debug?: boolean;
+}): NoyaResolvedNode {
   const path = [...parentPath, node.id];
 
   switch (node.type) {
@@ -368,7 +392,12 @@ export function createResolvedNode(
       return { ...node, path };
     case 'noyaPrimitiveElement': {
       const children = node.children.map<NoyaResolvedNode>((child) =>
-        createResolvedNode(findComponent, child, path),
+        createResolvedNode({
+          findComponent,
+          node: child,
+          parentPath: path,
+          debug,
+        }),
       );
 
       const result: NoyaResolvedPrimitiveElement = {
@@ -388,11 +417,12 @@ export function createResolvedNode(
         );
       }
 
-      let resolvedNode = createResolvedNode(
+      let resolvedNode = createResolvedNode({
         findComponent,
-        component.rootElement,
-        path,
-      );
+        node: component.rootElement,
+        parentPath: path,
+        debug,
+      });
 
       const variantDiffItems = node.diff?.items.flatMap((item) =>
         isDeepEqual(item.path, path) ? item.variantNames ?? [] : [],
@@ -420,6 +450,7 @@ export function createResolvedNode(
             resolvedNode,
             variant.diff,
             path,
+            debug,
           );
         }
       }
@@ -430,6 +461,7 @@ export function createResolvedNode(
           resolvedNode,
           node.diff,
           path,
+          debug,
         );
       }
 
@@ -445,6 +477,7 @@ export function createResolvedNode(
 export function instantiateResolvedComponent(
   findComponent: FindComponent,
   selection: SelectedComponent,
+  debug = false,
 ) {
   const instance = Model.compositeElement({
     id: 'root',
@@ -455,7 +488,12 @@ export function instantiateResolvedComponent(
     diff: selection.diff,
   });
 
-  let resolvedNode = createResolvedNode(findComponent, instance);
+  let resolvedNode = createResolvedNode({
+    findComponent,
+    node: instance,
+    parentPath: [],
+    debug,
+  });
 
   ResolvedHierarchy.visit(resolvedNode, (node) => {
     // Remove the root prefix
@@ -469,14 +507,16 @@ export function instantiateResolvedComponent(
   return resolvedNode.rootElement;
 }
 
-export function updateSelection({
+export function createSelectionWithDiff({
   selection,
   newResolvedNode,
   findComponent,
+  debug,
 }: {
   selection: SelectedComponent;
   newResolvedNode: NoyaResolvedNode;
   findComponent: FindComponent;
+  debug?: boolean;
 }): SelectedComponent {
   const instance = instantiateResolvedComponent(findComponent, {
     componentID: selection.componentID,
@@ -495,6 +535,7 @@ export function updateSelection({
     };
   } else {
     const diff = diffResolvedTrees(instance, newResolvedNode);
+
     return { ...selection, diff };
   }
 }

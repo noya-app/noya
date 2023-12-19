@@ -329,10 +329,10 @@ export function compileDesignSystem(
         );
       }
 
-      const resolvedNode = createResolvedNode(
+      const resolvedNode = createResolvedNode({
         findComponent,
-        noyaComponent.rootElement,
-      );
+        node: noyaComponent.rootElement,
+      });
 
       const simpleElement = createSimpleElement(
         renderResolvedNode({

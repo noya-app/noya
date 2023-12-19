@@ -18,9 +18,9 @@ import {
   NoyaVariant,
   ResolvedHierarchy,
   SelectedComponent,
-  applyDiff,
+  applySelectionDiff,
+  createSelectionWithDiff,
   describeDiffItem,
-  updateSelection,
 } from 'noya-component';
 import {
   Button,
@@ -157,7 +157,7 @@ export function DSComponentInspector({
   const handlePendingChange = useCallback(
     (newResolvedNode: NoyaResolvedNode) => {
       setSelection(
-        updateSelection({
+        createSelectionWithDiff({
           selection,
           newResolvedNode,
           findComponent,
@@ -546,7 +546,7 @@ export function DSComponentInspector({
                       const {
                         component: newComponent,
                         selection: newSelection,
-                      } = applyDiff({
+                      } = applySelectionDiff({
                         selection,
                         component,
                         findComponent,

@@ -182,10 +182,10 @@ const DOMRendererContent = memo(
 
                         if (!layer || !layer.data.node) return undefined;
 
-                        const resolvedNode = createResolvedNode(
+                        const resolvedNode = createResolvedNode({
                           findComponent,
-                          layer.data.node,
-                        );
+                          node: layer.data.node,
+                        });
 
                         const indexPath = ResolvedHierarchy.findIndexPath(
                           resolvedNode,
@@ -225,13 +225,14 @@ const DOMRendererContent = memo(
 
                         if (!layer) return undefined;
 
-                        const resolvedNode = createResolvedNode(
+                        const resolvedNode = createResolvedNode({
                           findComponent,
-                          layer.data.node ??
+                          node:
+                            layer.data.node ??
                             Model.primitiveElement({
                               componentID: boxSymbolId,
                             }),
-                        );
+                        });
 
                         if (!resolvedNode) return undefined;
 
@@ -304,15 +305,16 @@ const DOMRendererContent = memo(
                             });
                           }
 
-                          const resolvedNode = createResolvedNode(
+                          const resolvedNode = createResolvedNode({
                             findComponent,
-                            layer.do_objectID === selectedLayerId &&
+                            node:
+                              layer.do_objectID === selectedLayerId &&
                               overriddenBlock
-                              ? overriddenBlock
-                              : layer.data.node ??
+                                ? overriddenBlock
+                                : layer.data.node ??
                                   createLoadingNode() ??
                                   createPlaceholderNode(),
-                          );
+                          });
 
                           const content = renderResolvedNode({
                             contentEditable:

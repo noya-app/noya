@@ -8,7 +8,7 @@ import {
   NoyaResolvedPrimitiveElement,
   ResolvedHierarchy,
   added,
-  applyDiff,
+  applySelectionDiff,
   createResolvedNode,
   removed,
 } from 'noya-component';
@@ -36,10 +36,10 @@ describe('resolving', () => {
       componentID: component.componentID,
     });
 
-    const resolvedNode = createResolvedNode(
-      (componentID) => components[componentID],
-      element,
-    ) as NoyaResolvedCompositeElement;
+    const resolvedNode = createResolvedNode({
+      findComponent: (componentID) => components[componentID],
+      node: element,
+    }) as NoyaResolvedCompositeElement;
 
     expect(resolvedNode.id).toEqual(element.id);
     expect(resolvedNode.componentID).toEqual(element.componentID);
@@ -96,10 +96,10 @@ describe('diffing', () => {
       ]),
     });
 
-    const resolvedNode = createResolvedNode(
+    const resolvedNode = createResolvedNode({
       findComponent,
-      element,
-    ) as NoyaResolvedCompositeElement;
+      node: element,
+    }) as NoyaResolvedCompositeElement;
 
     const resolvedChild =
       resolvedNode.rootElement as NoyaResolvedPrimitiveElement;
@@ -118,10 +118,10 @@ describe('diffing', () => {
       ]),
     });
 
-    const resolvedNode = createResolvedNode(
+    const resolvedNode = createResolvedNode({
       findComponent,
-      element,
-    ) as NoyaResolvedCompositeElement;
+      node: element,
+    }) as NoyaResolvedCompositeElement;
 
     const resolvedChild =
       resolvedNode.rootElement as NoyaResolvedCompositeElement;
@@ -149,10 +149,10 @@ describe('diffing', () => {
       ]),
     });
 
-    const resolvedNode = createResolvedNode(
+    const resolvedNode = createResolvedNode({
       findComponent,
-      element,
-    ) as NoyaResolvedCompositeElement;
+      node: element,
+    }) as NoyaResolvedCompositeElement;
 
     const resolvedChild =
       resolvedNode.rootElement as NoyaResolvedPrimitiveElement;
@@ -411,7 +411,7 @@ describe('apply diff', () => {
 
     const findComponent = (componentID: string) => components[componentID];
 
-    const updated = applyDiff({
+    const updated = applySelectionDiff({
       selection: { componentID: component.componentID, diff },
       component,
       findComponent,
@@ -474,17 +474,17 @@ describe('apply diff', () => {
 
     const findComponent = (componentID: string) => components[componentID];
 
-    const updated = applyDiff({
+    const updated = applySelectionDiff({
       selection: { componentID: component.componentID, diff: element.diff },
       component,
       findComponent,
       enforceSchema,
     });
 
-    const resolved = createResolvedNode(
+    const resolved = createResolvedNode({
       findComponent,
-      updated.component.rootElement,
-    );
+      node: updated.component.rootElement,
+    });
 
     const resolvedPrimitive = ResolvedHierarchy.find(
       resolved,

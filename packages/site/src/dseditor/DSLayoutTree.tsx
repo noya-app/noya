@@ -164,10 +164,10 @@ export const DSLayoutTree = memo(function DSLayoutTree({
 
       if (!target) return;
 
-      const child = createResolvedNode(
+      const child = createResolvedNode({
         findComponent,
-        Model.primitiveElement(boxSymbolId),
-      );
+        node: Model.primitiveElement(boxSymbolId),
+      });
 
       const indexPath = ResolvedHierarchy.findIndexPath(
         resolvedNode,
@@ -480,7 +480,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
         onChange(
           ResolvedHierarchy.replace(resolvedNode, {
             at: indexPath,
-            node: createResolvedNode(findComponentPlusNewComponent, instance),
+            node: createResolvedNode({
+              findComponent: findComponentPlusNewComponent,
+              node: instance,
+            }),
           }),
         );
 
@@ -490,7 +493,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
         if (node.type !== 'noyaCompositeElement') break;
 
         const child = ResolvedHierarchy.clone(
-          createResolvedNode(findComponent, node.rootElement),
+          createResolvedNode({ findComponent, node: node.rootElement }),
         );
 
         onChange(
@@ -512,7 +515,7 @@ export const DSLayoutRow = memo(function DSLayerRow({
         onChange(
           ResolvedHierarchy.replace(resolvedNode, {
             at: indexPath,
-            node: createResolvedNode(findComponent, layout),
+            node: createResolvedNode({ findComponent, node: layout }),
           }),
         );
         break;
@@ -588,10 +591,10 @@ export const DSLayoutRow = memo(function DSLayerRow({
         break;
       }
       case 'addChild': {
-        const child = createResolvedNode(
+        const child = createResolvedNode({
           findComponent,
-          Model.primitiveElement(boxSymbolId),
-        );
+          node: Model.primitiveElement(boxSymbolId),
+        });
 
         onChange(
           resolvedNodeReducer(resolvedNode, {
@@ -749,14 +752,14 @@ export const DSLayoutRow = memo(function DSLayerRow({
               const parentPath = node.path.slice(0, -1);
 
               if (component) {
-                const newNode = createResolvedNode(
+                const newNode = createResolvedNode({
                   findComponent,
-                  Model.compositeElement({
+                  node: Model.compositeElement({
                     componentID: item.id,
                     name: node.name ?? item.name,
                   }),
                   parentPath,
-                );
+                });
 
                 onChange(
                   ResolvedHierarchy.replace(resolvedNode, {
@@ -780,14 +783,14 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   onChange(
                     ResolvedHierarchy.replace(resolvedNode, {
                       at: indexPath,
-                      node: createResolvedNode(
+                      node: createResolvedNode({
                         findComponent,
-                        Model.primitiveElement({
+                        node: Model.primitiveElement({
                           componentID: item.id,
                           name: node.name ?? item.name,
                         }),
                         parentPath,
-                      ),
+                      }),
                     }),
                   );
                 }

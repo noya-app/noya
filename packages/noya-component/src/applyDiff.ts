@@ -6,16 +6,18 @@ import {
 } from './traversal';
 import { NoyaComponent, NoyaNode, SelectedComponent } from './types';
 
-export function applyDiff({
+export function applySelectionDiff({
   selection,
   component,
   findComponent,
   enforceSchema,
+  debug,
 }: {
   selection: SelectedComponent;
   component: NoyaComponent;
   findComponent: FindComponent;
   enforceSchema: (node: NoyaNode) => NoyaNode;
+  debug?: boolean;
 }): {
   selection: SelectedComponent;
   component: NoyaComponent;
@@ -65,7 +67,7 @@ export function applyDiff({
   });
 
   const newRootElement = enforceSchema(
-    unresolve(instance, { items: compositesDiff }),
+    unresolve(instance, { items: compositesDiff }, debug),
   );
 
   return {

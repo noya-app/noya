@@ -36,7 +36,7 @@ export const AyonElementsInspector = memo(function AyonElementsInspector({
   const resolvedNode = useMemo(() => {
     if (!node) return;
 
-    return createResolvedNode(findComponent, node);
+    return createResolvedNode({ findComponent, node });
   }, [findComponent, node]);
 
   const handleChange = useCallback(
