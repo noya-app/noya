@@ -319,8 +319,9 @@ export function compileDesignSystem(
     );
   };
 
-  const componentPageItems = (configuration.ds.components ?? []).map(
-    (component) => {
+  const componentPageItems = (configuration.ds.components ?? [])
+    .filter((component) => component.accessModifier !== 'internal')
+    .map((component) => {
       const noyaComponent = findComponent(component.componentID);
 
       if (!noyaComponent) {
@@ -384,8 +385,7 @@ export function compileDesignSystem(
         dependencies,
         devDependencies,
       };
-    },
-  );
+    });
 
   const allDependencies = componentPageItems.reduce(
     (result, { dependencies }) => ({ ...result, ...dependencies }),
