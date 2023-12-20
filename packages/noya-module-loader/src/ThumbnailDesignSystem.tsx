@@ -91,6 +91,8 @@ const TextComponent = (
     const stringValue: string | undefined =
       typeof child.props.children === 'string'
         ? child.props.children
+        : child.props.dangerouslySetInnerHTML
+        ? child.props.dangerouslySetInnerHTML.__html
         : undefined;
 
     return (
