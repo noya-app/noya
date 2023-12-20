@@ -1,6 +1,6 @@
 import { CompletionItem } from 'noya-designsystem';
 import { StarIcon } from 'noya-icons';
-import { allClassNames, breakpoints } from 'noya-tailwind';
+import { allClassNames, breakpoints, colorSchemes } from 'noya-tailwind';
 import { cartesianProduct, range } from 'noya-utils';
 import React from 'react';
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
@@ -32,7 +32,10 @@ const baseStyleItems = [
   ),
 ];
 
-const breakpointStyleItems = cartesianProduct(baseStyleItems, breakpoints).map(
+const breakpointStyleItems = cartesianProduct(baseStyleItems, [
+  ...breakpoints,
+  ...colorSchemes.filter((x) => x !== 'light'),
+]).map(
   ([item, breakpoint]): CompletionItem => ({
     name: `${breakpoint}:${item.name}`,
     id: `${breakpoint}:${item.id}`,

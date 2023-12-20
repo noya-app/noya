@@ -198,6 +198,8 @@ export const breakpoints = [
   '2xl' as const,
 ];
 
+export const colorSchemes = ['light' as const, 'dark' as const];
+
 export type BreakpointKey = (typeof breakpoints)[number];
 
 export function matchBreakpoint(width: number): BreakpointKey {
