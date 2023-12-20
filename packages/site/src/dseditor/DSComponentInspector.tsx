@@ -43,6 +43,7 @@ import {
 import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { JSONForm } from 'noya-jsonforms';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
 import { upperFirst } from 'noya-utils';
@@ -166,6 +167,39 @@ export function DSComponentInspector({
     },
     [findComponent, selection, setSelection],
   );
+
+  const hasUnsavedChanges = selection.diff && selection.diff.items.length > 0;
+
+  const handleSave = useCallback(() => {
+    if (!hasUnsavedChanges) return;
+
+    const { component: newComponent, selection: newSelection } =
+      applySelectionDiff({
+        selection,
+        component,
+        findComponent,
+        enforceSchema,
+      });
+
+    if (newComponent !== component) {
+      onChangeComponent(newComponent);
+    }
+
+    if (newSelection !== selection) {
+      setSelection(newSelection);
+    }
+  }, [
+    component,
+    findComponent,
+    hasUnsavedChanges,
+    onChangeComponent,
+    selection,
+    setSelection,
+  ]);
+
+  useKeyboardShortcuts({
+    'Mod-s': handleSave,
+  });
 
   if (configureProp) {
     return (
@@ -524,8 +558,7 @@ export function DSComponentInspector({
             title="Elements"
             titleTextStyle="heading4"
             right={
-              selection.diff &&
-              selection.diff.items.length > 0 && (
+              hasUnsavedChanges && (
                 <>
                   <Button
                     onClick={() => {
@@ -540,28 +573,7 @@ export function DSComponentInspector({
                     <CrossCircledIcon />
                   </Button>
                   <Spacer.Horizontal size={8} />
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      const {
-                        component: newComponent,
-                        selection: newSelection,
-                      } = applySelectionDiff({
-                        selection,
-                        component,
-                        findComponent,
-                        enforceSchema,
-                      });
-
-                      if (newComponent !== component) {
-                        onChangeComponent(newComponent);
-                      }
-
-                      if (newSelection !== selection) {
-                        setSelection(newSelection);
-                      }
-                    }}
-                  >
+                  <Button variant="primary" onClick={handleSave}>
                     Save{selection.variantID ? ' Variant' : ''}
                     <Spacer.Horizontal size={4} inline />
                     <CheckCircledIcon />

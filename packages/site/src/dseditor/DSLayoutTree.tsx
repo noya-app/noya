@@ -51,7 +51,16 @@ import {
 } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { isDeepEqual, uuid } from 'noya-utils';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { z } from 'zod';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
@@ -188,6 +197,19 @@ export const DSLayoutTree = memo(function DSLayoutTree({
     },
   });
 
+  const rowRefs = useRef<Record<string, ILayoutRow | null>>({});
+
+  const focusPath = useCallback(
+    (path?: string[]) => {
+      if (!path) return;
+
+      setSelectedPath(path);
+      const row = rowRefs.current[path.join('/')];
+      row?.focus();
+    },
+    [setSelectedPath],
+  );
+
   return (
     <TreeView.Root
       keyExtractor={(obj) => obj.key}
@@ -269,6 +291,9 @@ export const DSLayoutTree = memo(function DSLayoutTree({
         { isDragging },
       ) => (
         <DSLayoutRow
+          ref={(ref) => {
+            rowRefs.current[key] = ref;
+          }}
           id={key}
           key={key}
           expanded={expanded}
@@ -289,6 +314,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           onCreateComponent={onCreateComponent}
           components={components}
           onSetExpanded={handleSetExpanded}
+          focusPath={focusPath}
           onConfigureProp={onConfigureProp}
         />
       )}
@@ -296,720 +322,826 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   );
 });
 
-export const DSLayoutRow = memo(function DSLayerRow({
-  id,
-  onChange,
-  resolvedNode,
-  findComponent,
-  highlightedPath,
-  setHighlightedPath,
-  selectedPath,
-  setSelectedPath,
-  depth,
-  indexPath,
-  node,
-  path,
-  isDragging,
-  isEditing,
-  setEditingId,
-  onCreateComponent,
-  components,
-  expanded,
-  onSetExpanded,
-  onConfigureProp,
-}: Pick<
-  Props,
-  | 'highlightedPath'
-  | 'setHighlightedPath'
-  | 'selectedPath'
-  | 'setSelectedPath'
-  | 'onConfigureProp'
-> & {
-  id: string;
-  onChange: (resolvedNode: NoyaResolvedNode) => void;
-  resolvedNode: NoyaResolvedNode;
-  findComponent: FindComponent;
-  depth: number;
-  key: string;
-  indexPath: number[];
-  node: NoyaResolvedNode;
-  path: string[];
-  isDragging: boolean;
-  isEditing: boolean;
-  setEditingId: (id: string | undefined) => void;
-  expanded?: boolean;
-  onSetExpanded: (id: string, expanded: boolean) => void;
-} & Pick<Props, 'onCreateComponent' | 'components'>) {
-  const client = useNoyaClientOrFallback();
-  const theme = useDesignSystemTheme();
-  const parent = ResolvedHierarchy.access(resolvedNode, indexPath.slice(0, -1));
-  const name = getNodeName(node, findComponent);
+interface ILayoutRow {
+  focus(): void;
+}
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export const DSLayoutRow = memo(
+  forwardRef(function DSLayerRow(
+    {
+      id,
+      onChange,
+      resolvedNode,
+      findComponent,
+      highlightedPath,
+      setHighlightedPath,
+      selectedPath,
+      setSelectedPath,
+      depth,
+      indexPath,
+      node,
+      path,
+      isDragging,
+      isEditing,
+      setEditingId,
+      onCreateComponent,
+      components,
+      expanded,
+      onSetExpanded,
+      onConfigureProp,
+      focusPath,
+    }: Pick<
+      Props,
+      | 'highlightedPath'
+      | 'setHighlightedPath'
+      | 'selectedPath'
+      | 'setSelectedPath'
+      | 'onConfigureProp'
+    > & {
+      id: string;
+      onChange: (resolvedNode: NoyaResolvedNode) => void;
+      resolvedNode: NoyaResolvedNode;
+      findComponent: FindComponent;
+      depth: number;
+      key: string;
+      indexPath: number[];
+      node: NoyaResolvedNode;
+      path: string[];
+      isDragging: boolean;
+      isEditing: boolean;
+      setEditingId: (id: string | undefined) => void;
+      expanded?: boolean;
+      onSetExpanded: (id: string, expanded: boolean) => void;
+      focusPath: (path?: string[]) => void;
+    } & Pick<Props, 'onCreateComponent' | 'components'>,
+    forwardedRef: React.ForwardedRef<ILayoutRow>,
+  ) {
+    const client = useNoyaClientOrFallback();
+    const theme = useDesignSystemTheme();
+    const parent = ResolvedHierarchy.access(
+      resolvedNode,
+      indexPath.slice(0, -1),
+    );
+    const name = getNodeName(node, findComponent);
 
-  const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
-  const [isSearchingStyles, setIsSearchingStyles] = React.useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (isSearchingStyles) {
-      styleSearchInputRef.current?.focus();
-    }
-  }, [isSearchingStyles]);
+    const styleSearchInputRef = React.useRef<HTMLInputElement>(null);
+    const [isSearchingStyles, setIsSearchingStyles] = React.useState(false);
 
-  const typeSearchInputRef = React.useRef<HTMLInputElement>(null);
-  const [isSearchingTypes, setIsSearchingTypes] = React.useState(false);
-
-  useEffect(() => {
-    if (isSearchingTypes) {
-      typeSearchInputRef.current?.focus();
-    }
-  }, [isSearchingTypes]);
-
-  const variantInputRef = React.useRef<HTMLInputElement>(null);
-  const [isSearchingVariants, setIsSearchingVariants] = React.useState(false);
-
-  useEffect(() => {
-    if (isSearchingVariants) {
-      variantInputRef.current?.focus();
-    }
-  }, [isSearchingVariants]);
-
-  const menu = createSectionedMenu(
-    [
-      node.type === 'noyaPrimitiveElement' && {
-        title: 'Add Child',
-        value: 'addChild',
-        icon: <PlusCircledIcon />,
-      },
-      depth !== 0 &&
-        parent.type === 'noyaPrimitiveElement' && {
-          title: 'Duplicate',
-          value: 'duplicate',
-          icon: <CopyIcon />,
-        },
-      depth !== 0 &&
-        parent.type === 'noyaPrimitiveElement' && {
-          title: 'Delete',
-          value: 'delete',
-          icon: <TrashIcon />,
-        },
-    ],
-    [
-      {
-        title: 'Wrap within Box',
-        value: 'wrapWithinBox',
-        icon: <ThickArrowUpIcon />,
-      },
-      node.type === 'noyaPrimitiveElement' &&
-        node.children.length > 0 && {
-          title: 'Replace with First Child',
-          value: 'replaceWithFirstChild',
-          icon: <ThickArrowDownIcon />,
-        },
-    ],
-    [
-      {
-        title: 'Rename',
-        value: 'rename',
-        icon: <InputIcon />,
-      },
-      node.type === 'noyaPrimitiveElement' && {
-        title: 'Add Style',
-        value: 'addStyle',
-        icon: <FontStyleIcon />,
-      },
-      node.type === 'noyaPrimitiveElement' && {
-        title: 'Pick Component',
-        value: 'addType',
-        icon: <DropdownMenuIcon />,
-      },
-    ],
-    [
-      {
-        title: 'Extract to New Component',
-        value: 'extractToComponent',
-        icon: <EnterIcon />,
-      },
-      node.type === 'noyaCompositeElement' && {
-        title: 'Replace with Contents',
-        value: 'replaceWithContents',
-        icon: <ExitIcon />,
-      },
-    ],
-    [
-      { title: 'Copy Style', value: 'copyStyle', icon: <ClipboardCopyIcon /> },
-      { title: 'Paste Style', value: 'pasteStyle', icon: <ClipboardIcon /> },
-    ],
-    [
-      {
-        title: 'Copy JSX',
-        value: 'copyJsx',
-        icon: <ClipboardCopyIcon />,
-      },
-      {
-        title: 'Paste JSX',
-        value: 'replaceWithRawJsx',
-        icon: <ClipboardIcon />,
-      },
-      {
-        title: 'Paste and clean JSX',
-        value: 'replaceWithJsx',
-        icon: <ClipboardIcon />,
-      },
-    ],
-  );
-  type MenuItemType = Exclude<
-    Extract<(typeof menu)[number], object>['value'],
-    undefined
-  >;
-  const hovered = highlightedPath?.join('/') === path.join('/');
-  const selected = selectedPath?.join('/') === path.join('/');
-  const openInputDialog = useOpenInputDialog();
-  const onSelectMenuItem = async (value: MenuItemType) => {
-    switch (value) {
-      case 'replaceWithFirstChild': {
-        onChange(
-          resolvedNodeReducer(resolvedNode, {
-            type: 'replaceNodeWithFirstChild',
-            indexPath,
-          }),
-        );
-        break;
+    useEffect(() => {
+      if (isSearchingStyles) {
+        styleSearchInputRef.current?.focus();
       }
-      case 'wrapWithinBox': {
-        onChange(
-          resolvedNodeReducer(resolvedNode, {
-            type: 'wrapNode',
-            indexPath,
-            primitiveType: boxSymbolId,
-            findComponent,
-          }),
-        );
-        break;
+    }, [isSearchingStyles]);
+
+    const typeSearchInputRef = React.useRef<HTMLInputElement>(null);
+    const [isSearchingTypes, setIsSearchingTypes] = React.useState(false);
+
+    useEffect(() => {
+      if (isSearchingTypes) {
+        typeSearchInputRef.current?.focus();
       }
-      case 'extractToComponent': {
-        const name = getNodeName(node, findComponent);
+    }, [isSearchingTypes]);
 
-        const text = await openInputDialog('Component Name', name);
+    const variantInputRef = React.useRef<HTMLInputElement>(null);
+    const [isSearchingVariants, setIsSearchingVariants] = React.useState(false);
 
-        if (!text) return;
+    useEffect(() => {
+      if (isSearchingVariants) {
+        variantInputRef.current?.focus();
+      }
+    }, [isSearchingVariants]);
 
-        const newComponent = Model.component({
-          name: text,
-          componentID: uuid(),
-          rootElement: unresolve(node),
-        });
-
-        onCreateComponent?.(newComponent);
-
-        const instance = Model.compositeElement({
-          componentID: newComponent.componentID,
-        });
-
-        const findComponentPlusNewComponent: FindComponent = (componentID) =>
-          componentID === newComponent.componentID
-            ? newComponent
-            : findComponent(componentID);
-
-        onChange(
-          ResolvedHierarchy.replace(resolvedNode, {
-            at: indexPath,
-            node: createResolvedNode({
-              findComponent: findComponentPlusNewComponent,
-              node: instance,
+    const menu = createSectionedMenu(
+      [
+        node.type === 'noyaPrimitiveElement' && {
+          title: 'Add Child',
+          value: 'addChild',
+          icon: <PlusCircledIcon />,
+        },
+        depth !== 0 &&
+          parent.type === 'noyaPrimitiveElement' && {
+            title: 'Duplicate',
+            value: 'duplicate',
+            icon: <CopyIcon />,
+            shortcut: 'Mod-d',
+          },
+        depth !== 0 &&
+          parent.type === 'noyaPrimitiveElement' && {
+            title: 'Delete',
+            value: 'delete',
+            icon: <TrashIcon />,
+          },
+      ],
+      [
+        {
+          title: 'Wrap within Box',
+          value: 'wrapWithinBox',
+          icon: <ThickArrowUpIcon />,
+        },
+        node.type === 'noyaPrimitiveElement' &&
+          node.children.length > 0 && {
+            title: 'Replace with First Child',
+            value: 'replaceWithFirstChild',
+            icon: <ThickArrowDownIcon />,
+          },
+      ],
+      [
+        {
+          title: 'Rename',
+          value: 'rename',
+          icon: <InputIcon />,
+        },
+        node.type === 'noyaPrimitiveElement' && {
+          title: 'Add Style',
+          value: 'addStyle',
+          icon: <FontStyleIcon />,
+        },
+        node.type === 'noyaPrimitiveElement' && {
+          title: 'Pick Component',
+          value: 'addType',
+          icon: <DropdownMenuIcon />,
+        },
+      ],
+      [
+        {
+          title: 'Extract to New Component',
+          value: 'extractToComponent',
+          icon: <EnterIcon />,
+        },
+        node.type === 'noyaCompositeElement' && {
+          title: 'Replace with Contents',
+          value: 'replaceWithContents',
+          icon: <ExitIcon />,
+        },
+      ],
+      [
+        {
+          title: 'Copy Style',
+          value: 'copyStyle',
+          icon: <ClipboardCopyIcon />,
+        },
+        { title: 'Paste Style', value: 'pasteStyle', icon: <ClipboardIcon /> },
+      ],
+      [
+        {
+          title: 'Copy JSX',
+          value: 'copyJsx',
+          icon: <ClipboardCopyIcon />,
+        },
+        {
+          title: 'Paste JSX',
+          value: 'replaceWithRawJsx',
+          icon: <ClipboardIcon />,
+        },
+        {
+          title: 'Paste and clean JSX',
+          value: 'replaceWithJsx',
+          icon: <ClipboardIcon />,
+        },
+      ],
+    );
+    type MenuItemType = Exclude<
+      Extract<(typeof menu)[number], object>['value'],
+      undefined
+    >;
+    const hovered = highlightedPath?.join('/') === path.join('/');
+    const selected = selectedPath?.join('/') === path.join('/');
+    const openInputDialog = useOpenInputDialog();
+    const onSelectMenuItem = async (value: MenuItemType) => {
+      switch (value) {
+        case 'replaceWithFirstChild': {
+          onChange(
+            resolvedNodeReducer(resolvedNode, {
+              type: 'replaceNodeWithFirstChild',
+              indexPath,
             }),
-          }),
-        );
-
-        break;
-      }
-      case 'replaceWithContents': {
-        if (node.type !== 'noyaCompositeElement') break;
-
-        const child = ResolvedHierarchy.clone(
-          createResolvedNode({ findComponent, node: node.rootElement }),
-        );
-
-        onChange(
-          ResolvedHierarchy.replace(resolvedNode, {
-            at: indexPath,
-            node: child,
-          }),
-        );
-
-        break;
-      }
-      case 'replaceWithJsx':
-      case 'replaceWithRawJsx': {
-        const text = await navigator.clipboard.readText();
-        if (!text) return;
-        const layout = parseLayoutWithOptions(text, 'geometric', {
-          rewrite: value === 'replaceWithJsx',
-        });
-        onChange(
-          ResolvedHierarchy.replace(resolvedNode, {
-            at: indexPath,
-            node: createResolvedNode({ findComponent, node: layout }),
-          }),
-        );
-        break;
-      }
-      case 'copyStyle': {
-        if (node.type !== 'noyaPrimitiveElement') break;
-        navigator.clipboard.writeText(
-          JSON.stringify(node.classNames.map((c) => c.value)),
-        );
-        break;
-      }
-      case 'pasteStyle': {
-        if (node.type !== 'noyaPrimitiveElement') break;
-        const text = await navigator.clipboard.readText();
-        let classNames: string[] = [];
-
-        try {
-          const json = JSON.parse(text);
-          classNames = z.array(z.string()).parse(json);
-        } catch (e) {
-          console.error(e);
-          return;
+          );
+          break;
         }
+        case 'wrapWithinBox': {
+          onChange(
+            resolvedNodeReducer(resolvedNode, {
+              type: 'wrapNode',
+              indexPath,
+              primitiveType: boxSymbolId,
+              findComponent,
+            }),
+          );
+          break;
+        }
+        case 'extractToComponent': {
+          const name = getNodeName(node, findComponent);
 
-        onChange(
-          resolvedNodeReducer(resolvedNode, {
-            type: 'addClassNames',
-            indexPath,
-            classNames,
-          }),
-        );
-        break;
-      }
-      case 'copyJsx': {
-        navigator.clipboard.writeText(exportLayout(node));
-        break;
-      }
-      case 'rename': {
-        setEditingId(id);
-        break;
-      }
-      case 'addStyle': {
-        // Wait for menu to close
-        setTimeout(() => {
-          setIsSearchingStyles(true);
-        }, 0);
-        break;
-      }
-      case 'addType': {
-        // Wait for menu to close
-        setTimeout(() => {
-          setIsSearchingTypes(true);
-        }, 0);
-        break;
-      }
-      case 'duplicate': {
-        onChange(
-          resolvedNodeReducer(resolvedNode, {
-            type: 'duplicateNode',
-            indexPath,
-          }),
-        );
+          const text = await openInputDialog('Component Name', name);
 
-        break;
-      }
-      case 'delete': {
-        onChange(
-          resolvedNodeReducer(resolvedNode, {
-            type: 'removeNode',
-            indexPath,
-          }),
-        );
-        break;
-      }
-      case 'addChild': {
-        const child = createResolvedNode({
-          findComponent,
-          node: Model.primitiveElement(boxSymbolId),
-        });
+          if (!text) return;
 
-        onChange(
-          resolvedNodeReducer(resolvedNode, {
+          const newComponent = Model.component({
+            name: text,
+            componentID: uuid(),
+            rootElement: unresolve(node),
+          });
+
+          onCreateComponent?.(newComponent);
+
+          const instance = Model.compositeElement({
+            componentID: newComponent.componentID,
+          });
+
+          const findComponentPlusNewComponent: FindComponent = (componentID) =>
+            componentID === newComponent.componentID
+              ? newComponent
+              : findComponent(componentID);
+
+          onChange(
+            ResolvedHierarchy.replace(resolvedNode, {
+              at: indexPath,
+              node: createResolvedNode({
+                findComponent: findComponentPlusNewComponent,
+                node: instance,
+              }),
+            }),
+          );
+
+          break;
+        }
+        case 'replaceWithContents': {
+          if (node.type !== 'noyaCompositeElement') break;
+
+          const child = ResolvedHierarchy.clone(
+            createResolvedNode({ findComponent, node: node.rootElement }),
+          );
+
+          onChange(
+            ResolvedHierarchy.replace(resolvedNode, {
+              at: indexPath,
+              node: child,
+            }),
+          );
+
+          break;
+        }
+        case 'replaceWithJsx':
+        case 'replaceWithRawJsx': {
+          const text = await navigator.clipboard.readText();
+          if (!text) return;
+          const layout = parseLayoutWithOptions(text, 'geometric', {
+            rewrite: value === 'replaceWithJsx',
+          });
+          onChange(
+            ResolvedHierarchy.replace(resolvedNode, {
+              at: indexPath,
+              node: createResolvedNode({ findComponent, node: layout }),
+            }),
+          );
+          break;
+        }
+        case 'copyStyle': {
+          if (node.type !== 'noyaPrimitiveElement') break;
+          navigator.clipboard.writeText(
+            JSON.stringify(node.classNames.map((c) => c.value)),
+          );
+          break;
+        }
+        case 'pasteStyle': {
+          if (node.type !== 'noyaPrimitiveElement') break;
+          const text = await navigator.clipboard.readText();
+          let classNames: string[] = [];
+
+          try {
+            const json = JSON.parse(text);
+            classNames = z.array(z.string()).parse(json);
+          } catch (e) {
+            console.error(e);
+            return;
+          }
+
+          onChange(
+            resolvedNodeReducer(resolvedNode, {
+              type: 'addClassNames',
+              indexPath,
+              classNames,
+            }),
+          );
+          break;
+        }
+        case 'copyJsx': {
+          navigator.clipboard.writeText(exportLayout(node));
+          break;
+        }
+        case 'rename': {
+          setEditingId(id);
+          break;
+        }
+        case 'addStyle': {
+          // Wait for menu to close
+          setTimeout(() => {
+            setIsSearchingStyles(true);
+          }, 0);
+          break;
+        }
+        case 'addType': {
+          // Wait for menu to close
+          setTimeout(() => {
+            setIsSearchingTypes(true);
+          }, 0);
+          break;
+        }
+        case 'duplicate': {
+          onChange(
+            resolvedNodeReducer(resolvedNode, {
+              type: 'duplicateNode',
+              indexPath,
+            }),
+          );
+
+          break;
+        }
+        case 'delete': {
+          onChange(
+            resolvedNodeReducer(resolvedNode, {
+              type: 'removeNode',
+              indexPath,
+            }),
+          );
+          break;
+        }
+        case 'addChild': {
+          const child = createResolvedNode({
+            findComponent,
+            node: Model.primitiveElement(boxSymbolId),
+          });
+
+          const updated = resolvedNodeReducer(resolvedNode, {
             type: 'insertNode',
             indexPath,
             node: child,
-          }),
-        );
-        break;
+          });
+
+          onChange(updated);
+
+          const childPath = ResolvedHierarchy.keyPathOfNode(updated, child);
+
+          setTimeout(() => {
+            focusPath(childPath);
+          }, 0);
+
+          break;
+        }
       }
-    }
-  };
+    };
 
-  const componentTypeItems = useMemo(
-    (): (CompletionItem | CompletionSectionHeader)[] => [
-      {
-        type: 'sectionHeader',
-        id: 'primitives',
-        name: 'Primitive Elements',
-      },
-      ...typeItems,
-      {
-        type: 'sectionHeader',
-        id: 'components',
-        name: 'Custom Components',
-      },
-      ...(components ?? []).map((c) => ({
-        id: c.componentID,
-        name: c.name,
-      })),
-    ],
-    [components],
-  );
+    const componentTypeItems = useMemo(
+      (): (CompletionItem | CompletionSectionHeader)[] => [
+        {
+          type: 'sectionHeader',
+          id: 'primitives',
+          name: 'Primitive Elements',
+        },
+        ...typeItems,
+        {
+          type: 'sectionHeader',
+          id: 'components',
+          name: 'Custom Components',
+        },
+        ...(components ?? []).map((c) => ({
+          id: c.componentID,
+          name: c.name,
+        })),
+      ],
+      [components],
+    );
 
-  const showHoverRing =
-    (hovered || isMenuOpen) &&
-    !isDragging &&
-    !isSearchingStyles &&
-    !isSearchingTypes;
+    const showHoverRing =
+      (hovered || isMenuOpen) &&
+      !isDragging &&
+      !isSearchingStyles &&
+      !isSearchingTypes;
 
-  const ref = React.useRef<HTMLLIElement>(null);
+    const ref = React.useRef<HTMLLIElement>(null);
 
-  return (
-    <TreeView.Row
-      ref={ref}
-      id={id}
-      depth={depth - 1}
-      menuItems={menu}
-      onSelectMenuItem={onSelectMenuItem}
-      sortable
-      onMenuOpenChange={setIsMenuOpen}
-      onHoverChange={(hovered) => {
-        setHighlightedPath(hovered ? path : undefined);
-      }}
-      onPress={() => {
-        setSelectedPath(path);
+    useImperativeHandle(forwardedRef, () => ({
+      focus() {
         ref.current?.focus();
-      }}
-      onKeyDown={(event) => {
-        // Double check that the element is still focused.
-        // This is necessary because menus contained within this view will
-        // otherwise receive the keydown event.
-        if (document.activeElement !== ref.current) return;
+      },
+    }));
 
-        event.preventDefault();
-        event.stopPropagation();
+    return (
+      <TreeView.Row
+        ref={ref}
+        id={id}
+        depth={depth - 1}
+        menuItems={menu}
+        onSelectMenuItem={onSelectMenuItem}
+        sortable
+        onMenuOpenChange={setIsMenuOpen}
+        onHoverChange={(hovered) => {
+          setHighlightedPath(hovered ? path : undefined);
+        }}
+        onPress={() => {
+          setSelectedPath(path);
+          ref.current?.focus();
+        }}
+        onKeyDown={(event) => {
+          // Double check that the element is still focused.
+          // This is necessary because menus contained within this view will
+          // otherwise receive the keydown event.
+          if (document.activeElement !== ref.current) return;
 
-        switch (event.key) {
-          case '+': {
-            onSelectMenuItem('addChild');
-            break;
+          // Check if the mod key is pressed
+          if (event.metaKey || event.ctrlKey) {
+            return;
           }
-          case '#': {
-            if (node.type === 'noyaPrimitiveElement') {
-              setIsSearchingStyles(true);
-            } else if (node.type === 'noyaCompositeElement') {
-              setIsSearchingVariants(true);
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          switch (event.key) {
+            case '+': {
+              onSelectMenuItem('addChild');
+              break;
             }
-            break;
-          }
-          case '/': {
-            setIsSearchingTypes(true);
-            break;
-          }
-          case 'Enter': {
-            setEditingId(id);
-            break;
-          }
-          case 'Delete':
-          case 'Backspace': {
-            // Prevent deleting the root
-            if (depth === 0) return;
-
-            onSelectMenuItem('delete');
-            break;
-          }
-          case 'Escape': {
-            setSelectedPath(undefined);
-            break;
-          }
-        }
-      }}
-      icon={
-        depth !== 0 && (
-          <DraggableMenuButton
-            isVisible={hovered || isMenuOpen || isDragging}
-            items={menu}
-            onSelect={onSelectMenuItem}
-          />
-        )
-      }
-      onDoubleClick={() => {
-        setEditingId(id);
-      }}
-    >
-      <Stack.V
-        flex="1 1 0%"
-        padding="1px"
-        borderRadius="4px"
-        gap="2px"
-        border={
-          showHoverRing
-            ? `1px solid ${theme.colors.primary}`
-            : node.type === 'noyaCompositeElement'
-            ? `1px solid transparent`
-            : `1px solid ${theme.colors.divider}`
-        }
-        background={
-          selected
-            ? theme.colors.primary
-            : node.type === 'noyaCompositeElement'
-            ? 'rgb(238, 229, 255)'
-            : undefined
-        }
-        color={
-          selected
-            ? 'white'
-            : node.type === 'noyaCompositeElement'
-            ? theme.colors.primary
-            : 'inherit'
-        }
-      >
-        {isSearchingTypes ? (
-          <InputFieldWithCompletions
-            ref={typeSearchInputRef}
-            placeholder={'Find component'}
-            items={componentTypeItems}
-            onBlur={() => {
-              setIsSearchingTypes(false);
-            }}
-            onSelectItem={(item) => {
-              setIsSearchingTypes(false);
-
-              const component = findComponent(item.id);
-              const parentPath = node.path.slice(0, -1);
-
-              if (component) {
-                const newNode = createResolvedNode({
-                  findComponent,
-                  node: Model.compositeElement({
-                    componentID: item.id,
-                    name: node.name ?? item.name,
-                  }),
-                  parentPath,
-                });
-
-                const updated = ResolvedHierarchy.replace(resolvedNode, {
-                  at: indexPath,
-                  node: newNode,
-                });
-
-                onChange(updated);
-
-                const childPath = ResolvedHierarchy.keyPathOfNode(
-                  updated,
-                  newNode,
-                );
-
-                if (!childPath) return;
-
-                onSetExpanded(childPath.join('/'), true);
-              } else {
-                if (node.type === 'noyaPrimitiveElement') {
-                  onChange(
-                    ResolvedHierarchy.replace(resolvedNode, {
-                      at: indexPath,
-                      node: {
-                        ...cloneDeep(node),
-                        componentID: item.id,
-                        id: uuid(), // New id to flag as add/remove change
-                      },
-                    }),
-                  );
-                } else {
-                  onChange(
-                    ResolvedHierarchy.replace(resolvedNode, {
-                      at: indexPath,
-                      node: createResolvedNode({
-                        findComponent,
-                        node: Model.primitiveElement({
-                          componentID: item.id,
-                          name: node.name ?? item.name,
-                        }),
-                        parentPath,
-                      }),
-                    }),
-                  );
-                }
+            case '#': {
+              if (node.type === 'noyaPrimitiveElement') {
+                setIsSearchingStyles(true);
+              } else if (node.type === 'noyaCompositeElement') {
+                setIsSearchingVariants(true);
               }
-            }}
-            style={{
-              zIndex: 1, // Focus outline should appear above chips
-              background: 'transparent',
-            }}
-          />
-        ) : isSearchingVariants && node.type === 'noyaCompositeElement' ? (
-          <InputFieldWithCompletions
-            ref={variantInputRef}
-            placeholder={'Find variant'}
-            items={
-              findComponent(node.componentID)?.variants?.map(
-                (variant): CompletionItem => ({
-                  id: variant.id,
-                  name: variant.name || '',
-                }),
-              ) ?? []
+              break;
             }
-            onBlur={() => {
-              setIsSearchingVariants(false);
-            }}
-            onSelectItem={(item) => {
-              setIsSearchingVariants(false);
-
-              onChange(
-                ResolvedHierarchy.replace(resolvedNode, {
-                  at: indexPath,
-                  node: {
-                    ...cloneDeep(node),
-                    variantNames: [
-                      ...(node.variantNames ?? []),
-                      Model.variantName(item.id),
-                    ],
-                  },
-                }),
-              );
-            }}
-            style={{
-              zIndex: 1, // Focus outline should appear above chips
-              background: 'transparent',
-            }}
-          />
-        ) : isSearchingStyles ? (
-          <InputFieldWithCompletions
-            ref={styleSearchInputRef}
-            placeholder={'Find style'}
-            items={
-              primitiveElementStyleItems[
-                (node as NoyaPrimitiveElement).componentID
-              ] ?? styleItems
+            case '/': {
+              setIsSearchingTypes(true);
+              break;
             }
-            onBlur={() => {
-              setIsSearchingStyles(false);
-              ref.current?.focus();
-            }}
-            onSelectItem={(item) => {
-              setIsSearchingStyles(false);
-              ref.current?.focus();
+            case 'Enter': {
+              setEditingId(id);
+              break;
+            }
+            case 'Delete':
+            case 'Backspace': {
+              // Prevent deleting the root
+              if (depth === 0) return;
 
-              if (node.type !== 'noyaPrimitiveElement') return;
-
-              onChange(
-                resolvedNodeReducer(resolvedNode, {
-                  type: 'addClassNames',
-                  indexPath,
-                  classNames: [item.name],
-                }),
-              );
-            }}
-            style={{
-              zIndex: 1, // Focus outline should appear above chips
-              background: 'transparent',
-            }}
-          />
-        ) : node.type === 'noyaString' ? (
-          <InputField.Root>
-            <InputField.Input
-              style={{
-                background: 'transparent',
-                color: 'dodgerblue',
-              }}
-              value={node.value}
-              onChange={(value) => {}}
+              onSelectMenuItem('delete');
+              break;
+            }
+            case 'Escape': {
+              setSelectedPath(undefined);
+              break;
+            }
+          }
+        }}
+        icon={
+          depth !== 0 && (
+            <DraggableMenuButton
+              isVisible={hovered || isMenuOpen || isDragging}
+              items={menu}
+              onSelect={onSelectMenuItem}
             />
-          </InputField.Root>
-        ) : (
-          <Stack.H
-            padding="4px 6px"
-            alignItems="center"
-            zIndex={isEditing ? 1 : undefined}
-            gap="4px"
-          >
-            {node.type === 'noyaCompositeElement' && (
-              <IconButton
-                iconName={expanded ? 'CaretDownIcon' : 'CaretRightIcon'}
-                color={theme.colors.primary}
-                onClick={() => {
-                  onSetExpanded(id, !expanded);
-                }}
-                contentStyle={{
-                  marginLeft: '-2px',
-                }}
-              />
-            )}
-            {isEditing ? (
-              <TreeView.EditableRowTitle
-                value={name}
-                onSubmitEditing={(value) => {
-                  setEditingId(undefined);
+          )
+        }
+        onDoubleClick={() => {
+          setEditingId(id);
+        }}
+      >
+        <Stack.V
+          flex="1 1 0%"
+          padding="1px"
+          borderRadius="4px"
+          gap="2px"
+          border={
+            showHoverRing
+              ? `1px solid ${theme.colors.primary}`
+              : node.type === 'noyaCompositeElement'
+              ? `1px solid transparent`
+              : `1px solid ${theme.colors.divider}`
+          }
+          background={
+            selected
+              ? theme.colors.primary
+              : node.type === 'noyaCompositeElement'
+              ? 'rgb(238, 229, 255)'
+              : undefined
+          }
+          color={
+            selected
+              ? 'white'
+              : node.type === 'noyaCompositeElement'
+              ? theme.colors.primary
+              : 'inherit'
+          }
+        >
+          {isSearchingTypes ? (
+            <InputFieldWithCompletions
+              ref={typeSearchInputRef}
+              placeholder={'Find component'}
+              items={componentTypeItems}
+              onBlur={() => {
+                setIsSearchingTypes(false);
+              }}
+              onSelectItem={(item) => {
+                setIsSearchingTypes(false);
 
-                  onChange(
-                    resolvedNodeReducer(resolvedNode, {
-                      type: 'setName',
-                      indexPath,
-                      name: value,
+                const component = findComponent(item.id);
+                const parentPath = node.path.slice(0, -1);
+
+                if (component) {
+                  const newNode = createResolvedNode({
+                    findComponent,
+                    node: Model.compositeElement({
+                      componentID: item.id,
+                      name: node.name ?? item.name,
                     }),
+                    parentPath,
+                  });
+
+                  const updated = ResolvedHierarchy.replace(resolvedNode, {
+                    at: indexPath,
+                    node: newNode,
+                  });
+
+                  onChange(updated);
+
+                  const childPath = ResolvedHierarchy.keyPathOfNode(
+                    updated,
+                    newNode,
                   );
-                }}
-                autoFocus
-              />
-            ) : (
-              <TreeView.RowTitle style={{ width: 0 }}>{name}</TreeView.RowTitle>
-            )}
-            <Chip
-              size="small"
-              variant={hovered ? 'outlined' : 'ghost'}
-              colorScheme={selected ? 'primary' : undefined}
-              monospace
+
+                  if (!childPath) return;
+
+                  onSetExpanded(childPath.join('/'), true);
+                } else {
+                  if (node.type === 'noyaPrimitiveElement') {
+                    onChange(
+                      ResolvedHierarchy.replace(resolvedNode, {
+                        at: indexPath,
+                        node: {
+                          ...cloneDeep(node),
+                          componentID: item.id,
+                          id: uuid(), // New id to flag as add/remove change
+                        },
+                      }),
+                    );
+                  } else {
+                    onChange(
+                      ResolvedHierarchy.replace(resolvedNode, {
+                        at: indexPath,
+                        node: createResolvedNode({
+                          findComponent,
+                          node: Model.primitiveElement({
+                            componentID: item.id,
+                            name: node.name ?? item.name,
+                          }),
+                          parentPath,
+                        }),
+                      }),
+                    );
+                  }
+                }
+              }}
               style={{
-                ...(selected && {
-                  color: 'white',
-                }),
+                zIndex: 1, // Focus outline should appear above chips
+                background: 'transparent',
               }}
-              onClick={() => {
-                setIsSearchingTypes(true);
+            />
+          ) : isSearchingVariants && node.type === 'noyaCompositeElement' ? (
+            <InputFieldWithCompletions
+              ref={variantInputRef}
+              placeholder={'Find variant'}
+              items={
+                findComponent(node.componentID)?.variants?.map(
+                  (variant): CompletionItem => ({
+                    id: variant.id,
+                    name: variant.name || '',
+                  }),
+                ) ?? []
+              }
+              onBlur={() => {
+                setIsSearchingVariants(false);
               }}
+              onSelectItem={(item) => {
+                setIsSearchingVariants(false);
+
+                onChange(
+                  ResolvedHierarchy.replace(resolvedNode, {
+                    at: indexPath,
+                    node: {
+                      ...cloneDeep(node),
+                      variantNames: [
+                        ...(node.variantNames ?? []),
+                        Model.variantName(item.id),
+                      ],
+                    },
+                  }),
+                );
+              }}
+              style={{
+                zIndex: 1, // Focus outline should appear above chips
+                background: 'transparent',
+              }}
+            />
+          ) : isSearchingStyles ? (
+            <InputFieldWithCompletions
+              ref={styleSearchInputRef}
+              placeholder={'Find style'}
+              items={
+                primitiveElementStyleItems[
+                  (node as NoyaPrimitiveElement).componentID
+                ] ?? styleItems
+              }
+              onBlur={() => {
+                setIsSearchingStyles(false);
+                ref.current?.focus();
+              }}
+              onSelectItem={(item) => {
+                setIsSearchingStyles(false);
+                ref.current?.focus();
+
+                if (node.type !== 'noyaPrimitiveElement') return;
+
+                onChange(
+                  resolvedNodeReducer(resolvedNode, {
+                    type: 'addClassNames',
+                    indexPath,
+                    classNames: [item.name],
+                  }),
+                );
+              }}
+              style={{
+                zIndex: 1, // Focus outline should appear above chips
+                background: 'transparent',
+              }}
+            />
+          ) : node.type === 'noyaString' ? (
+            <InputField.Root>
+              <InputField.Input
+                style={{
+                  background: 'transparent',
+                  color: 'dodgerblue',
+                }}
+                value={node.value}
+                onChange={(value) => {}}
+              />
+            </InputField.Root>
+          ) : (
+            <Stack.H
+              padding="4px 6px"
+              alignItems="center"
+              zIndex={isEditing ? 1 : undefined}
+              gap="4px"
             >
-              {getComponentName(node, findComponent)}
-            </Chip>
-          </Stack.H>
-        )}
-        {node.type === 'noyaCompositeElement' &&
-          (findComponent(node.componentID)?.variants?.length ?? 0) > 0 && (
+              {node.type === 'noyaCompositeElement' && (
+                <IconButton
+                  iconName={expanded ? 'CaretDownIcon' : 'CaretRightIcon'}
+                  color={theme.colors.primary}
+                  onClick={() => {
+                    onSetExpanded(id, !expanded);
+                  }}
+                  contentStyle={{
+                    marginLeft: '-2px',
+                  }}
+                />
+              )}
+              {isEditing ? (
+                <TreeView.EditableRowTitle
+                  value={name}
+                  onSubmitEditing={(value) => {
+                    setEditingId(undefined);
+
+                    onChange(
+                      resolvedNodeReducer(resolvedNode, {
+                        type: 'setName',
+                        indexPath,
+                        name: value,
+                      }),
+                    );
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <TreeView.RowTitle style={{ width: 0 }}>
+                  {name}
+                </TreeView.RowTitle>
+              )}
+              <Chip
+                size="small"
+                variant={hovered ? 'outlined' : 'ghost'}
+                colorScheme={selected ? 'primary' : undefined}
+                monospace
+                style={{
+                  ...(selected && {
+                    color: 'white',
+                  }),
+                }}
+                onClick={() => {
+                  setIsSearchingTypes(true);
+                }}
+              >
+                {getComponentName(node, findComponent)}
+              </Chip>
+            </Stack.H>
+          )}
+          {node.type === 'noyaCompositeElement' &&
+            (findComponent(node.componentID)?.variants?.length ?? 0) > 0 && (
+              <Stack.H flexWrap="wrap" gap="2px" margin={'-2px 0 0 0'}>
+                {node.variantNames?.map(({ variantID, id }) => {
+                  return (
+                    <Chip
+                      key={id}
+                      size={'small'}
+                      monospace
+                      deletable
+                      style={{
+                        color: theme.colors.primary,
+                        background: 'rgb(226, 211, 255)',
+                      }}
+                      onDelete={() => {
+                        onChange(
+                          ResolvedHierarchy.replace(resolvedNode, {
+                            at: indexPath,
+                            node: {
+                              ...node,
+                              variantNames: node.variantNames?.filter(
+                                (variantName) => variantName.id !== id,
+                              ),
+                            },
+                          }),
+                        );
+                      }}
+                    >
+                      {findComponent(node.componentID)?.variants?.find(
+                        (variant) => variant.id === variantID,
+                      )?.name ?? 'Default'}
+                    </Chip>
+                  );
+                })}
+                <Chip
+                  size={'small'}
+                  addable
+                  monospace
+                  style={{
+                    color: theme.colors.primary,
+                    background: 'rgb(226, 211, 255)',
+                  }}
+                  onAdd={() => {
+                    if (isSearchingVariants) {
+                      setIsSearchingVariants(false);
+                    } else {
+                      setIsSearchingVariants(true);
+                    }
+                  }}
+                />
+              </Stack.H>
+            )}
+          {node.type === 'noyaPrimitiveElement' && (
             <Stack.H flexWrap="wrap" gap="2px" margin={'-2px 0 0 0'}>
-              {node.variantNames?.map(({ variantID, id }) => {
+              {node.classNames.map(({ value, id }) => {
+                const status = undefined;
+
                 return (
                   <Chip
                     key={id}
                     size={'small'}
+                    deletable={status !== 'removed'}
+                    addable={status === 'removed'}
                     monospace
-                    deletable
+                    colorScheme={
+                      selected
+                        ? 'primary'
+                        : status === 'added'
+                        ? 'secondary'
+                        : undefined
+                    }
                     style={{
-                      color: theme.colors.primary,
-                      background: 'rgb(226, 211, 255)',
+                      opacity: status === 'removed' ? 0.5 : 1,
                     }}
                     onDelete={() => {
                       onChange(
-                        ResolvedHierarchy.replace(resolvedNode, {
-                          at: indexPath,
-                          node: {
-                            ...node,
-                            variantNames: node.variantNames?.filter(
-                              (variantName) => variantName.id !== id,
-                            ),
-                          },
+                        resolvedNodeReducer(resolvedNode, {
+                          type: 'removeClassNames',
+                          indexPath,
+                          classNames: [value],
                         }),
                       );
                     }}
+                    // onAdd={() => {
+                    //   if (rootNode.type !== 'noyaCompositeElement') return;
+
+                    //   const newSelection: NoyaCompositeElement = {
+                    //     ...rootNode,
+                    //     diff: resetRemovedClassName(
+                    //       rootNode.diff,
+                    //       path.slice(1),
+                    //       value,
+                    //     ),
+                    //   };
+
+                    //   setDiff(newSelection);
+                    // }}
                   >
-                    {findComponent(node.componentID)?.variants?.find(
-                      (variant) => variant.id === variantID,
-                    )?.name ?? 'Default'}
+                    {value}
                   </Chip>
                 );
               })}
@@ -1017,398 +1149,332 @@ export const DSLayoutRow = memo(function DSLayerRow({
                 size={'small'}
                 addable
                 monospace
-                style={{
-                  color: theme.colors.primary,
-                  background: 'rgb(226, 211, 255)',
-                }}
+                colorScheme={selected ? 'primary' : undefined}
                 onAdd={() => {
-                  if (isSearchingVariants) {
-                    setIsSearchingVariants(false);
+                  if (isSearchingStyles) {
+                    setIsSearchingStyles(false);
                   } else {
-                    setIsSearchingVariants(true);
+                    setIsSearchingStyles(true);
                   }
                 }}
               />
             </Stack.H>
           )}
-        {node.type === 'noyaPrimitiveElement' && (
-          <Stack.H flexWrap="wrap" gap="2px" margin={'-2px 0 0 0'}>
-            {node.classNames.map(({ value, id }) => {
-              const status = undefined;
-
+          {node.type === 'noyaPrimitiveElement' &&
+            node.props.length > 0 &&
+            node.props.map((prop) => {
               return (
-                <Chip
-                  key={id}
-                  size={'small'}
-                  deletable={status !== 'removed'}
-                  addable={status === 'removed'}
-                  monospace
-                  colorScheme={
-                    selected
-                      ? 'primary'
-                      : status === 'added'
-                      ? 'secondary'
-                      : undefined
-                  }
-                  style={{
-                    opacity: status === 'removed' ? 0.5 : 1,
-                  }}
-                  onDelete={() => {
-                    onChange(
-                      resolvedNodeReducer(resolvedNode, {
-                        type: 'removeClassNames',
-                        indexPath,
-                        classNames: [value],
-                      }),
-                    );
-                  }}
-                  // onAdd={() => {
-                  //   if (rootNode.type !== 'noyaCompositeElement') return;
-
-                  //   const newSelection: NoyaCompositeElement = {
-                  //     ...rootNode,
-                  //     diff: resetRemovedClassName(
-                  //       rootNode.diff,
-                  //       path.slice(1),
-                  //       value,
-                  //     ),
-                  //   };
-
-                  //   setDiff(newSelection);
-                  // }}
+                <InputField.Root
+                  key={prop.id}
+                  labelPosition="end"
+                  labelSize={60}
+                  size="small"
                 >
-                  {value}
-                </Chip>
-              );
-            })}
-            <Chip
-              size={'small'}
-              addable
-              monospace
-              colorScheme={selected ? 'primary' : undefined}
-              onAdd={() => {
-                if (isSearchingStyles) {
-                  setIsSearchingStyles(false);
-                } else {
-                  setIsSearchingStyles(true);
-                }
-              }}
-            />
-          </Stack.H>
-        )}
-        {node.type === 'noyaPrimitiveElement' &&
-          node.props.length > 0 &&
-          node.props.map((prop) => {
-            return (
-              <InputField.Root
-                key={prop.id}
-                labelPosition="end"
-                labelSize={60}
-                size="small"
-              >
-                <InputField.Input
-                  value={
-                    prop.type === 'generator'
-                      ? prop.generator === 'geometric'
-                        ? ''
-                        : prop.query
-                      : prop.value.toString()
-                  }
-                  allowSubmittingWithSameValue
-                  disabled={
-                    prop.type === 'generator' && prop.generator === 'geometric'
-                  }
-                  submitAutomaticallyAfterDelay={
-                    prop.type === 'generator' ? 300 : 100
-                  }
-                  onDoubleClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }}
-                  onSubmit={(value) => {
-                    onChange(
-                      ResolvedHierarchy.replace(resolvedNode, {
-                        at: indexPath,
-                        node: {
-                          ...node,
-                          props: node.props.map((p) => {
-                            if (
-                              p.name === prop.name &&
-                              p.type === 'generator' &&
-                              prop.type === 'generator' &&
-                              p.generator === prop.generator
-                            ) {
-                              return { ...p, query: value };
-                            }
-
-                            if (
-                              p.name === prop.name &&
-                              p.type === 'string' &&
-                              prop.type === 'string'
-                            ) {
-                              return { ...p, value };
-                            }
-
-                            if (
-                              p.name === prop.name &&
-                              p.type === 'number' &&
-                              prop.type === 'number'
-                            ) {
-                              const parsed = parseFloat(value);
-
-                              return {
-                                ...p,
-                                value: Number.isFinite(parsed)
-                                  ? parsed
-                                  : p.value,
-                              };
-                            }
-
-                            return p;
-                          }),
-                        },
-                      }),
-                    );
-                  }}
-                />
-                <InputField.Label>
-                  {prop.type === 'generator'
-                    ? `${
-                        prop.generator === 'geometric'
-                          ? 'Geometric Pattern'
-                          : prop.generator === 'random-icon'
-                          ? 'Iconify'
-                          : 'Unsplash Stock Photo'
-                      }\u00A0\u00A0`
-                    : prop.name}
-                </InputField.Label>
-                {prop.type === 'generator' && (
-                  <InputField.DropdownMenu
-                    items={createSectionedMenu(
-                      [
-                        (prop.generator === 'random-image' ||
-                          prop.generator === 'geometric') && {
-                          value: 'shuffle',
-                          title: 'Shuffle',
-                          icon: <ShuffleIcon />,
-                        },
-                        prop.generator === 'geometric' && {
-                          value: 'configure',
-                          title: 'Configure',
-                          icon: <MixerHorizontalIcon />,
-                        },
-                      ],
-                      [
-                        prop.generator !== 'random-icon' && {
-                          value: 'random-icon',
-                          title: 'Switch to Icon',
-                          icon: <VercelLogoIcon />,
-                        },
-                        prop.generator !== 'random-image' && {
-                          value: 'random-image',
-                          title: 'Switch to Stock Photo',
-                          icon: <ImageIcon />,
-                        },
-                        prop.generator !== 'geometric' && {
-                          value: 'geometric',
-                          title: 'Switch to Geometric Pattern',
-                          icon: <BoxModelIcon />,
-                        },
-                      ],
-                      [
-                        prop.generator !== 'geometric' && {
-                          value: 'fetch',
-                          title: 'Fetch',
-                          icon: <GlobeIcon />,
-                        },
-                      ],
-                    )}
-                    onSelect={async (value) => {
-                      switch (value) {
-                        case 'configure':
-                          onConfigureProp?.({
-                            path,
-                            prop: prop.name,
-                          });
-                          break;
-                        case 'fetch': {
-                          switch (prop.generator) {
-                            case 'random-image':
-                              break;
-                            case 'random-icon':
-                              const data =
-                                await client.networkClient.random.icon({
-                                  query: prop.query,
-                                  preferredCollection: 'heroicons',
-                                });
-
-                              if (data.icons.length === 0) return;
-
-                              const icon = data.icons[0];
-
-                              const iconResponse = await fetch(icon);
-                              const svg = await iconResponse.text();
-
-                              onChange(
-                                ResolvedHierarchy.replace(resolvedNode, {
-                                  at: indexPath,
-                                  node: {
-                                    ...node,
-                                    props: node.props.map((p) =>
-                                      p.name === prop.name &&
-                                      p.type === 'generator' &&
-                                      p.generator === prop.generator
-                                        ? {
-                                            ...p,
-                                            result: svg,
-                                            resolvedQuery: prop.query,
-                                          }
-                                        : p,
-                                    ),
-                                  },
-                                }),
-                              );
-                              break;
-                          }
-
-                          break;
-                        }
-                        case 'geometric':
-                        case 'random-image':
-                        case 'random-icon': {
-                          onChange(
-                            ResolvedHierarchy.replace(resolvedNode, {
-                              at: indexPath,
-                              node: {
-                                ...node,
-                                props: node.props.map((p) =>
-                                  p.name === prop.name &&
-                                  p.type === 'generator' &&
-                                  p.generator === prop.generator
-                                    ? {
-                                        ...p,
-                                        generator: value,
-                                        query: '',
-                                        result: undefined,
-                                        resolvedQuery: undefined,
-                                      }
-                                    : p,
-                                ),
-                              },
-                            }),
-                          );
-                          break;
-                        }
-                        case 'shuffle': {
-                          switch (prop.generator) {
-                            case 'random-image':
-                              client.random.resetImage({
-                                id: prop.id,
-                                query: prop.query,
-                              });
-                              break;
-                            case 'random-icon':
-                              client.random.resetIcon({
-                                id: prop.id,
-                                query: prop.query,
-                              });
-                              break;
-                          }
-
-                          onChange(
-                            ResolvedHierarchy.replace(resolvedNode, {
-                              at: indexPath,
-                              node: {
-                                ...node,
-                                props: node.props.map((p) =>
-                                  p.name === prop.name &&
-                                  p.type === 'generator' &&
-                                  p.generator === prop.generator
-                                    ? {
-                                        ...p,
-                                        query:
-                                          prop.generator === 'geometric'
-                                            ? randomSeed()
-                                            : p.query,
-                                        result: undefined,
-                                        resolvedQuery: undefined,
-                                        data: undefined,
-                                      }
-                                    : p,
-                                ),
-                              },
-                            }),
-                          );
-                          break;
-                        }
-                      }
+                  <InputField.Input
+                    value={
+                      prop.type === 'generator'
+                        ? prop.generator === 'geometric'
+                          ? ''
+                          : prop.query
+                        : prop.value.toString()
+                    }
+                    allowSubmittingWithSameValue
+                    disabled={
+                      prop.type === 'generator' &&
+                      prop.generator === 'geometric'
+                    }
+                    submitAutomaticallyAfterDelay={
+                      prop.type === 'generator' ? 300 : 100
+                    }
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
                     }}
-                  >
-                    <div
-                      style={{
-                        position: 'relative',
-                        top: '1px',
-                        right: '1px',
-                        height: '15px',
-                        width: '15px',
-                        // aspectRatio: '1/1',
-                        objectFit: 'cover',
-                        objectPosition: 'center',
-                        borderRadius: '4px',
-                        marginLeft: '4px',
-                        // marginRight: '-6px',
-                        cursor: 'pointer',
-                        overflow: 'hidden',
+                    onSubmit={(value) => {
+                      onChange(
+                        ResolvedHierarchy.replace(resolvedNode, {
+                          at: indexPath,
+                          node: {
+                            ...node,
+                            props: node.props.map((p) => {
+                              if (
+                                p.name === prop.name &&
+                                p.type === 'generator' &&
+                                prop.type === 'generator' &&
+                                p.generator === prop.generator
+                              ) {
+                                return { ...p, query: value };
+                              }
+
+                              if (
+                                p.name === prop.name &&
+                                p.type === 'string' &&
+                                prop.type === 'string'
+                              ) {
+                                return { ...p, value };
+                              }
+
+                              if (
+                                p.name === prop.name &&
+                                p.type === 'number' &&
+                                prop.type === 'number'
+                              ) {
+                                const parsed = parseFloat(value);
+
+                                return {
+                                  ...p,
+                                  value: Number.isFinite(parsed)
+                                    ? parsed
+                                    : p.value,
+                                };
+                              }
+
+                              return p;
+                            }),
+                          },
+                        }),
+                      );
+                    }}
+                  />
+                  <InputField.Label>
+                    {prop.type === 'generator'
+                      ? `${
+                          prop.generator === 'geometric'
+                            ? 'Geometric Pattern'
+                            : prop.generator === 'random-icon'
+                            ? 'Iconify'
+                            : 'Unsplash Stock Photo'
+                        }\u00A0\u00A0`
+                      : prop.name}
+                  </InputField.Label>
+                  {prop.type === 'generator' && (
+                    <InputField.DropdownMenu
+                      items={createSectionedMenu(
+                        [
+                          (prop.generator === 'random-image' ||
+                            prop.generator === 'geometric') && {
+                            value: 'shuffle',
+                            title: 'Shuffle',
+                            icon: <ShuffleIcon />,
+                          },
+                          prop.generator === 'geometric' && {
+                            value: 'configure',
+                            title: 'Configure',
+                            icon: <MixerHorizontalIcon />,
+                          },
+                        ],
+                        [
+                          prop.generator !== 'random-icon' && {
+                            value: 'random-icon',
+                            title: 'Switch to Icon',
+                            icon: <VercelLogoIcon />,
+                          },
+                          prop.generator !== 'random-image' && {
+                            value: 'random-image',
+                            title: 'Switch to Stock Photo',
+                            icon: <ImageIcon />,
+                          },
+                          prop.generator !== 'geometric' && {
+                            value: 'geometric',
+                            title: 'Switch to Geometric Pattern',
+                            icon: <BoxModelIcon />,
+                          },
+                        ],
+                        [
+                          prop.generator !== 'geometric' && {
+                            value: 'fetch',
+                            title: 'Fetch',
+                            icon: <GlobeIcon />,
+                          },
+                        ],
+                      )}
+                      onSelect={async (value) => {
+                        switch (value) {
+                          case 'configure':
+                            onConfigureProp?.({
+                              path,
+                              prop: prop.name,
+                            });
+                            break;
+                          case 'fetch': {
+                            switch (prop.generator) {
+                              case 'random-image':
+                                break;
+                              case 'random-icon':
+                                const data =
+                                  await client.networkClient.random.icon({
+                                    query: prop.query,
+                                    preferredCollection: 'heroicons',
+                                  });
+
+                                if (data.icons.length === 0) return;
+
+                                const icon = data.icons[0];
+
+                                const iconResponse = await fetch(icon);
+                                const svg = await iconResponse.text();
+
+                                onChange(
+                                  ResolvedHierarchy.replace(resolvedNode, {
+                                    at: indexPath,
+                                    node: {
+                                      ...node,
+                                      props: node.props.map((p) =>
+                                        p.name === prop.name &&
+                                        p.type === 'generator' &&
+                                        p.generator === prop.generator
+                                          ? {
+                                              ...p,
+                                              result: svg,
+                                              resolvedQuery: prop.query,
+                                            }
+                                          : p,
+                                      ),
+                                    },
+                                  }),
+                                );
+                                break;
+                            }
+
+                            break;
+                          }
+                          case 'geometric':
+                          case 'random-image':
+                          case 'random-icon': {
+                            onChange(
+                              ResolvedHierarchy.replace(resolvedNode, {
+                                at: indexPath,
+                                node: {
+                                  ...node,
+                                  props: node.props.map((p) =>
+                                    p.name === prop.name &&
+                                    p.type === 'generator' &&
+                                    p.generator === prop.generator
+                                      ? {
+                                          ...p,
+                                          generator: value,
+                                          query: '',
+                                          result: undefined,
+                                          resolvedQuery: undefined,
+                                        }
+                                      : p,
+                                  ),
+                                },
+                              }),
+                            );
+                            break;
+                          }
+                          case 'shuffle': {
+                            switch (prop.generator) {
+                              case 'random-image':
+                                client.random.resetImage({
+                                  id: prop.id,
+                                  query: prop.query,
+                                });
+                                break;
+                              case 'random-icon':
+                                client.random.resetIcon({
+                                  id: prop.id,
+                                  query: prop.query,
+                                });
+                                break;
+                            }
+
+                            onChange(
+                              ResolvedHierarchy.replace(resolvedNode, {
+                                at: indexPath,
+                                node: {
+                                  ...node,
+                                  props: node.props.map((p) =>
+                                    p.name === prop.name &&
+                                    p.type === 'generator' &&
+                                    p.generator === prop.generator
+                                      ? {
+                                          ...p,
+                                          query:
+                                            prop.generator === 'geometric'
+                                              ? randomSeed()
+                                              : p.query,
+                                          result: undefined,
+                                          resolvedQuery: undefined,
+                                          data: undefined,
+                                        }
+                                      : p,
+                                  ),
+                                },
+                              }),
+                            );
+                            break;
+                          }
+                        }
                       }}
                     >
-                      {prop.generator === 'geometric' ? (
-                        <BoxModelIcon color="#aaa" />
-                      ) : prop.result?.startsWith('<svg') ? (
-                        svgToReactElement(prop.result)
-                      ) : (
-                        <img
-                          src={prop.result}
-                          alt=""
-                          style={{
-                            position: 'absolute',
-                            inset: 0,
-                            height: '100%',
-                            width: '100%',
-                            objectFit: 'cover',
-                            objectPosition: 'center',
-                            borderRadius: '4px',
-                          }}
-                        />
-                      )}
-                      {hovered && (
-                        <>
-                          <div
+                      <div
+                        style={{
+                          position: 'relative',
+                          top: '1px',
+                          right: '1px',
+                          height: '15px',
+                          width: '15px',
+                          // aspectRatio: '1/1',
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                          borderRadius: '4px',
+                          marginLeft: '4px',
+                          // marginRight: '-6px',
+                          cursor: 'pointer',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {prop.generator === 'geometric' ? (
+                          <BoxModelIcon color="#aaa" />
+                        ) : prop.result?.startsWith('<svg') ? (
+                          svgToReactElement(prop.result)
+                        ) : (
+                          <img
+                            src={prop.result}
+                            alt=""
                             style={{
                               position: 'absolute',
                               inset: 0,
                               height: '100%',
                               width: '100%',
-                              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                              objectFit: 'cover',
+                              objectPosition: 'center',
+                              borderRadius: '4px',
                             }}
                           />
-                          <CaretDownIcon
-                            color="white"
-                            style={{
-                              position: 'relative',
-                            }}
-                          />
-                        </>
-                      )}
-                    </div>
-                  </InputField.DropdownMenu>
-                )}
-              </InputField.Root>
-            );
-          })}
-      </Stack.V>
-    </TreeView.Row>
-  );
-});
+                        )}
+                        {hovered && (
+                          <>
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                height: '100%',
+                                width: '100%',
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                              }}
+                            />
+                            <CaretDownIcon
+                              color="white"
+                              style={{
+                                position: 'relative',
+                              }}
+                            />
+                          </>
+                        )}
+                      </div>
+                    </InputField.DropdownMenu>
+                  )}
+                </InputField.Root>
+              );
+            })}
+        </Stack.V>
+      </TreeView.Row>
+    );
+  }),
+);
 
 function handleMoveItem(
   root: NoyaResolvedNode,
