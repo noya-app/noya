@@ -737,17 +737,27 @@ function Playground(
     );
   }
 
+  const first50Files = useMemo(() => {
+    const entries = Object.entries(props.files ?? {});
+
+    if (entries.length <= 50) return props.files;
+
+    return Object.fromEntries(entries.slice(0, 50));
+  }, [props.files]);
+
   return (
     <>
       <JavascriptPlayground
-        key={JSON.stringify(props.files)}
-        files={props.files}
+        key={JSON.stringify(first50Files)}
+        files={first50Files}
         panes={[
           {
             id: 'editor',
             type: 'editor',
             fileList:
-              Object.keys(props.files ?? {}).length > 1 ? 'sidebar' : undefined,
+              Object.keys(first50Files ?? {}).length > 1
+                ? 'sidebar'
+                : undefined,
           },
         ]}
         style={{
