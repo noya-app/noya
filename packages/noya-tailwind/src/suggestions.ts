@@ -124,6 +124,8 @@ export const suggestionPatterns = [
   'z-{zIndex}',
   '-z-{zIndex}',
   'appearance-none',
+  'flex-wrap',
+  'flex-nowrap',
 ];
 
 export const context = {
