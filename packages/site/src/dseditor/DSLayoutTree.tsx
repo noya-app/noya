@@ -795,12 +795,21 @@ export const DSLayoutRow = memo(function DSLayerRow({
                   parentPath,
                 });
 
-                onChange(
-                  ResolvedHierarchy.replace(resolvedNode, {
-                    at: indexPath,
-                    node: newNode,
-                  }),
+                const updated = ResolvedHierarchy.replace(resolvedNode, {
+                  at: indexPath,
+                  node: newNode,
+                });
+
+                onChange(updated);
+
+                const childPath = ResolvedHierarchy.keyPathOfNode(
+                  updated,
+                  newNode,
                 );
+
+                if (!childPath) return;
+
+                onSetExpanded(childPath.join('/'), true);
               } else {
                 if (node.type === 'noyaPrimitiveElement') {
                   onChange(
