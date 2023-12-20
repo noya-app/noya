@@ -202,23 +202,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
         setSelectedPath(undefined);
       }}
       acceptsDrop={(sourceIndex, destinationIndex, relationDropPosition) => {
-        const sourceItem = flattened[sourceIndex];
-        const destinationItem = flattened[destinationIndex];
-
-        if (!sourceItem || !destinationItem) return false;
-
-        if (destinationItem.node.type !== 'noyaPrimitiveElement') return false;
-
-        const sourcePath = ResolvedHierarchy.findIndexPath(
-          resolvedNode,
-          (node) => node.path.join('/') === sourceItem.path.join('/'),
-        );
-        const destinationPath = ResolvedHierarchy.findIndexPath(
-          resolvedNode,
-          (node) => node.path.join('/') === destinationItem.path.join('/'),
-        );
-
-        if (!sourcePath || !destinationPath) return false;
+        const { indexPath: sourcePath } = flattened[sourceIndex];
+        const { indexPath: destinationPath } = flattened[destinationIndex];
 
         // Don't allow dragging the root
         if (sourcePath.length === 0) {
@@ -230,13 +215,27 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           return false;
         }
 
-        const sourceParent = ResolvedHierarchy.access(
+        const originalParent = ResolvedHierarchy.access(
           resolvedNode,
           sourcePath.slice(0, -1),
         );
 
+        // Don't allow dragging the child of a composite element
+        if (originalParent.type === 'noyaCompositeElement') {
+          return false;
+        }
+
+        const newParent = ResolvedHierarchy.access(
+          resolvedNode,
+          relationDropPosition === 'inside'
+            ? destinationPath
+            : destinationPath.slice(0, -1),
+        );
+
         // Don't allow dragging into a non-primitive element
-        if (sourceParent.type !== 'noyaPrimitiveElement') return false;
+        if (newParent.type !== 'noyaPrimitiveElement') {
+          return false;
+        }
 
         // Don't allow dragging into a descendant
         if (
@@ -1428,7 +1427,7 @@ function handleMoveItem(
       case 'inside': {
         return ResolvedHierarchy.move(root, {
           indexPaths: [sourceIndexPath],
-          to: [...destinationIndexPath, 0],
+          to: [...destinationIndexPath, 1000],
         });
       }
     }
