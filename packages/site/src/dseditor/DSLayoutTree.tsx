@@ -61,6 +61,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { IndexPath } from 'tree-visit';
 import { z } from 'zod';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
@@ -210,6 +211,22 @@ export const DSLayoutTree = memo(function DSLayoutTree({
     [setSelectedPath],
   );
 
+  const handlePressDirection = useCallback(
+    (indexPath: IndexPath, direction: 'up' | 'down') => {
+      const index = flattened.findIndex((item) =>
+        isDeepEqual(item.indexPath, indexPath),
+      );
+
+      const next =
+        direction === 'up' ? flattened[index - 1] : flattened[index + 1];
+
+      if (!next) return;
+
+      focusPath(next.path);
+    },
+    [flattened, focusPath],
+  );
+
   return (
     <TreeView.Root
       keyExtractor={(obj) => obj.key}
@@ -316,6 +333,8 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           onSetExpanded={handleSetExpanded}
           focusPath={focusPath}
           onConfigureProp={onConfigureProp}
+          onPressDown={() => handlePressDirection(indexPath, 'down')}
+          onPressUp={() => handlePressDirection(indexPath, 'up')}
         />
       )}
     />
@@ -349,6 +368,8 @@ export const DSLayoutRow = memo(
       expanded,
       onSetExpanded,
       onConfigureProp,
+      onPressUp,
+      onPressDown,
       focusPath,
     }: Pick<
       Props,
@@ -372,6 +393,8 @@ export const DSLayoutRow = memo(
       setEditingId: (id: string | undefined) => void;
       expanded?: boolean;
       onSetExpanded: (id: string, expanded: boolean) => void;
+      onPressUp: () => void;
+      onPressDown: () => void;
       focusPath: (path?: string[]) => void;
     } & Pick<Props, 'onCreateComponent' | 'components'>,
     forwardedRef: React.ForwardedRef<ILayoutRow>,
@@ -759,6 +782,22 @@ export const DSLayoutRow = memo(
           event.stopPropagation();
 
           switch (event.key) {
+            case 'ArrowUp': {
+              onPressUp();
+              break;
+            }
+            case 'ArrowDown': {
+              onPressDown();
+              break;
+            }
+            case 'ArrowLeft': {
+              onSetExpanded(id, false);
+              break;
+            }
+            case 'ArrowRight': {
+              onSetExpanded(id, true);
+              break;
+            }
             case '+': {
               onSelectMenuItem('addChild');
               break;
