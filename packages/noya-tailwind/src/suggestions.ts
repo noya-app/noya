@@ -119,6 +119,7 @@ export const suggestionPatterns = [
   'inline',
   'inline-block',
   'inline-flex',
+  'block',
   'isolate',
   'isolation-auto',
   'z-{zIndex}',
@@ -126,6 +127,8 @@ export const suggestionPatterns = [
   'appearance-none',
   'flex-wrap',
   'flex-nowrap',
+  'hidden',
+  'visible',
 ];
 
 export const context = {

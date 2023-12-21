@@ -2172,6 +2172,7 @@ Array [
   "inline",
   "inline-block",
   "inline-flex",
+  "block",
   "isolate",
   "isolation-auto",
   "z-0",
@@ -2191,5 +2192,7 @@ Array [
   "appearance-none",
   "flex-wrap",
   "flex-nowrap",
+  "hidden",
+  "visible",
 ]
 `;

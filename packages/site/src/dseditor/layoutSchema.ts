@@ -1,10 +1,41 @@
-import { ElementHierarchy, Model, NoyaNode, NoyaString } from 'noya-component';
+import {
+  ElementHierarchy,
+  Model,
+  NoyaDiff,
+  NoyaNode,
+  NoyaString,
+  mapArrayDiff,
+} from 'noya-component';
 import { partition } from 'noya-utils';
 import { textSymbolId } from '../ayon/symbols/symbolIds';
 import { PRIMITIVE_ELEMENT_MAP } from './primitiveElements';
 
+export function enforceSchemaInDiff(diff: NoyaDiff): NoyaDiff {
+  return {
+    items: diff.items.map((item) => {
+      return {
+        ...item,
+        ...(item.children && {
+          children: mapArrayDiff(item.children, (child) =>
+            enforceSchema(child),
+          ),
+        }),
+      };
+    }),
+  };
+}
+
 export function enforceSchema(root: NoyaNode): NoyaNode {
   return ElementHierarchy.map(root, (node, transformedChildren) => {
+    if (node.type === 'noyaCompositeElement') {
+      return {
+        ...node,
+        ...(node.diff && {
+          diff: enforceSchemaInDiff(node.diff),
+        }),
+      };
+    }
+
     if (node.type !== 'noyaPrimitiveElement') return node;
 
     const primitive = PRIMITIVE_ELEMENT_MAP[node.componentID];

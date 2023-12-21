@@ -2,6 +2,7 @@
 import {
   ElementHierarchy,
   Model,
+  NoyaDiff,
   NoyaNode,
   NoyaPrimitiveElement,
   NoyaResolvedCompositeElement,
@@ -386,6 +387,7 @@ describe('diffing', () => {
 
 describe('apply diff', () => {
   const enforceSchema = (node: NoyaNode) => node;
+  const enforceSchemaInDiff = (diff: NoyaDiff) => diff;
 
   it('embeds class names in primitive', () => {
     const primitive = Model.primitiveElement({
@@ -416,6 +418,7 @@ describe('apply diff', () => {
       component,
       findComponent,
       enforceSchema,
+      enforceSchemaInDiff,
     });
 
     const element = ElementHierarchy.find(
@@ -479,6 +482,7 @@ describe('apply diff', () => {
       component,
       findComponent,
       enforceSchema,
+      enforceSchemaInDiff,
     });
 
     const resolved = createResolvedNode({

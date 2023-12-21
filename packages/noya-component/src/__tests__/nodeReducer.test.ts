@@ -40,6 +40,7 @@ function updateStateWithNewResolvedNode({
     selection: selectionWithDiff,
     component: state.findComponent(componentID)!,
     enforceSchema: (node) => node,
+    enforceSchemaInDiff: (diff) => diff,
     findComponent: state.findComponent,
     debug,
   });

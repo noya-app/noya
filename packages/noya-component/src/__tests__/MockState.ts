@@ -69,6 +69,7 @@ export class MockState {
       selection: selectionWithDiff,
       component: this.findComponent(componentID)!,
       enforceSchema: (node) => node,
+      enforceSchemaInDiff: (diff) => diff,
       findComponent: this.findComponent,
       debug,
     });

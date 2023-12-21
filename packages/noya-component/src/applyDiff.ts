@@ -1,22 +1,25 @@
 import { partitionDiff } from './partitionDiff';
 import {
   FindComponent,
+  createSelectionWithDiff,
   instantiateResolvedComponent,
   unresolve,
 } from './traversal';
-import { NoyaComponent, NoyaNode, SelectedComponent } from './types';
+import { NoyaComponent, NoyaDiff, NoyaNode, SelectedComponent } from './types';
 
 export function applySelectionDiff({
   selection,
   component,
   findComponent,
   enforceSchema,
+  enforceSchemaInDiff,
   debug,
 }: {
   selection: SelectedComponent;
   component: NoyaComponent;
   findComponent: FindComponent;
   enforceSchema: (node: NoyaNode) => NoyaNode;
+  enforceSchemaInDiff: (diff: NoyaDiff) => NoyaDiff;
   debug?: boolean;
 }): {
   selection: SelectedComponent;
@@ -27,18 +30,25 @@ export function applySelectionDiff({
   if (!selection.diff) return { selection, component };
 
   if (selection.variantID) {
-    // Merge the diff into the variant's diff
     const variant = component.variants?.find(
       (variant) => variant.id === selection.variantID,
     );
 
     if (!variant) return { selection, component };
 
+    // Create a variant diff by taking the diff between the base node and current (variant) node
+    const { diff: mergedDiff } = createSelectionWithDiff({
+      selection: { componentID: selection.componentID },
+      findComponent,
+      newResolvedNode: resolvedNode,
+      debug,
+    });
+
     const newVariant = {
       ...variant,
-      diff: {
-        items: [...(variant.diff?.items ?? []), ...selection.diff.items],
-      },
+      ...(mergedDiff && {
+        diff: enforceSchemaInDiff(mergedDiff),
+      }),
     };
 
     return {

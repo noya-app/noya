@@ -57,7 +57,7 @@ import {
 } from './DSComponentThumbnail';
 import { DSLayoutTree } from './DSLayoutTree';
 import { exportLayout } from './componentLayout';
-import { enforceSchema } from './layoutSchema';
+import { enforceSchema, enforceSchemaInDiff } from './layoutSchema';
 import { getNodeName } from './utils/nodeUtils';
 
 type Props = Pick<
@@ -179,6 +179,7 @@ export function DSComponentInspector({
         component,
         findComponent,
         enforceSchema,
+        enforceSchemaInDiff,
       });
 
     if (newComponent !== component) {
