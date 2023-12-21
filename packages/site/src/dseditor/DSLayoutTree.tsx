@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
+import { useRouter } from 'next/router';
 import { useNoyaClientOrFallback } from 'noya-api';
 import {
   FindComponent,
@@ -42,6 +43,7 @@ import {
   ImageIcon,
   InputIcon,
   MixerHorizontalIcon,
+  OpenInNewWindowIcon,
   PlusCircledIcon,
   ShuffleIcon,
   ThickArrowDownIcon,
@@ -489,6 +491,11 @@ export const DSLayoutRow = memo(
       ],
       [
         {
+          title: 'Open in Editor',
+          value: 'openComponent',
+          icon: <OpenInNewWindowIcon />,
+        },
+        {
           title: 'Extract to New Component',
           value: 'extractToComponent',
           icon: <EnterIcon />,
@@ -532,8 +539,26 @@ export const DSLayoutRow = memo(
     const hovered = highlightedPath?.join('/') === path.join('/');
     const selected = selectedPath?.join('/') === path.join('/');
     const openInputDialog = useOpenInputDialog();
+    const router = useRouter();
     const onSelectMenuItem = async (value: MenuItemType) => {
       switch (value) {
+        case 'openComponent': {
+          if (node.type !== 'noyaCompositeElement') return;
+
+          const component = findComponent(node.componentID);
+
+          if (!component) return;
+
+          router.push({
+            pathname: router.pathname,
+            query: {
+              ...router.query,
+              component: node.componentID,
+            },
+          });
+
+          break;
+        }
         case 'replaceWithFirstChild': {
           onChange(
             resolvedNodeReducer(resolvedNode, {
