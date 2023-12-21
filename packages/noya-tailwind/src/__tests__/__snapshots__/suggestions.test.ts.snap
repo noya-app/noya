@@ -2189,5 +2189,7 @@ Array [
   "-z-50",
   "-z-auto",
   "appearance-none",
+  "flex-wrap",
+  "flex-nowrap",
 ]
 `;

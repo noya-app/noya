@@ -1,5 +1,6 @@
 import { isDeepEqual, uuid } from 'noya-utils';
 import { IndexPath, defineTree } from 'tree-visit';
+import { mapArrayDiff } from './arrayDiff';
 import { NoyaResolvedNode } from './types';
 
 const Hierarchy = defineTree<NoyaResolvedNode>({
@@ -77,27 +78,57 @@ function ellipsisMiddle(str: string, maxLength: number) {
   return `${start}...${end}`;
 }
 
-function clone<T extends NoyaResolvedNode>(node: T): T {
+function clone<T extends NoyaResolvedNode>(
+  node: T,
+  { uuid: _uuid = uuid }: { uuid?: () => string } = {},
+): T {
+  const idMapping = new Map<string, string>();
+
+  const createConsistentId = (id: string) => {
+    if (idMapping.has(id)) return idMapping.get(id)!;
+
+    const newId = _uuid();
+
+    idMapping.set(id, newId);
+
+    return newId;
+  };
+
   return Hierarchy.map<NoyaResolvedNode>(node, (node, transformedChildren) => {
     switch (node.type) {
       case 'noyaString': {
         return {
           ...node,
-          id: uuid(),
+          id: createConsistentId(node.id),
         };
       }
       case 'noyaPrimitiveElement': {
         return {
           ...node,
-          id: uuid(),
+          id: createConsistentId(node.id),
           children: transformedChildren,
         };
       }
       case 'noyaCompositeElement': {
         return {
           ...node,
-          id: uuid(),
+          id: createConsistentId(node.id),
           rootElement: transformedChildren[0],
+          ...(node.diff && {
+            diff: {
+              items: node.diff.items.map((item) => {
+                return {
+                  ...item,
+                  path: item.path.map(createConsistentId),
+                  ...(item.children && {
+                    children: mapArrayDiff(item.children, (child) => {
+                      return { ...child, id: createConsistentId(child.id) };
+                    }),
+                  }),
+                };
+              }),
+            },
+          }),
         };
       }
     }
@@ -133,7 +164,14 @@ function keyPathOfNode(
   node: NoyaResolvedNode,
   target: NoyaResolvedNode,
 ): string[] | undefined {
-  const indexPath = indexPathOfNode(node, target);
+  return findKeyPath(node, (n) => n === target);
+}
+
+function findKeyPath(
+  node: NoyaResolvedNode,
+  predicate: (node: NoyaResolvedNode) => boolean,
+): string[] | undefined {
+  const indexPath = ResolvedHierarchy.findIndexPath(node, predicate);
 
   if (!indexPath) return undefined;
 
@@ -145,6 +183,7 @@ function keyPathOfNode(
 export const ResolvedHierarchy = {
   ...Hierarchy,
   clone,
+  findKeyPath,
   findByPath,
   findTypeByPath,
   indexPathOfNode,

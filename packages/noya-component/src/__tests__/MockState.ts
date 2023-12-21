@@ -1,6 +1,16 @@
+import { applySelectionDiff } from '../applyDiff';
 import { Model } from '../builders';
-import { createResolvedNode, instantiateResolvedComponent } from '../traversal';
-import { NoyaComponent, NoyaNode, SelectedComponent } from '../types';
+import {
+  createResolvedNode,
+  createSelectionWithDiff,
+  instantiateResolvedComponent,
+} from '../traversal';
+import {
+  NoyaComponent,
+  NoyaNode,
+  NoyaResolvedNode,
+  SelectedComponent,
+} from '../types';
 
 export class MockState {
   components: Record<string, NoyaComponent> = {};
@@ -37,5 +47,48 @@ export class MockState {
       [component.componentID]: component,
     };
     return state;
+  }
+
+  updateWithNewResolvedNode({
+    componentID,
+    newResolvedNode,
+    debug,
+  }: {
+    componentID: string;
+    newResolvedNode: NoyaResolvedNode;
+    debug?: boolean;
+  }) {
+    const selectionWithDiff = createSelectionWithDiff({
+      selection: { componentID },
+      findComponent: this.findComponent,
+      newResolvedNode: newResolvedNode,
+      debug,
+    });
+
+    const newSelection = applySelectionDiff({
+      selection: selectionWithDiff,
+      component: this.findComponent(componentID)!,
+      enforceSchema: (node) => node,
+      findComponent: this.findComponent,
+      debug,
+    });
+
+    const newState = this.clonedStateWithComponent(newSelection.component);
+    const newRoot = instantiateResolvedComponent(
+      newState.findComponent,
+      { componentID },
+      debug,
+    );
+
+    if (debug) {
+      // console.log(ResolvedHierarchy.diagram(newRoot));
+    }
+
+    return {
+      selectionWithDiff,
+      newSelection,
+      newRoot,
+      newState,
+    };
   }
 }
