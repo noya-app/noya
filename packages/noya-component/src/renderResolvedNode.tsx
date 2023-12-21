@@ -31,17 +31,14 @@ import { svgToReactElement } from './renderSVGElement';
 export const selectOptionSymbolId = 'a4009f44-db30-4658-9bcb-7531434150bb';
 export const ZERO_WIDTH_SPACE = '\u200b';
 
-export function getImageFromProp(
-  primaryScale: Theme['colors']['primary'],
-  prop?: NoyaProp,
-) {
+export function getImageFromProp(colors: Theme['colors'], prop?: NoyaProp) {
   if (!prop) return placeholderImage;
   if (prop.type !== 'generator') return placeholderImage;
   if (prop.generator === 'geometric') {
     return svgToDataUri(
       replaceColorPalette(
         prop.data ? createSVG(prop.data) : createPatternSVG(prop.query),
-        primaryScale,
+        colors,
       ),
     );
   }
@@ -181,6 +178,9 @@ export function renderResolvedNode({
       const primaryScale = (tailwindColors as any)[
         dsConfig.colors.primary
       ] as Theme['colors']['primary'];
+      const neutralScale = (tailwindColors as any)[
+        'slate'
+      ] as Theme['colors']['neutral'];
 
       const stylingProps = {
         ...(stylingMode === 'tailwind' &&
@@ -248,7 +248,10 @@ export function renderResolvedNode({
             // src: 'https://picsum.photos/300/300',
             src:
               // If we have a result
-              getImageFromProp(primaryScale, srcProp),
+              getImageFromProp(
+                { primary: primaryScale, neutral: neutralScale },
+                srcProp,
+              ),
           })}
           {...(element.componentID === component.id.Select && {
             options: unique(transformedChildren),

@@ -92,12 +92,21 @@ export const createPatternSVG = memoize((seed: string): string => {
  */
 export function replaceColorPalette(
   svg: string,
-  colors: Theme['colors']['primary'],
+  colors: Theme['colors'],
 ): string {
-  return svg.replace(
+  svg = svg.replace(
     /primary-(\d+)/g,
-    (_, index) => colors[Number(index) as keyof typeof colors],
+    (_, index) =>
+      colors.primary[Number(index) as keyof Theme['colors']['primary']],
   );
+
+  svg = svg.replace(
+    /neutral-(\d+)/g,
+    (_, index) =>
+      colors.neutral[Number(index) as keyof Theme['colors']['neutral']],
+  );
+
+  return svg;
 }
 
 export function randomSeed() {
