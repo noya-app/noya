@@ -5,6 +5,22 @@ Array [
   "package.json",
   "src/app/layout.tsx",
   "src/app/page.tsx",
+  "public/chakra/blue/dark/components/globals.css",
+  "public/chakra/blue/dark/components/layout.tsx",
+  "public/chakra/blue/dark/components/theme.ts",
+  "public/chakra/blue/light/components/globals.css",
+  "public/chakra/blue/light/components/layout.tsx",
+  "public/chakra/blue/light/components/theme.ts",
+  "public/chakra/teal/dark/components/globals.css",
+  "public/chakra/teal/dark/components/layout.tsx",
+  "public/chakra/teal/dark/components/theme.ts",
+  "public/chakra/teal/light/components/globals.css",
+  "public/chakra/teal/light/components/layout.tsx",
+  "public/chakra/teal/light/components/theme.ts",
+  "public/chakra/blue/dark/components/hero/page.tsx",
+  "public/chakra/blue/light/components/hero/page.tsx",
+  "public/chakra/teal/dark/components/hero/page.tsx",
+  "public/chakra/teal/light/components/hero/page.tsx",
   "src/app/chakra/blue/dark/components/globals.css",
   "src/app/chakra/blue/dark/components/layout.tsx",
   "src/app/chakra/blue/dark/components/theme.ts",
@@ -33,6 +49,270 @@ Object {
   \\"dependencies\\": {},
   \\"devDependencies\\": {}
 }",
+  "public/vanilla/blue/dark/components/globals.css": "@tailwind base;
+@tailwind components;
+@tailwind utilities;",
+  "public/vanilla/blue/dark/components/hero/page.tsx": "'use client';
+
+
+export default function Hero() {
+  return (
+    <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+        New
+      </div>
+      <span className=\\"text-white variant-h1 leading-none text-center text-5xl\\">
+        Create, iterate, inspire.
+      </span>
+      <span className=\\"text-white variant-h4 leading-none text-center text-2xl\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"flex items-center gap-4 mt-2\\">
+        <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+          Get Started
+        </button>
+        <a className=\\"text-blue-500 hover:text-blue-400\\">Learn More</a>
+      </div>
+    </div>
+  );
+}
+",
+  "public/vanilla/blue/dark/components/layout.tsx": "import './globals.css'
+
+export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
+  return children;
+}
+",
+  "public/vanilla/blue/dark/components/theme.ts": "export const theme = {
+  colorMode: 'dark',
+  colors: {
+    primary: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
+      950: '#172554',
+    },
+    neutral: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+      950: '#020617',
+    },
+  },
+};
+",
+  "public/vanilla/blue/light/components/globals.css": "@tailwind base;
+@tailwind components;
+@tailwind utilities;",
+  "public/vanilla/blue/light/components/hero/page.tsx": "'use client';
+
+
+export default function Hero() {
+  return (
+    <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+        New
+      </div>
+      <span className=\\"text-black variant-h1 leading-none text-center text-5xl\\">
+        Create, iterate, inspire.
+      </span>
+      <span className=\\"text-black variant-h4 leading-none text-center text-2xl\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"flex items-center gap-4 mt-2\\">
+        <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+          Get Started
+        </button>
+        <a className=\\"text-blue-500 hover:text-blue-400\\">Learn More</a>
+      </div>
+    </div>
+  );
+}
+",
+  "public/vanilla/blue/light/components/layout.tsx": "import './globals.css'
+
+export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
+  return children;
+}
+",
+  "public/vanilla/blue/light/components/theme.ts": "export const theme = {
+  colorMode: 'light',
+  colors: {
+    primary: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
+      950: '#172554',
+    },
+    neutral: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+      950: '#020617',
+    },
+  },
+};
+",
+  "public/vanilla/teal/dark/components/globals.css": "@tailwind base;
+@tailwind components;
+@tailwind utilities;",
+  "public/vanilla/teal/dark/components/hero/page.tsx": "'use client';
+
+
+export default function Hero() {
+  return (
+    <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+        New
+      </div>
+      <span className=\\"text-white variant-h1 leading-none text-center text-5xl\\">
+        Create, iterate, inspire.
+      </span>
+      <span className=\\"text-white variant-h4 leading-none text-center text-2xl\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"flex items-center gap-4 mt-2\\">
+        <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+          Get Started
+        </button>
+        <a className=\\"text-teal-500 hover:text-teal-400\\">Learn More</a>
+      </div>
+    </div>
+  );
+}
+",
+  "public/vanilla/teal/dark/components/layout.tsx": "import './globals.css'
+
+export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
+  return children;
+}
+",
+  "public/vanilla/teal/dark/components/theme.ts": "export const theme = {
+  colorMode: 'dark',
+  colors: {
+    primary: {
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
+      950: '#042f2e',
+    },
+    neutral: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+      950: '#020617',
+    },
+  },
+};
+",
+  "public/vanilla/teal/light/components/globals.css": "@tailwind base;
+@tailwind components;
+@tailwind utilities;",
+  "public/vanilla/teal/light/components/hero/page.tsx": "'use client';
+
+
+export default function Hero() {
+  return (
+    <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+        New
+      </div>
+      <span className=\\"text-black variant-h1 leading-none text-center text-5xl\\">
+        Create, iterate, inspire.
+      </span>
+      <span className=\\"text-black variant-h4 leading-none text-center text-2xl\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"flex items-center gap-4 mt-2\\">
+        <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+          Get Started
+        </button>
+        <a className=\\"text-teal-500 hover:text-teal-400\\">Learn More</a>
+      </div>
+    </div>
+  );
+}
+",
+  "public/vanilla/teal/light/components/layout.tsx": "import './globals.css'
+
+export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
+  return children;
+}
+",
+  "public/vanilla/teal/light/components/theme.ts": "export const theme = {
+  colorMode: 'light',
+  colors: {
+    primary: {
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
+      950: '#042f2e',
+    },
+    neutral: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+      950: '#020617',
+    },
+  },
+};
+",
   "src/app/layout.tsx": "export default function RootLayout({
   children,
 }: {
@@ -70,6 +350,89 @@ export default function Page() {
           <Link href=\\"/vanilla/blue/dark/components/hero\\">
             /vanilla/blue/dark/components/hero
           </Link>
+        </li>
+      </ul>
+      <h1 className=\\"text-4xl\\">Public</h1>
+      <ul>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/globals.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/globals.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/layout.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/layout.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/theme.ts\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/theme.ts
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/page.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/page.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/globals.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/globals.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/layout.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/layout.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/theme.ts\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/theme.ts
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/page.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/page.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/globals.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/globals.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/layout.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/layout.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/theme.ts\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/theme.ts
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/page.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/page.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/globals.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/globals.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/layout.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/layout.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/theme.ts\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/theme.ts
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/page.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/page.tsx
+          </a>
         </li>
       </ul>
     </div>

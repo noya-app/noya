@@ -507,6 +507,14 @@ export function compile(configuration: CompilerConfiguration) {
             `src/app/${basename}/${colorName}/${colorMode}/components/`,
           ),
         );
+
+        Object.assign(
+          allDSFiles,
+          addPathPrefix(
+            dsFiles,
+            `public/${basename}/${colorName}/${colorMode}/components/`,
+          ),
+        );
       }
     }
   }
@@ -533,10 +541,22 @@ export default function Page() {
       <h1 className="text-4xl">Components</h1>
       <ul>
         ${Object.keys(allDSFiles)
-          .filter((path) => path.endsWith('/page.tsx'))
+          .filter(
+            (path) => path.endsWith('/page.tsx') && !path.startsWith('public'),
+          )
           .map((p) => {
             const url = p.replace('src/app', '').replace('/page.tsx', '');
             return `<li><Link href="${url}">${url}</Link></li>`;
+          })
+          .join('\n')}
+      </ul>
+      <h1 className="text-4xl">Public</h1>
+      <ul>
+        ${Object.keys(allDSFiles)
+          .filter((path) => path.startsWith('public'))
+          .map((p) => {
+            const url = p.replace('public', '/__NOYA_REPLACE_BASE_PATH__');
+            return `<li><a href="${url}">${url}</a></li>`;
           })
           .join('\n')}
       </ul>
