@@ -138,7 +138,7 @@ export function renderDSPreview({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              ...(height ? { height } : { flex: '1' }),
+              ...(height && !isThumbnail ? { height } : { flex: '1' }),
             }}
           >
             {content}
