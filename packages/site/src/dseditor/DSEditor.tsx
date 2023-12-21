@@ -392,6 +392,7 @@ export function DSEditor({
           padding: viewType === 'preview' ? 0 : 20,
           isThumbnail,
           chrome,
+          height: currentComponent?.preview?.height,
         });
       }
       return null;
@@ -399,11 +400,12 @@ export function DSEditor({
     [
       selection,
       resolvedNode,
-      theme.colors.canvas.background,
       config,
+      theme.colors.canvas.background,
       viewType,
       isThumbnail,
       chrome,
+      currentComponent?.preview?.height,
     ],
   );
 
@@ -413,6 +415,20 @@ export function DSEditor({
   const handleContentDidChange = useCallback(() => {
     overlayRef.current?.update();
   }, []);
+
+  const handlePressMeasure = useCallback(() => {
+    if (!resolvedNode || !currentComponent) return;
+
+    const rect = overlayRef.current?.measureElementAtPath(resolvedNode.path);
+
+    handleChangeComponent({
+      ...currentComponent,
+      preview: {
+        ...currentComponent?.preview,
+        height: rect?.height,
+      },
+    });
+  }, [currentComponent, handleChangeComponent, resolvedNode]);
 
   const handleSelectComponent = useCallback(
     (componentId?: string) => {
@@ -626,6 +642,7 @@ export function DSEditor({
           setSelectedPath={setSelectedPath}
           onCreateComponent={handleCreateComponent}
           components={components}
+          onPressMeasure={handlePressMeasure}
         />
       )}
     </Stack.H>

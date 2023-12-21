@@ -17,6 +17,7 @@ interface Props {
 
 export type IRendererOverlay = {
   update: () => void;
+  measureElementAtPath: (path: string[]) => Rect | undefined;
 };
 
 /**
@@ -64,8 +65,26 @@ export const DSRendererOverlay = memo(
       forwardedRef,
       () => ({
         update: () => update(highlightedPath),
+        measureElementAtPath: (path: string[]) => {
+          const iframe = rendererRef.current?.getIframe();
+
+          if (!iframe) return;
+
+          const element = getDOMNodeByPath(iframe, path);
+
+          if (!element) return;
+
+          const rect = element.getBoundingClientRect();
+
+          return {
+            x: Math.floor(rect.x),
+            y: Math.floor(rect.y),
+            width: Math.ceil(rect.width),
+            height: Math.ceil(rect.height),
+          };
+        },
       }),
-      [highlightedPath, update],
+      [highlightedPath, rendererRef, update],
     );
 
     useEffect(() => {

@@ -129,6 +129,10 @@ export type ComponentThumbnailSource = {
   chrome?: ComponentThumbnailChrome;
 };
 
+export type NoyaPreview = {
+  height?: number;
+};
+
 export type NoyaAccessModifier = 'public' | 'internal';
 
 export type NoyaComponent = {
@@ -142,6 +146,7 @@ export type NoyaComponent = {
   rootElement: NoyaNode;
   variants?: NoyaVariant[];
   accessModifier?: NoyaAccessModifier;
+  preview?: NoyaPreview;
 };
 
 export type SelectedComponent = {

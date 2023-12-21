@@ -17,6 +17,7 @@ export function renderDSPreview({
   padding,
   isThumbnail,
   chrome = 'none',
+  height,
 }: {
   renderProps: DSRenderProps;
   dsConfig: DSConfig;
@@ -25,6 +26,7 @@ export function renderDSPreview({
   padding?: number;
   isThumbnail?: boolean;
   chrome?: ComponentThumbnailChrome;
+  height?: number;
 }) {
   const content = renderResolvedNode({
     containerWidth: props.size.width,
@@ -135,8 +137,8 @@ export function renderDSPreview({
           <div
             style={{
               display: 'flex',
-              flex: '1',
               flexDirection: 'column',
+              ...(height ? { height } : { flex: '1' }),
             }}
           >
             {content}

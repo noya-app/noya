@@ -71,6 +71,7 @@ type Props = Pick<
   resolvedNode: NoyaResolvedNode;
   onCreateComponent: (component: NoyaComponent) => void;
   components: NoyaComponent[];
+  onPressMeasure: () => void;
 };
 
 export function DSComponentInspector({
@@ -85,6 +86,7 @@ export function DSComponentInspector({
   setSelectedPath,
   onCreateComponent,
   components,
+  onPressMeasure,
 }: Props) {
   const { query } = useRouter();
   const openInputDialog = useOpenInputDialog();
@@ -303,6 +305,31 @@ export function DSComponentInspector({
                 onChange={(accessModifier) =>
                   onChangeComponent({ ...component, accessModifier })
                 }
+              />
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Preview Height" gap={8}>
+              <DimensionInput
+                value={component.preview?.height}
+                label="PX"
+                trigger="change"
+                placeholder="Default"
+                onSetValue={(value, mode) => {
+                  const newValue = isNaN(value)
+                    ? undefined
+                    : getNewValue(component.preview?.height ?? 0, mode, value);
+
+                  onChangeComponent({
+                    ...component,
+                    preview: {
+                      ...component.preview,
+                      height: newValue,
+                    },
+                  });
+                }}
+              />
+              <IconButton
+                iconName="RulerHorizontalIcon"
+                onClick={onPressMeasure}
               />
             </InspectorPrimitives.LabeledRow>
             <InspectorPrimitives.LabeledRow
