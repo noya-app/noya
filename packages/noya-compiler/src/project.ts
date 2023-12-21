@@ -461,10 +461,7 @@ const colorNames = [
   // 'rose',
 ];
 
-const colorModes = [
-  'light' as const,
-  // 'dark'
-];
+const colorModes = ['light' as const, 'dark' as const];
 
 export function compile(configuration: CompilerConfiguration) {
   const allDefinitions = Object.keys(configuration.resolvedDefinitions);
