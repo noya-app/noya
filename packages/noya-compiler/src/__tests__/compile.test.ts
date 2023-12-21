@@ -8,6 +8,7 @@ import {
 import { DS } from 'noya-api';
 import {
   compile,
+  compileAsync,
   createElementCode,
   createExpressionCode,
   createSimpleElement,
@@ -411,5 +412,15 @@ describe('project', () => {
     });
 
     expect(Object.keys(files)).toMatchSnapshot();
+  });
+
+  it('generates vanilla project', async () => {
+    const files = await compileAsync({
+      ds,
+      name: 'Vanilla',
+      definitions: ['vanilla'],
+    });
+
+    expect(files).toMatchSnapshot();
   });
 });
