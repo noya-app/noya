@@ -106,8 +106,8 @@ export function DSProjectInspector({
   ) => {
     switch (value) {
       case 'export': {
-        const data = JSON.stringify(components);
-        const file = new File([data], 'components.json', {
+        const data = JSON.stringify({ groups, components });
+        const file = new File([data], 'ds.json', {
           type: 'application/json',
         });
         downloadBlob(file);
@@ -121,13 +121,21 @@ export function DSProjectInspector({
         });
         if (file) {
           const data = await file.text();
-          const components = JSON.parse(data);
+          const parsed = JSON.parse(data) as
+            | NoyaComponent[]
+            | { groups?: ComponentGroup[]; components?: NoyaComponent[] };
+          const normalized = Array.isArray(parsed)
+            ? { components: parsed }
+            : parsed;
+
           setDS((state) =>
             produce(state, (draft) => {
               if (value === 'importAndDelete') {
                 draft.components = [];
+                draft.groups = [];
               }
-              draft.components = components;
+              draft.components = normalized.components;
+              draft.groups = normalized.groups;
             }),
           );
         }
