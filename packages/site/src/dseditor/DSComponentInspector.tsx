@@ -7,6 +7,7 @@ import {
 } from 'noya-api';
 import {
   ComponentGroup,
+  ComponentGroupTree,
   ComponentThumbnailChrome,
   ComponentThumbnailPosition,
   FindComponent,
@@ -21,6 +22,7 @@ import {
   ResolvedHierarchy,
   SelectedComponent,
   applySelectionDiff,
+  createRootGroup,
   createSelectionWithDiff,
   describeDiffItem,
 } from 'noya-component';
@@ -154,8 +156,10 @@ export function DSComponentInspector({
   }, [findComponent, resolvedNode]);
 
   const [currentTagValue, setCurrentTagValue] = React.useState('');
+  const rootGroup = useMemo(() => createRootGroup(groups), [groups]);
   const groupName =
-    groups?.find((group) => group.id === component.groupID)?.name ?? '';
+    ComponentGroupTree.find(rootGroup, (g) => g.id === component.groupID)
+      ?.name ?? '';
   const [currentGroupValue, setCurrentGroupValue] = React.useState(groupName);
 
   const isMounted = useIsMounted();
@@ -328,10 +332,22 @@ export function DSComponentInspector({
                   onChange={setCurrentGroupValue}
                   onBlur={() => setCurrentGroupValue(groupName)}
                   items={[
-                    ...(groups ?? []).map((group) => ({
-                      id: group.id,
-                      name: group.name,
-                    })),
+                    ...ComponentGroupTree.flatMap(
+                      rootGroup,
+                      (group, indexPath) => {
+                        if (group.id === 'root') return [];
+
+                        const name = ComponentGroupTree.accessPath(
+                          rootGroup,
+                          indexPath,
+                        )
+                          .slice(1)
+                          .map((group) => group.name)
+                          .join(' > ');
+
+                        return [{ id: group.id, name }];
+                      },
+                    ),
                     ...(currentGroupValue && groupName !== currentGroupValue
                       ? [
                           {

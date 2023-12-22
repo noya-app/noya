@@ -18,6 +18,7 @@ import {
   NoyaResolvedString,
   ResolvedHierarchy,
   SelectedComponent,
+  UNCATEGORIZED,
   createRootGroup,
   diffResolvedTrees,
   getSavableComponentGroups,
@@ -203,8 +204,9 @@ export function DSEditor({
   );
 
   const handleNewComponent = useCallback(
-    (componentID?: string) => {
+    (componentID?: string, groupID?: string) => {
       const newComponent = Model.component({
+        ...(groupID && groupID !== UNCATEGORIZED && { groupID }),
         componentID: componentID ?? uuid(),
         rootElement: Model.primitiveElement({
           componentID: boxSymbolId,

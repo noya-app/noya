@@ -55,7 +55,7 @@ interface Props {
   setDS: React.Dispatch<React.SetStateAction<DS>>;
   selectedComponentID?: string;
   components: NoyaComponent[];
-  onNewComponent: (componentID?: string) => void;
+  onNewComponent: (componentID?: string, groupID?: string) => void;
   onDeleteComponent: (componentID: string) => void;
   onSelectComponent: (componentID?: string) => void;
   onMoveComponent: (
@@ -339,6 +339,16 @@ export function DSProjectInspector({
                       tabIndex={0}
                       onChangeExpanded={() => {}}
                       isExpanded={true}
+                      right={
+                        <IconButton
+                          iconName="PlusIcon"
+                          onClick={() => {
+                            const componentID = uuid();
+                            onNewComponent(componentID, item.value.id);
+                            setRenamingComponent(componentID);
+                          }}
+                        />
+                      }
                       menuItems={[
                         {
                           value: 'rename',

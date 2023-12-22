@@ -4,7 +4,7 @@ import { NoyaComponent } from './types';
 
 export type ComponentGroup = Group<NoyaComponent>;
 
-const UNCATEGORIZED = 'uncategorized';
+export const UNCATEGORIZED = 'uncategorized';
 
 export const ComponentGroupTree = defineTree<ComponentGroup>(
   (group) => group?.children ?? [],
