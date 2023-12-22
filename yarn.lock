@@ -1681,15 +1681,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.2.tgz#1bfafe4b7ed0f3e4105837e056e0a89b108ebe36"
   integrity sha512-IkpVW/ehM1hWKln4fCA3NzJU8KwD+kIOvPZA4cqxoJHtE21CCzjyp+Kxbu0i5I4tBNOlXPL9mjwnWlL0VEG4Fg==
 
-"@dabbott/patterns@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.0.4.tgz#a7952ddc723e2438536198c248b4651a5af908ef"
-  integrity sha512-LKw4wPl6aTayyqVk81eSUUq5JeFIpsgggGoEu9KaI8rDEO/ZxeiRk42AdHqYlCWg6I3WqkAJcz2pAKJxZ6uftA==
-
-"@dabbott/patterns@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.1.0.tgz#f00faa2c804a86348b3e65302b0c9fb61051c710"
-  integrity sha512-tag9Vbh+yw5S4oxkobAvbiFk1Irpyc6q0pwGnq3LsyVcLO7n6G+Y+sVDxQIbJ2E+k/ALS/Phcmxa4/NkWOGK3A==
+"@dabbott/patterns@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.2.0.tgz#7966ca1a4482fe6afca58530f1da21dde193037f"
+  integrity sha512-61TYHNLDk3/BczspU8cRvqx+eNLumRBrZbWnyPASK13nkdxIAtXGFjPOiwA2Zpul7QLtqDsC8aE/NeNBwUMENA==
   dependencies:
     "@sinclair/typebox" "^0.31.28"
 
