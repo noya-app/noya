@@ -10,6 +10,7 @@ import {
   print,
 } from 'noya-compiler';
 import {
+  ComponentGroupTree,
   Model,
   NoyaComponent,
   NoyaResolvedNode,
@@ -17,7 +18,9 @@ import {
   NoyaResolvedString,
   ResolvedHierarchy,
   SelectedComponent,
+  createRootGroup,
   diffResolvedTrees,
+  getSavableComponentGroups,
   instantiateResolvedComponent,
   renderResolvedNode,
 } from 'noya-component';
@@ -86,7 +89,7 @@ export function DSEditor({
   const [ds, setDS] = React.useState<DS>(initialDocument);
   const project = useProject();
 
-  let { source, config, components = initialComponents } = ds;
+  let { source, config, components = initialComponents, groups } = ds;
 
   const librarySource = useMemo(() => {
     if (library) {
@@ -493,16 +496,22 @@ export function DSEditor({
           selectedComponentID={selection?.componentID}
           onSelectComponent={handleSelectComponent}
           components={components}
+          groups={groups}
           onNewComponent={handleNewComponent}
           onDeleteComponent={handleDeleteComponent}
-          onMoveComponent={(componentID, index) => {
+          onMoveComponent={(componentID, index, groupID) => {
             const removalIndex = components.findIndex(
               (c) => c.componentID === componentID,
             );
 
             if (removalIndex === -1) return;
 
-            const component = components[removalIndex];
+            let component = components[removalIndex];
+
+            if (groupID) {
+              component = { ...component, groupID };
+            }
+
             const newComponents = [...components];
 
             newComponents.splice(removalIndex, 1);
@@ -513,6 +522,12 @@ export function DSEditor({
             );
 
             setComponents(newComponents);
+          }}
+          onDeleteGroup={(groupID) => {
+            setDS((ds) => ({
+              ...ds,
+              groups: ds.groups?.filter((g) => g.id !== groupID),
+            }));
           }}
         />
       )}
@@ -643,6 +658,33 @@ export function DSEditor({
           onCreateComponent={handleCreateComponent}
           components={components}
           onPressMeasure={handlePressMeasure}
+          groups={groups}
+          onCreateGroup={(group, parentID) => {
+            const groupID = uuid();
+            const root = createRootGroup(groups);
+            const parentIndexPath = ComponentGroupTree.findIndexPath(
+              root,
+              (g) => g.id === parentID,
+            );
+            const parent = parentIndexPath
+              ? ComponentGroupTree.access(root, parentIndexPath)
+              : root;
+            const childrenLength = parent.children?.length ?? 0;
+
+            const newRoot = ComponentGroupTree.insert(root, {
+              nodes: [group],
+              at: parentIndexPath
+                ? [...parentIndexPath, childrenLength]
+                : [childrenLength],
+            });
+
+            setDS((ds) => ({
+              ...ds,
+              groups: getSavableComponentGroups(newRoot),
+            }));
+
+            return groupID;
+          }}
         />
       )}
     </Stack.H>
@@ -839,7 +881,7 @@ function Playground(
         </Button>
         <Button
           onClick={async () => {
-            if (!props.uploadAsset) return;
+            // if (!props.uploadAsset) return;
 
             const zipFile = await createZip();
             const bytes = await zipFile.arrayBuffer();

@@ -1,4 +1,4 @@
-import { NoyaComponent } from 'noya-component';
+import { ComponentGroup, NoyaComponent } from 'noya-component';
 import Sketch from 'noya-file-format';
 import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
@@ -56,6 +56,7 @@ export type DS = {
   source: DSSource;
   config: DSConfig;
   components?: NoyaComponent[];
+  groups?: ComponentGroup[];
   latestBuildAssetId?: string;
   prompt?: {
     inputDescription?: string;

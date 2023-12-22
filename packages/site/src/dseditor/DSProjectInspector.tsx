@@ -2,7 +2,15 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import { produce } from 'immer';
 import { DS } from 'noya-api';
-import { FindComponent, NoyaComponent } from 'noya-component';
+import {
+  ComponentGroup,
+  ComponentGroupTree,
+  FindComponent,
+  NoyaComponent,
+  createRootGroup,
+  flattenComponentGroups,
+  getSavableComponentGroups,
+} from 'noya-component';
 import {
   Button,
   DropdownMenu,
@@ -18,11 +26,14 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
+import { ChevronDownIcon, InputIcon, TrashIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
-import { uuid } from 'noya-utils';
+import { findLastIndex, uuid } from 'noya-utils';
 import React, { useState } from 'react';
-import { AyonListRow } from '../ayon/components/inspector/AyonListPrimitives';
+import {
+  AyonListRow,
+  AyonListSectionHeader,
+} from '../ayon/components/inspector/AyonListPrimitives';
 import { InspectorSection } from '../components/InspectorSection';
 import { LibraryVersionPicker } from '../components/LibraryVersionPicker';
 import { downloadBlob } from '../utils/download';
@@ -47,8 +58,14 @@ interface Props {
   onNewComponent: (componentID?: string) => void;
   onDeleteComponent: (componentID: string) => void;
   onSelectComponent: (componentID?: string) => void;
-  onMoveComponent: (componentID: string, index: number) => void;
+  onMoveComponent: (
+    componentID: string,
+    index: number,
+    groupID?: string,
+  ) => void;
   findComponent: FindComponent;
+  groups?: ComponentGroup[];
+  onDeleteGroup?: (groupID: string) => void;
 }
 
 export function DSProjectInspector({
@@ -64,6 +81,8 @@ export function DSProjectInspector({
   onSelectComponent,
   onMoveComponent,
   findComponent,
+  groups,
+  onDeleteGroup,
 }: Props) {
   const theme = useDesignSystemTheme();
   const {
@@ -116,6 +135,8 @@ export function DSProjectInspector({
       }
     }
   };
+
+  const componentItems = flattenComponentGroups({ groups, components });
 
   return (
     <Stack.V width="300px" background="white">
@@ -199,25 +220,149 @@ export function DSProjectInspector({
               variant="bare"
               sortable
               gap={4}
-              keyExtractor={(component) => component.componentID}
-              data={components}
+              keyExtractor={(item) => item.value.id}
+              data={componentItems}
+              acceptsDrop={(sourceIndex, destinationIndex, position) => {
+                const sourceItem = componentItems[sourceIndex];
+                const destinationItem = componentItems[destinationIndex];
+
+                if (
+                  sourceItem.type === 'group' &&
+                  destinationItem.type === 'group'
+                ) {
+                  return true;
+                } else if (sourceItem.type === 'item') {
+                  if (
+                    destinationItem.type === 'group' &&
+                    position === 'inside'
+                  ) {
+                    return true;
+                  } else if (
+                    destinationItem.type === 'item' &&
+                    position !== 'inside'
+                  ) {
+                    return true;
+                  }
+                }
+
+                return false;
+              }}
               onMoveItem={(
                 sourceIndex: number,
                 destinationIndex: number,
                 position: RelativeDropPosition,
               ) => {
-                if (position === 'inside') return;
+                const sourceItem = componentItems[sourceIndex];
+                const destinationItem = componentItems[destinationIndex];
+
+                if (position === 'inside') {
+                  if (
+                    sourceItem.type === 'group' &&
+                    destinationItem.type === 'group'
+                  ) {
+                    const newRoot = ComponentGroupTree.move(
+                      createRootGroup(groups),
+                      {
+                        indexPaths: [sourceItem.indexPath],
+                        to: [
+                          ...destinationItem.indexPath,
+                          destinationItem.value.children?.length ?? 0,
+                        ],
+                      },
+                    );
+
+                    setDS((state) =>
+                      produce(state, (draft) => {
+                        draft.groups = getSavableComponentGroups(newRoot);
+                      }),
+                    );
+                  } else if (
+                    sourceItem.type === 'item' &&
+                    destinationItem.type === 'group'
+                  ) {
+                    let lastChildOfGroupIndex = findLastIndex(
+                      components,
+                      (c) => c.groupID === destinationItem.value.id,
+                    );
+
+                    if (lastChildOfGroupIndex === -1) {
+                      lastChildOfGroupIndex = 0;
+                    } else {
+                      lastChildOfGroupIndex += 1;
+                    }
+
+                    onMoveComponent(
+                      sourceItem.value.componentID,
+                      lastChildOfGroupIndex,
+                      destinationItem.value.id,
+                    );
+                  }
+
+                  return;
+                }
+
+                if (
+                  sourceItem.type !== 'item' ||
+                  destinationItem.type !== 'item'
+                ) {
+                  return;
+                }
+
+                const destinationIndexInComponents = components.findIndex(
+                  (c) => c.componentID === destinationItem.value.componentID,
+                );
 
                 onMoveComponent(
-                  components[sourceIndex].componentID,
-                  ListView.normalizeIndex(destinationIndex, position),
+                  sourceItem.value.componentID,
+                  ListView.normalizeIndex(
+                    destinationIndexInComponents,
+                    position,
+                  ),
+                  destinationItem.value.groupID,
                 );
               }}
-              renderItem={(component) => {
+              renderItem={(item) => {
+                if (item.type === 'group') {
+                  return (
+                    <AyonListSectionHeader
+                      id={item.value.id}
+                      key={item.value.id}
+                      depth={item.depth}
+                      tabIndex={0}
+                      onChangeExpanded={() => {}}
+                      isExpanded={true}
+                      menuItems={[
+                        {
+                          value: 'rename',
+                          title: 'Rename',
+                          icon: <InputIcon />,
+                        },
+                        {
+                          value: 'delete',
+                          title: 'Delete',
+                          icon: <TrashIcon />,
+                        },
+                      ]}
+                      onSelectMenuItem={(value) => {
+                        switch (value) {
+                          case 'delete':
+                            onDeleteGroup?.(item.value.id);
+                            break;
+                        }
+                      }}
+                    >
+                      {item.value.name}
+                    </AyonListSectionHeader>
+                  );
+                }
+
+                const component = item.value;
+
                 return (
                   <AyonListRow
-                    id={component.componentID}
-                    key={component.componentID}
+                    id={component.id}
+                    key={component.id}
+                    depth={item.depth}
                     name={component.name || 'Unnamed'}
                     selected={component.componentID === selectedComponentID}
                     onPress={() => onSelectComponent(component.componentID)}

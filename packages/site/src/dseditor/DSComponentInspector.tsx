@@ -1,10 +1,12 @@
 import { useRouter } from 'next/router';
 import {
+  DS,
   asyncIterableToString,
   findAndParseJSONArray,
   useNoyaClientOrFallback,
 } from 'noya-api';
 import {
+  ComponentGroup,
   ComponentThumbnailChrome,
   ComponentThumbnailPosition,
   FindComponent,
@@ -28,6 +30,7 @@ import {
   Divider,
   IconButton,
   InputField,
+  InputFieldWithCompletions,
   ListView,
   Popover,
   ScrollArea,
@@ -46,7 +49,7 @@ import { JSONForm } from 'noya-jsonforms';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
-import { upperFirst } from 'noya-utils';
+import { upperFirst, uuid } from 'noya-utils';
 import React, { ComponentProps, memo, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
@@ -70,8 +73,13 @@ type Props = Pick<
   onChangeComponent: (component: NoyaComponent) => void;
   resolvedNode: NoyaResolvedNode;
   onCreateComponent: (component: NoyaComponent) => void;
+  onCreateGroup: (
+    group: Omit<ComponentGroup, 'children'>,
+    parentID: string | undefined,
+  ) => void;
   components: NoyaComponent[];
   onPressMeasure: () => void;
+  groups: DS['groups'];
 };
 
 export function DSComponentInspector({
@@ -85,8 +93,10 @@ export function DSComponentInspector({
   selectedPath,
   setSelectedPath,
   onCreateComponent,
+  onCreateGroup,
   components,
   onPressMeasure,
+  groups,
 }: Props) {
   const { query } = useRouter();
   const openInputDialog = useOpenInputDialog();
@@ -144,6 +154,9 @@ export function DSComponentInspector({
   }, [findComponent, resolvedNode]);
 
   const [currentTagValue, setCurrentTagValue] = React.useState('');
+  const groupName =
+    groups?.find((group) => group.id === component.groupID)?.name ?? '';
+  const [currentGroupValue, setCurrentGroupValue] = React.useState(groupName);
 
   const isMounted = useIsMounted();
 
@@ -306,6 +319,65 @@ export function DSComponentInspector({
                   onChangeComponent({ ...component, accessModifier })
                 }
               />
+            </InspectorPrimitives.LabeledRow>
+            <InspectorPrimitives.LabeledRow label="Group">
+              <Stack.V flex="1" gap="4px">
+                <InputFieldWithCompletions
+                  key={component.groupID ?? 'none'}
+                  initialValue={currentGroupValue}
+                  onChange={setCurrentGroupValue}
+                  onBlur={() => setCurrentGroupValue(groupName)}
+                  items={[
+                    ...(groups ?? []).map((group) => ({
+                      id: group.id,
+                      name: group.name,
+                    })),
+                    ...(currentGroupValue && groupName !== currentGroupValue
+                      ? [
+                          {
+                            id: 'new',
+                            name: `Create new: ${currentGroupValue}`,
+                            alwaysInclude: true,
+                          },
+                          ...(component.groupID
+                            ? [
+                                {
+                                  id: 'new-child',
+                                  name: `Create new: ${groupName} > ${currentGroupValue}`,
+                                  alwaysInclude: true,
+                                },
+                              ]
+                            : []),
+                        ]
+                      : []),
+                  ]}
+                  onSelectItem={(item) => {
+                    if (item.id === 'new') {
+                      item = {
+                        id: uuid(),
+                        name: currentGroupValue,
+                      };
+
+                      onCreateGroup(
+                        { id: item.id, name: item.name },
+                        undefined,
+                      );
+                    } else if (item.id === 'new-child') {
+                      item = {
+                        id: uuid(),
+                        name: currentGroupValue,
+                      };
+
+                      onCreateGroup(
+                        { id: item.id, name: item.name },
+                        component.groupID,
+                      );
+                    }
+
+                    onChangeComponent({ ...component, groupID: item.id });
+                  }}
+                />
+              </Stack.V>
             </InspectorPrimitives.LabeledRow>
             <InspectorPrimitives.LabeledRow label="Preview Height" gap={8}>
               <DimensionInput

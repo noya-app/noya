@@ -139,6 +139,7 @@ export type NoyaComponent = {
   id: string;
   type: 'noyaComponent';
   name: string;
+  groupID?: string;
   description?: string;
   tags?: string[];
   thumbnail?: ComponentThumbnailSource;

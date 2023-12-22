@@ -23,18 +23,24 @@ export const AyonListSectionHeader = memo(function AyonListSectionHeader({
   isExpanded,
   onChangeExpanded,
   right,
+  ...props
 }: {
   children: React.ReactNode;
   isExpanded: boolean;
   onChangeExpanded: (value: boolean) => void;
   right?: React.ReactNode;
-}) {
+} & React.ComponentProps<typeof ListView.Row>) {
   const toggleIsExpanded = useCallback(() => {
     onChangeExpanded(!isExpanded);
   }, [isExpanded, onChangeExpanded]);
 
   return (
-    <ListView.Row isSectionHeader backgroundColor="transparent" tabIndex={-1}>
+    <ListView.Row
+      isSectionHeader
+      backgroundColor="transparent"
+      tabIndex={-1}
+      {...props}
+    >
       <Stack.H padding="12px 0 4px 0" gap="2px" flex="1" alignItems="center">
         <Text
           variant="label"
@@ -69,7 +75,7 @@ type RowProps<MenuItemType extends string> = {
   onClickTrash?: () => void;
 } & Omit<
   React.ComponentProps<typeof ListView.Row<MenuItemType>>,
-  'depth' | 'disabled' | 'children'
+  'disabled' | 'children'
 >;
 
 export const AyonListRow = memo(function AyonListRow<
@@ -102,7 +108,6 @@ export const AyonListRow = memo(function AyonListRow<
   return (
     <ListView.Row
       {...props}
-      depth={0}
       backgroundColor="transparent"
       disabled={isLoading}
       onHoverChange={setIsHovered}

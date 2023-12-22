@@ -3,7 +3,7 @@ import {
   Theme,
   component,
 } from '@noya-design-system/protocol';
-import { DSConfig } from 'noya-api';
+import type { DSConfig } from 'noya-api';
 import {
   NoyaNumberProp,
   NoyaProp,
