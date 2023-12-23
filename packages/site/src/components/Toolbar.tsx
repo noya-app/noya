@@ -1,11 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {
-  NoyaAPI,
-  useMetadata,
-  useNoyaClientOrFallback,
-  useOptionalNoyaSession,
-} from 'noya-api';
+import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
 import {
   Avatar,
   Button,
@@ -35,6 +30,7 @@ import {
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';
+import { usePersistentState } from '../utils/clientStorage';
 import { NOYA_HOST } from '../utils/noyaClient';
 import { Logo } from './Logo';
 
@@ -81,8 +77,9 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
   const router = useRouter();
-  const client = useNoyaClientOrFallback();
-  const metadata = useMetadata<'light' | 'dark'>('prefersColorScheme');
+  const [colorScheme, setColorScheme] = usePersistentState<'light' | 'dark'>(
+    'noyaPrefersColorScheme',
+  );
 
   const userMenuItems = createSectionedMenu(
     [
@@ -95,7 +92,7 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
       // { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
     ],
     [
-      metadata === 'dark'
+      colorScheme === 'dark'
         ? { title: 'Use Light Mode', value: 'lightMode', icon: <SunIcon /> }
         : { title: 'Use Dark Mode', value: 'darkMode', icon: <MoonIcon /> },
     ],
@@ -174,10 +171,10 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                 onSelect={(value) => {
                   switch (value) {
                     case 'lightMode':
-                      client.metadata.set('prefersColorScheme', 'light');
+                      setColorScheme('light');
                       return;
                     case 'darkMode':
-                      client.metadata.set('prefersColorScheme', 'dark');
+                      setColorScheme('dark');
                       return;
                     case 'projects': {
                       router.push('/');

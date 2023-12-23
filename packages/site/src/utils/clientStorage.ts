@@ -1,3 +1,4 @@
+import { Emitter } from 'noya-fonts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const ClientStorageDefinitions = {
@@ -11,6 +12,7 @@ const ClientStorageDefinitions = {
   ayonShowPageSuggestions: 'noya-ayon-show-page-suggestions',
   ayonShowComponentSuggestions: 'noya-ayon-show-component-suggestions',
   dsShowMetadata: 'noya-ds-show-metadata',
+  noyaPrefersColorScheme: 'noya-prefers-color-scheme',
 };
 
 export const ayonOnboardingStep = [
@@ -48,6 +50,32 @@ export const ClientStorage = {
     } else {
       localStorage.setItem(key, value);
     }
+
+    this.emitter.emit(storageKey, value);
+  },
+
+  emitter: new Emitter<[ClientStorageKey, string | null]>(),
+
+  _isListening: false,
+
+  addListener(
+    storageKey: ClientStorageKey,
+    listener: (newValue: string | null) => void,
+  ): () => void {
+    // Set up a single listener for all storage events
+    if (!this._isListening && typeof window !== 'undefined') {
+      this._isListening = true;
+
+      window.addEventListener('storage', (event: StorageEvent) => {
+        this.emitter.emit(event.key as any, event.newValue);
+      });
+    }
+
+    return this.emitter.addListener((key, value) => {
+      if (key === storageKey) {
+        listener(value);
+      }
+    });
   },
 };
 
@@ -77,6 +105,15 @@ export function usePersistentState<T extends string = string>(
     },
     [storageKey],
   );
+
+  // Listen for changes to localStorage from other tabs
+  useEffect(() => {
+    const dispose = ClientStorage.addListener(storageKey, (newValue) => {
+      setState(newValue as T | null);
+    });
+
+    return () => dispose();
+  }, [storageKey]);
 
   return useMemo(() => [state, setValue] as const, [setValue, state]);
 }

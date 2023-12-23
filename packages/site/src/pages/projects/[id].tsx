@@ -1,11 +1,5 @@
 import { useRouter } from 'next/router';
-import {
-  NoyaAPI,
-  useMetadata,
-  useNoyaBilling,
-  useNoyaClient,
-  useNoyaFiles,
-} from 'noya-api';
+import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
   DesignSystemConfigurationProvider,
@@ -61,6 +55,7 @@ import {
   useIsSubscribed,
   useOnboardingUpsell,
 } from '../../hooks/useOnboardingUpsellExperiment';
+import { usePersistentState } from '../../utils/clientStorage';
 import { downloadUrl } from '../../utils/download';
 
 const FileTitle = memo(
@@ -369,8 +364,10 @@ export default memo(function Project(): JSX.Element {
     amplitude.logEvent('Project - Opened');
   }, []);
 
-  const metadata = useMetadata<'light' | 'dark'>('prefersColorScheme');
-  const theme = metadata === 'dark' ? darkTheme : lightTheme;
+  const [colorScheme] = usePersistentState<'light' | 'dark'>(
+    'noyaPrefersColorScheme',
+  );
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
   if (!id) return <></>;
 
