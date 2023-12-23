@@ -9,6 +9,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.textDisabled = 'rgb(100,99,102)';
   colors.inputBackground = 'rgba(181,178,255,0.08)';
   colors.inputBackgroundLight = 'rgba(181,178,255,0.10)';
+  colors.codeBackground = 'rgb(20,19,23)';
   colors.dividerSubtle = 'rgba(255,255,255,0.04)';
   colors.divider = 'rgba(255,255,255,0.08)';
   colors.dividerStrong = 'rgba(0,0,0,1)';
@@ -24,6 +25,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.listView.raisedBackground = 'rgba(181,178,255,0.1)';
   colors.listView.editingBackground = '#000';
   colors.slider.background = '#BBB';
+  colors.radioGroup.background = colors.inputBackground;
   colors.mask = 'rgb(102,187,106)';
   colors.transparentChecker = 'rgba(255,255,255,0.3)';
   colors.scrollbar = 'rgba(199,199,199,0.2)';

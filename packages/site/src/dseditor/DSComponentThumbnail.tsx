@@ -1,4 +1,5 @@
 import { NoyaComponent } from 'noya-component';
+import { lightTheme } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import React, { memo } from 'react';
 import { NOYA_HOST } from '../utils/noyaClient';
@@ -24,6 +25,7 @@ export const DSComponentThumbnail = memo(function DSComponentThumbnail({
       style={{
         width: '100%',
         height: '100%',
+        backgroundColor: lightTheme.colors.thumbnailBackground,
         backgroundSize: `${Math.round(size.width / 4)}px ${Math.round(
           size.height / 4,
         )}px`,

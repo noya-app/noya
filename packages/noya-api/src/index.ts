@@ -24,6 +24,7 @@ import {
   NoyaSubscription,
   NoyaSubscriptionItem,
   NoyaUser,
+  NoyaUserData,
 } from './core/schema';
 
 export * from './core/json';
@@ -53,6 +54,7 @@ export namespace NoyaAPI {
   export type Document = NoyaDocument;
   export type FileList = NoyaFileList;
   export type User = NoyaUser;
+  export type UserData = NoyaUserData;
   export type Session = NoyaSession;
   export type ExportFormat = NoyaExportFormat;
   export type Subscription = NoyaSubscription;

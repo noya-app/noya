@@ -53,6 +53,9 @@ export const colors = {
     background: 'white',
     border: '#BBB',
   },
+  radioGroup: {
+    background: 'white',
+  },
   icon: 'rgb(139, 139, 139)',
   iconSelected: 'rgb(220, 220, 220)',
   mask: 'rgb(12,193,67)',
@@ -62,6 +65,7 @@ export const colors = {
     return colors.primary;
   },
   selection: 'rgb(179,215,254)',
+  thumbnailBackground: 'rgb(240, 240, 242)',
 };
 
 export const fonts = {

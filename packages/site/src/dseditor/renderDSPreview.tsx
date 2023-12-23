@@ -68,7 +68,7 @@ export function renderDSPreview({
         ...(isThumbnail && {
           padding: '5vh 5vw',
           backgroundImage: undefined,
-          background: 'rgb(240, 240, 242)',
+          background: lightTheme.colors.thumbnailBackground,
           justifyContent: 'center',
         }),
       }}

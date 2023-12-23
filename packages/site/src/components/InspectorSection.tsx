@@ -1,4 +1,10 @@
-import { Button, IconButton, Spacer, Stack } from 'noya-designsystem';
+import {
+  Button,
+  IconButton,
+  Spacer,
+  Stack,
+  useDesignSystemTheme,
+} from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo } from 'react';
 import { ClientStorageKey, usePersistentState } from '../utils/clientStorage';
@@ -17,32 +23,36 @@ const InspectorSectionInternal = ({
   onClickTitle,
   titleTextStyle,
   right,
-}: Props) => (
-  <Stack.V
-    padding={titleTextStyle === 'heading3' ? '12px' : '24px 12px 12px'}
-    gap="12px"
-    background="white"
-  >
-    {title && (
-      <InspectorPrimitives.SectionHeader>
-        {onClickTitle ? (
-          <Button variant="none" onClick={onClickTitle}>
+}: Props) => {
+  const theme = useDesignSystemTheme();
+
+  return (
+    <Stack.V
+      padding={titleTextStyle === 'heading3' ? '12px' : '24px 12px 12px'}
+      gap="12px"
+      background={theme.colors.sidebar.background}
+    >
+      {title && (
+        <InspectorPrimitives.SectionHeader>
+          {onClickTitle ? (
+            <Button variant="none" onClick={onClickTitle}>
+              <InspectorPrimitives.Title textStyle={titleTextStyle}>
+                {title}
+              </InspectorPrimitives.Title>
+            </Button>
+          ) : (
             <InspectorPrimitives.Title textStyle={titleTextStyle}>
               {title}
             </InspectorPrimitives.Title>
-          </Button>
-        ) : (
-          <InspectorPrimitives.Title textStyle={titleTextStyle}>
-            {title}
-          </InspectorPrimitives.Title>
-        )}
-        <Spacer.Horizontal />
-        {right}
-      </InspectorPrimitives.SectionHeader>
-    )}
-    {children}
-  </Stack.V>
-);
+          )}
+          <Spacer.Horizontal />
+          {right}
+        </InspectorPrimitives.SectionHeader>
+      )}
+      {children}
+    </Stack.V>
+  );
+};
 
 const ExpandableInspectorSection = ({
   storageKey,

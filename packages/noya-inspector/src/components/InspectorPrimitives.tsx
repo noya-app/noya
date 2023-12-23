@@ -24,10 +24,10 @@ export const Title = styled.div<{
   display: 'flex',
   flexDirection: 'row',
   userSelect: 'none',
-
   ...(textStyle
     ? {
         ...theme.textStyles[textStyle],
+        color: theme.colors.text,
       }
     : {
         ...theme.textStyles.label,

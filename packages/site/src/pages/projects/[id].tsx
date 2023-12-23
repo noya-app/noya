@@ -1,5 +1,11 @@
 import { useRouter } from 'next/router';
-import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
+import {
+  NoyaAPI,
+  useMetadata,
+  useNoyaBilling,
+  useNoyaClient,
+  useNoyaFiles,
+} from 'noya-api';
 import {
   Button,
   DesignSystemConfigurationProvider,
@@ -10,6 +16,7 @@ import {
   Spacer,
   Stack,
   createSectionedMenu,
+  darkTheme,
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
@@ -29,12 +36,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  SubscriptionUsageMeterSmall,
-  getSubscriptionOverage,
-  usageMeterThreshold,
-} from '../../components/Subscription';
-
-import {
   BreadcrumbLink,
   BreadcrumbSlash,
   BreadcrumbText,
@@ -44,6 +45,11 @@ import { EditableText, IEditableText } from '../../components/EditableText';
 import { ProjectEditor } from '../../components/ProjectEditor';
 import { ProjectTypeIcon } from '../../components/ProjectTypeIcon';
 import { ShareProjectButton } from '../../components/ShareMenu';
+import {
+  SubscriptionUsageMeterSmall,
+  getSubscriptionOverage,
+  usageMeterThreshold,
+} from '../../components/Subscription';
 import { Toolbar } from '../../components/Toolbar';
 import { UpgradeDialog } from '../../components/UpgradeDialog';
 import { OnboardingProvider } from '../../contexts/OnboardingContext';
@@ -363,10 +369,13 @@ export default memo(function Project(): JSX.Element {
     amplitude.logEvent('Project - Opened');
   }, []);
 
+  const metadata = useMetadata<'light' | 'dark'>('prefersColorScheme');
+  const theme = metadata === 'dark' ? darkTheme : lightTheme;
+
   if (!id) return <></>;
 
   return (
-    <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
+    <DesignSystemConfigurationProvider platform={platform} theme={theme}>
       <Content fileId={id} />
       <Debugger />
     </DesignSystemConfigurationProvider>

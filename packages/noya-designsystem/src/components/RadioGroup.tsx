@@ -62,8 +62,10 @@ const StyledItem = styled(ToggleGroupPrimitive.Item).withConfig({
   justifyContent: 'center',
   verticalAlign: 'middle',
   '&[aria-checked="true"]': {
-    backgroundColor: colorScheme ? theme.colors[colorScheme] : 'white',
-    color: colorScheme ? 'white' : theme.colors.text,
+    backgroundColor: colorScheme
+      ? theme.colors[colorScheme]
+      : theme.colors.radioGroup.background,
+    color: colorScheme ? theme.colors.radioGroup.background : theme.colors.text,
     boxShadow: colorScheme ? undefined : `0 1px 1px rgba(0,0,0,0.1)`,
   },
   '&:focus': {

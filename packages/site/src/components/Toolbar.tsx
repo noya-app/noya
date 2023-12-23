@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
+import {
+  NoyaAPI,
+  useMetadata,
+  useNoyaClientOrFallback,
+  useOptionalNoyaSession,
+} from 'noya-api';
 import {
   Avatar,
   Button,
@@ -20,8 +25,10 @@ import {
   ExitIcon,
   InfoCircledIcon,
   ListBulletIcon,
+  MoonIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
+  SunIcon,
   VideoIcon,
   ViewHorizontalIcon,
 } from 'noya-icons';
@@ -74,6 +81,8 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
   const theme = useDesignSystemTheme();
   const session = useOptionalNoyaSession();
   const router = useRouter();
+  const client = useNoyaClientOrFallback();
+  const metadata = useMetadata<'light' | 'dark'>('prefersColorScheme');
 
   const userMenuItems = createSectionedMenu(
     [
@@ -84,6 +93,11 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
       },
       // { title: 'Docs', value: 'docs', icon: <FileTextIcon /> },
       // { title: 'Templates', value: 'templates', icon: <CopyIcon /> },
+    ],
+    [
+      metadata === 'dark'
+        ? { title: 'Use Light Mode', value: 'lightMode', icon: <SunIcon /> }
+        : { title: 'Use Dark Mode', value: 'darkMode', icon: <MoonIcon /> },
     ],
     [
       {
@@ -159,6 +173,12 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                 }}
                 onSelect={(value) => {
                   switch (value) {
+                    case 'lightMode':
+                      client.metadata.set('prefersColorScheme', 'light');
+                      return;
+                    case 'darkMode':
+                      client.metadata.set('prefersColorScheme', 'dark');
+                      return;
                     case 'projects': {
                       router.push('/');
                       return;

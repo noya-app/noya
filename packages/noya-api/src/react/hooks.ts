@@ -37,7 +37,7 @@ export function useNoyaEmailLists() {
 }
 
 export function useNoyaUserData() {
-  const userData = useSelector(useNoyaClient().userData$);
+  const userData = useSelector(useNoyaClientOrFallback().userData$);
   return userData;
 }
 

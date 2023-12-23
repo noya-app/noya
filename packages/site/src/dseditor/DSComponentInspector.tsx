@@ -234,7 +234,7 @@ export function DSComponentInspector({
   }
 
   return (
-    <Stack.V width="400px" background="white">
+    <Stack.V width="400px" background={theme.colors.sidebar.background}>
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
           <InspectorSection title="Component" titleTextStyle="heading4">
