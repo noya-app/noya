@@ -171,6 +171,7 @@ it('unresolves nested example', () => {
         diff: {
           items: [
             {
+              id: '1',
               path: ['4123dc59-8121-4605-9cb4-fb6b64e447c5'],
               children: [
                 [
@@ -241,6 +242,7 @@ it('unresolves nested example', () => {
 
   const diff = Model.diff([
     {
+      id: '2',
       path: [
         'c46747c9-d902-4a50-9339-5b5b0800ecd1',
         'e83959eb-aedf-49b4-a883-a86799c210cf',
@@ -279,6 +281,7 @@ it('unresolves nested example', () => {
         diff: {
           items: [
             {
+              id: '1',
               path: ['4123dc59-8121-4605-9cb4-fb6b64e447c5'],
               children: [
                 [
@@ -294,6 +297,7 @@ it('unresolves nested example', () => {
               ],
             },
             {
+              id: '2',
               path: [
                 '4123dc59-8121-4605-9cb4-fb6b64e447c5',
                 'bf57fca6-f645-49fb-9781-3ea3d13153a7',

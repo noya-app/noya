@@ -1,5 +1,8 @@
+import { applyArrayDiff } from './arrayDiff';
+import { Model } from './builders';
 import { partitionDiff } from './partitionDiff';
 import {
+  ElementHierarchy,
   FindComponent,
   createSelectionWithDiff,
   instantiateResolvedComponent,
@@ -27,7 +30,41 @@ export function applySelectionDiff({
 } {
   const resolvedNode = instantiateResolvedComponent(findComponent, selection);
 
-  if (!selection.diff) return { selection, component };
+  if (!selection.diff && !selection.metaDiff) return { selection, component };
+
+  if (selection.metaDiff) {
+    const unresolved = unresolve(resolvedNode);
+
+    const newRoot = ElementHierarchy.map<NoyaNode>(
+      unresolved,
+      (node, transformedChildren) => {
+        if (node.type === 'noyaString') return node;
+
+        if (node.type === 'noyaPrimitiveElement') {
+          return { ...node, children: transformedChildren };
+        }
+
+        const metaDiffItems = selection.metaDiff?.[node.id];
+
+        if (!metaDiffItems || !node.diff?.items) return node;
+
+        const newDiffItems = applyArrayDiff(node.diff.items, metaDiffItems);
+
+        return { ...node, diff: Model.diff(newDiffItems) };
+      },
+    );
+
+    return {
+      component: {
+        ...component,
+        rootElement: enforceSchema(newRoot),
+      },
+      selection: {
+        ...selection,
+        metaDiff: undefined,
+      },
+    };
+  }
 
   if (selection.variantID) {
     const variant = component.variants?.find(
@@ -67,7 +104,7 @@ export function applySelectionDiff({
 
   const [primitivesDiff, compositesDiff] = partitionDiff(
     resolvedNode,
-    selection.diff.items || [],
+    selection.diff?.items || [],
   );
 
   const instance = instantiateResolvedComponent(findComponent, {
@@ -76,9 +113,9 @@ export function applySelectionDiff({
     diff: { items: primitivesDiff },
   });
 
-  const newRootElement = enforceSchema(
-    unresolve(instance, { items: compositesDiff }, debug),
-  );
+  const unresolved = unresolve(instance, { items: compositesDiff }, debug);
+
+  const newRootElement = enforceSchema(unresolved);
 
   return {
     component: {
@@ -88,6 +125,7 @@ export function applySelectionDiff({
     selection: {
       ...selection,
       diff: undefined,
+      metaDiff: undefined,
     },
   };
 }

@@ -32,7 +32,7 @@ export const ElementHierarchy = defineTree<NoyaNode>({
     }
   },
 }).withOptions({
-  create: (node: NoyaNode, children: NoyaNode[], ip: number[]) => {
+  create: (node: NoyaNode, children: NoyaNode[]) => {
     switch (node.type) {
       case 'noyaString':
         return node;

@@ -525,6 +525,7 @@ describe('add component within layout', () => {
     // Diff should add the flex layout
     expect(selectionWithDiff.diff?.items).toEqual([
       Model.diffItem({
+        id: selectionWithDiff.diff?.items[0].id,
         path: [root.id],
         children: [added(unresolve(flexLayoutInstance), 0)],
       }),
@@ -579,6 +580,7 @@ describe('add component within layout', () => {
     // Diff should add the grid layout
     expect(selectionWithDiff2.diff?.items).toEqual([
       Model.diffItem({
+        id: selectionWithDiff2.diff?.items[0].id,
         path: ResolvedHierarchy.keyPathOfNode(
           newRoot2,
           ResolvedHierarchy.find(
@@ -591,15 +593,13 @@ describe('add component within layout', () => {
     ]);
 
     // Diff path should collapse into the flex layout
-    expect(
-      (
-        ResolvedHierarchy.find(
-          newRoot2,
-          (node) => node.name === 'InsertedFlexLayout',
-        ) as NoyaResolvedCompositeElement
-      ).diff?.items,
-    ).toEqual([
+    const insertedFlexLayout = ResolvedHierarchy.find(
+      newRoot2,
+      (node) => node.name === 'InsertedFlexLayout',
+    ) as NoyaResolvedCompositeElement;
+    expect(insertedFlexLayout.diff?.items).toEqual([
       Model.diffItem({
+        id: insertedFlexLayout.diff?.items[0].id,
         path: [resolvedFlex.id],
         children: [added(unresolve(resolvedGrid), 0)],
       }),

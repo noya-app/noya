@@ -94,10 +94,11 @@ function noyaVariant(options: ModelOptions<NoyaVariant>): NoyaVariant {
 
 function noyaDiffItem(
   options: ModelOptions<NoyaDiffItem> & Pick<NoyaDiffItem, 'path'>,
-) {
+): NoyaDiffItem {
   return {
     ...options,
     path: options.path,
+    id: options.id ?? uuid(),
   };
 }
 

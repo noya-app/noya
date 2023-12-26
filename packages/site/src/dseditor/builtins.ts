@@ -269,13 +269,13 @@ export const initialComponents: NoyaComponent[] = [
           componentID: heroSymbolId,
           diff: {
             items: [
-              {
+              Model.diffItem({
                 path: ['box'],
                 classNames: [
                   removed(2), // items-center
                   added(Model.className('items-start'), 0),
                 ],
-              },
+              }),
             ],
           },
         }),

@@ -10,10 +10,12 @@ import {
   ComponentGroupTree,
   ComponentThumbnailChrome,
   ComponentThumbnailPosition,
+  ElementHierarchy,
   FindComponent,
   Model,
   NoyaAccessModifier,
   NoyaComponent,
+  NoyaCompositeElement,
   NoyaDiffItem,
   NoyaNode,
   NoyaResolvedNode,
@@ -21,7 +23,9 @@ import {
   NoyaVariant,
   ResolvedHierarchy,
   SelectedComponent,
+  applyArrayDiff,
   applySelectionDiff,
+  computeArrayDiff,
   createRootGroup,
   createSelectionWithDiff,
   describeDiffItem,
@@ -84,6 +88,15 @@ type Props = Pick<
   groups: DS['groups'];
 };
 
+type DiffItemWithSource = NoyaDiffItem & {
+  source: 'current' | 'variant' | 'saved';
+};
+
+type MetadataMap = Record<
+  string,
+  { name: string; type: NoyaNode['type']; componentID?: string }
+>;
+
 export function DSComponentInspector({
   selection,
   setSelection,
@@ -114,8 +127,6 @@ export function DSComponentInspector({
     [component.variants],
   );
 
-  type DiffItemWithSource = NoyaDiffItem & { source: 'current' | 'variant' };
-
   const allDiffItems = useMemo((): DiffItemWithSource[] => {
     const variant = component.variants?.find(
       (variant) => variant.id === selection.variantID,
@@ -132,7 +143,7 @@ export function DSComponentInspector({
       ) ?? [];
 
     return [...variantDiffItems, ...currentDiffItems];
-  }, [component.variants, selection.diff, selection.variantID]);
+  }, [component.variants, selection.diff?.items, selection.variantID]);
 
   const metadataMap = useMemo(() => {
     return ResolvedHierarchy.reduce<
@@ -187,7 +198,8 @@ export function DSComponentInspector({
     [findComponent, selection, setSelection],
   );
 
-  const hasUnsavedChanges = selection.diff && selection.diff.items.length > 0;
+  const hasUnsavedChanges =
+    (selection.diff && selection.diff.items.length > 0) || selection.metaDiff;
 
   const handleSave = useCallback(() => {
     if (!hasUnsavedChanges) return;
@@ -681,6 +693,7 @@ export function DSComponentInspector({
                       setSelection({
                         ...selection,
                         diff: undefined,
+                        metaDiff: undefined,
                       });
                     }}
                   >
@@ -715,141 +728,55 @@ export function DSComponentInspector({
         {allDiffItems.length > 0 && (
           <InspectorSection title="Diff" titleTextStyle="heading4">
             <Stack.V>
-              <ListView.Root variant="bare" gap={4}>
-                {allDiffItems.map((item, i) => (
-                  <ListView.Row key={i}>
-                    <Stack.V
-                      border={`1px solid ${theme.colors.divider}`}
-                      padding="6px"
-                      gap="6px"
-                      flex="1"
-                      borderRadius="4px"
-                      separator={<Divider />}
-                      background={
-                        item.source === 'variant'
-                          ? 'rgb(238, 229, 255)'
-                          : 'transparent'
-                      }
-                    >
-                      <Stack.H alignItems="center">
-                        {withSeparatorElements(
-                          item.path.map((id) => (
-                            <Chip
-                              key={id}
-                              colorScheme={
-                                metadataMap[id]?.type === 'noyaCompositeElement'
-                                  ? 'primary'
-                                  : undefined
-                              }
-                            >
-                              {metadataMap[id]?.name ?? '?'}
-                            </Chip>
-                          )),
-                          <CaretRightIcon />,
-                        )}
-                        <Spacer.Horizontal />
-                        <Spacer.Horizontal size={8} />
-                        <IconButton
-                          iconName="Cross1Icon"
-                          onClick={() => {
-                            setSelection({
-                              ...selection,
-                              diff: {
-                                // items: activeDiff.items.filter(
-                                //   (item, j) => j !== i,
-                                // ),
-                                items: [],
-                              },
-                            });
-                          }}
-                        />
-                      </Stack.H>
-                      {item.classNames && item.classNames.length > 0 && (
-                        <Stack.H flexWrap="wrap" gap="8px">
-                          <Text variant="code">classes: </Text>
-                          {item.classNames.map((arrayDiffItem, j) => (
-                            <Text key={j} variant="code">
-                              {describeDiffItem(
-                                arrayDiffItem,
-                                (className) => className.value,
-                              )}
-                            </Text>
-                          ))}
-                        </Stack.H>
-                      )}
-                      {item.variantNames && item.variantNames.length > 0 && (
-                        <Stack.H flexWrap="wrap" gap="8px">
-                          <Text variant="code">variants: </Text>
-                          {item.variantNames.map((arrayDiffItem, j) => {
-                            const elementId = item.path[item.path.length - 1];
-                            const targetComponent = findComponent(
-                              metadataMap[elementId]?.componentID ?? '',
-                            );
-                            const variants = targetComponent?.variants ?? [];
-                            const findVariantName = (id: string): string => {
-                              const variant = variants.find(
-                                (variant) => variant.id === id,
-                              );
-                              return variant?.name ?? '';
-                            };
-
-                            return (
-                              <Text key={j} variant="code">
-                                {describeDiffItem(
-                                  arrayDiffItem,
-                                  (variantName) =>
-                                    findVariantName(variantName.variantID),
-                                )}
-                              </Text>
-                            );
-                          })}
-                        </Stack.H>
-                      )}
-                      {item.children && item.children.length > 0 && (
-                        <Stack.H flexWrap="wrap" gap="8px">
-                          <Text variant="code">children: </Text>
-                          {item.children.map((arrayDiffItem, j) => (
-                            <Text key={j} variant="code">
-                              {describeDiffItem(
-                                arrayDiffItem,
-                                (child) => child.name || child.id,
-                              )}
-                            </Text>
-                          ))}
-                        </Stack.H>
-                      )}
-                      {item.name && (
-                        <Stack.H flexWrap="wrap" gap="8px">
-                          <Text variant="code">name: </Text>
-                          <Text variant="code">{item.name}</Text>
-                        </Stack.H>
-                      )}
-                      {item.textValue && (
-                        <Stack.H flexWrap="wrap" gap="8px">
-                          <Text variant="code">textValue: </Text>
-                          <Text variant="code">{item.textValue}</Text>
-                        </Stack.H>
-                      )}
-                      {item.props && item.props.length > 0 && (
-                        <Stack.H flexWrap="wrap" gap="8px">
-                          <Text variant="code">props: </Text>
-                          {item.props.map((arrayDiffItem, j) => (
-                            <Text key={j} variant="code">
-                              {describeDiffItem(
-                                arrayDiffItem,
-                                (prop) => prop.name,
-                              )}
-                            </Text>
-                          ))}
-                        </Stack.H>
-                      )}
-                    </Stack.V>
-                  </ListView.Row>
-                ))}
-              </ListView.Root>
+              <DiffList
+                allDiffItems={allDiffItems}
+                metadataMap={metadataMap}
+                findComponent={findComponent}
+              />
             </Stack.V>
           </InspectorSection>
         )}
+        {ElementHierarchy.flat(component.rootElement)
+          .filter(
+            (node): node is NoyaCompositeElement =>
+              node.type === 'noyaCompositeElement',
+          )
+          .map((element) => {
+            const initialItems = element.diff?.items ?? [];
+            const metaDiffItems = selection.metaDiff?.[element.id] ?? [];
+            const current = applyArrayDiff(initialItems, metaDiffItems);
+
+            if (current.length === 0) return null;
+
+            return (
+              <InspectorSection
+                key={element.id}
+                title={`Diff (${element.name})`}
+                titleTextStyle="heading5"
+              >
+                <Stack.V>
+                  <DiffList
+                    allDiffItems={current}
+                    metadataMap={metadataMap}
+                    findComponent={findComponent}
+                    onDeleteItem={(index) => {
+                      const next = current.filter((_, i) => i !== index);
+
+                      const newArrayDiff = computeArrayDiff(initialItems, next);
+
+                      setSelection({
+                        ...selection,
+                        metaDiff: {
+                          ...selection.metaDiff,
+                          [element.id]: newArrayDiff,
+                        },
+                      });
+                    }}
+                  />
+                </Stack.V>
+              </InspectorSection>
+            );
+          })}
       </ScrollArea>
     </Stack.V>
   );
@@ -972,3 +899,137 @@ const PropEditor = memo(function PropEditor({
     </Stack.V>
   );
 });
+
+function DiffList<T extends NoyaDiffItem>({
+  allDiffItems,
+  metadataMap,
+  findComponent,
+  onDeleteItem,
+}: {
+  allDiffItems: T[];
+  metadataMap: MetadataMap;
+  findComponent: FindComponent;
+  onDeleteItem?: (index: number) => void;
+}) {
+  const theme = useDesignSystemTheme();
+
+  return (
+    <ListView.Root variant="bare" gap={4}>
+      {allDiffItems.map((item, i) => (
+        <ListView.Row key={i}>
+          <Stack.V
+            border={`1px solid ${theme.colors.divider}`}
+            padding="6px"
+            gap="6px"
+            flex="1"
+            borderRadius="4px"
+            separator={<Divider />}
+            // background={
+            //   item.source === 'variant' ? 'rgb(238, 229, 255)' : 'transparent'
+            // }
+          >
+            <Stack.H alignItems="center">
+              {withSeparatorElements(
+                item.path.map((id) => (
+                  <Chip
+                    key={id}
+                    colorScheme={
+                      metadataMap[id]?.type === 'noyaCompositeElement'
+                        ? 'primary'
+                        : undefined
+                    }
+                  >
+                    {metadataMap[id]?.name ?? '?'}
+                  </Chip>
+                )),
+                <CaretRightIcon />,
+              )}
+              <Spacer.Horizontal />
+              <Spacer.Horizontal size={8} />
+              <IconButton
+                iconName="Cross1Icon"
+                onClick={() => {
+                  onDeleteItem?.(i);
+                }}
+              />
+            </Stack.H>
+            {item.classNames && item.classNames.length > 0 && (
+              <Stack.H flexWrap="wrap" gap="8px">
+                <Text variant="code">classes: </Text>
+                {item.classNames.map((arrayDiffItem, j) => (
+                  <Text key={j} variant="code">
+                    {describeDiffItem(
+                      arrayDiffItem,
+                      (className) => className.value,
+                    )}
+                  </Text>
+                ))}
+              </Stack.H>
+            )}
+            {item.variantNames && item.variantNames.length > 0 && (
+              <Stack.H flexWrap="wrap" gap="8px">
+                <Text variant="code">variants: </Text>
+                {item.variantNames.map((arrayDiffItem, j) => {
+                  const elementId = item.path[item.path.length - 1];
+                  const targetComponent = findComponent(
+                    metadataMap[elementId]?.componentID ?? '',
+                  );
+                  const variants = targetComponent?.variants ?? [];
+                  const findVariantName = (id: string): string => {
+                    const variant = variants.find(
+                      (variant) => variant.id === id,
+                    );
+                    return variant?.name ?? '';
+                  };
+
+                  return (
+                    <Text key={j} variant="code">
+                      {describeDiffItem(arrayDiffItem, (variantName) =>
+                        findVariantName(variantName.variantID),
+                      )}
+                    </Text>
+                  );
+                })}
+              </Stack.H>
+            )}
+            {item.children && item.children.length > 0 && (
+              <Stack.H flexWrap="wrap" gap="8px">
+                <Text variant="code">children: </Text>
+                {item.children.map((arrayDiffItem, j) => (
+                  <Text key={j} variant="code">
+                    {describeDiffItem(
+                      arrayDiffItem,
+                      (child) => child.name || child.id,
+                    )}
+                  </Text>
+                ))}
+              </Stack.H>
+            )}
+            {item.name && (
+              <Stack.H flexWrap="wrap" gap="8px">
+                <Text variant="code">name: </Text>
+                <Text variant="code">{item.name}</Text>
+              </Stack.H>
+            )}
+            {item.textValue && (
+              <Stack.H flexWrap="wrap" gap="8px">
+                <Text variant="code">textValue: </Text>
+                <Text variant="code">{item.textValue}</Text>
+              </Stack.H>
+            )}
+            {item.props && item.props.length > 0 && (
+              <Stack.H flexWrap="wrap" gap="8px">
+                <Text variant="code">props: </Text>
+                {item.props.map((arrayDiffItem, j) => (
+                  <Text key={j} variant="code">
+                    {describeDiffItem(arrayDiffItem, (prop) => prop.name)}
+                  </Text>
+                ))}
+              </Stack.H>
+            )}
+          </Stack.V>
+        </ListView.Row>
+      ))}
+    </ListView.Root>
+  );
+}

@@ -94,6 +94,7 @@ export type NoyaGeneratorProp = {
 export type NoyaProp = NoyaStringProp | NoyaNumberProp | NoyaGeneratorProp;
 
 export type NoyaDiffItem = {
+  id: string;
   path: string[];
   props?: ArrayDiffItem<NoyaProp>[];
   classNames?: ArrayDiffItem<NoyaClassName>[];
@@ -154,6 +155,7 @@ export type SelectedComponent = {
   componentID: string;
   variantID?: string;
   diff?: NoyaDiff;
+  metaDiff?: Record<string, ArrayDiffItem<NoyaDiffItem>[]>;
 };
 
 export type StylingMode = 'inline' | 'tailwind';

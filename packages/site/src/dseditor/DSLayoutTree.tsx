@@ -912,14 +912,16 @@ export const DSLayoutRow = memo(
                 const parentPath = node.path.slice(0, -1);
 
                 if (component) {
-                  const newNode = createResolvedNode({
-                    findComponent,
-                    node: Model.compositeElement({
-                      componentID: item.id,
-                      name: node.name ?? item.name,
+                  const newNode = ResolvedHierarchy.clone(
+                    createResolvedNode({
+                      findComponent,
+                      node: Model.compositeElement({
+                        componentID: item.id,
+                        name: node.name ?? item.name,
+                      }),
+                      parentPath,
                     }),
-                    parentPath,
-                  });
+                  );
 
                   const updated = ResolvedHierarchy.replace(resolvedNode, {
                     at: indexPath,
