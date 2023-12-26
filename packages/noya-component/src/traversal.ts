@@ -87,16 +87,21 @@ export function unresolve(
                 ...diff,
                 items: [
                   ...(diff?.items ?? []),
-                  ...diffParam.items.map((item) => ({
-                    ...item,
-                    path: item.path.slice(resolvedNode.path.length),
-                  })),
+                  ...diffParam.items
+                    .filter((item) =>
+                      isDeepEqual(
+                        item.path.slice(0, resolvedNode.path.length),
+                        resolvedNode.path,
+                      ),
+                    )
+                    .map((item) => ({
+                      ...item,
+                      path: item.path.slice(resolvedNode.path.length),
+                    })),
                 ],
               }
             : diff,
       };
-
-      // console.log('result', JSON.stringify(node.diff, null, 2));
 
       return node;
     }
