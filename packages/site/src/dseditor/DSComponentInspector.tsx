@@ -34,6 +34,7 @@ import {
   Button,
   Chip,
   Divider,
+  DropdownMenu,
   IconButton,
   InputField,
   InputFieldWithCompletions,
@@ -748,11 +749,58 @@ export function DSComponentInspector({
 
             if (current.length === 0) return null;
 
+            const menu = [
+              {
+                title: 'Reset',
+                value: 'reset' as const,
+              },
+              {
+                title: 'Delete All',
+                value: 'deleteAll' as const,
+              },
+            ];
+
             return (
               <InspectorSection
                 key={element.id}
                 title={`Diff (${element.name})`}
                 titleTextStyle="heading5"
+                right={
+                  <DropdownMenu
+                    items={menu}
+                    onSelect={(value) => {
+                      switch (value) {
+                        case 'reset': {
+                          setSelection({
+                            ...selection,
+                            metaDiff: {
+                              ...selection.metaDiff,
+                              [element.id]: [],
+                            },
+                          });
+                          break;
+                        }
+                        case 'deleteAll': {
+                          const newArrayDiff = computeArrayDiff(
+                            initialItems,
+                            [],
+                          );
+
+                          setSelection({
+                            ...selection,
+                            metaDiff: {
+                              ...selection.metaDiff,
+                              [element.id]: newArrayDiff,
+                            },
+                          });
+                          break;
+                        }
+                      }
+                    }}
+                  >
+                    <IconButton iconName="DotsVerticalIcon" />
+                  </DropdownMenu>
+                }
               >
                 <Stack.V>
                   <DiffList
