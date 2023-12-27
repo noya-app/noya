@@ -59,13 +59,13 @@ Object {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-white variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -125,13 +125,13 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-black variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -191,13 +191,13 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-white variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -257,13 +257,13 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-black variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -449,13 +449,13 @@ export default function Page() {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-white variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -515,13 +515,13 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-black variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -581,13 +581,13 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-white variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -647,13 +647,13 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-black variant-h1 leading-none text-center text-5xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black variant-h4 leading-none text-center text-2xl\\">
+      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
@@ -724,10 +724,10 @@ export default config
 exports[`renders classnames 1`] = `
 "<Box className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
   <Tag>New</Tag>
-  <Text fontSize=\\"5xl\\" className=\\"variant-h1 leading-none text-center\\">
+  <Text fontSize=\\"5xl\\" className=\\"leading-none text-center\\">
     Create, iterate, inspire.
   </Text>
-  <Text fontSize=\\"2xl\\" className=\\"variant-h4 leading-none text-center\\">
+  <Text fontSize=\\"2xl\\" className=\\"leading-none text-center\\">
     Turn great ideas into new possibilities.
   </Text>
   <Box className=\\"flex items-center gap-4 mt-2\\">

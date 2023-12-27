@@ -8,8 +8,7 @@ import {
   x,
 } from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
-import { filterTailwindClassesByLastInGroup } from 'noya-tailwind';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 
 const handler = {
@@ -27,19 +26,42 @@ function getDSConfig(props: any): DSConfig {
   return { colorMode: 'light', colors: { primary: 'blue' } };
 }
 
+function getStyler(props: any): (className: string | string[]) => {
+  style?: CSSProperties;
+  className?: string;
+} {
+  if (props._noya && props._noya.getStylingProps) {
+    return props._noya.getStylingProps;
+  } else {
+    return (_: string | string[]) => ({});
+  }
+}
+
 function parseClasses(classes: string | undefined) {
   return classes?.split(/\s+/) ?? [];
 }
 
-function mergeClasses(
-  classes: (string | false)[],
-  className: string | undefined,
-) {
-  return filterTailwindClassesByLastInGroup(
-    [...classes, ...parseClasses(className)].filter(
-      (x): x is string => typeof x === 'string',
-    ),
-  ).join(' ');
+function createStylingProps(props: unknown, classes: (string | false)[]) {
+  const className = (props as any).className as string | undefined;
+  const style = (props as any).style as CSSProperties | undefined;
+
+  const getStylingProps = getStyler(props);
+
+  const filteredClasses = [...classes, ...parseClasses(className)].filter(
+    (x): x is string => typeof x === 'string',
+  );
+  // const filteredClasses = filterTailwindClassesByLastInGroup(
+  //   [...classes, ...parseClasses(className)].filter(
+  //     (x): x is string => typeof x === 'string',
+  //   ),
+  // );
+
+  const result = getStylingProps(filteredClasses);
+
+  return {
+    ...result,
+    style: { ...result.style, ...style },
+  };
 }
 
 const proxyObject = new Proxy(
@@ -48,135 +70,131 @@ const proxyObject = new Proxy(
       return <div {...applyCommonProps(props)} />;
     },
     [component.id.Card]: (props: any) => {
-      const className = mergeClasses(
-        [`rounded-lg`, `bg-white`, `border`, `border-gray-200`, `p-4`],
-        props.className,
-      );
+      const stylingProps = createStylingProps(props, [
+        `rounded-lg`,
+        `bg-white`,
+        `dark:bg-gray-800`,
+        `border`,
+        `border-gray-200`,
+        `dark:border-gray-700`,
+        `p-4`,
+      ]);
 
-      return <div {...applyCommonProps({ ...props, className })} />;
+      return <div {...applyCommonProps({ ...props, ...stylingProps })} />;
     },
     [component.id.Button]: (props: any) => {
       const config = getDSConfig(props);
       const variant = (props.variant as ButtonVariant) ?? 'solid';
+      const stylingProps = createStylingProps(props, [
+        `appearance-none`,
+        ...(variant === 'solid'
+          ? [
+              `bg-${config.colors.primary}-500`,
+              `hover:bg-${config.colors.primary}-400`,
+              `text-white`,
+              `shadow-sm`,
+            ]
+          : []),
+        ...(variant === 'outline'
+          ? [
+              `border`,
+              `border-${config.colors.primary}-500`,
+              `text-${config.colors.primary}-500`,
+              `hover:bg-${config.colors.primary}-50`,
+              `hover:text-${config.colors.primary}-700`,
+            ]
+          : []),
+        ...(variant === 'text'
+          ? [
+              `text-${config.colors.primary}-500`,
+              `hover:bg-${config.colors.primary}-50`,
+              `hover:text-${config.colors.primary}-700`,
+            ]
+          : []),
+        `rounded-md`,
+        `px-3.5`,
+        `py-2.5`,
+        `text-sm`,
+        `font-semibold`,
+      ]);
 
-      const className = mergeClasses(
-        [
-          `appearance-none`,
-          ...(variant === 'solid'
-            ? [
-                `bg-${config.colors.primary}-500`,
-                `hover:bg-${config.colors.primary}-400`,
-                `text-white`,
-                `shadow-sm`,
-              ]
-            : []),
-          ...(variant === 'outline'
-            ? [
-                `border`,
-                `border-${config.colors.primary}-500`,
-                `text-${config.colors.primary}-500`,
-                `hover:bg-${config.colors.primary}-50`,
-                `hover:text-${config.colors.primary}-700`,
-              ]
-            : []),
-          ...(variant === 'text'
-            ? [
-                `text-${config.colors.primary}-500`,
-                `hover:bg-${config.colors.primary}-50`,
-                `hover:text-${config.colors.primary}-700`,
-              ]
-            : []),
-          `rounded-md`,
-          `px-3.5`,
-          `py-2.5`,
-          `text-sm`,
-          `font-semibold`,
-        ],
-        props.className,
-      );
-
-      return <button {...applyCommonProps({ ...props, className })} />;
+      return <button {...applyCommonProps({ ...props, ...stylingProps })} />;
     },
     [component.id.Text]: (props: any) => {
-      const colorMode = getDSConfig(props).colorMode ?? 'light';
+      const stylingProps = createStylingProps(
+        props,
+        [
+          'text-black',
+          'dark:text-white',
+          ...parseClasses(props.className),
+          props.variant === 'h1' && `text-5xl`,
+          props.variant === 'h2' && `text-4xl`,
+          props.variant === 'h3' && `text-3xl`,
+          props.variant === 'h4' && `text-2xl`,
+          props.variant === 'h5' && `text-xl`,
+          props.variant === 'h6' && `text-lg`,
+        ].filter(Boolean),
+      );
 
-      const className = [
-        `text-${colorMode === 'light' ? 'black' : 'white'}`,
-        ...parseClasses(props.className),
-        props.variant === 'h1' && `text-5xl`,
-        props.variant === 'h2' && `text-4xl`,
-        props.variant === 'h3' && `text-3xl`,
-        props.variant === 'h4' && `text-2xl`,
-        props.variant === 'h5' && `text-xl`,
-        props.variant === 'h6' && `text-lg`,
-      ]
-        .filter(Boolean)
-        .join(' ');
-
-      return <span {...applyCommonProps({ ...props, className })} />;
+      return <span {...applyCommonProps({ ...props, ...stylingProps })} />;
     },
     [component.id.Link]: (props: any) => {
       const config = getDSConfig(props);
 
-      const className = mergeClasses(
-        [
-          `text-${config.colors.primary}-500`,
-          `hover:text-${config.colors.primary}-400`,
-        ],
-        props.className,
-      );
+      const stylingProps = createStylingProps(props, [
+        `text-${config.colors.primary}-500`,
+        `hover:text-${config.colors.primary}-400`,
+      ]);
 
       return (
-        <a {...applyCommonProps({ ...props, className })} href={props.href} />
+        <a
+          {...applyCommonProps({ ...props, ...stylingProps })}
+          href={props.href}
+        />
       );
     },
     [component.id.Tag]: (props: any) => {
       const config = getDSConfig(props);
 
-      const className = mergeClasses(
-        [
-          `inline-flex`,
-          `items-center`,
-          `px-2.5`,
-          `py-1`,
-          `rounded-full`,
-          `text-xs`,
-          `font-medium`,
-          `bg-${config.colors.primary}-200/50`,
-          // `border`,
-          // `border-${config.colors.primary}-900/10`,
-          `text-${config.colors.primary}-600`,
-        ],
-        props.className,
-      );
+      const stylingProps = createStylingProps(props, [
+        `inline-flex`,
+        `items-center`,
+        `px-2.5`,
+        `py-1`,
+        `rounded-full`,
+        `text-xs`,
+        `font-medium`,
+        `bg-${config.colors.primary}-200/50`,
+        `dark:bg-${config.colors.primary}-500/25`,
+        // `border`,
+        // `border-${config.colors.primary}-900/10`,
+        `text-${config.colors.primary}-600`,
+      ]);
 
-      return <div {...applyCommonProps({ ...props, className })} />;
+      return <div {...applyCommonProps({ ...props, ...stylingProps })} />;
     },
     [component.id.Input]: (props: any) => {
-      const className = mergeClasses(
-        [
-          `block`,
-          `w-full`,
-          `rounded-md`,
-          `border-0`,
-          `px-4`,
-          `py-2`,
-          `text-gray-900`,
-          `shadow-sm`,
-          `ring-1`,
-          `ring-inset`,
-          `ring-gray-300`,
-          `placeholder:text-gray-400`,
-          `focus:ring-2`,
-          `focus:ring-inset`,
-          `focus:ring-indigo-600`,
-          `sm:text-sm`,
-          `sm:leading-6`,
-        ],
-        props.className,
-      );
+      const stylingProps = createStylingProps(props, [
+        `block`,
+        `w-full`,
+        `rounded-md`,
+        `border-0`,
+        `px-4`,
+        `py-2`,
+        `text-gray-900`,
+        `shadow-sm`,
+        `ring-1`,
+        `ring-inset`,
+        `ring-gray-300`,
+        `placeholder:text-gray-400`,
+        `focus:ring-2`,
+        `focus:ring-inset`,
+        `focus:ring-indigo-600`,
+        `sm:text-sm`,
+        `sm:leading-6`,
+      ]);
 
-      return <input {...applyCommonProps({ ...props, className })} />;
+      return <input {...applyCommonProps({ ...props, ...stylingProps })} />;
     },
     [component.id.Image]: (props: any) => {
       return <img {...applyCommonProps(props)} src={props.src} />;
@@ -184,21 +202,18 @@ const proxyObject = new Proxy(
     [component.id.Avatar]: (props: any) => {
       const colorMode = getDSConfig(props).colorMode ?? 'light';
 
-      const className = mergeClasses(
-        [
-          `rounded-full`,
-          `flex`,
-          `items-center`,
-          `justify-center`,
-          'overflow-hidden',
-          `bg-${colorMode === 'light' ? 'gray-100' : 'gray-800'}`,
-          `text-${colorMode === 'light' ? 'gray-300' : 'gray-600'}`,
-        ],
-        props.className,
-      );
+      const stylingProps = createStylingProps(props, [
+        `rounded-full`,
+        `flex`,
+        `items-center`,
+        `justify-center`,
+        'overflow-hidden',
+        `bg-${colorMode === 'light' ? 'gray-100' : 'gray-800'}`,
+        `text-${colorMode === 'light' ? 'gray-300' : 'gray-600'}`,
+      ]);
 
       return (
-        <div {...applyCommonProps({ ...props, className })}>
+        <div {...applyCommonProps({ ...props, ...stylingProps })}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

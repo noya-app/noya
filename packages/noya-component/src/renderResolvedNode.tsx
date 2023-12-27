@@ -19,7 +19,7 @@ import {
 import {
   BreakpointKey,
   extractTailwindClassesByBreakpoint,
-  extractTailwindClassesByTheme,
+  extractTailwindClassesByColorScheme,
   matchBreakpoint,
   parametersToTailwindStyle,
   tailwindColors,
@@ -78,7 +78,47 @@ export function renderResolvedNode({
   stylingMode?: StylingMode;
   theme?: any;
 }) {
-  const noya = { theme, dsConfig };
+  const breakpoint: BreakpointKey = containerWidth
+    ? matchBreakpoint(containerWidth)
+    : 'md';
+
+  function getStylingProps(initialClassNames: string | string[]): {
+    style?: React.CSSProperties;
+    className?: string;
+  } {
+    if (typeof initialClassNames === 'string') {
+      return getStylingProps(initialClassNames.split(/\s+/));
+    }
+
+    const classNames = initialClassNames
+      .filter((className) => !className.startsWith('variant-'))
+      .map((className) => {
+        return className.replace(/-primary-/, `-${dsConfig.colors.primary}-`);
+      });
+
+    const classNamesForCurrentPage = extractTailwindClassesByBreakpoint(
+      extractTailwindClassesByColorScheme(
+        classNames,
+        dsConfig.colorMode ?? 'light',
+      ),
+      breakpoint,
+    );
+
+    const style = parametersToTailwindStyle(classNamesForCurrentPage);
+
+    const stylingProps = {
+      // Include all classnames regardless of breakpoint/colorScheme
+      ...(stylingMode === 'tailwind' &&
+        classNames.length > 0 && {
+          className: classNames.join(' '),
+        }),
+      ...(stylingMode === 'inline' && { style }),
+    };
+
+    return stylingProps;
+  }
+
+  const noya = { theme, dsConfig, getStylingProps };
 
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
@@ -139,38 +179,11 @@ export function renderResolvedNode({
 
       if (!PrimitiveComponent) return null;
 
-      let classNames = element.classNames.map((className) => {
-        return className.value.replace(
-          /-primary-/,
-          `-${dsConfig.colors.primary}-`,
-        );
-      });
-
-      let classNamesForRendering = extractTailwindClassesByTheme(
-        classNames,
-        dsConfig.colorMode ?? 'light',
-      );
-
-      let breakpoint: BreakpointKey = 'md';
-
-      if (containerWidth) {
-        breakpoint = matchBreakpoint(containerWidth);
-      }
-
-      // Keep classNames starting with sm: and md:, but remove the prefixes.
-      // Remove any classNames starting with lg:, xl:, and 2xl:.
-      classNamesForRendering = extractTailwindClassesByBreakpoint(
-        classNamesForRendering,
-        breakpoint,
-      );
-
-      const style = parametersToTailwindStyle(classNamesForRendering);
-
-      const variantClassName = findLast(classNamesForRendering, (className) =>
-        className.startsWith('variant-'),
+      const variantClassName = findLast(element.classNames, (item) =>
+        item.value.startsWith('variant-'),
       );
       const variant = variantClassName
-        ? variantClassName.split('-')[1]
+        ? variantClassName.value.split('-')[1]
         : undefined;
 
       if (element.componentID === component.id.Table) return null;
@@ -188,13 +201,9 @@ export function renderResolvedNode({
         'slate'
       ] as Theme['colors']['neutral'];
 
-      const stylingProps = {
-        ...(stylingMode === 'tailwind' &&
-          classNames.length > 0 && {
-            className: classNames.join(' '),
-          }),
-        ...(stylingMode === 'inline' && { style }),
-      };
+      const stylingProps = getStylingProps(
+        element.classNames.map((item) => item.value),
+      );
 
       // Render SVGs as React elements
       if (

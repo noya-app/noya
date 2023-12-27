@@ -37,6 +37,7 @@ export function renderDSPreview({
     dsConfig,
     system: props.system,
     theme: props.theme,
+    stylingMode: 'inline',
   });
 
   const colorMode = dsConfig.colorMode ?? 'light';

@@ -58,7 +58,8 @@ export function getTextAlign(hashtags: string[]) {
 
 export const classGroups = {
   appearance: /^appearance-none/,
-  fontSize: /^(text-base|text-sm|text-xs)/,
+  fontSize:
+    /^(text-base|text-xs|text-sm|text-lg|text-xl|text-2xl|text-3xl|text-4xl|text-5xl|text-6xl|text-7xl|text-8xl|text-9xl)/,
   fontWeight:
     /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
   background: /^bg/,
@@ -244,7 +245,7 @@ const themes = ['light', 'dark'] as const;
  * Extracts the classes for the given theme. Omits the theme prefix.
  * Omits that are prefixed with a different theme.
  */
-export const extractTailwindClassesByTheme = (
+export const extractTailwindClassesByColorScheme = (
   classes: string[],
   theme: (typeof themes)[number],
 ) => {
@@ -265,7 +266,7 @@ export const extractTailwindClassesByTheme = (
 
 function getValue(className: string): string | undefined {
   let value =
-    /-((\d+)((\/|\.)\d+)?|(sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
+    /-((\d+)((\/|\.)\d+)?|(base|sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
       className,
     )?.[1];
 
@@ -329,8 +330,14 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         appearance: 'none',
       };
     case 'fontSize':
-      // Not used?
-      return {};
+      const [size, extras] = (context.theme('fontSize') as any)[
+        getValue(className) || 'base'
+      ];
+
+      return {
+        fontSize: size,
+        ...extras,
+      };
     case 'background': {
       return {
         backgroundColor: getColor(className),

@@ -63,6 +63,13 @@ describe('resolves styles', () => {
     });
   });
 
+  it('font size', () => {
+    expect(resolveTailwindClass('text-xl')).toEqual({
+      fontSize: '1.25rem',
+      lineHeight: '1.75rem',
+    });
+  });
+
   it('fill color', () => {
     expect(resolveTailwindClass('fill-red-500')).toEqual({
       fill: '#ef4444',
