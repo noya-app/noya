@@ -69,7 +69,7 @@ type Props = {
   setHighlightedPath?: (path: string[] | undefined) => void;
   setSelectedPath?: (path: string[] | undefined) => void;
   onBeforeInput?: (event: InputEvent) => void;
-  onReady?: () => void;
+  onReadyChange?: () => void;
   onContentDidChange?: () => void;
   sync?: boolean;
 };
@@ -84,7 +84,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
     setHighlightedPath,
     setSelectedPath,
     onBeforeInput,
-    onReady,
+    onReadyChange,
     onContentDidChange,
     sync = true,
   }: Props,
@@ -98,10 +98,13 @@ export const DSRenderer = forwardRef(function DSRenderer(
   >();
   const [iframeSize, setIframeSize] = useDeepState<Size | undefined>();
 
-  const handleReady = useCallback(() => {
-    setReady(true);
-    onReady?.();
-  }, [onReady]);
+  const handleReadyChange = useCallback(
+    (value: boolean) => {
+      setReady(value);
+      onReadyChange?.();
+    },
+    [onReadyChange],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -283,8 +286,9 @@ export const DSRenderer = forwardRef(function DSRenderer(
       <ControlledFrame
         ref={ref}
         title="Design System Preview"
-        onReady={handleReady}
+        onReadyChange={handleReadyChange}
         onResize={setIframeSize}
+        colorScheme={config.colorMode ?? 'light'}
       />
       {!system && <Loading>Loading design system...</Loading>}
     </Stack.V>

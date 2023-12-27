@@ -11,70 +11,75 @@ import React, {
 } from 'react';
 
 interface Props {
-  onReady?: () => void;
+  onReadyChange?: (ready: boolean) => void;
   onResize?: (size: Size) => void;
   title: string;
+  colorScheme: 'light' | 'dark';
+}
+
+function useMessageListener(
+  id: string,
+  callbacks: Record<string, (event: MessageEvent) => void>,
+) {
+  const callbacksRef = useRef(callbacks);
+
+  useEffect(() => {
+    callbacksRef.current = callbacks;
+  }, [callbacks]);
+
+  useEffect(() => {
+    const listener = (event: MessageEvent) => {
+      try {
+        if (event.data.id === id) {
+          callbacksRef.current[event.data.type]?.(event);
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener('message', listener);
+
+    return () => {
+      window.removeEventListener('message', listener);
+    };
+  }, [id]);
 }
 
 export const ControlledFrame = memo(
   forwardRef(function ControlledFrame(
-    { onReady, onResize, title }: Props,
+    { onReadyChange, onResize, title, colorScheme }: Props,
     forwardedRef: React.ForwardedRef<HTMLIFrameElement>,
   ) {
     const ref = useRef<HTMLIFrameElement | null>(null);
     const [id] = useState(() => Math.random().toString());
 
-    // Listen to messages from the iframe. When the iframe is ready, call onReady
-    useEffect(() => {
-      const listener = (event: MessageEvent) => {
-        let ok: boolean = false;
+    useMessageListener(id, {
+      resize: (event) => onResize?.(event.data.size),
+      ready: () => onReadyChange?.(true),
+      keydown: (event) => {
+        const customEvent = new KeyboardEvent('keydown', {
+          key: event.data.command.key,
+          keyCode: event.data.command.keyCode,
+          altKey: event.data.command.altKey,
+          shiftKey: event.data.command.shiftKey,
+          ctrlKey: event.data.command.ctrlKey,
+          metaKey: event.data.command.metaKey,
+          bubbles: true,
+        });
 
-        try {
-          if (event.data.id === id) {
-            switch (event.data.type) {
-              case 'ready': {
-                ok = true;
-                break;
-              }
-              case 'resize': {
-                onResize?.(event.data.size);
-                break;
-              }
-              case 'keydown': {
-                const customEvent = new KeyboardEvent('keydown', {
-                  key: event.data.command.key,
-                  keyCode: event.data.command.keyCode,
-                  altKey: event.data.command.altKey,
-                  shiftKey: event.data.command.shiftKey,
-                  ctrlKey: event.data.command.ctrlKey,
-                  metaKey: event.data.command.metaKey,
-                  bubbles: true,
-                });
-
-                ref.current?.dispatchEvent(customEvent);
-              }
-            }
-          }
-        } catch (e) {}
-
-        if (ok) {
-          onReady?.();
-        }
-      };
-
-      window.addEventListener('message', listener);
-
-      return () => {
-        window.removeEventListener('message', listener);
-      };
-    }, [id, onReady, onResize]);
+        ref.current?.dispatchEvent(customEvent);
+      },
+    });
 
     const handleRef = useCallback(
       (value: HTMLIFrameElement | null) => {
+        if (!value) {
+          onReadyChange?.(false);
+        }
+
         ref.current = value;
         assignRef(forwardedRef, value);
       },
-      [forwardedRef],
+      [forwardedRef, onReadyChange],
     );
 
     const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
@@ -120,6 +125,8 @@ export const ControlledFrame = memo(
       background: linear-gradient(90deg, #ffffff00, #e2e8f0dd, #ffffff00);
       background-size: 200% 100%;
     }
+
+    ${colorScheme === 'dark' ? 'html { background: #111; }' : ''}
   </style>
 </head>
 <body>
@@ -191,6 +198,7 @@ export const ControlledFrame = memo(
 
     return (
       <iframe
+        key={srcDoc}
         ref={handleRef}
         tabIndex={-1}
         title={title}
