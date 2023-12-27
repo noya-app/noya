@@ -3,6 +3,7 @@
 exports[`project generates project 1`] = `
 Array [
   "package.json",
+  "tailwind.config.ts",
   "src/app/layout.tsx",
   "src/app/page.tsx",
   "public/chakra/blue/dark/components/globals.css",
@@ -702,6 +703,20 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
     },
   },
 };
+",
+  "tailwind.config.ts": "import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  important: true,
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {},
+  plugins: [],
+}
+export default config
 ",
 }
 `;
