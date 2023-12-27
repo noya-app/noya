@@ -87,6 +87,7 @@ type Props = Pick<
   components: NoyaComponent[];
   onPressMeasure: () => void;
   groups: DS['groups'];
+  uploadAsset?: (file: ArrayBuffer) => Promise<string>;
 };
 
 type DiffItemWithSource = NoyaDiffItem & {
@@ -113,6 +114,7 @@ export function DSComponentInspector({
   components,
   onPressMeasure,
   groups,
+  uploadAsset,
 }: Props) {
   const { query } = useRouter();
   const openInputDialog = useOpenInputDialog();
@@ -723,6 +725,7 @@ export function DSComponentInspector({
               onCreateComponent={onCreateComponent}
               components={components}
               onConfigureProp={setConfigureProp}
+              uploadAsset={uploadAsset}
             />
           </InspectorSection>
         </Stack.V>

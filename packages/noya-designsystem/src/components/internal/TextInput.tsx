@@ -43,7 +43,7 @@ type ReadOnlyProps = Props & {
 };
 
 const ReadOnlyTextInput = forwardRef(function ReadOnlyTextInput(
-  { onKeyDown, value, ...rest }: ReadOnlyProps,
+  { onKeyDown, onFocusChange, value, ...rest }: ReadOnlyProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
   return (

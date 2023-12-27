@@ -1,3 +1,4 @@
+import { fileOpen } from 'browser-fs-access';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import { useNoyaClientOrFallback } from 'noya-api';
@@ -6,6 +7,7 @@ import {
   Model,
   NoyaComponent,
   NoyaPrimitiveElement,
+  NoyaProp,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
   ResolvedHierarchy,
@@ -42,6 +44,7 @@ import {
   GlobeIcon,
   ImageIcon,
   InputIcon,
+  Link1Icon,
   MixerHorizontalIcon,
   OpenInNewWindowIcon,
   PlusCircledIcon,
@@ -49,6 +52,7 @@ import {
   ThickArrowDownIcon,
   ThickArrowUpIcon,
   TrashIcon,
+  UploadIcon,
   VercelLogoIcon,
 } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
@@ -129,6 +133,7 @@ interface Props {
   onConfigureProp?: (
     options: { path: string[]; prop: string } | undefined,
   ) => void;
+  uploadAsset?: (file: ArrayBuffer) => Promise<string>;
 }
 
 /**
@@ -145,6 +150,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   onCreateComponent,
   components,
   onConfigureProp,
+  uploadAsset,
 }: Props) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const handleSetExpanded = useCallback((id: string, expanded: boolean) => {
@@ -337,6 +343,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           onConfigureProp={onConfigureProp}
           onPressDown={() => handlePressDirection(indexPath, 'down')}
           onPressUp={() => handlePressDirection(indexPath, 'up')}
+          uploadAsset={uploadAsset}
         />
       )}
     />
@@ -373,6 +380,7 @@ export const DSLayoutRow = memo(
       onPressUp,
       onPressDown,
       focusPath,
+      uploadAsset,
     }: Pick<
       Props,
       | 'highlightedPath'
@@ -380,6 +388,7 @@ export const DSLayoutRow = memo(
       | 'selectedPath'
       | 'setSelectedPath'
       | 'onConfigureProp'
+      | 'uploadAsset'
     > & {
       id: string;
       onChange: (resolvedNode: NoyaResolvedNode) => void;
@@ -1330,6 +1339,11 @@ export const DSLayoutRow = memo(
                           },
                         ],
                         [
+                          {
+                            value: 'image-url',
+                            title: 'Switch to Image URL',
+                            icon: <Link1Icon />,
+                          },
                           prop.generator !== 'random-icon' && {
                             value: 'random-icon',
                             title: 'Switch to Icon',
@@ -1404,6 +1418,26 @@ export const DSLayoutRow = memo(
 
                             break;
                           }
+                          case 'image-url': {
+                            onChange(
+                              ResolvedHierarchy.replace(resolvedNode, {
+                                at: indexPath,
+                                node: {
+                                  ...node,
+                                  props: node.props.map((p) =>
+                                    p.name === prop.name
+                                      ? {
+                                          ...p,
+                                          type: 'string',
+                                          value: '',
+                                        }
+                                      : p,
+                                  ),
+                                },
+                              }),
+                            );
+                            break;
+                          }
                           case 'geometric':
                           case 'random-image':
                           case 'random-icon': {
@@ -1475,62 +1509,80 @@ export const DSLayoutRow = memo(
                         }
                       }}
                     >
-                      <div
-                        style={{
-                          position: 'relative',
-                          top: '1px',
-                          right: '1px',
-                          height: '15px',
-                          width: '15px',
-                          // aspectRatio: '1/1',
-                          objectFit: 'cover',
-                          objectPosition: 'center',
-                          borderRadius: '4px',
-                          marginLeft: '4px',
-                          // marginRight: '-6px',
-                          cursor: 'pointer',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        {prop.generator === 'geometric' ? (
-                          <BoxModelIcon color="#aaa" />
-                        ) : prop.result?.startsWith('<svg') ? (
-                          svgToReactElement(prop.result)
-                        ) : (
-                          <img
-                            src={prop.result}
-                            alt=""
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              height: '100%',
-                              width: '100%',
-                              objectFit: 'cover',
-                              objectPosition: 'center',
-                              borderRadius: '4px',
-                            }}
-                          />
-                        )}
-                        {hovered && (
-                          <>
-                            <div
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                height: '100%',
-                                width: '100%',
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                              }}
-                            />
-                            <CaretDownIcon
-                              color="white"
-                              style={{
-                                position: 'relative',
-                              }}
-                            />
-                          </>
-                        )}
-                      </div>
+                      <PropDropdown prop={prop} hovered={hovered} />
+                    </InputField.DropdownMenu>
+                  )}
+                  {prop.type === 'string' && prop.name === 'src' && (
+                    <InputField.DropdownMenu
+                      items={createSectionedMenu(
+                        [
+                          {
+                            value: 'upload',
+                            title: 'Upload',
+                            icon: <UploadIcon />,
+                          },
+                        ],
+                        [
+                          {
+                            value: 'generator',
+                            title: 'Switch to Image Generator',
+                            icon: <Link1Icon />,
+                          },
+                        ],
+                      )}
+                      onSelect={async (value) => {
+                        switch (value) {
+                          case 'upload': {
+                            if (!uploadAsset) return;
+                            const file = await fileOpen();
+                            const buffer = await file.arrayBuffer();
+                            const url = await uploadAsset(buffer);
+                            onChange(
+                              ResolvedHierarchy.replace(resolvedNode, {
+                                at: indexPath,
+                                node: {
+                                  ...node,
+                                  props: node.props.map((p) =>
+                                    p.name === prop.name
+                                      ? {
+                                          ...p,
+                                          type: 'string',
+                                          value: url,
+                                        }
+                                      : p,
+                                  ),
+                                },
+                              }),
+                            );
+                            break;
+                          }
+                          case 'generator': {
+                            onChange(
+                              ResolvedHierarchy.replace(resolvedNode, {
+                                at: indexPath,
+                                node: {
+                                  ...node,
+                                  props: node.props.map((p) =>
+                                    p.name === prop.name
+                                      ? {
+                                          ...p,
+                                          type: 'generator',
+                                          generator: 'random-image',
+                                          query: '',
+                                          result: undefined,
+                                          resolvedQuery: undefined,
+                                        }
+                                      : p,
+                                  ),
+                                },
+                              }),
+                            );
+                            break;
+                          }
+                        }
+                      }}
+                    >
+                      <PropDropdown prop={prop} hovered={hovered} />
                     </InputField.DropdownMenu>
                   )}
                 </InputField.Root>
@@ -1541,6 +1593,83 @@ export const DSLayoutRow = memo(
     );
   }),
 );
+
+const PropDropdown = forwardRef(function PropDropdown(
+  {
+    prop,
+    hovered,
+    ...rest
+  }: {
+    prop: NoyaProp;
+    hovered: boolean;
+  },
+  forwardedRef: React.ForwardedRef<HTMLDivElement>,
+) {
+  return (
+    <div
+      ref={forwardedRef}
+      style={{
+        position: 'relative',
+        top: '1px',
+        right: '1px',
+        height: '15px',
+        width: '15px',
+        objectFit: 'cover',
+        objectPosition: 'center',
+        borderRadius: '4px',
+        marginLeft: '4px',
+        cursor: 'pointer',
+        overflow: 'hidden',
+      }}
+      {...rest}
+    >
+      {prop.type === 'generator' && prop.generator === 'geometric' ? (
+        <BoxModelIcon color="#aaa" />
+      ) : prop.type === 'generator' && prop.result?.startsWith('<svg') ? (
+        svgToReactElement(prop.result)
+      ) : (
+        <img
+          src={
+            prop.type === 'generator'
+              ? prop.result ?? ''
+              : prop.type === 'string'
+              ? prop.value
+              : undefined
+          }
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            height: '100%',
+            width: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            borderRadius: '4px',
+          }}
+        />
+      )}
+      {hovered && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              height: '100%',
+              width: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            }}
+          />
+          <CaretDownIcon
+            color="white"
+            style={{
+              position: 'relative',
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+});
 
 function handleMoveItem(
   root: NoyaResolvedNode,

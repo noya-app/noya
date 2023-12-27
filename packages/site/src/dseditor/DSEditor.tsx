@@ -661,6 +661,7 @@ export function DSEditor({
           components={components}
           onPressMeasure={handlePressMeasure}
           groups={groups}
+          uploadAsset={uploadAsset}
           onCreateGroup={(group, parentID) => {
             const groupID = uuid();
             const root = createRootGroup(groups);

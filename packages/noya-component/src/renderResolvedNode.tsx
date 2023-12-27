@@ -32,22 +32,28 @@ export const selectOptionSymbolId = 'a4009f44-db30-4658-9bcb-7531434150bb';
 export const ZERO_WIDTH_SPACE = '\u200b';
 
 export function getImageFromProp(colors: Theme['colors'], prop?: NoyaProp) {
-  if (!prop) return placeholderImage;
-  if (prop.type !== 'generator') return placeholderImage;
-  if (prop.generator === 'geometric') {
-    return svgToDataUri(
-      replaceColorPalette(
-        prop.data ? createSVG(prop.data) : createPatternSVG(prop.query),
-        colors,
-      ),
-    );
-  }
-  if (prop.result) {
-    if (prop.result.startsWith('<svg')) {
-      return svgToDataUri(prop.result);
+  switch (prop?.type) {
+    case 'string': {
+      return prop.value || placeholderImage;
     }
-    return prop.result;
+    case 'generator': {
+      if (prop.generator === 'geometric') {
+        return svgToDataUri(
+          replaceColorPalette(
+            prop.data ? createSVG(prop.data) : createPatternSVG(prop.query),
+            colors,
+          ),
+        );
+      }
+      if (prop.result) {
+        if (prop.result.startsWith('<svg')) {
+          return svgToDataUri(prop.result);
+        }
+        return prop.result;
+      }
+    }
   }
+
   return placeholderImage;
 }
 
