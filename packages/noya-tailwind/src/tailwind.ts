@@ -290,15 +290,32 @@ function getSpacingValue(className: string): string | undefined {
 const customValueRE = /[A-Za-z0-9-]*(?:\[(.*)\])?/;
 
 export function getColor(className: string) {
-  const custom = customValueRE.exec(className)?.[1];
+  const [withoutOpacity, opacity] = className.split('/');
+
+  const custom = customValueRE.exec(withoutOpacity)?.[1];
 
   if (custom) {
     return custom;
   }
 
-  const value = className.split('-').slice(1);
+  const value = withoutOpacity.split('-').slice(1);
 
-  return get(context.theme('colors'), value);
+  let result = get(context.theme('colors'), value) as string;
+
+  // If result is a 3 digit hex, expand it to 6 digits
+  if (opacity && result && /#([0-9a-f]{3})$/i.test(result)) {
+    result = `#${result[1]}${result[1]}${result[2]}${result[2]}${result[3]}${result[3]}`;
+  }
+
+  // If result is a 6 digit hex, add the opacity
+  if (opacity && /#([0-9a-f]{6})$/i.test(result)) {
+    const o = Math.floor((parseInt(opacity, 10) * 255) / 100)
+      .toString(16)
+      .padStart(2, '0');
+    result = `${result}${o}`;
+  }
+
+  return result;
 }
 
 export const resolveTailwindClass = memoize(function resolveTailwindClass(

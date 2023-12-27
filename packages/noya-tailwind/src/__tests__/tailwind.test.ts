@@ -31,6 +31,12 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('bg-[#000000e5]')).toEqual({
       backgroundColor: '#000000e5',
     });
+    expect(resolveTailwindClass('bg-red-500/50')).toEqual({
+      backgroundColor: '#ef44447f',
+    });
+    expect(resolveTailwindClass('bg-white/50')).toEqual({
+      backgroundColor: '#ffffff7f',
+    });
   });
 
   it('blur', () => {

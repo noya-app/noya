@@ -71,11 +71,8 @@ import { IndexPath } from 'tree-visit';
 import { z } from 'zod';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
-import {
-  primitiveElementStyleItems,
-  styleItems,
-  typeItems,
-} from './completionItems';
+import { StyleInputField } from './StyleInputField';
+import { typeItems } from './completionItems';
 import { exportLayout, parseLayoutWithOptions } from './componentLayout';
 import { getComponentName, getNodeName } from './utils/nodeUtils';
 
@@ -1018,14 +1015,9 @@ export const DSLayoutRow = memo(
               }}
             />
           ) : isSearchingStyles ? (
-            <InputFieldWithCompletions
+            <StyleInputField
               ref={styleSearchInputRef}
-              placeholder={'Find style'}
-              items={
-                primitiveElementStyleItems[
-                  (node as NoyaPrimitiveElement).componentID
-                ] ?? styleItems
-              }
+              componentID={(node as NoyaPrimitiveElement).componentID}
               onBlur={() => {
                 setIsSearchingStyles(false);
                 ref.current?.focus();

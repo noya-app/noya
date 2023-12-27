@@ -46,7 +46,9 @@ export function fuzzyTokenize({
 
   let lastMatchIndex = 0;
 
-  for (const match of itemScore.labelMatch ?? []) {
+  const matches = mergeRanges(itemScore.labelMatch, itemScore.descriptionMatch);
+
+  for (const match of matches ?? []) {
     if (match.start > lastMatchIndex) {
       tokens.push({
         type: 'text',
@@ -70,4 +72,37 @@ export function fuzzyTokenize({
   }
 
   return tokens;
+}
+
+type MatchRange = { start: number; end: number };
+
+function mergeRanges(a?: MatchRange[], b?: MatchRange[]): MatchRange[] {
+  if (!a) return b ?? [];
+  if (!b) return a;
+
+  if (a.length === 0) return b;
+  if (b.length === 0) return a;
+
+  const merged: MatchRange[] = [];
+
+  const all = [...a, ...b].sort((a, b) => a.start - b.start);
+
+  let current: MatchRange | undefined;
+
+  for (const range of all) {
+    if (!current) {
+      current = range;
+    } else if (range.start <= current.end) {
+      current.end = Math.max(current.end, range.end);
+    } else {
+      merged.push(current);
+      current = range;
+    }
+  }
+
+  if (current) {
+    merged.push(current);
+  }
+
+  return merged;
 }
