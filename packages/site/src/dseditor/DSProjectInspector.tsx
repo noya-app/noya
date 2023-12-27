@@ -1,7 +1,7 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import { produce } from 'immer';
-import { DS } from 'noya-api';
+import { DS, useNoyaClientOrFallback } from 'noya-api';
 import {
   ComponentGroup,
   ComponentGroupTree,
@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   ExtractMenuItemType,
   IconButton,
+  InputField,
   ListView,
   RelativeDropPosition,
   ScrollArea,
@@ -26,7 +27,12 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon, InputIcon, TrashIcon } from 'noya-icons';
+import {
+  ChevronDownIcon,
+  InputIcon,
+  OpenInNewWindowIcon,
+  TrashIcon,
+} from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { findLastIndex, uuid } from 'noya-utils';
 import React, { useState } from 'react';
@@ -36,6 +42,7 @@ import {
 } from '../ayon/components/inspector/AyonListPrimitives';
 import { InspectorSection } from '../components/InspectorSection';
 import { LibraryVersionPicker } from '../components/LibraryVersionPicker';
+import { StyledAnchor } from '../components/NavigationLinks';
 import { downloadBlob } from '../utils/download';
 import { DSThemeInspector } from './DSThemeInspector';
 
@@ -145,11 +152,27 @@ export function DSProjectInspector({
   };
 
   const componentItems = flattenComponentGroups({ groups, components });
+  const client = useNoyaClientOrFallback();
 
   return (
     <Stack.V width="300px" background="white">
       <ScrollArea>
         <Stack.V gap="1px" background={theme.colors.canvas.background}>
+          {ds.latestBuildAssetId && (
+            <InspectorSection title="Build" titleTextStyle="heading4">
+              <StyledAnchor
+                href={`${client.assets.url(ds.latestBuildAssetId)}/index.html`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Latest Build <OpenInNewWindowIcon />
+              </StyledAnchor>
+              <InputField.Root labelPosition="end" labelSize={50}>
+                <InputField.Label>Asset ID</InputField.Label>
+                <InputField.Input value={ds.latestBuildAssetId} readOnly />
+              </InputField.Root>
+            </InspectorSection>
+          )}
           <InspectorSection title="Theme" titleTextStyle="heading4">
             <InspectorPrimitives.LabeledRow label="Base Library">
               <Select

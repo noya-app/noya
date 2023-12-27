@@ -4,22 +4,28 @@ import { Stack } from 'noya-designsystem';
 import React, { ComponentProps, ForwardedRef, forwardRef } from 'react';
 import styled from 'styled-components';
 
-const StyledAnchor = styled.a<{ active?: boolean }>(({ theme, active }) => ({
-  ...theme.textStyles.small,
-  color: active ? theme.colors.text : theme.colors.textMuted,
-  backgroundColor: active ? theme.colors.inputBackground : 'transparent',
-  padding: '4px 8px',
-  borderRadius: 4,
-  textDecoration: 'none',
-  '&:hover': {
-    opacity: 0.8,
-  },
-  '&:active': {
-    opacity: 0.9,
-  },
-}));
+export const StyledAnchor = styled.a<{ active?: boolean }>(
+  ({ theme, active }) => ({
+    ...theme.textStyles.small,
+    color: active ? theme.colors.text : theme.colors.textMuted,
+    backgroundColor: active ? theme.colors.inputBackground : 'rgba(0,0,0,0.05)',
+    padding: '4px 8px',
+    borderRadius: 4,
+    textDecoration: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '4px',
+    '&:hover': {
+      opacity: 0.8,
+    },
+    '&:active': {
+      opacity: 0.9,
+    },
+  }),
+);
 
-const StyledLink = forwardRef(function StyledLink(
+export const StyledLink = forwardRef(function StyledLink(
   props: ComponentProps<typeof StyledAnchor> & { activePrefix?: string },
   forwardedRef: ForwardedRef<HTMLAnchorElement>,
 ) {
