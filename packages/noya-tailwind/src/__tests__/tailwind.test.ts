@@ -22,6 +22,13 @@ describe('parse class name', () => {
     });
   });
 
+  it('empty opacity', () => {
+    expect(parseTailwindClass('bg-red-500/')).toEqual({
+      className: 'bg-red-500',
+      opacity: '',
+    });
+  });
+
   it('prefix', () => {
     expect(parseTailwindClass('lg:bg-red-500')).toEqual({
       className: 'bg-red-500',
