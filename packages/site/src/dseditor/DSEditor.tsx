@@ -2,18 +2,11 @@ import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import JavascriptPlayground, { PlaygroundProps } from 'javascript-playgrounds';
 import { useRouter } from 'next/router';
 import { DS, useNoyaClientOrFallback } from 'noya-api';
-import {
-  clean,
-  compileAsync,
-  createElementCode,
-  createSimpleElement,
-  print,
-} from 'noya-compiler';
+import { compileAsync } from 'noya-compiler';
 import {
   ComponentGroupTree,
   Model,
   NoyaComponent,
-  NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
   NoyaResolvedString,
   ResolvedHierarchy,
@@ -23,7 +16,6 @@ import {
   diffResolvedTrees,
   getSavableComponentGroups,
   instantiateResolvedComponent,
-  renderResolvedNode,
 } from 'noya-component';
 import {
   Button,
@@ -557,11 +549,12 @@ export function DSEditor({
                 />
               </Stack.V>
             )}
-            {contentTab === 'code' && resolvedNode && system && (
-              <DSComponentCode
-                resolvedNode={resolvedNode}
+            {contentTab === 'code' && system && (
+              <DSGalleryCode
                 system={system}
-                dsConfig={config}
+                ds={ds}
+                setLatestBuildAssetId={setLatestBuildAssetId}
+                componentID={selection.componentID}
               />
             )}
           </Stack.V>
@@ -638,7 +631,6 @@ export function DSEditor({
               <DSGalleryCode
                 system={system}
                 ds={ds}
-                uploadAsset={uploadAsset}
                 setLatestBuildAssetId={setLatestBuildAssetId}
               />
             )}
@@ -694,52 +686,16 @@ export function DSEditor({
   );
 }
 
-function DSComponentCode({
-  resolvedNode,
-  system,
-  dsConfig,
-}: {
-  resolvedNode: NoyaResolvedNode;
-  system: DesignSystemDefinition;
-  dsConfig: DS['config'];
-}) {
-  const [code, setCode] = React.useState<string>();
-
-  useEffect(() => {
-    const reactNode = renderResolvedNode({
-      contentEditable: false,
-      disableTabNavigation: false,
-      includeDataProps: true,
-      system,
-      dsConfig,
-      resolvedNode,
-      stylingMode: 'tailwind',
-    });
-
-    const code = createElementCode(createSimpleElement(reactNode, system)!);
-
-    const out = clean(print(code));
-
-    setCode(out);
-  }, [dsConfig, resolvedNode, system]);
-
-  return (
-    <Stack.V flex="1" background="white">
-      {code !== undefined && <Playground files={{ 'index.tsx': code }} />}
-    </Stack.V>
-  );
-}
-
 function DSGalleryCode({
   system,
   ds,
-  uploadAsset,
   setLatestBuildAssetId,
+  componentID,
 }: {
   system: DesignSystemDefinition;
   ds: DS;
-  uploadAsset?: (file: ArrayBuffer) => Promise<string>;
   setLatestBuildAssetId?: (latestBuildAssetId: string | undefined) => void;
+  componentID?: string;
 }) {
   const [files, setFiles] = React.useState<Record<string, string>>();
 
@@ -748,25 +704,30 @@ function DSGalleryCode({
       const output = await compileAsync({
         name: 'Gallery',
         ds,
-        definitions: [
-          'vanilla',
-          '@noya-design-system/chakra',
-          '@noya-design-system/antd',
-          '@noya-design-system/mui',
-        ],
+        definitions: componentID
+          ? [ds.source.name]
+          : [
+              'vanilla',
+              '@noya-design-system/chakra',
+              '@noya-design-system/antd',
+              '@noya-design-system/mui',
+            ],
+        ...(componentID && {
+          filterComponents: (component) =>
+            component.componentID === componentID,
+        }),
       });
 
       setFiles(output);
     }
 
     main();
-  }, [ds, system]);
+  }, [componentID, ds, system]);
 
   return (
     <Stack.V flex="1" background="white">
       {files !== undefined && (
         <Playground
-          uploadAsset={uploadAsset}
           files={files}
           setLatestBuildAssetId={setLatestBuildAssetId}
         />
@@ -777,7 +738,6 @@ function DSGalleryCode({
 
 function Playground(
   props: Pick<PlaygroundProps, 'files'> & {
-    uploadAsset?: (file: ArrayBuffer) => Promise<string>;
     setLatestBuildAssetId?: (latestBuildAssetId: string | undefined) => void;
   },
 ) {
@@ -845,6 +805,7 @@ function Playground(
             borderRight: `1px solid ${theme.colors.divider}`,
             padding: '4px',
             backgroundColor: 'white',
+            flex: '0 0 300px',
           },
           workspacesRow: {
             backgroundColor: 'white',
@@ -873,6 +834,7 @@ function Playground(
       />
       <Stack.H position="absolute" top="10px" right="20px" gap="20px">
         <Button
+          variant="secondary"
           onClick={async () => {
             const zipFile = await createZip();
             downloadBlob(zipFile);
@@ -883,9 +845,8 @@ function Playground(
           <DownloadIcon />
         </Button>
         <Button
+          variant="secondary"
           onClick={async () => {
-            // if (!props.uploadAsset) return;
-
             const zipFile = await createZip();
             const bytes = await zipFile.arrayBuffer();
 
@@ -900,8 +861,6 @@ function Playground(
             const binary = await build.arrayBuffer();
 
             const assetId = await client.assets.create(binary, fileId);
-
-            // const assetUrl = await props.uploadAsset(binary);
 
             props.setLatestBuildAssetId?.(assetId);
 

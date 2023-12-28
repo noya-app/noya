@@ -7,6 +7,7 @@ import { path } from 'imfs';
 import { DS } from 'noya-api';
 import {
   FindComponent,
+  NoyaComponent,
   createResolvedNode,
   renderResolvedNode,
 } from 'noya-component';
@@ -39,6 +40,7 @@ export interface CompilerConfiguration {
   name: string;
   ds: DS;
   resolvedDefinitions: Record<string, DesignSystemDefinition>;
+  filterComponents?: (component: NoyaComponent) => boolean;
 }
 
 type ResolvedCompilerConfiguration = CompilerConfiguration & {
@@ -319,7 +321,10 @@ export function compileDesignSystem(
     );
   };
 
+  const filterComponents = configuration.filterComponents ?? (() => true);
+
   const componentPageItems = (configuration.ds.components ?? [])
+    .filter(filterComponents)
     .filter((component) => component.accessModifier !== 'internal')
     .map((component) => {
       const noyaComponent = findComponent(component.componentID);
