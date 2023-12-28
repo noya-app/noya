@@ -8,6 +8,7 @@ import {
   x,
 } from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
+import { filterTailwindClassesByLastInGroup } from 'noya-tailwind';
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -47,14 +48,11 @@ function createStylingProps(props: unknown, classes: (string | false)[]) {
 
   const getStylingProps = getStyler(props);
 
-  const filteredClasses = [...classes, ...parseClasses(className)].filter(
-    (x): x is string => typeof x === 'string',
+  const filteredClasses = filterTailwindClassesByLastInGroup(
+    [...classes, ...parseClasses(className)].filter(
+      (x): x is string => typeof x === 'string',
+    ),
   );
-  // const filteredClasses = filterTailwindClassesByLastInGroup(
-  //   [...classes, ...parseClasses(className)].filter(
-  //     (x): x is string => typeof x === 'string',
-  //   ),
-  // );
 
   const result = getStylingProps(filteredClasses);
 
@@ -126,7 +124,6 @@ const proxyObject = new Proxy(
         [
           'text-black',
           'dark:text-white',
-          ...parseClasses(props.className),
           props.variant === 'h1' && `text-5xl`,
           props.variant === 'h2' && `text-4xl`,
           props.variant === 'h3' && `text-3xl`,

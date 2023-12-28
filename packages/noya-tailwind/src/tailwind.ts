@@ -178,16 +178,56 @@ export const getTailwindClassesByGroup = memoize((group: ClassGroupKey) => {
   );
 });
 
-export const filterTailwindClassesByLastInGroup = memoize(
-  (hashtags: string[]) => {
-    const byGroup: Partial<Record<ClassGroupKey, string>> = {};
+export function parseTailwindClass(className: string) {
+  const match = className.match(/^(\w+:)?(.*?)(\/\d+)?$/);
 
-    hashtags.forEach((className) => {
-      const group = getTailwindClassGroup(className);
-      byGroup[group] = className;
+  if (!match) return { className };
+
+  const [, prefix, classNameWithoutPrefix, opacity] = match;
+
+  return {
+    className: classNameWithoutPrefix,
+    ...(prefix && { prefix: prefix.slice(0, -1) }),
+    ...(opacity && { opacity: opacity.slice(1) }),
+  };
+}
+
+export const filterTailwindClassesByLastInGroup = memoize(
+  (classNames: string[]) => {
+    const originalIndexes = Object.fromEntries(
+      classNames.map((className, index) => [className, index]),
+    );
+
+    const byKey: Record<string, string> = {};
+    const prefixedGroups = new Map<string, Set<string>>();
+
+    classNames.forEach((className) => {
+      const parsed = parseTailwindClass(className);
+      const group = getTailwindClassGroup(parsed.className);
+      const key = parsed.prefix ? `${parsed.prefix}:${group}` : group;
+
+      if (parsed.prefix) {
+        // Track groups for each prefix
+        if (!prefixedGroups.has(parsed.prefix)) {
+          prefixedGroups.set(parsed.prefix, new Set());
+        }
+        prefixedGroups.get(parsed.prefix)?.add(group);
+      } else {
+        // If a non-prefixed class comes after a prefixed class in the same group
+        // Remove all prefixed versions of this group
+        prefixedGroups.forEach((groups, prefix) => {
+          if (groups.has(group)) {
+            delete byKey[`${prefix}:${group}`];
+          }
+        });
+      }
+
+      byKey[key] = className;
     });
 
-    return Object.values(byGroup);
+    return Object.values(byKey).sort(
+      (a, b) => originalIndexes[a] - originalIndexes[b],
+    );
   },
 );
 

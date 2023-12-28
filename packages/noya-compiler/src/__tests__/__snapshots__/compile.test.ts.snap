@@ -62,17 +62,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\">Learn More</a>
+        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -128,17 +130,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\">Learn More</a>
+        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -194,17 +198,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\">Learn More</a>
+        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -260,17 +266,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\">Learn More</a>
+        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -452,17 +460,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\">Learn More</a>
+        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -518,17 +528,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 dark:bg-blue-500/25 text-blue-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\">Learn More</a>
+        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -584,17 +596,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\">Learn More</a>
+        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -650,17 +664,19 @@ export default function Hero() {
       <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 dark:bg-teal-500/25 text-teal-600\\">
         New
       </div>
-      <span className=\\"text-black dark:text-white leading-none text-center text-5xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-5xl leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black dark:text-white leading-none text-center text-2xl leading-none text-center\\">
+      <span className=\\"text-black dark:text-white text-2xl leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
         <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\">Learn More</a>
+        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+          Learn More
+        </a>
       </div>
     </div>
   );
@@ -732,7 +748,7 @@ exports[`renders classnames 1`] = `
   </Text>
   <Box className=\\"flex items-center gap-4 mt-2\\">
     <Button>Get Started</Button>
-    <Link>Learn More</Link>
+    <Link href=\\"#\\">Learn More</Link>
   </Box>
 </Box>;
 "
@@ -757,7 +773,7 @@ exports[`renders default 1`] = `
   </Text>
   <Box display=\\"flex\\" alignItems=\\"center\\" gap=\\"1rem\\" mt=\\"0.5rem\\">
     <Button>Get Started</Button>
-    <Link>Learn More</Link>
+    <Link href=\\"#\\">Learn More</Link>
   </Box>
 </Box>;
 "

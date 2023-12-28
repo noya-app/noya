@@ -1,10 +1,42 @@
 import {
+  filterTailwindClassesByLastInGroup,
   getBlockClassName,
   getColor,
   parametersToTailwindStyle,
+  parseTailwindClass,
   resolveTailwindClass,
   simpleAlignmentResolver,
 } from '../tailwind';
+
+describe('parse class name', () => {
+  it('basic', () => {
+    expect(parseTailwindClass('bg-red-500')).toEqual({
+      className: 'bg-red-500',
+    });
+  });
+
+  it('opacity', () => {
+    expect(parseTailwindClass('bg-red-500/10')).toEqual({
+      className: 'bg-red-500',
+      opacity: '10',
+    });
+  });
+
+  it('prefix', () => {
+    expect(parseTailwindClass('lg:bg-red-500')).toEqual({
+      className: 'bg-red-500',
+      prefix: 'lg',
+    });
+  });
+
+  it('opacity with prefix', () => {
+    expect(parseTailwindClass('lg:bg-red-500/10')).toEqual({
+      className: 'bg-red-500',
+      opacity: '10',
+      prefix: 'lg',
+    });
+  });
+});
 
 it('only applies last class within a group', () => {
   expect(getBlockClassName(['bg-red-500', 'bg-blue-500'])).toEqual(
@@ -302,6 +334,53 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('-z-10')).toEqual({
       zIndex: '-10',
     });
+  });
+});
+
+describe('last class in group', () => {
+  it('basic', () => {
+    const result = filterTailwindClassesByLastInGroup([
+      'bg-red-500',
+      'bg-blue-500',
+    ]);
+
+    expect(result).toEqual(['bg-blue-500']);
+  });
+
+  it('with prefix', () => {
+    const result = filterTailwindClassesByLastInGroup([
+      'dark:bg-red-500',
+      'dark:bg-blue-500',
+    ]);
+
+    expect(result).toEqual(['dark:bg-blue-500']);
+  });
+
+  it('prefix after base is kept', () => {
+    const result = filterTailwindClassesByLastInGroup([
+      'bg-red-500',
+      'dark:bg-blue-500',
+    ]);
+
+    expect(result).toEqual(['bg-red-500', 'dark:bg-blue-500']);
+  });
+
+  it('prefix before base is removed', () => {
+    const result = filterTailwindClassesByLastInGroup([
+      'dark:bg-red-500',
+      'bg-blue-500',
+    ]);
+
+    expect(result).toEqual(['bg-blue-500']);
+  });
+
+  it('keeps different prefixes', () => {
+    const result = filterTailwindClassesByLastInGroup([
+      'dark:bg-red-500',
+      'lg:bg-blue-500',
+    ]);
+
+    expect(result).toEqual(['dark:bg-red-500', 'lg:bg-blue-500']);
   });
 });
 

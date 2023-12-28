@@ -20,6 +20,7 @@ import {
   BreakpointKey,
   extractTailwindClassesByBreakpoint,
   extractTailwindClassesByColorScheme,
+  filterTailwindClassesByLastInGroup,
   matchBreakpoint,
   parametersToTailwindStyle,
   tailwindColors,
@@ -90,11 +91,13 @@ export function renderResolvedNode({
       return getStylingProps(initialClassNames.split(/\s+/));
     }
 
-    const classNames = initialClassNames
-      .filter((className) => !className.startsWith('variant-'))
-      .map((className) => {
-        return className.replace(/-primary-/, `-${dsConfig.colors.primary}-`);
-      });
+    const classNames = filterTailwindClassesByLastInGroup(
+      initialClassNames
+        .filter((className) => !className.startsWith('variant-'))
+        .map((className) => {
+          return className.replace(/-primary-/, `-${dsConfig.colors.primary}-`);
+        }),
+    );
 
     const classNamesForCurrentPage = extractTailwindClassesByBreakpoint(
       extractTailwindClassesByColorScheme(
@@ -284,6 +287,9 @@ export function renderResolvedNode({
           {...((element.componentID === component.id.Checkbox ||
             element.componentID === component.id.Radio) && {
             label: transformedChildren,
+          })}
+          {...(element.componentID === component.id.Link && {
+            href: '#',
           })}
           {...(noya && { _noya: noya })}
         />
