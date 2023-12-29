@@ -169,6 +169,7 @@ export function diffResolvedTrees(
       a.classNames,
       b.classNames,
       (className) => className.value,
+      { removalMode: 'key' },
     );
 
     if (classNamesDiff.length) {
@@ -179,6 +180,7 @@ export function diffResolvedTrees(
       a.children,
       b.children,
       (item) => item.id,
+      { removalMode: 'key' },
     );
 
     if (arrayDiff.length > 0) {
@@ -201,6 +203,7 @@ export function diffResolvedTrees(
       a.variantNames ?? [],
       b.variantNames ?? [],
       (item) => item.id,
+      { removalMode: 'key' },
     );
 
     if (variantNamesDiff.length > 0) {
@@ -299,7 +302,7 @@ export function applyResolvedDiff(
       rootNode = resolvedNodeReducer(rootNode, {
         type: 'setProps',
         indexPath,
-        props: applyArrayDiff(node.props, item.props),
+        props: applyArrayDiff(node.props, item.props, (item) => item.id),
       });
     }
 
@@ -307,7 +310,11 @@ export function applyResolvedDiff(
       rootNode = resolvedNodeReducer(rootNode, {
         type: 'setClassNames',
         indexPath,
-        classNames: applyArrayDiff(node.classNames, item.classNames),
+        classNames: applyArrayDiff(
+          node.classNames,
+          item.classNames,
+          (item) => item.id,
+        ),
       });
     }
 
@@ -321,6 +328,7 @@ export function applyResolvedDiff(
         variantNames: applyArrayDiff(
           node.variantNames ?? [],
           item.variantNames,
+          (item) => item.id,
         ),
       });
     }
@@ -341,6 +349,7 @@ export function applyResolvedDiff(
 
             return result;
           }),
+          (item) => item.id,
         ),
       });
     }
@@ -406,6 +415,7 @@ export function createResolvedNode({
       const variantNames = applyArrayDiff(
         node.variantNames ?? [],
         variantDiffItems ?? [],
+        (item) => item.id,
       );
 
       for (let variantName of variantNames) {

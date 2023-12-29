@@ -48,7 +48,11 @@ export function applySelectionDiff({
 
         if (!metaDiffItems || !node.diff?.items) return node;
 
-        const newDiffItems = applyArrayDiff(node.diff.items, metaDiffItems);
+        const newDiffItems = applyArrayDiff(
+          node.diff.items,
+          metaDiffItems,
+          (item) => item.id,
+        );
 
         return { ...node, diff: Model.diff(newDiffItems) };
       },

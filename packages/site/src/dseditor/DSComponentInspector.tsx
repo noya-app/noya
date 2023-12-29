@@ -748,7 +748,11 @@ export function DSComponentInspector({
           .map((element) => {
             const initialItems = element.diff?.items ?? [];
             const metaDiffItems = selection.metaDiff?.[element.id] ?? [];
-            const current = applyArrayDiff(initialItems, metaDiffItems);
+            const current = applyArrayDiff(
+              initialItems,
+              metaDiffItems,
+              (item) => item.id,
+            );
 
             if (current.length === 0) return null;
 
@@ -787,6 +791,7 @@ export function DSComponentInspector({
                           const newArrayDiff = computeArrayDiff(
                             initialItems,
                             [],
+                            (item) => item.id,
                           );
 
                           setSelection({
@@ -813,7 +818,11 @@ export function DSComponentInspector({
                     onDeleteItem={(index) => {
                       const next = current.filter((_, i) => i !== index);
 
-                      const newArrayDiff = computeArrayDiff(initialItems, next);
+                      const newArrayDiff = computeArrayDiff(
+                        initialItems,
+                        next,
+                        (item) => item.id,
+                      );
 
                       setSelection({
                         ...selection,

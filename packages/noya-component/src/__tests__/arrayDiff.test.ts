@@ -50,6 +50,17 @@ test('removes item', () => {
   expect(diff).toEqual([removed(1)]);
 });
 
+test('removes item using key', () => {
+  const a = ['a', 'b'];
+  const b = ['a'];
+
+  const diff = computeArrayDiff(a, b, (item) => item, { removalMode: 'key' });
+  const applied = applyArrayDiff(a, diff);
+
+  expect(applied).toEqual(b);
+  expect(diff).toEqual([removed('b')]);
+});
+
 test('replaces item', () => {
   const a = ['a', 'b', 'd'];
   const b = ['a', 'c', 'd'];
@@ -146,4 +157,15 @@ test('filter duplicates', () => {
   const applied = applyArrayDiff(a, diff);
 
   expect(applied).toEqual(['a', 'b']);
+});
+
+test('custom identity', () => {
+  let a = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+  let b = [{ id: 'b' }, { id: 'a' }];
+
+  const diff = computeArrayDiff(a, b, (item) => item.id, {
+    removalMode: 'key',
+  });
+
+  expect(diff).toEqual([removed('c'), moved(0, 1)]);
 });
