@@ -1,9 +1,14 @@
 export type ArrayDiffItem<T> =
+  | [type: 'a', item: T]
   | [type: 'a', item: T, to: number]
   | [type: 'r', from: number | string]
   | [type: 'm', from: number, to: number];
 
-export function added<T>(item: T, to: number): ArrayDiffItem<T> {
+export function added<T>(item: T, to?: number): ArrayDiffItem<T> {
+  if (to === undefined) {
+    return ['a', item];
+  }
+
   return ['a', item, to];
 }
 
@@ -65,6 +70,7 @@ export function computeArrayDiff<T>(
   const items: ArrayDiffItem<T>[] = [];
   const aMap = new Map(a.map((item, index) => [identity(item), index]));
   const bMap = new Map(b.map((item, index) => [identity(item), index]));
+  let result: T[] = [...a];
 
   // Detect duplicates by comparing array length vs map size.
   if (aMap.size !== a.length || bMap.size !== b.length) {
@@ -87,6 +93,7 @@ export function computeArrayDiff<T>(
           options.removalMode === 'key' ? itemIdentity : i - removalOffset,
         ),
       );
+      applyArrayDiffItemMutable(result, items[items.length - 1], identity);
       removalOffset++;
     }
   }
@@ -95,11 +102,19 @@ export function computeArrayDiff<T>(
   for (let i = 0; i < b.length; i++) {
     const item = b[i];
     if (!aMap.has(identity(item))) {
-      items.push(added(item, i));
+      // Check if i is the last index in the current result.
+      if (i === result.length) {
+        items.push(added(item));
+        // console.log('yes');
+      } else {
+        items.push(added(item, i));
+      }
+
+      // items.push(added(item, i));
+      applyArrayDiffItemMutable(result, items[items.length - 1], identity);
     }
   }
 
-  let result = applyArrayDiff(a, items, identity);
   let firstMove = computeFirstArrayMove(0, result, b, identity);
   while (firstMove) {
     items.push(firstMove[1]);
@@ -120,6 +135,29 @@ function getIndex<T>(
     : items.findIndex((item) => indexOrKey === identity(item));
 }
 
+function applyArrayDiffItemMutable<T>(
+  a: T[],
+  item: ArrayDiffItem<T>,
+  identity: (item: T) => string,
+): void {
+  switch (item[0]) {
+    case 'a':
+      if (item.length === 3) {
+        a.splice(item[2], 0, item[1]);
+      } else {
+        a.push(item[1]);
+      }
+      break;
+    case 'r':
+      a.splice(getIndex(a, item[1], identity), 1);
+      break;
+    case 'm':
+      const [movedItem] = a.splice(item[1], 1);
+      a.splice(item[2], 0, movedItem);
+      break;
+  }
+}
+
 export function applyArrayDiff(
   a: string[],
   items: ArrayDiffItem<string>[],
@@ -137,18 +175,7 @@ export function applyArrayDiff<T>(
   let result = [...a];
 
   for (const item of items) {
-    switch (item[0]) {
-      case 'a':
-        result.splice(item[2], 0, item[1]);
-        break;
-      case 'r':
-        result.splice(getIndex(result, item[1], identity), 1);
-        break;
-      case 'm':
-        const [movedItem] = result.splice(item[1], 1);
-        result.splice(item[2], 0, movedItem);
-        break;
-    }
+    applyArrayDiffItemMutable(result, item, identity);
   }
 
   return result;
@@ -161,7 +188,11 @@ export function mapArrayDiff<T, K>(
   return items.map((item) => {
     switch (item[0]) {
       case 'a':
-        return added(map(item[1]), item[2]);
+        if (item.length === 3) {
+          return added(map(item[1]), item[2]);
+        } else {
+          return added(map(item[1]));
+        }
       case 'r':
         return removed(item[1]);
       case 'm':

@@ -527,7 +527,7 @@ describe('add component within layout', () => {
       Model.diffItem({
         id: selectionWithDiff.diff?.items[0].id,
         path: [root.id],
-        children: [added(unresolve(flexLayoutInstance), 0)],
+        children: [added(unresolve(flexLayoutInstance))],
       }),
     ]);
 
@@ -588,7 +588,7 @@ describe('add component within layout', () => {
             (node) => node.name === 'FlexPrimitive',
           )!,
         )!,
-        children: [added(unresolve(resolvedGrid), 0)],
+        children: [added(unresolve(resolvedGrid))],
       }),
     ]);
 
@@ -601,7 +601,7 @@ describe('add component within layout', () => {
       Model.diffItem({
         id: insertedFlexLayout.diff?.items[0].id,
         path: [resolvedFlex.id],
-        children: [added(unresolve(resolvedGrid), 0)],
+        children: [added(unresolve(resolvedGrid))],
       }),
     ]);
 

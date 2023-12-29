@@ -14,7 +14,10 @@ test('append item', () => {
   const applied = applyArrayDiff(a, diff);
 
   expect(applied).toEqual(b);
-  expect(diff).toEqual([added('b', 1)]);
+  expect(diff).toEqual([added('b')]);
+
+  // Double check that the diff is the same if we use an explicit index
+  expect(applyArrayDiff(a, [added('b', 1)])).toEqual(b);
 });
 
 test('prepend item', () => {
@@ -36,7 +39,7 @@ test('inserts item', () => {
   const applied = applyArrayDiff(a, diff);
 
   expect(applied).toEqual(b);
-  expect(diff).toEqual([added('a', 0), added('c', 2)]);
+  expect(diff).toEqual([added('a', 0), added('c')]);
 });
 
 test('removes item', () => {
@@ -80,7 +83,7 @@ test('replaces item with multiple changes', () => {
   const applied = applyArrayDiff(a, diff);
 
   expect(applied).toEqual(b);
-  expect(diff).toEqual([removed(1), removed(1), added('c', 1), added('e', 2)]);
+  expect(diff).toEqual([removed(1), removed(1), added('c'), added('e')]);
 });
 
 test('swaps adjacent items', () => {
@@ -135,7 +138,7 @@ test('moves and adds item', () => {
   const applied = applyArrayDiff(a, diff);
 
   expect(applied).toEqual(b);
-  expect(diff).toEqual([removed(1), added('d', 2), moved(0, 1)]);
+  expect(diff).toEqual([removed(1), added('d'), moved(0, 1)]);
 });
 
 test('swaps multiple pairs', () => {
