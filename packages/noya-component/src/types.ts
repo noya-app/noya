@@ -158,4 +158,4 @@ export type SelectedComponent = {
   metaDiff?: Record<string, ArrayDiffItem<NoyaDiffItem>[]>;
 };
 
-export type StylingMode = 'inline' | 'tailwind';
+export type StylingMode = 'inline' | 'tailwind' | 'tailwind-resolved';

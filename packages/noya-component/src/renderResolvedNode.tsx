@@ -91,20 +91,22 @@ export function renderResolvedNode({
       return getStylingProps(initialClassNames.split(/\s+/));
     }
 
-    const classNames = filterTailwindClassesByLastInGroup(
-      initialClassNames
-        .filter((className) => !className.startsWith('variant-'))
-        .map((className) => {
-          return className.replace(/-primary-/, `-${dsConfig.colors.primary}-`);
-        }),
-    );
+    const normalizedClassNames = initialClassNames
+      .map((className) =>
+        className.replace(/-primary-/, `-${dsConfig.colors.primary}-`),
+      )
+      .filter((className) => !className.startsWith('variant-'));
 
-    const classNamesForCurrentPage = extractTailwindClassesByBreakpoint(
-      extractTailwindClassesByColorScheme(
-        classNames,
-        dsConfig.colorMode ?? 'light',
+    const classNames = filterTailwindClassesByLastInGroup(normalizedClassNames);
+
+    const classNamesForCurrentPage = filterTailwindClassesByLastInGroup(
+      extractTailwindClassesByBreakpoint(
+        extractTailwindClassesByColorScheme(
+          classNames,
+          dsConfig.colorMode ?? 'light',
+        ),
+        breakpoint,
       ),
-      breakpoint,
     );
 
     const style = parametersToTailwindStyle(classNamesForCurrentPage);
@@ -114,6 +116,10 @@ export function renderResolvedNode({
       ...(stylingMode === 'tailwind' &&
         classNames.length > 0 && {
           className: classNames.join(' '),
+        }),
+      ...(stylingMode === 'tailwind-resolved' &&
+        classNamesForCurrentPage.length > 0 && {
+          className: classNamesForCurrentPage.join(' '),
         }),
       ...(stylingMode === 'inline' && { style }),
     };

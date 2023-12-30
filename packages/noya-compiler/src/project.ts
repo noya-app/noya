@@ -348,7 +348,7 @@ export function compileDesignSystem(
           system: DesignSystem,
           dsConfig: configuration.ds.config,
           resolvedNode,
-          stylingMode: 'tailwind',
+          stylingMode: 'tailwind-resolved',
         }),
         DesignSystem,
       );

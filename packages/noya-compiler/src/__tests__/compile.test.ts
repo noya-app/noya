@@ -276,7 +276,7 @@ describe('renders', () => {
       system: ChakraDesignSystem,
       dsConfig: ds.config,
       resolvedNode,
-      stylingMode: 'tailwind',
+      stylingMode: 'tailwind-resolved',
     });
 
     const code = createElementCode(
