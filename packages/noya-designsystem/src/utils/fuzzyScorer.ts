@@ -35,20 +35,25 @@ export type IToken =
   | { type: 'text'; text: string }
   | { type: 'match'; text: string };
 
+export type MatchRange = { start: number; end: number };
+
 export function fuzzyTokenize({
   item,
   itemScore,
 }: {
   item: string;
   itemScore: IItemScore;
-}) {
+}): IToken[] {
   const tokens: IToken[] = [];
 
   let lastMatchIndex = 0;
 
-  const matches = mergeRanges(itemScore.labelMatch, itemScore.descriptionMatch);
+  const matches: MatchRange[] = mergeRanges([
+    ...(itemScore.labelMatch ?? []),
+    ...(itemScore.descriptionMatch ?? []),
+  ]);
 
-  for (const match of matches ?? []) {
+  for (const match of matches) {
     if (match.start > lastMatchIndex) {
       tokens.push({
         type: 'text',
@@ -74,22 +79,14 @@ export function fuzzyTokenize({
   return tokens;
 }
 
-type MatchRange = { start: number; end: number };
-
-function mergeRanges(a?: MatchRange[], b?: MatchRange[]): MatchRange[] {
-  if (!a) return b ?? [];
-  if (!b) return a;
-
-  if (a.length === 0) return b;
-  if (b.length === 0) return a;
-
+function mergeRanges(ranges: MatchRange[]): MatchRange[] {
   const merged: MatchRange[] = [];
 
-  const all = [...a, ...b].sort((a, b) => a.start - b.start);
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
 
   let current: MatchRange | undefined;
 
-  for (const range of all) {
+  for (const range of sorted) {
     if (!current) {
       current = range;
     } else if (range.start <= current.end) {

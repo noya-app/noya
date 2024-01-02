@@ -169,7 +169,15 @@ export function useGeneratedLayoutManager() {
 export function useManagedLayouts() {
   const manager = useGeneratedLayoutManager();
 
-  return useSelector(manager.resolvedLayouts$);
+  // Fixes typescript circular reference error
+  return useSelector(manager.resolvedLayouts$ as unknown) as Record<
+    string,
+    {
+      node: NoyaNode;
+      loading: boolean;
+      provider: string;
+    }[]
+  >;
 }
 
 export function useManagedLayout(name: string, description: string) {
