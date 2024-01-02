@@ -1,4 +1,4 @@
-import { Point } from 'noya-geometry';
+import { Point } from '@noya-app/noya-geometry';
 import { decodeCurvePoint, getCurrentHandleDirection } from 'noya-state';
 import { getBoundingRectMap } from './geometrySelectors';
 import { getCursorForDirection, getSelectedLayers } from './layerSelectors';

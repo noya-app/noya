@@ -1,5 +1,5 @@
+import { center, Size } from '@noya-app/noya-geometry';
 import Sketch from 'noya-file-format';
-import { center, Size } from 'noya-geometry';
 import { SketchLayer } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import React, { memo, useMemo } from 'react';

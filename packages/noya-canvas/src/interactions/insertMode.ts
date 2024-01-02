@@ -1,5 +1,5 @@
+import { createRect } from '@noya-app/noya-geometry';
 import { ReactEventHandlers } from 'noya-designsystem';
-import { createRect } from 'noya-geometry';
 import {
   DrawableLayerType,
   handleActionType,

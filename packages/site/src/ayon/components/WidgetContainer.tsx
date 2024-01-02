@@ -1,4 +1,4 @@
-import { AffineTransform, Rect } from 'noya-geometry';
+import { AffineTransform, Rect } from '@noya-app/noya-geometry';
 import * as React from 'react';
 
 export function WidgetContainer({

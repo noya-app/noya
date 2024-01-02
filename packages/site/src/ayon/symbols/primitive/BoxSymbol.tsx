@@ -1,7 +1,7 @@
+import { findLast } from '@noya-app/noya-utils';
 import { BoxProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import { parametersToTailwindStyle, tailwindBlockClasses } from 'noya-tailwind';
-import { findLast } from 'noya-utils';
 import React from 'react';
 import { getParameters } from '../../utils/getMappedParameters';
 import { boxSymbolId } from '../symbolIds';

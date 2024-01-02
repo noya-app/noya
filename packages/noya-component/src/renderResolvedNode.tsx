@@ -1,3 +1,4 @@
+import { findLast, unique } from '@noya-app/noya-utils';
 import {
   DesignSystemDefinition,
   Theme,
@@ -25,7 +26,6 @@ import {
   parametersToTailwindStyle,
   tailwindColors,
 } from 'noya-tailwind';
-import { findLast, unique } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import { svgToReactElement } from './renderSVGElement';
 

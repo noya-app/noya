@@ -1,6 +1,6 @@
+import { encodeQueryParameters, isExternalUrl } from '@noya-app/noya-utils';
 import Sketch from 'noya-file-format';
 import { applyOverrides, Layers, Overrides } from 'noya-state';
-import { encodeQueryParameters, isExternalUrl } from 'noya-utils';
 import { imageSymbolId } from '../symbols/symbolIds';
 import { Attribution, RandomImageResolver } from './RandomImageResolver';
 

@@ -1,4 +1,4 @@
-import { delimitedPath } from 'noya-utils';
+import { delimitedPath } from '@noya-app/noya-utils';
 import { accessPath, IndexPath, visit } from 'tree-visit';
 
 type ThemeTreeNode<T> = {

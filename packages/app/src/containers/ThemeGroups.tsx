@@ -1,3 +1,4 @@
+import { sortBy } from '@noya-app/noya-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { TreeView } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -5,7 +6,6 @@ import { GroupIcon } from 'noya-icons';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import { createThemeGroups } from 'noya-theme-editor';
-import { sortBy } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 
 type ThemeGroupType = Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster;

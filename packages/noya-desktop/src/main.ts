@@ -1,7 +1,7 @@
+import { encodeQueryParameters } from '@noya-app/noya-utils';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import contextMenu from 'electron-context-menu';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
-import { encodeQueryParameters } from 'noya-utils';
 import { doubleClickToolbar } from './actions/doubleClickToolbar';
 import { openFile } from './actions/openFile';
 import { saveFile } from './actions/saveFile';

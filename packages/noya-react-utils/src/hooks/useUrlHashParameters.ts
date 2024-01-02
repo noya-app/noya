@@ -1,4 +1,4 @@
-import { decodeQueryParameters } from 'noya-utils';
+import { decodeQueryParameters } from '@noya-app/noya-utils';
 import { useEffect, useState } from 'react';
 
 export type UrlHashParameters = Record<string, string>;

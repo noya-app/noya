@@ -1,4 +1,4 @@
-import { Brand } from 'noya-utils';
+import { Brand } from '@noya-app/noya-utils';
 
 export type FontId = Brand<string, 'fontId'>;
 

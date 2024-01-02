@@ -1,8 +1,8 @@
 import { SketchModel } from '../index';
 
-jest.mock('noya-utils', () => {
+jest.mock('@noya-app/noya-utils', () => {
   const uuid = () => '0';
-  const original = jest.requireActual('noya-utils');
+  const original = jest.requireActual('@noya-app/noya-utils');
   return { ...original, uuid };
 });
 

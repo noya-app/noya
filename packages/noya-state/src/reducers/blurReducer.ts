@@ -1,7 +1,7 @@
+import { clamp } from '@noya-app/noya-utils';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
-import { clamp } from 'noya-utils';
 import { SetNumberMode } from '../types';
 
 export type BlurAction =

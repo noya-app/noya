@@ -1,3 +1,4 @@
+import { isDeepEqual, upperFirst, uuid } from '@noya-app/noya-utils';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   RelativeDropPosition,
@@ -17,7 +18,6 @@ import {
   createOverrideHierarchy,
   getSiblingBlocks,
 } from 'noya-state';
-import { isDeepEqual, upperFirst, uuid } from 'noya-utils';
 import React, { useCallback } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { BlockPreviewProps } from '../../../docs/InteractiveBlockPreview';

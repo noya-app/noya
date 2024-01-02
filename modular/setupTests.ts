@@ -4,12 +4,15 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom/extend-expect';
 
+import crypto from 'crypto';
 import fs from 'fs';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
 import nock from 'nock';
 import { setPublicPath } from 'noya-public-path';
 import path from 'path';
 import util from 'util';
+
+(window as any).crypto = crypto;
 
 expect.extend({ toMatchImageSnapshot });
 

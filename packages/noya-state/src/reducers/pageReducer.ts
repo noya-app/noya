@@ -1,5 +1,5 @@
+import { getIncrementedName, uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
-import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import { createPage, getSymbolsInstancesIndexPaths } from '../selectors';
 import { UUID } from '../types';

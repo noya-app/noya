@@ -1,6 +1,6 @@
 import { useSelector } from '@legendapp/state/react';
+import { range } from '@noya-app/noya-utils';
 import { NoyaAPI } from 'noya-api';
-import { range } from 'noya-utils';
 import { useMemo } from 'react';
 import { GENERATED_PAGE_NAME_COUNT, GeneratedPageName } from '../core/client';
 import { NoyaRequestSnapshot } from '../core/networkClient';

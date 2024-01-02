@@ -1,4 +1,4 @@
-import { toRadians } from 'noya-geometry';
+import { toRadians } from '@noya-app/noya-geometry';
 
 // Descriptions of color filters:
 // https://www.w3.org/TR/filter-effects-1

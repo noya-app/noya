@@ -1,4 +1,4 @@
-import { Size } from 'noya-geometry';
+import { Size } from '@noya-app/noya-geometry';
 import { assignRef } from 'noya-react-utils';
 import React, {
   forwardRef,

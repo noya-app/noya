@@ -1,11 +1,11 @@
+import { delimitedPath, uuid } from '@noya-app/noya-utils';
 import { Draft } from 'immer';
 import type Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
-import { delimitedPath, uuid } from 'noya-utils';
 import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
 import { Layers } from '../layer';
 import type { ApplicationState } from '../reducers/applicationReducer';
-import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
+import { LayerIndexPaths, findPageLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentTab } from './workspaceSelectors';
 
 export type ComponentsTypes =

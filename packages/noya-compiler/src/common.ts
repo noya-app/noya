@@ -1,5 +1,5 @@
+import { memoize } from '@noya-app/noya-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import { memoize } from 'noya-utils';
 
 const passthroughSymbol = Symbol('passthrough');
 const simpleElementSymbol = Symbol('simpleElement');

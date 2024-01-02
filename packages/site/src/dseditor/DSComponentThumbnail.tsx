@@ -1,6 +1,6 @@
+import { Size } from '@noya-app/noya-geometry';
 import { NoyaComponent } from 'noya-component';
 import { lightTheme } from 'noya-designsystem';
-import { Size } from 'noya-geometry';
 import React, { memo } from 'react';
 import { NOYA_HOST } from '../utils/noyaClient';
 

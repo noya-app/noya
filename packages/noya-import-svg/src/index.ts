@@ -6,7 +6,6 @@ import {
   parseCSSColor,
   PathWithoutQuadratics,
 } from '@lona/svg-model';
-import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   computeBoundsFromPoints,
@@ -15,12 +14,13 @@ import {
   resize,
   transformRect,
   unionRects,
-} from 'noya-geometry';
+} from '@noya-app/noya-geometry';
+import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { makePathsFromCommands } from './PathBuilder';
 
-export type { CommandWithoutQuadratics };
 export { makePathsFromCommands };
+export type { CommandWithoutQuadratics };
 
 function getBoundingRectFromCommands(
   commands: CommandWithoutQuadratics[],

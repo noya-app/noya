@@ -1,3 +1,4 @@
+import { findLastIndex, uuid } from '@noya-app/noya-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import { produce } from 'immer';
@@ -34,7 +35,6 @@ import {
   TrashIcon,
 } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
-import { findLastIndex, uuid } from 'noya-utils';
 import React, { useState } from 'react';
 import {
   AyonListRow,

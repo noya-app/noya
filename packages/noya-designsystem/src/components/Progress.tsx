@@ -1,5 +1,5 @@
+import { clamp } from '@noya-app/noya-utils';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
-import { clamp } from 'noya-utils';
 import React, { CSSProperties } from 'react';
 import styled from 'styled-components';
 

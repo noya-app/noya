@@ -1,6 +1,6 @@
+import { Point } from '@noya-app/noya-geometry';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
-import { Point } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { Selectors } from 'noya-state';
 import React, { useMemo } from 'react';

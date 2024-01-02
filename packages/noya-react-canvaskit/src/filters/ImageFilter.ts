@@ -1,5 +1,5 @@
+import { Point } from '@noya-app/noya-geometry';
 import type { CanvasKit, InputColor } from 'canvaskit';
-import { Point } from 'noya-geometry';
 
 export type DropShadow = {
   type: 'dropShadow';

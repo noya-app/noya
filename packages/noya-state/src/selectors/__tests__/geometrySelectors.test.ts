@@ -1,10 +1,10 @@
-import { Insets, Rect } from 'noya-geometry';
+import { Insets, Rect } from '@noya-app/noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile } from 'noya-state';
 import {
   getBoundingRect,
-  getLayersInRect,
   getClippedLayerMap,
+  getLayersInRect,
 } from '../geometrySelectors';
 
 const insets: Insets = {

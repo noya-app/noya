@@ -1,4 +1,4 @@
-import { Size } from 'noya-geometry';
+import { Size } from '@noya-app/noya-geometry';
 import { useSize } from 'noya-react-utils';
 import React, { memo, ReactNode, useRef } from 'react';
 import styled from 'styled-components';

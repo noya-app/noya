@@ -1,4 +1,4 @@
-import { createBounds, insetRect, Rect } from 'noya-geometry';
+import { createBounds, insetRect, Rect } from '@noya-app/noya-geometry';
 import { useFill, usePaint } from 'noya-react-canvaskit';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';

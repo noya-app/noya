@@ -1,4 +1,4 @@
-import { isDeepEqual, uuid } from 'noya-utils';
+import { isDeepEqual, uuid } from '@noya-app/noya-utils';
 import { IndexPath, defineTree } from 'tree-visit';
 import { mapArrayDiff } from './arrayDiff';
 import { NoyaResolvedNode } from './types';

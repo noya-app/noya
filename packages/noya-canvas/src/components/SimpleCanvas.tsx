@@ -1,6 +1,6 @@
+import { ResizePosition } from '@noya-app/noya-geometry';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
-import { ResizePosition } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { ILogEvent } from 'noya-log';
 import { Layers, Selectors, getCurrentPage } from 'noya-state';

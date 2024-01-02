@@ -1,4 +1,4 @@
-import { Rect } from 'noya-geometry';
+import { Rect } from '@noya-app/noya-geometry';
 
 export function isWithinRectRange({
   rect,

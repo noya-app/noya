@@ -1,3 +1,4 @@
+import { memoize } from '@noya-app/noya-utils';
 import { NoyaAPI } from 'noya-api';
 import {
   LayoutHierarchy,
@@ -11,7 +12,6 @@ import {
   ResolvedHierarchy,
   createSeed,
 } from 'noya-component';
-import { memoize } from 'noya-utils';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { enforceSchema } from './layoutSchema';
 import { PRIMITIVE_ELEMENT_MAP, PRIMITIVE_TAG_MAP } from './primitiveElements';

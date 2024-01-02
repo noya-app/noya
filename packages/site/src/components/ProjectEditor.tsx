@@ -1,6 +1,6 @@
+import { Size } from '@noya-app/noya-geometry';
 import dynamic from 'next/dynamic';
 import { NoyaAPI } from 'noya-api';
-import { Size } from 'noya-geometry';
 import React, { memo } from 'react';
 import { ViewType } from '../ayon/types';
 

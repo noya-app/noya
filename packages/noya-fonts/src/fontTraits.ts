@@ -1,4 +1,4 @@
-import { upperFirst } from 'noya-utils';
+import { upperFirst } from '@noya-app/noya-utils';
 import { FontSlant, FontTraits } from './fontDescriptor';
 import { ALL_FONT_WEIGHTS, isValidFontWeight } from './fontWeight';
 
@@ -33,9 +33,7 @@ export function encodeFontTraits(fontTraits: FontTraits): string {
 /**
  * Split a hyphen-separated font name into a font family and traits
  */
-export function decodeFontName(
-  fontName: string,
-): {
+export function decodeFontName(fontName: string): {
   fontFamily: string;
   fontTraits: FontTraits;
 } {

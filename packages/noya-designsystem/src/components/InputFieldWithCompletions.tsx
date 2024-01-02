@@ -1,5 +1,5 @@
-import { Size } from 'noya-geometry';
-import { chunkBy, partition } from 'noya-utils';
+import { Size } from '@noya-app/noya-geometry';
+import { chunkBy, partition } from '@noya-app/noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,

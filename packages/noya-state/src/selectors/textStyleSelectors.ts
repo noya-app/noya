@@ -1,7 +1,7 @@
+import { unique } from '@noya-app/noya-utils';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
-import { unique } from 'noya-utils';
 import { SimpleTextDecoration } from '../primitives';
 import type { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';

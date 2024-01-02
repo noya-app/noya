@@ -1,8 +1,9 @@
+import { Rect, createBounds } from '@noya-app/noya-geometry';
+import { findLast, upperFirst, uuid } from '@noya-app/noya-utils';
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
 import { Model, NoyaNode } from 'noya-component';
 import Sketch from 'noya-file-format';
-import { Rect, createBounds } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   Action,
@@ -13,7 +14,6 @@ import {
   applicationReducer,
   interactionReducer,
 } from 'noya-state';
-import { findLast, upperFirst, uuid } from 'noya-utils';
 import { FlattenedLayoutItem } from '../../components/PageSetup';
 import { enforceSchema } from '../../dseditor/layoutSchema';
 import {

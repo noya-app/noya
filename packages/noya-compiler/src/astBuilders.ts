@@ -1,4 +1,4 @@
-import { groupBy } from 'noya-utils';
+import { groupBy } from '@noya-app/noya-utils';
 import ts from 'typescript';
 import { SimpleElement, isPassthrough, isSimpleElement } from './common';
 import { isSafeForJsxText, isValidPropertyKey } from './validate';

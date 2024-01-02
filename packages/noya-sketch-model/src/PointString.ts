@@ -1,4 +1,4 @@
-import { Point } from 'noya-geometry';
+import { Point } from '@noya-app/noya-geometry';
 
 export const PointString = {
   decode(pointString: string): Point {

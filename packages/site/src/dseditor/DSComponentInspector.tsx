@@ -1,3 +1,4 @@
+import { upperFirst, uuid } from '@noya-app/noya-utils';
 import { useRouter } from 'next/router';
 import {
   DS,
@@ -56,7 +57,6 @@ import { JSONForm } from 'noya-jsonforms';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
-import { upperFirst, uuid } from 'noya-utils';
 import React, { ComponentProps, memo, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';

@@ -1,13 +1,13 @@
-import { SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   distance,
   getLineOrientation,
   Point,
   Size,
-} from 'noya-geometry';
+} from '@noya-app/noya-geometry';
+import { round } from '@noya-app/noya-utils';
+import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { useColorFill } from 'noya-react-canvaskit';
-import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect, Text } from '../ComponentsContext';

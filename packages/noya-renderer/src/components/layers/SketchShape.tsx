@@ -1,6 +1,6 @@
+import { AffineTransform, Rect } from '@noya-app/noya-geometry';
 import * as CanvasKit from 'canvaskit';
 import Sketch from 'noya-file-format';
-import { AffineTransform, Rect } from 'noya-geometry';
 import {
   ClipProps,
   PaintParameters,
@@ -9,13 +9,13 @@ import {
   usePaint,
 } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
-import { getStrokedPath, Primitives } from 'noya-state';
+import { Primitives, getStrokedPath } from 'noya-state';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Group, Path } from '../../ComponentsContext';
+import { useSketchImage } from '../../ImageCache';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
-import { useSketchImage } from '../../ImageCache';
 import { getUniformValues } from '../../shaders';
 import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';

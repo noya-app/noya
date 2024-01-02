@@ -1,3 +1,4 @@
+import { getFileExtensionForType, uuid } from '@noya-app/noya-utils';
 import { fileOpen } from 'browser-fs-access';
 import {
   InputField,
@@ -11,7 +12,6 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { FileDropTarget, TypedFile, isSupportedFile } from 'noya-react-utils';
-import { getFileExtensionForType, uuid } from 'noya-utils';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';

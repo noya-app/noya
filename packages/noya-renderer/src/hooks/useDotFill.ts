@@ -1,5 +1,5 @@
+import { Rect } from '@noya-app/noya-geometry';
 import Sketch from 'noya-file-format';
-import { Rect } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';

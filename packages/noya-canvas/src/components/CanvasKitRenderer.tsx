@@ -1,6 +1,6 @@
+import { Size } from '@noya-app/noya-geometry';
 import type { Surface } from 'canvaskit';
 import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
-import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import { usePixelRatio } from 'noya-react-utils';
 import {
@@ -13,8 +13,8 @@ import {
   useCanvasKit,
 } from 'noya-renderer';
 import React, {
-  memo,
   ReactNode,
+  memo,
   useLayoutEffect,
   useRef,
   useState,

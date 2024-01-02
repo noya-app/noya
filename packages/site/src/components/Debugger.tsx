@@ -1,3 +1,7 @@
+import {
+  decodeQueryParameters,
+  encodeQueryParameters,
+} from '@noya-app/noya-utils';
 import { useNetworkRequests } from 'noya-api';
 import {
   Chip,
@@ -15,7 +19,6 @@ import {
   castHashParameter,
   useUrlHashParameters,
 } from 'noya-react-utils';
-import { decodeQueryParameters, encodeQueryParameters } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
 import { usePersistentState } from '../utils/clientStorage';
 

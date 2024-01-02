@@ -1,8 +1,9 @@
+import { Size } from '@noya-app/noya-geometry';
+import { UTF16 } from '@noya-app/noya-utils';
 import type { CanvasKit, Image } from 'canvaskit';
 import { StateProvider } from 'noya-app-state-context';
 import { Theme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
   CanvasKitProvider,
@@ -12,7 +13,6 @@ import {
 } from 'noya-renderer';
 import { WorkspaceState } from 'noya-state';
 import { SVGRenderer } from 'noya-svg-renderer';
-import { UTF16 } from 'noya-utils';
 import React, { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ThemeProvider } from 'styled-components';

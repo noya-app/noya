@@ -1,3 +1,4 @@
+import { uuid } from '@noya-app/noya-utils';
 import {
   Button,
   Divider,
@@ -8,7 +9,6 @@ import {
   useOpenInputDialog,
 } from 'noya-designsystem';
 import type Sketch from 'noya-file-format';
-import { uuid } from 'noya-utils';
 import React, { memo, useCallback, useState } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 import {

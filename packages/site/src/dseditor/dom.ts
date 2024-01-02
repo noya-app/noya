@@ -1,4 +1,4 @@
-import { Point } from 'noya-geometry';
+import { Point } from '@noya-app/noya-geometry';
 
 export const ZERO_WIDTH_SPACE = '\u200b';
 

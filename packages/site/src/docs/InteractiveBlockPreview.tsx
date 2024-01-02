@@ -1,3 +1,4 @@
+import { Size } from '@noya-app/noya-geometry';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
@@ -6,7 +7,6 @@ import {
   useDesignSystemConfiguration,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides, createSketchFile } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';

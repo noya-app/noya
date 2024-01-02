@@ -1,18 +1,18 @@
+import { getRectCornerPoints } from '@noya-app/noya-geometry';
 import Sketch from 'noya-file-format';
-import { getRectCornerPoints } from 'noya-geometry';
 import { makePath } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { Group, Image } from '../../ComponentsContext';
-import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useSketchImage } from '../../ImageCache';
 import { useZoom } from '../../ZoomContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
+import { SHOW_PIXELS_ZOOM_THRESHOLD } from '../PixelGrid';
 import BlurGroup from '../effects/BlurGroup';
 import ColorControlsGroup from '../effects/ColorControlsGroup';
 import DropShadowGroup from '../effects/DropShadowGroup';
 import SketchBorder from '../effects/SketchBorder';
-import { SHOW_PIXELS_ZOOM_THRESHOLD } from '../PixelGrid';
 
 interface Props {
   layer: Sketch.Bitmap;

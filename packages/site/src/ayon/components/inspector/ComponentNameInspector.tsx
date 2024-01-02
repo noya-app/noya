@@ -1,3 +1,4 @@
+import { debounce } from '@noya-app/noya-utils';
 import { useGeneratedComponentNames, useNoyaClient } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import { Model, NoyaNode } from 'noya-component';
@@ -11,7 +12,6 @@ import {
 import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { debounce } from 'noya-utils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { primitiveElements } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';

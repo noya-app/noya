@@ -1,4 +1,4 @@
-import { Insets, Size } from 'noya-geometry';
+import { Insets, Size } from '@noya-app/noya-geometry';
 import { useSize } from 'noya-react-utils';
 import { useLayoutEffect, useMemo } from 'react';
 

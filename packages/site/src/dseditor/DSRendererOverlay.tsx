@@ -1,5 +1,5 @@
+import { Rect } from '@noya-app/noya-geometry';
 import { useDesignSystemTheme } from 'noya-designsystem';
-import { Rect } from 'noya-geometry';
 import { useDeepState } from 'noya-react-utils';
 import React, {
   forwardRef,

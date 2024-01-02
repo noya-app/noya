@@ -1,5 +1,5 @@
+import { memoize } from '@noya-app/noya-utils';
 import { Theme } from '@noya-design-system/protocol';
-import { memoize } from 'noya-utils';
 
 export function svgToDataUri(svg: string) {
   return 'data:image/svg+xml,' + encodeURIComponent(svg);

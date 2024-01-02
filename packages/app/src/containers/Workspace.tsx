@@ -1,22 +1,22 @@
+import { Size } from '@noya-app/noya-geometry';
 import produce from 'immer';
 import { useSelector, useWorkspace } from 'noya-app-state-context';
 import { Canvas, CanvasKitRenderer } from 'noya-canvas';
 import {
-  darkTheme,
   DesignSystemConfigurationProvider,
   Divider,
   InputField,
-  lightTheme,
   ScrollArea,
   Spacer,
+  darkTheme,
+  lightTheme,
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
-import { Size } from 'noya-geometry';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { AutoSizer, useSystemColorScheme } from 'noya-react-utils';
 import { DesignFile } from 'noya-renderer';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { ReactNode, memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import Inspector from './Inspector';

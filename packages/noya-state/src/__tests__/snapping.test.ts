@@ -12,9 +12,9 @@ beforeEach(() => {
   mockInitialId = 0;
 });
 
-jest.mock('noya-utils', () => {
+jest.mock('@noya-app/noya-utils', () => {
   const uuid = () => (mockInitialId++).toString();
-  const original = jest.requireActual('noya-utils');
+  const original = jest.requireActual('@noya-app/noya-utils');
   return { ...original, uuid };
 });
 

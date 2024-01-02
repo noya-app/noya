@@ -1,4 +1,4 @@
-import { isDeepEqual, partition } from 'noya-utils';
+import { isDeepEqual, partition } from '@noya-app/noya-utils';
 import { ResolvedHierarchy } from './resolvedHierarchy';
 import { NoyaDiffItem, NoyaResolvedNode } from './types';
 

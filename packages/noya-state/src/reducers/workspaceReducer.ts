@@ -1,7 +1,7 @@
+import { Insets, Size } from '@noya-app/noya-geometry';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { DSConfig } from 'noya-api';
-import { Insets, Size } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';

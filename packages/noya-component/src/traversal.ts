@@ -1,3 +1,4 @@
+import { isDeepEqual } from '@noya-app/noya-utils';
 import {
   Model,
   NoyaComponent,
@@ -16,7 +17,6 @@ import {
   mapArrayDiff,
   resolvedNodeReducer,
 } from 'noya-component';
-import { isDeepEqual } from 'noya-utils';
 import { defineTree } from 'tree-visit';
 
 // Doesn't traverse into nested components

@@ -1,7 +1,7 @@
+import { invert } from '@noya-app/noya-utils';
 import { Select } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SetNumberMode } from 'noya-state';
-import { invert } from 'noya-utils';
 import React, { memo, useCallback } from 'react';
 import { DimensionSliderRow } from './DimensionSliderRow';
 import * as InspectorPrimitives from './InspectorPrimitives';

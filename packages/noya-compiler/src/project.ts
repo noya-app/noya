@@ -1,3 +1,4 @@
+import { unique } from '@noya-app/noya-utils';
 import {
   DesignSystemDefinition,
   Theme,
@@ -13,7 +14,6 @@ import {
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
 import { tailwindColors } from 'noya-tailwind';
-import { unique } from 'noya-utils';
 import React, { ReactNode, isValidElement } from 'react';
 import { flat } from 'tree-visit';
 import ts from 'typescript';

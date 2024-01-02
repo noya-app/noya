@@ -3092,6 +3092,20 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@noya-app/noya-geometry@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-geometry/-/noya-geometry-0.0.5.tgz#0a5246c4a951cfcb0bfdfa4774e340983dda0b23"
+  integrity sha512-U/z9ZIMSwV0fWOLMGyV5OVOq0DhF6EN8lO2205wObR6HPeZmvSDxwmby24tK7PQHSgmtjMGrhZeNqHYyvWNK+w==
+  dependencies:
+    "@noya-app/noya-utils" "0.0.5"
+
+"@noya-app/noya-utils@0.0.5", "@noya-app/noya-utils@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-utils/-/noya-utils-0.0.5.tgz#fbc4904ec39b6a8523a1b9071c55e6650b8dfa83"
+  integrity sha512-A2CseGkn7g7qLHjSdc4kS3/JSslajNpkspUosJaEaq1dvw3KiJY28KZIJ/bGmQImA7zvwByXHC3pD0JY2N8I0Q==
+  dependencies:
+    uuid "^9.0.1"
+
 "@noya-design-system/protocol@^0.0.59":
   version "0.0.59"
   resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.59.tgz#3b6f3e1da23f89c04ab54ef87d7acafc36514b51"
@@ -5121,11 +5135,6 @@
   version "8.3.1"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.1.tgz#1a32969cf8f0364b3d8c8af9cc3555b7805df14f"
   integrity sha512-Y2mHTRAbqfFkpjldbkHGY8JIzRN6XqYRliG8/24FcHm2D2PwW24fl5xMRTVGdrb7iMrwCaIEbLWerGIkXuFWVg==
-
-"@types/uuid@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.0.tgz#53ef263e5239728b56096b0a869595135b7952d2"
-  integrity sha512-kr90f+ERiQtKWMz5rP32ltJ/BtULDI5RVO0uavn1HQUOwjx0R1h0rnDYNL0CepF1zL5bSY6FISAfd9tOdDhU5Q==
 
 "@types/websocket@1.0.2":
   version "1.0.2"
@@ -21194,10 +21203,10 @@ uuid@^8.0.0, uuid@^8.3.0, uuid@^8.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
-uuid@^9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
-  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
+uuid@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"

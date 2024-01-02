@@ -1,5 +1,5 @@
+import { insetRect, Rect } from '@noya-app/noya-geometry';
 import { useApplicationState } from 'noya-app-state-context';
-import { insetRect, Rect } from 'noya-geometry';
 import { useFill, useStroke } from 'noya-react-canvaskit';
 import { getDragHandles, Primitives } from 'noya-state';
 import React, { memo } from 'react';

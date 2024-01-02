@@ -1,3 +1,4 @@
+import { uuid } from '@noya-app/noya-utils';
 import {
   EnhancedGeneratedPageName,
   useGeneratedPageComponentNames,
@@ -15,7 +16,6 @@ import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
-import { uuid } from 'noya-utils';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { InspectorSection } from '../../../components/InspectorSection';

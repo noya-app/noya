@@ -1,3 +1,4 @@
+import { round } from '@noya-app/noya-utils';
 import {
   useApplicationState,
   useDispatch,
@@ -22,7 +23,6 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
-import { round } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 

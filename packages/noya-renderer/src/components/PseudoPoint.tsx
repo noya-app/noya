@@ -1,4 +1,4 @@
-import { Point } from 'noya-geometry';
+import { Point } from '@noya-app/noya-geometry';
 import { useFill, useStroke } from 'noya-react-canvaskit';
 import React from 'react';
 import { useTheme } from 'styled-components';

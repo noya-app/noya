@@ -1,6 +1,6 @@
+import { memoize } from '@noya-app/noya-utils';
 import { Property } from 'csstype';
 import { CaretDownIcon } from 'noya-icons';
-import { memoize } from 'noya-utils';
 import React, {
   Children,
   createContext,

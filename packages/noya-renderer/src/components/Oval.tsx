@@ -1,5 +1,5 @@
+import { Point } from '@noya-app/noya-geometry';
 import { Paint } from 'canvaskit';
-import { Point } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
 import React, { memo } from 'react';
 import { Path } from '../ComponentsContext';

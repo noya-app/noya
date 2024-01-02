@@ -1,3 +1,4 @@
+import { ClipboardUtils } from '@noya-app/noya-utils';
 import { ReactEventHandlers } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
@@ -5,7 +6,6 @@ import {
   handleActionType,
   InteractionState,
 } from 'noya-state';
-import { ClipboardUtils } from 'noya-utils';
 import { NoyaClipboardData } from '../hooks/useCopyHandler';
 import { InteractionAPI } from './types';
 

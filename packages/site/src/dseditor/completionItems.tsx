@@ -1,7 +1,7 @@
+import { range } from '@noya-app/noya-utils';
 import { CompletionItem } from 'noya-designsystem';
 import { StarIcon } from 'noya-icons';
 import { allClassNames } from 'noya-tailwind';
-import { range } from 'noya-utils';
 import React from 'react';
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 import { PRIMITIVE_ELEMENT_MAP, primitiveElements } from './primitiveElements';

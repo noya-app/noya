@@ -1,7 +1,7 @@
+import { isExternalUrl } from '@noya-app/noya-utils';
 import { ImageProps } from '@noya-design-system/protocol';
 import { SketchModel } from 'noya-sketch-model';
 import { parametersToTailwindStyle, tailwindBlockClasses } from 'noya-tailwind';
-import { isExternalUrl } from 'noya-utils';
 import React from 'react';
 import { getParameters } from '../../utils/getMappedParameters';
 import { boxSymbolId, imageSymbolId } from '../symbolIds';

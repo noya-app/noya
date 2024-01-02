@@ -1,7 +1,7 @@
+import { delimitedPath, getIncrementedName, uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
-import { delimitedPath, getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   findPageLayerIndexPaths,
@@ -13,10 +13,10 @@ import {
   visitLayerColors,
   visitStyleColors,
 } from '../selectors';
+import { accessPageLayers } from '../selectors/layerSelectors';
 import { SetNumberMode } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
 import type { ApplicationState, ThemeTab } from './applicationReducer';
-import { accessPageLayers } from '../selectors/layerSelectors';
 
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
 

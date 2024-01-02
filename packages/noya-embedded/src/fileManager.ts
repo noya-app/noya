@@ -1,5 +1,5 @@
+import { Base64 } from '@noya-app/noya-utils';
 import { fileSave, FileWithHandle } from 'browser-fs-access';
-import { Base64 } from 'noya-utils';
 import { hostApp } from './hostApp';
 
 class FileManager {

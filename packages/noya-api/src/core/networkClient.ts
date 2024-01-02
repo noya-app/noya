@@ -1,8 +1,8 @@
 /* eslint-disable no-loop-func */
+import { Rect, Size } from '@noya-app/noya-geometry';
+import { encodeQueryParameters } from '@noya-app/noya-utils';
 import { Emitter } from 'noya-fonts';
-import { Rect, Size } from 'noya-geometry';
 import { castHashParameter, getUrlHashParameters } from 'noya-react-utils';
-import { encodeQueryParameters } from 'noya-utils';
 import { z } from 'zod';
 import { NoyaAPIError } from './error';
 import {

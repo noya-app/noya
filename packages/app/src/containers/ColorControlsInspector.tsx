@@ -1,8 +1,8 @@
+import { InterpolateOptions, interpolate } from '@noya-app/noya-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { ColorControlsRow, EnableableElementController } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
-import { getMultiNumberValue, Selectors, SetNumberMode } from 'noya-state';
-import { interpolate, InterpolateOptions } from 'noya-utils';
+import { Selectors, SetNumberMode, getMultiNumberValue } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 
 function makeInterpolator(options: InterpolateOptions) {

@@ -1,3 +1,4 @@
+import { partition } from '@noya-app/noya-utils';
 import {
   ElementHierarchy,
   Model,
@@ -6,7 +7,6 @@ import {
   NoyaString,
   mapArrayDiff,
 } from 'noya-component';
-import { partition } from 'noya-utils';
 import { textSymbolId } from '../ayon/symbols/symbolIds';
 import { PRIMITIVE_ELEMENT_MAP } from './primitiveElements';
 

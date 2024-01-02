@@ -1,6 +1,6 @@
+import { clamp } from '@noya-app/noya-utils';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
-import { clamp } from 'noya-utils';
 import { SetNumberMode } from '../types';
 
 export type ColorControlsAction =

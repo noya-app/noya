@@ -1,5 +1,3 @@
-import type { CanvasKit } from 'canvaskit';
-import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createRect,
@@ -14,7 +12,9 @@ import {
   rotatedRectContainsPoint,
   Size,
   transformRect,
-} from 'noya-geometry';
+} from '@noya-app/noya-geometry';
+import type { CanvasKit } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { ScalingOptions } from 'noya-state';
@@ -258,7 +258,7 @@ export function getLayerAtPoint(
     const localPoints = framePoints.map((point) => transform.applyTo(point));
 
     const frameContainsPoint = rotatedRectContainsPoint(
-      localPoints,
+      localPoints as [Point, Point, Point, Point],
       screenPoint,
     );
 

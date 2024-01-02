@@ -1,3 +1,8 @@
+import {
+  createRectFromBounds,
+  getRectCornerPoints,
+  getRectEdgeMidPoints,
+} from '@noya-app/noya-geometry';
 import type {
   AngleInDegrees,
   AngleInRadians,
@@ -13,11 +18,6 @@ import type {
   VerbList,
   WeightList,
 } from 'canvaskit';
-import {
-  createRectFromBounds,
-  getRectCornerPoints,
-  getRectEdgeMidPoints,
-} from 'noya-geometry';
 import { parsePathCmds } from 'noya-state';
 import { JSEmbindObject } from './Embind';
 import { SVGKit } from './SVGKit';

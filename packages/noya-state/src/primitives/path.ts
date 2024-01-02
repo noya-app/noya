@@ -1,6 +1,7 @@
+import { Point, Rect, distance } from '@noya-app/noya-geometry';
+import { clamp, rotate, windowsOf, zip } from '@noya-app/noya-utils';
 import { CanvasKit, Path, PathOp } from 'canvaskit';
 import Sketch from 'noya-file-format';
-import { distance, Point, Rect } from 'noya-geometry';
 import {
   CommandWithoutQuadratics,
   makePathsFromCommands,
@@ -12,8 +13,7 @@ import {
   parsePoint,
   stringifyPoint,
 } from 'noya-state';
-import { clamp, rotate, windowsOf, zip } from 'noya-utils';
-import { parsePathCmds, PathCommand, PathCommandVerb } from './pathCommand';
+import { PathCommand, PathCommandVerb, parsePathCmds } from './pathCommand';
 
 /**
  * The radius of an edge should be less than half the length of that edge

@@ -1,5 +1,5 @@
+import { Point } from '@noya-app/noya-geometry';
 import { ReactEventHandlers } from 'noya-designsystem';
-import { Point } from 'noya-geometry';
 import {
   handleActionType,
   InteractionState,

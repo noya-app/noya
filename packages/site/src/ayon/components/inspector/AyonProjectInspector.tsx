@@ -1,3 +1,4 @@
+import { debounce, uuid } from '@noya-app/noya-utils';
 import {
   EnhancedGeneratedPageName,
   useGeneratedPageNames,
@@ -18,7 +19,6 @@ import {
 import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
-import { debounce, uuid } from 'noya-utils';
 import React, {
   useCallback,
   useEffect,

@@ -1,3 +1,4 @@
+import { upperFirst } from '@noya-app/noya-utils';
 import { produce } from 'immer';
 import { DS } from 'noya-api';
 import {
@@ -9,7 +10,6 @@ import {
 import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { tailwindColors } from 'noya-tailwind';
-import { upperFirst } from 'noya-utils';
 import React from 'react';
 import styled from 'styled-components';
 import { ColorModeInput } from './ColorModeInput';

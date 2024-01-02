@@ -1,4 +1,4 @@
-import { insetRect, Rect } from 'noya-geometry';
+import { insetRect, Rect } from '@noya-app/noya-geometry';
 import { useStroke } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';

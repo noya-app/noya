@@ -1,7 +1,7 @@
 import { observable } from '@legendapp/state';
+import { Rect } from '@noya-app/noya-geometry';
+import { memoizedGetter, range } from '@noya-app/noya-utils';
 import produce from 'immer';
-import { Rect } from 'noya-geometry';
-import { memoizedGetter, range } from 'noya-utils';
 import { z } from 'zod';
 import { fileReducer } from './collection';
 import { findAndParseJSONArray } from './json';

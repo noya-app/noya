@@ -1,6 +1,6 @@
 // MIT https://github.com/spatie/tailwind-safelist-generator
 
-import { cartesianProduct } from 'noya-utils';
+import { cartesianProduct } from '@noya-app/noya-utils';
 
 // See https://stackoverflow.com/a/47063174
 function deepKeys(

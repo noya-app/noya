@@ -1,5 +1,5 @@
-import { Rect } from 'noya-geometry';
-import { round } from 'noya-utils';
+import { Rect } from '@noya-app/noya-geometry';
+import { round } from '@noya-app/noya-utils';
 import { resizeRect } from '../primitives';
 
 // Ignore rounding errors in tests, for now

@@ -1,4 +1,4 @@
-import { uuid } from 'noya-utils';
+import { uuid } from '@noya-app/noya-utils';
 import { fileReducer } from './collection';
 import { INoyaNetworkClient, NoyaRequest } from './networkClient';
 import {

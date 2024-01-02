@@ -1,3 +1,4 @@
+import { range, windowsOf } from '@noya-app/noya-utils';
 import {
   FlattenedRectangleArray,
   LineMetrics,
@@ -9,7 +10,6 @@ import {
   TextStyle,
   URange,
 } from 'canvaskit';
-import { range, windowsOf } from 'noya-utils';
 import { JSEmbindObject } from './Embind';
 
 export class JSParagraph extends JSEmbindObject implements Paragraph {

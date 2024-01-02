@@ -1,4 +1,4 @@
-import { findLast } from 'noya-utils';
+import { findLast } from '@noya-app/noya-utils';
 
 export function getMappedParameters<T extends Record<string, string[]>>(
   parameters: string[] | Set<string> | undefined,

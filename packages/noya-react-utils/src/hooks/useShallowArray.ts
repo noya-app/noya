@@ -1,4 +1,4 @@
-import { isShallowEqual } from 'noya-utils';
+import { isShallowEqual } from '@noya-app/noya-utils';
 import { useRef } from 'react';
 
 /**

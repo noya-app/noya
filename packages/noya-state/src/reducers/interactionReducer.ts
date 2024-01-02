@@ -1,13 +1,13 @@
+import { Point, Rect } from '@noya-app/noya-geometry';
+import { uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
-import { Point, Rect } from 'noya-geometry';
 import {
   ScalingOptions,
   TextSelectionRange,
   UUID,
   getCursorForCompassDirection,
 } from 'noya-state';
-import { uuid } from 'noya-utils';
 import type React from 'react';
 import { CSSProperties, ReactNode, createElement } from 'react';
 

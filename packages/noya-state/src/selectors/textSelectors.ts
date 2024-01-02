@@ -1,15 +1,16 @@
+import {
+  AffineTransform,
+  Point,
+  Rect,
+  Size,
+  createBounds,
+  insetRect,
+  rectContainsPoint,
+} from '@noya-app/noya-geometry';
+import { memoize, unique } from '@noya-app/noya-utils';
 import { CanvasKit } from 'canvaskit';
 import Sketch from 'noya-file-format';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
-import {
-  AffineTransform,
-  createBounds,
-  insetRect,
-  Point,
-  Rect,
-  rectContainsPoint,
-  Size,
-} from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,
@@ -18,7 +19,6 @@ import {
   Selectors,
   TextSelectionRange,
 } from 'noya-state';
-import { memoize, unique } from 'noya-utils';
 import type { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';

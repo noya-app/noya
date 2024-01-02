@@ -1,3 +1,4 @@
+import { isDeepEqual, uuid } from '@noya-app/noya-utils';
 import { fileOpen } from 'browser-fs-access';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
@@ -56,7 +57,6 @@ import {
   VercelLogoIcon,
 } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { isDeepEqual, uuid } from 'noya-utils';
 import React, {
   forwardRef,
   memo,

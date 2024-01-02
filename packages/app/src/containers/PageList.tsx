@@ -1,3 +1,4 @@
+import { uuid } from '@noya-app/noya-utils';
 import {
   useApplicationState,
   useDispatch,
@@ -15,7 +16,6 @@ import Sketch from 'noya-file-format';
 import { DashboardIcon, FileIcon, StackIcon } from 'noya-icons';
 import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import { uuid } from 'noya-utils';
 import React, {
   memo,
   useCallback,

@@ -1,3 +1,4 @@
+import { roundPoint } from '@noya-app/noya-geometry';
 import {
   DS,
   useGeneratedComponentDescriptions,
@@ -14,7 +15,6 @@ import {
 } from 'noya-canvas';
 import { ElementHierarchy, NoyaNode } from 'noya-component';
 import { DividerVertical, Stack } from 'noya-designsystem';
-import { roundPoint } from 'noya-geometry';
 import { amplitude } from 'noya-log';
 import {
   FileDropTarget,

@@ -1,3 +1,5 @@
+import { Size } from '@noya-app/noya-geometry';
+import { isDeepEqual } from '@noya-app/noya-utils';
 import {
   useApplicationState,
   useGetStateSnapshot,
@@ -15,12 +17,10 @@ import {
   withSeparatorElements,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Size } from 'noya-geometry';
 import { ArrowDownIcon, MaskOnIcon } from 'noya-icons';
 import { LayerIcon } from 'noya-inspector';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
-import { isDeepEqual } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,

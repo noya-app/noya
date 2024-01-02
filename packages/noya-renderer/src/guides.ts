@@ -1,4 +1,10 @@
-import { Axis, Bounds, createBounds, Point, Rect } from 'noya-geometry';
+import {
+  Axis,
+  Bounds,
+  createBounds,
+  Point,
+  Rect,
+} from '@noya-app/noya-geometry';
 
 type BoundsKey = keyof Bounds;
 export type Direction = '+' | '-';

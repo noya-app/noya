@@ -1,3 +1,4 @@
+import { encodeQueryParameters } from '@noya-app/noya-utils';
 import { useRouter } from 'next/router';
 import { NoyaAPI } from 'noya-api';
 import {
@@ -9,7 +10,6 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { amplitude } from 'noya-log';
-import { encodeQueryParameters } from 'noya-utils';
 import React, { useEffect, useMemo } from 'react';
 import { NOYA_HOST } from '../../../utils/noyaClient';
 

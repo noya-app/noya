@@ -1,10 +1,10 @@
+import { get, groupBy, memoize } from '@noya-app/noya-utils';
 import {
   ThemeValue,
   config,
   context,
   suggestedTailwindClasses,
 } from 'noya-tailwind';
-import { get, groupBy, memoize } from 'noya-utils';
 import { CSSProperties } from 'react';
 import { tailwindToLinearGradient } from './tailwindGradient';
 

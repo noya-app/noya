@@ -1,17 +1,17 @@
-import Sketch from 'noya-file-format';
 import {
   Axis,
-  createBounds,
-  createRect,
   Point,
   Rect,
   Size,
-} from 'noya-geometry';
-import { cartesianProduct, isDeepEqual } from 'noya-utils';
+  createBounds,
+  createRect,
+} from '@noya-app/noya-geometry';
+import { cartesianProduct, isDeepEqual } from '@noya-app/noya-utils';
+import Sketch from 'noya-file-format';
 import { IndexPath } from 'tree-visit';
 import { Layers } from './layer';
 import { ParentLayer } from './layers';
-import { resizeRect, ScalingOptions } from './primitives';
+import { ScalingOptions, resizeRect } from './primitives';
 import type { ApplicationState } from './reducers/applicationReducer';
 import { CompassDirection } from './reducers/interactionReducer';
 import { getRectExtentPoint } from './selection';

@@ -1,4 +1,4 @@
-import { Point, Rect } from 'noya-geometry';
+import { Point, Rect } from '@noya-app/noya-geometry';
 import { KeyMap, PlatformName } from 'noya-keymap';
 import { ILogEvent } from 'noya-log';
 import { OffsetPoint } from 'noya-react-utils';

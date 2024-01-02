@@ -1,5 +1,5 @@
+import { uuid } from '@noya-app/noya-utils';
 import Sketch from 'noya-file-format';
-import { uuid } from 'noya-utils';
 
 export { PointString } from './PointString';
 export * from './debugDescription';

@@ -1,3 +1,4 @@
+import { range } from '@noya-app/noya-utils';
 import {
   Button,
   IconButton,
@@ -8,7 +9,6 @@ import {
   Stack,
   withSeparatorElements,
 } from 'noya-designsystem';
-import { range } from 'noya-utils';
 import React, { ReactNode, memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';

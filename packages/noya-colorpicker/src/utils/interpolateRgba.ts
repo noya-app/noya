@@ -1,4 +1,4 @@
-import { interpolate } from 'noya-utils';
+import { interpolate } from '@noya-app/noya-utils';
 import { RgbaColor } from '../types';
 
 export interface GradientStopRgba {

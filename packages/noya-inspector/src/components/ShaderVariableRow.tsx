@@ -1,3 +1,4 @@
+import { upperFirst } from '@noya-app/noya-utils';
 import {
   IconButton,
   InputField,
@@ -7,7 +8,6 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
-import { upperFirst } from 'noya-utils';
 import React, { memo, useCallback } from 'react';
 import type { ColorFillProps } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';

@@ -1,3 +1,4 @@
+import { Size } from '@noya-app/noya-geometry';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -13,7 +14,6 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Size } from 'noya-geometry';
 import {
   ChevronDownIcon,
   FigmaLogoIcon,

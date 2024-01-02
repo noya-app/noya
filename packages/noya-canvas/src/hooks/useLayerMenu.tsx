@@ -1,3 +1,4 @@
+import { ClipboardUtils } from '@noya-app/noya-utils';
 import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import {
   MenuConfig,
@@ -9,7 +10,6 @@ import {
 import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
-import { ClipboardUtils } from 'noya-utils';
 import { useCallback, useMemo } from 'react';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {

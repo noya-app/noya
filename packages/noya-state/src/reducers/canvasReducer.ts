@@ -1,8 +1,3 @@
-import { CanvasKit } from 'canvaskit';
-import produce from 'immer';
-import { interpolateRgba } from 'noya-colorpicker';
-import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   Point,
@@ -21,7 +16,13 @@ import {
   roundPoint,
   transformRect,
   unionRects,
-} from 'noya-geometry';
+} from '@noya-app/noya-geometry';
+import { lerp, uuid, zip } from '@noya-app/noya-utils';
+import { CanvasKit } from 'canvaskit';
+import produce from 'immer';
+import { interpolateRgba } from 'noya-colorpicker';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
@@ -32,7 +33,6 @@ import {
   decodeCurvePoint,
   encodeCurvePoint,
 } from 'noya-state';
-import { lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
 import { ScalingOptions, getScalingOptions } from '../primitives';
 import { getLineDragHandleIndexForDirection } from '../selection';

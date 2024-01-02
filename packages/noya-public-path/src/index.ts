@@ -1,5 +1,5 @@
 // TODO: There's an import order issue. This fixes it for now
-import 'noya-utils';
+import '@noya-app/noya-utils';
 
 let PUBLIC_PATH = '/';
 

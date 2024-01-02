@@ -1,4 +1,4 @@
-import { TupleOf } from 'noya-utils';
+import { TupleOf } from '@noya-app/noya-utils';
 
 export enum PathCommandVerb {
   move = 0,
@@ -21,7 +21,7 @@ const commandParameterCount = {
 export type PathCommand = {
   [P in PathCommandVerb]: [
     P,
-    ...TupleOf<number, typeof commandParameterCount[P]>
+    ...TupleOf<number, (typeof commandParameterCount)[P]>,
   ];
 }[PathCommandVerb];
 

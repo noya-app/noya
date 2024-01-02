@@ -1,3 +1,4 @@
+import { uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
 import { DS, NoyaAPI, asyncIterableToString } from 'noya-api';
 import {
@@ -6,7 +7,6 @@ import {
   NoyaComponent,
   instantiateResolvedComponent,
 } from 'noya-component';
-import { uuid } from 'noya-utils';
 import { exportLayout, parseLayout } from '../dseditor/componentLayout';
 
 const DEFAULT_PROMPTS = {

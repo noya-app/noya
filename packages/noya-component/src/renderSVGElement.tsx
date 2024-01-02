@@ -1,4 +1,4 @@
-import { memoize } from 'noya-utils';
+import { memoize } from '@noya-app/noya-utils';
 import React, { ReactElement } from 'react';
 
 interface SVGComponentProps {

@@ -1,4 +1,4 @@
-import { distance, Point } from 'noya-geometry';
+import { distance, Point } from '@noya-app/noya-geometry';
 import { useCallback, useRef } from 'react';
 
 export function useMultipleClickCount() {

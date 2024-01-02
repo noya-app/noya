@@ -1,25 +1,26 @@
-import produce from 'immer';
-import { RelativeDropPosition } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   AffineTransform,
-  createBounds,
   Point,
+  createBounds,
   rectContainsRect,
   transformRect,
   unionRects,
-} from 'noya-geometry';
+} from '@noya-app/noya-geometry';
+import { getIncrementedName, groupBy, uuid } from '@noya-app/noya-utils';
+import produce from 'immer';
+import { RelativeDropPosition } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,
-  findIndexPath,
   Primitives,
+  findIndexPath,
 } from 'noya-state';
-import { getIncrementedName, groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { PageLayer } from '../layers';
 import {
+  LayerIndexPaths,
   addSiblingLayer,
   addToParentLayer,
   applyOverrides,
@@ -31,8 +32,8 @@ import {
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
   getLayerIndexPathsExcludingDescendants,
-  getLayersInRect,
   getLayerTransformAtIndexPath,
+  getLayersInRect,
   getParentLayer,
   getRightMostLayerBounds,
   getSelectedLayerIndexPathsExcludingDescendants,
@@ -42,7 +43,6 @@ import {
   getSymbolsInstancesIndexPaths,
   getSymbolsPageIndex,
   insertLayerAtIndexPath,
-  LayerIndexPaths,
   moveLayer,
   removeLayer,
 } from '../selectors';

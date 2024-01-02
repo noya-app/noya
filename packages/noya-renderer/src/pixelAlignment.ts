@@ -6,8 +6,8 @@ import {
   Point,
   Rect,
   Size,
-} from 'noya-geometry';
-import { round } from 'noya-utils';
+} from '@noya-app/noya-geometry';
+import { round } from '@noya-app/noya-utils';
 
 export function pixelAlignPoint(
   point: Point,

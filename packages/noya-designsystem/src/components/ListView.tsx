@@ -1,6 +1,6 @@
+import { Size } from '@noya-app/noya-geometry';
+import { range } from '@noya-app/noya-utils';
 import { composeRefs } from '@radix-ui/react-compose-refs';
-import { Size } from 'noya-geometry';
-import { range } from 'noya-utils';
 import React, {
   Children,
   createContext,

@@ -1,4 +1,4 @@
-import { isDeepEqual } from 'noya-utils';
+import { isDeepEqual } from '@noya-app/noya-utils';
 import { useCallback, useMemo, useState } from 'react';
 
 export const useDeepState: typeof useState = (

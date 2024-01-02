@@ -1,4 +1,4 @@
-import { AffineTransform } from 'noya-geometry';
+import { AffineTransform } from '@noya-app/noya-geometry';
 import { useMemo } from 'react';
 import { useRootScale } from '../RootScaleContext';
 
