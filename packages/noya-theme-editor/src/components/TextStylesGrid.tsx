@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { delimitedPath, sortBy } from '@noya-app/noya-utils';
 import { GridView, useOpenInputDialog } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
 import { ThemeMenuItemType, menuItems } from '../utils/menuItems';

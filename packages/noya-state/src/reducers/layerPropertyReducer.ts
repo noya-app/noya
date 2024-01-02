@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import Sketch from 'noya-file-format';
 import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {

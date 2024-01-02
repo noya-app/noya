@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { upperFirst } from '@noya-app/noya-utils';
 import {
   IconButton,
@@ -6,7 +7,6 @@ import {
   LabeledElementView,
   Select,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import React, { memo, useCallback } from 'react';
 import type { ColorFillProps } from './FillInputFieldWithPicker';

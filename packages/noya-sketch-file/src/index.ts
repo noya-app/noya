@@ -1,5 +1,5 @@
+import type { Sketch } from '@noya-app/noya-file-format';
 import JSZip from 'jszip';
-import type Sketch from 'noya-file-format';
 
 async function readEntry<T>(zip: JSZip, name: string): Promise<T> {
   const data = await zip.file(name)!.async('string');

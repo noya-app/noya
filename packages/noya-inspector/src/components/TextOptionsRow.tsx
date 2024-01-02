@@ -1,10 +1,10 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   Label,
   LabeledElementView,
   RadioGroup,
   Select,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   LetterCaseCapitalizeIcon,
   LetterCaseLowercaseIcon,

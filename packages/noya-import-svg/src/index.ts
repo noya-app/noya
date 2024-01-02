@@ -6,6 +6,7 @@ import {
   parseCSSColor,
   PathWithoutQuadratics,
 } from '@lona/svg-model';
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   computeBoundsFromPoints,
@@ -15,7 +16,6 @@ import {
   transformRect,
   unionRects,
 } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { makePathsFromCommands } from './PathBuilder';
 

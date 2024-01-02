@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import * as Popover from '@radix-ui/react-popover';
 import { useApplicationState } from 'noya-app-state-context';
 import {
@@ -9,12 +10,11 @@ import {
   useGlobalInputBlurListener,
   useOpenInputDialog,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import React, {
   ComponentProps,
-  memo,
   SyntheticEvent,
+  memo,
   useCallback,
   useMemo,
 } from 'react';

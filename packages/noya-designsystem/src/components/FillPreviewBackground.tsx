@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import { useSketchImage } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';

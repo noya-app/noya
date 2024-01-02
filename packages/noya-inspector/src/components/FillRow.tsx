@@ -1,17 +1,17 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   InputField,
   Label,
   LabeledElementView,
-  rgbaToSketchColor,
   Select,
-  sketchColorToHex,
   SketchPattern,
+  rgbaToSketchColor,
+  sketchColorToHex,
   withSeparatorElements,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { SetNumberMode } from 'noya-state';
-import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import React, { ReactNode, memo, useCallback, useMemo } from 'react';
 import { DimensionInput, DimensionValue } from './DimensionInput';
 import {
   ColorFillProps,
@@ -21,7 +21,7 @@ import {
   ShaderFillProps,
 } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
-import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
+import { PATTERN_FILL_TYPE_OPTIONS, PatternFillType } from './PatternInspector';
 import { ShaderVariableValueInput } from './ShaderVariableRow';
 
 const GRADIENT_TYPE_OPTIONS = [

@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { CanvasKit } from 'canvaskit';
-import Sketch from 'noya-file-format';
 import type { ApplicationState } from './applicationReducer';
 import { layerPropertyReducer } from './layerPropertyReducer';
 import { symbolsReducer } from './symbolsReducer';

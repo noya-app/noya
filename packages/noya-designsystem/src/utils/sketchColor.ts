@@ -1,4 +1,4 @@
-import type Sketch from 'noya-file-format';
+import type { Sketch } from '@noya-app/noya-file-format';
 import {
   hsvaToRgbaString,
   RgbaColor,

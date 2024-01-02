@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   Divider,
   InputField,
@@ -6,7 +7,6 @@ import {
   RadioGroup,
   Spacer,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   PinBottomIcon,
   PinLeftIcon,

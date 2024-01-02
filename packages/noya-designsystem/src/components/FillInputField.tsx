@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import React, { CSSProperties, ForwardedRef, forwardRef, memo } from 'react';
 import styled from 'styled-components';
 import { SketchPattern } from '../utils/sketchPattern';

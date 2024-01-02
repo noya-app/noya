@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { uuid } from '@noya-app/noya-utils';
 import {
   EnhancedGeneratedPageName,
@@ -12,7 +13,6 @@ import {
   SEPARATOR_ITEM,
   createSectionedMenu,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';

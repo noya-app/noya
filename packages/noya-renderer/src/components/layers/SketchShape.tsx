@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform, Rect } from '@noya-app/noya-geometry';
 import * as CanvasKit from 'canvaskit';
-import Sketch from 'noya-file-format';
 import {
   ClipProps,
   PaintParameters,

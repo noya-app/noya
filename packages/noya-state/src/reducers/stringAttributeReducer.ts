@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import produce from 'immer';
-import Sketch from 'noya-file-format';
 import { SetNumberMode } from '../types';
 
 export type StringAttributeAction =

@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { insetRect, Rect } from '@noya-app/noya-geometry';
 import { useWorkspace } from 'noya-app-state-context';
-import Sketch from 'noya-file-format';
 import {
   ClipProps,
   useBlurMaskFilter,

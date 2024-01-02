@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { ClipboardUtils } from '@noya-app/noya-utils';
 import { ReactEventHandlers } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   AddLayerOptions,
   handleActionType,

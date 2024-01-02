@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { getFileExtensionForType, uuid } from '@noya-app/noya-utils';
 import {
   FileDropTarget,
@@ -15,7 +16,6 @@ import {
   SupportedImageUploadType,
   useHover,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';

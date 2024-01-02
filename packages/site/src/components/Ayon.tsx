@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
 import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import produce from 'immer';
@@ -14,7 +15,6 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   ChevronDownIcon,
   FigmaLogoIcon,

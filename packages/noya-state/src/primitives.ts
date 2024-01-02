@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { FontId, SYSTEM_FONT_ID } from '@noya-app/noya-fonts';
 import {
   AffineTransform,
@@ -19,7 +20,6 @@ import type {
   TextAlign,
   TextStyle,
 } from 'canvaskit';
-import Sketch from 'noya-file-format';
 import { CompassDirection } from 'noya-state';
 import * as PathUtils from './primitives/path';
 import {

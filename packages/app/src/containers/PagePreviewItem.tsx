@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import { CanvasPreviewItem } from 'noya-theme-editor';

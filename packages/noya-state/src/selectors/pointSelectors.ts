@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   Point,
   Rect,
@@ -8,7 +9,6 @@ import {
 import { range, windowsOf } from '@noya-app/noya-utils';
 import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
-import Sketch from 'noya-file-format';
 import { PointString } from 'noya-sketch-model';
 import {
   DecodedCurvePoint,

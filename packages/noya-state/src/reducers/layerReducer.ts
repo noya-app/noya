@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   Point,
@@ -9,7 +10,6 @@ import {
 import { getIncrementedName, groupBy, uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,

@@ -1,7 +1,7 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Point, Rect } from '@noya-app/noya-geometry';
 import { uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
-import Sketch from 'noya-file-format';
 import {
   ScalingOptions,
   TextSelectionRange,

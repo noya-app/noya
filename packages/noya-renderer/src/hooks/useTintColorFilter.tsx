@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import { useMemo } from 'react';

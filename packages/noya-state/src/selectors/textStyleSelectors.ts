@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { unique } from '@noya-app/noya-utils';
-import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { SimpleTextDecoration } from '../primitives';

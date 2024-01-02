@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import produce from 'immer';
 import * as ExportOptions from '../exportOptions';
 

@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
@@ -7,7 +8,6 @@ import {
   Select,
   Spacer,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import {
   Layers,
@@ -24,7 +24,7 @@ const CURVE_MODE_OPTIONS = [
   'Disconnected' as const,
 ];
 
-type CurveModeOption = typeof CURVE_MODE_OPTIONS[0] | 'None';
+type CurveModeOption = (typeof CURVE_MODE_OPTIONS)[0] | 'None';
 
 function getCurveMode(value: CurveModeOption): Sketch.CurveMode {
   switch (value) {

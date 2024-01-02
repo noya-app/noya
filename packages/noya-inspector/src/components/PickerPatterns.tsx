@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Divider, PatternPreviewBackground, Select } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import React, { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';

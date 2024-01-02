@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   Point,
@@ -9,7 +10,6 @@ import {
   isPointOnCircumference,
 } from '@noya-app/noya-geometry';
 import { lerp } from '@noya-app/noya-utils';
-import Sketch from 'noya-file-format';
 import { PointString } from 'noya-sketch-model';
 import {
   Layers,

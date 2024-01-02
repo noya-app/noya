@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import { useManagedLayout } from '../components/GeneratedLayoutContext';
 import { CustomLayerData } from '../types';
 

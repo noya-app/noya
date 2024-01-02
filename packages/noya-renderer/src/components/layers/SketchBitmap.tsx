@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { getRectCornerPoints } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import { makePath } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';

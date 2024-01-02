@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Label, LabeledElementView, RadioGroup } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   BorderCenterIcon,
   BorderInsideIcon,

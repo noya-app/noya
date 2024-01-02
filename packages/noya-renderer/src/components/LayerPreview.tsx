@@ -1,10 +1,10 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   createResizeTransform,
   Rect,
   Size,
   transformRect,
 } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import { ClipProps, useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { PageLayer, Primitives } from 'noya-state';
 import React, { useMemo } from 'react';

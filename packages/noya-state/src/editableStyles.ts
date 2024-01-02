@@ -1,7 +1,7 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { FontTraits, decodeFontName } from '@noya-app/noya-fonts';
 import { isDeepEqual, zipLongest } from '@noya-app/noya-utils';
 import { SketchPattern } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors, getMultiNumberValue, getMultiValue } from 'noya-state';
 import { SimpleTextDecoration } from './primitives';

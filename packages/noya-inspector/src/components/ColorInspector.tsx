@@ -1,3 +1,4 @@
+import type { Sketch } from '@noya-app/noya-file-format';
 import { clamp } from '@noya-app/noya-utils';
 import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
@@ -8,7 +9,6 @@ import {
   rgbaToSketchColor,
   sketchColorToHex,
 } from 'noya-designsystem';
-import type Sketch from 'noya-file-format';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import { DimensionInput } from './DimensionInput';

@@ -1,3 +1,4 @@
+import type { Sketch } from '@noya-app/noya-file-format';
 import { clamp } from '@noya-app/noya-utils';
 import { useApplicationState } from 'noya-app-state-context';
 import { hexToRgba, validHex } from 'noya-colorpicker';
@@ -9,7 +10,6 @@ import {
   rgbaToSketchColor,
   sketchColorToHex,
 } from 'noya-designsystem';
-import type Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

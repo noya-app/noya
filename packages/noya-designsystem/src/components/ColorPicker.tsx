@@ -1,15 +1,15 @@
+import type { Sketch } from '@noya-app/noya-file-format';
 import {
   Alpha,
   ColorModel,
-  ColorPicker as NoyaColorPicker,
-  equalColorObjects,
   HsvaColor,
-  hsvaToRgba,
   Hue,
-  rgbaToHsva,
+  ColorPicker as NoyaColorPicker,
   Saturation,
+  equalColorObjects,
+  hsvaToRgba,
+  rgbaToHsva,
 } from 'noya-colorpicker';
-import type Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 import { Spacer } from './Spacer';

@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   createRect,
@@ -14,7 +15,6 @@ import {
   transformRect,
 } from '@noya-app/noya-geometry';
 import type { CanvasKit } from 'canvaskit';
-import Sketch from 'noya-file-format';
 import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { ScalingOptions } from 'noya-state';

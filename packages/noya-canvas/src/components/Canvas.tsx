@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   Insets,
@@ -29,7 +30,6 @@ import {
   mergeEventHandlers,
   usePlatformModKey,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {

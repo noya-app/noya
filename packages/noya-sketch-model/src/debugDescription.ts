@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { round } from '@noya-app/noya-utils';
-import Sketch from 'noya-file-format';
 import { diagram } from 'tree-visit';
 import { PointString } from './PointString';
 

@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   DEFAULT_FONT_TRAITS,
   FontTraits,
@@ -13,7 +14,6 @@ import {
   Select,
   SelectOption,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { useFontManager } from 'noya-renderer';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';

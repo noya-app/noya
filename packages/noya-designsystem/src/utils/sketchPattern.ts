@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 
 export const SUPPORTED_IMAGE_UPLOAD_TYPES = [
   'image/png' as const,
@@ -14,10 +14,10 @@ export const SUPPORTED_CANVAS_UPLOAD_TYPES = [
 ];
 
 export type SupportedImageUploadType =
-  typeof SUPPORTED_IMAGE_UPLOAD_TYPES[number];
+  (typeof SUPPORTED_IMAGE_UPLOAD_TYPES)[number];
 
 export type SupportedCanvasUploadType =
-  typeof SUPPORTED_CANVAS_UPLOAD_TYPES[number];
+  (typeof SUPPORTED_CANVAS_UPLOAD_TYPES)[number];
 
 export type SketchPattern = {
   // This _class doesn't exist in Sketch, but it's convenient in `switch`

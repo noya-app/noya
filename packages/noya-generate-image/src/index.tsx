@@ -1,9 +1,9 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
 import { UTF16 } from '@noya-app/noya-utils';
 import type { CanvasKit, Image } from 'canvaskit';
 import { StateProvider } from 'noya-app-state-context';
 import { Theme } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
   CanvasKitProvider,

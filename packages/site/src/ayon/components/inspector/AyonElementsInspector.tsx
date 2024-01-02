@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   NoyaComponent,
   NoyaResolvedNode,
@@ -5,7 +6,6 @@ import {
   unresolve,
 } from 'noya-component';
 import { ActivityIndicator } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { DSLayoutTree } from '../../../dseditor/DSLayoutTree';

@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import produce from 'immer';
-import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 
 export type ShaderAction =

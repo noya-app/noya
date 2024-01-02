@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
-import Sketch from 'noya-file-format';
 import { Selectors, SimpleTextDecoration } from 'noya-state';
 import * as Layers from '../layers';
 import {

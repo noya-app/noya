@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform, Point } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import { Layers } from 'noya-state';
 
 // Event coordinates are relative to (0,0), but we want them to include

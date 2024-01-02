@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Rect } from '@noya-app/noya-geometry';
 import * as CanvasKit from 'canvaskit';
-import Sketch from 'noya-file-format';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';

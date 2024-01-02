@@ -1,8 +1,8 @@
-import type Sketch from 'noya-file-format';
+import type { Sketch } from '@noya-app/noya-file-format';
 import { IndexPath } from 'tree-visit';
-import type { ApplicationState } from '../reducers/applicationReducer';
 import { Layers } from '../layer';
 import { findIndexPath, INCLUDE_AND_SKIP } from '../layers';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import type { UUID } from '../types';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 

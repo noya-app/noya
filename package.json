@@ -57,6 +57,7 @@
     ]
   },
   "dependencies": {
+    "@noya-app/noya-file-format": "^0.0.1",
     "@noya-app/noya-fonts": "^0.0.3",
     "@noya-app/noya-geometry": "^0.0.6",
     "@noya-app/noya-google-fonts": "^0.0.3",

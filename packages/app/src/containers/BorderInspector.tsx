@@ -1,7 +1,7 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, Select, Spacer } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import {
   BorderRow,
   CheckboxArrayController,

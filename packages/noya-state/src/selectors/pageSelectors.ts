@@ -1,6 +1,6 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { Point } from '@noya-app/noya-geometry';
 import { Draft } from 'immer';
-import Sketch from 'noya-file-format';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import { Layers } from '../layer';
 import type { ApplicationState } from '../reducers/applicationReducer';

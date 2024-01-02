@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import * as CanvasKit from 'canvaskit';
-import Sketch from 'noya-file-format';
 import React, { memo, ReactNode, useMemo } from 'react';
 import { getSaturationMatrix } from '../../colorMatrix';
 import { Group } from '../../ComponentsContext';

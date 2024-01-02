@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { GridView, Spacer, Stack, lightTheme } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { DesktopIcon, LaptopIcon, MobileIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import React from 'react';

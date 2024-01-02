@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 
 import * as avatar from './primitive/AvatarSymbol';
 import * as box from './primitive/BoxSymbol';

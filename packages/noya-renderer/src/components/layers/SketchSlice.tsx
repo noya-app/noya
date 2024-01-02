@@ -1,11 +1,11 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Rect } from '../../ComponentsContext';
-import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useRenderingMode } from '../../RenderingModeContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 
 interface Props {
   layer: Sketch.Slice;

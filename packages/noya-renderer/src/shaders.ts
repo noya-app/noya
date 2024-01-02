@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 
 function getVariableUniformDeclaration({ name, value }: Sketch.ShaderVariable) {
   switch (value.type) {

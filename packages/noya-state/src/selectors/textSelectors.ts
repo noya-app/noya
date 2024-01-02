@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { SYSTEM_FONT_ID } from '@noya-app/noya-fonts';
 import {
   AffineTransform,
@@ -10,7 +11,6 @@ import {
 } from '@noya-app/noya-geometry';
 import { memoize, unique } from '@noya-app/noya-utils';
 import { CanvasKit } from 'canvaskit';
-import Sketch from 'noya-file-format';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,

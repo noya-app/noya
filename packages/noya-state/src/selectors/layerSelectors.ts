@@ -1,3 +1,4 @@
+import type { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -13,7 +14,6 @@ import {
 import produce, { Draft } from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { RelativeDropPosition } from 'noya-designsystem';
-import type Sketch from 'noya-file-format';
 import { CSSProperties } from 'react';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '../layer';

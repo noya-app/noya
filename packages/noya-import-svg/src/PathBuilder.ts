@@ -1,6 +1,6 @@
 import { CommandWithoutQuadratics } from '@lona/svg-model';
+import { Sketch } from '@noya-app/noya-file-format';
 import { Point } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import { PointString, SketchModel } from 'noya-sketch-model';
 
 function makeCurvePoint(

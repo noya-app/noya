@@ -1,8 +1,8 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { isDeepEqual } from '@noya-app/noya-utils';
 import { useNoyaClient } from 'noya-api';
 import { NoyaNode } from 'noya-component';
 import { Button, Spacer, lightTheme } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';

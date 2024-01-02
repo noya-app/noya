@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import { PageLayer, Selectors } from 'noya-state';
 import React, { memo } from 'react';
 import { useIsLayerClipped } from '../../ClippedLayerContext';

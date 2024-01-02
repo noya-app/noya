@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 
 export type ComponentMap = Record<string, React.FC<any>>;
 

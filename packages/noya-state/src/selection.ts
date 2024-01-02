@@ -1,10 +1,10 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
   createBounds,
   Point,
   Rect,
 } from '@noya-app/noya-geometry';
-import Sketch from 'noya-file-format';
 import {
   CompassDirection,
   compassDirections,

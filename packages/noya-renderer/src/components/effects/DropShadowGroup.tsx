@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { Sketch } from '@noya-app/noya-file-format';
 import { DropShadow } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, ReactNode, useMemo } from 'react';

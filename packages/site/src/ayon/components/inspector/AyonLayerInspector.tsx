@@ -1,3 +1,4 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { isDeepEqual, upperFirst, uuid } from '@noya-app/noya-utils';
 import { useApplicationState } from 'noya-app-state-context';
 import {
@@ -7,7 +8,6 @@ import {
   TreeView,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import Sketch from 'noya-file-format';
 import { InspectorPrimitives } from 'noya-inspector';
 import { SketchModel } from 'noya-sketch-model';
 import {

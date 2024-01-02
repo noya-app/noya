@@ -1,5 +1,5 @@
+import { Sketch } from '@noya-app/noya-file-format';
 import { ComponentGroup, NoyaComponent } from 'noya-component';
-import Sketch from 'noya-file-format';
 import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
 

@@ -2960,6 +2960,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@noya-app/noya-file-format@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-file-format/-/noya-file-format-0.0.1.tgz#add1d85684d9abe7aafeb80214c69330acaa4267"
+  integrity sha512-llX+YoWxhzrzZt4VhY62XCoNsSXzc4XOx10doHTrvYSwvaL4PX07DZtuH+30TlXF9PtZqonENgztMLpHfeOkKw==
+
 "@noya-app/noya-fonts@*":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-fonts/-/noya-fonts-0.0.2.tgz#1b4141845d27afc293c2a4253a0bd0d2b6567004"
