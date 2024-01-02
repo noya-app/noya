@@ -1,24 +1,24 @@
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {
-  memo,
   ReactElement,
   ReactNode,
+  memo,
   useCallback,
   useMemo,
 } from 'react';
 import styled from 'styled-components';
+import { Spacer } from './Spacer';
 import {
   CHECKBOX_RIGHT_INSET,
   CHECKBOX_WIDTH,
-  getKeyboardShortcutsForMenuItems,
   KeyboardShortcut,
   MenuItem,
   SEPARATOR_ITEM,
+  getKeyboardShortcutsForMenuItems,
   styles,
 } from './internal/Menu';
-import { Spacer } from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Separator

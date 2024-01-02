@@ -1,4 +1,4 @@
-import { KeyModifiers } from 'noya-keymap';
+import { KeyModifiers } from '@noya-app/noya-keymap';
 import React, {
   createContext,
   CSSProperties,

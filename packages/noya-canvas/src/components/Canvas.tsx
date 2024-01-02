@@ -5,6 +5,7 @@ import {
   Size,
   createRect,
 } from '@noya-app/noya-geometry';
+import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from '@noya-app/noya-keymap';
 import {
   useApplicationState,
   useSelector,
@@ -28,7 +29,6 @@ import {
   usePlatformModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';

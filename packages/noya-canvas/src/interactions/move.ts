@@ -1,6 +1,6 @@
 import { Point } from '@noya-app/noya-geometry';
+import { KeyMap } from '@noya-app/noya-keymap';
 import { ReactEventHandlers } from 'noya-designsystem';
-import { KeyMap } from 'noya-keymap';
 import {
   handleActionType,
   InferBlockType,

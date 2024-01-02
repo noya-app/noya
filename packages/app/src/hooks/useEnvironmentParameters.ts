@@ -1,4 +1,4 @@
-import { PlatformName } from 'noya-keymap';
+import { PlatformName } from '@noya-app/noya-keymap';
 import { createContext, useContext } from 'react';
 
 export type EnvironmentParameters = {

@@ -1,4 +1,4 @@
-import { PlatformName } from 'noya-keymap';
+import { PlatformName } from '@noya-app/noya-keymap';
 import React, {
   createContext,
   memo,

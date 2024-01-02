@@ -1,7 +1,7 @@
+import { getCurrentPlatform, PlatformName } from '@noya-app/noya-keymap';
 import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
-import { getCurrentPlatform, PlatformName } from 'noya-keymap';
 import {
   castHashParameter,
   PromiseState,

@@ -1,9 +1,9 @@
 import { Insets, Size } from '@noya-app/noya-geometry';
+import { KeyModifiers } from '@noya-app/noya-keymap';
 import { uuid } from '@noya-app/noya-utils';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
-import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { Selectors } from 'noya-state';

@@ -1,7 +1,7 @@
 import { ResizePosition } from '@noya-app/noya-geometry';
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import { ILogEvent } from 'noya-log';
 import { Layers, Selectors, getCurrentPage } from 'noya-state';
 import React, {

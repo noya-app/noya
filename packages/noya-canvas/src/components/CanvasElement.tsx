@@ -1,6 +1,6 @@
 import { Insets, Size } from '@noya-app/noya-geometry';
+import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from '@noya-app/noya-keymap';
 import { ReactDOMEventHandlers } from 'noya-designsystem';
-import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from 'noya-keymap';
 import React, {
   CSSProperties,
   ForwardedRef,

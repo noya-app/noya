@@ -1,3 +1,4 @@
+import { KeyCommand, useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { round } from '@noya-app/noya-utils';
 import {
   useApplicationState,
@@ -16,7 +17,6 @@ import {
 } from 'noya-designsystem';
 import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { LayerIcon } from 'noya-inspector';
-import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
   InteractionType,

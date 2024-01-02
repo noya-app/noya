@@ -3099,6 +3099,13 @@
   dependencies:
     "@noya-app/noya-utils" "0.0.5"
 
+"@noya-app/noya-keymap@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-keymap/-/noya-keymap-0.0.3.tgz#8b63f83d7a33356c7b3fd655a12e67422b9ba786"
+  integrity sha512-8ACXu9qLJj8sMkdCRUu3G3p68/l4omG/CTbnnxDc+bs7qA+2Va2Mgw033FVni8yx9j8L5z9LwzXG9ZJ7Jn3aeQ==
+  dependencies:
+    w3c-keyname "^2.2.8"
+
 "@noya-app/noya-utils@0.0.5", "@noya-app/noya-utils@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-utils/-/noya-utils-0.0.5.tgz#fbc4904ec39b6a8523a1b9071c55e6650b8dfa83"
@@ -21340,10 +21347,10 @@ w3c-hr-time@^1.0.2:
   dependencies:
     browser-process-hrtime "^1.0.0"
 
-w3c-keyname@^2.2.4:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/w3c-keyname/-/w3c-keyname-2.2.4.tgz#4ade6916f6290224cdbd1db8ac49eab03d0eef6b"
-  integrity sha512-tOhfEwEzFLJzf6d1ZPkYfGj+FWhIpBux9ppoP3rlclw3Z0BZv3N7b7030Z1kYth+6rDuAsXUFr+d0VE6Ed1ikw==
+w3c-keyname@^2.2.8:
+  version "2.2.8"
+  resolved "https://registry.yarnpkg.com/w3c-keyname/-/w3c-keyname-2.2.8.tgz#7b17c8c6883d4e8b86ac8aba79d39e880f8869c5"
+  integrity sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==
 
 w3c-xmlserializer@^2.0.0:
   version "2.0.0"

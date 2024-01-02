@@ -1,3 +1,4 @@
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { isDeepEqual, uuid } from '@noya-app/noya-utils';
 import { fileOpen } from 'browser-fs-access';
 import cloneDeep from 'lodash/cloneDeep';
@@ -56,7 +57,6 @@ import {
   UploadIcon,
   VercelLogoIcon,
 } from 'noya-icons';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {
   forwardRef,
   memo,

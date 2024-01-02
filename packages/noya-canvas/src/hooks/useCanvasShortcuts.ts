@@ -1,5 +1,5 @@
+import { FALLTHROUGH, useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { useApplicationState } from 'noya-app-state-context';
-import { FALLTHROUGH, useKeyboardShortcuts } from 'noya-keymap';
 import { Layers, Selectors } from 'noya-state';
 import { useArrowKeyShortcuts } from './useArrowKeyShortcuts';
 

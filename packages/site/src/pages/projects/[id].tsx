@@ -1,4 +1,5 @@
 import { Size } from '@noya-app/noya-geometry';
+import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import { debounce } from '@noya-app/noya-utils';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
@@ -17,7 +18,6 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { StarFilledIcon } from 'noya-icons';
-import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import React, {
   ReactNode,

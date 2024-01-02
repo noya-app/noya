@@ -1,3 +1,4 @@
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   Chip,
@@ -11,7 +12,6 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Component1Icon } from 'noya-icons';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { allClassNames } from 'noya-tailwind';
 import React, { useCallback, useEffect, useMemo } from 'react';

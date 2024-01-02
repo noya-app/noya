@@ -1,6 +1,6 @@
+import { getShortcutDisplayParts } from '@noya-app/noya-keymap';
 import { useDesignSystemConfiguration } from 'noya-designsystem';
 import { ApplicationMenuItem } from 'noya-embedded';
-import { getShortcutDisplayParts } from 'noya-keymap';
 import React, { memo, ReactElement, ReactNode } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { Theme } from '../../theme';

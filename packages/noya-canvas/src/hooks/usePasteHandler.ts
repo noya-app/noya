@@ -1,6 +1,6 @@
+import { elementShouldHandleOwnShortcut } from '@noya-app/noya-keymap';
 import { ClipboardUtils } from '@noya-app/noya-utils';
 import Sketch from 'noya-file-format';
-import { elementShouldHandleOwnShortcut } from 'noya-keymap';
 import { isSupportedFile, TypedFile } from 'noya-react-utils';
 import { useEffect } from 'react';
 import { NoyaClipboardData } from './useCopyHandler';

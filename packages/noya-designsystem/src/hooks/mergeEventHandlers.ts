@@ -1,6 +1,6 @@
+import { KeyMap } from '@noya-app/noya-keymap';
 import { unique } from '@noya-app/noya-utils';
 import { composeEventHandlers } from '@radix-ui/primitive';
-import { KeyMap } from 'noya-keymap';
 import { useGesture } from 'react-use-gesture';
 import { RegularMenuItem } from '../components/internal/Menu';
 import { Optional } from '../utils/createSectionedMenu';

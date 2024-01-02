@@ -1,4 +1,5 @@
 import { Size } from '@noya-app/noya-geometry';
+import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -23,7 +24,6 @@ import {
   SketchLogoIcon,
   TransformIcon,
 } from 'noya-icons';
-import { getCurrentPlatform } from 'noya-keymap';
 import { amplitude } from 'noya-log';
 import { setPublicPath } from 'noya-public-path';
 import {

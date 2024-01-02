@@ -1,6 +1,6 @@
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {
   ForwardedRef,
   SyntheticEvent,
