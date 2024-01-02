@@ -97,12 +97,12 @@ const MenubarContent = memo(function MenubarContent({
     const recentDocumentsMenuItem: MenuItem<ApplicationMenuItemType> = {
       value: 'openRecent',
       title: 'Open Recent',
-      role: 'recentdocuments',
+      role: 'recentDocuments',
       items: [
         {
           value: 'clearRecent',
           title: 'Clear Recent',
-          role: 'clearrecentdocuments',
+          role: 'clearRecentDocuments',
         },
       ],
     };

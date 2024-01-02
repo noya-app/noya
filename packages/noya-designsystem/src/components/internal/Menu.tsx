@@ -8,6 +8,8 @@ import withSeparatorElements from '../../utils/withSeparatorElements';
 
 export const SEPARATOR_ITEM = 'separator';
 
+export type MenuItemRole = ApplicationMenuItem['role'];
+
 export type RegularMenuItem<T extends string> = {
   value?: T;
   title: ReactNode;
@@ -16,10 +18,7 @@ export type RegularMenuItem<T extends string> = {
   disabled?: boolean;
   icon?: ReactElement;
   items?: MenuItem<T>[];
-  role?:
-    | ApplicationMenuItem['role']
-    | 'recentdocuments'
-    | 'clearrecentdocuments';
+  role?: MenuItemRole;
 };
 
 export type MenuItem<T extends string> =
