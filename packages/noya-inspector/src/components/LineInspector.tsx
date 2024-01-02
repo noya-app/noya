@@ -1,13 +1,13 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Spacer } from 'noya-designsystem';
-import { useShallowArray } from 'noya-react-utils';
 import {
+  Selectors,
+  SetNumberMode,
   clampRotation,
   decodeCurvePoint,
   getMultiNumberValue,
   isPointsLayer,
-  Selectors,
-  SetNumberMode,
 } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';

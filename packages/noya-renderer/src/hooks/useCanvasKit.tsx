@@ -1,5 +1,5 @@
+import { SuspendedValue } from '@noya-app/react-utils';
 import type { CanvasKit } from 'canvaskit';
-import { SuspendedValue } from 'noya-react-utils';
 import React, { createContext, memo, ReactNode, useContext } from 'react';
 import { loadCanvasKit } from '../loadCanvasKit';
 

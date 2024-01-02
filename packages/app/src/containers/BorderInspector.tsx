@@ -1,3 +1,4 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, Select, Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -6,14 +7,13 @@ import {
   CheckboxArrayController,
   InspectorPrimitives,
 } from 'noya-inspector';
-import { useShallowArray } from 'noya-react-utils';
 import {
   EditableBorder,
+  Selectors,
   getEditableBorder,
   getEditableStyles,
-  Selectors,
 } from 'noya-state';
-import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
+import React, { ReactNode, memo, useCallback, useMemo, useState } from 'react';
 
 const LINE_CAP_OPTIONS = [
   Sketch.LineCapStyle.Butt.toString(),

@@ -1,4 +1,4 @@
-import { useDeepMemo } from 'noya-react-utils';
+import { useDeepMemo } from '@noya-app/react-utils';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { ColorPickerContextValue, ColorPickerProvider } from '../contexts/ColorPickerContext';

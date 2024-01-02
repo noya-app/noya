@@ -1,5 +1,5 @@
 import { Insets, Size } from '@noya-app/noya-geometry';
-import { useSize } from 'noya-react-utils';
+import { useSize } from '@noya-app/react-utils';
 import { useLayoutEffect, useMemo } from 'react';
 
 type CanvasSizes = {

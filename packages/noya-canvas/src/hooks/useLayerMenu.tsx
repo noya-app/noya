@@ -1,4 +1,5 @@
 import { ClipboardUtils } from '@noya-app/noya-utils';
+import { useShallowArray } from '@noya-app/react-utils';
 import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import {
   MenuConfig,
@@ -8,7 +9,6 @@ import {
   useOpenInputDialog,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 

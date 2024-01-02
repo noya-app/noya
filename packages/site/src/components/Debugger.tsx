@@ -2,6 +2,11 @@ import {
   decodeQueryParameters,
   encodeQueryParameters,
 } from '@noya-app/noya-utils';
+import {
+  AutoSizer,
+  castHashParameter,
+  useUrlHashParameters,
+} from '@noya-app/react-utils';
 import { useNetworkRequests } from 'noya-api';
 import {
   Chip,
@@ -14,11 +19,6 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import {
-  AutoSizer,
-  castHashParameter,
-  useUrlHashParameters,
-} from 'noya-react-utils';
 import React, { memo, useMemo } from 'react';
 import { usePersistentState } from '../utils/clientStorage';
 

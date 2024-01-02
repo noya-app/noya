@@ -60,6 +60,7 @@
     "@noya-app/noya-geometry": "^0.0.5",
     "@noya-app/noya-keymap": "^0.0.3",
     "@noya-app/noya-utils": "^0.0.5",
+    "@noya-app/react-utils": "^0.0.3",
     "@shopify/eslint-plugin": "^40.1.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",

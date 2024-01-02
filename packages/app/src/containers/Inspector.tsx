@@ -1,3 +1,4 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
 import {
@@ -5,14 +6,13 @@ import {
   InspectorPrimitives,
   LineInspector,
 } from 'noya-inspector';
-import { useShallowArray } from 'noya-react-utils';
 import {
-  getMultiNumberValue,
-  getMultiValue,
-  isLine,
   Layers,
   Selectors,
   SetNumberMode,
+  getMultiNumberValue,
+  getMultiValue,
+  isLine,
 } from 'noya-state';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';

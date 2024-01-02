@@ -3,6 +3,7 @@ import {
   Size,
   createResizeTransform,
 } from '@noya-app/noya-geometry';
+import { useSize } from '@noya-app/react-utils';
 import { DS, useNoyaClientOrFallback } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import {
@@ -15,7 +16,6 @@ import {
   unresolve,
 } from 'noya-component';
 import Sketch from 'noya-file-format';
-import { useSize } from 'noya-react-utils';
 import { RenderingMode } from 'noya-renderer';
 import { Layers, Selectors, getClippedLayerMap } from 'noya-state';
 import React, {

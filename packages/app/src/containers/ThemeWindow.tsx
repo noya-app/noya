@@ -1,5 +1,5 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import {
   SwatchesGrid,

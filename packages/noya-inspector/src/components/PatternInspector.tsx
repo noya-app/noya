@@ -1,4 +1,9 @@
 import { getFileExtensionForType, uuid } from '@noya-app/noya-utils';
+import {
+  FileDropTarget,
+  TypedFile,
+  isSupportedFile,
+} from '@noya-app/react-utils';
 import { fileOpen } from 'browser-fs-access';
 import {
   InputField,
@@ -11,7 +16,6 @@ import {
   useHover,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { FileDropTarget, TypedFile, isSupportedFile } from 'noya-react-utils';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';
@@ -124,16 +128,16 @@ const PatternPreview = memo(
     }, [handleImageFile]);
 
     return (
-      <FileDropTarget<SupportedImageUploadType>
+      <FileDropTarget
+        supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
         onDropFiles={useCallback(
           (files) => {
             if (files.length === 0) return;
 
-            handleImageFile(files[0]);
+            handleImageFile(files[0] as TypedFile<SupportedImageUploadType>);
           },
           [handleImageFile],
         )}
-        supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
       >
         {(isDropTargetActive: boolean) => (
           <Container {...hoverProps} isActive={isDropTargetActive}>

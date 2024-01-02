@@ -1,4 +1,4 @@
-import { assignRef } from 'noya-react-utils';
+import { assignRef } from '@noya-app/react-utils';
 import React, { forwardRef, memo, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 

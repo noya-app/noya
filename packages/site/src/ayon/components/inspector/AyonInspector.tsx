@@ -1,3 +1,4 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState } from 'noya-app-state-context';
 import { NoyaNode } from 'noya-component';
 import {
@@ -8,7 +9,6 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
-import { useShallowArray } from 'noya-react-utils';
 import { Layers, Selectors } from 'noya-state';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';

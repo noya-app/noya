@@ -1,12 +1,12 @@
+import { SuspendedValue, useMutableState } from '@noya-app/react-utils';
 import { TypefaceFontProvider } from 'canvaskit';
 import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
 import { getPublicPath } from 'noya-public-path';
-import { SuspendedValue, useMutableState } from 'noya-react-utils';
 import React, {
+  ReactNode,
   createContext,
   memo,
-  ReactNode,
   useContext,
   useEffect,
   useMemo,

@@ -1,8 +1,8 @@
 import { Size } from '@noya-app/noya-geometry';
 import { getFileExtensionForType } from '@noya-app/noya-utils';
+import { TypedFile } from '@noya-app/react-utils';
 import type { CanvasKit } from 'canvaskit';
 import { SupportedCanvasUploadType } from 'noya-designsystem';
-import { TypedFile } from 'noya-react-utils';
 import { InsertedImage } from 'noya-state';
 
 export async function importImageFile(

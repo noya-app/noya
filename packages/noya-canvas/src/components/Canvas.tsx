@@ -6,6 +6,7 @@ import {
   createRect,
 } from '@noya-app/noya-geometry';
 import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from '@noya-app/noya-keymap';
+import { FileDropTarget, OffsetPoint, TypedFile } from '@noya-app/react-utils';
 import {
   useApplicationState,
   useSelector,
@@ -29,7 +30,6 @@ import {
   usePlatformModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {
@@ -985,18 +985,24 @@ export const Canvas = memo(function Canvas({
   });
 
   return (
-    <FileDropTarget<SupportedCanvasUploadType>
+    <FileDropTarget
       supportedFileTypes={SUPPORTED_CANVAS_UPLOAD_TYPES}
       onDropFiles={useCallback(
-        (file, point) => {
-          const sketchFileIndex = file.findIndex(({ name }) =>
+        (files, point) => {
+          const sketchFileIndex = files.findIndex(({ name }) =>
             name.endsWith('.sketch'),
           );
 
           if (sketchFileIndex !== -1) {
-            onImportSketchFile(file[sketchFileIndex]);
+            onImportSketchFile(
+              files[sketchFileIndex] as TypedFile<SupportedCanvasUploadType>,
+            );
           } else {
-            onImportImages(file, 'nearestArtboard', point);
+            onImportImages(
+              files as TypedFile<SupportedCanvasUploadType>[],
+              'nearestArtboard',
+              point,
+            );
           }
         },
         [onImportImages, onImportSketchFile],

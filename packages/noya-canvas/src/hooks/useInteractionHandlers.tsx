@@ -1,5 +1,6 @@
 import { Point, Rect } from '@noya-app/noya-geometry';
 import { KeyMap, handleKeyboardEvent } from '@noya-app/noya-keymap';
+import { OffsetPoint } from '@noya-app/react-utils';
 import {
   useApplicationState,
   useHistory,
@@ -13,7 +14,6 @@ import {
   usePlatformModKey,
 } from 'noya-designsystem';
 import { ILogEvent } from 'noya-log';
-import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   CompassDirection,

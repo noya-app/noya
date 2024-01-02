@@ -1,3 +1,4 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Button, Select, useOpenInputDialog } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -9,8 +10,7 @@ import {
   UpdateIcon,
 } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
-import { useShallowArray } from 'noya-react-utils';
-import { getMultiValue, Selectors } from 'noya-state';
+import { Selectors, getMultiValue } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 

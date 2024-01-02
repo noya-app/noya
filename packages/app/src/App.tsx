@@ -1,12 +1,12 @@
 import { getCurrentPlatform, PlatformName } from '@noya-app/noya-keymap';
-import { StateProvider } from 'noya-app-state-context';
-import { fileManager } from 'noya-embedded';
-import { decodeFontName } from 'noya-fonts';
 import {
   castHashParameter,
   PromiseState,
   useUrlHashParameters,
-} from 'noya-react-utils';
+} from '@noya-app/react-utils';
+import { StateProvider } from 'noya-app-state-context';
+import { fileManager } from 'noya-embedded';
+import { decodeFontName } from 'noya-fonts';
 import {
   CanvasKitProvider,
   FontManagerProvider,

@@ -1,4 +1,4 @@
-import { useDeepState } from 'noya-react-utils';
+import { useDeepState } from '@noya-app/react-utils';
 import { normalizeRange } from 'noya-state';
 import React, { ComponentProps, forwardRef, useCallback } from 'react';
 import { DSRenderProps, DSRenderer, IDSRenderer } from './DSRenderer';

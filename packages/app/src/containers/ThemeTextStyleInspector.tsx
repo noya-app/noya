@@ -1,8 +1,8 @@
 import { delimitedPath } from '@noya-app/noya-utils';
+import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
 import { NameInspector } from 'noya-inspector';
-import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import BorderInspector from './BorderInspector';

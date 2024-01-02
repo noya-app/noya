@@ -1,8 +1,8 @@
+import { useShallowArray } from '@noya-app/react-utils';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { LinkedSymbolRow, SymbolInstanceOverridesRow } from 'noya-inspector';
-import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import FillInspector from './FillInspector';

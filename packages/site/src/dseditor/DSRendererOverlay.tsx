@@ -1,6 +1,6 @@
 import { Rect } from '@noya-app/noya-geometry';
+import { useDeepState } from '@noya-app/react-utils';
 import { useDesignSystemTheme } from 'noya-designsystem';
-import { useDeepState } from 'noya-react-utils';
 import React, {
   forwardRef,
   memo,

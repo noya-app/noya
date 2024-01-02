@@ -1,4 +1,5 @@
 import { UTF16, findLast, uuid } from '@noya-app/noya-utils';
+import { useDeepState } from '@noya-app/react-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import JavascriptPlayground, { PlaygroundProps } from 'javascript-playgrounds';
 import { useRouter } from 'next/router';
@@ -31,7 +32,6 @@ import {
 import { toZipFile } from 'noya-filesystem';
 import { DownloadIcon } from 'noya-icons';
 import { loadDesignSystem } from 'noya-module-loader';
-import { useDeepState } from 'noya-react-utils';
 import React, {
   Dispatch,
   SetStateAction,

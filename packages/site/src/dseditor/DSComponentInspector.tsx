@@ -1,5 +1,6 @@
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { upperFirst, uuid } from '@noya-app/noya-utils';
+import { useIsMounted } from '@noya-app/react-utils';
 import { useRouter } from 'next/router';
 import {
   DS,
@@ -55,7 +56,6 @@ import {
 import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { JSONForm } from 'noya-jsonforms';
-import { useIsMounted } from 'noya-react-utils';
 import { getNewValue } from 'noya-state';
 import React, { ComponentProps, memo, useCallback, useMemo } from 'react';
 import { z } from 'zod';

@@ -1,6 +1,6 @@
 import { Size } from '@noya-app/noya-geometry';
+import { useSize } from '@noya-app/react-utils';
 import { CanvasViewer } from 'noya-canvas-preview';
-import { useSize } from 'noya-react-utils';
 import React, { memo, ReactNode, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
