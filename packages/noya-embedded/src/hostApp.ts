@@ -1,5 +1,5 @@
+import { Emitter } from '@noya-app/noya-fonts';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
-import { Emitter } from 'noya-fonts';
 
 type MessageFromEmbeddedWithId = Extract<MessageFromEmbedded, { id: number }>;
 type MessageFromHostWithId = Extract<MessageFromHost, { id: number }>;

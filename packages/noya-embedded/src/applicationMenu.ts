@@ -1,8 +1,8 @@
+import { Emitter } from '@noya-app/noya-fonts';
 import { getCurrentPlatform, normalizeKeyName } from '@noya-app/noya-keymap';
 import type * as Electron from 'electron';
 import { MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
-import { Emitter } from 'noya-fonts';
 import { hostApp } from './hostApp';
 
 export type ApplicationMenuItemType =

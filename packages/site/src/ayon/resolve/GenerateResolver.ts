@@ -1,4 +1,4 @@
-import { Emitter } from 'noya-fonts';
+import { Emitter } from '@noya-app/noya-fonts';
 import { NOYA_HOST } from '../../utils/noyaClient';
 
 export class GenerateResolver {

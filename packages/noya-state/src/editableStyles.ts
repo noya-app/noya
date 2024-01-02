@@ -1,9 +1,9 @@
+import { FontTraits, decodeFontName } from '@noya-app/noya-fonts';
 import { isDeepEqual, zipLongest } from '@noya-app/noya-utils';
 import { SketchPattern } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { decodeFontName, FontTraits } from 'noya-fonts';
 import { SketchModel } from 'noya-sketch-model';
-import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
+import { Selectors, getMultiNumberValue, getMultiValue } from 'noya-state';
 import { SimpleTextDecoration } from './primitives';
 
 export type EditableTextStyle = {

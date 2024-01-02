@@ -1,4 +1,4 @@
-import { Emitter } from 'noya-fonts';
+import { Emitter } from '@noya-app/noya-fonts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const ClientStorageDefinitions = {

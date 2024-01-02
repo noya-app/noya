@@ -1,4 +1,4 @@
-import { Emitter } from 'noya-fonts';
+import { Emitter } from '@noya-app/noya-fonts';
 
 function getRedirectURL(url: string) {
   return new Promise<string>((resolve) => {

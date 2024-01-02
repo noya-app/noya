@@ -1,7 +1,7 @@
+import { FontId, FontManager, SYSTEM_FONT_ID } from '@noya-app/noya-fonts';
+import { GoogleFontProvider } from '@noya-app/noya-google-fonts';
 import { SuspendedValue, useMutableState } from '@noya-app/react-utils';
 import { TypefaceFontProvider } from 'canvaskit';
-import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
-import { GoogleFontProvider } from 'noya-google-fonts';
 import { getPublicPath } from 'noya-public-path';
 import React, {
   ReactNode,

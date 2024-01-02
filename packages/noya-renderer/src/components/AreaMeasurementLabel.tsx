@@ -1,5 +1,5 @@
+import { SYSTEM_FONT_ID } from '@noya-app/noya-fonts';
 import { Size } from '@noya-app/noya-geometry';
-import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { useColorFill } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { Rect, Text } from '../ComponentsContext';

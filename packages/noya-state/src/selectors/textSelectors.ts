@@ -1,3 +1,4 @@
+import { SYSTEM_FONT_ID } from '@noya-app/noya-fonts';
 import {
   AffineTransform,
   Point,
@@ -10,7 +11,6 @@ import {
 import { memoize, unique } from '@noya-app/noya-utils';
 import { CanvasKit } from 'canvaskit';
 import Sketch from 'noya-file-format';
-import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,

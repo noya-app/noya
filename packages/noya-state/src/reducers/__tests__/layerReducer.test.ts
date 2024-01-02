@@ -1,6 +1,6 @@
+import { FontManager } from '@noya-app/noya-fonts';
+import { GoogleFontProvider } from '@noya-app/noya-google-fonts';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
-import { FontManager } from 'noya-fonts';
-import { GoogleFontProvider } from 'noya-google-fonts';
 import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import {

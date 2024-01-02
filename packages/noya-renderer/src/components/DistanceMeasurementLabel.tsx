@@ -1,3 +1,4 @@
+import { SYSTEM_FONT_ID } from '@noya-app/noya-fonts';
 import {
   AffineTransform,
   distance,
@@ -6,7 +7,6 @@ import {
   Size,
 } from '@noya-app/noya-geometry';
 import { round } from '@noya-app/noya-utils';
-import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { useColorFill } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';

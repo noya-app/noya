@@ -2960,12 +2960,29 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-app/noya-geometry@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-geometry/-/noya-geometry-0.0.5.tgz#0a5246c4a951cfcb0bfdfa4774e340983dda0b23"
-  integrity sha512-U/z9ZIMSwV0fWOLMGyV5OVOq0DhF6EN8lO2205wObR6HPeZmvSDxwmby24tK7PQHSgmtjMGrhZeNqHYyvWNK+w==
+"@noya-app/noya-fonts@*":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-fonts/-/noya-fonts-0.0.2.tgz#1b4141845d27afc293c2a4253a0bd0d2b6567004"
+  integrity sha512-6h3mtdLx7AgzvFG3sSwYP9k8rj8XbUEGY037+RF0ZOeI3sVEBAl+G724zZd2ZrKj7Q9TXhnqEQGhVBelx3w6RA==
+
+"@noya-app/noya-fonts@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-fonts/-/noya-fonts-0.0.3.tgz#0d8ad963f9522bfce654ffa964cbcf2c21a3d84f"
+  integrity sha512-eppDa3LQ6/V8S05f9kzx/Ya+HZSEaA8uyDa//f/UmSVhGc35nao6kXjf1VW0dAuhDvcaRpxleT6GHgdApZavSA==
+
+"@noya-app/noya-geometry@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-geometry/-/noya-geometry-0.0.6.tgz#4f661683eb7dfddb217a15a71da4c0dca540a22f"
+  integrity sha512-nCsk6y39EWytGggyas8JHrWMgUtcWThDtBMZdLTKLMHtfvavcATNMgKArswPXN5pZYDY7ZVP2boSncFxj6Pj6g==
   dependencies:
-    "@noya-app/noya-utils" "0.0.5"
+    "@noya-app/noya-utils" "0.0.6"
+
+"@noya-app/noya-google-fonts@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-google-fonts/-/noya-google-fonts-0.0.3.tgz#2ecdd0bf8a69c2f6c6e4377d08bec9806fd0c87a"
+  integrity sha512-Ld/tQh1pCIvP2p6/1aVZ4Ha84GnHRti+QjQLwODC4AtODyy0cHLdbiWvaIguZTKkX3+ivwa2U62Vlx6JQhsMjw==
+  dependencies:
+    "@noya-app/noya-fonts" "*"
 
 "@noya-app/noya-keymap@^0.0.3":
   version "0.0.3"
@@ -2974,17 +2991,17 @@
   dependencies:
     w3c-keyname "^2.2.8"
 
-"@noya-app/noya-utils@0.0.5", "@noya-app/noya-utils@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-utils/-/noya-utils-0.0.5.tgz#fbc4904ec39b6a8523a1b9071c55e6650b8dfa83"
-  integrity sha512-A2CseGkn7g7qLHjSdc4kS3/JSslajNpkspUosJaEaq1dvw3KiJY28KZIJ/bGmQImA7zvwByXHC3pD0JY2N8I0Q==
+"@noya-app/noya-utils@0.0.6", "@noya-app/noya-utils@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-utils/-/noya-utils-0.0.6.tgz#e11b944561e9dada409a00d980d9297d0adc82da"
+  integrity sha512-61gmyuYaPHENgtATgncCTAlYydITntBu1Nos/JB9hemZzmddjVmSo1SnsSGj7/jYCTxEMhl/k6sKhhe92j4jEg==
   dependencies:
     uuid "^9.0.1"
 
-"@noya-app/react-utils@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@noya-app/react-utils/-/react-utils-0.0.3.tgz#6473a7e858e4e7a83664df73ba90b5b292c0b131"
-  integrity sha512-8C3yaa0tWphnNaBeWS/b5hAG2DrOxPWJGa06y+s4Vj57lEwz1NPvkMRE5lIioNUkSpyCvdf562f/RU4l0ITwMA==
+"@noya-app/react-utils@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@noya-app/react-utils/-/react-utils-0.0.4.tgz#3220f3e713164cc01897150f5f22f541a9ee3686"
+  integrity sha512-Xa7djzuEBiaNUOtL7p/mg+zRpqMIR5tMLFgrUutAtiy6/XIMqnRw+RvU5jE27wU3dRc9ckb3CnSRZxmVSMt9Pw==
   dependencies:
     cross-fetch "^4.0.0"
 
