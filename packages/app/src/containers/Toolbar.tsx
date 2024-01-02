@@ -15,6 +15,7 @@ import {
   Spacer,
   Tooltip,
   createSectionedMenu,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import { LayerIcon } from 'noya-inspector';
 import {
@@ -24,7 +25,7 @@ import {
   Selectors,
 } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 type InteractionStateProjection =
   | {
@@ -79,7 +80,7 @@ const ToolbarContent = memo(function ToolbarContent({
 }: Props) {
   const dispatch = useDispatch();
 
-  const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
+  const itemSeparatorSize = useDesignSystemTheme().sizes.toolbar.itemSeparator;
 
   const interactionType = interactionStateProjection.type;
   const isInsertingLayerType =

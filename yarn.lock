@@ -2960,7 +2960,17 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-app/noya-file-format@^0.0.1":
+"@noya-app/noya-colorpicker@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-colorpicker/-/noya-colorpicker-0.0.2.tgz#59b5bd35021bfc9b0141254e84905b64e4666f84"
+  integrity sha512-UwEN18h2dipD8C1bS/0cNuzjtwDYH5/h5SvHf64zxk8SLaimOt2fhMYT1p/hWFaQFm2zQW3vm30bI2aXysofOw==
+  dependencies:
+    "@noya-app/noya-file-format" "0.0.1"
+    "@noya-app/noya-utils" "0.0.6"
+    "@noya-app/react-utils" "0.0.4"
+    styled-components "5.3.0"
+
+"@noya-app/noya-file-format@0.0.1", "@noya-app/noya-file-format@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-file-format/-/noya-file-format-0.0.1.tgz#add1d85684d9abe7aafeb80214c69330acaa4267"
   integrity sha512-llX+YoWxhzrzZt4VhY62XCoNsSXzc4XOx10doHTrvYSwvaL4PX07DZtuH+30TlXF9PtZqonENgztMLpHfeOkKw==
@@ -3010,7 +3020,7 @@
   dependencies:
     uuid "^9.0.1"
 
-"@noya-app/react-utils@^0.0.4":
+"@noya-app/react-utils@0.0.4", "@noya-app/react-utils@^0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@noya-app/react-utils/-/react-utils-0.0.4.tgz#3220f3e713164cc01897150f5f22f541a9ee3686"
   integrity sha512-Xa7djzuEBiaNUOtL7p/mg+zRpqMIR5tMLFgrUutAtiy6/XIMqnRw+RvU5jE27wU3dRc9ckb3CnSRZxmVSMt9Pw==
@@ -18375,7 +18385,7 @@ style-value-types@5.0.0:
     hey-listen "^1.0.8"
     tslib "^2.1.0"
 
-styled-components@^5.2.1:
+styled-components@5.3.0, styled-components@^5.2.1:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-5.3.0.tgz#e47c3d3e9ddfff539f118a3dd0fd4f8f4fb25727"
   integrity sha512-bPJKwZCHjJPf/hwTJl6TbkSZg/3evha+XPEizrZUGb535jLImwDUdjTNxXqjjaASt2M4qO4AVfoHJNe3XB/tpQ==

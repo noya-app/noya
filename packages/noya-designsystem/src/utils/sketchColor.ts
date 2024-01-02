@@ -1,10 +1,10 @@
-import type { Sketch } from '@noya-app/noya-file-format';
 import {
   hsvaToRgbaString,
   RgbaColor,
   rgbaToHex,
   rgbaToHsva,
-} from 'noya-colorpicker';
+} from '@noya-app/noya-colorpicker';
+import type { Sketch } from '@noya-app/noya-file-format';
 
 export function sketchColorToRgba(value: Sketch.Color): RgbaColor {
   return {

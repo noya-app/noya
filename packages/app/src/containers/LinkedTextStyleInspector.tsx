@@ -7,11 +7,15 @@ import {
 } from '@noya-app/noya-icons';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Button, Select, useOpenInputDialog } from 'noya-designsystem';
+import {
+  Button,
+  Select,
+  useDesignSystemTheme,
+  useOpenInputDialog,
+} from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useTheme } from 'styled-components';
 
 const NO_TEXT_STYLE = 'none';
 
@@ -19,7 +23,7 @@ export default memo(function ThemeTextInspector() {
   const [, dispatch] = useApplicationState();
   const openDialog = useOpenInputDialog();
 
-  const iconColor = useTheme().colors.icon;
+  const iconColor = useDesignSystemTheme().colors.icon;
 
   const sharedTextStyles = useShallowArray(
     useSelector(Selectors.getSharedTextStyles),

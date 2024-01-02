@@ -13,7 +13,12 @@ import {
   useGetWorkspaceStateSnapshot,
   useSelector,
 } from 'noya-app-state-context';
-import { Button, Divider, withSeparatorElements } from 'noya-designsystem';
+import {
+  Button,
+  Divider,
+  useDesignSystemTheme,
+  withSeparatorElements,
+} from 'noya-designsystem';
 import { ImageEncoding, generateImage } from 'noya-generate-image';
 import {
   ArrayController,
@@ -25,7 +30,6 @@ import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { PageLayer, Selectors } from 'noya-state';
 import { CanvasPreviewItem } from 'noya-theme-editor';
 import React, { memo, useCallback } from 'react';
-import { useTheme } from 'styled-components';
 
 export const ExportPreviewRow = memo(function ExportPreviewRow({
   layer,
@@ -90,7 +94,7 @@ function getExportSize(exportFormat: Sketch.ExportFormat, size: Size) {
 export default memo(function ExportInspector() {
   const title = 'Exports';
   const dispatch = useDispatch();
-  const theme = useTheme();
+  const theme = useDesignSystemTheme();
   const CanvasKit = useCanvasKit();
   const getWorkspaceStateSnapshot = useGetWorkspaceStateSnapshot();
 

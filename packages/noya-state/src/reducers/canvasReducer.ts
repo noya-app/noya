@@ -1,3 +1,4 @@
+import { interpolateRgba } from '@noya-app/noya-colorpicker';
 import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
@@ -21,7 +22,6 @@ import {
 import { lerp, uuid, zip } from '@noya-app/noya-utils';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { interpolateRgba } from 'noya-colorpicker';
 import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';

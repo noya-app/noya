@@ -1,4 +1,3 @@
-import type { Sketch } from '@noya-app/noya-file-format';
 import {
   Alpha,
   ColorModel,
@@ -10,7 +9,8 @@ import {
   equalColorObjects,
   hsvaToRgba,
   rgbaToHsva,
-} from 'noya-colorpicker';
+} from '@noya-app/noya-colorpicker';
+import type { Sketch } from '@noya-app/noya-file-format';
 import React, { memo, useCallback, useMemo } from 'react';
 import { Spacer } from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';

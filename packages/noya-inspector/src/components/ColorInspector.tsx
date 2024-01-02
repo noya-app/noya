@@ -1,8 +1,11 @@
+import {
+  SketchColorPicker,
+  hexToRgba,
+  validHex,
+} from '@noya-app/noya-colorpicker';
 import type { Sketch } from '@noya-app/noya-file-format';
 import { clamp } from '@noya-app/noya-utils';
-import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
-  ColorPicker,
   InputField,
   Label,
   LabeledElementView,
@@ -84,7 +87,7 @@ export const ColorInspector = memo(function ColorInspector({
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Column>
-        <ColorPicker value={displayColor} onChange={onChangeColor} />
+        <SketchColorPicker value={displayColor} onChange={onChangeColor} />
         <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row id={id}>
           <LabeledElementView renderLabel={renderLabel}>

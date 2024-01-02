@@ -1,6 +1,6 @@
+import { rgbaToHex } from '@noya-app/noya-colorpicker';
 import { Sketch } from '@noya-app/noya-file-format';
 import { delimitedPath, sortBy } from '@noya-app/noya-utils';
-import { rgbaToHex } from 'noya-colorpicker';
 import {
   GridView,
   sketchColorToRgba,

@@ -7,10 +7,15 @@ import {
   TrashIcon,
 } from '@noya-app/noya-icons';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Button, RadioGroup, Spacer } from 'noya-designsystem';
+import {
+  Button,
+  RadioGroup,
+  Spacer,
+  useDesignSystemTheme,
+} from 'noya-designsystem';
 import { Selectors, ThemeTab } from 'noya-state';
 import React, { useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 const TabsContainer = styled.div(({ theme }) => ({
   minWidth: `${54 * 4}px`,
@@ -30,7 +35,7 @@ export default function SwatchesToolbar() {
   const [, dispatch] = useApplicationState();
   const {
     sizes: { sidebarWidth },
-  } = useTheme();
+  } = useDesignSystemTheme();
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
   const handleChangeTab = useCallback(

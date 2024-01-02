@@ -14,6 +14,7 @@ import {
   RelativeDropPosition,
   Spacer,
   TreeView,
+  useDesignSystemTheme,
 } from 'noya-designsystem';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, {
@@ -23,7 +24,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 import { PagePreviewItem } from './PagePreviewItem';
 
 const Container = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
@@ -123,7 +124,7 @@ const PageListContent = memo(function PageListContent({
 }: Props) {
   const dispatch = useDispatch();
   const { icon: iconColor, iconSelected: iconSelectedColor } =
-    useTheme().colors;
+    useDesignSystemTheme().colors;
   const [editingPage, setEditingPage] = useState<string | undefined>();
   const [isExpanded, setIsExpanded] = useState(true);
 

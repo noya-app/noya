@@ -178,7 +178,7 @@ const DropdownMenuRoot = forwardRef(function DropdownMenuRoot<T extends string>(
           sideOffset={4}
           style={contentStyle}
           collisionPadding={8}
-          {...{ onCloseAutoFocus }}
+          {...({ onCloseAutoFocus } as any)}
         >
           {items.map((item, index) =>
             item === SEPARATOR_ITEM ? (

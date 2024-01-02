@@ -1,5 +1,5 @@
+import { hexToRgba, validHex } from '@noya-app/noya-colorpicker';
 import { Sketch } from '@noya-app/noya-file-format';
-import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   InputField,
   Label,
