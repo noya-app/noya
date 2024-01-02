@@ -1,4 +1,4 @@
-import { Cross1Icon, PlusIcon } from 'noya-icons';
+import { Cross1Icon, PlusIcon } from '@noya-app/noya-icons';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { useDesignSystemTheme } from '../contexts/DesignSystemConfiguration';

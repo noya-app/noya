@@ -1,4 +1,5 @@
 import { Rect, Size } from '@noya-app/noya-geometry';
+import { RocketIcon } from '@noya-app/noya-icons';
 import { upperFirst } from '@noya-app/noya-utils';
 import {
   asyncIterableToString,
@@ -20,7 +21,6 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { RocketIcon } from 'noya-icons';
 import React, {
   ReactElement,
   memo,

@@ -10,7 +10,7 @@ import {
   Share1Icon,
   SquareIcon,
   TextIcon,
-} from 'noya-icons';
+} from '@noya-app/noya-icons';
 import { PageLayer } from 'noya-state';
 import React, { memo } from 'react';
 import { useTheme } from 'styled-components';

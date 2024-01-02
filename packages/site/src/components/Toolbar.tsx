@@ -1,3 +1,17 @@
+import {
+  ChevronDownIcon,
+  DiscordLogoIcon,
+  EnvelopeClosedIcon,
+  ExitIcon,
+  InfoCircledIcon,
+  ListBulletIcon,
+  MoonIcon,
+  PersonIcon,
+  QuestionMarkCircledIcon,
+  SunIcon,
+  VideoIcon,
+  ViewHorizontalIcon,
+} from '@noya-app/noya-icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
@@ -13,20 +27,6 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import {
-  ChevronDownIcon,
-  DiscordLogoIcon,
-  EnvelopeClosedIcon,
-  ExitIcon,
-  InfoCircledIcon,
-  ListBulletIcon,
-  MoonIcon,
-  PersonIcon,
-  QuestionMarkCircledIcon,
-  SunIcon,
-  VideoIcon,
-  ViewHorizontalIcon,
-} from 'noya-icons';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';

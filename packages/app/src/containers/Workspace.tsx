@@ -1,4 +1,5 @@
 import { Size } from '@noya-app/noya-geometry';
+import { MagnifyingGlassIcon } from '@noya-app/noya-icons';
 import { AutoSizer, useSystemColorScheme } from '@noya-app/react-utils';
 import produce from 'immer';
 import { useSelector, useWorkspace } from 'noya-app-state-context';
@@ -13,7 +14,6 @@ import {
   lightTheme,
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
-import { MagnifyingGlassIcon } from 'noya-icons';
 import { DesignFile } from 'noya-renderer';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, { ReactNode, memo, useCallback, useMemo, useState } from 'react';

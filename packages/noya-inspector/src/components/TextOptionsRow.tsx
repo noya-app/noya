@@ -1,15 +1,15 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import {
+  LetterCaseCapitalizeIcon,
+  LetterCaseLowercaseIcon,
+  LetterCaseUppercaseIcon,
+} from '@noya-app/noya-icons';
+import {
   Label,
   LabeledElementView,
   RadioGroup,
   Select,
 } from 'noya-designsystem';
-import {
-  LetterCaseCapitalizeIcon,
-  LetterCaseLowercaseIcon,
-  LetterCaseUppercaseIcon,
-} from 'noya-icons';
 import { SimpleTextDecoration } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

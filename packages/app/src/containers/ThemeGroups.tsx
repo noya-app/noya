@@ -1,9 +1,9 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { GroupIcon } from '@noya-app/noya-icons';
 import { sortBy } from '@noya-app/noya-utils';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { TreeView } from 'noya-designsystem';
-import { GroupIcon } from 'noya-icons';
 import { Selectors } from 'noya-state';
 import { createThemeGroups } from 'noya-theme-editor';
 import React, { memo, useCallback, useMemo } from 'react';

@@ -1,9 +1,9 @@
+import { DragHandleDots2Icon } from '@noya-app/noya-icons';
 import {
   DropdownMenu,
   MenuItem,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { DragHandleDots2Icon } from 'noya-icons';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 

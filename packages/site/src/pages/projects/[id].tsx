@@ -1,4 +1,5 @@
 import { Size } from '@noya-app/noya-geometry';
+import { StarFilledIcon } from '@noya-app/noya-icons';
 import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import { debounce } from '@noya-app/noya-utils';
 import { useRouter } from 'next/router';
@@ -17,7 +18,6 @@ import {
   lightTheme,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { StarFilledIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import React, {
   ReactNode,

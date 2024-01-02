@@ -1,6 +1,6 @@
+import { CheckIcon, ChevronRightIcon } from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
-import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import React, {
   ReactElement,
   ReactNode,

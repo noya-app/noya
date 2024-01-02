@@ -1,4 +1,4 @@
-import * as Icons from 'noya-icons';
+import * as Icons from '@noya-app/noya-icons';
 import React, {
   CSSProperties,
   ForwardedRef,

@@ -1,6 +1,6 @@
+import { SlashIcon } from '@noya-app/noya-icons';
 import Link from 'next/link';
 import { Text } from 'noya-designsystem';
-import { SlashIcon } from 'noya-icons';
 import React, { forwardRef, memo } from 'react';
 import styled from 'styled-components';
 

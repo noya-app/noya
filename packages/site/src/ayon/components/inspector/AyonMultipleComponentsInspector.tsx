@@ -1,5 +1,5 @@
+import { ViewHorizontalIcon, ViewVerticalIcon } from '@noya-app/noya-icons';
 import { Button, Spacer } from 'noya-designsystem';
-import { ViewHorizontalIcon, ViewVerticalIcon } from 'noya-icons';
 import React, { memo, useCallback } from 'react';
 import { InspectorSection } from '../../../components/InspectorSection';
 import { useAyonDispatch } from '../../state/ayonState';

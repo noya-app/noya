@@ -1,9 +1,9 @@
+import * as Icons from '@noya-app/noya-icons';
 import produce from 'immer';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { darkTheme, Divider, Stack } from 'noya-designsystem';
-import * as Icons from 'noya-icons';
 import { amplitude } from 'noya-log';
 import React, {
   ComponentProps,
@@ -129,7 +129,7 @@ const MDXComponents = {
       <Component style={{ display: 'inline', verticalAlign: 'text-top' }} />
     );
   },
-  table: (props: React.ComponentProps<typeof PageComponents['table']>) => (
+  table: (props: React.ComponentProps<(typeof PageComponents)['table']>) => (
     <ScrollableTableContainer>
       <StyledTable {...props} />
     </ScrollableTableContainer>

@@ -1,5 +1,5 @@
+import { FlipHorizontalIcon, FlipVerticalIcon } from '@noya-app/noya-icons';
 import { Button, Spacer } from 'noya-designsystem';
-import { FlipHorizontalIcon, FlipVerticalIcon } from 'noya-icons';
 import React, { memo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 

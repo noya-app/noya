@@ -1,3 +1,27 @@
+import {
+  BoxModelIcon,
+  CaretDownIcon,
+  ClipboardCopyIcon,
+  ClipboardIcon,
+  CopyIcon,
+  DropdownMenuIcon,
+  EnterIcon,
+  ExitIcon,
+  FontStyleIcon,
+  GlobeIcon,
+  ImageIcon,
+  InputIcon,
+  Link1Icon,
+  MixerHorizontalIcon,
+  OpenInNewWindowIcon,
+  PlusCircledIcon,
+  ShuffleIcon,
+  ThickArrowDownIcon,
+  ThickArrowUpIcon,
+  TrashIcon,
+  UploadIcon,
+  VercelLogoIcon,
+} from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { isDeepEqual, uuid } from '@noya-app/noya-utils';
 import { fileOpen } from 'browser-fs-access';
@@ -33,30 +57,6 @@ import {
   useDesignSystemTheme,
   useOpenInputDialog,
 } from 'noya-designsystem';
-import {
-  BoxModelIcon,
-  CaretDownIcon,
-  ClipboardCopyIcon,
-  ClipboardIcon,
-  CopyIcon,
-  DropdownMenuIcon,
-  EnterIcon,
-  ExitIcon,
-  FontStyleIcon,
-  GlobeIcon,
-  ImageIcon,
-  InputIcon,
-  Link1Icon,
-  MixerHorizontalIcon,
-  OpenInNewWindowIcon,
-  PlusCircledIcon,
-  ShuffleIcon,
-  ThickArrowDownIcon,
-  ThickArrowUpIcon,
-  TrashIcon,
-  UploadIcon,
-  VercelLogoIcon,
-} from 'noya-icons';
 import React, {
   forwardRef,
   memo,

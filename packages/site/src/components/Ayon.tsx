@@ -1,5 +1,14 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
+import {
+  ChevronDownIcon,
+  FigmaLogoIcon,
+  FileIcon,
+  ImageIcon,
+  PlusIcon,
+  SketchLogoIcon,
+  TransformIcon,
+} from '@noya-app/noya-icons';
 import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
@@ -15,15 +24,6 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import {
-  ChevronDownIcon,
-  FigmaLogoIcon,
-  FileIcon,
-  ImageIcon,
-  PlusIcon,
-  SketchLogoIcon,
-  TransformIcon,
-} from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { setPublicPath } from 'noya-public-path';
 import {

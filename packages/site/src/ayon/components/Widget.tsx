@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { transformRect } from '@noya-app/noya-geometry';
+import { ChevronDownIcon } from '@noya-app/noya-icons';
 import { fileOpen } from 'browser-fs-access';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
@@ -12,7 +13,6 @@ import {
   Spacer,
   Stack,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
 import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { ReactNode, useEffect, useMemo, useState } from 'react';

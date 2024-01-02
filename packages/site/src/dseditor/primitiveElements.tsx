@@ -1,5 +1,3 @@
-import { component } from '@noya-design-system/protocol';
-import { Model, NoyaPrimitiveElement } from 'noya-component';
 import {
   AvatarIcon,
   BadgeIcon,
@@ -15,7 +13,9 @@ import {
   SwitchIcon,
   TableIcon,
   TextIcon,
-} from 'noya-icons';
+} from '@noya-app/noya-icons';
+import { component } from '@noya-design-system/protocol';
+import { Model, NoyaPrimitiveElement } from 'noya-component';
 import React, { ReactNode } from 'react';
 import {
   avatarSymbolId,

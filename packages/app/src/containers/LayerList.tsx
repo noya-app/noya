@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
+import { ArrowDownIcon, MaskOnIcon } from '@noya-app/noya-icons';
 import { isDeepEqual } from '@noya-app/noya-utils';
 import { useDeepMemo, useShallowArray } from '@noya-app/react-utils';
 import {
@@ -18,7 +19,6 @@ import {
   usePlatformModKey,
   withSeparatorElements,
 } from 'noya-designsystem';
-import { ArrowDownIcon, MaskOnIcon } from 'noya-icons';
 import { LayerIcon } from 'noya-inspector';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import React, {

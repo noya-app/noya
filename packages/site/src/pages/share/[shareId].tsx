@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from '@noya-app/noya-icons';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -12,7 +13,6 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ArrowRightIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';

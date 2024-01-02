@@ -1,4 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { DashboardIcon, FileIcon, StackIcon } from '@noya-app/noya-icons';
 import { uuid } from '@noya-app/noya-utils';
 import { useDeepMemo } from '@noya-app/react-utils';
 import {
@@ -14,7 +15,6 @@ import {
   Spacer,
   TreeView,
 } from 'noya-designsystem';
-import { DashboardIcon, FileIcon, StackIcon } from 'noya-icons';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, {
   memo,

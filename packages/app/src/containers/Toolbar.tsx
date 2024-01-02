@@ -1,3 +1,4 @@
+import { ChevronDownIcon, PointModeIcon } from '@noya-app/noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { round } from '@noya-app/noya-utils';
 import {
@@ -15,7 +16,6 @@ import {
   Tooltip,
   createSectionedMenu,
 } from 'noya-designsystem';
-import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { LayerIcon } from 'noya-inspector';
 import {
   DrawableLayerType,

@@ -1,3 +1,9 @@
+import {
+  ChevronDownIcon,
+  InputIcon,
+  OpenInNewWindowIcon,
+  TrashIcon,
+} from '@noya-app/noya-icons';
 import { findLastIndex, uuid } from '@noya-app/noya-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
@@ -28,12 +34,6 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import {
-  ChevronDownIcon,
-  InputIcon,
-  OpenInNewWindowIcon,
-  TrashIcon,
-} from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useState } from 'react';
 import {

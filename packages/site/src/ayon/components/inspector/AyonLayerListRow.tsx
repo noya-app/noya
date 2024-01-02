@@ -1,4 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { Component1Icon } from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { useApplicationState } from 'noya-app-state-context';
 import {
@@ -11,7 +12,6 @@ import {
   TreeView,
   createSectionedMenu,
 } from 'noya-designsystem';
-import { Component1Icon } from 'noya-icons';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { allClassNames } from 'noya-tailwind';
 import React, { useCallback, useEffect, useMemo } from 'react';

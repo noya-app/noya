@@ -1,14 +1,14 @@
 import { Sketch } from '@noya-app/noya-file-format';
-import { useShallowArray } from '@noya-app/react-utils';
-import { useDispatch, useSelector } from 'noya-app-state-context';
-import { Button, Select, useOpenInputDialog } from 'noya-designsystem';
 import {
   CursorTextIcon,
   LinkBreak2Icon,
   PlusIcon,
   ResetIcon,
   UpdateIcon,
-} from 'noya-icons';
+} from '@noya-app/noya-icons';
+import { useShallowArray } from '@noya-app/react-utils';
+import { useDispatch, useSelector } from 'noya-app-state-context';
+import { Button, Select, useOpenInputDialog } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Selectors, getMultiValue } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';

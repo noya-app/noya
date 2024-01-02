@@ -1,5 +1,13 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import {
+  PinBottomIcon,
+  PinLeftIcon,
+  PinRightIcon,
+  PinTopIcon,
+  SpaceEvenlyHorizontallyIcon,
+  SpaceEvenlyVerticallyIcon,
+} from '@noya-app/noya-icons';
+import {
   Divider,
   InputField,
   Label,
@@ -7,14 +15,6 @@ import {
   RadioGroup,
   Spacer,
 } from 'noya-designsystem';
-import {
-  PinBottomIcon,
-  PinLeftIcon,
-  PinRightIcon,
-  PinTopIcon,
-  SpaceEvenlyHorizontallyIcon,
-  SpaceEvenlyVerticallyIcon,
-} from 'noya-icons';
 import { GroupLayouts, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

@@ -1,3 +1,4 @@
+import { PlusIcon } from '@noya-app/noya-icons';
 import { debounce, uuid } from '@noya-app/noya-utils';
 import {
   EnhancedGeneratedPageName,
@@ -16,7 +17,6 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { PlusIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import React, {

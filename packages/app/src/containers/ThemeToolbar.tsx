@@ -1,5 +1,3 @@
-import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Button, RadioGroup, Spacer } from 'noya-designsystem';
 import {
   BlendingModeIcon,
   ComponentInstanceIcon,
@@ -7,7 +5,9 @@ import {
   MarginIcon,
   PlusIcon,
   TrashIcon,
-} from 'noya-icons';
+} from '@noya-app/noya-icons';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Button, RadioGroup, Spacer } from 'noya-designsystem';
 import { Selectors, ThemeTab } from 'noya-state';
 import React, { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';

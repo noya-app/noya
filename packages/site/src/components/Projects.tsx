@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { resize } from '@noya-app/noya-geometry';
+import { ChevronDownIcon, PlusIcon } from '@noya-app/noya-icons';
 import { formatDistance, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
 import { DS, NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
@@ -15,7 +16,6 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon, PlusIcon } from 'noya-icons';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useCallback, useEffect, useState } from 'react';

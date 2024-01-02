@@ -1,11 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import {
-  Label,
-  LabeledElementView,
-  RadioGroup,
-  Spacer,
-} from 'noya-designsystem';
-import {
   AlignCenterVerticallyIcon,
   PinBottomIcon,
   PinTopIcon,
@@ -16,7 +10,13 @@ import {
   TextAlignJustifyIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-} from 'noya-icons';
+} from '@noya-app/noya-icons';
+import {
+  Label,
+  LabeledElementView,
+  RadioGroup,
+  Spacer,
+} from 'noya-designsystem';
 import React, { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

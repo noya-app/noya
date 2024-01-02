@@ -1,5 +1,5 @@
+import { DashboardIcon, MixerVerticalIcon } from '@noya-app/noya-icons';
 import { NoyaAPI } from 'noya-api';
-import { DashboardIcon, MixerVerticalIcon } from 'noya-icons';
 import React from 'react';
 
 interface Props {

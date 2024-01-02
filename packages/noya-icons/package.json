@@ -1,9 +1,0 @@
-{
-  "name": "noya-icons",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "license": "UNLICENSED",
-  "dependencies": {
-    "@radix-ui/react-icons": "^1.1.1"
-  }
-}

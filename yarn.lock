@@ -2989,6 +2989,13 @@
   dependencies:
     "@noya-app/noya-fonts" "*"
 
+"@noya-app/noya-icons@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-icons/-/noya-icons-0.0.1.tgz#d03cdb1ada1623f7ad3573eb46984eea27d030be"
+  integrity sha512-or4ibuqNEzAxFh7yzjBCiQJS0Z+wNp4qYBN6cZFLvSrKSwgG52YmhLE7w8gMMO9Ga1WtrCnqCvzlh1uCbjHXZg==
+  dependencies:
+    "@radix-ui/react-icons" "^1.1.1"
+
 "@noya-app/noya-keymap@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-keymap/-/noya-keymap-0.0.3.tgz#8b63f83d7a33356c7b3fd655a12e67422b9ba786"

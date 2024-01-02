@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@noya-app/noya-icons';
 import { upperFirst } from '@noya-app/noya-utils';
 import { produce } from 'immer';
 import { DS } from 'noya-api';
@@ -7,7 +8,6 @@ import {
   Spacer,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { tailwindColors } from 'noya-tailwind';
 import React from 'react';

@@ -1,4 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { ResetIcon } from '@noya-app/noya-icons';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
@@ -7,7 +8,6 @@ import {
   Spacer,
   TreeView,
 } from 'noya-designsystem';
-import { ResetIcon } from 'noya-icons';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import React, { ReactNode, memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

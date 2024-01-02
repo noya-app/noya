@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@noya-app/noya-icons';
 import { NoyaAPI, useNoyaClient } from 'noya-api';
 import {
   Button,
@@ -7,7 +8,6 @@ import {
   createSectionedMenu,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { ChevronDownIcon } from 'noya-icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_DESIGN_SYSTEM } from '../../../components/DSContext';
 import { useAyonState } from '../../state/ayonState';

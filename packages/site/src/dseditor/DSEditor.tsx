@@ -1,3 +1,4 @@
+import { DownloadIcon } from '@noya-app/noya-icons';
 import { UTF16, findLast, uuid } from '@noya-app/noya-utils';
 import { useDeepState } from '@noya-app/react-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
@@ -30,7 +31,6 @@ import {
   useDesignSystemTheme,
 } from 'noya-designsystem';
 import { toZipFile } from 'noya-filesystem';
-import { DownloadIcon } from 'noya-icons';
 import { loadDesignSystem } from 'noya-module-loader';
 import React, {
   Dispatch,

@@ -1,3 +1,4 @@
+import { DotFilledIcon } from '@noya-app/noya-icons';
 import {
   Body,
   Button,
@@ -14,7 +15,6 @@ import {
   Stack,
   useDesignSystemTheme,
 } from 'noya-designsystem';
-import { DotFilledIcon } from 'noya-icons';
 import React from 'react';
 import PremiumTemplateMosaic from '../assets/PremiumTemplateMosaic.png';
 

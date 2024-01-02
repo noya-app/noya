@@ -1,6 +1,6 @@
+import { MoonIcon, SunIcon } from '@noya-app/noya-icons';
 import { ColorMode } from '@noya-design-system/protocol';
 import { RadioGroup, Small, Spacer } from 'noya-designsystem';
-import { MoonIcon, SunIcon } from 'noya-icons';
 import React from 'react';
 
 export function ColorModeInput({

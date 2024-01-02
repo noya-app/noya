@@ -1,3 +1,4 @@
+import { HamburgerMenuIcon } from '@noya-app/noya-icons';
 import {
   useDispatch,
   useGetStateSnapshot,
@@ -12,7 +13,6 @@ import {
   createSectionedMenu,
 } from 'noya-designsystem';
 import { ApplicationMenuItemType, applicationMenu } from 'noya-embedded';
-import { HamburgerMenuIcon } from 'noya-icons';
 import { InspectorPrimitives } from 'noya-inspector';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';

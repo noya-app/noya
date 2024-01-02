@@ -1,3 +1,8 @@
+import {
+  CaretRightIcon,
+  CheckCircledIcon,
+  CrossCircledIcon,
+} from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { upperFirst, uuid } from '@noya-app/noya-utils';
 import { useIsMounted } from '@noya-app/react-utils';
@@ -53,7 +58,6 @@ import {
   useOpenInputDialog,
   withSeparatorElements,
 } from 'noya-designsystem';
-import { CaretRightIcon, CheckCircledIcon, CrossCircledIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { JSONForm } from 'noya-jsonforms';
 import { getNewValue } from 'noya-state';

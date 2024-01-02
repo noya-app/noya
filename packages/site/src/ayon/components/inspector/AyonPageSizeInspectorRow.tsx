@@ -1,6 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { DesktopIcon, LaptopIcon, MobileIcon } from '@noya-app/noya-icons';
 import { GridView, Spacer, Stack, lightTheme } from 'noya-designsystem';
-import { DesktopIcon, LaptopIcon, MobileIcon } from 'noya-icons';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import React from 'react';
 import { useAyonDispatch } from '../../state/ayonState';
