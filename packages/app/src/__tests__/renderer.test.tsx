@@ -2,6 +2,7 @@ import { darkTheme } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { FontManager } from '@noya-app/noya-fonts';
 import { GoogleFontProvider } from '@noya-app/noya-google-fonts';
+import { decode } from '@noya-app/noya-sketch-file';
 import { act } from '@testing-library/react';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
@@ -11,7 +12,6 @@ import {
   loadCanvasKit,
   RenderingModeProvider,
 } from 'noya-renderer';
-import { decode } from 'noya-sketch-file';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,

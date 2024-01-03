@@ -1,9 +1,9 @@
 import { Insets, Size } from '@noya-app/noya-geometry';
+import { SketchFile } from '@noya-app/noya-sketch-file';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { DSConfig } from 'noya-api';
 import { IFontManager } from 'noya-renderer';
-import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
 import { CustomReducer } from './applicationReducer';

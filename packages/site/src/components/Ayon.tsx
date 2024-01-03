@@ -21,6 +21,7 @@ import {
   TransformIcon,
 } from '@noya-app/noya-icons';
 import { getCurrentPlatform } from '@noya-app/noya-keymap';
+import { SketchFile } from '@noya-app/noya-sketch-file';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -33,7 +34,6 @@ import {
   useCanvasKit,
   useFontManager,
 } from 'noya-renderer';
-import { SketchFile } from 'noya-sketch-file';
 import {
   Layers,
   Selectors,

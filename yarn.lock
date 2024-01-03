@@ -3008,6 +3008,15 @@
   resolved "https://registry.yarnpkg.com/@noya-app/noya-file-format/-/noya-file-format-0.0.1.tgz#add1d85684d9abe7aafeb80214c69330acaa4267"
   integrity sha512-llX+YoWxhzrzZt4VhY62XCoNsSXzc4XOx10doHTrvYSwvaL4PX07DZtuH+30TlXF9PtZqonENgztMLpHfeOkKw==
 
+"@noya-app/noya-filesystem@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-filesystem/-/noya-filesystem-0.0.1.tgz#9153da972e65bf9c1471227d0b95c385ae2007ac"
+  integrity sha512-vRZcT+wwA/ajSl0Rg91ar6DWqGaKfMoHy6QLm589egko59VXbBiINkg1GTmuBFdXhrS1Ks9FSdQKIfYp65rdLA==
+  dependencies:
+    fflate "^0.7.4"
+    imfs "^0.1.0"
+    tree-visit "0.4.1"
+
 "@noya-app/noya-fonts@*":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-fonts/-/noya-fonts-0.0.2.tgz#1b4141845d27afc293c2a4253a0bd0d2b6567004"
@@ -3045,6 +3054,20 @@
   integrity sha512-8ACXu9qLJj8sMkdCRUu3G3p68/l4omG/CTbnnxDc+bs7qA+2Va2Mgw033FVni8yx9j8L5z9LwzXG9ZJ7Jn3aeQ==
   dependencies:
     w3c-keyname "^2.2.8"
+
+"@noya-app/noya-sketch-file@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-sketch-file/-/noya-sketch-file-0.0.1.tgz#c92d618b764fb8f1cc56aa36995c47b64c10ab61"
+  integrity sha512-MVFcfId7IRWPybKhNPnNhigp6n5lG+z6ma+IT6XiAsjWVmK9+awjXvSyDSBLBf1l4PwDijv05Nt73r8WK27AWQ==
+  dependencies:
+    jszip "^3.5.0"
+
+"@noya-app/noya-sketch-model@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-sketch-model/-/noya-sketch-model-0.0.1.tgz#ce03453fec413552ff7e2fe117ebda67047799e7"
+  integrity sha512-qgj8isxM3SCTgSoWRAX3XQ0frdU8q9nG2YkpTkxzjW3wDaSD7urrp0Eh+dnL83OUP6XzGeGBMYkuNL7sa5ApSg==
+  dependencies:
+    tree-visit "^0.4.0"
 
 "@noya-app/noya-utils@0.0.6", "@noya-app/noya-utils@^0.0.6":
   version "0.0.6"
@@ -18910,6 +18933,11 @@ tr46@~0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
+
+tree-visit@0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/tree-visit/-/tree-visit-0.4.1.tgz#59266d2e6958d65646392419dd416697cb80386a"
+  integrity sha512-9UCTRmfBZq1sdJeXNBob25yXGjsWt75Uibu1vQr8ahveLqXMvbFooRrS8Ntct2GR8URgKsplXuJnKVMmoAtmvQ==
 
 tree-visit@^0.4.0:
   version "0.4.0"

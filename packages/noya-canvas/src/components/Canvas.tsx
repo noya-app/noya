@@ -18,6 +18,7 @@ import {
   createRect,
 } from '@noya-app/noya-geometry';
 import { KEYBOARD_SHORTCUT_PASSTHROUGH_CLASS } from '@noya-app/noya-keymap';
+import { decode } from '@noya-app/noya-sketch-file';
 import { FileDropTarget, OffsetPoint, TypedFile } from '@noya-app/react-utils';
 import {
   useApplicationState,
@@ -31,7 +32,6 @@ import {
   usePasteHandler,
 } from 'noya-canvas';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
-import { decode } from 'noya-sketch-file';
 import {
   ImportedImageTarget,
   Layers,

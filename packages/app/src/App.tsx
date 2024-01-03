@@ -1,5 +1,6 @@
 import { decodeFontName } from '@noya-app/noya-fonts';
 import { getCurrentPlatform, PlatformName } from '@noya-app/noya-keymap';
+import { decode, SketchFile } from '@noya-app/noya-sketch-file';
 import {
   castHashParameter,
   PromiseState,
@@ -15,7 +16,6 @@ import {
   useDownloadFont,
   useFontManager,
 } from 'noya-renderer';
-import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
   createSketchFile,

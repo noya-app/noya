@@ -6,6 +6,7 @@ import {
   createSectionedMenu,
 } from '@noya-app/noya-designsystem';
 import { HamburgerMenuIcon } from '@noya-app/noya-icons';
+import { decode, encode } from '@noya-app/noya-sketch-file';
 import {
   useDispatch,
   useGetStateSnapshot,
@@ -14,7 +15,6 @@ import {
 } from 'noya-app-state-context';
 import { ApplicationMenuItemType, applicationMenu } from 'noya-embedded';
 import { InspectorPrimitives } from 'noya-inspector';
-import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';

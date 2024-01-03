@@ -1,6 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchFile } from '@noya-app/noya-sketch-file';
 import { ComponentGroup, NoyaComponent } from 'noya-component';
-import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
 
 export type NoyaJson =

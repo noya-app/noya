@@ -1,5 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
-import { SketchFile } from 'noya-sketch-file';
+import { SketchFile } from '@noya-app/noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 
 export function createSketchFile(
