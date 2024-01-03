@@ -1,12 +1,12 @@
-import { ArrowRightIcon } from '@noya-app/noya-icons';
-import router from 'next/router';
 import {
   Button,
   Small,
   Spacer,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { ArrowRightIcon } from '@noya-app/noya-icons';
+import router from 'next/router';
 import React, { ReactNode } from 'react';
 
 export function Interstitial({

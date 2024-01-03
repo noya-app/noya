@@ -1,8 +1,3 @@
-import { ArrowRightIcon } from '@noya-app/noya-icons';
-import { GetServerSidePropsContext } from 'next';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { NoyaAPI } from 'noya-api';
 import {
   Chip,
   DesignSystemConfigurationProvider,
@@ -12,7 +7,12 @@ import {
   Spacer,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { ArrowRightIcon } from '@noya-app/noya-icons';
+import { GetServerSidePropsContext } from 'next';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { NoyaAPI } from 'noya-api';
 import { amplitude } from 'noya-log';
 import { Layers } from 'noya-state';
 import React, { useEffect, useState } from 'react';

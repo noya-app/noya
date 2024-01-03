@@ -1,4 +1,4 @@
-import { MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
+import { MenuItem, SEPARATOR_ITEM } from '@noya-app/noya-designsystem';
 
 export type ThemeMenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
 

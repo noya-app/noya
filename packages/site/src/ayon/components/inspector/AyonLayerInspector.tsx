@@ -1,13 +1,13 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { isDeepEqual, upperFirst, uuid } from '@noya-app/noya-utils';
-import { useApplicationState } from 'noya-app-state-context';
 import {
   RelativeDropPosition,
   Select,
   Stack,
   TreeView,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { isDeepEqual, upperFirst, uuid } from '@noya-app/noya-utils';
+import { useApplicationState } from 'noya-app-state-context';
 import { InspectorPrimitives } from 'noya-inspector';
 import { SketchModel } from 'noya-sketch-model';
 import {

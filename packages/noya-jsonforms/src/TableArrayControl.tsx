@@ -11,7 +11,7 @@ import {
   encode,
 } from '@jsonforms/core';
 import { DispatchCell, withJsonFormsArrayControlProps } from '@jsonforms/react';
-import { IconButton, Stack } from 'noya-designsystem';
+import { IconButton, Stack } from '@noya-app/noya-designsystem';
 import { ArrayController } from 'noya-inspector';
 import React from 'react';
 

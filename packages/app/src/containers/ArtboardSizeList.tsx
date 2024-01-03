@@ -1,5 +1,5 @@
+import { Select, Spacer, TreeView } from '@noya-app/noya-designsystem';
 import { useApplicationState } from 'noya-app-state-context';
-import { Select, Spacer, TreeView } from 'noya-designsystem';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 

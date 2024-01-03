@@ -1,10 +1,10 @@
+import { darkTheme, lightTheme } from '@noya-app/noya-designsystem';
 import { DSConfig } from 'noya-api';
 import {
   ComponentThumbnailChrome,
   NoyaResolvedNode,
   renderResolvedNode,
 } from 'noya-component';
-import { darkTheme, lightTheme } from 'noya-designsystem';
 import React from 'react';
 import { DSRenderProps } from './DSRenderer';
 import { closest } from './dom';

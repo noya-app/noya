@@ -1,7 +1,3 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { CheckIcon } from '@noya-app/noya-icons';
-import { isSameMonth, parseISO } from 'date-fns';
-import { NoyaAPI } from 'noya-api';
 import {
   Body,
   Button,
@@ -12,7 +8,11 @@ import {
   Spacer,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { CheckIcon } from '@noya-app/noya-icons';
+import { isSameMonth, parseISO } from 'date-fns';
+import { NoyaAPI } from 'noya-api';
 import { Layers } from 'noya-state';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';

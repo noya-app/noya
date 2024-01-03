@@ -7,8 +7,8 @@ import {
   rankWith,
 } from '@jsonforms/core';
 import { withJsonFormsCellProps } from '@jsonforms/react';
+import { InputField } from '@noya-app/noya-designsystem';
 import { round } from '@noya-app/noya-utils';
-import { InputField } from 'noya-designsystem';
 import React from 'react';
 
 const toNumber = (value: number, defaultValue: number | undefined) =>

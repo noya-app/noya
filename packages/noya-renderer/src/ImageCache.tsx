@@ -1,7 +1,8 @@
-import { Sketch } from '@noya-app/noya-file-format';
+import { ImageDataProvider } from '@noya-app/noya-designsystem';
 import { useIsMounted, useMutableState } from '@noya-app/react-utils';
 import { useApplicationState } from 'noya-app-state-context';
 import { generateImageFromPDF } from 'noya-pdf';
+import { FileMap } from 'noya-sketch-file';
 import React, {
   ReactNode,
   createContext,
@@ -10,6 +11,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
 } from 'react';
 
 type ImageCache = Record<string, ArrayBuffer>;
@@ -36,6 +38,7 @@ export const ImageCacheProvider = memo(function ImageCacheProvider({
   children,
 }: Props) {
   const [imageCache, updateImageCache] = useMutableState(globalImageCache);
+  const [state] = useApplicationState();
 
   const isMounted = useIsMounted();
 
@@ -55,9 +58,38 @@ export const ImageCacheProvider = memo(function ImageCacheProvider({
     [addImageToCache, imageCache],
   );
 
+  const isLoadingImageMapRef = useRef<Record<string, boolean>>({});
+
+  const getImageData = useCallback(
+    (ref: string) => {
+      const { imageData, pdfData } = getData(
+        ref,
+        imageCache,
+        state.sketch.images,
+      );
+
+      if (!imageData && pdfData) {
+        if (isLoadingImageMapRef.current[ref]) return;
+
+        isLoadingImageMapRef.current[ref] = true;
+
+        generateImageFromPDF(new Uint8Array(pdfData))
+          .then((blob) => blob.arrayBuffer())
+          .then((arrayBuffer) => {
+            addImageToCache(ref, arrayBuffer);
+          });
+      }
+
+      return imageData;
+    },
+    [addImageToCache, imageCache, state.sketch.images],
+  );
+
   return (
     <ImageCacheContext.Provider value={contextValue}>
-      {children}
+      <ImageDataProvider getImageData={getImageData}>
+        {children}
+      </ImageDataProvider>
     </ImageCacheContext.Provider>
   );
 });
@@ -72,26 +104,42 @@ function useImageCache(): ImageCacheContextValue {
   return value;
 }
 
-export function useSketchImage(image?: Sketch.FileRef | Sketch.DataRef) {
+export function useSketchImage(ref?: string) {
   const [state] = useApplicationState();
   const [imageCache, addImageToCache] = useImageCache();
 
-  const imageData = image
-    ? imageCache[image._ref] || state.sketch.images[image._ref]
-    : undefined;
-
-  const ref = image?._ref;
+  const { pdfData, imageData } = getData(ref, imageCache, state.sketch.images);
 
   useEffect(() => {
-    if (!ref || !ref.endsWith('.pdf') || !imageData || ref in imageCache)
-      return;
+    if (imageData || !ref || !pdfData) return;
 
-    generateImageFromPDF(new Uint8Array(imageData))
+    generateImageFromPDF(new Uint8Array(pdfData))
       .then((blob) => blob.arrayBuffer())
       .then((arrayBuffer) => {
         addImageToCache(ref, arrayBuffer);
       });
-  }, [addImageToCache, imageCache, imageData, ref]);
+  }, [addImageToCache, imageCache, imageData, pdfData, ref]);
 
   return imageData;
+}
+
+function getData(
+  ref: string | undefined,
+  imageCache: ImageCache,
+  fileMap: FileMap,
+) {
+  if (!ref) return {};
+
+  const isPDF = ref.endsWith('.pdf');
+
+  const imageData =
+    ref && ref in imageCache
+      ? imageCache[ref]
+      : !isPDF
+      ? fileMap[ref]
+      : undefined;
+
+  const pdfData = isPDF ? fileMap[ref] : undefined;
+
+  return { pdfData, imageData };
 }

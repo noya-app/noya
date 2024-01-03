@@ -1,13 +1,13 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { ResetIcon } from '@noya-app/noya-icons';
-import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
   InputField,
   Select,
   Spacer,
   TreeView,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { ResetIcon } from '@noya-app/noya-icons';
+import { useApplicationState } from 'noya-app-state-context';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import React, { ReactNode, memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

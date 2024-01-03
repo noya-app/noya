@@ -1,14 +1,14 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { ClipboardUtils } from '@noya-app/noya-utils';
-import { useShallowArray } from '@noya-app/react-utils';
-import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import {
   MenuConfig,
   MenuItem,
   RegularMenuItem,
   createSectionedMenu,
   useOpenInputDialog,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { ClipboardUtils } from '@noya-app/noya-utils';
+import { useShallowArray } from '@noya-app/react-utils';
+import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import { InteractionType, Layers, Selectors } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 

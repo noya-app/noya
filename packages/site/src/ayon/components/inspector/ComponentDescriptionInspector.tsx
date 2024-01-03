@@ -1,6 +1,11 @@
+import {
+  ActivityIndicator,
+  Button,
+  Select,
+  Spacer,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
-import { ActivityIndicator, Button, Select, Spacer } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback } from 'react';
 import { PRIMITIVE_TAG_MAP } from '../../../dseditor/primitiveElements';

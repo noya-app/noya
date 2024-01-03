@@ -1,7 +1,7 @@
+import { Divider, withSeparatorElements } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useDispatch, useSelector } from 'noya-app-state-context';
-import { Divider, withSeparatorElements } from 'noya-designsystem';
 import { LinkedSymbolRow, SymbolInstanceOverridesRow } from 'noya-inspector';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback } from 'react';

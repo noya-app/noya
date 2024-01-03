@@ -1,11 +1,3 @@
-import { PlusIcon } from '@noya-app/noya-icons';
-import { debounce, uuid } from '@noya-app/noya-utils';
-import {
-  EnhancedGeneratedPageName,
-  useGeneratedPageNames,
-  useNoyaClientOrFallback,
-} from 'noya-api';
-import { useWorkspace } from 'noya-app-state-context';
 import {
   Button,
   ExtractMenuItemType,
@@ -16,7 +8,15 @@ import {
   Spacer,
   createSectionedMenu,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { PlusIcon } from '@noya-app/noya-icons';
+import { debounce, uuid } from '@noya-app/noya-utils';
+import {
+  EnhancedGeneratedPageName,
+  useGeneratedPageNames,
+  useNoyaClientOrFallback,
+} from 'noya-api';
+import { useWorkspace } from 'noya-app-state-context';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import React, {

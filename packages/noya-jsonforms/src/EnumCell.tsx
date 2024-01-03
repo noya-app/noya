@@ -7,7 +7,7 @@ import {
   rankWith,
 } from '@jsonforms/core';
 import { withJsonFormsEnumCellProps } from '@jsonforms/react';
-import { Select, SelectOption } from 'noya-designsystem';
+import { Select, SelectOption } from '@noya-app/noya-designsystem';
 import React from 'react';
 
 export const EnumCell = (props: EnumCellProps) => {

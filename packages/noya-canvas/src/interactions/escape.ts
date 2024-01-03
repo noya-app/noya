@@ -1,4 +1,4 @@
-import { ReactEventHandlers } from 'noya-designsystem';
+import { ReactEventHandlers } from '@noya-app/noya-designsystem';
 import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 

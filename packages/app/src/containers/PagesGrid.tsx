@@ -1,5 +1,5 @@
+import { GridView, MenuItem } from '@noya-app/noya-designsystem';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { GridView, MenuItem } from 'noya-designsystem';
 import React, { memo, useCallback } from 'react';
 import { PagePreviewItem } from './PagePreviewItem';
 

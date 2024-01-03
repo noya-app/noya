@@ -1,4 +1,4 @@
-import { Select } from 'noya-designsystem';
+import { Select } from '@noya-app/noya-designsystem';
 import React, { useMemo, useState } from 'react';
 
 interface Props {

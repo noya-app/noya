@@ -1,5 +1,5 @@
+import { ScrollArea, Select } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
-import { ScrollArea, Select } from 'noya-designsystem';
 import { useDeletable } from 'noya-react-canvaskit';
 import { useCompileShader } from 'noya-renderer';
 import React, { ComponentProps, memo, useCallback, useMemo } from 'react';

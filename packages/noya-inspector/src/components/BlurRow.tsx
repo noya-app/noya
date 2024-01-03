@@ -1,6 +1,6 @@
+import { Select } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { invert } from '@noya-app/noya-utils';
-import { Select } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import { DimensionSliderRow } from './DimensionSliderRow';

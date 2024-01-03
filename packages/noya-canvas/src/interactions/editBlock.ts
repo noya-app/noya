@@ -1,4 +1,7 @@
-import { mergeEventHandlers, ReactEventHandlers } from 'noya-designsystem';
+import {
+  mergeEventHandlers,
+  ReactEventHandlers,
+} from '@noya-app/noya-designsystem';
 import {
   handleActionType,
   InferBlockType,

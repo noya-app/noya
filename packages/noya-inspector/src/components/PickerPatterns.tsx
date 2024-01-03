@@ -1,5 +1,9 @@
+import {
+  Divider,
+  PatternPreviewBackground,
+  Select,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
-import { Divider, PatternPreviewBackground, Select } from 'noya-designsystem';
 import React, { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';
@@ -21,7 +25,7 @@ const PatternSquare = memo(
         onClick={useCallback(() => onClick(item), [item, onClick])}
       >
         <PatternPreviewBackground
-          imageRef={item}
+          imageRef={item._ref}
           fillType={Sketch.PatternFillType.Fit}
           tileScale={1}
         />

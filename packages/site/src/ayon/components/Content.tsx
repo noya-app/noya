@@ -1,3 +1,4 @@
+import { DividerVertical, Stack } from '@noya-app/noya-designsystem';
 import { roundPoint } from '@noya-app/noya-geometry';
 import {
   FileDropTarget,
@@ -20,7 +21,6 @@ import {
   convertPoint,
 } from 'noya-canvas';
 import { ElementHierarchy, NoyaNode } from 'noya-component';
-import { DividerVertical, Stack } from 'noya-designsystem';
 import { amplitude } from 'noya-log';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';

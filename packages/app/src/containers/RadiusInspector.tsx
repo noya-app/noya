@@ -1,6 +1,6 @@
+import { InputField, Slider, Spacer } from '@noya-app/noya-designsystem';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { InputField, Slider, Spacer } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Selectors, getMultiNumberValue } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';

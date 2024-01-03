@@ -4,7 +4,7 @@ import {
   Spacer,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo } from 'react';
 import { ClientStorageKey, usePersistentState } from '../utils/clientStorage';

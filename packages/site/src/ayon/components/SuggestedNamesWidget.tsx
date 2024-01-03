@@ -1,6 +1,6 @@
+import { Button, Stack } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { Button, Stack } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import * as React from 'react';
 import { Stacking } from '../stacking';

@@ -1,7 +1,7 @@
+import { Button, Select } from '@noya-app/noya-designsystem';
 import { ComponentInstanceIcon, LinkBreak2Icon } from '@noya-app/noya-icons';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useSelector } from 'noya-app-state-context';
-import { Button, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';

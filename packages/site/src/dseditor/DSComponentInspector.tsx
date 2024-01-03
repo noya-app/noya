@@ -1,4 +1,24 @@
 import {
+  Button,
+  Chip,
+  Divider,
+  DropdownMenu,
+  IconButton,
+  InputField,
+  InputFieldWithCompletions,
+  ListView,
+  Popover,
+  ScrollArea,
+  Select,
+  Small,
+  Spacer,
+  Stack,
+  Text,
+  useDesignSystemTheme,
+  useOpenInputDialog,
+  withSeparatorElements,
+} from '@noya-app/noya-designsystem';
+import {
   CaretRightIcon,
   CheckCircledIcon,
   CrossCircledIcon,
@@ -38,26 +58,6 @@ import {
   createSelectionWithDiff,
   describeDiffItem,
 } from 'noya-component';
-import {
-  Button,
-  Chip,
-  Divider,
-  DropdownMenu,
-  IconButton,
-  InputField,
-  InputFieldWithCompletions,
-  ListView,
-  Popover,
-  ScrollArea,
-  Select,
-  Small,
-  Spacer,
-  Stack,
-  Text,
-  useDesignSystemTheme,
-  useOpenInputDialog,
-  withSeparatorElements,
-} from 'noya-designsystem';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { JSONForm } from 'noya-jsonforms';
 import { getNewValue } from 'noya-state';

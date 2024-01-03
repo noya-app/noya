@@ -1637,7 +1637,7 @@
   dependencies:
     tslib "^2.0.0"
 
-"@dnd-kit/core@^3.1.1":
+"@dnd-kit/core@3.1.1", "@dnd-kit/core@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@dnd-kit/core/-/core-3.1.1.tgz#c5ad6665931f5a51e74226220e58ac7514f3faf0"
   integrity sha512-18YY5+1lTqJbGSg6JBSa/fjAOTUYAysFrQ5Ti8oppEPHFacQbC+owM51y2z2KN0LkDHBfGZKw2sFT7++ttwfpA==
@@ -1646,7 +1646,7 @@
     "@dnd-kit/utilities" "^2.0.0"
     tslib "^2.0.0"
 
-"@dnd-kit/modifiers@^3.0.0":
+"@dnd-kit/modifiers@3.0.0", "@dnd-kit/modifiers@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@dnd-kit/modifiers/-/modifiers-3.0.0.tgz#d6fc85f31d634d856edbc23f623d63890f5a8616"
   integrity sha512-CmskqOcW4Bw61JP1Lqkx7cRzv9xQS/5seI+Q5eKhx+mS/MA5IrX2jgtMxvQ6PKYDnx2v/uHxqLNVhlvumtBTSQ==
@@ -1654,7 +1654,7 @@
     "@dnd-kit/utilities" "^2.0.0"
     tslib "^2.0.0"
 
-"@dnd-kit/sortable@^4.0.0":
+"@dnd-kit/sortable@4.0.0", "@dnd-kit/sortable@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@dnd-kit/sortable/-/sortable-4.0.0.tgz#81dd2b014a16527cf89602dc40060d9ee4dad352"
   integrity sha512-teYVFy6mQG/u6F6CaGxAkzPfiNJvguFzWfJ/zonYQRxfANHX6QJ6GziMG9KON/Ae9Q2ODJP8vib+guWJrDXeGg==
@@ -2960,7 +2960,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-app/noya-colorpicker@^0.0.2":
+"@noya-app/noya-colorpicker@0.0.2", "@noya-app/noya-colorpicker@^0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-colorpicker/-/noya-colorpicker-0.0.2.tgz#59b5bd35021bfc9b0141254e84905b64e4666f84"
   integrity sha512-UwEN18h2dipD8C1bS/0cNuzjtwDYH5/h5SvHf64zxk8SLaimOt2fhMYT1p/hWFaQFm2zQW3vm30bI2aXysofOw==
@@ -2969,6 +2969,39 @@
     "@noya-app/noya-utils" "0.0.6"
     "@noya-app/react-utils" "0.0.4"
     styled-components "5.3.0"
+
+"@noya-app/noya-designsystem@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-designsystem/-/noya-designsystem-0.0.3.tgz#89211cea322d87c2ea7d0d819809cef5d8278d76"
+  integrity sha512-gGZVGSkV09QM2DPYyVqiovc0+qCXHI4miq6cK8QJoQDTveJGDy39eMt92reKjiY6CcYVxH9OFzJ98y+mfL+f7w==
+  dependencies:
+    "@dnd-kit/core" "3.1.1"
+    "@dnd-kit/modifiers" "3.0.0"
+    "@dnd-kit/sortable" "4.0.0"
+    "@noya-app/noya-colorpicker" "0.0.2"
+    "@radix-ui/primitive" "^1.0.0"
+    "@radix-ui/react-avatar" "^1.0.1"
+    "@radix-ui/react-compose-refs" "^1.0.0"
+    "@radix-ui/react-context-menu" "^2.0.1"
+    "@radix-ui/react-dialog" "^1.0.2"
+    "@radix-ui/react-dropdown-menu" "^2.0.1"
+    "@radix-ui/react-popover" "^1.0.2"
+    "@radix-ui/react-progress" "^1.0.1"
+    "@radix-ui/react-radio-group" "^1.1.0"
+    "@radix-ui/react-scroll-area" "^1.0.2"
+    "@radix-ui/react-slider" "^1.1.0"
+    "@radix-ui/react-switch" "^1.0.1"
+    "@radix-ui/react-toast" "^1.1.4"
+    "@radix-ui/react-toggle-group" "^1.0.1"
+    "@radix-ui/react-tooltip" "^1.0.2"
+    "@radix-ui/react-utils" "^0.0.5"
+    immer "9.0.5"
+    kiwi.js "^1.1.3"
+    react-use-gesture "9.1.3"
+    react-virtualized "^9.22.3"
+    react-window "^1.8.8"
+    styled-components "5.3.0"
+    vscode-fuzzy-scorer "^0.0.4"
 
 "@noya-app/noya-file-format@0.0.1", "@noya-app/noya-file-format@^0.0.1":
   version "0.0.1"
@@ -4759,34 +4792,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-virtualized@^9.21.21":
-  version "9.21.21"
-  resolved "https://registry.yarnpkg.com/@types/react-virtualized/-/react-virtualized-9.21.21.tgz#65c96f25314f0fb3d40536929dc78112753b49e1"
-  integrity sha512-Exx6I7p4Qn+BBA1SRyj/UwQlZ0I0Pq7g7uhAp0QQ4JWzZunqEqNBGTmCmMmS/3N9wFgAGWuBD16ap7k8Y14VPA==
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/react" "^17"
-
-"@types/react-window@^1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@types/react-window/-/react-window-1.8.5.tgz#285fcc5cea703eef78d90f499e1457e9b5c02fc1"
-  integrity sha512-V9q3CvhC9Jk9bWBOysPGaWy/Z0lxYcTXLtLipkt2cnRj1JOSFNF7wqGpkScSXMgBwC+fnVRg/7shwgddBG5ICw==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react@*", "@types/react@>=16.9.0", "@types/react@^17.0.0":
   version "17.0.19"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.19.tgz#8f2a85e8180a43b57966b237d26a29481dacc991"
   integrity sha512-sX1HisdB1/ZESixMTGnMxH9TDe8Sk709734fEQZzCV/4lSu9kJCPbo2PbTRoZM+53Pp0P10hYVyReUueGwUi4A==
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/scheduler" "*"
-    csstype "^3.0.2"
-
-"@types/react@^17":
-  version "17.0.52"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.52.tgz#10d8b907b5c563ac014a541f289ae8eaa9bf2e9b"
-  integrity sha512-vwk8QqVODi0VaZZpDXQCmEmiOuyjEFPY7Ttaw5vjM112LOq37yz1CDJGrRJwA1fYEq4Iitd5rnjd1yWAc/bT+A==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -11375,7 +11384,7 @@ immediate@~3.0.5:
   resolved "https://registry.yarnpkg.com/immediate/-/immediate-3.0.6.tgz#9db1dbd0faf8de6fbe0f5dd5e56bb606280de69b"
   integrity sha1-nbHb0Pr43m++D13V5Wu2BigN5ps=
 
-immer@^9.0.5:
+immer@9.0.5, immer@^9.0.5:
   version "9.0.5"
   resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.5.tgz#a7154f34fe7064f15f00554cc94c66cc0bf453ec"
   integrity sha512-2WuIehr2y4lmYz9gaQzetPR2ECniCifk4ORaQbU3g5EalLt+0IVTosEPJ5BoYl/75ky2mivzdRzV8wWgQGOSYQ==
@@ -12915,6 +12924,11 @@ kiwi.js@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/kiwi.js/-/kiwi.js-1.1.2.tgz#814fa53602f7b095361be0e771ae9b32ebe5fdef"
   integrity sha512-O/6vug4T5j7eEBYdtxdI4BrPcJyp0qC0ai0oka2tGwJfbUXYSgCQil+dzzPmDCZxSkGcIvkaoQGy05tmCCfa5g==
+
+kiwi.js@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/kiwi.js/-/kiwi.js-1.1.3.tgz#8e62dd9714cdacd8f8d11cf654e0c6001ab3c403"
+  integrity sha512-aBA32N0LjuF0RIeV+OVhT8wnGAwdLYynKxkHbRvatI7yajOBM3OUjzTuzt3w9UnY9TYt7U65oe7U8EXlUHuTrQ==
 
 kleur@^3.0.3:
   version "3.0.3"
@@ -16512,7 +16526,7 @@ react-style-singleton@^2.2.1:
     invariant "^2.2.4"
     tslib "^2.0.0"
 
-react-use-gesture@^9.1.3:
+react-use-gesture@9.1.3, react-use-gesture@^9.1.3:
   version "9.1.3"
   resolved "https://registry.yarnpkg.com/react-use-gesture/-/react-use-gesture-9.1.3.tgz#92bd143e4f58e69bd424514a5bfccba2a1d62ec0"
   integrity sha512-CdqA2SmS/fj3kkS2W8ZU8wjTbVBAIwDWaRprX7OKaj7HlGwBasGEFggmk5qNklknqk9zK/h8D355bEJFTpqEMg==

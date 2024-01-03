@@ -1,6 +1,6 @@
+import { Stack } from '@noya-app/noya-designsystem';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Stack } from 'noya-designsystem';
 import React, { ComponentProps, ForwardedRef, forwardRef } from 'react';
 import styled from 'styled-components';
 

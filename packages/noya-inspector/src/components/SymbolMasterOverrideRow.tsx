@@ -1,6 +1,6 @@
+import { Divider, Spacer, TreeView } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
-import { Divider, Spacer, TreeView } from 'noya-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import React, { ReactNode, memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

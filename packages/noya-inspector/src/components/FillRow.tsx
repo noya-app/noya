@@ -1,5 +1,4 @@
 import { hexToRgba, validHex } from '@noya-app/noya-colorpicker';
-import { Sketch } from '@noya-app/noya-file-format';
 import {
   InputField,
   Label,
@@ -9,7 +8,8 @@ import {
   rgbaToSketchColor,
   sketchColorToHex,
   withSeparatorElements,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
 import { SetNumberMode } from 'noya-state';
 import React, { ReactNode, memo, useCallback, useMemo } from 'react';
 import { DimensionInput, DimensionValue } from './DimensionInput';

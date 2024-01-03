@@ -1,14 +1,4 @@
 import {
-  decodeQueryParameters,
-  encodeQueryParameters,
-} from '@noya-app/noya-utils';
-import {
-  AutoSizer,
-  castHashParameter,
-  useUrlHashParameters,
-} from '@noya-app/react-utils';
-import { useNetworkRequests } from 'noya-api';
-import {
   Chip,
   Divider,
   IconButton,
@@ -18,7 +8,17 @@ import {
   Spacer,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import {
+  decodeQueryParameters,
+  encodeQueryParameters,
+} from '@noya-app/noya-utils';
+import {
+  AutoSizer,
+  castHashParameter,
+  useUrlHashParameters,
+} from '@noya-app/react-utils';
+import { useNetworkRequests } from 'noya-api';
 import React, { memo, useMemo } from 'react';
 import { usePersistentState } from '../utils/clientStorage';
 

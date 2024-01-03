@@ -1,4 +1,20 @@
 import {
+  Button,
+  DropdownMenu,
+  ExtractMenuItemType,
+  IconButton,
+  InputField,
+  ListView,
+  RelativeDropPosition,
+  ScrollArea,
+  Select,
+  Spacer,
+  Stack,
+  Text,
+  createSectionedMenu,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
+import {
   ChevronDownIcon,
   InputIcon,
   OpenInNewWindowIcon,
@@ -18,22 +34,6 @@ import {
   flattenComponentGroups,
   getSavableComponentGroups,
 } from 'noya-component';
-import {
-  Button,
-  DropdownMenu,
-  ExtractMenuItemType,
-  IconButton,
-  InputField,
-  ListView,
-  RelativeDropPosition,
-  ScrollArea,
-  Select,
-  Spacer,
-  Stack,
-  Text,
-  createSectionedMenu,
-  useDesignSystemTheme,
-} from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { useState } from 'react';
 import {

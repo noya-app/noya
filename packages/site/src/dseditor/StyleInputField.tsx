@@ -1,5 +1,8 @@
+import {
+  InputFieldWithCompletions,
+  fuzzyFilter,
+} from '@noya-app/noya-designsystem';
 import { range } from '@noya-app/noya-utils';
-import { InputFieldWithCompletions, fuzzyFilter } from 'noya-designsystem';
 import { parseTailwindClass, stringifyTailwindClass } from 'noya-tailwind';
 import React, { forwardRef, useMemo } from 'react';
 import { primitiveElementStyleItems, styleItems } from './completionItems';

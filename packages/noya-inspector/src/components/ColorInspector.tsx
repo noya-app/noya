@@ -3,15 +3,15 @@ import {
   hexToRgba,
   validHex,
 } from '@noya-app/noya-colorpicker';
-import type { Sketch } from '@noya-app/noya-file-format';
-import { clamp } from '@noya-app/noya-utils';
 import {
   InputField,
   Label,
   LabeledElementView,
   rgbaToSketchColor,
   sketchColorToHex,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import type { Sketch } from '@noya-app/noya-file-format';
+import { clamp } from '@noya-app/noya-utils';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import { DimensionInput } from './DimensionInput';

@@ -1,4 +1,3 @@
-import { getCurrentPlatform, handleKeyboardEvent } from '@noya-app/noya-keymap';
 import {
   CompletionItem,
   CompletionListItem,
@@ -9,7 +8,8 @@ import {
   Small,
   Stack,
   fuzzyFilter,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { getCurrentPlatform, handleKeyboardEvent } from '@noya-app/noya-keymap';
 import React, {
   useCallback,
   useEffect,

@@ -1,3 +1,11 @@
+import {
+  InputField,
+  Label,
+  LabeledElementView,
+  MenuItem,
+  Select,
+  SelectOption,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import {
   DEFAULT_FONT_TRAITS,
@@ -6,14 +14,6 @@ import {
   encodeFontTraits,
   getTraitsDisplayName,
 } from '@noya-app/noya-fonts';
-import {
-  InputField,
-  Label,
-  LabeledElementView,
-  MenuItem,
-  Select,
-  SelectOption,
-} from 'noya-designsystem';
 import { useFontManager } from 'noya-renderer';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';

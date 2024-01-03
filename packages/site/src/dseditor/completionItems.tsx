@@ -1,6 +1,6 @@
+import { CompletionItem } from '@noya-app/noya-designsystem';
 import { StarIcon } from '@noya-app/noya-icons';
 import { range } from '@noya-app/noya-utils';
-import { CompletionItem } from 'noya-designsystem';
 import { allClassNames } from 'noya-tailwind';
 import React from 'react';
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';

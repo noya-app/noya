@@ -1,7 +1,7 @@
+import { MenuItem, SEPARATOR_ITEM } from '@noya-app/noya-designsystem';
 import { Emitter } from '@noya-app/noya-fonts';
 import { getCurrentPlatform, normalizeKeyName } from '@noya-app/noya-keymap';
 import type * as Electron from 'electron';
-import { MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
 import { hostApp } from './hostApp';
 

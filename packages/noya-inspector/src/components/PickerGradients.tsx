@@ -1,4 +1,3 @@
-import type { Sketch } from '@noya-app/noya-file-format';
 import {
   Button,
   ContextMenu,
@@ -9,7 +8,8 @@ import {
   Select,
   Spacer,
   useOpenInputDialog,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import type { Sketch } from '@noya-app/noya-file-format';
 import React, { memo, useCallback, useState } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 import {

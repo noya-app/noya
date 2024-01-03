@@ -1,4 +1,16 @@
 import {
+  Avatar,
+  Button,
+  DividerVertical,
+  DropdownMenu,
+  Popover,
+  Small,
+  Spacer,
+  Stack,
+  createSectionedMenu,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
+import {
   ChevronDownIcon,
   DiscordLogoIcon,
   EnvelopeClosedIcon,
@@ -15,18 +27,6 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useOptionalNoyaSession } from 'noya-api';
-import {
-  Avatar,
-  Button,
-  DividerVertical,
-  DropdownMenu,
-  Popover,
-  Small,
-  Spacer,
-  Stack,
-  createSectionedMenu,
-  useDesignSystemTheme,
-} from 'noya-designsystem';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { useOnboarding } from '../contexts/OnboardingContext';

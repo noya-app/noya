@@ -1,3 +1,10 @@
+import {
+  ExtractMenuItemType,
+  ListView,
+  RelativeDropPosition,
+  SEPARATOR_ITEM,
+  createSectionedMenu,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { uuid } from '@noya-app/noya-utils';
 import {
@@ -6,13 +13,6 @@ import {
   useNoyaClientOrFallback,
 } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
-import {
-  ExtractMenuItemType,
-  ListView,
-  RelativeDropPosition,
-  SEPARATOR_ITEM,
-  createSectionedMenu,
-} from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';

@@ -1,6 +1,6 @@
-import { Label, LabeledElementView } from 'noya-designsystem';
+import { Label, LabeledElementView } from '@noya-app/noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import React, { memo, ReactNode, useCallback } from 'react';
+import React, { ReactNode, memo, useCallback } from 'react';
 import { DimensionInput, DimensionValue } from './DimensionInput';
 import {
   ColorFillProps,

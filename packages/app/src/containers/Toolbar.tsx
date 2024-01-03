@@ -1,12 +1,3 @@
-import { ChevronDownIcon, PointModeIcon } from '@noya-app/noya-icons';
-import { KeyCommand, useKeyboardShortcuts } from '@noya-app/noya-keymap';
-import { round } from '@noya-app/noya-utils';
-import {
-  useApplicationState,
-  useDispatch,
-  useSelector,
-  useWorkspaceState,
-} from 'noya-app-state-context';
 import {
   Button,
   DropdownMenu,
@@ -16,7 +7,16 @@ import {
   Tooltip,
   createSectionedMenu,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { ChevronDownIcon, PointModeIcon } from '@noya-app/noya-icons';
+import { KeyCommand, useKeyboardShortcuts } from '@noya-app/noya-keymap';
+import { round } from '@noya-app/noya-utils';
+import {
+  useApplicationState,
+  useDispatch,
+  useSelector,
+  useWorkspaceState,
+} from 'noya-app-state-context';
 import { LayerIcon } from 'noya-inspector';
 import {
   DrawableLayerType,

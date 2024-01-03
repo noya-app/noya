@@ -1,11 +1,3 @@
-import { format } from 'date-fns';
-import {
-  useNoyaBilling,
-  useNoyaClient,
-  useNoyaEmailLists,
-  useNoyaFiles,
-  useNoyaSession,
-} from 'noya-api';
 import {
   Body,
   Heading2,
@@ -15,7 +7,15 @@ import {
   Stack,
   Switch,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { format } from 'date-fns';
+import {
+  useNoyaBilling,
+  useNoyaClient,
+  useNoyaEmailLists,
+  useNoyaFiles,
+  useNoyaSession,
+} from 'noya-api';
 import { amplitude } from 'noya-log';
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from '../components/AppLayout';

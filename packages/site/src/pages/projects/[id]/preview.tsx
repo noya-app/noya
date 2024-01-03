@@ -1,9 +1,9 @@
-import { useRouter } from 'next/router';
-import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
   lightTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { useRouter } from 'next/router';
+import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ProjectEditor } from '../../../components/ProjectEditor';
 import { localStorageClient } from '../../../utils/noyaClient';

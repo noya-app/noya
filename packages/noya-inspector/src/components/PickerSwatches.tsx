@@ -1,5 +1,3 @@
-import type { Sketch } from '@noya-app/noya-file-format';
-import { uuid } from '@noya-app/noya-utils';
 import {
   Button,
   Divider,
@@ -8,7 +6,9 @@ import {
   sketchColorToRgbaString,
   Spacer,
   useOpenInputDialog,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import type { Sketch } from '@noya-app/noya-file-format';
+import { uuid } from '@noya-app/noya-utils';
 import React, { memo, useCallback, useState } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 import {

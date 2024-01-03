@@ -1,9 +1,3 @@
-import { Size } from '@noya-app/noya-geometry';
-import { MagnifyingGlassIcon } from '@noya-app/noya-icons';
-import { AutoSizer, useSystemColorScheme } from '@noya-app/react-utils';
-import produce from 'immer';
-import { useSelector, useWorkspace } from 'noya-app-state-context';
-import { Canvas, CanvasKitRenderer } from 'noya-canvas';
 import {
   DesignSystemConfigurationProvider,
   Divider,
@@ -12,7 +6,13 @@ import {
   Spacer,
   darkTheme,
   lightTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Size } from '@noya-app/noya-geometry';
+import { MagnifyingGlassIcon } from '@noya-app/noya-icons';
+import { AutoSizer, useSystemColorScheme } from '@noya-app/react-utils';
+import produce from 'immer';
+import { useSelector, useWorkspace } from 'noya-app-state-context';
+import { Canvas, CanvasKitRenderer } from 'noya-canvas';
 import { doubleClickToolbar } from 'noya-embedded';
 import { DesignFile } from 'noya-renderer';
 import { Selectors, WorkspaceTab } from 'noya-state';

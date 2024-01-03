@@ -1,4 +1,4 @@
-import { Spacer } from 'noya-designsystem';
+import { Spacer } from '@noya-app/noya-designsystem';
 import React, { CSSProperties, memo, ReactNode } from 'react';
 import styled, { useTheme } from 'styled-components';
 

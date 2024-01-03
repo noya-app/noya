@@ -1,5 +1,5 @@
+import { RadioGroup } from '@noya-app/noya-designsystem';
 import { GridIcon, RowsIcon } from '@noya-app/noya-icons';
-import { RadioGroup } from 'noya-designsystem';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 

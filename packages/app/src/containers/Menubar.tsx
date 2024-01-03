@@ -1,3 +1,10 @@
+import {
+  Button,
+  DropdownMenu,
+  MenuItem,
+  Spacer,
+  createSectionedMenu,
+} from '@noya-app/noya-designsystem';
 import { HamburgerMenuIcon } from '@noya-app/noya-icons';
 import {
   useDispatch,
@@ -5,13 +12,6 @@ import {
   useHistory,
   useWorkspace,
 } from 'noya-app-state-context';
-import {
-  Button,
-  DropdownMenu,
-  MenuItem,
-  Spacer,
-  createSectionedMenu,
-} from 'noya-designsystem';
 import { ApplicationMenuItemType, applicationMenu } from 'noya-embedded';
 import { InspectorPrimitives } from 'noya-inspector';
 import { decode, encode } from 'noya-sketch-file';

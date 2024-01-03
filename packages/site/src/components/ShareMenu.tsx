@@ -1,5 +1,3 @@
-import { ChevronDownIcon, OpenInNewWindowIcon } from '@noya-app/noya-icons';
-import { useNoyaClient } from 'noya-api';
 import {
   Button,
   Divider,
@@ -11,7 +9,9 @@ import {
   Stack,
   Switch,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { ChevronDownIcon, OpenInNewWindowIcon } from '@noya-app/noya-icons';
+import { useNoyaClient } from 'noya-api';
 import { InspectorPrimitives } from 'noya-inspector';
 import { amplitude } from 'noya-log';
 import React, { memo, useEffect, useReducer } from 'react';

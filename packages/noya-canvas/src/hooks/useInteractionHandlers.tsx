@@ -1,3 +1,10 @@
+import {
+  ReactEventHandlers,
+  createSectionedMenu,
+  mergeEventHandlers,
+  usePlatform,
+  usePlatformModKey,
+} from '@noya-app/noya-designsystem';
 import { Point, Rect } from '@noya-app/noya-geometry';
 import { KeyMap, handleKeyboardEvent } from '@noya-app/noya-keymap';
 import { OffsetPoint } from '@noya-app/react-utils';
@@ -6,13 +13,6 @@ import {
   useHistory,
   useWorkspace,
 } from 'noya-app-state-context';
-import {
-  ReactEventHandlers,
-  createSectionedMenu,
-  mergeEventHandlers,
-  usePlatform,
-  usePlatformModKey,
-} from 'noya-designsystem';
 import { ILogEvent } from 'noya-log';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {

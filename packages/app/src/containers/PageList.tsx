@@ -1,3 +1,12 @@
+import {
+  IconButton,
+  Label,
+  MenuItem,
+  RelativeDropPosition,
+  Spacer,
+  TreeView,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { DashboardIcon, FileIcon, StackIcon } from '@noya-app/noya-icons';
 import { uuid } from '@noya-app/noya-utils';
@@ -7,15 +16,6 @@ import {
   useDispatch,
   useWorkspace,
 } from 'noya-app-state-context';
-import {
-  IconButton,
-  Label,
-  MenuItem,
-  RelativeDropPosition,
-  Spacer,
-  TreeView,
-  useDesignSystemTheme,
-} from 'noya-designsystem';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, {
   memo,

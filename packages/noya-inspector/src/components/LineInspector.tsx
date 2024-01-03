@@ -1,6 +1,6 @@
+import { Spacer } from '@noya-app/noya-designsystem';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Spacer } from 'noya-designsystem';
 import {
   Selectors,
   SetNumberMode,

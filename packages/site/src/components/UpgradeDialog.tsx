@@ -1,5 +1,5 @@
+import { Dialog } from '@noya-app/noya-designsystem';
 import { NoyaAPI } from 'noya-api';
-import { Dialog } from 'noya-designsystem';
 import React from 'react';
 import { UpgradeInfo } from '../components/UpgradeInfo';
 

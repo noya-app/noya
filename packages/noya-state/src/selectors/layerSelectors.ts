@@ -1,3 +1,4 @@
+import { RelativeDropPosition } from '@noya-app/noya-designsystem';
 import type { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
@@ -13,7 +14,6 @@ import {
 } from '@noya-app/noya-geometry';
 import produce, { Draft } from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { RelativeDropPosition } from 'noya-designsystem';
 import { CSSProperties } from 'react';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '../layer';

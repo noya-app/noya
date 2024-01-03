@@ -52,7 +52,7 @@ const SketchFill = memo(function SketchFill({
 }) {
   const CanvasKit = useCanvasKit();
 
-  const image = useSketchImage(fill.image);
+  const image = useSketchImage(fill.image?._ref);
 
   // TODO: Delete unused shaders
   const runtimeEffect = useMemo(() => {

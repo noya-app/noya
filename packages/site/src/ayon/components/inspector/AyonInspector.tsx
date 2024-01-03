@@ -1,13 +1,13 @@
-import { useShallowArray } from '@noya-app/react-utils';
-import { useApplicationState } from 'noya-app-state-context';
-import { NoyaNode } from 'noya-component';
 import {
   RadioGroup,
   ScrollArea,
   Small,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { useShallowArray } from '@noya-app/react-utils';
+import { useApplicationState } from 'noya-app-state-context';
+import { NoyaNode } from 'noya-component';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Layers, Selectors } from 'noya-state';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';

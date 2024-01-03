@@ -6,7 +6,7 @@ import {
   Stack,
   Text,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { DraggableMenuButton } from './DraggableMenuButton';

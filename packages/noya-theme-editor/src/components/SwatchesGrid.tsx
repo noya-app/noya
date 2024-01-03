@@ -1,11 +1,11 @@
 import { rgbaToHex } from '@noya-app/noya-colorpicker';
-import { Sketch } from '@noya-app/noya-file-format';
-import { delimitedPath, sortBy } from '@noya-app/noya-utils';
 import {
   GridView,
   sketchColorToRgba,
   useOpenInputDialog,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { delimitedPath, sortBy } from '@noya-app/noya-utils';
 import { SelectionType } from 'noya-state';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
 import { ThemeMenuItemType, menuItems } from '../utils/menuItems';

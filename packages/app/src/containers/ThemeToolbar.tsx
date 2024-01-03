@@ -1,4 +1,10 @@
 import {
+  Button,
+  RadioGroup,
+  Spacer,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
+import {
   BlendingModeIcon,
   ComponentInstanceIcon,
   LetterCaseToggleIcon,
@@ -7,12 +13,6 @@ import {
   TrashIcon,
 } from '@noya-app/noya-icons';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import {
-  Button,
-  RadioGroup,
-  Spacer,
-  useDesignSystemTheme,
-} from 'noya-designsystem';
 import { Selectors, ThemeTab } from 'noya-state';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';

@@ -1,6 +1,6 @@
+import { Divider, withSeparatorElements } from '@noya-app/noya-designsystem';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Divider, withSeparatorElements } from 'noya-designsystem';
 import {
   DimensionsInspector,
   InspectorPrimitives,

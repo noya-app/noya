@@ -1,4 +1,18 @@
 import {
+  Chip,
+  CompletionItem,
+  CompletionSectionHeader,
+  IconButton,
+  InputField,
+  InputFieldWithCompletions,
+  RelativeDropPosition,
+  Stack,
+  TreeView,
+  createSectionedMenu,
+  useDesignSystemTheme,
+  useOpenInputDialog,
+} from '@noya-app/noya-designsystem';
+import {
   BoxModelIcon,
   CaretDownIcon,
   ClipboardCopyIcon,
@@ -43,20 +57,6 @@ import {
   svgToReactElement,
   unresolve,
 } from 'noya-component';
-import {
-  Chip,
-  CompletionItem,
-  CompletionSectionHeader,
-  IconButton,
-  InputField,
-  InputFieldWithCompletions,
-  RelativeDropPosition,
-  Stack,
-  TreeView,
-  createSectionedMenu,
-  useDesignSystemTheme,
-  useOpenInputDialog,
-} from 'noya-designsystem';
 import React, {
   forwardRef,
   memo,

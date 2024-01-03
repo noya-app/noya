@@ -1,3 +1,11 @@
+import {
+  Divider,
+  InputField,
+  Label,
+  LabeledElementView,
+  RadioGroup,
+  Spacer,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import {
   PinBottomIcon,
@@ -7,14 +15,6 @@ import {
   SpaceEvenlyHorizontallyIcon,
   SpaceEvenlyVerticallyIcon,
 } from '@noya-app/noya-icons';
-import {
-  Divider,
-  InputField,
-  Label,
-  LabeledElementView,
-  RadioGroup,
-  Spacer,
-} from 'noya-designsystem';
 import { GroupLayouts, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

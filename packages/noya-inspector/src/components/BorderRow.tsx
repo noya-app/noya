@@ -1,10 +1,14 @@
+import {
+  Label,
+  LabeledElementView,
+  RadioGroup,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import {
   BorderCenterIcon,
   BorderInsideIcon,
   BorderOutsideIcon,
 } from '@noya-app/noya-icons';
-import { Label, LabeledElementView, RadioGroup } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { ReactNode, memo, useCallback } from 'react';
 import { DimensionInput, DimensionValue } from './DimensionInput';

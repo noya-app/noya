@@ -1,10 +1,10 @@
+import { darkTheme } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { FontManager } from '@noya-app/noya-fonts';
 import { GoogleFontProvider } from '@noya-app/noya-google-fonts';
 import { act } from '@testing-library/react';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
-import { darkTheme } from 'noya-designsystem';
 import { generateImage } from 'noya-generate-image';
 import {
   DesignFile,

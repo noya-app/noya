@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@noya-app/noya-colorpicker": "^0.0.2",
+    "@noya-app/noya-designsystem": "^0.0.3",
     "@noya-app/noya-file-format": "^0.0.1",
     "@noya-app/noya-fonts": "^0.0.3",
     "@noya-app/noya-geometry": "^0.0.6",

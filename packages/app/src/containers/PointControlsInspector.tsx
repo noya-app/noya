@@ -1,5 +1,3 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
   InputField,
@@ -7,7 +5,9 @@ import {
   LabeledElementView,
   Select,
   Spacer,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { useApplicationState } from 'noya-app-state-context';
 import { InspectorPrimitives } from 'noya-inspector';
 import {
   Layers,

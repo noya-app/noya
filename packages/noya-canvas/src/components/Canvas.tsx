@@ -1,3 +1,14 @@
+import {
+  ContextMenu,
+  SUPPORTED_CANVAS_UPLOAD_TYPES,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
+  SupportedCanvasUploadType,
+  SupportedImageUploadType,
+  isLeftButtonClicked,
+  isRightButtonClicked,
+  mergeEventHandlers,
+  usePlatformModKey,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import {
   AffineTransform,
@@ -19,17 +30,6 @@ import {
   useMultipleClickCount,
   usePasteHandler,
 } from 'noya-canvas';
-import {
-  ContextMenu,
-  SUPPORTED_CANVAS_UPLOAD_TYPES,
-  SUPPORTED_IMAGE_UPLOAD_TYPES,
-  SupportedCanvasUploadType,
-  SupportedImageUploadType,
-  isLeftButtonClicked,
-  isRightButtonClicked,
-  mergeEventHandlers,
-  usePlatformModKey,
-} from 'noya-designsystem';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {

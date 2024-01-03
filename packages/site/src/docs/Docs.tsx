@@ -1,9 +1,9 @@
+import { darkTheme, Divider, Stack } from '@noya-app/noya-designsystem';
 import * as Icons from '@noya-app/noya-icons';
 import produce from 'immer';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { darkTheme, Divider, Stack } from 'noya-designsystem';
 import { amplitude } from 'noya-log';
 import React, {
   ComponentProps,

@@ -1,6 +1,10 @@
+import {
+  Button,
+  Spacer,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
 import { ChevronDownIcon } from '@noya-app/noya-icons';
 import { NoyaAPI } from 'noya-api';
-import { Button, Spacer, useDesignSystemTheme } from 'noya-designsystem';
 import React, { ReactNode, forwardRef } from 'react';
 import { ProjectTypeIcon } from './ProjectTypeIcon';
 

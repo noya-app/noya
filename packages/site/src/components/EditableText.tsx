@@ -1,4 +1,8 @@
-import { InputField, Stack, useDesignSystemTheme } from 'noya-designsystem';
+import {
+  InputField,
+  Stack,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
 import React, {
   forwardRef,
   memo,

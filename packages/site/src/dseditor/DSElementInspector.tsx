@@ -1,10 +1,10 @@
-import { Model, NoyaComponent, NoyaPrimitiveElement } from 'noya-component';
 import {
   Chip,
   InputField,
   InputFieldWithCompletions,
   Stack,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Model, NoyaComponent, NoyaPrimitiveElement } from 'noya-component';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useEffect } from 'react';
 import {

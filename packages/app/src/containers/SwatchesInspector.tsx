@@ -1,7 +1,7 @@
+import { Divider } from '@noya-app/noya-designsystem';
 import { delimitedPath, isDeepEqual } from '@noya-app/noya-utils';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Divider } from 'noya-designsystem';
 import { ColorInspector, NameInspector } from 'noya-inspector';
 import { Selectors, getMultiValue } from 'noya-state';
 import React, { memo, useCallback } from 'react';

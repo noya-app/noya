@@ -1,5 +1,5 @@
+import { ReactEventHandlers } from '@noya-app/noya-designsystem';
 import { InteractionAPI } from 'noya-canvas';
-import { ReactEventHandlers } from 'noya-designsystem';
 import { handleActionType, InteractionState } from 'noya-state';
 import { CSSProperties } from 'react';
 import { ProxyMouseEventHandler } from '../../dseditor/dom';

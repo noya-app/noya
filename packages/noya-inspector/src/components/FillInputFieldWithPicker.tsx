@@ -1,6 +1,3 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import * as Popover from '@radix-ui/react-popover';
-import { useApplicationState } from 'noya-app-state-context';
 import {
   Divider,
   FillInputField,
@@ -9,7 +6,10 @@ import {
   useDialogContainsElement,
   useGlobalInputBlurListener,
   useOpenInputDialog,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import * as Popover from '@radix-ui/react-popover';
+import { useApplicationState } from 'noya-app-state-context';
 import { Selectors } from 'noya-state';
 import React, {
   ComponentProps,

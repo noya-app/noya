@@ -1,16 +1,16 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
-import { debounce } from '@noya-app/noya-utils';
-import { useGeneratedComponentNames, useNoyaClient } from 'noya-api';
-import { useWorkspace } from 'noya-app-state-context';
-import { Model, NoyaNode } from 'noya-component';
 import {
   CompletionItem,
   CompletionSectionHeader,
   InputField,
   InputFieldWithCompletions,
   Small,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
+import { debounce } from '@noya-app/noya-utils';
+import { useGeneratedComponentNames, useNoyaClient } from 'noya-api';
+import { useWorkspace } from 'noya-app-state-context';
+import { Model, NoyaNode } from 'noya-component';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { primitiveElements } from '../../../dseditor/primitiveElements';

@@ -15,9 +15,9 @@ import {
   DispatchCell,
   withJsonFormsControlProps,
 } from '@jsonforms/react';
+import { Small, Stack } from '@noya-app/noya-designsystem';
 import maxBy from 'lodash/maxBy';
 import merge from 'lodash/merge';
-import { Small, Stack } from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import React from 'react';
 

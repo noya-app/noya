@@ -1,9 +1,9 @@
-import { NextRouter, useRouter } from 'next/router';
-import { NoyaAPI, useNoyaClient } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
   lightTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { NextRouter, useRouter } from 'next/router';
+import { NoyaAPI, useNoyaClient } from 'noya-api';
 import { amplitude } from 'noya-log';
 import React, { useEffect, useRef } from 'react';
 import { Interstitial } from '../../../components/Interstitial';

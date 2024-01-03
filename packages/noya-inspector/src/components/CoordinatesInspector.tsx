@@ -1,4 +1,4 @@
-import { Spacer } from 'noya-designsystem';
+import { Spacer } from '@noya-app/noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { memo } from 'react';
 import { DimensionInput, DimensionValue } from './DimensionInput';

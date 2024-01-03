@@ -1,4 +1,4 @@
-import { useDesignSystemTheme } from 'noya-designsystem';
+import { useDesignSystemTheme } from '@noya-app/noya-designsystem';
 import React, { forwardRef } from 'react';
 
 export const Logo = forwardRef(function Logo(

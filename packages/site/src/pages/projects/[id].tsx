@@ -1,9 +1,3 @@
-import { Size } from '@noya-app/noya-geometry';
-import { StarFilledIcon } from '@noya-app/noya-icons';
-import { getCurrentPlatform } from '@noya-app/noya-keymap';
-import { debounce } from '@noya-app/noya-utils';
-import { useRouter } from 'next/router';
-import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
   DesignSystemConfigurationProvider,
@@ -17,7 +11,13 @@ import {
   darkTheme,
   lightTheme,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Size } from '@noya-app/noya-geometry';
+import { StarFilledIcon } from '@noya-app/noya-icons';
+import { getCurrentPlatform } from '@noya-app/noya-keymap';
+import { debounce } from '@noya-app/noya-utils';
+import { useRouter } from 'next/router';
+import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
 import { amplitude } from 'noya-log';
 import React, {
   ReactNode,

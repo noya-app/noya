@@ -10,8 +10,12 @@ import {
 } from '@jsonforms/core';
 import { JsonFormsDispatch, withJsonFormsAnyOfProps } from '@jsonforms/react';
 // import { Tab, Tabs } from '@mui/material';
+import {
+  RadioGroup,
+  Stack,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
 import isEmpty from 'lodash/isEmpty';
-import { RadioGroup, Stack, useDesignSystemTheme } from 'noya-designsystem';
 import React, { useCallback, useState } from 'react';
 import { CombinatorProperties } from './CombinatorProperties';
 // import { TabSwitchConfirmDialog } from './TabSwitchConfirmDialog';

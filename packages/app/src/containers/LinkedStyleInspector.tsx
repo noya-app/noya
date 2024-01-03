@@ -1,3 +1,9 @@
+import {
+  Button,
+  Select,
+  useDesignSystemTheme,
+  useOpenInputDialog,
+} from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import {
   CursorTextIcon,
@@ -8,12 +14,6 @@ import {
 } from '@noya-app/noya-icons';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useDispatch, useSelector } from 'noya-app-state-context';
-import {
-  Button,
-  Select,
-  useDesignSystemTheme,
-  useOpenInputDialog,
-} from 'noya-designsystem';
 import { InspectorPrimitives } from 'noya-inspector';
 import { Selectors, getMultiValue } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';

@@ -1,11 +1,11 @@
+import {
+  DesignSystemConfigurationProvider,
+  darkTheme,
+} from '@noya-app/noya-designsystem';
 import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { NoyaAPI, NoyaAPIProvider } from 'noya-api';
-import {
-  DesignSystemConfigurationProvider,
-  darkTheme,
-} from 'noya-designsystem';
 import { amplitude } from 'noya-log';
 import React, { useMemo } from 'react';
 import { Analytics, installAnalytics } from '../components/Analytics';

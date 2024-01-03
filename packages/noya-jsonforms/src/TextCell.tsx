@@ -7,8 +7,8 @@ import {
   rankWith,
 } from '@jsonforms/core';
 import { withJsonFormsCellProps } from '@jsonforms/react';
+import { InputField } from '@noya-app/noya-designsystem';
 import merge from 'lodash/merge';
-import { InputField } from 'noya-designsystem';
 import React from 'react';
 
 export const TextCell = (props: CellProps) => {

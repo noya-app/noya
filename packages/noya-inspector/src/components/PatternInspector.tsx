@@ -1,11 +1,3 @@
-import { Sketch } from '@noya-app/noya-file-format';
-import { getFileExtensionForType, uuid } from '@noya-app/noya-utils';
-import {
-  FileDropTarget,
-  TypedFile,
-  isSupportedFile,
-} from '@noya-app/react-utils';
-import { fileOpen } from 'browser-fs-access';
 import {
   InputField,
   PatternPreviewBackground,
@@ -15,7 +7,15 @@ import {
   Slider,
   SupportedImageUploadType,
   useHover,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
+import { getFileExtensionForType, uuid } from '@noya-app/noya-utils';
+import {
+  FileDropTarget,
+  TypedFile,
+  isSupportedFile,
+} from '@noya-app/react-utils';
+import { fileOpen } from 'browser-fs-access';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';
@@ -143,7 +143,7 @@ const PatternPreview = memo(
           <Container {...hoverProps} isActive={isDropTargetActive}>
             {pattern.image && (
               <PatternPreviewBackground
-                imageRef={pattern.image}
+                imageRef={pattern.image._ref}
                 fillType={pattern.patternFillType}
                 tileScale={pattern.patternTileScale}
               />

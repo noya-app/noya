@@ -4,7 +4,7 @@ import {
   Spacer,
   Stack,
   useDesignSystemTheme,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
 import React, { ReactNode } from 'react';
 
 export function AppLayout({

@@ -1,7 +1,7 @@
+import { sketchColorToRgba } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { center, Size } from '@noya-app/noya-geometry';
 import produce from 'immer';
-import { sketchColorToRgba } from 'noya-designsystem';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';

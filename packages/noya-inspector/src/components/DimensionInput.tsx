@@ -1,5 +1,5 @@
+import { InputField } from '@noya-app/noya-designsystem';
 import { round } from '@noya-app/noya-utils';
-import { InputField } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 

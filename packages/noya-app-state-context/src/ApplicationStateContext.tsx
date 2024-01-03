@@ -1,4 +1,4 @@
-import { useGlobalInputBlurTrigger } from 'noya-designsystem';
+import { useGlobalInputBlurTrigger } from '@noya-app/noya-designsystem';
 import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
 import React, {
   ReactNode,

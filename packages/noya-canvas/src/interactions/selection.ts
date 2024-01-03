@@ -1,4 +1,7 @@
-import { isRightButtonClicked, ReactEventHandlers } from 'noya-designsystem';
+import {
+  isRightButtonClicked,
+  ReactEventHandlers,
+} from '@noya-app/noya-designsystem';
 import {
   handleActionType,
   InteractionState,

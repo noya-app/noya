@@ -1,6 +1,3 @@
-import { groupBy, uuid } from '@noya-app/noya-utils';
-import { useRouter } from 'next/router';
-import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import {
   Button,
   DesignSystemConfigurationProvider,
@@ -8,7 +5,10 @@ import {
   Stack,
   lightTheme,
   useDesignSystemConfiguration,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { groupBy, uuid } from '@noya-app/noya-utils';
+import { useRouter } from 'next/router';
+import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from 'noya-state';
 import React, { useEffect, useMemo, useState } from 'react';

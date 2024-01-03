@@ -8,7 +8,11 @@ import {
   VerticalLayout,
 } from '@jsonforms/core';
 import { withJsonFormsLayoutProps } from '@jsonforms/react';
-import { Heading5, Stack, useDesignSystemTheme } from 'noya-designsystem';
+import {
+  Heading5,
+  Stack,
+  useDesignSystemTheme,
+} from '@noya-app/noya-designsystem';
 import React from 'react';
 import { useChildren } from './useChildren';
 // import { withVanillaControlProps } from '../util';

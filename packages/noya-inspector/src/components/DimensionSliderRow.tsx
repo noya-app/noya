@@ -1,4 +1,4 @@
-import { InputField, Slider } from 'noya-designsystem';
+import { InputField, Slider } from '@noya-app/noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import { DimensionValue } from './DimensionInput';

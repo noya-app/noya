@@ -1,11 +1,11 @@
-import { Sketch } from '@noya-app/noya-file-format';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
   GridView,
   Stack,
   useDesignSystemConfiguration,
-} from 'noya-designsystem';
+} from '@noya-app/noya-designsystem';
+import { Sketch } from '@noya-app/noya-file-format';
 import { BlockCategory, blockMetadata } from '../ayon/symbols/metadata';
 
 import { useRouter } from 'next/router';
