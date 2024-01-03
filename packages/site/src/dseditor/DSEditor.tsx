@@ -8,6 +8,7 @@ import {
   Stack,
   useDesignSystemTheme,
 } from '@noya-app/noya-designsystem';
+import { toZipFile } from '@noya-app/noya-filesystem';
 import { DownloadIcon } from '@noya-app/noya-icons';
 import { UTF16, findLast, uuid } from '@noya-app/noya-utils';
 import { useDeepState } from '@noya-app/react-utils';
@@ -30,7 +31,6 @@ import {
   getSavableComponentGroups,
   instantiateResolvedComponent,
 } from 'noya-component';
-import { toZipFile } from 'noya-filesystem';
 import { loadDesignSystem } from 'noya-module-loader';
 import React, {
   Dispatch,
