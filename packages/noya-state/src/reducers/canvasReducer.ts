@@ -23,11 +23,11 @@ import {
   transformRect,
   unionRects,
 } from '@noya-app/noya-geometry';
+import { PointString, SketchModel } from '@noya-app/noya-sketch-model';
 import { lerp, uuid, zip } from '@noya-app/noya-utils';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { svgToLayer } from 'noya-import-svg';
-import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   DecodedCurvePoint,
   LastEditedTextStyle,

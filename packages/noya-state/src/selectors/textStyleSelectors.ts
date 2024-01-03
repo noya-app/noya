@@ -1,6 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { unique } from '@noya-app/noya-utils';
-import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { SimpleTextDecoration } from '../primitives';
 import type { ApplicationState } from '../reducers/applicationReducer';

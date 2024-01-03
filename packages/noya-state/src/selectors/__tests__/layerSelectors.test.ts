@@ -1,5 +1,5 @@
+import { debugDescription, SketchModel } from '@noya-app/noya-sketch-model';
 import produce from 'immer';
-import { debugDescription, SketchModel } from 'noya-sketch-model';
 
 import { fixGroupFrame, resizeLayerFrame } from '../layerSelectors';
 

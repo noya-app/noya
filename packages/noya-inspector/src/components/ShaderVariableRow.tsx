@@ -6,8 +6,8 @@ import {
   Select,
 } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { upperFirst } from '@noya-app/noya-utils';
-import { SketchModel } from 'noya-sketch-model';
 import React, { memo, useCallback } from 'react';
 import type { ColorFillProps } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';

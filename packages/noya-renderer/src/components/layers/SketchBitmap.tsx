@@ -1,7 +1,7 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { getRectCornerPoints } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { makePath } from 'noya-react-canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { Group, Image } from '../../ComponentsContext';

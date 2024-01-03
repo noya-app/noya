@@ -1,7 +1,7 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { center, Size } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { SketchLayer } from 'noya-renderer';
-import { SketchModel } from 'noya-sketch-model';
 import React, { memo, useMemo } from 'react';
 import { CanvasPreviewItem } from './CanvasPreviewItem';
 

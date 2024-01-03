@@ -1,7 +1,7 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { Rect } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { useDeletable } from 'noya-react-canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';
 import { useMemo } from 'react';
 import { getUniformValues } from '../shaders';

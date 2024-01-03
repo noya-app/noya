@@ -1,6 +1,6 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { isExternalUrl } from '@noya-app/noya-utils';
 import { AvatarProps } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import { parametersToTailwindStyle } from 'noya-tailwind';
 import React from 'react';
 import { isApproximatelySquare, isWithinRectRange } from '../../infer/score';

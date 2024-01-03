@@ -1,6 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { CanvasKit, RuntimeEffect } from 'canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import { useMemo } from 'react';
 import { getSkiaShaderString } from '../shaders';
 import { useCanvasKit } from './useCanvasKit';

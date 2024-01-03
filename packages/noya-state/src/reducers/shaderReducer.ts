@@ -1,6 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import produce from 'immer';
-import { SketchModel } from 'noya-sketch-model';
 
 export type ShaderAction =
   | [type: 'setShaderString', index: number, value: string]

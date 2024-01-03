@@ -1,5 +1,5 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { RadioProps } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
 import { isWithinRectRange } from '../../infer/score';
 import { getParameters } from '../../utils/getMappedParameters';

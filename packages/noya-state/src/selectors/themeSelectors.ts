@@ -1,7 +1,7 @@
 import type { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { delimitedPath, uuid } from '@noya-app/noya-utils';
 import { Draft } from 'immer';
-import { SketchModel } from 'noya-sketch-model';
 import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
 import { Layers } from '../layer';
 import type { ApplicationState } from '../reducers/applicationReducer';

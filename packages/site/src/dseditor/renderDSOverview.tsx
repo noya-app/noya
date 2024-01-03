@@ -1,3 +1,4 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import {
   AvatarProps,
   ButtonProps,
@@ -11,7 +12,6 @@ import {
   TagProps,
   component,
 } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import React, { CSSProperties } from 'react';
 import { heroSymbol } from '../ayon/symbols/composed/HeroSymbol';
 import { librarySymbolMap } from '../ayon/symbols/symbols';

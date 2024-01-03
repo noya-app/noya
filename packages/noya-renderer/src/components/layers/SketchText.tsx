@@ -1,9 +1,9 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { CanvasKit, Paragraph } from 'canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import { Layers, Selectors, TextSelectionRange } from 'noya-state';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';

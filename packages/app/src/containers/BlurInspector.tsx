@@ -1,7 +1,7 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { useShallowArray } from '@noya-app/react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { BlurRow, EnableableElementController } from 'noya-inspector';
-import { SketchModel } from 'noya-sketch-model';
 import { Layers, Selectors, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 import { saturationInterpolator } from './ColorControlsInspector';

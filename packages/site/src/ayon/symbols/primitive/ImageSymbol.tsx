@@ -1,6 +1,6 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { isExternalUrl } from '@noya-app/noya-utils';
 import { ImageProps } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import { parametersToTailwindStyle, tailwindBlockClasses } from 'noya-tailwind';
 import React from 'react';
 import { getParameters } from '../../utils/getMappedParameters';

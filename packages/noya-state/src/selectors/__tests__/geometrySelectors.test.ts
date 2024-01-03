@@ -1,5 +1,5 @@
 import { Insets, Rect } from '@noya-app/noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { createInitialState, createSketchFile } from 'noya-state';
 import {
   getBoundingRect,

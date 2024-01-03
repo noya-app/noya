@@ -1,5 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
-import { SketchModel } from 'noya-sketch-model';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import type { TextSelectionRange } from './textEditorSelectors';
 
 type TextSpan = {

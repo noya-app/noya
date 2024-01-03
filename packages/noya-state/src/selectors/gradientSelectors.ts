@@ -9,8 +9,8 @@ import {
   isPointInLine,
   isPointOnCircumference,
 } from '@noya-app/noya-geometry';
+import { PointString } from '@noya-app/noya-sketch-model';
 import { lerp } from '@noya-app/noya-utils';
-import { PointString } from 'noya-sketch-model';
 import {
   Layers,
   getCurrentPage,

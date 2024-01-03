@@ -1,10 +1,10 @@
-import { debugDescription, SketchModel } from 'noya-sketch-model';
+import { debugDescription, SketchModel } from '@noya-app/noya-sketch-model';
 import {
   fromTextSpans,
-  toTextSpans,
+  getAttributesInRange,
   replaceTextInRange,
   setAttributesInRange,
-  getAttributesInRange,
+  toTextSpans,
 } from '../attributedStringSelectors';
 import { getEncodedStringAttributes } from '../textStyleSelectors';
 

@@ -6,10 +6,10 @@ import {
   distance,
   toDegrees,
 } from '@noya-app/noya-geometry';
+import { PointString } from '@noya-app/noya-sketch-model';
 import { range, windowsOf } from '@noya-app/noya-utils';
 import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
-import { PointString } from 'noya-sketch-model';
 import {
   DecodedCurvePoint,
   Primitives,

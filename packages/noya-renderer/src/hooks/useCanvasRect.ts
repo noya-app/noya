@@ -1,5 +1,5 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { useWorkspace } from 'noya-app-state-context';
-import { SketchModel } from 'noya-sketch-model';
 import { useMemo } from 'react';
 import { useCanvasKit } from './useCanvasKit';
 

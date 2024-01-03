@@ -1,5 +1,5 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { CheckboxProps } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import { parametersToTailwindStyle } from 'noya-tailwind';
 import React from 'react';
 import { isWithinRectRange } from '../../infer/score';

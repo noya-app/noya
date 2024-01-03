@@ -1,10 +1,10 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import {
   DesignSystemDefinition,
   component,
 } from '@noya-design-system/protocol';
 import produce from 'immer';
-import { SketchModel } from 'noya-sketch-model';
 import {
   InteractionState,
   Selectors,

@@ -1,6 +1,6 @@
+import { debugDescription, SketchModel } from '@noya-app/noya-sketch-model';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
-import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';
 import { fixGroupFrame } from '../../selectors/layerSelectors';
 import { layerPropertyReducer } from '../layerPropertyReducer';

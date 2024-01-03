@@ -1,10 +1,10 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { Rect, createBounds } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { findLast, upperFirst, uuid } from '@noya-app/noya-utils';
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
 import { Model, NoyaNode } from 'noya-component';
-import { SketchModel } from 'noya-sketch-model';
 import {
   Action,
   CustomReducer,

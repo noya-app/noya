@@ -4,10 +4,10 @@ import {
   createRect,
   transformRect,
 } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { useColorFill } from 'noya-react-canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import {
   DecodedCurvePoint,
   Layers,

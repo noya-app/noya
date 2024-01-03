@@ -1,7 +1,7 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { clamp } from '@noya-app/noya-utils';
 import produce from 'immer';
-import { SketchModel } from 'noya-sketch-model';
 import { SetNumberMode } from '../types';
 import { moveArrayItem } from '../utils/moveArrayItem';
 import { BlurAction, blurReducer } from './blurReducer';

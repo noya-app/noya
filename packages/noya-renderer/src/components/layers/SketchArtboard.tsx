@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { insetRect, Rect } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { useWorkspace } from 'noya-app-state-context';
 import {
   ClipProps,
@@ -9,7 +10,6 @@ import {
   usePaint,
   useStroke,
 } from 'noya-react-canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';

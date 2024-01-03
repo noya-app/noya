@@ -16,7 +16,7 @@ import {
   transformRect,
   unionRects,
 } from '@noya-app/noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { makePathsFromCommands } from './PathBuilder';
 
 export { makePathsFromCommands };

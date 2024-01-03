@@ -1,7 +1,7 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { round } from '@noya-app/noya-utils';
 import type { CanvasKit as CanvasKitType, Path } from 'canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
-import { SketchModel } from 'noya-sketch-model';
 import { PathCommand, PathCommandVerb, parsePathCmds } from 'noya-state';
 import { path } from '../primitives/path';
 

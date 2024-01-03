@@ -1,5 +1,5 @@
+import { debugDescription } from '@noya-app/noya-sketch-model';
 import fs from 'fs';
-import { debugDescription } from 'noya-sketch-model';
 import path from 'path';
 import { svgToLayer } from '..';
 

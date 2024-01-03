@@ -8,9 +8,9 @@ import {
   transformRect,
   unionRects,
 } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { getIncrementedName, groupBy, uuid } from '@noya-app/noya-utils';
 import produce from 'immer';
-import { SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,
   Primitives,

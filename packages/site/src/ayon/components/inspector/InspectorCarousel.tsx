@@ -1,7 +1,7 @@
 import { GridView, Stack } from '@noya-app/noya-designsystem';
 import { Size } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { StateProvider } from 'noya-app-state-context';
-import { SketchModel } from 'noya-sketch-model';
 import { createInitialWorkspaceState, createSketchFile } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useDS } from '../../../components/DSContext';

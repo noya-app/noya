@@ -1,7 +1,7 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import produce from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
-import { SketchModel } from 'noya-sketch-model';
 import { Overrides } from 'noya-state';
 import {
   IndexPath,

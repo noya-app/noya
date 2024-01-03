@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform, Rect } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import * as CanvasKit from 'canvaskit';
 import {
   ClipProps,
@@ -8,7 +9,6 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
-import { SketchModel } from 'noya-sketch-model';
 import { Primitives, getStrokedPath } from 'noya-state';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Group, Path } from '../../ComponentsContext';

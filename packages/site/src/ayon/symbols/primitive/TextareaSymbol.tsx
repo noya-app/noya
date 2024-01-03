@@ -1,5 +1,5 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { InputProps } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import React from 'react';
 import { getParameters } from '../../utils/getMappedParameters';
 import { textareaSymbolId } from '../symbolIds';

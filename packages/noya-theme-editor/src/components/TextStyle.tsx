@@ -1,9 +1,9 @@
 import { sketchColorToRgba } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { center, Size } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import produce from 'immer';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
-import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { CanvasPreviewItem } from './CanvasPreviewItem';

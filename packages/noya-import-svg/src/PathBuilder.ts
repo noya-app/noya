@@ -1,7 +1,7 @@
 import { CommandWithoutQuadratics } from '@lona/svg-model';
 import { Sketch } from '@noya-app/noya-file-format';
 import { Point } from '@noya-app/noya-geometry';
-import { PointString, SketchModel } from 'noya-sketch-model';
+import { PointString, SketchModel } from '@noya-app/noya-sketch-model';
 
 function makeCurvePoint(
   curveMode: Sketch.CurveMode,

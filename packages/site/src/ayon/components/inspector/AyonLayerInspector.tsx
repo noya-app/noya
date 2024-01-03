@@ -6,10 +6,10 @@ import {
   useDesignSystemTheme,
 } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { isDeepEqual, upperFirst, uuid } from '@noya-app/noya-utils';
 import { useApplicationState } from 'noya-app-state-context';
 import { InspectorPrimitives } from 'noya-inspector';
-import { SketchModel } from 'noya-sketch-model';
 import {
   Action,
   Layers,

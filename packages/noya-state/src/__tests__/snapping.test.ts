@@ -1,22 +1,10 @@
-import { SketchModel } from 'noya-sketch-model';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import {
   getLayerSnapValues,
   getSnapAdjustmentDistance,
   getSnaps,
   getSnapValues,
 } from '../snapping';
-
-let mockInitialId = 0;
-
-beforeEach(() => {
-  mockInitialId = 0;
-});
-
-jest.mock('@noya-app/noya-utils', () => {
-  const uuid = () => (mockInitialId++).toString();
-  const original = jest.requireActual('@noya-app/noya-utils');
-  return { ...original, uuid };
-});
 
 test('axis values', () => {
   const rect = { x: 20, y: -50, width: 80, height: 100 };
@@ -45,9 +33,11 @@ test('get layer axis info', () => {
 
 test('snapping pairs', () => {
   const source = SketchModel.rectangle({
+    do_objectID: '1',
     frame: SketchModel.rect({ x: 0, y: 0, width: 100, height: 100 }),
   });
   const target = SketchModel.oval({
+    do_objectID: '2',
     frame: SketchModel.rect({ x: 0, y: 104, width: 100, height: 100 }),
   });
   const page = SketchModel.page({

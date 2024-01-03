@@ -6,8 +6,8 @@ import {
 } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { NoyaAPI, NoyaAPIProvider, useNoyaClient } from 'noya-api';
-import { SketchModel } from 'noya-sketch-model';
 import { Layers, Overrides, createSketchFile } from 'noya-state';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { PreferredOverride, blockMetadata } from '../ayon/symbols/metadata';

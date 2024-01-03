@@ -1,5 +1,5 @@
+import { SketchModel } from '@noya-app/noya-sketch-model';
 import { IconProps, LinkProps, component } from '@noya-design-system/protocol';
-import { SketchModel } from 'noya-sketch-model';
 import { parametersToTailwindStyle, tailwindTextClasses } from 'noya-tailwind';
 import React from 'react';
 import { getParameters } from '../../utils/getMappedParameters';
