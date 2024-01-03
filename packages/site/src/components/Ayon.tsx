@@ -456,11 +456,13 @@ const AyonControlledState = memo(function AyonWithState({
 
   return (
     <StateProvider state={state} dispatch={dispatch}>
-      <DSProvider
-        savedDesignSystem={state.history.present.sketch.document.designSystem}
-      >
-        {children}
-      </DSProvider>
+      <ImageCacheProvider>
+        <DSProvider
+          savedDesignSystem={state.history.present.sketch.document.designSystem}
+        >
+          {children}
+        </DSProvider>
+      </ImageCacheProvider>
     </StateProvider>
   );
 });
@@ -480,22 +482,20 @@ export const Ayon = memo(function Ayon({
     <AyonProvider value={Ayon}>
       <GeneratedLayoutProvider>
         <Suspense fallback={null}>
-          <ImageCacheProvider>
-            <CanvasKitProvider
-              library={
-                props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
-              }
-            >
-              <FontManagerProvider>
-                <AyonControlledState
-                  initialDocument={initialDocument}
-                  onChangeDocument={onChangeDocument}
-                >
-                  <Workspace {...props} />
-                </AyonControlledState>
-              </FontManagerProvider>
-            </CanvasKitProvider>
-          </ImageCacheProvider>
+          <CanvasKitProvider
+            library={
+              props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
+            }
+          >
+            <FontManagerProvider>
+              <AyonControlledState
+                initialDocument={initialDocument}
+                onChangeDocument={onChangeDocument}
+              >
+                <Workspace {...props} />
+              </AyonControlledState>
+            </FontManagerProvider>
+          </CanvasKitProvider>
         </Suspense>
       </GeneratedLayoutProvider>
     </AyonProvider>
