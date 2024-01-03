@@ -66,6 +66,7 @@
     "@noya-app/noya-google-fonts": "^0.0.3",
     "@noya-app/noya-icons": "^0.0.1",
     "@noya-app/noya-keymap": "^0.0.3",
+    "@noya-app/noya-pathkit": "^0.0.2",
     "@noya-app/noya-sketch-file": "^0.0.1",
     "@noya-app/noya-sketch-model": "^0.0.1",
     "@noya-app/noya-utils": "^0.0.6",

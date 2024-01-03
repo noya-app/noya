@@ -3055,6 +3055,11 @@
   dependencies:
     w3c-keyname "^2.2.8"
 
+"@noya-app/noya-pathkit@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-pathkit/-/noya-pathkit-0.0.2.tgz#45e31e9059b9992a66a50c3c1cea2556c1117cba"
+  integrity sha512-FuVYwehpVluc4leV0x9Xsx97Gc1+ay+Glp3L7MqTROMU51zrrFWa3dtsS3o28ZrXVZqsP0ijTs7YnP/ifbgfxw==
+
 "@noya-app/noya-sketch-file@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-sketch-file/-/noya-sketch-file-0.0.1.tgz#c92d618b764fb8f1cc56aa36995c47b64c10ab61"
