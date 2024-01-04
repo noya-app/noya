@@ -3055,6 +3055,16 @@
   dependencies:
     "@radix-ui/react-icons" "^1.1.1"
 
+"@noya-app/noya-import-svg@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-import-svg/-/noya-import-svg-0.0.1.tgz#ff568d94c225e3382e5771a82f9193b45bf59e58"
+  integrity sha512-9gDrJjmGMVw1Rly1NKfkoxS9mmOOoU0JPZ7Pp6cVxL+FeIEyCpzXFayXAgEkQsy8PSmX3GOzCJE3hP43/4jNEA==
+  dependencies:
+    "@lona/svg-model" "^3.0.0-alpha.10"
+    "@noya-app/noya-file-format" "0.0.1"
+    "@noya-app/noya-geometry" "0.0.7"
+    "@noya-app/noya-sketch-model" "0.0.3"
+
 "@noya-app/noya-keymap@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-keymap/-/noya-keymap-0.0.3.tgz#8b63f83d7a33356c7b3fd655a12e67422b9ba786"
@@ -3074,7 +3084,7 @@
   dependencies:
     jszip "^3.5.0"
 
-"@noya-app/noya-sketch-model@^0.0.3":
+"@noya-app/noya-sketch-model@0.0.3", "@noya-app/noya-sketch-model@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-sketch-model/-/noya-sketch-model-0.0.3.tgz#94351c13013d157b6459ad49d393ffe5a61ab892"
   integrity sha512-Ra1oWWHg34Pe0kwV7PfuAQSEDHmbl21VLoRK3nxqZ2Q0XJQVsjFbSfs/2aEVlJbmDn9Mh30K519JhZR+aI0AWw==

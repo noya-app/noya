@@ -1,3 +1,4 @@
+import { CanvasKit } from '@noya-app/noya-canvaskit';
 import { interpolateRgba } from '@noya-app/noya-colorpicker';
 import {
   rgbaToSketchColor,
@@ -23,11 +24,10 @@ import {
   transformRect,
   unionRects,
 } from '@noya-app/noya-geometry';
+import { svgToLayer } from '@noya-app/noya-import-svg';
 import { PointString, SketchModel } from '@noya-app/noya-sketch-model';
 import { lerp, uuid, zip } from '@noya-app/noya-utils';
-import { CanvasKit } from '@noya-app/noya-canvaskit';
 import produce from 'immer';
-import { svgToLayer } from 'noya-import-svg';
 import {
   DecodedCurvePoint,
   LastEditedTextStyle,

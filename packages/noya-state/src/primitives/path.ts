@@ -1,12 +1,12 @@
+import { CanvasKit, Path, PathOp } from '@noya-app/noya-canvaskit';
 import { Sketch } from '@noya-app/noya-file-format';
 import { Point, Rect, distance } from '@noya-app/noya-geometry';
-import { PointString, SketchModel } from '@noya-app/noya-sketch-model';
-import { clamp, rotate, windowsOf, zip } from '@noya-app/noya-utils';
-import { CanvasKit, Path, PathOp } from '@noya-app/noya-canvaskit';
 import {
   CommandWithoutQuadratics,
   makePathsFromCommands,
-} from 'noya-import-svg';
+} from '@noya-app/noya-import-svg';
+import { PointString, SketchModel } from '@noya-app/noya-sketch-model';
+import { clamp, rotate, windowsOf, zip } from '@noya-app/noya-utils';
 import {
   lineCapStyle,
   lineJoinStyle,
