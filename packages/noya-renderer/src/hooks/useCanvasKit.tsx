@@ -3,8 +3,9 @@ import {
   CanvasKitProvider as CKProvider,
   useCanvasKit as useCK,
 } from '@noya-app/noya-graphics';
+import { loadPathKit } from '@noya-app/noya-pathkit';
 import { SuspendedValue } from '@noya-app/react-utils';
-import React, { memo, ReactNode } from 'react';
+import React, { ReactNode, memo } from 'react';
 import { loadCanvasKit } from '../loadCanvasKit';
 
 // We don't start loading CanvasKit until the Provider renders the first time,
@@ -24,7 +25,9 @@ export const CanvasKitProvider = memo(function CanvasKitProvider({
   if (!CanvasKit && !suspendedCanvasKit) {
     if (library === 'svgkit') {
       suspendedCanvasKit = new SuspendedValue<CanvasKit>(
-        import('noya-svgkit').then((module) => module.loadSVGKit()),
+        import('@noya-app/noya-svgkit').then((module) =>
+          module.loadSVGKit({ loadPathKit }),
+        ),
       );
     } else {
       suspendedCanvasKit = new SuspendedValue<CanvasKit>(loadCanvasKit());

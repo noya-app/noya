@@ -3048,7 +3048,7 @@
   dependencies:
     "@noya-app/noya-fonts" "*"
 
-"@noya-app/noya-graphics@^0.0.2":
+"@noya-app/noya-graphics@0.0.2", "@noya-app/noya-graphics@^0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-graphics/-/noya-graphics-0.0.2.tgz#92594ff73a5c57c425a2340d9c03caeb4694a98d"
   integrity sha512-zLn0Wo8Th6NJW7evgWXaSwZrQDvmortiolibhkY9R0P7k8rvC6DQ4dhWY//jSO3AHD+H2tfgeWCt3NezwGo4gA==
@@ -3080,7 +3080,7 @@
   dependencies:
     w3c-keyname "^2.2.8"
 
-"@noya-app/noya-pathkit@^0.0.2":
+"@noya-app/noya-pathkit@0.0.2", "@noya-app/noya-pathkit@^0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-pathkit/-/noya-pathkit-0.0.2.tgz#45e31e9059b9992a66a50c3c1cea2556c1117cba"
   integrity sha512-FuVYwehpVluc4leV0x9Xsx97Gc1+ay+Glp3L7MqTROMU51zrrFWa3dtsS3o28ZrXVZqsP0ijTs7YnP/ifbgfxw==
@@ -3100,6 +3100,27 @@
     "@noya-app/noya-file-format" "^0.0.1"
     "@noya-app/noya-utils" "^0.0.7"
     tree-visit "^0.4.0"
+
+"@noya-app/noya-svg-renderer@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-svg-renderer/-/noya-svg-renderer-0.0.1.tgz#7d5f0220c7a86e36ba8c8eaeed25b95e6eb64a86"
+  integrity sha512-mY4HnLvMdfd0eAntxt6TPivqIcs8SyHSWAZLNQAU/G95lueAQ2ei3/Rj18XO7IiwXPMEBfWVoJd3dGIFrzVsQw==
+  dependencies:
+    "@noya-app/noya-canvaskit" "0.0.1"
+    "@noya-app/noya-geometry" "0.0.7"
+    "@noya-app/noya-graphics" "0.0.2"
+    "@noya-app/noya-utils" "0.0.7"
+
+"@noya-app/noya-svgkit@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-svgkit/-/noya-svgkit-0.0.1.tgz#93edc4c3e895eabaeb8a447e1b4b29f7523e4e5a"
+  integrity sha512-ITfQf6qQCqaTy1yX7AqM3l1r6IG/ej7lWF8aYH3HPvwbg6sDjnFhQdG9CT/JVcOk5ApdTHDjo8HY95eRm+gzmA==
+  dependencies:
+    "@noya-app/noya-canvaskit" "0.0.1"
+    "@noya-app/noya-geometry" "0.0.7"
+    "@noya-app/noya-pathkit" "0.0.2"
+    "@noya-app/noya-utils" "0.0.7"
+    color-parse "^1.4.2"
 
 "@noya-app/noya-utils@0.0.7", "@noya-app/noya-utils@^0.0.7":
   version "0.0.7"
