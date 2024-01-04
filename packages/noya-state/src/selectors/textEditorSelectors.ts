@@ -1,6 +1,6 @@
 import { Point } from '@noya-app/noya-geometry';
 import { clamp } from '@noya-app/noya-utils';
-import { Paragraph, ShapedLine } from 'canvaskit';
+import { Paragraph, ShapedLine } from '@noya-app/noya-canvaskit';
 import { normalizeRange } from '../selectors/attributedStringSelectors';
 
 export type TextSelectionRange = {

@@ -1,5 +1,5 @@
 import { AffineTransform } from '@noya-app/noya-geometry';
-import { ColorFilter, ImageFilter } from 'canvaskit';
+import { ColorFilter, ImageFilter } from '@noya-app/noya-canvaskit';
 import { ReactNode, createElement, memo, useMemo } from 'react';
 import { DropShadow } from '../filters/ImageFilter';
 import { ClipProps, GroupComponentProps } from '../types';

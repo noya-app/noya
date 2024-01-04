@@ -1,6 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform, Point } from '@noya-app/noya-geometry';
-import { Paint } from 'canvaskit';
+import { Paint } from '@noya-app/noya-canvaskit';
 import { useDeletable, useFill, useStroke } from 'noya-react-canvaskit';
 import {
   Layers,

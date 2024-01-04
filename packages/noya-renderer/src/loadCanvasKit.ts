@@ -1,13 +1,13 @@
 import type {
   CanvasKit,
-  CanvasKitInit,
   Paint,
   PaintStyle,
   Shader,
-} from 'canvaskit';
-import { getPublicPath } from 'noya-public-path';
+  TextStyle,
+  loadCanvasKit as load,
+} from '@noya-app/noya-canvaskit';
 
-declare module 'canvaskit' {
+declare module '@noya-app/noya-canvaskit' {
   // Exposed for SVGKit, since we need to introspect the paint in SVGRenderer.
   // We need to implement these in CanvasKit too if we want to use with CanvasKit + SVGRenderer.
   interface Paint {
@@ -25,16 +25,33 @@ declare module 'canvaskit' {
 
 // Using `var` avoids this being uninitialized, maybe due to circular dependencies
 // eslint-disable-next-line no-var
-var loadingPromise: ReturnType<typeof CanvasKitInit> | undefined = undefined;
+var loadingPromise: ReturnType<typeof load> | undefined = undefined;
 
 export function loadCanvasKit() {
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = new Promise(async (resolve) => {
-    const module = await import('canvaskit');
+    const { defaultCreateURL, loadCanvasKit } = await import(
+      '@noya-app/noya-canvaskit'
+    );
 
-    const CanvasKit = await module.CanvasKitInit({
-      locateFile: (file: string) => getPublicPath() + 'wasm/' + file,
+    const CanvasKit = await loadCanvasKit({
+      createURL: (base64) => {
+        // If we're running in node, create a temporary file from this
+        // base64 string and return the path to it
+        const fs = require('fs');
+
+        if (!('writeFileSync' in fs)) return defaultCreateURL(base64);
+
+        const path = require('path');
+        const os = require('os');
+        const filePath = path.join(
+          os.tmpdir(),
+          `noya-canvaskit-${base64.length}.wasm`,
+        );
+        fs.writeFileSync(filePath, base64, 'base64');
+        return filePath;
+      },
     });
 
     patchForSVGRenderer(CanvasKit);

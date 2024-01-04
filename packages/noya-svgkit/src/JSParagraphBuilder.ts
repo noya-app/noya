@@ -10,7 +10,7 @@ import {
   TextBaseline,
   TextStyle,
   TypefaceFontProvider,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { JSEmbindObject } from './Embind';
 import { JSParagraph } from './JSParagraph';
 

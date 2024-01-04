@@ -3,7 +3,7 @@ import { Insets, Size } from '@noya-app/noya-geometry';
 import { KeyModifiers } from '@noya-app/noya-keymap';
 import { SketchFile } from '@noya-app/noya-sketch-file';
 import { uuid } from '@noya-app/noya-utils';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from '@noya-app/noya-canvaskit';
 import produce from 'immer';
 import { IFontManager } from 'noya-renderer';
 import { Selectors } from 'noya-state';

@@ -8,7 +8,7 @@ import {
   Paragraph,
   Path,
   Rect,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { ReactNode } from 'react';
 import { DropShadow } from './filters/ImageFilter';
 

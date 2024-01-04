@@ -10,7 +10,7 @@ import {
   rectContainsPoint,
 } from '@noya-app/noya-geometry';
 import { memoize, unique } from '@noya-app/noya-utils';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from '@noya-app/noya-canvaskit';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,

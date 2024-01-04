@@ -1,4 +1,4 @@
-import { Rect } from 'canvaskit';
+import { Rect } from '@noya-app/noya-canvaskit';
 import useStable4ElementArray from './useStable4ElementArray';
 
 export type RectParameters = Float32Array;

@@ -1,5 +1,5 @@
 import { memoize } from '@noya-app/noya-utils';
-import { CanvasKit, Paint } from 'canvaskit';
+import { CanvasKit, Paint } from '@noya-app/noya-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import { createElement, memo, useMemo } from 'react';
 import usePaint, { PaintParameters } from '../hooks/usePaint';

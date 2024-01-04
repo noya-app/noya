@@ -13,7 +13,7 @@ import {
   Shader,
   StrokeCap,
   StrokeJoin,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { constants } from './constants';
 import { JSEmbindObject } from './Embind';
 

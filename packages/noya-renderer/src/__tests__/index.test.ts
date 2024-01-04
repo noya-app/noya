@@ -1,4 +1,4 @@
-import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import type { CanvasKit as CanvasKitType } from '@noya-app/noya-canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
 import { color, fill, rect } from 'noya-state';
 

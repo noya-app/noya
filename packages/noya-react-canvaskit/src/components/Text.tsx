@@ -1,4 +1,4 @@
-import { Paragraph } from 'canvaskit';
+import { Paragraph } from '@noya-app/noya-canvaskit';
 import { createElement, memo, useMemo } from 'react';
 import useRect, { RectParameters } from '../hooks/useRect';
 import { TextComponentProps } from '../types';

@@ -19,7 +19,7 @@ import type {
   StrokeJoin,
   TextAlign,
   TextStyle,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { CompassDirection } from 'noya-state';
 import * as PathUtils from './primitives/path';
 import {

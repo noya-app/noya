@@ -1,4 +1,4 @@
-import { EmbindEnum, EmbindEnumEntity } from 'canvaskit';
+import { EmbindEnum, EmbindEnumEntity } from '@noya-app/noya-canvaskit';
 
 export class JSEmbindObject {
   _isDeleted = false;

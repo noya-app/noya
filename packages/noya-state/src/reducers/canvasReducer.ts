@@ -25,7 +25,7 @@ import {
 } from '@noya-app/noya-geometry';
 import { PointString, SketchModel } from '@noya-app/noya-sketch-model';
 import { lerp, uuid, zip } from '@noya-app/noya-utils';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from '@noya-app/noya-canvaskit';
 import produce from 'immer';
 import { svgToLayer } from 'noya-import-svg';
 import {

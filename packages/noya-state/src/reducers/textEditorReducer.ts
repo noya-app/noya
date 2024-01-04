@@ -1,4 +1,4 @@
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from '@noya-app/noya-canvaskit';
 import produce from 'immer';
 import {
   Layers,

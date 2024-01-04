@@ -39,7 +39,7 @@ import type {
   Vertices,
   WebGLContextHandle,
   WebGLOptions,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { constants } from './constants';
 import { JSEmbindObject } from './Embind';
 import { JSMaskFilter } from './JSMaskFilter';

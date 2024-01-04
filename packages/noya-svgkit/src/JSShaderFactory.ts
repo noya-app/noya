@@ -8,14 +8,14 @@ import {
   InputPoint,
   Shader,
   TileMode,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 
 export class JSShaderFactory {
   static MakeBlend(mode: BlendMode, one: Shader, two: Shader): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
   static MakeColor(color: InputColor, space: ColorSpace): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
   static MakeFractalNoise(
     baseFreqX: number,
@@ -25,10 +25,10 @@ export class JSShaderFactory {
     tileW: number,
     tileH: number,
   ): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
   static MakeLerp(t: number, one: Shader, two: Shader): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
 
   static MakeLinearGradient(
@@ -41,7 +41,7 @@ export class JSShaderFactory {
     flags?: number,
     colorSpace?: ColorSpace,
   ): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
 
   static MakeRadialGradient(
@@ -54,7 +54,7 @@ export class JSShaderFactory {
     flags?: number,
     colorSpace?: ColorSpace,
   ): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
 
   static MakeSweepGradient(
@@ -69,7 +69,7 @@ export class JSShaderFactory {
     endAngle?: AngleInDegrees,
     colorSpace?: ColorSpace,
   ): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
 
   static MakeTurbulence(
@@ -80,7 +80,7 @@ export class JSShaderFactory {
     tileW: number,
     tileH: number,
   ): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
 
   static MakeTwoPointConicalGradient(
@@ -95,6 +95,6 @@ export class JSShaderFactory {
     flags?: number,
     colorSpace?: ColorSpace,
   ): Shader {
-    return (null as unknown) as Shader;
+    return null as unknown as Shader;
   }
 }

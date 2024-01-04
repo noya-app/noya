@@ -8,7 +8,7 @@ import {
 } from '@noya-app/noya-geometry';
 import { PointString } from '@noya-app/noya-sketch-model';
 import { range, windowsOf } from '@noya-app/noya-utils';
-import { CanvasKit, Path } from 'canvaskit';
+import { CanvasKit, Path } from '@noya-app/noya-canvaskit';
 import { Draft } from 'immer';
 import {
   DecodedCurvePoint,

@@ -9,7 +9,7 @@ import {
   ShapedLine,
   TextStyle,
   URange,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { JSEmbindObject } from './Embind';
 
 export class JSParagraph extends JSEmbindObject implements Paragraph {

@@ -1,5 +1,5 @@
 import { Sketch } from '@noya-app/noya-file-format';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from '@noya-app/noya-canvaskit';
 import produce from 'immer';
 import * as Layers from '../layers';
 import {

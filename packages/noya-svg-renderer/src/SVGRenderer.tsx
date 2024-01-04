@@ -5,7 +5,7 @@ import {
   getFileExtensionForType,
   zip,
 } from '@noya-app/noya-utils';
-import { Paint } from 'canvaskit';
+import { Paint } from '@noya-app/noya-canvaskit';
 import { ClipProps } from 'noya-react-canvaskit';
 import {
   ComponentsContextValue,

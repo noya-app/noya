@@ -4,7 +4,7 @@ import {
   PaintStyle,
   StrokeCap,
   StrokeJoin,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useColor, { ColorParameters } from './useColor';

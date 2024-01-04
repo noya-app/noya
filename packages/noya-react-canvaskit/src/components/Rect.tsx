@@ -1,4 +1,4 @@
-import { Paint } from 'canvaskit';
+import { Paint } from '@noya-app/noya-canvaskit';
 import { createElement, memo, useMemo } from 'react';
 import usePaint from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';

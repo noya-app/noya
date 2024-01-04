@@ -2960,25 +2960,32 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-app/noya-colorpicker@0.0.2", "@noya-app/noya-colorpicker@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-colorpicker/-/noya-colorpicker-0.0.2.tgz#59b5bd35021bfc9b0141254e84905b64e4666f84"
-  integrity sha512-UwEN18h2dipD8C1bS/0cNuzjtwDYH5/h5SvHf64zxk8SLaimOt2fhMYT1p/hWFaQFm2zQW3vm30bI2aXysofOw==
+"@noya-app/noya-canvaskit@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-canvaskit/-/noya-canvaskit-0.0.1.tgz#da83bd20a1a90585033d99a7882c0758ca7bdf2e"
+  integrity sha512-ms/hrNgpDjdpVE2G/wytJ33F3rPPCSlD8LvyPngZsQR117dlyZjq+n+0S7WuaB6o9Z9wENQ71SISBg9m0RjVgQ==
+
+"@noya-app/noya-colorpicker@0.0.3", "@noya-app/noya-colorpicker@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-colorpicker/-/noya-colorpicker-0.0.3.tgz#a995b5fa4fa56d1d78287e45d7a5bddd79b2df22"
+  integrity sha512-jBFlq2w/slJacfMKMXKrarhgKeie252J1p+n7D84xrCZWlQxg+jCAnkYbOzhNKlzXHJ6LaQcWFKHDq/gr/lLVQ==
   dependencies:
     "@noya-app/noya-file-format" "0.0.1"
-    "@noya-app/noya-utils" "0.0.6"
+    "@noya-app/noya-utils" "0.0.7"
     "@noya-app/react-utils" "0.0.4"
     styled-components "5.3.0"
 
-"@noya-app/noya-designsystem@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-designsystem/-/noya-designsystem-0.0.3.tgz#89211cea322d87c2ea7d0d819809cef5d8278d76"
-  integrity sha512-gGZVGSkV09QM2DPYyVqiovc0+qCXHI4miq6cK8QJoQDTveJGDy39eMt92reKjiY6CcYVxH9OFzJ98y+mfL+f7w==
+"@noya-app/noya-designsystem@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-designsystem/-/noya-designsystem-0.0.5.tgz#3278866f6f60fba6f9472b3b54844fb5dc2e5de5"
+  integrity sha512-yMtjXpqSTMIqr75niRft4kYCD/CjGSZwbjgcbAHrGaxMdjAxGsdUblpZQzXCt7X9fXCVSXucZ0DzHBFm79MIww==
   dependencies:
     "@dnd-kit/core" "3.1.1"
     "@dnd-kit/modifiers" "3.0.0"
     "@dnd-kit/sortable" "4.0.0"
-    "@noya-app/noya-colorpicker" "0.0.2"
+    "@noya-app/noya-colorpicker" "0.0.3"
+    "@noya-app/noya-geometry" "0.0.7"
+    "@noya-app/noya-utils" "0.0.7"
     "@radix-ui/primitive" "^1.0.0"
     "@radix-ui/react-avatar" "^1.0.1"
     "@radix-ui/react-compose-refs" "^1.0.0"
@@ -3027,12 +3034,12 @@
   resolved "https://registry.yarnpkg.com/@noya-app/noya-fonts/-/noya-fonts-0.0.3.tgz#0d8ad963f9522bfce654ffa964cbcf2c21a3d84f"
   integrity sha512-eppDa3LQ6/V8S05f9kzx/Ya+HZSEaA8uyDa//f/UmSVhGc35nao6kXjf1VW0dAuhDvcaRpxleT6GHgdApZavSA==
 
-"@noya-app/noya-geometry@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-geometry/-/noya-geometry-0.0.6.tgz#4f661683eb7dfddb217a15a71da4c0dca540a22f"
-  integrity sha512-nCsk6y39EWytGggyas8JHrWMgUtcWThDtBMZdLTKLMHtfvavcATNMgKArswPXN5pZYDY7ZVP2boSncFxj6Pj6g==
+"@noya-app/noya-geometry@0.0.7", "@noya-app/noya-geometry@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-geometry/-/noya-geometry-0.0.7.tgz#0dbadc58fdfaae49f8f6745c528972130510c28c"
+  integrity sha512-2u/No+dwN6U+86adF+gE7ZfJLDwdXVKoW3H4v76PKzwkrZmhuqCo87FCU5kIg7tmNQ+nerPjP0dNTP6jtNcFIg==
   dependencies:
-    "@noya-app/noya-utils" "0.0.6"
+    "@noya-app/noya-utils" "0.0.7"
 
 "@noya-app/noya-google-fonts@^0.0.3":
   version "0.0.3"
@@ -3067,19 +3074,21 @@
   dependencies:
     jszip "^3.5.0"
 
-"@noya-app/noya-sketch-model@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-sketch-model/-/noya-sketch-model-0.0.1.tgz#ce03453fec413552ff7e2fe117ebda67047799e7"
-  integrity sha512-qgj8isxM3SCTgSoWRAX3XQ0frdU8q9nG2YkpTkxzjW3wDaSD7urrp0Eh+dnL83OUP6XzGeGBMYkuNL7sa5ApSg==
+"@noya-app/noya-sketch-model@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-sketch-model/-/noya-sketch-model-0.0.3.tgz#94351c13013d157b6459ad49d393ffe5a61ab892"
+  integrity sha512-Ra1oWWHg34Pe0kwV7PfuAQSEDHmbl21VLoRK3nxqZ2Q0XJQVsjFbSfs/2aEVlJbmDn9Mh30K519JhZR+aI0AWw==
   dependencies:
+    "@noya-app/noya-file-format" "^0.0.1"
+    "@noya-app/noya-utils" "^0.0.7"
     tree-visit "^0.4.0"
 
-"@noya-app/noya-utils@0.0.6", "@noya-app/noya-utils@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-utils/-/noya-utils-0.0.6.tgz#e11b944561e9dada409a00d980d9297d0adc82da"
-  integrity sha512-61gmyuYaPHENgtATgncCTAlYydITntBu1Nos/JB9hemZzmddjVmSo1SnsSGj7/jYCTxEMhl/k6sKhhe92j4jEg==
+"@noya-app/noya-utils@0.0.7", "@noya-app/noya-utils@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-utils/-/noya-utils-0.0.7.tgz#a54118bed2ed14437022fd1d3d3eafc632a81a34"
+  integrity sha512-O3YlWlbszkORyQsA4jMqTF2NDIEt2TwLCClWSp3WfhGmCGDi1XhEWy1vgTC+26499prMkHA3EdcI7kJuvqJiKw==
   dependencies:
-    uuid "^9.0.1"
+    uuid "8.3.2"
 
 "@noya-app/react-utils@0.0.4", "@noya-app/react-utils@^0.0.4":
   version "0.0.4"
@@ -19697,15 +19706,10 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@^8.3.0, uuid@^8.3.2:
+uuid@8.3.2, uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
-
-uuid@^9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
-  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"

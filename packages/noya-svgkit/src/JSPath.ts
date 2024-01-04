@@ -17,7 +17,7 @@ import type {
   StrokeOpts,
   VerbList,
   WeightList,
-} from 'canvaskit';
+} from '@noya-app/noya-canvaskit';
 import { parsePathCmds } from 'noya-state';
 import { JSEmbindObject } from './Embind';
 import { SVGKit } from './SVGKit';

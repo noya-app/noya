@@ -484,7 +484,9 @@ export const Ayon = memo(function Ayon({
         <Suspense fallback={null}>
           <CanvasKitProvider
             library={
-              props.canvasRendererType === 'canvas' ? 'canvaskit' : 'svgkit'
+              props.canvasRendererType === 'canvas'
+                ? '@noya-app/noya-canvaskit'
+                : 'svgkit'
             }
           >
             <FontManagerProvider>

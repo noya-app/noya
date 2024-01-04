@@ -14,7 +14,7 @@ import {
   Size,
   transformRect,
 } from '@noya-app/noya-geometry';
-import type { CanvasKit } from 'canvaskit';
+import type { CanvasKit } from '@noya-app/noya-canvaskit';
 import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { ScalingOptions } from 'noya-state';
