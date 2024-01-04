@@ -2960,7 +2960,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@noya-app/noya-canvaskit@^0.0.1":
+"@noya-app/noya-canvaskit@0.0.1", "@noya-app/noya-canvaskit@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@noya-app/noya-canvaskit/-/noya-canvaskit-0.0.1.tgz#da83bd20a1a90585033d99a7882c0758ca7bdf2e"
   integrity sha512-ms/hrNgpDjdpVE2G/wytJ33F3rPPCSlD8LvyPngZsQR117dlyZjq+n+0S7WuaB6o9Z9wENQ71SISBg9m0RjVgQ==
@@ -3047,6 +3047,14 @@
   integrity sha512-Ld/tQh1pCIvP2p6/1aVZ4Ha84GnHRti+QjQLwODC4AtODyy0cHLdbiWvaIguZTKkX3+ivwa2U62Vlx6JQhsMjw==
   dependencies:
     "@noya-app/noya-fonts" "*"
+
+"@noya-app/noya-graphics@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-graphics/-/noya-graphics-0.0.2.tgz#92594ff73a5c57c425a2340d9c03caeb4694a98d"
+  integrity sha512-zLn0Wo8Th6NJW7evgWXaSwZrQDvmortiolibhkY9R0P7k8rvC6DQ4dhWY//jSO3AHD+H2tfgeWCt3NezwGo4gA==
+  dependencies:
+    "@noya-app/noya-canvaskit" "0.0.1"
+    "@noya-app/noya-geometry" "0.0.7"
 
 "@noya-app/noya-icons@^0.0.1":
   version "0.0.1"
