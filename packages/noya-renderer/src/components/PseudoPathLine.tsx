@@ -1,9 +1,9 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { Path } from '@noya-app/noya-graphics';
 import { useStroke } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React from 'react';
 import { useTheme } from 'styled-components';
-import { Path } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 
 interface EditablePathPointProps {

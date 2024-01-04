@@ -1,10 +1,10 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { Path } from '@noya-app/noya-graphics';
 import { useApplicationState } from 'noya-app-state-context';
 import { useDeletable, useFill } from 'noya-react-canvaskit';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Path } from '../ComponentsContext';
 import { useZoom } from '../ZoomContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 

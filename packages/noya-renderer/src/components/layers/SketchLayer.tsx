@@ -1,9 +1,9 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform } from '@noya-app/noya-geometry';
+import { Group } from '@noya-app/noya-graphics';
 import { PageLayer, Selectors } from 'noya-state';
 import React, { memo } from 'react';
 import { useIsLayerClipped } from '../../ClippedLayerContext';
-import { Group } from '../../ComponentsContext';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';

@@ -1,9 +1,9 @@
 import { createBounds, insetRect, Rect } from '@noya-app/noya-geometry';
+import { Rect as RCKRect, Text } from '@noya-app/noya-graphics';
 import { useFill, usePaint } from 'noya-react-canvaskit';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Rect as RCKRect, Text } from '../ComponentsContext';
 import { useFontManager } from '../FontManagerContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 

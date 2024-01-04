@@ -1,10 +1,10 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform } from '@noya-app/noya-geometry';
+import { Group, Rect } from '@noya-app/noya-graphics';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { useFill } from 'noya-react-canvaskit';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
-import { Group, Rect } from '../../ComponentsContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';

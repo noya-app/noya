@@ -1,11 +1,11 @@
-import { Size } from '@noya-app/noya-geometry';
-import { usePixelRatio } from '@noya-app/react-utils';
 import type { Surface } from '@noya-app/noya-canvaskit';
+import { Size } from '@noya-app/noya-geometry';
+import { ComponentsProvider } from '@noya-app/noya-graphics';
+import { usePixelRatio } from '@noya-app/react-utils';
 import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
   CanvasKitProvider,
-  ComponentsProvider,
   FontManagerProvider,
   ImageCacheProvider,
   RenderingModeProvider,

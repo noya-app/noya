@@ -1,9 +1,9 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { Rect } from '@noya-app/noya-graphics';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Rect } from '../../ComponentsContext';
 import { useRenderingMode } from '../../RenderingModeContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 

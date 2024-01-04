@@ -1,10 +1,10 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { getRectCornerPoints } from '@noya-app/noya-geometry';
+import { Group, Image } from '@noya-app/noya-graphics';
 import { SketchModel } from '@noya-app/noya-sketch-model';
 import { makePath } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
-import { Group, Image } from '../../ComponentsContext';
 import { useSketchImage } from '../../ImageCache';
 import { useZoom } from '../../ZoomContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';

@@ -1,6 +1,7 @@
+import { Paint } from '@noya-app/noya-canvaskit';
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform, Point } from '@noya-app/noya-geometry';
-import { Paint } from '@noya-app/noya-canvaskit';
+import { Group, Path, Polyline, Rect } from '@noya-app/noya-graphics';
 import { useDeletable, useFill, useStroke } from 'noya-react-canvaskit';
 import {
   Layers,
@@ -10,7 +11,6 @@ import {
 } from 'noya-state';
 import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Path, Polyline, Rect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 
 const CONTROL_POINT_SIZE = 2;

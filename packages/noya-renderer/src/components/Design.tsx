@@ -4,6 +4,7 @@ import {
   createRect,
   transformRect,
 } from '@noya-app/noya-geometry';
+import { Group, Rect as RCKRect } from '@noya-app/noya-graphics';
 import { SketchModel } from '@noya-app/noya-sketch-model';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
@@ -22,7 +23,6 @@ import {
 import React, { ReactNode, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { useRenderingMode } from '../RenderingModeContext';
 import { ZoomProvider } from '../ZoomContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';

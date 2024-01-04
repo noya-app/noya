@@ -10,6 +10,7 @@ import {
   distance,
   normalizeRect,
 } from '@noya-app/noya-geometry';
+import { Group } from '@noya-app/noya-graphics';
 import { groupBy, round } from '@noya-app/noya-utils';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
@@ -22,7 +23,6 @@ import {
   getSnaps,
 } from 'noya-state';
 import React, { Fragment, memo, useMemo } from 'react';
-import { Group } from '../ComponentsContext';
 import { useZoom } from '../ZoomContext';
 import {
   AXES,

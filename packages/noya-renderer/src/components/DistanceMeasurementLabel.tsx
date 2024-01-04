@@ -6,11 +6,11 @@ import {
   Point,
   Size,
 } from '@noya-app/noya-geometry';
+import { Group, Rect, Text } from '@noya-app/noya-graphics';
 import { round } from '@noya-app/noya-utils';
 import { useColorFill } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Rect, Text } from '../ComponentsContext';
 import { useFontManager } from '../FontManagerContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useZoom } from '../ZoomContext';

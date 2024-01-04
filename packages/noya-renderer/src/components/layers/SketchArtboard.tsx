@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { insetRect, Rect } from '@noya-app/noya-geometry';
+import { Group, Rect as RCKRect, Text } from '@noya-app/noya-graphics';
 import { SketchModel } from '@noya-app/noya-sketch-model';
 import { useWorkspace } from 'noya-app-state-context';
 import {
@@ -13,7 +14,6 @@ import {
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Rect as RCKRect, Text } from '../../ComponentsContext';
 import { useFontManager } from '../../FontManagerContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useDotFill } from '../../hooks/useDotFill';

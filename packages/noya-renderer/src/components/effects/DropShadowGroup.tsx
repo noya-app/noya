@@ -1,8 +1,8 @@
 import { Sketch } from '@noya-app/noya-file-format';
+import { Group } from '@noya-app/noya-graphics';
 import { DropShadow } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, ReactNode, useMemo } from 'react';
-import { Group } from '../../ComponentsContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 
 interface Props {

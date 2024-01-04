@@ -1,10 +1,10 @@
+import { Paint } from '@noya-app/noya-canvaskit';
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform } from '@noya-app/noya-geometry';
-import { Paint } from '@noya-app/noya-canvaskit';
+import { Group, Path, Rect } from '@noya-app/noya-graphics';
 import { useStroke } from 'noya-react-canvaskit';
 import { Layers, Selectors } from 'noya-state';
 import React, { ReactNode, useMemo } from 'react';
-import { Group, Path, Rect } from '../ComponentsContext';
 import { useZoom } from '../ZoomContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';

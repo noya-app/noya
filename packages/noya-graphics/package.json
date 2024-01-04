@@ -1,0 +1,5 @@
+{
+  "name": "@noya-app/noya-graphics",
+  "version": "0.0.1",
+  "main": "src/index.ts"
+}

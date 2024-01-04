@@ -5,10 +5,10 @@ import {
   Size,
   transformRect,
 } from '@noya-app/noya-geometry';
+import { Group, Rect as RCKRect } from '@noya-app/noya-graphics';
 import { ClipProps, useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { PageLayer, Primitives } from 'noya-state';
 import React, { useMemo } from 'react';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import useCheckeredFill from '../hooks/useCheckeredFill';
 import SketchLayer from './layers/SketchLayer';

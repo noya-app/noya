@@ -1,5 +1,6 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform, Point } from '@noya-app/noya-geometry';
+import { Group, Polyline, Rect } from '@noya-app/noya-graphics';
 import { useApplicationState } from 'noya-app-state-context';
 import { DropShadow, useColorFill, useStroke } from 'noya-react-canvaskit';
 import {
@@ -9,7 +10,6 @@ import {
   getCircleTangentSquare,
 } from 'noya-state';
 import React, { Fragment, memo, useMemo } from 'react';
-import { Group, Polyline, Rect } from '../ComponentsContext';
 import { useZoom } from '../ZoomContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { Oval } from './Oval';

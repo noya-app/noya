@@ -1,9 +1,9 @@
 import { sketchColorToRgbaString } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
+import { Path, useCanvasKit } from '@noya-app/noya-graphics';
 import { CanvasViewer } from 'noya-canvas-preview';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
-import { Path, useCanvasKit } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
 
 const PREVIEW_SIZE = 60;

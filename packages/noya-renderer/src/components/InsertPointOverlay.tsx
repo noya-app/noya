@@ -1,9 +1,9 @@
+import { Path } from '@noya-app/noya-graphics';
 import { useApplicationState } from 'noya-app-state-context';
 import { useStroke } from 'noya-react-canvaskit';
 import { Layers, Selectors } from 'noya-state';
 import React, { memo } from 'react';
 import { useTheme } from 'styled-components';
-import { Path } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import PseudoPoint from './PseudoPoint';
 

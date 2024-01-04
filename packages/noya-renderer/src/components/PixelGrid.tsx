@@ -1,10 +1,10 @@
+import { Rect } from '@noya-app/noya-graphics';
 import { range } from '@noya-app/noya-utils';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { useColorFill } from 'noya-react-canvaskit';
 import { Selectors } from 'noya-state';
 import React from 'react';
 import { useTheme } from 'styled-components';
-import { Rect } from '../ComponentsContext';
 import { useZoom } from '../ZoomContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 

@@ -1,8 +1,8 @@
-import { Point } from '@noya-app/noya-geometry';
 import { Paint } from '@noya-app/noya-canvaskit';
+import { Point } from '@noya-app/noya-geometry';
+import { Path } from '@noya-app/noya-graphics';
 import { useDeletable } from 'noya-react-canvaskit';
 import React, { memo } from 'react';
-import { Path } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 
 interface Props {

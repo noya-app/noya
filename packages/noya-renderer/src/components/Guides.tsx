@@ -1,9 +1,9 @@
-import { Point } from '@noya-app/noya-geometry';
 import { Paint } from '@noya-app/noya-canvaskit';
+import { Point } from '@noya-app/noya-geometry';
+import { Polyline } from '@noya-app/noya-graphics';
 import { useDeletable, useStroke } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Polyline } from '../ComponentsContext';
 import { useZoom } from '../ZoomContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { pixelAlignPoints } from '../pixelAlignment';

@@ -1,13 +1,13 @@
+import { CanvasKit, Paragraph } from '@noya-app/noya-canvaskit';
 import { Sketch } from '@noya-app/noya-file-format';
 import { AffineTransform } from '@noya-app/noya-geometry';
+import { Group, Rect, Text } from '@noya-app/noya-graphics';
 import { SketchModel } from '@noya-app/noya-sketch-model';
-import { CanvasKit, Paragraph } from '@noya-app/noya-canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Layers, Selectors, TextSelectionRange } from 'noya-state';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Rect, Text } from '../../ComponentsContext';
 import { useFontManager } from '../../FontManagerContext';
 import { getLuminance } from '../../colorMatrix';
 import { useCanvasKit } from '../../hooks/useCanvasKit';

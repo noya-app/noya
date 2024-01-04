@@ -1,17 +1,17 @@
+import { Paint } from '@noya-app/noya-canvaskit';
 import { AffineTransform, Point, Size } from '@noya-app/noya-geometry';
+import {
+  ComponentsContextValue,
+  ComponentsProvider,
+  useCanvasKit,
+} from '@noya-app/noya-graphics';
 import {
   Base64,
   detectFileType,
   getFileExtensionForType,
   zip,
 } from '@noya-app/noya-utils';
-import { Paint } from '@noya-app/noya-canvaskit';
 import { ClipProps } from 'noya-react-canvaskit';
-import {
-  ComponentsContextValue,
-  ComponentsProvider,
-  useCanvasKit,
-} from 'noya-renderer';
 import React, {
   ComponentProps,
   ReactNode,

@@ -1,7 +1,7 @@
-import type { Components } from 'noya-react-canvaskit';
 import React, { createContext, memo, useContext } from 'react';
+import { IComponents } from './types';
 
-export type ComponentsContextValue = typeof Components;
+export type ComponentsContextValue = IComponents;
 
 const ComponentsContext = createContext<ComponentsContextValue | undefined>(
   undefined,
@@ -19,8 +19,8 @@ function useComponents(): ComponentsContextValue {
   return value;
 }
 
-type ComponentParameters<K extends keyof typeof Components> = Parameters<
-  typeof Components[K]
+export type ComponentParameters<K extends keyof IComponents> = Parameters<
+  IComponents[K]
 >[0];
 
 export const Rect = memo(function Rect(props: ComponentParameters<'Rect'>) {

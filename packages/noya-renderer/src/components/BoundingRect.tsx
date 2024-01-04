@@ -1,9 +1,9 @@
 import { insetRect, Rect } from '@noya-app/noya-geometry';
+import { Rect as RCKRect } from '@noya-app/noya-graphics';
 import { useStroke } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Rect as RCKRect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useZoom } from '../ZoomContext';
 
