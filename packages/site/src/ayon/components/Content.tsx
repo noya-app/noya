@@ -1,6 +1,7 @@
 import { DividerVertical, Stack } from '@noya-app/noya-designsystem';
 import { roundPoint } from '@noya-app/noya-geometry';
 import { SketchModel } from '@noya-app/noya-sketch-model';
+import { SVGRenderer } from '@noya-app/noya-svg-renderer';
 import {
   FileDropTarget,
   OffsetPoint,
@@ -25,7 +26,6 @@ import { ElementHierarchy, NoyaNode } from 'noya-component';
 import { amplitude } from 'noya-log';
 import { Design, RenderingModeProvider, useCanvasKit } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
-import { SVGRenderer } from 'noya-svg-renderer';
 import React, { memo, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { IDSRenderer } from '../../dseditor/DSRenderer';

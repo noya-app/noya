@@ -3,6 +3,7 @@ import { Theme } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { Size } from '@noya-app/noya-geometry';
 import { ComponentsProvider } from '@noya-app/noya-graphics';
+import { SVGRenderer } from '@noya-app/noya-svg-renderer';
 import { UTF16 } from '@noya-app/noya-utils';
 import { StateProvider } from 'noya-app-state-context';
 import { Components, render, unmount } from 'noya-react-canvaskit';
@@ -12,7 +13,6 @@ import {
   ImageCacheProvider,
 } from 'noya-renderer';
 import { WorkspaceState } from 'noya-state';
-import { SVGRenderer } from 'noya-svg-renderer';
 import React, { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ThemeProvider } from 'styled-components';
