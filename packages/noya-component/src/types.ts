@@ -50,6 +50,7 @@ export type NoyaResolvedNode =
 export type NoyaResolvedCompositeElement = NoyaCompositeElement & {
   rootElement: NoyaResolvedNode;
   path: string[];
+  // compositePath: string[];
 };
 export type NoyaResolvedPrimitiveElement = Omit<
   NoyaPrimitiveElement,
@@ -57,9 +58,11 @@ export type NoyaResolvedPrimitiveElement = Omit<
 > & {
   children: NoyaResolvedNode[];
   path: string[];
+  // compositePath: string[];
 };
 export type NoyaResolvedString = NoyaString & {
   path: string[];
+  // compositePath: string[];
 };
 export type NoyaClassName = {
   id: string;

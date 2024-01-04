@@ -242,13 +242,19 @@ export function diffResolvedTrees(
   return Model.diff(items);
 }
 
-export function applyResolvedDiff(
-  findComponent: FindComponent,
-  rootNode: NoyaResolvedNode,
-  diff: NoyaDiff,
-  parentPath: string[],
-  debug: boolean = false,
-) {
+export function applyResolvedDiff({
+  findComponent,
+  rootNode,
+  diff,
+  parentPath,
+  debug = false,
+}: {
+  findComponent: FindComponent;
+  rootNode: NoyaResolvedNode;
+  diff: NoyaDiff;
+  parentPath: string[];
+  debug?: boolean;
+}) {
   for (const item of diff.items) {
     const path = [...parentPath, ...item.path];
     const node = ResolvedHierarchy.findByPath(rootNode, path);
@@ -430,24 +436,24 @@ export function createResolvedNode({
         }
 
         if (variant) {
-          resolvedNode = applyResolvedDiff(
+          resolvedNode = applyResolvedDiff({
             findComponent,
-            resolvedNode,
-            variant.diff,
-            path,
+            rootNode: resolvedNode,
+            diff: variant.diff,
+            parentPath: path,
             debug,
-          );
+          });
         }
       }
 
       if (node.diff) {
-        resolvedNode = applyResolvedDiff(
+        resolvedNode = applyResolvedDiff({
           findComponent,
-          resolvedNode,
-          node.diff,
-          path,
+          rootNode: resolvedNode,
+          diff: node.diff,
+          parentPath: path,
           debug,
-        );
+        });
       }
 
       return {
