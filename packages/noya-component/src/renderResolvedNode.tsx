@@ -14,7 +14,6 @@ import {
   createPatternSVG,
   createSVG,
   placeholderImage,
-  replaceColorPalette,
   svgToDataUri,
 } from 'noya-component';
 import {
@@ -40,10 +39,9 @@ export function getImageFromProp(colors: Theme['colors'], prop?: NoyaProp) {
     case 'generator': {
       if (prop.generator === 'geometric') {
         return svgToDataUri(
-          replaceColorPalette(
-            prop.data ? createSVG(prop.data) : createPatternSVG(prop.query),
-            colors,
-          ),
+          prop.data
+            ? createSVG(prop.data, colors)
+            : createPatternSVG(prop.query, colors),
         );
       }
       if (prop.result) {

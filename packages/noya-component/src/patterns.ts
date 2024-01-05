@@ -1,4 +1,3 @@
-import { memoize } from '@noya-app/noya-utils';
 import { Theme } from '@noya-design-system/protocol';
 
 export function svgToDataUri(svg: string) {
@@ -64,36 +63,43 @@ const loadModule = (): Mod => {
   }
 };
 
-export const createSVG = (data: any): string => {
+export const createSVG = (data: any, colors?: Theme['colors']): string => {
   const { createSVG } = loadModule();
+
+  if (colors) {
+    data = replaceColorPaletteRecursive(data, colors);
+  }
 
   return createSVG(data);
 };
 
-export const createPatternSVG = memoize((seed: string): string => {
+export const createPatternSVG = (
+  seed: string,
+  colors?: Theme['colors'],
+): string => {
   const { createPatternSVG } = loadModule();
 
-  let svg = createPatternSVG({
+  let data: Parameters<CreatePatternSVG>[0] = {
     seed,
     overscale: 1.005,
     cellSize: 250,
     background: 'primary-200',
     shapes: ['triangle', 'quadrant'],
     foreground: ['primary-300', 'primary-400', 'primary-500', 'primary-600'],
-  });
+  };
+
+  if (colors) {
+    data = replaceColorPaletteRecursive(data, colors);
+  }
+
+  let svg = createPatternSVG(data);
 
   svg = svg.replace('<svg ', '<svg preserveAspectRatio="xMidYMid slice" ');
 
   return svg;
-});
+};
 
-/**
- * Replace any fill="primary-N" with a color from the color scale
- */
-export function replaceColorPalette(
-  svg: string,
-  colors: Theme['colors'],
-): string {
+function replaceColor(svg: string, colors: Theme['colors']): string {
   svg = svg.replace(
     /primary-(\d+)/g,
     (_, index) =>
@@ -120,4 +126,22 @@ export function createSeed(string: string) {
 export function getSchema() {
   const mod = loadModule();
   return mod.schema;
+}
+
+function replaceColorPaletteRecursive<T>(node: T, colors: Theme['colors']): T {
+  function inner(value: any): any {
+    if (typeof value === 'string') return replaceColor(value, colors);
+
+    if (Array.isArray(value)) return value.map((n) => inner(n));
+
+    if (typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, value]) => [key, inner(value)]),
+      );
+    }
+
+    return value;
+  }
+
+  return inner(node) as T;
 }
