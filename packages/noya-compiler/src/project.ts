@@ -5,10 +5,11 @@ import {
   component,
 } from '@noya-design-system/protocol';
 import { path } from 'imfs';
-import { DS } from 'noya-api';
+import { DS, DSConfig } from 'noya-api';
 import {
   FindComponent,
   NoyaComponent,
+  createNoyaDSRenderingContext,
   createResolvedNode,
   renderResolvedNode,
 } from 'noya-component';
@@ -218,7 +219,13 @@ function extractImports(
   });
 }
 
-function createLayoutSource(DesignSystem: DesignSystemDefinition): {
+function createLayoutSource({
+  DesignSystem,
+  _noya,
+}: {
+  DesignSystem: DesignSystemDefinition;
+  _noya: { theme: Theme; dsConfig: DSConfig };
+}): {
   source: string;
 } {
   const cssImport = "import './globals.css'";
@@ -231,12 +238,9 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 `;
 
   const providerElement = DesignSystem.components[component.id.Provider]
-    ? DesignSystem.createElement(
-        DesignSystem.components[component.id.Provider],
-        {
-          theme: createPassthrough(ts.factory.createIdentifier('theme')),
-        },
-        createPassthrough(
+    ? DesignSystem.components[component.id.Provider]({
+        theme: createPassthrough(ts.factory.createIdentifier('theme')),
+        children: createPassthrough(
           ts.factory.createJsxExpression(
             undefined,
             ts.factory.createPropertyAccessExpression(
@@ -245,15 +249,15 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
             ),
           ),
         ),
-      )
+        ...(_noya && { _noya }),
+      })
     : null;
 
   const nextProviderElement = DesignSystem.components[component.id.NextProvider]
-    ? DesignSystem.createElement(
-        DesignSystem.components[component.id.NextProvider],
-        {},
-        providerElement,
-      )
+    ? DesignSystem.components[component.id.NextProvider]({
+        children: providerElement,
+        ...(_noya && { _noya }),
+      })
     : providerElement;
 
   if (!nextProviderElement) return { source: defaultLayout };
@@ -402,8 +406,6 @@ export function compileDesignSystem(
     {},
   );
 
-  const layoutSource = createLayoutSource(DesignSystem);
-
   const theme: Theme = {
     colorMode: configuration.ds.config.colorMode ?? 'light',
     colors: {
@@ -411,6 +413,15 @@ export function compileDesignSystem(
       neutral: tailwindColors.slate,
     },
   };
+
+  const layoutSource = createLayoutSource({
+    DesignSystem,
+    _noya: createNoyaDSRenderingContext({
+      theme,
+      dsConfig: configuration.ds.config,
+      stylingMode: 'tailwind-resolved',
+    }),
+  });
 
   const themeFile = generateThemeFile(DesignSystem, { theme });
 
@@ -431,7 +442,7 @@ export function compileDesignSystem(
       ]),
     ),
     'theme.ts': themeFile,
-    ...(layoutSource ? { 'layout.tsx': layoutSource.source } : {}),
+    'layout.tsx': layoutSource.source,
   };
 
   return {

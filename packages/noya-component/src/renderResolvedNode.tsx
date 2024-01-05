@@ -58,6 +58,78 @@ export function getImageFromProp(colors: Theme['colors'], prop?: NoyaProp) {
   return placeholderImage;
 }
 
+export function createNoyaDSRenderingContext({
+  theme,
+  dsConfig,
+  stylingMode,
+  breakpoint,
+}: {
+  theme: any;
+  dsConfig: DSConfig;
+  stylingMode: StylingMode;
+  breakpoint?: BreakpointKey;
+}): {
+  theme: any;
+  dsConfig: DSConfig;
+  getStylingProps: (className: string | string[]) => {
+    style?: React.CSSProperties;
+    className?: string;
+  };
+} {
+  function getStylingProps(initialClassNames: string | string[]): {
+    style?: React.CSSProperties;
+    className?: string;
+  } {
+    if (typeof initialClassNames === 'string') {
+      return getStylingProps(initialClassNames.split(/\s+/));
+    }
+
+    const normalizedClassNames = initialClassNames
+      .map((className) =>
+        className.replace(/-primary-/, `-${dsConfig.colors.primary}-`),
+      )
+      .filter((className) => !className.startsWith('variant-'));
+
+    const classNames = filterTailwindClassesByLastInGroup(normalizedClassNames);
+
+    const classNamesByColorScheme = extractTailwindClassesByColorScheme(
+      classNames,
+      dsConfig.colorMode ?? 'light',
+    );
+
+    const classNamesByBreakpoint = breakpoint
+      ? extractTailwindClassesByBreakpoint(classNamesByColorScheme, breakpoint)
+      : classNamesByColorScheme;
+
+    const classNamesForCurrentPage = filterTailwindClassesByLastInGroup(
+      classNamesByBreakpoint,
+    );
+
+    const style = parametersToTailwindStyle(classNamesForCurrentPage);
+
+    const stylingProps = {
+      // Include all classnames regardless of breakpoint/colorScheme
+      ...(stylingMode === 'tailwind' &&
+        classNames.length > 0 && {
+          className: classNames.join(' '),
+        }),
+      ...(stylingMode === 'tailwind-resolved' &&
+        classNamesForCurrentPage.length > 0 && {
+          className: classNamesForCurrentPage.join(' '),
+        }),
+      ...(stylingMode === 'inline' && { style }),
+    };
+
+    return stylingProps;
+  }
+
+  return {
+    theme,
+    dsConfig,
+    getStylingProps,
+  };
+}
+
 export function renderResolvedNode({
   containerWidth,
   contentEditable,
@@ -83,51 +155,12 @@ export function renderResolvedNode({
     ? matchBreakpoint(containerWidth)
     : 'md';
 
-  function getStylingProps(initialClassNames: string | string[]): {
-    style?: React.CSSProperties;
-    className?: string;
-  } {
-    if (typeof initialClassNames === 'string') {
-      return getStylingProps(initialClassNames.split(/\s+/));
-    }
-
-    const normalizedClassNames = initialClassNames
-      .map((className) =>
-        className.replace(/-primary-/, `-${dsConfig.colors.primary}-`),
-      )
-      .filter((className) => !className.startsWith('variant-'));
-
-    const classNames = filterTailwindClassesByLastInGroup(normalizedClassNames);
-
-    const classNamesForCurrentPage = filterTailwindClassesByLastInGroup(
-      extractTailwindClassesByBreakpoint(
-        extractTailwindClassesByColorScheme(
-          classNames,
-          dsConfig.colorMode ?? 'light',
-        ),
-        breakpoint,
-      ),
-    );
-
-    const style = parametersToTailwindStyle(classNamesForCurrentPage);
-
-    const stylingProps = {
-      // Include all classnames regardless of breakpoint/colorScheme
-      ...(stylingMode === 'tailwind' &&
-        classNames.length > 0 && {
-          className: classNames.join(' '),
-        }),
-      ...(stylingMode === 'tailwind-resolved' &&
-        classNamesForCurrentPage.length > 0 && {
-          className: classNamesForCurrentPage.join(' '),
-        }),
-      ...(stylingMode === 'inline' && { style }),
-    };
-
-    return stylingProps;
-  }
-
-  const noya = { theme, dsConfig, getStylingProps };
+  const noya = createNoyaDSRenderingContext({
+    theme,
+    dsConfig,
+    breakpoint,
+    stylingMode,
+  });
 
   return ResolvedHierarchy.map<ReactNode>(
     resolvedNode,
@@ -210,7 +243,7 @@ export function renderResolvedNode({
         'slate'
       ] as Theme['colors']['neutral'];
 
-      const stylingProps = getStylingProps(
+      const stylingProps = noya.getStylingProps(
         element.classNames.map((item) => item.value),
       );
 

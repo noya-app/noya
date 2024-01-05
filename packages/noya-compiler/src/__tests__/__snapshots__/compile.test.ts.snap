@@ -80,10 +80,25 @@ export default function Hero() {
   );
 }
 ",
-  "public/vanilla/blue/dark/components/layout.tsx": "import './globals.css'
+  "public/vanilla/blue/dark/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#111',
+      }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "public/vanilla/blue/dark/components/theme.ts": "export const theme = {
@@ -148,10 +163,20 @@ export default function Hero() {
   );
 }
 ",
-  "public/vanilla/blue/light/components/layout.tsx": "import './globals.css'
+  "public/vanilla/blue/light/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "public/vanilla/blue/light/components/theme.ts": "export const theme = {
@@ -216,10 +241,25 @@ export default function Hero() {
   );
 }
 ",
-  "public/vanilla/teal/dark/components/layout.tsx": "import './globals.css'
+  "public/vanilla/teal/dark/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#111',
+      }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "public/vanilla/teal/dark/components/theme.ts": "export const theme = {
@@ -284,10 +324,20 @@ export default function Hero() {
   );
 }
 ",
-  "public/vanilla/teal/light/components/layout.tsx": "import './globals.css'
+  "public/vanilla/teal/light/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "public/vanilla/teal/light/components/theme.ts": "export const theme = {
@@ -478,10 +528,25 @@ export default function Hero() {
   );
 }
 ",
-  "src/app/vanilla/blue/dark/components/layout.tsx": "import './globals.css'
+  "src/app/vanilla/blue/dark/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#111',
+      }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "src/app/vanilla/blue/dark/components/theme.ts": "export const theme = {
@@ -546,10 +611,20 @@ export default function Hero() {
   );
 }
 ",
-  "src/app/vanilla/blue/light/components/layout.tsx": "import './globals.css'
+  "src/app/vanilla/blue/light/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "src/app/vanilla/blue/light/components/theme.ts": "export const theme = {
@@ -614,10 +689,25 @@ export default function Hero() {
   );
 }
 ",
-  "src/app/vanilla/teal/dark/components/layout.tsx": "import './globals.css'
+  "src/app/vanilla/teal/dark/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#111',
+      }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "src/app/vanilla/teal/dark/components/theme.ts": "export const theme = {
@@ -682,10 +772,20 @@ export default function Hero() {
   );
 }
 ",
-  "src/app/vanilla/teal/light/components/layout.tsx": "import './globals.css'
+  "src/app/vanilla/teal/light/components/layout.tsx": "'use client';
 
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
+import './globals.css';
+import React from 'react';
+import { theme } from './theme';
+
+export default function NextProvider(props: React.PropsWithChildren<{}>) {
+  return (
+    <div
+      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+    >
+      {props.children}
+    </div>
+  );
 }
 ",
   "src/app/vanilla/teal/light/components/theme.ts": "export const theme = {

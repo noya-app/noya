@@ -226,7 +226,23 @@ const proxyObject = new Proxy(
         </div>
       );
     },
-    [component.id.Provider]: undefined,
+    [component.id.Provider]: (props: any) => {
+      const config = getDSConfig(props);
+
+      return (
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            ...(config.colorMode === 'dark' && { background: '#111' }),
+          }}
+        >
+          {props.children}
+        </div>
+      );
+    },
+    [component.id.NextProvider]: undefined,
   },
   handler,
 );
