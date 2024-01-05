@@ -64,6 +64,7 @@ interface Props {
   components: NoyaComponent[];
   onNewComponent: (componentID?: string, groupID?: string) => void;
   onDeleteComponent: (componentID: string) => void;
+  onDuplicateComponent: (componentID: string) => void;
   onSelectComponent: (componentID?: string) => void;
   onMoveComponent: (
     componentID: string,
@@ -85,6 +86,7 @@ export function DSProjectInspector({
   components,
   onNewComponent,
   onDeleteComponent,
+  onDuplicateComponent,
   onSelectComponent,
   onMoveComponent,
   findComponent,
@@ -409,6 +411,7 @@ export function DSProjectInspector({
                     onPress={() => onSelectComponent(component.componentID)}
                     menuItems={[
                       { value: 'rename', title: 'Rename' },
+                      { value: 'duplicate', title: 'Duplicate' },
                       { value: 'delete', title: 'Delete' },
                     ]}
                     backgroundColor={
@@ -443,6 +446,9 @@ export function DSProjectInspector({
                           break;
                         case 'rename':
                           setRenamingComponent(component.componentID);
+                          break;
+                        case 'duplicate':
+                          onDuplicateComponent(component.componentID);
                           break;
                       }
                     }}

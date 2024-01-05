@@ -19,6 +19,7 @@ import { DS, useNoyaClientOrFallback } from 'noya-api';
 import { compileAsync } from 'noya-compiler';
 import {
   ComponentGroupTree,
+  ElementHierarchy,
   Model,
   NoyaComponent,
   NoyaResolvedPrimitiveElement,
@@ -226,6 +227,28 @@ export function DSEditor({
       setComponents(components.filter((c) => c.componentID !== componentID));
     },
     [components, setComponents, setSelection],
+  );
+
+  const handleDuplicateComponent = useCallback(
+    (componentID: string) => {
+      const component = findComponent(componentID);
+
+      if (!component) return;
+
+      const newComponent = Model.component({
+        ...component,
+        id: uuid(),
+        componentID: uuid(),
+        variants: undefined,
+        rootElement: ElementHierarchy.clone(component.rootElement),
+      });
+
+      setComponents([...components, newComponent]);
+      setSelection({
+        componentID: newComponent.componentID,
+      });
+    },
+    [components, findComponent, setComponents, setSelection],
   );
 
   const handleChangeComponent = useCallback(
@@ -493,6 +516,7 @@ export function DSEditor({
           groups={groups}
           onNewComponent={handleNewComponent}
           onDeleteComponent={handleDeleteComponent}
+          onDuplicateComponent={handleDuplicateComponent}
           onMoveComponent={(componentID, index, groupID) => {
             const removalIndex = components.findIndex(
               (c) => c.componentID === componentID,

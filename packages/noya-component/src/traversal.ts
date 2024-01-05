@@ -1,4 +1,4 @@
-import { isDeepEqual } from '@noya-app/noya-utils';
+import { isDeepEqual, uuid } from '@noya-app/noya-utils';
 import {
   Model,
   NoyaComponent,
@@ -20,7 +20,7 @@ import {
 import { defineTree } from 'tree-visit';
 
 // Doesn't traverse into nested components
-export const ElementHierarchy = defineTree<NoyaNode>({
+const ElementTree = defineTree<NoyaNode>({
   getChildren: (node) => {
     switch (node.type) {
       case 'noyaString':
@@ -43,6 +43,69 @@ export const ElementHierarchy = defineTree<NoyaNode>({
     }
   },
 });
+
+function clone<T extends NoyaNode>(
+  node: T,
+  { uuid: _uuid = uuid }: { uuid?: () => string } = {},
+): T {
+  const idMapping = new Map<string, string>();
+
+  const createConsistentId = (id: string) => {
+    if (idMapping.has(id)) return idMapping.get(id)!;
+
+    const newId = _uuid();
+
+    idMapping.set(id, newId);
+
+    return newId;
+  };
+
+  return ElementTree.map<NoyaNode>(node, (node, transformedChildren) => {
+    switch (node.type) {
+      case 'noyaString': {
+        return {
+          ...node,
+          id: createConsistentId(node.id),
+        };
+      }
+      case 'noyaPrimitiveElement': {
+        return {
+          ...node,
+          id: createConsistentId(node.id),
+          children: transformedChildren,
+        };
+      }
+      case 'noyaCompositeElement': {
+        const composite: NoyaCompositeElement = {
+          ...node,
+          id: createConsistentId(node.id),
+          ...(node.diff && {
+            diff: {
+              items: node.diff.items.map((item) => {
+                return {
+                  ...item,
+                  path: item.path.map(createConsistentId),
+                  ...(item.children && {
+                    children: mapArrayDiff(item.children, (child) => {
+                      return { ...child, id: createConsistentId(child.id) };
+                    }),
+                  }),
+                };
+              }),
+            },
+          }),
+        };
+
+        return composite;
+      }
+    }
+  }) as T;
+}
+
+export const ElementHierarchy = {
+  ...ElementTree,
+  clone,
+};
 
 export type FindComponent = (id: string) => NoyaComponent | undefined;
 
