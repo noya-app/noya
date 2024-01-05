@@ -319,7 +319,7 @@ export function applyResolvedDiff({
         classNames: applyArrayDiff(
           node.classNames,
           item.classNames,
-          (item) => item.id,
+          (item) => item.value,
         ),
       });
     }

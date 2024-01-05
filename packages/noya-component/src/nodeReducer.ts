@@ -123,7 +123,7 @@ export function resolvedNodeReducer(
       });
     }
     case 'removeClassNames': {
-      const { indexPath, classNames: className } = action;
+      const { indexPath, classNames } = action;
 
       const node = ResolvedHierarchy.access(resolvedNode, indexPath);
 
@@ -134,7 +134,7 @@ export function resolvedNodeReducer(
         node: {
           ...cloneDeep(node),
           classNames: node.classNames.filter(
-            (c) => !className.includes(c.value),
+            (c) => !classNames.includes(c.value),
           ),
         },
       });
