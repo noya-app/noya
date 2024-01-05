@@ -73,7 +73,7 @@
     "@noya-app/noya-sketch-file": "^0.0.1",
     "@noya-app/noya-sketch-model": "^0.0.3",
     "@noya-app/noya-svg-renderer": "^0.0.1",
-    "@noya-app/noya-svgkit": "^0.0.1",
+    "@noya-app/noya-svgkit": "^0.0.2",
     "@noya-app/noya-utils": "^0.0.7",
     "@noya-app/react-utils": "^0.0.4",
     "@shopify/eslint-plugin": "^40.1.0",
