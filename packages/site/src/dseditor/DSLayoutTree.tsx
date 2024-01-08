@@ -162,6 +162,27 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   const [editingId, setEditingId] = useState<string | undefined>();
 
   useKeyboardShortcuts({
+    'Mod-d': () => {
+      const indexPath = ResolvedHierarchy.findIndexPath(resolvedNode, (n) =>
+        isDeepEqual(n.path, selectedPath),
+      );
+
+      if (!indexPath) return;
+
+      const parent = ResolvedHierarchy.access(
+        resolvedNode,
+        indexPath.slice(0, -1),
+      );
+
+      if (!parent || parent.type !== 'noyaPrimitiveElement') return;
+
+      onChange(
+        resolvedNodeReducer(resolvedNode, {
+          type: 'duplicateNode',
+          indexPath,
+        }),
+      );
+    },
     // Add a box into either the selected element or the first primitive element
     '+': () => {
       const selectedElement = ResolvedHierarchy.findTypeByPath(
@@ -456,7 +477,6 @@ export const DSLayoutRow = memo(
             title: 'Duplicate',
             value: 'duplicate',
             icon: <CopyIcon />,
-            shortcut: 'Mod-d',
           },
         depth !== 0 &&
           parent.type === 'noyaPrimitiveElement' && {
