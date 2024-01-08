@@ -6,8 +6,7 @@
   },
   "main": "./src/index.ts",
   "version": "1.0.0",
-  "dependencies": {},
   "optionalDependencies": {
-    "@dabbott/patterns": "^0.2.0"
+    "@dabbott/patterns": "0.3.0"
   }
 }

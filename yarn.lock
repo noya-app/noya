@@ -1623,10 +1623,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.2.tgz#1bfafe4b7ed0f3e4105837e056e0a89b108ebe36"
   integrity sha512-IkpVW/ehM1hWKln4fCA3NzJU8KwD+kIOvPZA4cqxoJHtE21CCzjyp+Kxbu0i5I4tBNOlXPL9mjwnWlL0VEG4Fg==
 
-"@dabbott/patterns@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.2.0.tgz#7966ca1a4482fe6afca58530f1da21dde193037f"
-  integrity sha512-61TYHNLDk3/BczspU8cRvqx+eNLumRBrZbWnyPASK13nkdxIAtXGFjPOiwA2Zpul7QLtqDsC8aE/NeNBwUMENA==
+"@dabbott/patterns@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@dabbott/patterns/-/patterns-0.3.0.tgz#0c2cf807c975f01671cd92e7661776a89ec8797a"
+  integrity sha512-h+FED/hXHhh5RQv5Ye8tQjZmD1gYGopgeaz5W2IK8N6C7mc/o8gkgipNuqH3PSe7Zr3auxMI9Rm9BRGbB3YIXw==
   dependencies:
     "@sinclair/typebox" "^0.31.28"
 
