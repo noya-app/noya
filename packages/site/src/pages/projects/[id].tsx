@@ -266,7 +266,7 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   useKeyboardShortcuts({
-    'Mod-shift-p': () => {
+    'Mod-p': () => {
       setShowCommandPalette(!showCommandPalette);
     },
   });

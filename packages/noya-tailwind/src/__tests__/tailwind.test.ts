@@ -107,6 +107,11 @@ describe('resolves styles', () => {
       fontSize: '1.25rem',
       lineHeight: '1.75rem',
     });
+
+    expect(resolveTailwindClass('text-xs')).toEqual({
+      fontSize: '0.75rem',
+      lineHeight: '1rem',
+    });
   });
 
   it('fill color', () => {

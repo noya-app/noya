@@ -84,7 +84,12 @@ const proxyObject = new Proxy(
       const config = getDSConfig(props);
       const variant = (props.variant as ButtonVariant) ?? 'solid';
       const stylingProps = createStylingProps(props, [
-        `appearance-none`,
+        'appearance-none',
+        'text-sm',
+        'font-bold',
+        'rounded-md',
+        'px-3.5',
+        'py-2.5',
         ...(variant === 'solid'
           ? [
               `bg-${config.colors.primary}-500`,
@@ -109,11 +114,6 @@ const proxyObject = new Proxy(
               `hover:text-${config.colors.primary}-700`,
             ]
           : []),
-        `rounded-md`,
-        `px-3.5`,
-        `py-2.5`,
-        `text-sm`,
-        `font-semibold`,
       ]);
 
       return <button {...applyCommonProps({ ...props, ...stylingProps })} />;
@@ -124,12 +124,14 @@ const proxyObject = new Proxy(
         [
           'text-black',
           'dark:text-white',
-          props.variant === 'h1' && `text-5xl`,
-          props.variant === 'h2' && `text-4xl`,
-          props.variant === 'h3' && `text-3xl`,
-          props.variant === 'h4' && `text-2xl`,
-          props.variant === 'h5' && `text-xl`,
-          props.variant === 'h6' && `text-lg`,
+          ...(props.variant === 'h1'
+            ? ['text-6xl', 'font-bold', 'tracking-tighter']
+            : []),
+          props.variant === 'h2' && 'text-4xl',
+          props.variant === 'h3' && 'text-3xl',
+          props.variant === 'h4' && 'text-2xl',
+          props.variant === 'h5' && 'text-xl',
+          props.variant === 'h6' && 'text-lg',
         ].filter(Boolean),
       );
 
@@ -139,6 +141,8 @@ const proxyObject = new Proxy(
       const config = getDSConfig(props);
 
       const stylingProps = createStylingProps(props, [
+        'text-sm',
+        'font-bold',
         `text-${config.colors.primary}-500`,
         `hover:text-${config.colors.primary}-400`,
       ]);
@@ -154,13 +158,13 @@ const proxyObject = new Proxy(
       const config = getDSConfig(props);
 
       const stylingProps = createStylingProps(props, [
-        `inline-flex`,
-        `items-center`,
-        `px-2.5`,
-        `py-0.5`,
-        `rounded-full`,
-        `text-xs`,
-        `font-medium`,
+        'inline-flex',
+        'items-center',
+        'px-2.5',
+        'py-0.5',
+        'rounded-full',
+        'text-sm',
+        'font-medium',
         `bg-${config.colors.primary}-200/10`,
         `dark:bg-${config.colors.primary}-500/10`,
         `border`,

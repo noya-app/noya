@@ -37,7 +37,8 @@ export const suggestionPatterns = [
   'blur-{blur}',
   'text-{colors}',
   'font-{fontWeight}',
-  // Text alignment
+  'tracking-{letterSpacing}',
+  'text-{fontSize}',
   'text-left',
   'text-center',
   'text-right',

@@ -13,6 +13,8 @@ const ClientStorageDefinitions = {
   ayonShowComponentSuggestions: 'noya-ayon-show-component-suggestions',
   dsShowMetadata: 'noya-ds-show-metadata',
   noyaPrefersColorScheme: 'noya-prefers-color-scheme',
+  showLeftSidebar: 'noya-show-left-sidebar',
+  showRightSidebar: 'noya-show-right-sidebar',
 };
 
 export const ayonOnboardingStep = [

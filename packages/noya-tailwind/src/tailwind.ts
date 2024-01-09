@@ -58,8 +58,7 @@ export function getTextAlign(hashtags: string[]) {
 
 export const classGroups = {
   appearance: /^appearance-none/,
-  fontSize:
-    /^(text-base|text-xs|text-sm|text-lg|text-xl|text-2xl|text-3xl|text-4xl|text-5xl|text-6xl|text-7xl|text-8xl|text-9xl)/,
+  fontSize: /^text-(base|xs|sm|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)/,
   fontWeight:
     /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
   background: /^bg/,
@@ -133,6 +132,7 @@ export const classGroups = {
   gridFlow: /^grid-flow/,
   gridCols: /^grid-cols/,
   lineHeight: /^leading-/,
+  tracking: /^tracking-/,
   position: /^(absolute|relative|fixed|sticky)/,
   inset: /^inset-/,
   opacity: /^opacity-/,
@@ -323,7 +323,7 @@ export const extractTailwindClassesByColorScheme = (
 
 function getValue(className: string): string | undefined {
   let value =
-    /-((\d+)((\/|\.)\d+)?|(base|sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
+    /-((\d+)((\/|\.)\d+)?|(base|xs|sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
       className,
     )?.[1];
 
@@ -710,6 +710,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       const [, value] = className.split('-');
       return {
         lineHeight: (config.theme as any).lineHeight[value || 'DEFAULT'],
+      };
+    }
+    case 'tracking': {
+      const [, value] = className.split('-');
+      return {
+        letterSpacing: (config.theme as any).letterSpacing[value || 'DEFAULT'],
       };
     }
     case 'textAlign': {

@@ -12,6 +12,7 @@ import {
 } from '@noya-app/noya-designsystem';
 import { toZipFile } from '@noya-app/noya-filesystem';
 import { DownloadIcon } from '@noya-app/noya-icons';
+import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { UTF16, findLast, uuid } from '@noya-app/noya-utils';
 import { useDeepState } from '@noya-app/react-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
@@ -46,6 +47,7 @@ import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { ShareProjectButton } from '../components/ShareMenu';
 import { useProject } from '../contexts/ProjectContext';
+import { usePersistentState } from '../utils/clientStorage';
 import { downloadBlob } from '../utils/download';
 import { DSComponentInspector } from './DSComponentInspector';
 import { DSComponentThumbnail } from './DSComponentThumbnail';
@@ -534,9 +536,27 @@ export function DSEditor({
 
   const rootGroup = createRootGroup(groups);
 
+  const [rightSidebarVisibility, setRightSidebarVisibility] =
+    usePersistentState<'show' | 'hide'>('showRightSidebar', 'show');
+
+  const [leftSidebarVisibility, setLeftSidebarVisibility] = usePersistentState<
+    'show' | 'hide'
+  >('showLeftSidebar', 'show');
+
+  useKeyboardShortcuts({
+    'Mod-.': () => {
+      setLeftSidebarVisibility(
+        leftSidebarVisibility === 'show' ? 'hide' : 'show',
+      );
+      setRightSidebarVisibility(
+        rightSidebarVisibility === 'show' ? 'hide' : 'show',
+      );
+    },
+  });
+
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
-      {viewType !== 'preview' && (
+      {viewType !== 'preview' && leftSidebarVisibility !== 'hide' && (
         <DSProjectInspector
           name={fileName}
           findComponent={findComponent}
@@ -692,51 +712,54 @@ export function DSEditor({
           </Stack.V>
         )}
       </Stack.V>
-      {viewType !== 'preview' && selection && resolvedNode && (
-        <DSComponentInspector
-          key={selection.componentID} // Use key to reset any navigation state
-          selection={selection}
-          setSelection={setSelection}
-          findComponent={findComponent}
-          onChangeComponent={handleChangeComponent}
-          resolvedNode={resolvedNode}
-          highlightedPath={highlightedPath}
-          setHighlightedPath={setHighlightedPath}
-          selectedPath={selectedPath}
-          setSelectedPath={setSelectedPath}
-          onCreateComponent={handleCreateComponent}
-          components={components}
-          onPressMeasure={handlePressMeasure}
-          groups={groups}
-          uploadAsset={uploadAsset}
-          onCreateGroup={(group, parentID) => {
-            const groupID = uuid();
-            const root = createRootGroup(groups);
-            const parentIndexPath = ComponentGroupTree.findIndexPath(
-              root,
-              (g) => g.id === parentID,
-            );
-            const parent = parentIndexPath
-              ? ComponentGroupTree.access(root, parentIndexPath)
-              : root;
-            const childrenLength = parent.children?.length ?? 0;
+      {viewType !== 'preview' &&
+        selection &&
+        resolvedNode &&
+        rightSidebarVisibility !== 'hide' && (
+          <DSComponentInspector
+            key={selection.componentID} // Use key to reset any navigation state
+            selection={selection}
+            setSelection={setSelection}
+            findComponent={findComponent}
+            onChangeComponent={handleChangeComponent}
+            resolvedNode={resolvedNode}
+            highlightedPath={highlightedPath}
+            setHighlightedPath={setHighlightedPath}
+            selectedPath={selectedPath}
+            setSelectedPath={setSelectedPath}
+            onCreateComponent={handleCreateComponent}
+            components={components}
+            onPressMeasure={handlePressMeasure}
+            groups={groups}
+            uploadAsset={uploadAsset}
+            onCreateGroup={(group, parentID) => {
+              const groupID = uuid();
+              const root = createRootGroup(groups);
+              const parentIndexPath = ComponentGroupTree.findIndexPath(
+                root,
+                (g) => g.id === parentID,
+              );
+              const parent = parentIndexPath
+                ? ComponentGroupTree.access(root, parentIndexPath)
+                : root;
+              const childrenLength = parent.children?.length ?? 0;
 
-            const newRoot = ComponentGroupTree.insert(root, {
-              nodes: [group],
-              at: parentIndexPath
-                ? [...parentIndexPath, childrenLength]
-                : [childrenLength],
-            });
+              const newRoot = ComponentGroupTree.insert(root, {
+                nodes: [group],
+                at: parentIndexPath
+                  ? [...parentIndexPath, childrenLength]
+                  : [childrenLength],
+              });
 
-            setDS((ds) => ({
-              ...ds,
-              groups: getSavableComponentGroups(newRoot),
-            }));
+              setDS((ds) => ({
+                ...ds,
+                groups: getSavableComponentGroups(newRoot),
+              }));
 
-            return groupID;
-          }}
-        />
-      )}
+              return groupID;
+            }}
+          />
+        )}
     </Stack.H>
   );
 }
