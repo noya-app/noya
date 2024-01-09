@@ -252,6 +252,17 @@ export function DSComponentInspector({
     );
   }
 
+  const diffSectionMenu = [
+    {
+      title: 'Reset',
+      value: 'reset' as const,
+    },
+    {
+      title: 'Delete All' + (selection.variantID ? ' (permanent)' : ''),
+      value: 'deleteAll' as const,
+    },
+  ];
+
   return (
     <Stack.V width="400px" background={theme.colors.sidebar.background}>
       <ScrollArea>
@@ -734,7 +745,50 @@ export function DSComponentInspector({
           </InspectorSection>
         </Stack.V>
         {allDiffItems.length > 0 && (
-          <InspectorSection title="Diff" titleTextStyle="heading4">
+          <InspectorSection
+            title="Diff"
+            titleTextStyle="heading4"
+            right={
+              <DropdownMenu
+                items={diffSectionMenu}
+                onSelect={(value) => {
+                  switch (value) {
+                    case 'reset': {
+                      break;
+                    }
+                    case 'deleteAll': {
+                      if (!selection.variantID) return;
+
+                      const variant = component.variants?.find(
+                        (variant) => variant.id === selection.variantID,
+                      );
+
+                      if (!variant) return;
+
+                      onChangeComponent({
+                        ...component,
+                        variants: component.variants?.map((variant) =>
+                          variant.id === selection.variantID
+                            ? {
+                                ...variant,
+                                diff: {
+                                  ...variant.diff,
+                                  items: [],
+                                },
+                              }
+                            : variant,
+                        ),
+                      });
+
+                      return;
+                    }
+                  }
+                }}
+              >
+                <IconButton iconName="DotsVerticalIcon" />
+              </DropdownMenu>
+            }
+          >
             <Stack.V>
               <DiffList
                 allDiffItems={allDiffItems}
@@ -760,17 +814,6 @@ export function DSComponentInspector({
 
             if (current.length === 0) return null;
 
-            const menu = [
-              {
-                title: 'Reset',
-                value: 'reset' as const,
-              },
-              {
-                title: 'Delete All',
-                value: 'deleteAll' as const,
-              },
-            ];
-
             return (
               <InspectorSection
                 key={element.id}
@@ -778,7 +821,7 @@ export function DSComponentInspector({
                 titleTextStyle="heading5"
                 right={
                   <DropdownMenu
-                    items={menu}
+                    items={diffSectionMenu}
                     onSelect={(value) => {
                       switch (value) {
                         case 'reset': {

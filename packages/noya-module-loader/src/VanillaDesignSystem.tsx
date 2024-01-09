@@ -127,11 +127,21 @@ const proxyObject = new Proxy(
           ...(props.variant === 'h1'
             ? ['text-6xl', 'font-bold', 'tracking-tighter']
             : []),
-          props.variant === 'h2' && 'text-4xl',
-          props.variant === 'h3' && 'text-3xl',
-          props.variant === 'h4' && 'text-2xl',
-          props.variant === 'h5' && 'text-xl',
-          props.variant === 'h6' && 'text-lg',
+          ...(props.variant === 'h2'
+            ? ['text-5xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h3'
+            ? ['text-4xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h4'
+            ? ['text-3xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h5'
+            ? ['text-2xl', 'font-semibold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h6'
+            ? ['text-xl', 'font-semibold', 'tracking-tight']
+            : []),
         ].filter(Boolean),
       );
 
@@ -165,11 +175,11 @@ const proxyObject = new Proxy(
         'rounded-full',
         'text-sm',
         'font-medium',
-        `bg-${config.colors.primary}-200/10`,
-        `dark:bg-${config.colors.primary}-500/10`,
-        `border`,
-        `border-${config.colors.primary}-600/10`,
-        `text-${config.colors.primary}-600`,
+        `bg-${config.colors.primary}-200/20`,
+        `dark:bg-${config.colors.primary}-500/20`,
+        // `border`,
+        // `border-${config.colors.primary}-600/10`,
+        `text-${config.colors.primary}-600/80`,
       ]);
 
       return <div {...applyCommonProps({ ...props, ...stylingProps })} />;
