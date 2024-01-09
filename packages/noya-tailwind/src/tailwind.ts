@@ -122,6 +122,10 @@ export const classGroups = {
   borderBottomWidth: /^border-b(-\d+)?$/,
   borderLeftWidth: /^border-l(-\d+)?$/,
   borderColor: /^border-[-a-z]+/,
+  ringWidth: /^ring(-\d+)?$/,
+  ringOffsetWidth: /^ring-offset(-\d+)?$/,
+  ringInset: /^ring-inset$/,
+  ringColor: /^ring-(?!inset)[-a-z]+/,
   textDecoration: /^(underline|overline|no-underline|line-through)/,
   boxShadow: /^shadow/,
   autoCols: /^auto-cols/,
@@ -803,6 +807,11 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
       return {
         overflowY: className.replace('overflow-y-', '') as any,
       };
+    case 'ringColor':
+    case 'ringInset':
+    case 'ringOffsetWidth':
+    case 'ringWidth':
+      return {};
   }
 
   return assertNever(classGroup);
@@ -850,6 +859,49 @@ export function parametersToTailwindStyle(
     result.backgroundImage = tailwindToLinearGradient(classNames, (color) =>
       getColor(`bg-${color}`),
     );
+  }
+
+  if (hasClassGroup('ringWidth', classNames)) {
+    let ringProps: {
+      ringWidth?: string;
+      ringOffsetWidth?: string;
+      ringColor?: string;
+      ringInset?: boolean;
+    } = {};
+
+    const ringWidth = getLastClassInGroup('ringWidth', classNames);
+    if (ringWidth) {
+      const value = getValue(ringWidth);
+      ringProps.ringWidth = (config.theme.ringWidth as any)[value || 'DEFAULT'];
+    }
+
+    const ringOffsetWidth = getLastClassInGroup('ringOffsetWidth', classNames);
+    if (ringOffsetWidth) {
+      const value = getValue(ringOffsetWidth);
+      ringProps.ringOffsetWidth = (config.theme.ringOffsetWidth as any)[
+        value || 'DEFAULT'
+      ];
+    }
+
+    const ringColor = getLastClassInGroup('ringColor', classNames);
+    if (ringColor) {
+      ringProps.ringColor = getColor(ringColor);
+    } else {
+      ringProps.ringColor = '#3b82f680';
+    }
+
+    const ringInset = classNames.includes('ring-inset');
+    if (ringInset) {
+      ringProps.ringInset = true;
+    }
+
+    const ringString = `${ringProps.ringInset ? 'inset ' : ''}0 0 0 ${
+      ringProps.ringOffsetWidth
+        ? `calc(${ringProps.ringWidth} + ${ringProps.ringOffsetWidth})`
+        : ringProps.ringWidth
+    } ${ringProps.ringColor}`;
+
+    result.boxShadow = ringString;
   }
 
   return result;

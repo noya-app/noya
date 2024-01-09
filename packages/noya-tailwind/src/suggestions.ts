@@ -141,6 +141,10 @@ export const suggestionPatterns = [
   'overflow-y-visible',
   'overflow-x-scroll',
   'overflow-y-scroll',
+  'ring-{ringWidth}',
+  'ring-offset-{ringOffsetWidth}',
+  'ring-{colors}',
+  'ring-inset',
 ];
 
 export const context = {

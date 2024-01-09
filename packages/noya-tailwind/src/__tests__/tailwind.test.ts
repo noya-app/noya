@@ -444,4 +444,30 @@ describe('parameters', () => {
       textAlign: 'center',
     });
   });
+
+  describe('ring', () => {
+    it('default', () => {
+      expect(parametersToTailwindStyle(['ring'])).toEqual({
+        boxShadow: '0 0 0 3px #3b82f680',
+      });
+    });
+
+    it('width', () => {
+      expect(parametersToTailwindStyle(['ring-2'])).toEqual({
+        boxShadow: '0 0 0 2px #3b82f680',
+      });
+    });
+
+    it('color', () => {
+      expect(parametersToTailwindStyle(['ring', 'ring-blue-500'])).toEqual({
+        boxShadow: '0 0 0 3px #3b82f6',
+      });
+    });
+
+    it('inset', () => {
+      expect(parametersToTailwindStyle(['ring', 'ring-inset'])).toEqual({
+        boxShadow: 'inset 0 0 0 3px #3b82f680',
+      });
+    });
+  });
 });
