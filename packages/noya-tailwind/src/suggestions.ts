@@ -129,6 +129,18 @@ export const suggestionPatterns = [
   'flex-nowrap',
   'hidden',
   'visible',
+  'overflow-auto',
+  'overflow-hidden',
+  'overflow-visible',
+  'overflow-scroll',
+  'overflow-x-auto',
+  'overflow-y-auto',
+  'overflow-x-hidden',
+  'overflow-y-hidden',
+  'overflow-x-visible',
+  'overflow-y-visible',
+  'overflow-x-scroll',
+  'overflow-y-scroll',
 ];
 
 export const context = {

@@ -135,6 +135,9 @@ export const classGroups = {
   objectFit:
     /^(object-contain|object-cover|object-fill|object-none|object-scale-down)/,
   objectPosition: /^object-/,
+  overflow: /^overflow-(auto|hidden|visible|scroll)/,
+  overflowX: /^overflow-x-(auto|hidden|visible|scroll)/,
+  overflowY: /^overflow-y-(auto|hidden|visible|scroll)/,
   isolate: /^(isolate|isolation-auto)/,
   zIndex: /^-?z-/,
   display:
@@ -787,6 +790,18 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         filter: `blur(${
           (context.theme('blur') as any)[getValue(className) || 'DEFAULT']
         })`,
+      };
+    case 'overflow':
+      return {
+        overflow: className.replace('overflow-', '') as any,
+      };
+    case 'overflowX':
+      return {
+        overflowX: className.replace('overflow-x-', '') as any,
+      };
+    case 'overflowY':
+      return {
+        overflowY: className.replace('overflow-y-', '') as any,
       };
   }
 
