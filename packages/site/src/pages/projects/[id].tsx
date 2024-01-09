@@ -1,5 +1,6 @@
 import {
   Button,
+  CompletionItem,
   DesignSystemConfigurationProvider,
   Divider,
   DropdownMenu,
@@ -14,7 +15,10 @@ import {
 } from '@noya-app/noya-designsystem';
 import { Size } from '@noya-app/noya-geometry';
 import { StarFilledIcon } from '@noya-app/noya-icons';
-import { getCurrentPlatform } from '@noya-app/noya-keymap';
+import {
+  getCurrentPlatform,
+  useKeyboardShortcuts,
+} from '@noya-app/noya-keymap';
 import { debounce } from '@noya-app/noya-utils';
 import { useRouter } from 'next/router';
 import { NoyaAPI, useNoyaBilling, useNoyaClient, useNoyaFiles } from 'noya-api';
@@ -34,6 +38,7 @@ import {
   BreadcrumbSlash,
   BreadcrumbText,
 } from '../../components/Breadcrumbs';
+import { CommandPalette } from '../../components/CommandPalette';
 import { Debugger } from '../../components/Debugger';
 import { EditableText, IEditableText } from '../../components/EditableText';
 import { ProjectEditor } from '../../components/ProjectEditor';
@@ -201,6 +206,12 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
   const [rightToolbar, setRightToolbar] = useState<ReactNode>(null);
   const [centerToolbar, setCenterToolbar] = useState<ReactNode>(null);
   const [projectPath, setProjectPath] = useState<string | undefined>(undefined);
+  const [commandPaletteItems, setCommandPaletteItems] = useState<
+    CompletionItem[]
+  >([]);
+  const [commandPaletteHandler, setCommandPaletteHandler] = useState<
+    ((item: CompletionItem) => void) | undefined
+  >(undefined);
 
   const project: ProjectContextValue = useMemo(
     () => ({
@@ -208,8 +219,20 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
       setCenterToolbar,
       setRightToolbar,
       setProjectPath,
+      setCommandPalette: (items, handler) => {
+        setCommandPaletteItems(items);
+        setCommandPaletteHandler(() => handler);
+      },
     }),
     [],
+  );
+
+  const handleSelectCommandPaletteItem = useCallback(
+    (item: CompletionItem) => {
+      setShowCommandPalette(false);
+      commandPaletteHandler?.(item);
+    },
+    [commandPaletteHandler],
   );
 
   const fileNameRef = React.useRef<IEditableText>(null);
@@ -239,6 +262,14 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
     },
     [fileEditorRef],
   );
+
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  useKeyboardShortcuts({
+    'Mod-shift-p': () => {
+      setShowCommandPalette(!showCommandPalette);
+    },
+  });
 
   return (
     <OnboardingProvider>
@@ -292,6 +323,12 @@ const Content = memo(function Content({ fileId }: { fileId: string }) {
           <Divider variant="strong" />
           <FileEditor ref={fileEditorRef} fileId={fileId} />
         </Stack.V>
+        <CommandPalette
+          items={commandPaletteItems}
+          showCommandPalette={showCommandPalette}
+          setShowCommandPalette={setShowCommandPalette}
+          onSelect={handleSelectCommandPaletteItem}
+        />
         {/* {billing.upgradeDialog} */}
       </ProjectProvider>
     </OnboardingProvider>

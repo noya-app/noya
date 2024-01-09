@@ -1,6 +1,5 @@
 import {
   CompletionItem,
-  CompletionListItem,
   CompletionMenu,
   Divider,
   InputField,
@@ -11,24 +10,35 @@ import {
 } from '@noya-app/noya-designsystem';
 import { getCurrentPlatform, handleKeyboardEvent } from '@noya-app/noya-keymap';
 import React, {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
-export function SearchCompletionMenu({
-  onSelect,
-  onHover,
-  onClose,
-  items,
-}: {
-  onSelect: (item: CompletionListItem) => void;
-  onHover: (item: CompletionListItem) => void;
-  onClose: () => void;
-  items: CompletionItem[];
-}) {
+export interface ISearchCompletionMenu {
+  focus: () => void;
+}
+
+export const SearchCompletionMenu = forwardRef(function SearchCompletionMenu(
+  {
+    onSelect,
+    onHover,
+    onClose,
+    items,
+    width = 200,
+  }: {
+    onSelect: (item: CompletionItem) => void;
+    onHover?: (item: CompletionItem) => void;
+    onClose: () => void;
+    items: CompletionItem[];
+    width?: number;
+  },
+  forwardedRef: React.ForwardedRef<ISearchCompletionMenu>,
+) {
   const [state, setState] = useState({
     search: '',
     index: 0,
@@ -60,7 +70,7 @@ export function SearchCompletionMenu({
   }, []);
 
   useEffect(() => {
-    onHover(results[index]);
+    onHover?.(results[index]);
   }, [index, onHover, results]);
 
   const searchHeight = 31;
@@ -68,11 +78,11 @@ export function SearchCompletionMenu({
   const listSize =
     results.length > 0
       ? {
-          width: 200,
+          width,
           height: Math.min(results.length * 31, 31 * 6.5),
         }
       : {
-          width: 200,
+          width,
           height: 60,
         };
 
@@ -102,6 +112,12 @@ export function SearchCompletionMenu({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useImperativeHandle(forwardedRef, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+  }));
+
   return (
     <Stack.V {...elementSize} overflow="hidden">
       <InputField.Root flex="0">
@@ -119,27 +135,27 @@ export function SearchCompletionMenu({
           }}
           onChange={setSearch}
           onKeyDown={handleKeyDown}
-          onBlur={(event) => {
-            const isWithinPopover =
-              event.relatedTarget &&
-              event.relatedTarget instanceof HTMLElement &&
-              event.relatedTarget.role === 'dialog';
+          // onBlur={(event) => {
+          //   const isWithinPopover =
+          //     event.relatedTarget &&
+          //     event.relatedTarget instanceof HTMLElement &&
+          //     event.relatedTarget.role === 'dialog';
 
-            if (isWithinPopover) {
-              inputRef.current?.focus();
+          //   if (isWithinPopover) {
+          //     inputRef.current?.focus();
 
-              event.stopPropagation();
-              event.preventDefault();
-            }
-          }}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-          }}
-          onFocusCapture={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-          }}
+          //     event.stopPropagation();
+          //     event.preventDefault();
+          //   }
+          // }}
+          // onPointerDown={(event) => {
+          //   event.stopPropagation();
+          //   event.preventDefault();
+          // }}
+          // onFocusCapture={(event) => {
+          //   event.stopPropagation();
+          //   event.preventDefault();
+          // }}
         />
       </InputField.Root>
       <Divider />
@@ -149,7 +165,10 @@ export function SearchCompletionMenu({
           listSize={listSize}
           items={results}
           selectedIndex={index}
-          onSelectItem={onSelect}
+          onSelectItem={(item) => {
+            if (item.type === 'sectionHeader') return;
+            onSelect(item);
+          }}
           onHoverIndex={setIndex}
         />
       ) : (
@@ -164,4 +183,4 @@ export function SearchCompletionMenu({
       )}
     </Stack.V>
   );
-}
+});

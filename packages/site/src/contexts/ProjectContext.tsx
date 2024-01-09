@@ -1,3 +1,4 @@
+import { CompletionItem } from '@noya-app/noya-designsystem';
 import { createContext, ReactNode, useContext } from 'react';
 
 export type ProjectContextValue = {
@@ -5,6 +6,10 @@ export type ProjectContextValue = {
   setRightToolbar: (value: ReactNode) => void;
   setCenterToolbar: (value: ReactNode) => void;
   setProjectPath: (value?: string) => void;
+  setCommandPalette: (
+    items: CompletionItem[],
+    handler: (item: CompletionItem) => void,
+  ) => void;
 };
 
 const ProjectContext = createContext<ProjectContextValue>({
@@ -12,6 +17,7 @@ const ProjectContext = createContext<ProjectContextValue>({
   setRightToolbar: () => {},
   setCenterToolbar: () => {},
   setProjectPath: () => {},
+  setCommandPalette: () => {},
 });
 
 export const ProjectProvider = ProjectContext.Provider;

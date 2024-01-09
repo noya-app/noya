@@ -1,8 +1,10 @@
 import {
   Button,
   Chip,
+  CompletionItem,
   DividerVertical,
   GridView,
+  Heading2,
   RadioGroup,
   Spacer,
   Stack,
@@ -480,6 +482,36 @@ export function DSEditor({
   }, [contentTab, fileId, project]);
 
   useEffect(() => {
+    const commandPaletteItems: CompletionItem[] = components
+      .map((component) => {
+        const indexPath = ComponentGroupTree.findIndexPath(
+          createRootGroup(groups),
+          (group) => group.id === component.groupID,
+        );
+
+        const groupPath = indexPath
+          ? ComponentGroupTree.accessPath(createRootGroup(groups), indexPath)
+              .slice(1)
+              .map((group) => group.name)
+              .join(' / ')
+          : 'Uncategorized';
+
+        return {
+          id: component.componentID,
+          name: component.name,
+          icon: <Chip size="small">{groupPath}</Chip>,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const handler = (item: CompletionItem) => {
+      setSelection({ componentID: item.id });
+    };
+
+    project.setCommandPalette(commandPaletteItems, handler);
+  }, [components, groups, project, setSelection]);
+
+  useEffect(() => {
     const componentName = components.find(
       (component) => component.componentID === selection?.componentID,
     )?.name;
@@ -499,6 +531,8 @@ export function DSEditor({
     },
     [resolvedNode],
   );
+
+  const rootGroup = createRootGroup(groups);
 
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
@@ -586,69 +620,66 @@ export function DSEditor({
           <Stack.V flex="1">
             {contentTab === 'preview' && (
               <GridView.Root size="large" textPosition="below">
-                <GridView.SectionHeader title="Components" />
-                <GridView.Section>
-                  {components
-                    .filter(
-                      (component) => component.accessModifier !== 'internal',
-                    )
-                    .map((component) => {
-                      return (
-                        <GridView.Item
-                          id={component.id}
-                          key={component.id}
-                          title={component.name}
-                          subtitle={
-                            <Stack.H
-                              as="span"
-                              display="inline-flex"
-                              gap="4px"
-                              overflow="hidden"
-                              textOverflow="ellipsis"
-                              margin={'6px 0 0 0'}
-                            >
-                              {(component.tags ?? ['no tags']).map((tag) => (
-                                <Chip
-                                  size="small"
-                                  key={tag}
-                                  style={{ fontFamily: 'monospace' }}
-                                  variant={
-                                    tag === 'no tags' ? 'outlined' : 'solid'
-                                  }
+                <Stack.H padding="20px 20px 0 20px">
+                  <Heading2>Components</Heading2>
+                </Stack.H>
+                {rootGroup.children
+                  ?.flatMap((group) => group.children ?? [])
+                  .map((group) => {
+                    const indexPath = ComponentGroupTree.findIndexPath(
+                      rootGroup,
+                      (g) => g.id === group.id,
+                    );
+
+                    if (!indexPath) return null;
+
+                    const parent = ComponentGroupTree.access(
+                      rootGroup,
+                      indexPath.slice(0, -1),
+                    );
+
+                    return (
+                      <>
+                        <GridView.SectionHeader
+                          key={group.id}
+                          title={`${parent.name}/${group.name}`}
+                        />
+                        <GridView.Section>
+                          {components
+                            .filter((c) => c.groupID === group.id)
+                            .map((component) => {
+                              return (
+                                <GridView.Item
+                                  id={component.id}
+                                  key={component.id}
+                                  title={component.name}
+                                  onClick={() => {
+                                    setSelection({
+                                      componentID: component.componentID,
+                                    });
+                                  }}
                                 >
-                                  {tag}
-                                </Chip>
-                              ))}
-                            </Stack.H>
-                          }
-                          // menuItems={menuItems}
-                          // selected={item.do_objectID === state.selectedPage}
-                          // onSelectMenuItem={handleSelectMenuItem}
-                          // onContextMenu={() => dispatch('selectPage', item.do_objectID)}
-                          onClick={() => {
-                            setSelection({
-                              componentID: component.componentID,
-                            });
-                          }}
-                        >
-                          <Stack.H
-                            width="100%"
-                            aspectRatio="16/9"
-                            alignItems="center"
-                            justifyContent="center"
-                            borderRadius="4px"
-                            background={theme.colors.inputBackground}
-                            border={`1px solid ${theme.colors.divider}`}
-                          >
-                            <DSComponentThumbnail
-                              component={component}
-                              fileId={fileId}
-                            />
-                          </Stack.H>
-                        </GridView.Item>
-                      );
-                    })}
-                </GridView.Section>
+                                  <Stack.H
+                                    width="100%"
+                                    aspectRatio="16/9"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    borderRadius="4px"
+                                    background={theme.colors.inputBackground}
+                                    border={`1px solid ${theme.colors.divider}`}
+                                  >
+                                    <DSComponentThumbnail
+                                      component={component}
+                                      fileId={fileId}
+                                    />
+                                  </Stack.H>
+                                </GridView.Item>
+                              );
+                            })}
+                        </GridView.Section>
+                      </>
+                    );
+                  })}
               </GridView.Root>
             )}
             {contentTab === 'code' && system && (
