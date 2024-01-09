@@ -88,6 +88,8 @@ export const ControlledFrame = memo(
     const srcDoc = `<!DOCTYPE html>
 <head>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
     html, body, #noya-preview-root { height: 100%; margin: 0; padding: 0; }
 
     /* Hide scrollbar for Chrome, Safari and Opera */

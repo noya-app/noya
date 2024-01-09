@@ -157,14 +157,14 @@ const proxyObject = new Proxy(
         `inline-flex`,
         `items-center`,
         `px-2.5`,
-        `py-1`,
+        `py-0.5`,
         `rounded-full`,
         `text-xs`,
         `font-medium`,
-        `bg-${config.colors.primary}-200/50`,
-        `dark:bg-${config.colors.primary}-500/25`,
-        // `border`,
-        // `border-${config.colors.primary}-900/10`,
+        `bg-${config.colors.primary}-200/10`,
+        `dark:bg-${config.colors.primary}-500/10`,
+        `border`,
+        `border-${config.colors.primary}-600/10`,
         `text-${config.colors.primary}-600`,
       ]);
 
@@ -235,6 +235,7 @@ const proxyObject = new Proxy(
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
+            fontFamily: 'Manrope, sans-serif',
             ...(config.colorMode === 'dark' && { background: '#111' }),
           }}
         >
