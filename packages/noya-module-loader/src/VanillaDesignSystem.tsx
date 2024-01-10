@@ -249,7 +249,9 @@ const proxyObject = new Proxy(
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: 'Manrope, sans-serif',
+            fontFamily: 'Manrope', // Gets swapped at compile-time
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
             ...(config.colorMode === 'dark' && { background: '#111' }),
           }}
         >

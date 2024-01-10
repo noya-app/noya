@@ -15,8 +15,8 @@ import {
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
 import { tailwindColors } from 'noya-tailwind';
-import React, { ReactNode, isValidElement } from 'react';
-import { flat } from 'tree-visit';
+import React, { CSSProperties, ReactNode, isValidElement } from 'react';
+import { defineTree } from 'tree-visit';
 import ts from 'typescript';
 import {
   createElementCode,
@@ -178,13 +178,15 @@ const getChildren = (
   ];
 };
 
+export const SimpleElementTree = defineTree(getChildren);
+
 function extractImports(
   simpleElement: SimpleElement,
   DesignSystem: DesignSystemDefinition,
 ) {
   return (DesignSystem.imports ?? []).flatMap(({ source, alwaysInclude }) => {
     const names = unique(
-      flat(simpleElement, { getChildren }).flatMap((element) =>
+      SimpleElementTree.flat(simpleElement).flatMap((element) =>
         typeof element !== 'string' &&
         !isPassthrough(element) &&
         element.source === source
@@ -266,6 +268,30 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 
   if (!layoutElement) return { source: defaultLayout };
 
+  const fonts = SimpleElementTree.reduce<string[]>(
+    layoutElement,
+    (result, node) => {
+      if (!isSimpleElement(node)) return result;
+
+      const style = node.props.style as CSSProperties | undefined;
+      const fontFamily = style?.fontFamily;
+
+      if (!fontFamily) return result;
+
+      delete style.fontFamily;
+
+      node.props.className = createPassthrough(
+        ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('font' + fontFamily),
+          ts.factory.createIdentifier('className'),
+        ),
+      );
+
+      return [...result, fontFamily];
+    },
+    [],
+  );
+
   const layoutComponentFunc = createReactComponentDeclaration(
     'NextProvider',
     createElementCode(layoutElement),
@@ -296,8 +322,14 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
       cssImport,
       "import React from 'react'",
       print(layoutImports),
+      ...(fonts.length > 0
+        ? [`import { ${fonts.join(', ')} } from "next/font/google";`]
+        : []),
       'import { theme } from "./theme"',
     ].join('\n'),
+    ...fonts.map(
+      (font) => `const font${font} = ${font}({ subsets: ["latin"] })`,
+    ),
     print(layoutComponentFunc),
   ]
     .map(clean)

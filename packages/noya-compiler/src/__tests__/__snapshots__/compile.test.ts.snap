@@ -87,7 +87,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -96,9 +99,11 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
         background: '#111',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -174,7 +179,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -183,8 +191,10 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -260,7 +270,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -269,9 +282,11 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
         background: '#111',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -347,7 +362,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -356,8 +374,10 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -559,7 +579,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -568,9 +591,11 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
         background: '#111',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -646,7 +671,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -655,8 +683,10 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -732,7 +762,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -741,9 +774,11 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
         background: '#111',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
@@ -819,7 +854,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
+import { Manrope } from 'next/font/google';
 import { theme } from './theme';
+
+const fontManrope = Manrope({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -828,8 +866,10 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Manrope, sans-serif',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
       }}
+      className={fontManrope.className}
     >
       {props.children}
     </div>
