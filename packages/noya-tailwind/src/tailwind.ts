@@ -132,6 +132,7 @@ export const classGroups = {
   autoRows: /^auto-rows/,
   gridFlow: /^grid-flow/,
   gridCols: /^grid-cols/,
+  gridColumnSpan: /^col-span-/,
   lineHeight: /^leading-/,
   tracking: /^tracking-/,
   position: /^(absolute|relative|fixed|sticky)/,
@@ -250,6 +251,7 @@ export const filterTailwindClassesByLastInGroup = memoize(
 );
 
 export const breakpoints = [
+  'none' as const,
   'sm' as const,
   'md' as const,
   'lg' as const,
@@ -259,15 +261,15 @@ export const breakpoints = [
 
 export const colorSchemes = ['light' as const, 'dark' as const];
 
-export type BreakpointKey = (typeof breakpoints)[number];
+export type BreakpointKey = (typeof breakpoints)[number] | 'none';
 
 export function matchBreakpoint(width: number): BreakpointKey {
-  if (width < 640) return 'sm';
-  if (width < 768) return 'md';
-  if (width < 1024) return 'lg';
-  if (width < 1280) return 'xl';
-  if (width < 1536) return '2xl';
-  return '2xl';
+  if (width >= 1536) return '2xl';
+  if (width >= 1280) return 'xl';
+  if (width >= 1024) return 'lg';
+  if (width >= 768) return 'md';
+  if (width >= 640) return 'sm';
+  return 'none';
 }
 
 export const extractTailwindClassesByBreakpoint = (
@@ -779,6 +781,12 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         gridTemplateColumns: (config.theme as any).gridTemplateColumns[
           value || 'DEFAULT'
         ],
+      };
+    }
+    case 'gridColumnSpan': {
+      const value = className.replace('col-', '');
+      return {
+        gridColumn: (config.theme as any).gridColumn[value || 'auto'],
       };
     }
     case 'gradientDirection':

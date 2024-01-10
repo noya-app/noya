@@ -287,6 +287,10 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('auto-cols-max')).toEqual({
       gridAutoColumns: 'max-content',
     });
+
+    expect(resolveTailwindClass('col-span-2')).toEqual({
+      gridColumn: 'span 2 / span 2',
+    });
   });
 
   it('position', () => {

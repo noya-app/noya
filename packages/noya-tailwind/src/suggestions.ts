@@ -115,6 +115,7 @@ export const suggestionPatterns = [
   'grid-flow-row',
   'grow',
   'grow-0',
+  'col-{gridColumn}',
   'shrink',
   'shrink-0',
   'flex',
