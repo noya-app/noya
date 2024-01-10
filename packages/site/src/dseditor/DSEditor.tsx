@@ -717,7 +717,7 @@ export function DSEditor({
         resolvedNode &&
         rightSidebarVisibility !== 'hide' && (
           <DSComponentInspector
-            key={selection.componentID} // Use key to reset any navigation state
+            key={`${selection.componentID}-${selection.variantID ?? ''}`} // Use key to reset any navigation state
             selection={selection}
             setSelection={setSelection}
             findComponent={findComponent}

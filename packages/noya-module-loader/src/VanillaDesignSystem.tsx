@@ -2,7 +2,9 @@
 /* eslint-disable jsx-a11y/alt-text */
 import {
   ButtonVariant,
+  CheckboxProps,
   DesignSystemDefinition,
+  InputProps,
   applyCommonProps,
   component,
   x,
@@ -184,7 +186,7 @@ const proxyObject = new Proxy(
 
       return <div {...applyCommonProps({ ...props, ...stylingProps })} />;
     },
-    [component.id.Input]: (props: any) => {
+    [component.id.Input]: (props: InputProps) => {
       const stylingProps = createStylingProps(props, [
         `block`,
         `w-full`,
@@ -205,7 +207,52 @@ const proxyObject = new Proxy(
         `sm:leading-6`,
       ]);
 
-      return <input {...applyCommonProps({ ...props, ...stylingProps })} />;
+      return (
+        <input
+          {...applyCommonProps({ ...props, ...stylingProps })}
+          value={props.value}
+          placeholder={props.placeholder}
+          disabled={props.disabled}
+        />
+      );
+    },
+    [component.id.Checkbox]: (props: CheckboxProps) => {
+      const getStylingProps = getStyler(props);
+
+      const containerStylingProps = getStylingProps([
+        'flex',
+        'items-center',
+        'gap-2',
+      ]);
+
+      const stylingProps = createStylingProps(props, [
+        'w-5',
+        'h-5',
+        'rounded',
+        'shadow-sm',
+        'ring-1',
+        'ring-neutral-500',
+        ...(props.checked ? ['bg-primary-500', 'ring-primary-500'] : []),
+        'focus:ring',
+        'focus:ring-indigo-200',
+        'focus:ring-opacity-50',
+      ]);
+
+      return (
+        <div {...applyCommonProps({ ...props, ...containerStylingProps })}>
+          <button
+            role="checkbox"
+            aria-checked={props.checked}
+            disabled={props.disabled}
+            {...stylingProps}
+          />
+          {props.label && (
+            <label className="font-medium text-gray-700 select-none">
+              {props.label}
+            </label>
+          )}
+        </div>
+      );
     },
     [component.id.Image]: (props: any) => {
       return <img {...applyCommonProps(props)} src={props.src} />;
