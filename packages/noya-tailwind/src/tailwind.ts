@@ -323,7 +323,7 @@ export const extractTailwindClassesByColorScheme = (
 
 function getValue(className: string): string | undefined {
   let value =
-    /-((\d+)((\/|\.)\d+)?|(base|xs|sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
+    /-((\d+)((\/|\.)\d+)?|(base|px|xs|sm|md|lg|\d?xl|full|none|auto|screen))$/.exec(
       className,
     )?.[1];
 

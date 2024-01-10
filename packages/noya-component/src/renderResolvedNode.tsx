@@ -149,9 +149,9 @@ export function renderResolvedNode({
   stylingMode?: StylingMode;
   theme?: any;
 }) {
-  const breakpoint: BreakpointKey = containerWidth
+  const breakpoint: BreakpointKey | undefined = containerWidth
     ? matchBreakpoint(containerWidth)
-    : 'md';
+    : undefined;
 
   const noya = createNoyaDSRenderingContext({
     theme,

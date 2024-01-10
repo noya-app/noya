@@ -245,6 +245,10 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('h-0.5')).toEqual({
       height: '0.125rem',
     });
+
+    expect(resolveTailwindClass('h-px')).toEqual({
+      height: '1px',
+    });
   });
 
   it('borderWidth', () => {

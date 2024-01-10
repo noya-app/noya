@@ -100,8 +100,8 @@ const proxyObject = new Proxy(
           : []),
         ...(variant === 'outline'
           ? [
-              `border`,
-              `border-${config.colors.primary}-500`,
+              `ring-1`,
+              `ring-${config.colors.primary}-500`,
               `text-${config.colors.primary}-500`,
               `hover:bg-${config.colors.primary}-50`,
               `hover:text-${config.colors.primary}-700`,
