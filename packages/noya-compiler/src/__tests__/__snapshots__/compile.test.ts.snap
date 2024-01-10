@@ -59,20 +59,23 @@ Object {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/25 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-500/20 text-blue-600/80\\">
         New
       </div>
-      <span className=\\"text-white text-5xl leading-none text-center\\">
+      <span className=\\"text-white text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white text-2xl leading-none text-center\\">
+      <span className=\\"text-white text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-blue-500 hover:text-blue-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -93,6 +96,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
         background: '#111',
       }}
     >
@@ -142,20 +146,23 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-200/20 text-blue-600/80\\">
         New
       </div>
-      <span className=\\"text-black text-5xl leading-none text-center\\">
+      <span className=\\"text-black text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black text-2xl leading-none text-center\\">
+      <span className=\\"text-black text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-blue-500 hover:text-blue-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -172,7 +179,12 @@ import { theme } from './theme';
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
     <div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
+      }}
     >
       {props.children}
     </div>
@@ -220,20 +232,23 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-500/25 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-500/20 text-teal-600/80\\">
         New
       </div>
-      <span className=\\"text-white text-5xl leading-none text-center\\">
+      <span className=\\"text-white text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white text-2xl leading-none text-center\\">
+      <span className=\\"text-white text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-teal-500 hover:bg-teal-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-teal-500 hover:text-teal-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -254,6 +269,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
         background: '#111',
       }}
     >
@@ -303,20 +319,23 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-200/20 text-teal-600/80\\">
         New
       </div>
-      <span className=\\"text-black text-5xl leading-none text-center\\">
+      <span className=\\"text-black text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black text-2xl leading-none text-center\\">
+      <span className=\\"text-black text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-teal-500 hover:bg-teal-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-teal-500 hover:text-teal-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -333,7 +352,12 @@ import { theme } from './theme';
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
     <div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
+      }}
     >
       {props.children}
     </div>
@@ -507,20 +531,23 @@ export default function Page() {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/25 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-500/20 text-blue-600/80\\">
         New
       </div>
-      <span className=\\"text-white text-5xl leading-none text-center\\">
+      <span className=\\"text-white text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white text-2xl leading-none text-center\\">
+      <span className=\\"text-white text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-blue-500 hover:text-blue-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -541,6 +568,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
         background: '#111',
       }}
     >
@@ -590,20 +618,23 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200/50 text-blue-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-200/20 text-blue-600/80\\">
         New
       </div>
-      <span className=\\"text-black text-5xl leading-none text-center\\">
+      <span className=\\"text-black text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black text-2xl leading-none text-center\\">
+      <span className=\\"text-black text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-blue-500 hover:bg-blue-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-blue-500 hover:text-blue-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -620,7 +651,12 @@ import { theme } from './theme';
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
     <div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
+      }}
     >
       {props.children}
     </div>
@@ -668,20 +704,23 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-500/25 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-500/20 text-teal-600/80\\">
         New
       </div>
-      <span className=\\"text-white text-5xl leading-none text-center\\">
+      <span className=\\"text-white text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-white text-2xl leading-none text-center\\">
+      <span className=\\"text-white text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-teal-500 hover:bg-teal-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-teal-500 hover:text-teal-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -702,6 +741,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
         background: '#111',
       }}
     >
@@ -751,20 +791,23 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
 export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-      <div className=\\"inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-200/50 text-teal-600\\">
+      <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-200/20 text-teal-600/80\\">
         New
       </div>
-      <span className=\\"text-black text-5xl leading-none text-center\\">
+      <span className=\\"text-black text-6xl font-bold tracking-tighter leading-none text-center\\">
         Create, iterate, inspire.
       </span>
-      <span className=\\"text-black text-2xl leading-none text-center\\">
+      <span className=\\"text-black text-3xl font-bold tracking-tight leading-none text-center\\">
         Turn great ideas into new possibilities.
       </span>
       <div className=\\"flex items-center gap-4 mt-2\\">
-        <button className=\\"appearance-none bg-teal-500 hover:bg-teal-400 text-white shadow-sm rounded-md px-3.5 py-2.5 text-sm font-semibold\\">
+        <button className=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-teal-500 hover:bg-teal-400 text-white shadow-sm\\">
           Get Started
         </button>
-        <a className=\\"text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+        <a
+          className=\\"text-sm font-bold text-teal-500 hover:text-teal-400\\"
+          href=\\"#\\"
+        >
           Learn More
         </a>
       </div>
@@ -781,7 +824,12 @@ import { theme } from './theme';
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
     <div
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'Manrope, sans-serif',
+      }}
     >
       {props.children}
     </div>
