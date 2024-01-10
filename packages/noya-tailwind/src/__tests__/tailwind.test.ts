@@ -193,6 +193,10 @@ describe('resolves styles', () => {
     expect(resolveTailwindClass('shadow-none')).toEqual({
       boxShadow: 'none',
     });
+
+    expect(parametersToTailwindStyle(['shadow', 'shadow-red-500'])).toEqual({
+      boxShadow: '0 1px 3px 0 #ef4444, 0 1px 2px -1px #ef4444',
+    });
   });
 
   it('borderRadius', () => {

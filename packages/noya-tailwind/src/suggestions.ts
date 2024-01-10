@@ -22,6 +22,7 @@ export const suggestionPatterns = [
   'bottom-{inset}',
   'left-{inset}',
   'shadow-{boxShadow}',
+  'shadow-{colors}',
   'border-{borderWidth}',
   'border-x-{borderWidth}',
   'border-y-{borderWidth}',

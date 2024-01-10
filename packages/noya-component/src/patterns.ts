@@ -100,17 +100,19 @@ export const createPatternSVG = (
 };
 
 function replaceColor(svg: string, colors: Theme['colors']): string {
-  svg = svg.replace(
-    /primary-(\d+)/g,
-    (_, index) =>
-      colors.primary[Number(index) as keyof Theme['colors']['primary']],
-  );
+  svg = svg.replace(/primary-(\d+)(?:\/(\d+))?/g, (_, index, opacity) => {
+    const color =
+      colors.primary[Number(index) as keyof Theme['colors']['primary']];
+    const o = opacity ? Number(opacity).toString(16).padStart(2, '0') : '';
+    return color + o;
+  });
 
-  svg = svg.replace(
-    /neutral-(\d+)/g,
-    (_, index) =>
-      colors.neutral[Number(index) as keyof Theme['colors']['neutral']],
-  );
+  svg = svg.replace(/neutral-(\d+)(?:\/(\d+))?/g, (_, index, opacity) => {
+    const color =
+      colors.neutral[Number(index) as keyof Theme['colors']['neutral']];
+    const o = opacity ? Number(opacity).toString(16).padStart(2, '0') : '';
+    return color + o;
+  });
 
   return svg;
 }

@@ -126,7 +126,8 @@ export const classGroups = {
   ringInset: /^ring-inset$/,
   ringColor: /^ring-(?!inset)[-a-z]+/,
   textDecoration: /^(underline|overline|no-underline|line-through)/,
-  boxShadow: /^shadow/,
+  boxShadow: /^shadow(-(sm|DEFAULT|md|lg|xl|2xl|inner|none))?$/,
+  boxShadowColor: /^shadow-(?!sm|DEFAULT|md|lg|xl|2xl|inner|none)[-0-9a-z]+/,
   autoCols: /^auto-cols/,
   autoRows: /^auto-rows/,
   gridFlow: /^grid-flow/,
@@ -561,6 +562,8 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
         boxShadow: (config.theme as any).boxShadow[value || 'DEFAULT'],
       };
     }
+    case 'boxShadowColor':
+      return {}; // Handled separately
     case 'borderWidth': {
       const value = getValue(className);
       return {
@@ -865,6 +868,26 @@ export function parametersToTailwindStyle(
     result.backgroundImage = tailwindToLinearGradient(classNames, (color) =>
       getColor(`bg-${color}`),
     );
+  }
+
+  if (
+    hasClassGroup('boxShadow', classNames) &&
+    hasClassGroup('boxShadowColor', classNames)
+  ) {
+    const shadow = getLastClassInGroup('boxShadow', classNames);
+
+    if (shadow) {
+      const value = getValue(shadow);
+      const baseValue = (config.theme.boxShadow as any)[value || 'DEFAULT'];
+      const shadowColor = getLastClassInGroup('boxShadowColor', classNames);
+
+      if (baseValue && shadowColor) {
+        result.boxShadow = baseValue.replace(
+          /rgb\((.*?)\)/g,
+          getColor(shadowColor),
+        );
+      }
+    }
   }
 
   if (hasClassGroup('ringWidth', classNames)) {
