@@ -8,6 +8,7 @@ import {
   InputFieldWithCompletions,
   ListView,
   Popover,
+  RadioGroup,
   ScrollArea,
   Select,
   Small,
@@ -64,7 +65,9 @@ import { getNewValue } from 'noya-state';
 import React, { ComponentProps, memo, useCallback, useMemo } from 'react';
 import { z } from 'zod';
 import { AutoResizingTextArea } from '../ayon/components/inspector/DescriptionTextArea';
+import { InspectorContainer } from '../ayon/components/inspector/InspectorContainer';
 import { InspectorSection } from '../components/InspectorSection';
+import { usePersistentState } from '../utils/clientStorage';
 import {
   DSComponentThumbnail,
   defaultThumbnailSize,
@@ -240,6 +243,10 @@ export function DSComponentInspector({
     'Mod-s': handleSave,
   });
 
+  const [componentEditorTab, setComponentEditorTab] = usePersistentState<
+    'content' | 'metadata'
+  >('componentEditorTab', 'content');
+
   if (configureProp) {
     return (
       <PropEditor
@@ -264,80 +271,93 @@ export function DSComponentInspector({
   ];
 
   return (
-    <Stack.V width="400px" background={theme.colors.sidebar.background}>
-      <ScrollArea>
-        <Stack.V gap="1px" background={theme.colors.canvas.background}>
-          <InspectorSection title="Component" titleTextStyle="heading4">
-            <InspectorPrimitives.LabeledRow label="Variant" gap="8px">
-              <Select
-                value={selection.variantID ?? 'default'}
-                id="variant-input"
-                options={variantsWithDefault.map(
-                  (variant) => variant?.id ?? 'default',
-                )}
-                getTitle={(id) => {
-                  const variant = component.variants?.find(
-                    (variant) => variant.id === id,
-                  );
-                  return variant?.name ?? 'Default';
-                }}
-                onChange={(id) => {
-                  setSelection({
-                    ...selection,
-                    variantID: id === 'default' ? undefined : id,
-                  });
-                }}
-              />
-              {selection.variantID && (
-                <IconButton
-                  iconName="InputIcon"
-                  onClick={async () => {
-                    const variant = component.variants?.find(
-                      (variant) => variant.id === selection.variantID,
-                    );
+    <InspectorContainer width={400}>
+      <InspectorSection title="Component" titleTextStyle="heading4">
+        <InspectorPrimitives.LabeledRow label="Variant" gap="8px">
+          <Select
+            value={selection.variantID ?? 'default'}
+            id="variant-input"
+            options={variantsWithDefault.map(
+              (variant) => variant?.id ?? 'default',
+            )}
+            getTitle={(id) => {
+              const variant = component.variants?.find(
+                (variant) => variant.id === id,
+              );
+              return variant?.name ?? 'Default';
+            }}
+            onChange={(id) => {
+              setSelection({
+                ...selection,
+                variantID: id === 'default' ? undefined : id,
+              });
+            }}
+          />
+          {selection.variantID && (
+            <IconButton
+              iconName="InputIcon"
+              onClick={async () => {
+                const variant = component.variants?.find(
+                  (variant) => variant.id === selection.variantID,
+                );
 
-                    if (!variant) return;
+                if (!variant) return;
 
-                    const name = variant.name;
-                    const newName = await openInputDialog('Variant Name', name);
+                const name = variant.name;
+                const newName = await openInputDialog('Variant Name', name);
 
-                    if (!newName) return;
+                if (!newName) return;
 
-                    onChangeComponent({
-                      ...component,
-                      variants: component.variants?.map((variant) =>
-                        variant.id === selection.variantID
-                          ? { ...variant, name: newName }
-                          : variant,
-                      ),
-                    });
-                  }}
-                />
-              )}
-              <IconButton
-                iconName="PlusIcon"
-                onClick={async () => {
-                  const name = await openInputDialog('Variant Name');
+                onChangeComponent({
+                  ...component,
+                  variants: component.variants?.map((variant) =>
+                    variant.id === selection.variantID
+                      ? { ...variant, name: newName }
+                      : variant,
+                  ),
+                });
+              }}
+            />
+          )}
+          <IconButton
+            iconName="PlusIcon"
+            onClick={async () => {
+              const name = await openInputDialog('Variant Name');
 
-                  if (!name) return;
+              if (!name) return;
 
-                  const variant = Model.variant({
-                    name,
-                  });
+              const variant = Model.variant({
+                name,
+              });
 
-                  onChangeComponent({
-                    ...component,
-                    variants: [...(component.variants ?? []), variant],
-                  });
+              onChangeComponent({
+                ...component,
+                variants: [...(component.variants ?? []), variant],
+              });
 
-                  setSelection({
-                    ...selection,
-                    variantID: variant.id,
-                  });
-                }}
-              />
-            </InspectorPrimitives.LabeledRow>
-          </InspectorSection>
+              setSelection({
+                ...selection,
+                variantID: variant.id,
+              });
+            }}
+          />
+        </InspectorPrimitives.LabeledRow>
+      </InspectorSection>
+      <Stack.V>
+        <Stack.H
+          padding="12px 12px 2px 12px"
+          background={theme.colors.sidebar.background}
+        >
+          <RadioGroup.Root
+            id="component-editor-tabs"
+            value={componentEditorTab}
+            onValueChange={setComponentEditorTab}
+          >
+            <RadioGroup.Item value="content">Content</RadioGroup.Item>
+            <RadioGroup.Item value="metadata">Metadata</RadioGroup.Item>
+          </RadioGroup.Root>
+        </Stack.H>
+        {componentEditorTab === 'metadata' && (
           <InspectorSection
             title="Metadata"
             titleTextStyle="heading4"
@@ -473,7 +493,10 @@ export function DSComponentInspector({
 
                       if (!isMounted.current) return;
 
-                      onChangeComponent({ ...component, description: result });
+                      onChangeComponent({
+                        ...component,
+                        description: result,
+                      });
                     }
                   }}
                 />
@@ -700,6 +723,8 @@ export function DSComponentInspector({
               </InspectorPrimitives.Column>
             </InspectorPrimitives.LabeledRow>
           </InspectorSection>
+        )}
+        {componentEditorTab === 'content' && (
           <InspectorSection
             title="Elements"
             titleTextStyle="heading4"
@@ -743,8 +768,8 @@ export function DSComponentInspector({
               uploadAsset={uploadAsset}
             />
           </InspectorSection>
-        </Stack.V>
-        {allDiffItems.length > 0 && (
+        )}
+        {componentEditorTab === 'content' && allDiffItems.length > 0 && (
           <InspectorSection
             title="Diff"
             titleTextStyle="heading4"
@@ -798,94 +823,95 @@ export function DSComponentInspector({
             </Stack.V>
           </InspectorSection>
         )}
-        {ElementHierarchy.flat(component.rootElement)
-          .filter(
-            (node): node is NoyaCompositeElement =>
-              node.type === 'noyaCompositeElement',
-          )
-          .map((element) => {
-            const initialItems = element.diff?.items ?? [];
-            const metaDiffItems = selection.metaDiff?.[element.id] ?? [];
-            const current = applyArrayDiff(
-              initialItems,
-              metaDiffItems,
-              (item) => item.id,
-            );
+        {componentEditorTab === 'content' &&
+          ElementHierarchy.flat(component.rootElement)
+            .filter(
+              (node): node is NoyaCompositeElement =>
+                node.type === 'noyaCompositeElement',
+            )
+            .map((element) => {
+              const initialItems = element.diff?.items ?? [];
+              const metaDiffItems = selection.metaDiff?.[element.id] ?? [];
+              const current = applyArrayDiff(
+                initialItems,
+                metaDiffItems,
+                (item) => item.id,
+              );
 
-            if (current.length === 0) return null;
+              if (current.length === 0) return null;
 
-            return (
-              <InspectorSection
-                key={element.id}
-                title={`Diff (${element.name})`}
-                titleTextStyle="heading5"
-                right={
-                  <DropdownMenu
-                    items={diffSectionMenu}
-                    onSelect={(value) => {
-                      switch (value) {
-                        case 'reset': {
-                          setSelection({
-                            ...selection,
-                            metaDiff: {
-                              ...selection.metaDiff,
-                              [element.id]: [],
-                            },
-                          });
-                          break;
+              return (
+                <InspectorSection
+                  key={element.id}
+                  title={`Diff (${element.name})`}
+                  titleTextStyle="heading5"
+                  right={
+                    <DropdownMenu
+                      items={diffSectionMenu}
+                      onSelect={(value) => {
+                        switch (value) {
+                          case 'reset': {
+                            setSelection({
+                              ...selection,
+                              metaDiff: {
+                                ...selection.metaDiff,
+                                [element.id]: [],
+                              },
+                            });
+                            break;
+                          }
+                          case 'deleteAll': {
+                            const newArrayDiff = computeArrayDiff(
+                              initialItems,
+                              [],
+                              (item) => item.id,
+                            );
+
+                            setSelection({
+                              ...selection,
+                              metaDiff: {
+                                ...selection.metaDiff,
+                                [element.id]: newArrayDiff,
+                              },
+                            });
+                            break;
+                          }
                         }
-                        case 'deleteAll': {
-                          const newArrayDiff = computeArrayDiff(
-                            initialItems,
-                            [],
-                            (item) => item.id,
-                          );
+                      }}
+                    >
+                      <IconButton iconName="DotsVerticalIcon" />
+                    </DropdownMenu>
+                  }
+                >
+                  <Stack.V>
+                    <DiffList
+                      allDiffItems={current}
+                      metadataMap={metadataMap}
+                      findComponent={findComponent}
+                      onDeleteItem={(index) => {
+                        const next = current.filter((_, i) => i !== index);
 
-                          setSelection({
-                            ...selection,
-                            metaDiff: {
-                              ...selection.metaDiff,
-                              [element.id]: newArrayDiff,
-                            },
-                          });
-                          break;
-                        }
-                      }
-                    }}
-                  >
-                    <IconButton iconName="DotsVerticalIcon" />
-                  </DropdownMenu>
-                }
-              >
-                <Stack.V>
-                  <DiffList
-                    allDiffItems={current}
-                    metadataMap={metadataMap}
-                    findComponent={findComponent}
-                    onDeleteItem={(index) => {
-                      const next = current.filter((_, i) => i !== index);
+                        const newArrayDiff = computeArrayDiff(
+                          initialItems,
+                          next,
+                          (item) => item.id,
+                        );
 
-                      const newArrayDiff = computeArrayDiff(
-                        initialItems,
-                        next,
-                        (item) => item.id,
-                      );
-
-                      setSelection({
-                        ...selection,
-                        metaDiff: {
-                          ...selection.metaDiff,
-                          [element.id]: newArrayDiff,
-                        },
-                      });
-                    }}
-                  />
-                </Stack.V>
-              </InspectorSection>
-            );
-          })}
-      </ScrollArea>
-    </Stack.V>
+                        setSelection({
+                          ...selection,
+                          metaDiff: {
+                            ...selection.metaDiff,
+                            [element.id]: newArrayDiff,
+                          },
+                        });
+                      }}
+                    />
+                  </Stack.V>
+                </InspectorSection>
+              );
+            })}
+      </Stack.V>
+    </InspectorContainer>
   );
 }
 

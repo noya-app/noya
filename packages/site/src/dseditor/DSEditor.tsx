@@ -554,6 +554,14 @@ export function DSEditor({
     },
   });
 
+  const publicComponentCount = components.filter(
+    (c) => c.accessModifier !== 'internal',
+  ).length;
+
+  const privateComponentCount = components.filter(
+    (c) => c.accessModifier === 'internal',
+  ).length;
+
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
       {viewType !== 'preview' && leftSidebarVisibility !== 'hide' && (
@@ -640,9 +648,19 @@ export function DSEditor({
           <Stack.V flex="1">
             {contentTab === 'preview' && (
               <GridView.Root size="large" textPosition="below">
-                <Stack.H padding="20px 20px 0 20px">
-                  <Heading2>Components</Heading2>
-                </Stack.H>
+                <Stack.V padding="20px 20px 10px 20px">
+                  <Heading2 color="text" display="inline-flex">
+                    Components
+                  </Heading2>
+                  <Stack.H gap="8px" alignItems="center">
+                    <Chip colorScheme="primary">
+                      Public: {publicComponentCount}
+                    </Chip>
+                    <Chip colorScheme="secondary">
+                      Private: {privateComponentCount}
+                    </Chip>
+                  </Stack.H>
+                </Stack.V>
                 {rootGroup.children
                   ?.flatMap((group) => group.children ?? [])
                   .map((group) => {

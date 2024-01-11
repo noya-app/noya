@@ -15,6 +15,7 @@ const ClientStorageDefinitions = {
   noyaPrefersColorScheme: 'noya-prefers-color-scheme',
   showLeftSidebar: 'noya-show-left-sidebar',
   showRightSidebar: 'noya-show-right-sidebar',
+  componentEditorTab: 'noya-component-editor-tab',
 };
 
 export const ayonOnboardingStep = [

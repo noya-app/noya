@@ -1,6 +1,5 @@
 import {
   RadioGroup,
-  ScrollArea,
   Small,
   Stack,
   useDesignSystemTheme,
@@ -22,6 +21,7 @@ import { AyonPageInspector } from './AyonPageInspector';
 import { AyonProjectInspector } from './AyonProjectInspector';
 import { CustomLayerInspector } from './CustomLayerInspector';
 import { DesignSystemPicker } from './DesignSystemPicker';
+import { InspectorContainer } from './InspectorContainer';
 
 type Props = {
   name: string;
@@ -30,41 +30,6 @@ type Props = {
   setHighlightedNodePath: (value: NodePath | undefined) => void;
   setPreviewNode: (node: NoyaNode | undefined) => void;
 };
-
-const InspectorContainer = memo(function InspectorContainer({
-  width,
-  header,
-  children,
-  fallback,
-}: {
-  width: number | string;
-  header?: React.ReactNode;
-  children?: React.ReactNode;
-  fallback?: React.ReactNode;
-}) {
-  const theme = useDesignSystemTheme();
-
-  return (
-    <Stack.V flex="1" background="white" width={width} position="relative">
-      {header}
-      {children ? (
-        <ScrollArea>
-          <Stack.V
-            gap="1px"
-            position="relative"
-            background={theme.colors.canvas.background}
-          >
-            {children}
-          </Stack.V>
-        </ScrollArea>
-      ) : fallback ? (
-        <Stack.V position="relative" height="100%">
-          {fallback}
-        </Stack.V>
-      ) : null}
-    </Stack.V>
-  );
-});
 
 export const AyonInspector = memo(function AyonInspector({
   name,
