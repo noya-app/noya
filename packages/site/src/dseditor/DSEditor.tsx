@@ -7,7 +7,6 @@ import {
   DividerVertical,
   GridView,
   Heading2,
-  Heading3,
   InputField,
   Spacer,
   Stack,
@@ -765,33 +764,31 @@ export function DSEditor({
             setShowCodePreview(false);
           }
         }}
-        title={
-          <Stack.H alignItems="center" gap="12px" margin="0 0 -6px 0">
-            <Heading3>Build</Heading3>
-            {selection?.componentID ? (
-              <Chip
-                deletable
-                onDelete={() => {
-                  setSelection(undefined);
-                }}
-              >
-                Current Component: {findComponent(selection?.componentID)?.name}
-              </Chip>
-            ) : (
-              <Chip>All Components</Chip>
-            )}
-          </Stack.H>
-        }
         style={{
           width: '90%',
           height: '90%',
           display: 'flex',
           flexDirection: 'column',
           maxWidth: '90%',
+          gap: '12px',
         }}
       >
+        <Stack.H alignItems="center" gap="12px">
+          <span style={theme.textStyles.heading3}>Build</span>
+          {selection?.componentID ? (
+            <Chip
+              deletable
+              onDelete={() => {
+                setSelection(undefined);
+              }}
+            >
+              Current Component: {findComponent(selection?.componentID)?.name}
+            </Chip>
+          ) : (
+            <Chip>All Components</Chip>
+          )}
+        </Stack.H>
         <Divider overflow={theme.sizes.dialog.padding} />
-        <Spacer.Vertical size={12} />
         {system && showCodePreview && (
           <DSGalleryCode
             system={system}
