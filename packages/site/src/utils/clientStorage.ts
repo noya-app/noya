@@ -16,6 +16,7 @@ const ClientStorageDefinitions = {
   showLeftSidebar: 'noya-show-left-sidebar',
   showRightSidebar: 'noya-show-right-sidebar',
   componentEditorTab: 'noya-component-editor-tab',
+  codePreviewFilesFilter: 'noya-code-preview-files-filter',
 };
 
 export const ayonOnboardingStep = [

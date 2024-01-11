@@ -2,16 +2,19 @@ import {
   Button,
   Chip,
   CompletionItem,
+  Dialog,
+  Divider,
   DividerVertical,
   GridView,
   Heading2,
-  RadioGroup,
+  Heading3,
+  InputField,
   Spacer,
   Stack,
   useDesignSystemTheme,
 } from '@noya-app/noya-designsystem';
 import { toZipFile } from '@noya-app/noya-filesystem';
-import { DownloadIcon } from '@noya-app/noya-icons';
+import { DownloadIcon, RocketIcon } from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { UTF16, findLast, uuid } from '@noya-app/noya-utils';
 import { useDeepState } from '@noya-app/react-utils';
@@ -461,27 +464,22 @@ export function DSEditor({
     [setSelection],
   );
 
-  type ContentTabName = 'preview' | 'code';
-
-  const [contentTab, setContentTab] = React.useState<ContentTabName>('preview');
+  const [showCodePreview, setShowCodePreview] = React.useState(false);
 
   useEffect(() => {
     project.setRightToolbar(
       <>
-        <Stack.H width="160px">
-          <RadioGroup.Root
-            id="content-tab"
-            value={contentTab}
-            onValueChange={setContentTab}
-          >
-            <RadioGroup.Item value="preview">Preview</RadioGroup.Item>
-            <RadioGroup.Item value="code">Code</RadioGroup.Item>
-          </RadioGroup.Root>
-        </Stack.H>
+        <Button
+          onClick={() => {
+            setShowCodePreview(true);
+          }}
+        >
+          Build
+        </Button>
         <ShareProjectButton fileId={fileId} />
       </>,
     );
-  }, [contentTab, fileId, project]);
+  }, [fileId, project]);
 
   useEffect(() => {
     const commandPaletteItems: CompletionItem[] = components
@@ -614,119 +612,100 @@ export function DSEditor({
       <Stack.V flex="1">
         {selection ? (
           <Stack.V flex="1">
-            {contentTab === 'preview' && (
-              <Stack.V flex="1" overflow="hidden" position="relative">
-                <DSControlledRenderer
-                  ref={rendererRef}
-                  librarySource={librarySource}
-                  config={config}
-                  renderContent={handleRenderContent}
-                  getStringValueAtPath={getStringValueAtPath}
-                  onChangeTextAtPath={handleSetTextAtPath}
-                  onSplitNodeAtPath={handleSplitNodeAtPath}
-                  setHighlightedPath={setHighlightedPath}
-                  setSelectedPath={setSelectedPath}
-                  onContentDidChange={handleContentDidChange}
-                />
-                <DSRendererOverlay
-                  ref={overlayRef}
-                  rendererRef={rendererRef}
-                  highlightedPath={highlightedPath}
-                />
-              </Stack.V>
-            )}
-            {contentTab === 'code' && system && (
-              <DSGalleryCode
-                system={system}
-                ds={ds}
-                setLatestBuildAssetId={setLatestBuildAssetId}
-                componentID={selection.componentID}
+            <Stack.V flex="1" overflow="hidden" position="relative">
+              <DSControlledRenderer
+                ref={rendererRef}
+                librarySource={librarySource}
+                config={config}
+                renderContent={handleRenderContent}
+                getStringValueAtPath={getStringValueAtPath}
+                onChangeTextAtPath={handleSetTextAtPath}
+                onSplitNodeAtPath={handleSplitNodeAtPath}
+                setHighlightedPath={setHighlightedPath}
+                setSelectedPath={setSelectedPath}
+                onContentDidChange={handleContentDidChange}
               />
-            )}
+              <DSRendererOverlay
+                ref={overlayRef}
+                rendererRef={rendererRef}
+                highlightedPath={highlightedPath}
+              />
+            </Stack.V>
           </Stack.V>
         ) : (
           <Stack.V flex="1">
-            {contentTab === 'preview' && (
-              <GridView.Root size="large" textPosition="below">
-                <Stack.V padding="20px 20px 10px 20px">
-                  <Heading2 color="text" display="inline-flex">
-                    Components
-                  </Heading2>
-                  <Stack.H gap="8px" alignItems="center">
-                    <Chip colorScheme="primary">
-                      Public: {publicComponentCount}
-                    </Chip>
-                    <Chip colorScheme="secondary">
-                      Private: {privateComponentCount}
-                    </Chip>
-                  </Stack.H>
-                </Stack.V>
-                {rootGroup.children
-                  ?.flatMap((group) => group.children ?? [])
-                  .map((group) => {
-                    const indexPath = ComponentGroupTree.findIndexPath(
-                      rootGroup,
-                      (g) => g.id === group.id,
-                    );
+            <GridView.Root size="large" textPosition="below">
+              <Stack.V padding="20px 20px 10px 20px">
+                <Heading2 color="text" display="inline-flex">
+                  Components
+                </Heading2>
+                <Stack.H gap="8px" alignItems="center">
+                  <Chip colorScheme="primary">
+                    Public: {publicComponentCount}
+                  </Chip>
+                  <Chip colorScheme="secondary">
+                    Private: {privateComponentCount}
+                  </Chip>
+                </Stack.H>
+              </Stack.V>
+              {rootGroup.children
+                ?.flatMap((group) => group.children ?? [])
+                .map((group) => {
+                  const indexPath = ComponentGroupTree.findIndexPath(
+                    rootGroup,
+                    (g) => g.id === group.id,
+                  );
 
-                    if (!indexPath) return null;
+                  if (!indexPath) return null;
 
-                    const parent = ComponentGroupTree.access(
-                      rootGroup,
-                      indexPath.slice(0, -1),
-                    );
+                  const parent = ComponentGroupTree.access(
+                    rootGroup,
+                    indexPath.slice(0, -1),
+                  );
 
-                    return (
-                      <>
-                        <GridView.SectionHeader
-                          key={group.id}
-                          title={`${parent.name}/${group.name}`}
-                        />
-                        <GridView.Section>
-                          {components
-                            .filter((c) => c.groupID === group.id)
-                            .map((component) => {
-                              return (
-                                <GridView.Item
-                                  id={component.id}
-                                  key={component.id}
-                                  title={component.name}
-                                  onClick={() => {
-                                    setSelection({
-                                      componentID: component.componentID,
-                                    });
-                                  }}
+                  return (
+                    <>
+                      <GridView.SectionHeader
+                        key={group.id}
+                        title={`${parent.name}/${group.name}`}
+                      />
+                      <GridView.Section>
+                        {components
+                          .filter((c) => c.groupID === group.id)
+                          .map((component) => {
+                            return (
+                              <GridView.Item
+                                id={component.id}
+                                key={component.id}
+                                title={component.name}
+                                onClick={() => {
+                                  setSelection({
+                                    componentID: component.componentID,
+                                  });
+                                }}
+                              >
+                                <Stack.H
+                                  width="100%"
+                                  aspectRatio="16/9"
+                                  alignItems="center"
+                                  justifyContent="center"
+                                  borderRadius="4px"
+                                  background={theme.colors.inputBackground}
+                                  border={`1px solid ${theme.colors.divider}`}
                                 >
-                                  <Stack.H
-                                    width="100%"
-                                    aspectRatio="16/9"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                    borderRadius="4px"
-                                    background={theme.colors.inputBackground}
-                                    border={`1px solid ${theme.colors.divider}`}
-                                  >
-                                    <DSComponentThumbnail
-                                      component={component}
-                                      fileId={fileId}
-                                    />
-                                  </Stack.H>
-                                </GridView.Item>
-                              );
-                            })}
-                        </GridView.Section>
-                      </>
-                    );
-                  })}
-              </GridView.Root>
-            )}
-            {contentTab === 'code' && system && (
-              <DSGalleryCode
-                system={system}
-                ds={ds}
-                setLatestBuildAssetId={setLatestBuildAssetId}
-              />
-            )}
+                                  <DSComponentThumbnail
+                                    component={component}
+                                    fileId={fileId}
+                                  />
+                                </Stack.H>
+                              </GridView.Item>
+                            );
+                          })}
+                      </GridView.Section>
+                    </>
+                  );
+                })}
+            </GridView.Root>
           </Stack.V>
         )}
       </Stack.V>
@@ -778,6 +757,50 @@ export function DSEditor({
             }}
           />
         )}
+      <Dialog
+        open={showCodePreview}
+        closeOnInteractOutside
+        onOpenChange={(value) => {
+          if (!value) {
+            setShowCodePreview(false);
+          }
+        }}
+        title={
+          <Stack.H alignItems="center" gap="12px" margin="0 0 -6px 0">
+            <Heading3>Build</Heading3>
+            {selection?.componentID ? (
+              <Chip
+                deletable
+                onDelete={() => {
+                  setSelection(undefined);
+                }}
+              >
+                Current Component: {findComponent(selection?.componentID)?.name}
+              </Chip>
+            ) : (
+              <Chip>All Components</Chip>
+            )}
+          </Stack.H>
+        }
+        style={{
+          width: '90%',
+          height: '90%',
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: '90%',
+        }}
+      >
+        <Divider overflow={theme.sizes.dialog.padding} />
+        <Spacer.Vertical size={12} />
+        {system && showCodePreview && (
+          <DSGalleryCode
+            system={system}
+            ds={ds}
+            setLatestBuildAssetId={setLatestBuildAssetId}
+            componentID={selection?.componentID}
+          />
+        )}
+      </Dialog>
     </Stack.H>
   );
 }
@@ -821,7 +844,7 @@ function DSGalleryCode({
   }, [componentID, ds, system]);
 
   return (
-    <Stack.V flex="1" background="white">
+    <Stack.V flex="1" gap="12px">
       {files !== undefined && (
         <Playground
           files={files}
@@ -855,16 +878,73 @@ function Playground(
     );
   }
 
-  const first50Files = useMemo(() => {
-    const entries = Object.entries(props.files ?? {});
+  const [filter, setFilter] = usePersistentState<string>(
+    'codePreviewFilesFilter',
+    '',
+  );
 
-    if (entries.length <= 50) return props.files;
+  const first50Files = useMemo(() => {
+    const filterRE = new RegExp(filter, 'i');
+
+    const entries = Object.entries(props.files ?? {}).filter(
+      ([name]) => !filter || filterRE.test(name),
+    );
 
     return Object.fromEntries(entries.slice(0, 50));
-  }, [props.files]);
+  }, [filter, props.files]);
 
   return (
     <>
+      <Stack.H gap="8px">
+        <InputField.Root>
+          <InputField.Input
+            value={filter}
+            onChange={setFilter}
+            placeholder="Filter files (regex)..."
+          />
+        </InputField.Root>
+        <Button
+          onClick={async () => {
+            const zipFile = await createZip();
+            downloadBlob(zipFile);
+          }}
+        >
+          Download ZIP
+          <Spacer.Horizontal size={6} inline />
+          <DownloadIcon />
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={async () => {
+            const zipFile = await createZip();
+            const bytes = await zipFile.arrayBuffer();
+
+            const build = await fetch('http://localhost:31114/build', {
+              method: 'POST',
+              body: bytes,
+              headers: {
+                'Content-Type': 'application/zip',
+              },
+            });
+
+            const binary = await build.arrayBuffer();
+
+            const assetId = await client.assets.create(binary, fileId);
+
+            props.setLatestBuildAssetId?.(assetId);
+
+            const url = `${client.assets.url(assetId)}/index.html`;
+
+            console.info('Uploaded to', assetId, url);
+
+            window.open(url, '_blank')?.focus();
+          }}
+        >
+          Create Build
+          <Spacer.Horizontal size={6} inline />
+          <RocketIcon />
+        </Button>
+      </Stack.H>
       <JavascriptPlayground
         key={JSON.stringify(first50Files)}
         files={first50Files}
@@ -881,6 +961,7 @@ function Playground(
         style={{
           width: '100%',
           height: '100%',
+          border: `1px solid ${theme.colors.divider}`,
         }}
         styles={{
           tab: {
@@ -928,50 +1009,6 @@ function Playground(
         }
       `}
       />
-      <Stack.H position="absolute" top="10px" right="20px" gap="20px">
-        <Button
-          variant="secondary"
-          onClick={async () => {
-            const zipFile = await createZip();
-            downloadBlob(zipFile);
-          }}
-        >
-          Download ZIP
-          <Spacer.Horizontal size={6} inline />
-          <DownloadIcon />
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={async () => {
-            const zipFile = await createZip();
-            const bytes = await zipFile.arrayBuffer();
-
-            const build = await fetch('http://localhost:31114/build', {
-              method: 'POST',
-              body: bytes,
-              headers: {
-                'Content-Type': 'application/zip',
-              },
-            });
-
-            const binary = await build.arrayBuffer();
-
-            const assetId = await client.assets.create(binary, fileId);
-
-            props.setLatestBuildAssetId?.(assetId);
-
-            const url = `${client.assets.url(assetId)}/index.html`;
-
-            console.info('Uploaded to', assetId, url);
-
-            window.open(url, '_blank')?.focus();
-          }}
-        >
-          Upload ZIP
-          <Spacer.Horizontal size={6} inline />
-          <DownloadIcon />
-        </Button>
-      </Stack.H>
     </>
   );
 }
