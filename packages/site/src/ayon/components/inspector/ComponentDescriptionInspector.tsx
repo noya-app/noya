@@ -6,9 +6,9 @@ import {
 } from '@noya-app/noya-designsystem';
 import { Sketch } from '@noya-app/noya-file-format';
 import { useGeneratedComponentDescription, useNoyaClient } from 'noya-api';
+import { PRIMITIVE_TAG_MAP } from 'noya-component';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback } from 'react';
-import { PRIMITIVE_TAG_MAP } from '../../../dseditor/primitiveElements';
 import { useAyonDispatch } from '../../state/ayonState';
 import { CustomLayerData, PreferredImageGenerator } from '../../types';
 import { useManagedLayout } from '../GeneratedLayoutContext';

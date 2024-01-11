@@ -1,4 +1,4 @@
-import { unique } from '@noya-app/noya-utils';
+import { isDeepEqual, unique } from '@noya-app/noya-utils';
 import {
   DesignSystemDefinition,
   Theme,
@@ -9,13 +9,22 @@ import { DS, DSConfig } from 'noya-api';
 import {
   FindComponent,
   NoyaComponent,
+  NoyaResolvedNode,
+  ResolvedHierarchy,
   createNoyaDSRenderingContext,
   createResolvedNode,
+  getNodeName,
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
-import { tailwindColors } from 'noya-tailwind';
-import React, { CSSProperties, ReactNode, isValidElement } from 'react';
+import { parametersToTailwindStyle, tailwindColors } from 'noya-tailwind';
+import React, {
+  CSSProperties,
+  ReactElement,
+  ReactNode,
+  isValidElement,
+} from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { defineTree } from 'tree-visit';
 import ts from 'typescript';
 import {
@@ -34,7 +43,7 @@ import {
   simpleElement,
 } from './common';
 import { generateThemeFile } from './compileTheme';
-import { print } from './print';
+import { formatCSS, formatHTML, print } from './print';
 import { sanitizePackageName } from './validate';
 
 export interface CompilerConfiguration {
@@ -142,6 +151,7 @@ export function createSimpleElement(
   return simpleElement({
     name,
     accessPath,
+    nodePath: element.props['data-path']?.split('/'),
     source,
     // Filter out children prop and undefined props
     props: Object.fromEntries(
@@ -340,14 +350,24 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
   };
 }
 
+export type ExportType =
+  | 'html-css'
+  | 'html-tailwind'
+  | 'react-css'
+  | 'react-tailwind';
+
+export type ExportMap = Partial<Record<ExportType, Record<string, string>>>;
+
 export function compileDesignSystem(
   configuration: ResolvedCompilerConfiguration & {
     includeTailwindBase: boolean;
+    exportTypes: ExportType[];
   },
 ): {
   files: Record<string, string>;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
+  allExportMap: Record<string, ExportMap>;
 } {
   const DesignSystem = configuration.designSystemDefinition;
 
@@ -358,6 +378,14 @@ export function compileDesignSystem(
   };
 
   const filterComponents = configuration.filterComponents ?? (() => true);
+
+  const theme: Theme = {
+    colorMode: configuration.ds.config.colorMode ?? 'light',
+    colors: {
+      primary: (tailwindColors as any)[configuration.ds.config.colors.primary],
+      neutral: tailwindColors.slate,
+    },
+  };
 
   const componentPageItems = (configuration.ds.components ?? [])
     .filter(filterComponents)
@@ -376,18 +404,18 @@ export function compileDesignSystem(
         node: noyaComponent.rootElement,
       });
 
-      const simpleElement = createSimpleElement(
-        renderResolvedNode({
-          contentEditable: false,
-          disableTabNavigation: false,
-          includeDataProps: true,
-          system: DesignSystem,
-          dsConfig: configuration.ds.config,
-          resolvedNode,
-          stylingMode: 'tailwind-resolved',
-        }),
-        DesignSystem,
-      );
+      const reactNode = renderResolvedNode({
+        contentEditable: false,
+        disableTabNavigation: false,
+        includeDataProps: true,
+        system: DesignSystem,
+        dsConfig: configuration.ds.config,
+        resolvedNode,
+        stylingMode: 'tailwind-resolved',
+        theme,
+      });
+
+      const simpleElement = createSimpleElement(reactNode, DesignSystem);
 
       if (!simpleElement) {
         throw new Error('Could not create simple element');
@@ -420,11 +448,120 @@ export function compileDesignSystem(
         .map(clean)
         .join('\n');
 
+      const exportMap: ExportMap = {};
+
+      if (configuration.exportTypes.includes('react-tailwind')) {
+        exportMap['react-tailwind'] = {
+          [getComponentNameIdentifier(component.name, 'kebab') + '.tsx']: source
+            .replace(/'use client';?/, '')
+            .trim(),
+        };
+      }
+
+      if (configuration.exportTypes.includes('react-css')) {
+        const { styleRules, simpleElementToClassName } = compileCSS({
+          simpleElement,
+          component,
+          resolvedNode,
+          findComponent,
+        });
+
+        const cleanedSimpleElement = SimpleElementTree.map<
+          SimpleElement['children'][number]
+        >(simpleElement, (node, transformedChildren, indexPath) => {
+          if (typeof node === 'string') return node;
+          if (isPassthrough(node)) return node;
+
+          const className = simpleElementToClassName.get(node);
+
+          const { style, ...props } = node.props;
+
+          return {
+            ...node,
+            props: { ...props, className },
+            children: transformedChildren,
+          };
+        }) as SimpleElement;
+
+        const func = createReactComponentDeclaration(
+          getComponentNameIdentifier(component.name),
+          createElementCode(cleanedSimpleElement),
+        );
+
+        const source = [print(imports), print(func)].map(clean).join('\n');
+
+        exportMap['react-css'] = {
+          [getComponentNameIdentifier(component.name, 'kebab') + '.tsx']:
+            source.trim(),
+          [getComponentNameIdentifier(component.name, 'kebab') + '.css']:
+            formatCSS(buildStyleSheet(styleRules)),
+        };
+      }
+
+      if (configuration.exportTypes.includes('html-tailwind')) {
+        const cleanedReactNode = SimpleElementTree.map(
+          simpleElement,
+          (node, transformedChildren, indexPath) => {
+            if (typeof node === 'string') return node;
+            if (isPassthrough(node)) return node;
+            return React.createElement(
+              node.name,
+              { ...node.props, key: indexPath.join('/') },
+              transformedChildren.length > 0 ? transformedChildren : undefined,
+            );
+          },
+        );
+
+        exportMap['html-tailwind'] = {
+          [getComponentNameIdentifier(component.name, 'kebab') + '.html']:
+            formatHTML(
+              renderToStaticMarkup(cleanedReactNode as ReactElement),
+            ).trim(),
+        };
+      }
+
+      if (configuration.exportTypes.includes('html-css')) {
+        const { styleRules, simpleElementToClassName } = compileCSS({
+          simpleElement,
+          component,
+          resolvedNode,
+          findComponent,
+        });
+
+        const cleanedReactNode = SimpleElementTree.map(
+          simpleElement,
+          (node, transformedChildren, indexPath) => {
+            if (typeof node === 'string') return node;
+            if (isPassthrough(node)) return node;
+
+            const className = simpleElementToClassName.get(node);
+
+            const { style, ...props } = node.props;
+
+            return React.createElement(
+              node.name,
+              { key: indexPath.join('/'), ...props, className },
+              transformedChildren.length > 0 ? transformedChildren : undefined,
+            );
+          },
+        );
+
+        exportMap['html-css'] = {
+          [getComponentNameIdentifier(component.name, 'kebab') + '.html']:
+            formatHTML(
+              renderToStaticMarkup(cleanedReactNode as ReactElement),
+            ).trim(),
+          [getComponentNameIdentifier(component.name, 'kebab') + '.css']:
+            formatCSS(buildStyleSheet(styleRules)),
+        };
+      }
+
       return {
         name: component.name,
         source,
         dependencies,
         devDependencies,
+        exportMap,
       };
     });
 
@@ -438,13 +575,13 @@ export function compileDesignSystem(
     {},
   );
 
-  const theme: Theme = {
-    colorMode: configuration.ds.config.colorMode ?? 'light',
-    colors: {
-      primary: (tailwindColors as any)[configuration.ds.config.colors.primary],
-      neutral: tailwindColors.slate,
+  const allExportMap = componentPageItems.reduce(
+    (result, { name, exportMap }) => {
+      result[getComponentNameIdentifier(name, 'kebab')] = exportMap;
+      return result;
     },
-  };
+    {} as Record<string, ExportMap>,
+  );
 
   const layoutSource = createLayoutSource({
     DesignSystem,
@@ -481,6 +618,7 @@ export function compileDesignSystem(
     files: sortFiles(files),
     dependencies: allDependencies,
     devDependencies: allDevDependencies,
+    allExportMap,
   };
 }
 
@@ -525,6 +663,7 @@ export function compile(configuration: CompilerConfiguration) {
           files: dsFiles,
           dependencies,
           devDependencies,
+          allExportMap,
         } = compileDesignSystem({
           ...configuration,
           ds: {
@@ -541,6 +680,10 @@ export function compile(configuration: CompilerConfiguration) {
           designSystemDefinition:
             configuration.resolvedDefinitions[libraryName],
           includeTailwindBase: libraryName === 'vanilla',
+          exportTypes:
+            libraryName === 'vanilla'
+              ? ['html-css', 'html-tailwind', 'react-css', 'react-tailwind']
+              : ['react-css', 'react-tailwind'],
         });
 
         Object.assign(allDependencies, dependencies);
@@ -556,13 +699,29 @@ export function compile(configuration: CompilerConfiguration) {
           ),
         );
 
-        Object.assign(
-          allDSFiles,
-          addPathPrefix(
-            dsFiles,
-            `public/${basename}/${colorName}/${colorMode}/components/`,
-          ),
-        );
+        // const exportFiles: Record<string, string> = {};
+
+        for (const [componentName, exportMap] of Object.entries(allExportMap)) {
+          for (const [exportType, files] of Object.entries(exportMap)) {
+            Object.assign(
+              allDSFiles,
+              addPathPrefix(
+                files,
+                `public/${basename}/${colorName}/${colorMode}/components/${componentName}/${exportType}/`,
+              ),
+            );
+          }
+        }
+
+        // Object.assign(
+        //   allDSFiles,
+        //   addPathPrefix(
+        //     dsFiles,
+        //     `public/${basename}/${colorName}/${colorMode}/components/`,
+        //   ),
+        // );
+
+        // console.log(libraryName, colorMode, colorName, allExportMap);
       }
     }
   }
@@ -683,4 +842,86 @@ function addPathPrefix(
   return Object.fromEntries(
     Object.entries(files).map(([key, value]) => [prefix + key, value]),
   );
+}
+
+function styleNameToString(key: string) {
+  const prefix = /^(ms|moz|webkit)/i.test(key) ? '-' : '';
+  // Convert camelCase to kebab-case and add vendor prefix if needed
+  key = prefix + camelCaseToKebabCase(key);
+  return key;
+
+  function camelCaseToKebabCase(string: string) {
+    return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  }
+}
+
+type StyleRule = {
+  selector: string;
+  declarations: [string, string][];
+};
+
+function compileCSS({
+  simpleElement,
+  component,
+  resolvedNode,
+  findComponent,
+}: {
+  simpleElement: SimpleElement;
+  component: NoyaComponent;
+  resolvedNode: NoyaResolvedNode;
+  findComponent: FindComponent;
+}) {
+  let styleRules: StyleRule[] = [];
+  const simpleElementToClassName = new Map<SimpleElement, string>();
+
+  SimpleElementTree.visit(simpleElement, (simple) => {
+    if (typeof simple === 'string') return;
+    if (isPassthrough(simple)) return;
+    if (simple.nodePath) {
+      const indexPath = ResolvedHierarchy.findIndexPath(resolvedNode, (node) =>
+        isDeepEqual(node.path, simple.nodePath),
+      );
+
+      if (!indexPath) return;
+
+      const pathOfNodes = ResolvedHierarchy.accessPath(resolvedNode, indexPath);
+
+      const namePath = pathOfNodes.map((n) => getNodeName(n, findComponent));
+
+      const className = [component.name, ...namePath]
+        .map((name) => getComponentNameIdentifier(name, 'kebab'))
+        .join('__');
+
+      simpleElementToClassName.set(simple, className);
+
+      const convertedFromTailwind = parametersToTailwindStyle(
+        (simple.props.className as string | undefined)?.split(' '),
+      );
+
+      const allDeclarations = Object.entries({
+        ...(simple.props.style ?? {}),
+        ...convertedFromTailwind,
+      }).map(([key, value]) => {
+        const styleName = styleNameToString(key);
+        return [styleName, value.toString()] as [string, string];
+      });
+
+      styleRules.push({
+        selector: `.${className}`,
+        declarations: allDeclarations,
+      });
+    }
+  });
+
+  return { styleRules, simpleElementToClassName };
+}
+
+function buildStyleSheet(styleRules: StyleRule[]) {
+  return styleRules
+    .map(({ selector: ruleName, declarations: rules }) => {
+      return `${ruleName} { ${rules
+        .map(([key, value]) => `${key}: ${value};`)
+        .join(' ')} }`;
+    })
+    .join('\n\n');
 }

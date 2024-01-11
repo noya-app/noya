@@ -26,9 +26,9 @@ import {
   tailwindColors,
 } from 'noya-tailwind';
 import React, { ReactNode } from 'react';
+import { selectOptionSymbolId } from './primitiveElements';
 import { svgToReactElement } from './renderSVGElement';
 
-export const selectOptionSymbolId = 'a4009f44-db30-4658-9bcb-7531434150bb';
 export const ZERO_WIDTH_SPACE = '\u200b';
 
 export function getImageFromProp(colors: Theme['colors'], prop?: NoyaProp) {

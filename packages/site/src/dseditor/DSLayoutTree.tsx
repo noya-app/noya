@@ -52,6 +52,8 @@ import {
   NoyaResolvedPrimitiveElement,
   ResolvedHierarchy,
   createResolvedNode,
+  getComponentName,
+  getNodeName,
   randomSeed,
   resolvedNodeReducer,
   svgToReactElement,
@@ -74,7 +76,6 @@ import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { StyleInputField } from './StyleInputField';
 import { typeItems } from './completionItems';
 import { exportLayout, parseLayoutWithOptions } from './componentLayout';
-import { getComponentName, getNodeName } from './utils/nodeUtils';
 
 type LayoutTreeItem = {
   depth: number;

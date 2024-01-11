@@ -6,22 +6,6 @@ Array [
   "tailwind.config.ts",
   "src/app/layout.tsx",
   "src/app/page.tsx",
-  "public/chakra/blue/dark/components/globals.css",
-  "public/chakra/blue/dark/components/layout.tsx",
-  "public/chakra/blue/dark/components/theme.ts",
-  "public/chakra/blue/light/components/globals.css",
-  "public/chakra/blue/light/components/layout.tsx",
-  "public/chakra/blue/light/components/theme.ts",
-  "public/chakra/teal/dark/components/globals.css",
-  "public/chakra/teal/dark/components/layout.tsx",
-  "public/chakra/teal/dark/components/theme.ts",
-  "public/chakra/teal/light/components/globals.css",
-  "public/chakra/teal/light/components/layout.tsx",
-  "public/chakra/teal/light/components/theme.ts",
-  "public/chakra/blue/dark/components/hero/page.tsx",
-  "public/chakra/blue/light/components/hero/page.tsx",
-  "public/chakra/teal/dark/components/hero/page.tsx",
-  "public/chakra/teal/light/components/hero/page.tsx",
   "src/app/chakra/blue/dark/components/globals.css",
   "src/app/chakra/blue/dark/components/layout.tsx",
   "src/app/chakra/blue/dark/components/theme.ts",
@@ -34,6 +18,18 @@ Array [
   "src/app/chakra/teal/light/components/globals.css",
   "src/app/chakra/teal/light/components/layout.tsx",
   "src/app/chakra/teal/light/components/theme.ts",
+  "public/chakra/blue/dark/components/hero/react-css/hero.css",
+  "public/chakra/blue/dark/components/hero/react-css/hero.tsx",
+  "public/chakra/blue/dark/components/hero/react-tailwind/hero.tsx",
+  "public/chakra/blue/light/components/hero/react-css/hero.css",
+  "public/chakra/blue/light/components/hero/react-css/hero.tsx",
+  "public/chakra/blue/light/components/hero/react-tailwind/hero.tsx",
+  "public/chakra/teal/dark/components/hero/react-css/hero.css",
+  "public/chakra/teal/dark/components/hero/react-css/hero.tsx",
+  "public/chakra/teal/dark/components/hero/react-tailwind/hero.tsx",
+  "public/chakra/teal/light/components/hero/react-css/hero.css",
+  "public/chakra/teal/light/components/hero/react-css/hero.tsx",
+  "public/chakra/teal/light/components/hero/react-tailwind/hero.tsx",
   "src/app/chakra/blue/dark/components/hero/page.tsx",
   "src/app/chakra/blue/light/components/hero/page.tsx",
   "src/app/chakra/teal/dark/components/hero/page.tsx",
@@ -50,13 +46,202 @@ Object {
   \\"dependencies\\": {},
   \\"devDependencies\\": {}
 }",
-  "public/vanilla/blue/dark/components/globals.css": "@tailwind base;
-@tailwind components;
-@tailwind utilities;",
-  "public/vanilla/blue/dark/components/hero/page.tsx": "'use client';
+  "public/vanilla/blue/dark/components/hero/html-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
 
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #3b82f633;
+  color: #2563ebcc;
+}
 
-export default function Hero() {
+.hero__content__title {
+  color: #fff;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
+
+.hero__content__subtitle {
+  color: #fff;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+",
+  "public/vanilla/blue/dark/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
+  <div class=\\"hero__content__tag\\">New</div>
+  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__content__subtitle\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"hero__content__actions-row\\">
+    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
+    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/blue/dark/components/hero/html-tailwind/hero.html": "<div class=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+  <div class=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-500/20 text-blue-600/80\\">
+    New
+  </div>
+  <span class=\\"text-white text-6xl font-bold tracking-tighter leading-none text-center\\">
+    Create, iterate, inspire.
+  </span>
+  <span class=\\"text-white text-3xl font-bold tracking-tight leading-none text-center\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"flex items-center gap-4 mt-2\\">
+    <button class=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white shadow-sm\\">
+      Get Started
+    </button>
+    <a class=\\"text-sm font-bold text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/blue/dark/components/hero/react-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
+
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #3b82f633;
+  color: #2563ebcc;
+}
+
+.hero__content__title {
+  color: #fff;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
+
+.hero__content__subtitle {
+  color: #fff;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+",
+  "public/vanilla/blue/dark/components/hero/react-css/hero.tsx": "export default function Hero() {
+  return (
+    <div className=\\"hero__content\\">
+      <div className=\\"hero__content__tag\\">New</div>
+      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__content__subtitle\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"hero__content__actions-row\\">
+        <button className=\\"hero__content__actions-row__button\\">
+          Get Started
+        </button>
+        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+          Learn More
+        </a>
+      </div>
+    </div>
+  );
+}",
+  "public/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
       <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-500/20 text-blue-600/80\\">
@@ -81,74 +266,203 @@ export default function Hero() {
       </div>
     </div>
   );
+}",
+  "public/vanilla/blue/light/components/hero/html-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
+
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #bfdbfe33;
+  color: #2563ebcc;
+}
+
+.hero__content__title {
+  color: #000;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
+
+.hero__content__subtitle {
+  color: #000;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
 }
 ",
-  "public/vanilla/blue/dark/components/layout.tsx": "'use client';
+  "public/vanilla/blue/light/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
+  <div class=\\"hero__content__tag\\">New</div>
+  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__content__subtitle\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"hero__content__actions-row\\">
+    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
+    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/blue/light/components/hero/html-tailwind/hero.html": "<div class=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+  <div class=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-200/20 text-blue-600/80\\">
+    New
+  </div>
+  <span class=\\"text-black text-6xl font-bold tracking-tighter leading-none text-center\\">
+    Create, iterate, inspire.
+  </span>
+  <span class=\\"text-black text-3xl font-bold tracking-tight leading-none text-center\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"flex items-center gap-4 mt-2\\">
+    <button class=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-blue-500 hover:bg-blue-400 text-white shadow-sm\\">
+      Get Started
+    </button>
+    <a class=\\"text-sm font-bold text-blue-500 hover:text-blue-400\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/blue/light/components/hero/react-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
 
-import './globals.css';
-import React from 'react';
-import { Manrope } from 'next/font/google';
-import { theme } from './theme';
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #bfdbfe33;
+  color: #2563ebcc;
+}
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+.hero__content__title {
+  color: #000;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
 
-export default function NextProvider(props: React.PropsWithChildren<{}>) {
+.hero__content__subtitle {
+  color: #000;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+",
+  "public/vanilla/blue/light/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-        background: '#111',
-      }}
-      className={fontManrope.className}
-    >
-      {props.children}
+    <div className=\\"hero__content\\">
+      <div className=\\"hero__content__tag\\">New</div>
+      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__content__subtitle\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"hero__content__actions-row\\">
+        <button className=\\"hero__content__actions-row__button\\">
+          Get Started
+        </button>
+        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+          Learn More
+        </a>
+      </div>
     </div>
   );
-}
-",
-  "public/vanilla/blue/dark/components/theme.ts": "export const theme = {
-  colorMode: 'dark',
-  colors: {
-    primary: {
-      50: '#eff6ff',
-      100: '#dbeafe',
-      200: '#bfdbfe',
-      300: '#93c5fd',
-      400: '#60a5fa',
-      500: '#3b82f6',
-      600: '#2563eb',
-      700: '#1d4ed8',
-      800: '#1e40af',
-      900: '#1e3a8a',
-      950: '#172554',
-    },
-    neutral: {
-      50: '#f8fafc',
-      100: '#f1f5f9',
-      200: '#e2e8f0',
-      300: '#cbd5e1',
-      400: '#94a3b8',
-      500: '#64748b',
-      600: '#475569',
-      700: '#334155',
-      800: '#1e293b',
-      900: '#0f172a',
-      950: '#020617',
-    },
-  },
-};
-",
-  "public/vanilla/blue/light/components/globals.css": "@tailwind base;
-@tailwind components;
-@tailwind utilities;",
-  "public/vanilla/blue/light/components/hero/page.tsx": "'use client';
-
-
-export default function Hero() {
+}",
+  "public/vanilla/blue/light/components/hero/react-tailwind/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
       <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-200/20 text-blue-600/80\\">
@@ -173,73 +487,203 @@ export default function Hero() {
       </div>
     </div>
   );
+}",
+  "public/vanilla/teal/dark/components/hero/html-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
+
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #14b8a633;
+  color: #0d9488cc;
+}
+
+.hero__content__title {
+  color: #fff;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
+
+.hero__content__subtitle {
+  color: #fff;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #14b8a6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #14b8a6;
 }
 ",
-  "public/vanilla/blue/light/components/layout.tsx": "'use client';
+  "public/vanilla/teal/dark/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
+  <div class=\\"hero__content__tag\\">New</div>
+  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__content__subtitle\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"hero__content__actions-row\\">
+    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
+    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/teal/dark/components/hero/html-tailwind/hero.html": "<div class=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+  <div class=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-500/20 text-teal-600/80\\">
+    New
+  </div>
+  <span class=\\"text-white text-6xl font-bold tracking-tighter leading-none text-center\\">
+    Create, iterate, inspire.
+  </span>
+  <span class=\\"text-white text-3xl font-bold tracking-tight leading-none text-center\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"flex items-center gap-4 mt-2\\">
+    <button class=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-teal-500 hover:bg-teal-400 text-white shadow-sm\\">
+      Get Started
+    </button>
+    <a class=\\"text-sm font-bold text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/teal/dark/components/hero/react-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
 
-import './globals.css';
-import React from 'react';
-import { Manrope } from 'next/font/google';
-import { theme } from './theme';
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #14b8a633;
+  color: #0d9488cc;
+}
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+.hero__content__title {
+  color: #fff;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
 
-export default function NextProvider(props: React.PropsWithChildren<{}>) {
+.hero__content__subtitle {
+  color: #fff;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #14b8a6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #14b8a6;
+}
+",
+  "public/vanilla/teal/dark/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-      }}
-      className={fontManrope.className}
-    >
-      {props.children}
+    <div className=\\"hero__content\\">
+      <div className=\\"hero__content__tag\\">New</div>
+      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__content__subtitle\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"hero__content__actions-row\\">
+        <button className=\\"hero__content__actions-row__button\\">
+          Get Started
+        </button>
+        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+          Learn More
+        </a>
+      </div>
     </div>
   );
-}
-",
-  "public/vanilla/blue/light/components/theme.ts": "export const theme = {
-  colorMode: 'light',
-  colors: {
-    primary: {
-      50: '#eff6ff',
-      100: '#dbeafe',
-      200: '#bfdbfe',
-      300: '#93c5fd',
-      400: '#60a5fa',
-      500: '#3b82f6',
-      600: '#2563eb',
-      700: '#1d4ed8',
-      800: '#1e40af',
-      900: '#1e3a8a',
-      950: '#172554',
-    },
-    neutral: {
-      50: '#f8fafc',
-      100: '#f1f5f9',
-      200: '#e2e8f0',
-      300: '#cbd5e1',
-      400: '#94a3b8',
-      500: '#64748b',
-      600: '#475569',
-      700: '#334155',
-      800: '#1e293b',
-      900: '#0f172a',
-      950: '#020617',
-    },
-  },
-};
-",
-  "public/vanilla/teal/dark/components/globals.css": "@tailwind base;
-@tailwind components;
-@tailwind utilities;",
-  "public/vanilla/teal/dark/components/hero/page.tsx": "'use client';
-
-
-export default function Hero() {
+}",
+  "public/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
       <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-500/20 text-teal-600/80\\">
@@ -264,74 +708,203 @@ export default function Hero() {
       </div>
     </div>
   );
+}",
+  "public/vanilla/teal/light/components/hero/html-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
+
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #99f6e433;
+  color: #0d9488cc;
+}
+
+.hero__content__title {
+  color: #000;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
+
+.hero__content__subtitle {
+  color: #000;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #14b8a6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #14b8a6;
 }
 ",
-  "public/vanilla/teal/dark/components/layout.tsx": "'use client';
+  "public/vanilla/teal/light/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
+  <div class=\\"hero__content__tag\\">New</div>
+  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__content__subtitle\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"hero__content__actions-row\\">
+    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
+    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/teal/light/components/hero/html-tailwind/hero.html": "<div class=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
+  <div class=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-200/20 text-teal-600/80\\">
+    New
+  </div>
+  <span class=\\"text-black text-6xl font-bold tracking-tighter leading-none text-center\\">
+    Create, iterate, inspire.
+  </span>
+  <span class=\\"text-black text-3xl font-bold tracking-tight leading-none text-center\\">
+    Turn great ideas into new possibilities.
+  </span>
+  <div class=\\"flex items-center gap-4 mt-2\\">
+    <button class=\\"appearance-none text-sm font-bold rounded-md px-3.5 py-2.5 bg-teal-500 hover:bg-teal-400 text-white shadow-sm\\">
+      Get Started
+    </button>
+    <a class=\\"text-sm font-bold text-teal-500 hover:text-teal-400\\" href=\\"#\\">
+      Learn More
+    </a>
+  </div>
+</div>",
+  "public/vanilla/teal/light/components/hero/react-css/hero.css": ".hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  flex: 1;
+  gap: 1rem;
+}
 
-import './globals.css';
-import React from 'react';
-import { Manrope } from 'next/font/google';
-import { theme } from './theme';
+.hero__content__tag {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  background-color: #99f6e433;
+  color: #0d9488cc;
+}
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+.hero__content__title {
+  color: #000;
+  font-size: 3.75rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  text-align: center;
+}
 
-export default function NextProvider(props: React.PropsWithChildren<{}>) {
+.hero__content__subtitle {
+  color: #000;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.hero__content__actions-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hero__content__actions-row__button {
+  appearance: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  background-color: #14b8a6;
+  color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.hero__content__actions-row__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  color: #14b8a6;
+}
+",
+  "public/vanilla/teal/light/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-        background: '#111',
-      }}
-      className={fontManrope.className}
-    >
-      {props.children}
+    <div className=\\"hero__content\\">
+      <div className=\\"hero__content__tag\\">New</div>
+      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__content__subtitle\\">
+        Turn great ideas into new possibilities.
+      </span>
+      <div className=\\"hero__content__actions-row\\">
+        <button className=\\"hero__content__actions-row__button\\">
+          Get Started
+        </button>
+        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+          Learn More
+        </a>
+      </div>
     </div>
   );
-}
-",
-  "public/vanilla/teal/dark/components/theme.ts": "export const theme = {
-  colorMode: 'dark',
-  colors: {
-    primary: {
-      50: '#f0fdfa',
-      100: '#ccfbf1',
-      200: '#99f6e4',
-      300: '#5eead4',
-      400: '#2dd4bf',
-      500: '#14b8a6',
-      600: '#0d9488',
-      700: '#0f766e',
-      800: '#115e59',
-      900: '#134e4a',
-      950: '#042f2e',
-    },
-    neutral: {
-      50: '#f8fafc',
-      100: '#f1f5f9',
-      200: '#e2e8f0',
-      300: '#cbd5e1',
-      400: '#94a3b8',
-      500: '#64748b',
-      600: '#475569',
-      700: '#334155',
-      800: '#1e293b',
-      900: '#0f172a',
-      950: '#020617',
-    },
-  },
-};
-",
-  "public/vanilla/teal/light/components/globals.css": "@tailwind base;
-@tailwind components;
-@tailwind utilities;",
-  "public/vanilla/teal/light/components/hero/page.tsx": "'use client';
-
-
-export default function Hero() {
+}",
+  "public/vanilla/teal/light/components/hero/react-tailwind/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
       <div className=\\"inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-teal-200/20 text-teal-600/80\\">
@@ -356,66 +929,7 @@ export default function Hero() {
       </div>
     </div>
   );
-}
-",
-  "public/vanilla/teal/light/components/layout.tsx": "'use client';
-
-import './globals.css';
-import React from 'react';
-import { Manrope } from 'next/font/google';
-import { theme } from './theme';
-
-const fontManrope = Manrope({ subsets: ['latin'] });
-
-export default function NextProvider(props: React.PropsWithChildren<{}>) {
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
-      }}
-      className={fontManrope.className}
-    >
-      {props.children}
-    </div>
-  );
-}
-",
-  "public/vanilla/teal/light/components/theme.ts": "export const theme = {
-  colorMode: 'light',
-  colors: {
-    primary: {
-      50: '#f0fdfa',
-      100: '#ccfbf1',
-      200: '#99f6e4',
-      300: '#5eead4',
-      400: '#2dd4bf',
-      500: '#14b8a6',
-      600: '#0d9488',
-      700: '#0f766e',
-      800: '#115e59',
-      900: '#134e4a',
-      950: '#042f2e',
-    },
-    neutral: {
-      50: '#f8fafc',
-      100: '#f1f5f9',
-      200: '#e2e8f0',
-      300: '#cbd5e1',
-      400: '#94a3b8',
-      500: '#64748b',
-      600: '#475569',
-      700: '#334155',
-      800: '#1e293b',
-      900: '#0f172a',
-      950: '#020617',
-    },
-  },
-};
-",
+}",
   "src/app/layout.tsx": "export default function RootLayout({
   children,
 }: {
@@ -458,83 +972,123 @@ export default function Page() {
       <h1 className=\\"text-4xl\\">Public</h1>
       <ul>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/globals.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/globals.css
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-tailwind/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/layout.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/layout.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-css/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-css/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/theme.ts\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/theme.ts
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-css/hero.css
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/page.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/page.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-tailwind/hero.html
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/globals.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/globals.css
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.html
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/layout.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/layout.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.css
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/theme.ts\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/theme.ts
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-tailwind/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/page.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/page.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/globals.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/globals.css
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.css
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/layout.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/layout.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-tailwind/hero.html
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/theme.ts\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/theme.ts
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-css/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-css/hero.html
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/page.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/page.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-css/hero.css
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/globals.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/globals.css
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/layout.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/layout.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/theme.ts\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/theme.ts
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.css
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/page.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/page.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-tailwind/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-css/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-css/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-css/hero.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-css/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-css/hero.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-css/hero.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-tailwind/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.css
           </a>
         </li>
       </ul>

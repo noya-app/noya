@@ -9,12 +9,13 @@ import {
   Model,
   NoyaNode,
   NoyaResolvedNode,
+  PRIMITIVE_ELEMENT_MAP,
+  PRIMITIVE_TAG_MAP,
   ResolvedHierarchy,
   createSeed,
 } from 'noya-component';
 import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { enforceSchema } from './layoutSchema';
-import { PRIMITIVE_ELEMENT_MAP, PRIMITIVE_TAG_MAP } from './primitiveElements';
 import { rewriteLayout } from './rewriteLayout';
 
 const IMAGE_ALT_REWRITE_MAP = new Set([

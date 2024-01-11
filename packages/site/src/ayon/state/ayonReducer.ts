@@ -4,7 +4,12 @@ import { SketchModel } from '@noya-app/noya-sketch-model';
 import { findLast, upperFirst, uuid } from '@noya-app/noya-utils';
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
-import { Model, NoyaNode } from 'noya-component';
+import {
+  Model,
+  NoyaNode,
+  PRIMITIVE_ELEMENT_NAMES,
+  primitiveElements,
+} from 'noya-component';
 import {
   Action,
   CustomReducer,
@@ -16,10 +21,6 @@ import {
 } from 'noya-state';
 import { FlattenedLayoutItem } from '../../components/PageSetup';
 import { enforceSchema } from '../../dseditor/layoutSchema';
-import {
-  PRIMITIVE_ELEMENT_NAMES,
-  primitiveElements,
-} from '../../dseditor/primitiveElements';
 import { boxSymbolId } from '../symbols/symbolIds';
 import {
   CustomLayerData,

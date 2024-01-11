@@ -11,29 +11,13 @@ import {
   Link1Icon,
   RadiobuttonIcon,
   SwitchIcon,
-  TableIcon,
   TextIcon,
 } from '@noya-app/noya-icons';
 import { component } from '@noya-design-system/protocol';
 import { Model, NoyaPrimitiveElement } from 'noya-component';
 import React, { ReactNode } from 'react';
-import {
-  avatarSymbolId,
-  boxSymbolId,
-  buttonSymbolId,
-  checkboxSymbolId,
-  imageSymbolId,
-  inputSymbolId,
-  linkSymbolId,
-  radioSymbolId,
-  selectOptionSymbolId,
-  selectSymbolId,
-  switchSymbolId,
-  tableSymbolId,
-  tagSymbolId,
-  textSymbolId,
-  textareaSymbolId,
-} from '../ayon/symbols/symbolIds';
+
+export const selectOptionSymbolId = 'a4009f44-db30-4658-9bcb-7531434150bb';
 
 export type PrimitiveElementSchema = {
   children:
@@ -57,7 +41,7 @@ export type PrimitiveElementMetadata = {
 
 export const primitiveElements: PrimitiveElementMetadata[] = [
   {
-    id: avatarSymbolId,
+    id: component.id.Avatar,
     name: 'Avatar',
     description: 'A user avatar',
     icon: <AvatarIcon />,
@@ -65,12 +49,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Avatar',
-        componentID: avatarSymbolId,
+        componentID: component.id.Avatar,
         classNames: [],
       }),
   },
   {
-    id: boxSymbolId,
+    id: component.id.Box,
     name: 'Box',
     description: 'A container for other elements',
     icon: <BoxIcon />,
@@ -78,12 +62,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Box',
-        componentID: boxSymbolId,
+        componentID: component.id.Box,
         classNames: Model.classNames(['flex-1', 'bg-primary-50']),
       }),
   },
   {
-    id: buttonSymbolId,
+    id: component.id.Button,
     name: 'Button',
     description: 'A button with the text "Submit"',
     icon: <ButtonIcon />,
@@ -92,7 +76,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Button',
-        componentID: buttonSymbolId,
+        componentID: component.id.Button,
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Submit')],
       }),
@@ -112,7 +96,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       }),
   },
   {
-    id: checkboxSymbolId,
+    id: component.id.Checkbox,
     name: 'Checkbox',
     description: 'A checkbox with the label "Checkbox"',
     icon: <CheckboxIcon />,
@@ -120,13 +104,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Checkbox',
-        componentID: checkboxSymbolId,
+        componentID: component.id.Checkbox,
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Checkbox')],
       }),
   },
   {
-    id: imageSymbolId,
+    id: component.id.Image,
     name: 'Image',
     description: 'An image',
     icon: <ImageIcon />,
@@ -140,12 +124,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Image',
-        componentID: imageSymbolId,
+        componentID: component.id.Image,
         classNames: Model.classNames(['flex-1', 'object-cover']),
       }),
   },
   {
-    id: inputSymbolId,
+    id: component.id.Input,
     name: 'Input',
     description: 'A text input',
     icon: <InputIcon />,
@@ -161,14 +145,14 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
       // Instead the user should be using textarea (maybe we can suggest this).
       Model.primitiveElement({
         name: 'Input',
-        componentID: inputSymbolId,
+        componentID: component.id.Input,
         props: [
           Model.stringProp({ name: 'placeholder', value: 'Placeholder' }),
         ],
       }),
   },
   {
-    id: linkSymbolId,
+    id: component.id.Link,
     name: 'Link',
     description: 'A link with the text "Link"',
     icon: <Link1Icon />,
@@ -176,7 +160,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Link',
-        componentID: linkSymbolId,
+        componentID: component.id.Link,
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Link')],
       }),
@@ -189,7 +173,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     schema: { children: 'none', props: { value: 'number' } },
   },
   {
-    id: radioSymbolId,
+    id: component.id.Radio,
     name: 'Radio',
     description: 'A radio button with the label "Radio"',
     icon: <RadiobuttonIcon />,
@@ -197,13 +181,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Radio',
-        componentID: radioSymbolId,
+        componentID: component.id.Radio,
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Radio')],
       }),
   },
   {
-    id: selectSymbolId,
+    id: component.id.Select,
     name: 'Select',
     description: 'A select menu with options "Option 1" and "Option 2"',
     icon: <DropdownMenuIcon />,
@@ -214,7 +198,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Select',
-        componentID: selectSymbolId,
+        componentID: component.id.Select,
         classNames: Model.classNames(['flex-1']),
         children: [
           Model.primitiveElement({
@@ -239,22 +223,22 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     aliases: ['Select Option', 'Dropdown Option'],
   },
   {
-    id: switchSymbolId,
+    id: component.id.Switch,
     name: 'Switch',
     description: 'A switch',
     icon: <SwitchIcon />,
     schema: { children: 'none' },
     aliases: ['Toggle'],
   },
+  // {
+  //   id: tableSymbolId,
+  //   name: 'Table',
+  //   description: 'A table',
+  //   icon: <TableIcon />,
+  //   schema: { children: 'none' },
+  // },
   {
-    id: tableSymbolId,
-    name: 'Table',
-    description: 'A table',
-    icon: <TableIcon />,
-    schema: { children: 'none' },
-  },
-  {
-    id: tagSymbolId,
+    id: component.id.Tag,
     name: 'Tag',
     description: 'A tag with the text "Tag"',
     icon: <BadgeIcon />,
@@ -264,13 +248,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Tag',
-        componentID: tagSymbolId,
+        componentID: component.id.Tag,
         classNames: Model.classNames(['self-start']),
         children: [Model.string('Tag')],
       }),
   },
   {
-    id: textSymbolId,
+    id: component.id.Text,
     name: 'Text',
     description: 'A text element with the text "Text"',
     icon: <TextIcon />,
@@ -280,13 +264,13 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Text',
-        componentID: textSymbolId,
+        componentID: component.id.Text,
         classNames: Model.classNames(['flex-1']),
         children: [Model.string('Text')],
       }),
   },
   {
-    id: textareaSymbolId,
+    id: component.id.Textarea,
     name: 'Textarea',
     description: 'A text area that the user can type into',
     icon: <InputIcon />,
@@ -299,7 +283,7 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     initialValue: () =>
       Model.primitiveElement({
         name: 'Textarea',
-        componentID: textareaSymbolId,
+        componentID: component.id.Textarea,
         classNames: Model.classNames(['flex-1', 'h-full', 'min-h-0']),
         props: [
           Model.stringProp({ name: 'placeholder', value: 'Placeholder' }),

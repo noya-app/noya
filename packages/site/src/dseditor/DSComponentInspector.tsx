@@ -58,6 +58,7 @@ import {
   createRootGroup,
   createSelectionWithDiff,
   describeDiffItem,
+  getNodeName,
 } from 'noya-component';
 import { DimensionInput, InspectorPrimitives } from 'noya-inspector';
 import { JSONForm } from 'noya-jsonforms';
@@ -75,7 +76,6 @@ import {
 import { DSLayoutTree } from './DSLayoutTree';
 import { exportLayout } from './componentLayout';
 import { enforceSchema, enforceSchemaInDiff } from './layoutSchema';
-import { getNodeName } from './utils/nodeUtils';
 
 type Props = Pick<
   ComponentProps<typeof DSLayoutTree>,

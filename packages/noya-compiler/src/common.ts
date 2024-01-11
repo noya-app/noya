@@ -9,6 +9,7 @@ export type Passthrough = { [passthroughSymbol]: true };
 export type SimpleElement = {
   [simpleElementSymbol]: true;
   name: string;
+  nodePath?: string[];
   accessPath?: string[];
   source?: string;
   props: Record<string, unknown>;

@@ -5,10 +5,10 @@ import {
   NoyaDiff,
   NoyaNode,
   NoyaString,
+  PRIMITIVE_ELEMENT_MAP,
   mapArrayDiff,
 } from 'noya-component';
 import { textSymbolId } from '../ayon/symbols/symbolIds';
-import { PRIMITIVE_ELEMENT_MAP } from './primitiveElements';
 
 export function enforceSchemaInDiff(diff: NoyaDiff): NoyaDiff {
   return {

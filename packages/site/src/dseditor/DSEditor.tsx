@@ -881,10 +881,16 @@ function Playground(
   );
 
   const first50Files = useMemo(() => {
-    const filterRE = new RegExp(filter, 'i');
+    let filterRE: RegExp | undefined;
+
+    try {
+      filterRE = new RegExp(filter, 'i');
+    } catch (e) {
+      filterRE = undefined;
+    }
 
     const entries = Object.entries(props.files ?? {}).filter(
-      ([name]) => !filter || filterRE.test(name),
+      ([name]) => !filter || !filterRE || filterRE.test(name),
     );
 
     return Object.fromEntries(entries.slice(0, 50));
