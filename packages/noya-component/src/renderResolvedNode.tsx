@@ -270,6 +270,12 @@ export function renderResolvedNode({
         };
       }
 
+      // If there's only one child, we unwrap it
+      const preferSingleChild =
+        transformedChildren.length === 1
+          ? transformedChildren[0]
+          : transformedChildren;
+
       return (
         <PrimitiveComponent
           // We use the indexPath as the key, since the element ids aren't stable while
@@ -318,12 +324,12 @@ export function renderResolvedNode({
             element.componentID === component.id.Tag ||
             element.componentID === component.id.Text ||
             element.componentID === component.id.Card) && {
-            children: transformedChildren,
+            children: preferSingleChild,
           })}
           // Components with labels
           {...((element.componentID === component.id.Checkbox ||
             element.componentID === component.id.Radio) && {
-            label: transformedChildren,
+            label: preferSingleChild,
           })}
           {...(element.componentID === component.id.Link && {
             href: '#',
