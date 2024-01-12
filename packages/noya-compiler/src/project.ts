@@ -873,6 +873,7 @@ function compileCSS({
 }) {
   let styleRules: StyleRule[] = [];
   const simpleElementToClassName = new Map<SimpleElement, string>();
+  const existingNames = new Set<string>();
 
   SimpleElementTree.visit(simpleElement, (simple) => {
     if (typeof simple === 'string') return;
@@ -887,8 +888,13 @@ function compileCSS({
       const pathOfNodes = ResolvedHierarchy.accessPath(resolvedNode, indexPath);
 
       const namePath = pathOfNodes.map((n) => getNodeName(n, findComponent));
+      const elementName = namePath[namePath.length - 1];
 
-      const className = [component.name, ...namePath]
+      const className = (
+        !existingNames.has(elementName)
+          ? [component.name, elementName]
+          : [component.name, ...namePath]
+      )
         .map((name) => getComponentNameIdentifier(name, 'kebab'))
         .join('__');
 
@@ -898,13 +904,18 @@ function compileCSS({
         (simple.props.className as string | undefined)?.split(' '),
       );
 
-      const allDeclarations = Object.entries({
+      const allDeclarationsObject = mergeShorthand({
         ...(simple.props.style ?? {}),
         ...convertedFromTailwind,
-      }).map(([key, value]) => {
-        const styleName = styleNameToString(key);
-        return [styleName, value.toString()] as [string, string];
       });
+
+      const allDeclarations = Object.entries(allDeclarationsObject)
+        // Filter undefined values
+        .filter(([, value]) => value !== undefined)
+        .map(([key, value]) => {
+          const styleName = styleNameToString(key);
+          return [styleName, value.toString()] as [string, string];
+        });
 
       styleRules.push({
         selector: `.${className}`,
@@ -924,4 +935,49 @@ function buildStyleSheet(styleRules: StyleRule[]) {
         .join(' ')} }`;
     })
     .join('\n\n');
+}
+
+const shorthandProperties = {
+  padding: [
+    'paddingTop' as const,
+    'paddingRight' as const,
+    'paddingBottom' as const,
+    'paddingLeft' as const,
+  ],
+  margin: [
+    'marginTop' as const,
+    'marginRight' as const,
+    'marginBottom' as const,
+    'marginLeft' as const,
+  ],
+};
+
+type ShorthandProperty = keyof typeof shorthandProperties;
+
+function mergeShorthand(style: CSSProperties): CSSProperties {
+  for (const shorthand in shorthandProperties) {
+    const properties = shorthandProperties[shorthand as ShorthandProperty];
+    const usedProps = (properties as any[]).filter((prop) => prop in style);
+
+    // Only create shorthand if 2 or more properties are used
+    if (usedProps.length >= 2) {
+      const values = properties.map((prop) => style[prop] || '0');
+
+      // Determine the shortest possible shorthand
+      let shorthandValue: string | number = '';
+      if (values[0] === values[2] && values[1] === values[3]) {
+        shorthandValue =
+          values[0] === values[1] ? values[0] : `${values[0]} ${values[1]}`;
+      } else if (values[1] === values[3]) {
+        shorthandValue = `${values[0]} ${values[1]} ${values[2]}`;
+      } else {
+        shorthandValue = values.join(' ');
+      }
+
+      style[shorthand as ShorthandProperty] = shorthandValue;
+      properties.forEach((prop) => delete style[prop]);
+    }
+  }
+
+  return style;
 }

@@ -56,22 +56,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #3b82f633;
   color: #2563ebcc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #fff;
   font-size: 3.75rem;
   line-height: 1;
@@ -80,7 +77,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #fff;
   font-size: 1.875rem;
   line-height: 1;
@@ -89,29 +86,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #3b82f6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -119,14 +113,12 @@ Object {
 }
 ",
   "public/vanilla/blue/dark/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
-  <div class=\\"hero__content__tag\\">New</div>
-  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
-  <span class=\\"hero__content__subtitle\\">
-    Turn great ideas into new possibilities.
-  </span>
-  <div class=\\"hero__content__actions-row\\">
-    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
-    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+  <div class=\\"hero__tag\\">New</div>
+  <span class=\\"hero__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__subtitle\\">Turn great ideas into new possibilities.</span>
+  <div class=\\"hero__actions-row\\">
+    <button class=\\"hero__button\\">Get Started</button>
+    <a class=\\"hero__link\\" href=\\"#\\">
       Learn More
     </a>
   </div>
@@ -160,22 +152,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #3b82f633;
   color: #2563ebcc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #fff;
   font-size: 3.75rem;
   line-height: 1;
@@ -184,7 +173,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #fff;
   font-size: 1.875rem;
   line-height: 1;
@@ -193,29 +182,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #3b82f6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -225,16 +211,14 @@ Object {
   "public/vanilla/blue/dark/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"hero__content\\">
-      <div className=\\"hero__content__tag\\">New</div>
-      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
-      <span className=\\"hero__content__subtitle\\">
+      <div className=\\"hero__tag\\">New</div>
+      <span className=\\"hero__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__subtitle\\">
         Turn great ideas into new possibilities.
       </span>
-      <div className=\\"hero__content__actions-row\\">
-        <button className=\\"hero__content__actions-row__button\\">
-          Get Started
-        </button>
-        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      <div className=\\"hero__actions-row\\">
+        <button className=\\"hero__button\\">Get Started</button>
+        <a className=\\"hero__link\\" href=\\"#\\">
           Learn More
         </a>
       </div>
@@ -277,22 +261,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #bfdbfe33;
   color: #2563ebcc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #000;
   font-size: 3.75rem;
   line-height: 1;
@@ -301,7 +282,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #000;
   font-size: 1.875rem;
   line-height: 1;
@@ -310,29 +291,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #3b82f6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -340,14 +318,12 @@ Object {
 }
 ",
   "public/vanilla/blue/light/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
-  <div class=\\"hero__content__tag\\">New</div>
-  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
-  <span class=\\"hero__content__subtitle\\">
-    Turn great ideas into new possibilities.
-  </span>
-  <div class=\\"hero__content__actions-row\\">
-    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
-    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+  <div class=\\"hero__tag\\">New</div>
+  <span class=\\"hero__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__subtitle\\">Turn great ideas into new possibilities.</span>
+  <div class=\\"hero__actions-row\\">
+    <button class=\\"hero__button\\">Get Started</button>
+    <a class=\\"hero__link\\" href=\\"#\\">
       Learn More
     </a>
   </div>
@@ -381,22 +357,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #bfdbfe33;
   color: #2563ebcc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #000;
   font-size: 3.75rem;
   line-height: 1;
@@ -405,7 +378,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #000;
   font-size: 1.875rem;
   line-height: 1;
@@ -414,29 +387,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #3b82f6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -446,16 +416,14 @@ Object {
   "public/vanilla/blue/light/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"hero__content\\">
-      <div className=\\"hero__content__tag\\">New</div>
-      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
-      <span className=\\"hero__content__subtitle\\">
+      <div className=\\"hero__tag\\">New</div>
+      <span className=\\"hero__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__subtitle\\">
         Turn great ideas into new possibilities.
       </span>
-      <div className=\\"hero__content__actions-row\\">
-        <button className=\\"hero__content__actions-row__button\\">
-          Get Started
-        </button>
-        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      <div className=\\"hero__actions-row\\">
+        <button className=\\"hero__button\\">Get Started</button>
+        <a className=\\"hero__link\\" href=\\"#\\">
           Learn More
         </a>
       </div>
@@ -498,22 +466,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #14b8a633;
   color: #0d9488cc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #fff;
   font-size: 3.75rem;
   line-height: 1;
@@ -522,7 +487,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #fff;
   font-size: 1.875rem;
   line-height: 1;
@@ -531,29 +496,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #14b8a6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -561,14 +523,12 @@ Object {
 }
 ",
   "public/vanilla/teal/dark/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
-  <div class=\\"hero__content__tag\\">New</div>
-  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
-  <span class=\\"hero__content__subtitle\\">
-    Turn great ideas into new possibilities.
-  </span>
-  <div class=\\"hero__content__actions-row\\">
-    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
-    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+  <div class=\\"hero__tag\\">New</div>
+  <span class=\\"hero__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__subtitle\\">Turn great ideas into new possibilities.</span>
+  <div class=\\"hero__actions-row\\">
+    <button class=\\"hero__button\\">Get Started</button>
+    <a class=\\"hero__link\\" href=\\"#\\">
       Learn More
     </a>
   </div>
@@ -602,22 +562,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #14b8a633;
   color: #0d9488cc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #fff;
   font-size: 3.75rem;
   line-height: 1;
@@ -626,7 +583,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #fff;
   font-size: 1.875rem;
   line-height: 1;
@@ -635,29 +592,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #14b8a6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -667,16 +621,14 @@ Object {
   "public/vanilla/teal/dark/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"hero__content\\">
-      <div className=\\"hero__content__tag\\">New</div>
-      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
-      <span className=\\"hero__content__subtitle\\">
+      <div className=\\"hero__tag\\">New</div>
+      <span className=\\"hero__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__subtitle\\">
         Turn great ideas into new possibilities.
       </span>
-      <div className=\\"hero__content__actions-row\\">
-        <button className=\\"hero__content__actions-row__button\\">
-          Get Started
-        </button>
-        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      <div className=\\"hero__actions-row\\">
+        <button className=\\"hero__button\\">Get Started</button>
+        <a className=\\"hero__link\\" href=\\"#\\">
           Learn More
         </a>
       </div>
@@ -719,22 +671,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #99f6e433;
   color: #0d9488cc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #000;
   font-size: 3.75rem;
   line-height: 1;
@@ -743,7 +692,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #000;
   font-size: 1.875rem;
   line-height: 1;
@@ -752,29 +701,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #14b8a6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -782,14 +728,12 @@ Object {
 }
 ",
   "public/vanilla/teal/light/components/hero/html-css/hero.html": "<div class=\\"hero__content\\">
-  <div class=\\"hero__content__tag\\">New</div>
-  <span class=\\"hero__content__title\\">Create, iterate, inspire.</span>
-  <span class=\\"hero__content__subtitle\\">
-    Turn great ideas into new possibilities.
-  </span>
-  <div class=\\"hero__content__actions-row\\">
-    <button class=\\"hero__content__actions-row__button\\">Get Started</button>
-    <a class=\\"hero__content__actions-row__link\\" href=\\"#\\">
+  <div class=\\"hero__tag\\">New</div>
+  <span class=\\"hero__title\\">Create, iterate, inspire.</span>
+  <span class=\\"hero__subtitle\\">Turn great ideas into new possibilities.</span>
+  <div class=\\"hero__actions-row\\">
+    <button class=\\"hero__button\\">Get Started</button>
+    <a class=\\"hero__link\\" href=\\"#\\">
       Learn More
     </a>
   </div>
@@ -823,22 +767,19 @@ Object {
   gap: 1rem;
 }
 
-.hero__content__tag {
+.hero__tag {
   display: inline-flex;
   align-items: center;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
   background-color: #99f6e433;
   color: #0d9488cc;
+  padding: 0.125rem 0.625rem;
 }
 
-.hero__content__title {
+.hero__title {
   color: #000;
   font-size: 3.75rem;
   line-height: 1;
@@ -847,7 +788,7 @@ Object {
   text-align: center;
 }
 
-.hero__content__subtitle {
+.hero__subtitle {
   color: #000;
   font-size: 1.875rem;
   line-height: 1;
@@ -856,29 +797,26 @@ Object {
   text-align: center;
 }
 
-.hero__content__actions-row {
+.hero__actions-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.hero__content__actions-row__button {
+.hero__button {
   appearance: none;
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
   border-radius: 0.375rem;
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
   background-color: #14b8a6;
   color: #fff;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 0.625rem 0.875rem;
 }
 
-.hero__content__actions-row__link {
+.hero__link {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 700;
@@ -888,16 +826,14 @@ Object {
   "public/vanilla/teal/light/components/hero/react-css/hero.tsx": "export default function Hero() {
   return (
     <div className=\\"hero__content\\">
-      <div className=\\"hero__content__tag\\">New</div>
-      <span className=\\"hero__content__title\\">Create, iterate, inspire.</span>
-      <span className=\\"hero__content__subtitle\\">
+      <div className=\\"hero__tag\\">New</div>
+      <span className=\\"hero__title\\">Create, iterate, inspire.</span>
+      <span className=\\"hero__subtitle\\">
         Turn great ideas into new possibilities.
       </span>
-      <div className=\\"hero__content__actions-row\\">
-        <button className=\\"hero__content__actions-row__button\\">
-          Get Started
-        </button>
-        <a className=\\"hero__content__actions-row__link\\" href=\\"#\\">
+      <div className=\\"hero__actions-row\\">
+        <button className=\\"hero__button\\">Get Started</button>
+        <a className=\\"hero__link\\" href=\\"#\\">
           Learn More
         </a>
       </div>
