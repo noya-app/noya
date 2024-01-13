@@ -8,13 +8,13 @@ import {
 import { Sketch } from '@noya-app/noya-file-format';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { debounce } from '@noya-app/noya-utils';
+import { component } from '@noya-design-system/protocol';
 import { useGeneratedComponentNames, useNoyaClient } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import { Model, NoyaNode, primitiveElements } from 'noya-component';
 import { InspectorPrimitives } from 'noya-inspector';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAyonDispatch } from '../../state/ayonState';
-import { boxSymbolId } from '../../symbols/symbolIds';
 import { CustomLayerData } from '../../types';
 
 type Props = {
@@ -212,6 +212,6 @@ function isBoxWithNoChildren(node: NoyaNode) {
   return (
     node.type === 'noyaPrimitiveElement' &&
     node.children.length === 0 &&
-    node.componentID === boxSymbolId
+    node.componentID === component.id.Box
   );
 }

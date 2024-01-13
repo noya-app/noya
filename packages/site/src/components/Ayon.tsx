@@ -22,6 +22,7 @@ import {
 } from '@noya-app/noya-icons';
 import { getCurrentPlatform } from '@noya-app/noya-keymap';
 import { SketchFile } from '@noya-app/noya-sketch-file';
+import { component } from '@noya-design-system/protocol';
 import produce from 'immer';
 import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
@@ -56,7 +57,6 @@ import { Content } from '../ayon/components/Content';
 import { GeneratedLayoutProvider } from '../ayon/components/GeneratedLayoutContext';
 import { ayonReducer } from '../ayon/state/ayonReducer';
 import { useAyonState } from '../ayon/state/ayonState';
-import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { useProject } from '../contexts/ProjectContext';
@@ -151,7 +151,7 @@ function Workspace({
                 setOnboardingStep?.('insertedBlock');
                 dispatch('interaction', [
                   'insert',
-                  { symbolId: boxSymbolId },
+                  { symbolId: component.id.Box },
                   'mouse',
                 ]);
               }}

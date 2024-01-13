@@ -32,8 +32,8 @@ export interface EditBlockActions
 export const createEditBlockInteraction = ({
   inferBlockType,
 }: {
-  inferBlockType: InferBlockType;
-}) =>
+  inferBlockType?: InferBlockType;
+} = {}) =>
   function editBlockInteraction(actions: EditBlockActions) {
     const { startEditingBlock, reset } = actions;
 
@@ -155,8 +155,8 @@ function editBlockSelectionMode(actions: EditBlockActions) {
 function createEditBlockInsertMode({
   inferBlockType,
 }: {
-  inferBlockType: InferBlockType;
-}) {
+  inferBlockType?: InferBlockType;
+} = {}) {
   return (actions: EditBlockActions) => {
     const drawingInteraction = createDrawingInteraction({
       hasMovementThreshold: true,

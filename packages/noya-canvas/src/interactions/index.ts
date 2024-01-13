@@ -19,15 +19,13 @@ import { zoomInteraction } from './zoom';
 
 export namespace Interactions {
   export const focus = focusInteraction;
-  export const createMove = createMoveInteraction;
   export const move = moveInteraction;
   export const marquee = marqueeInteraction;
   export const selection = selectionInteraction;
   export const pan = panInteraction;
-  export const createDrawing = createDrawingInteraction;
-  export const createInsertMode = createInsertModeInteraction;
-  export const createEditBlock = createEditBlockInteraction;
+  export const insertMode = createInsertModeInteraction();
   export const editText = editTextInteraction;
+  export const editBlock = createEditBlockInteraction();
   export const clipboard = clipboardInteraction;
   export const history = historyInteraction;
   export const escape = escapeInteraction;
@@ -37,5 +35,10 @@ export namespace Interactions {
   export const defaultCursor = defaultCursorInteraction;
   export const selectionMode = selectionModeInteraction;
   export const scale = scaleInteraction;
+
   export const createScale = createScaleInteraction;
+  export const createMove = createMoveInteraction;
+  export const createDrawing = createDrawingInteraction;
+  export const createInsertMode = createInsertModeInteraction;
+  export const createEditBlock = createEditBlockInteraction;
 }

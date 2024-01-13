@@ -30,7 +30,6 @@ import React, { memo, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { measureImage } from '../../utils/measureImage';
-import { inferBlockType } from '../infer/inferBlock';
 import { useAyonState } from '../state/ayonState';
 import { CustomLayerData, NodePath, ViewType } from '../types';
 import { createCustomLayerInteraction } from '../utils/customLayerInteraction';
@@ -414,7 +413,7 @@ export const Content = memo(function Content({
                     ? [
                         Interactions.escape,
                         Interactions.clipboard,
-                        Interactions.createEditBlock({ inferBlockType }),
+                        Interactions.editBlock,
                         Interactions.selection,
                         Interactions.marquee,
                       ]
@@ -428,18 +427,17 @@ export const Content = memo(function Content({
                         Interactions.history,
                         Interactions.clipboard,
                         Interactions.editText,
-                        Interactions.createEditBlock({ inferBlockType }),
+                        Interactions.editBlock,
                         Interactions.focus,
                         Interactions.pan,
                         Interactions.scale,
-                        Interactions.createInsertMode({ inferBlockType }),
+                        Interactions.insertMode,
                         Interactions.selection,
                         Interactions.move,
                         Interactions.marquee,
                         Interactions.createDrawing({
                           allowDrawingFromNoneState: false,
                           hasMovementThreshold: true,
-                          inferBlockType,
                           didDrawLayer: (id) => {
                             startRenamingLayer(id);
                           },

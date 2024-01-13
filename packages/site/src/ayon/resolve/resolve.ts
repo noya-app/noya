@@ -1,7 +1,7 @@
 import { Sketch } from '@noya-app/noya-file-format';
 import { encodeQueryParameters, isExternalUrl } from '@noya-app/noya-utils';
+import { component } from '@noya-design-system/protocol';
 import { Layers, Overrides, applyOverrides } from 'noya-state';
-import { imageSymbolId } from '../symbols/symbolIds';
 import { Attribution, RandomImageResolver } from './RandomImageResolver';
 
 // const redirectResolver = new RedirectResolver();
@@ -62,7 +62,7 @@ export function resolveLayer({
 
   const cacheKey = cachePrefix ? `${cachePrefix}@${layerId}` : layerId;
 
-  if (symbolID === imageSymbolId && !isExternalUrl(blockText)) {
+  if (symbolID === component.id.Image && !isExternalUrl(blockText)) {
     const width = frame.width === 0 ? 1024 : frame.width;
     const height = frame.height === 0 ? 1024 : frame.height;
 

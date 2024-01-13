@@ -1,4 +1,5 @@
 import { memoize } from '@noya-app/noya-utils';
+import { component } from '@noya-design-system/protocol';
 import { NoyaAPI } from 'noya-api';
 import {
   LayoutHierarchy,
@@ -14,7 +15,6 @@ import {
   ResolvedHierarchy,
   createSeed,
 } from 'noya-component';
-import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { enforceSchema } from './layoutSchema';
 import { rewriteLayout } from './rewriteLayout';
 
@@ -145,7 +145,7 @@ function convertLayoutToComponent(
   );
 
   if (result.type !== 'noyaPrimitiveElement') {
-    return Model.primitiveElement({ componentID: boxSymbolId });
+    return Model.primitiveElement({ componentID: component.id.Box });
   }
 
   return result;

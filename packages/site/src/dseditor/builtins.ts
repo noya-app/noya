@@ -1,18 +1,13 @@
+import { component } from '@noya-design-system/protocol';
 import { Model, NoyaComponent, added, removed } from 'noya-component';
-import {
-  boxSymbolId,
-  buttonSymbolId,
-  heroSymbolId,
-  heroWithImageSymbolId,
-  linkSymbolId,
-  tagSymbolId,
-  textSymbolId,
-} from '../ayon/symbols/symbolIds';
 
 // const sidebarItemSymbolId = uuid();
 // const sidebarItemActiveVariantId = uuid();
 // const sidebarItemStringId = uuid();
 // const sidebarSymbolId = uuid();
+
+export const heroSymbolId = '61eb943b-7ee7-4b33-9315-aac7cb2d2764';
+export const heroWithImageSymbolId = 'ce98b3b6-b831-43c7-8c87-ea79e20f6601';
 
 export const initialComponents: NoyaComponent[] = [
   // Model.component({
@@ -20,7 +15,7 @@ export const initialComponents: NoyaComponent[] = [
   //   componentID: sidebarItemSymbolId,
   //   rootElement: Model.primitiveElement({
   //     id: 'b',
-  //     componentID: buttonSymbolId,
+  //     componentID: component.id.Button,
   //     children: [
   //       Model.string({
   //         id: sidebarItemStringId,
@@ -59,7 +54,7 @@ export const initialComponents: NoyaComponent[] = [
   //               added(
   //                 Model.primitiveElement({
   //                   id: 'icon',
-  //                   componentID: buttonSymbolId,
+  //                   componentID: component.id.Button,
   //                   classNames: Model.classNames([
   //                     'w-4',
   //                     'h-4',
@@ -81,7 +76,7 @@ export const initialComponents: NoyaComponent[] = [
   //   componentID: sidebarSymbolId,
   //   rootElement: Model.primitiveElement({
   //     id: 'sidebar',
-  //     componentID: boxSymbolId,
+  //     componentID: component.id.Box,
   //     classNames: Model.classNames([
   //       'flex-1',
   //       'flex',
@@ -137,7 +132,7 @@ export const initialComponents: NoyaComponent[] = [
   //             //     {
   //             //       node: Model.primitiveElement({
   //             //         id: 'title',
-  //             //         componentID: textSymbolId,
+  //             //         componentID: component.id.Text,
   //             //         children: [Model.string('Title')],
   //             //         classNames: Model.classNames(['variant-h4']),
   //             //       }),
@@ -166,7 +161,7 @@ export const initialComponents: NoyaComponent[] = [
   //   name: 'Super Sidebar',
   //   componentID: uuid(),
   //   rootElement: Model.primitiveElement({
-  //     componentID: boxSymbolId,
+  //     componentID: component.id.Box,
   //     children: [
   //       Model.compositeElement({
   //         componentID: sidebarSymbolId,
@@ -201,15 +196,15 @@ export const initialComponents: NoyaComponent[] = [
         'flex-1',
         'gap-4',
       ]),
-      componentID: boxSymbolId,
+      componentID: component.id.Box,
       children: [
         Model.primitiveElement({
-          componentID: tagSymbolId,
+          componentID: component.id.Tag,
           children: [Model.string('New')],
         }),
         Model.primitiveElement({
           name: 'Title',
-          componentID: textSymbolId,
+          componentID: component.id.Text,
           children: [Model.string('Create, iterate, inspire.')],
           classNames: Model.classNames([
             'variant-h1',
@@ -219,7 +214,7 @@ export const initialComponents: NoyaComponent[] = [
         }),
         Model.primitiveElement({
           name: 'Subtitle',
-          componentID: textSymbolId,
+          componentID: component.id.Text,
           children: [Model.string('Turn great ideas into new possibilities.')],
           classNames: Model.classNames([
             'variant-h4',
@@ -236,14 +231,14 @@ export const initialComponents: NoyaComponent[] = [
             'gap-4',
             'mt-2',
           ]),
-          componentID: boxSymbolId,
+          componentID: component.id.Box,
           children: [
             Model.primitiveElement({
-              componentID: buttonSymbolId,
+              componentID: component.id.Button,
               children: [Model.string('Get Started')],
             }),
             Model.primitiveElement({
-              componentID: linkSymbolId,
+              componentID: component.id.Link,
               children: [Model.string('Learn More')],
             }),
           ],
@@ -257,7 +252,7 @@ export const initialComponents: NoyaComponent[] = [
     rootElement: Model.primitiveElement({
       id: 'hwiroot',
       name: 'Root',
-      componentID: boxSymbolId,
+      componentID: component.id.Box,
       classNames: Model.classNames([
         'flex-1',
         'grid',
@@ -281,7 +276,7 @@ export const initialComponents: NoyaComponent[] = [
         }),
         Model.primitiveElement({
           name: 'Image',
-          componentID: boxSymbolId,
+          componentID: component.id.Box,
           classNames: Model.classNames(['w-full', 'h-full', 'bg-gray-200']),
         }),
       ],

@@ -1,6 +1,7 @@
 import {
   Button,
   Chip,
+  CompletionItem,
   DividerVertical,
   IconButton,
   Popover,
@@ -11,6 +12,7 @@ import {
 import { Sketch } from '@noya-app/noya-file-format';
 import { transformRect } from '@noya-app/noya-geometry';
 import { ChevronDownIcon } from '@noya-app/noya-icons';
+import { component } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { BlockContent, DrawableLayerType, Layers, Selectors } from 'noya-state';
@@ -21,8 +23,6 @@ import ConfigureBlockTypeWebp from '../../assets/ConfigureBlockType.webp';
 import { OnboardingAnimation } from '../../components/OnboardingAnimation';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { Stacking } from '../stacking';
-import { imageSymbolId } from '../symbols/symbolIds';
-import { getAllInsertableSymbols } from '../symbols/symbols';
 import { SearchCompletionMenu } from './SearchCompletionMenu';
 import { WidgetContainer } from './WidgetContainer';
 
@@ -121,14 +121,7 @@ export const Widget = function Widget({
     state.interactionState.type === 'editingBlock' &&
     state.interactionState.layerId === layer.do_objectID;
 
-  const symbolItems = useMemo(
-    () =>
-      getAllInsertableSymbols(state).map((symbol) => ({
-        name: symbol.name,
-        id: symbol.symbolID,
-      })),
-    [state],
-  );
+  const symbolItems: CompletionItem[] = useMemo(() => [], []);
 
   const [showBlockPicker, setShowBlockPicker] = useState(false);
 
@@ -181,7 +174,7 @@ export const Widget = function Widget({
                       <DividerVertical variant="strong" overflow={4} />
                     }
                   >
-                    {layer.symbolID === imageSymbolId && (
+                    {layer.symbolID === component.id.Image && (
                       <IconButton
                         iconName="UploadIcon"
                         onPointerDown={async (event) => {

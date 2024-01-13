@@ -38,6 +38,7 @@ import {
 } from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { isDeepEqual, uuid } from '@noya-app/noya-utils';
+import { component } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
@@ -72,7 +73,6 @@ import React, {
 import { IndexPath } from 'tree-visit';
 import { z } from 'zod';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
-import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { StyleInputField } from './StyleInputField';
 import { typeItems } from './completionItems';
 import { exportLayout, parseLayoutWithOptions } from './componentLayout';
@@ -205,7 +205,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
 
       const child = createResolvedNode({
         findComponent,
-        node: Model.primitiveElement(boxSymbolId),
+        node: Model.primitiveElement(component.id.Box),
       });
 
       const indexPath = ResolvedHierarchy.findIndexPath(
@@ -600,7 +600,7 @@ export const DSLayoutRow = memo(
             resolvedNodeReducer(resolvedNode, {
               type: 'wrapNode',
               indexPath,
-              primitiveType: boxSymbolId,
+              primitiveType: component.id.Box,
               findComponent,
             }),
           );
@@ -746,7 +746,7 @@ export const DSLayoutRow = memo(
         case 'addChild': {
           const child = createResolvedNode({
             findComponent,
-            node: Model.primitiveElement(boxSymbolId),
+            node: Model.primitiveElement(component.id.Box),
           });
 
           const updated = resolvedNodeReducer(resolvedNode, {

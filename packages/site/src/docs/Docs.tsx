@@ -5,13 +5,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { amplitude } from 'noya-log';
-import React, {
-  ComponentProps,
-  ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef } from 'react';
 import {
   Anchor,
   defaultTheme,
@@ -28,14 +22,11 @@ import {
 } from 'react-guidebook';
 import styled from 'styled-components';
 import guidebook from '../../guidebook';
-import { librarySymbolMap } from '../ayon/symbols/symbols';
 import { Ayon } from '../components/Ayon';
 import { AyonProvider } from '../components/AyonContext';
 import { NavigationLinks } from '../components/NavigationLinks';
 import { Toolbar } from '../components/Toolbar';
-import { BlockGrid } from './BlockGrid';
 import { getHeadTags } from './getHeadTags';
-import { InteractiveBlockPreview } from './InteractiveBlockPreview';
 import { searchPages, searchTextMatch } from './search';
 import { socialConfig } from './socialConfig';
 
@@ -110,18 +101,10 @@ const StyledTable = guidebookStyled(PageComponents.table)({
   marginBottom: 0,
 });
 
-const getSymbolMaster = (symbolId: string) => librarySymbolMap[symbolId];
-
 const MDXComponents = {
   ...PageComponents,
   a: StyledAnchor,
   kbd: InlineCode,
-  InteractiveBlockPreview: (
-    props: ComponentProps<typeof InteractiveBlockPreview>,
-  ) => <InteractiveBlockPreview {...props} getSymbolMaster={getSymbolMaster} />,
-  BlockGrid: (
-    props: ComponentProps<typeof BlockGrid> & { category: string },
-  ) => <BlockGrid {...props} getSymbolMaster={getSymbolMaster} />,
   InlineIcon: ({ name }: { name: keyof typeof Icons }) => {
     const Component = Icons[name];
 

@@ -5,6 +5,7 @@ import {
   createResizeTransform,
 } from '@noya-app/noya-geometry';
 import { useSize } from '@noya-app/react-utils';
+import { component } from '@noya-design-system/protocol';
 import { DS, useNoyaClientOrFallback } from 'noya-api';
 import { useWorkspace } from 'noya-app-state-context';
 import {
@@ -31,7 +32,6 @@ import { DSControlledRenderer } from '../../dseditor/DSControlledRenderer';
 import { IDSRenderer } from '../../dseditor/DSRenderer';
 import { initialComponents } from '../../dseditor/builtins';
 import { useAyonState } from '../state/ayonState';
-import { boxSymbolId, textSymbolId } from '../symbols/symbolIds';
 import { CustomLayerData, NodePath } from '../types';
 import { useManagedLayouts } from './GeneratedLayoutContext';
 
@@ -234,7 +234,7 @@ const DOMRendererContent = memo(
                           node:
                             layer.data.node ??
                             Model.primitiveElement({
-                              componentID: boxSymbolId,
+                              componentID: component.id.Box,
                             }),
                         });
 
@@ -273,7 +273,7 @@ const DOMRendererContent = memo(
 
                           function createPlaceholderNode() {
                             return Model.primitiveElement({
-                              componentID: boxSymbolId,
+                              componentID: component.id.Box,
                               classNames: [
                                 Model.className('flex-1'),
                                 Model.className('flex'),
@@ -285,12 +285,12 @@ const DOMRendererContent = memo(
                               children: [
                                 !layer.name
                                   ? Model.primitiveElement({
-                                      componentID: boxSymbolId,
+                                      componentID: component.id.Box,
                                       children: [],
                                     })
                                   : layer.data.description === undefined
                                   ? Model.primitiveElement({
-                                      componentID: textSymbolId,
+                                      componentID: component.id.Text,
                                       children: [
                                         Model.string(
                                           `Generating ${layer.name} description...`,
@@ -298,7 +298,7 @@ const DOMRendererContent = memo(
                                       ],
                                     })
                                   : Model.primitiveElement({
-                                      componentID: textSymbolId,
+                                      componentID: component.id.Text,
                                       children: [
                                         Model.string(
                                           `Generating ${layer.name} layout...`,

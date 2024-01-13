@@ -1,18 +1,16 @@
-import { Model, NoyaPrimitiveElement, NoyaString } from 'noya-component';
+import { component } from '@noya-design-system/protocol';
 import {
-  boxSymbolId,
-  buttonSymbolId,
-  imageSymbolId,
+  Model,
+  NoyaPrimitiveElement,
+  NoyaString,
   selectOptionSymbolId,
-  selectSymbolId,
-  textSymbolId,
-} from '../../ayon/symbols/symbolIds';
+} from 'noya-component';
 import { enforceSchema } from '../layoutSchema';
 
 describe('none', () => {
   test('removes children', () => {
     const root = Model.primitiveElement({
-      componentID: imageSymbolId,
+      componentID: component.id.Image,
       children: [Model.string({ value: 'foo' })],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
@@ -23,27 +21,27 @@ describe('none', () => {
 describe('nodes', () => {
   test('wraps string child', () => {
     const root = Model.primitiveElement({
-      componentID: boxSymbolId,
+      componentID: component.id.Box,
       children: [Model.string({ value: 'foo' })],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
     expect(result.children.length).toEqual(1);
     expect((result.children[0] as NoyaPrimitiveElement).componentID).toEqual(
-      textSymbolId,
+      component.id.Text,
     );
   });
 });
 
 describe('stringOrNodes', () => {
   test('adds empty string child', () => {
-    const root = Model.primitiveElement({ componentID: buttonSymbolId });
+    const root = Model.primitiveElement({ componentID: component.id.Button });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
     expect(result.children.length).toEqual(1);
   });
 
   test('merges strings', () => {
     const root = Model.primitiveElement({
-      componentID: buttonSymbolId,
+      componentID: component.id.Button,
       children: [
         Model.string({ value: 'foo' }),
         Model.string({ value: 'bar' }),
@@ -56,18 +54,18 @@ describe('stringOrNodes', () => {
 
   test('wraps string child in text element if there is a node', () => {
     const root = Model.primitiveElement({
-      componentID: buttonSymbolId,
+      componentID: component.id.Button,
       children: [
         Model.string({ value: 'foo' }),
         Model.primitiveElement({
-          componentID: imageSymbolId,
+          componentID: component.id.Image,
         }),
       ],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
     expect(result.children.length).toEqual(2);
     expect((result.children[0] as NoyaPrimitiveElement).componentID).toEqual(
-      textSymbolId,
+      component.id.Text,
     );
   });
 });
@@ -75,14 +73,14 @@ describe('stringOrNodes', () => {
 describe('select with option children', () => {
   test('removes non-option child', () => {
     const root = Model.primitiveElement({
-      componentID: selectSymbolId,
+      componentID: component.id.Select,
       children: [
         Model.string({ value: 'foo' }),
         Model.primitiveElement({
           componentID: selectOptionSymbolId,
           children: [],
         }),
-        Model.primitiveElement(boxSymbolId),
+        Model.primitiveElement(component.id.Box),
       ],
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
@@ -96,7 +94,7 @@ describe('select with option children', () => {
 describe('props', () => {
   test('adds image src prop', () => {
     const root = Model.primitiveElement({
-      componentID: imageSymbolId,
+      componentID: component.id.Image,
     });
     const result = enforceSchema(root) as NoyaPrimitiveElement;
     expect(result.props.length).toEqual(1);

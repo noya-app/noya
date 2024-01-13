@@ -1,4 +1,5 @@
 import { partition } from '@noya-app/noya-utils';
+import { component } from '@noya-design-system/protocol';
 import {
   ElementHierarchy,
   Model,
@@ -8,7 +9,6 @@ import {
   PRIMITIVE_ELEMENT_MAP,
   mapArrayDiff,
 } from 'noya-component';
-import { textSymbolId } from '../ayon/symbols/symbolIds';
 
 export function enforceSchemaInDiff(diff: NoyaDiff): NoyaDiff {
   return {
@@ -87,7 +87,7 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
           transformedChildren = transformedChildren.map((node) =>
             node.type === 'noyaString'
               ? Model.primitiveElement({
-                  componentID: textSymbolId,
+                  componentID: component.id.Text,
                   children: [node],
                 })
               : node,
@@ -103,7 +103,7 @@ export function enforceSchema(root: NoyaNode): NoyaNode {
             transformedChildren = transformedChildren.map((node) =>
               node.type === 'noyaString'
                 ? Model.primitiveElement({
-                    componentID: textSymbolId,
+                    componentID: component.id.Text,
                     children: [node],
                   })
                 : node,

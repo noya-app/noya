@@ -17,7 +17,10 @@ import { DownloadIcon, RocketIcon } from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
 import { UTF16, findLast, uuid } from '@noya-app/noya-utils';
 import { useDeepState } from '@noya-app/react-utils';
-import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import {
+  DesignSystemDefinition,
+  component as protocolComponent,
+} from '@noya-design-system/protocol';
 import JavascriptPlayground, { PlaygroundProps } from 'javascript-playgrounds';
 import { useRouter } from 'next/router';
 import { DS, useNoyaClientOrFallback } from 'noya-api';
@@ -45,7 +48,6 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
-import { boxSymbolId } from '../ayon/symbols/symbolIds';
 import { ViewType } from '../ayon/types';
 import { ShareProjectButton } from '../components/ShareMenu';
 import { useProject } from '../contexts/ProjectContext';
@@ -208,7 +210,7 @@ export function DSEditor({
         ...(groupID && groupID !== UNCATEGORIZED && { groupID }),
         componentID: componentID ?? uuid(),
         rootElement: Model.primitiveElement({
-          componentID: boxSymbolId,
+          componentID: protocolComponent.id.Box,
         }),
       });
 

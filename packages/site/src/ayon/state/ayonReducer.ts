@@ -2,6 +2,7 @@ import { Sketch } from '@noya-app/noya-file-format';
 import { Rect, createBounds } from '@noya-app/noya-geometry';
 import { SketchModel } from '@noya-app/noya-sketch-model';
 import { findLast, upperFirst, uuid } from '@noya-app/noya-utils';
+import { component } from '@noya-design-system/protocol';
 import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
 import {
@@ -21,7 +22,6 @@ import {
 } from 'noya-state';
 import { FlattenedLayoutItem } from '../../components/PageSetup';
 import { enforceSchema } from '../../dseditor/layoutSchema';
-import { boxSymbolId } from '../symbols/symbolIds';
 import {
   CustomLayerData,
   LayoutGenerationSource,
@@ -244,7 +244,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (
           description,
           layoutGenerationSource: { name, description },
           node: Model.primitiveElement({
-            componentID: boxSymbolId,
+            componentID: component.id.Box,
             classNames: Model.classNames([
               'flex-1',
               'flex',
@@ -320,7 +320,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (
             data: {
               description: '',
               node: primitiveElements
-                .find((p) => p.id === boxSymbolId)
+                .find((p) => p.id === component.id.Box)
                 ?.initialValue?.(),
             },
           });
@@ -426,7 +426,7 @@ export const ayonReducer: CustomReducer<AyonAction> = (
             suggestedNames: item.componentNames,
             // description: componentName,
             // node: primitiveElements
-            //   .find((p) => p.id === boxSymbolId)
+            //   .find((p) => p.id === component.id.Box)
             //   ?.initialValue?.(),
           },
         });
