@@ -2,13 +2,13 @@ import { memoize, partition } from '@noya-app/noya-utils';
 import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
 import {
   ClassGroupKey,
+  classNameToStyle,
   extractTailwindClassesByBreakpoint,
   filterTailwindClassesByLastInGroup,
+  getClassGroup,
   getLastClassInGroup,
-  getTailwindClassGroup,
   hasClassGroup,
-  isTailwindClassGroup,
-  resolveTailwindClass,
+  isClassGroup,
 } from 'noya-tailwind';
 
 export function rewriteRemoveHiddenElements(layout: LayoutNode) {
@@ -215,7 +215,7 @@ const spacingClassGroups = new Set<ClassGroupKey>([
 export function rewriteConsistentSpacing(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
     return classes.map((name) => {
-      const group = getTailwindClassGroup(name);
+      const group = getClassGroup(name);
 
       if (spacingClassGroups.has(group)) {
         // Replace numeric value
@@ -234,7 +234,7 @@ export function rewriteRootClasses(layout: LayoutNode) {
     // Remove width/height class group (we don't want to overflow the container)
     // Remove position class group (we'll add relative back in)
     classes = classes.filter((name) => {
-      const classGroup = getTailwindClassGroup(name);
+      const classGroup = getClassGroup(name);
       return (
         classGroup !== 'width' &&
         classGroup !== 'height' &&
@@ -340,9 +340,7 @@ export function rewriteForbiddenClassGroups(layout: LayoutNode) {
 
     if (forbiddenGroups) {
       classes = classes.filter((name) => {
-        return !forbiddenGroups.some(
-          (group) => getTailwindClassGroup(name) === group,
-        );
+        return !forbiddenGroups.some((group) => getClassGroup(name) === group);
       });
     }
 
@@ -361,7 +359,7 @@ export function rewriteRemoveUselessClasses(layout: LayoutNode) {
 
       if (name.includes('variant')) return true;
 
-      const resolved = resolveTailwindClass(name);
+      const resolved = classNameToStyle(name);
       return resolved && Object.keys(resolved).length > 0;
     });
   });
@@ -656,7 +654,7 @@ export function rewriteCardPadding(layout: LayoutNode) {
     if (node.tag !== 'Card') return;
 
     // Always use flex as the default
-    classes = classes.filter((name) => !isTailwindClassGroup(name, 'display'));
+    classes = classes.filter((name) => !isClassGroup(name, 'display'));
 
     if (!hasClassGroup('flexDirection', classes)) {
       classes.push('flex-col');
@@ -712,7 +710,7 @@ export function rewriteMarginsInLayoutWithGap(layout: LayoutNode) {
         const { class: class_, ...attributes } = node.attributes;
 
         const updated = parseClasses(class_)
-          .filter((name) => !marginClassGroups.has(getTailwindClassGroup(name)))
+          .filter((name) => !marginClassGroups.has(getClassGroup(name)))
           .join(' ');
 
         return {
@@ -788,7 +786,7 @@ const colorClassGroups = new Set<ClassGroupKey>([
 export function rewriteAutoDarkMode(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
     return classes.flatMap((name) => {
-      const group = getTailwindClassGroup(name);
+      const group = getClassGroup(name);
 
       if (colorClassGroups.has(group)) {
         if (name.match(/black|white/)) {

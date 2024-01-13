@@ -18,11 +18,11 @@ import {
 } from 'noya-component';
 import {
   BreakpointKey,
+  classNamesToStyle,
   extractTailwindClassesByBreakpoint,
   extractTailwindClassesByColorScheme,
   filterTailwindClassesByLastInGroup,
   matchBreakpoint,
-  parametersToTailwindStyle,
   tailwindColors,
 } from 'noya-tailwind';
 import React, { ReactNode } from 'react';
@@ -103,7 +103,7 @@ export function createNoyaDSRenderingContext({
       classNamesByBreakpoint,
     );
 
-    const style = parametersToTailwindStyle(classNamesForCurrentPage);
+    const style = classNamesToStyle(classNamesForCurrentPage);
 
     const stylingProps = {
       // Include all classnames regardless of breakpoint/colorScheme

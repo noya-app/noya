@@ -1,8 +1,8 @@
-import { resolveTailwindClass } from 'noya-tailwind';
+import { classNameToStyle } from 'noya-tailwind';
 import React from 'react';
 
 export function HashtagIcon({ item }: { item: string }) {
-  let resolvedStyle = resolveTailwindClass(item.replace('fill', 'bg'));
+  let resolvedStyle = classNameToStyle(item.replace('fill', 'bg'));
 
   return (
     <div

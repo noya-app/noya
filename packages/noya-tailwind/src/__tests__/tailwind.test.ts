@@ -1,11 +1,8 @@
+import { parseTailwindClass, stringifyTailwindClass } from '../parse';
 import {
+  classNameToStyle,
+  classNamesToStyle,
   filterTailwindClassesByLastInGroup,
-  getBlockClassName,
-  getColor,
-  parametersToTailwindStyle,
-  parseTailwindClass,
-  resolveTailwindClass,
-  simpleAlignmentResolver,
 } from '../tailwind';
 
 describe('parse class name', () => {
@@ -13,6 +10,10 @@ describe('parse class name', () => {
     expect(parseTailwindClass('bg-red-500')).toEqual({
       className: 'bg-red-500',
     });
+
+    expect(stringifyTailwindClass({ className: 'bg-red-500' })).toEqual(
+      'bg-red-500',
+    );
   });
 
   it('opacity', () => {
@@ -20,6 +21,10 @@ describe('parse class name', () => {
       className: 'bg-red-500',
       opacity: '10',
     });
+
+    expect(
+      stringifyTailwindClass({ className: 'bg-red-500', opacity: '10' }),
+    ).toEqual('bg-red-500/10');
   });
 
   it('empty opacity', () => {
@@ -27,6 +32,10 @@ describe('parse class name', () => {
       className: 'bg-red-500',
       opacity: '',
     });
+
+    expect(
+      stringifyTailwindClass({ className: 'bg-red-500', opacity: '' }),
+    ).toEqual('bg-red-500');
   });
 
   it('prefix', () => {
@@ -34,6 +43,10 @@ describe('parse class name', () => {
       className: 'bg-red-500',
       prefix: 'lg',
     });
+
+    expect(
+      stringifyTailwindClass({ className: 'bg-red-500', prefix: 'lg' }),
+    ).toEqual('lg:bg-red-500');
   });
 
   it('opacity with prefix', () => {
@@ -42,320 +55,311 @@ describe('parse class name', () => {
       opacity: '10',
       prefix: 'lg',
     });
+
+    expect(
+      stringifyTailwindClass({
+        className: 'bg-red-500',
+        opacity: '10',
+        prefix: 'lg',
+      }),
+    ).toEqual('lg:bg-red-500/10');
   });
-});
-
-it('only applies last class within a group', () => {
-  expect(getBlockClassName(['bg-red-500', 'bg-blue-500'])).toEqual(
-    'bg-blue-500',
-  );
-});
-
-it('applies one class within every group', () => {
-  expect(getBlockClassName(['text-red-500', 'bg-blue-500'])).toEqual(
-    'text-red-500 bg-blue-500',
-  );
-});
-
-it('gets color', () => {
-  expect(getColor('text-red-500')).toEqual('#ef4444');
-  expect(getColor('text-white')).toEqual('#fff');
 });
 
 describe('resolves styles', () => {
   it('background', () => {
-    expect(resolveTailwindClass('bg-red-500')).toEqual({
+    expect(classNameToStyle('bg-red-500')).toEqual({
       backgroundColor: '#ef4444',
     });
-    expect(resolveTailwindClass('bg-[#000000e5]')).toEqual({
+    expect(classNameToStyle('bg-[#000000e5]')).toEqual({
       backgroundColor: '#000000e5',
     });
-    expect(resolveTailwindClass('bg-red-500/50')).toEqual({
+    expect(classNameToStyle('bg-red-500/50')).toEqual({
       backgroundColor: '#ef44447f',
     });
-    expect(resolveTailwindClass('bg-white/50')).toEqual({
+    expect(classNameToStyle('bg-white/50')).toEqual({
       backgroundColor: '#ffffff7f',
     });
   });
 
   it('blur', () => {
-    expect(resolveTailwindClass('blur')).toEqual({
+    expect(classNameToStyle('blur')).toEqual({
       filter: 'blur(8px)',
     });
-    expect(resolveTailwindClass('blur-sm')).toEqual({
+    expect(classNameToStyle('blur-sm')).toEqual({
       filter: 'blur(4px)',
     });
   });
 
   it('backdrop-blur', () => {
-    expect(resolveTailwindClass('backdrop-blur')).toEqual({
+    expect(classNameToStyle('backdrop-blur')).toEqual({
       backdropFilter: 'blur(8px)',
     });
-    expect(resolveTailwindClass('backdrop-blur-sm')).toEqual({
+    expect(classNameToStyle('backdrop-blur-sm')).toEqual({
       backdropFilter: 'blur(4px)',
     });
   });
 
   it('text color', () => {
-    expect(resolveTailwindClass('text-red-500')).toEqual({
+    expect(classNameToStyle('text-red-500')).toEqual({
       color: '#ef4444',
     });
   });
 
   it('font size', () => {
-    expect(resolveTailwindClass('text-xl')).toEqual({
+    expect(classNameToStyle('text-xl')).toEqual({
       fontSize: '1.25rem',
       lineHeight: '1.75rem',
     });
 
-    expect(resolveTailwindClass('text-xs')).toEqual({
+    expect(classNameToStyle('text-xs')).toEqual({
       fontSize: '0.75rem',
       lineHeight: '1rem',
     });
   });
 
   it('fill color', () => {
-    expect(resolveTailwindClass('fill-red-500')).toEqual({
+    expect(classNameToStyle('fill-red-500')).toEqual({
       fill: '#ef4444',
     });
   });
 
   it('justify', () => {
-    expect(resolveTailwindClass('justify-start')).toEqual({
+    expect(classNameToStyle('justify-start')).toEqual({
       justifyContent: 'start',
     });
 
-    expect(resolveTailwindClass('justify-center')).toEqual({
+    expect(classNameToStyle('justify-center')).toEqual({
       justifyContent: 'center',
     });
   });
 
   it('items', () => {
-    expect(resolveTailwindClass('items-start')).toEqual({
+    expect(classNameToStyle('items-start')).toEqual({
       alignItems: 'start',
     });
-    expect(resolveTailwindClass('items-baseline')).toEqual({
+    expect(classNameToStyle('items-baseline')).toEqual({
       alignItems: 'baseline',
     });
   });
 
   it('gap', () => {
-    expect(resolveTailwindClass('gap-4')).toEqual({
+    expect(classNameToStyle('gap-4')).toEqual({
       gap: '1rem',
     });
   });
 
   it('flex', () => {
-    expect(resolveTailwindClass('flex-1')).toEqual({
+    expect(classNameToStyle('flex-1')).toEqual({
       flex: '1',
     });
   });
 
   it('flexBasis', () => {
-    expect(resolveTailwindClass('basis-20')).toEqual({
+    expect(classNameToStyle('basis-20')).toEqual({
       flexBasis: '5rem',
     });
   });
 
   it('padding', () => {
-    expect(resolveTailwindClass('p-4')).toEqual({
+    expect(classNameToStyle('p-4')).toEqual({
       padding: '1rem',
     });
 
-    expect(resolveTailwindClass('px-4')).toEqual({
+    expect(classNameToStyle('px-4')).toEqual({
       paddingLeft: '1rem',
       paddingRight: '1rem',
     });
   });
 
   it('margin', () => {
-    expect(resolveTailwindClass('m-4')).toEqual({
+    expect(classNameToStyle('m-4')).toEqual({
       margin: '1rem',
     });
 
-    expect(resolveTailwindClass('mx-4')).toEqual({
+    expect(classNameToStyle('mx-4')).toEqual({
       marginLeft: '1rem',
       marginRight: '1rem',
     });
 
-    expect(resolveTailwindClass('mx-auto')).toEqual({
+    expect(classNameToStyle('mx-auto')).toEqual({
       marginLeft: 'auto',
       marginRight: 'auto',
     });
   });
 
   it('shadow', () => {
-    expect(resolveTailwindClass('shadow')).toEqual({
+    expect(classNameToStyle('shadow')).toEqual({
       boxShadow:
         '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
     });
 
-    expect(resolveTailwindClass('shadow-none')).toEqual({
+    expect(classNameToStyle('shadow-none')).toEqual({
       boxShadow: 'none',
     });
 
-    expect(parametersToTailwindStyle(['shadow', 'shadow-red-500'])).toEqual({
+    expect(classNamesToStyle(['shadow', 'shadow-red-500'])).toEqual({
       boxShadow: '0 1px 3px 0 #ef4444, 0 1px 2px -1px #ef4444',
     });
   });
 
   it('borderRadius', () => {
-    expect(resolveTailwindClass('rounded')).toEqual({
+    expect(classNameToStyle('rounded')).toEqual({
       borderRadius: '0.25rem',
     });
 
-    expect(resolveTailwindClass('rounded-2xl')).toEqual({
+    expect(classNameToStyle('rounded-2xl')).toEqual({
       borderRadius: '1rem',
     });
   });
 
   it('borderColor', () => {
-    expect(resolveTailwindClass('border-black')).toEqual({
+    expect(classNameToStyle('border-black')).toEqual({
       borderColor: '#000',
     });
   });
 
   it('width', () => {
-    expect(resolveTailwindClass('w-4')).toEqual({
+    expect(classNameToStyle('w-4')).toEqual({
       width: '1rem',
     });
 
-    expect(resolveTailwindClass('w-full')).toEqual({
+    expect(classNameToStyle('w-full')).toEqual({
       width: '100%',
     });
 
-    expect(resolveTailwindClass('w-1/2')).toEqual({
+    expect(classNameToStyle('w-1/2')).toEqual({
       width: '50%',
     });
 
-    expect(resolveTailwindClass('w-screen')).toEqual({
+    expect(classNameToStyle('w-screen')).toEqual({
       width: '100vw',
     });
   });
 
   it('height', () => {
-    expect(resolveTailwindClass('h-4')).toEqual({
+    expect(classNameToStyle('h-4')).toEqual({
       height: '1rem',
     });
 
-    expect(resolveTailwindClass('h-full')).toEqual({
+    expect(classNameToStyle('h-full')).toEqual({
       height: '100%',
     });
 
-    expect(resolveTailwindClass('h-1/2')).toEqual({
+    expect(classNameToStyle('h-1/2')).toEqual({
       height: '50%',
     });
 
-    expect(resolveTailwindClass('h-0.5')).toEqual({
+    expect(classNameToStyle('h-0.5')).toEqual({
       height: '0.125rem',
     });
 
-    expect(resolveTailwindClass('h-px')).toEqual({
+    expect(classNameToStyle('h-px')).toEqual({
       height: '1px',
     });
   });
 
   it('borderWidth', () => {
-    expect(resolveTailwindClass('border')).toEqual({
+    expect(classNameToStyle('border')).toEqual({
       borderWidth: '1px',
     });
 
-    expect(resolveTailwindClass('border-2')).toEqual({
+    expect(classNameToStyle('border-2')).toEqual({
       borderWidth: '2px',
     });
 
-    expect(resolveTailwindClass('border-x')).toEqual({
+    expect(classNameToStyle('border-x')).toEqual({
       borderLeftWidth: '1px',
       borderRightWidth: '1px',
     });
 
-    expect(resolveTailwindClass('border-x-2')).toEqual({
+    expect(classNameToStyle('border-x-2')).toEqual({
       borderLeftWidth: '2px',
       borderRightWidth: '2px',
     });
   });
 
   it('grid', () => {
-    expect(resolveTailwindClass('grid')).toEqual({
+    expect(classNameToStyle('grid')).toEqual({
       display: 'grid',
     });
 
-    expect(resolveTailwindClass('grid-flow-col')).toEqual({
+    expect(classNameToStyle('grid-flow-col')).toEqual({
       gridAutoFlow: 'column',
     });
 
-    expect(resolveTailwindClass('auto-cols-max')).toEqual({
+    expect(classNameToStyle('auto-cols-max')).toEqual({
       gridAutoColumns: 'max-content',
     });
 
-    expect(resolveTailwindClass('col-span-2')).toEqual({
+    expect(classNameToStyle('col-span-2')).toEqual({
       gridColumn: 'span 2 / span 2',
     });
   });
 
   it('position', () => {
-    expect(resolveTailwindClass('absolute')).toEqual({
+    expect(classNameToStyle('absolute')).toEqual({
       position: 'absolute',
     });
   });
 
   it('top', () => {
-    expect(resolveTailwindClass('top-4')).toEqual({
+    expect(classNameToStyle('top-4')).toEqual({
       top: '1rem',
     });
   });
 
   it('minWidth', () => {
-    expect(resolveTailwindClass('min-w-0')).toEqual({
+    expect(classNameToStyle('min-w-0')).toEqual({
       minWidth: '0px',
     });
   });
 
   it('maxWidth', () => {
-    expect(resolveTailwindClass('max-w-full')).toEqual({
+    expect(classNameToStyle('max-w-full')).toEqual({
       maxWidth: '100%',
     });
   });
 
   it('minHeight', () => {
-    expect(resolveTailwindClass('min-h-0')).toEqual({
+    expect(classNameToStyle('min-h-0')).toEqual({
       minHeight: '0px',
     });
   });
 
   it('maxHeight', () => {
-    expect(resolveTailwindClass('max-h-full')).toEqual({
+    expect(classNameToStyle('max-h-full')).toEqual({
       maxHeight: '100%',
     });
   });
 
   it('lineHeight', () => {
-    expect(resolveTailwindClass('leading-4')).toEqual({
+    expect(classNameToStyle('leading-4')).toEqual({
       lineHeight: '1rem',
     });
 
-    expect(resolveTailwindClass('leading-none')).toEqual({
+    expect(classNameToStyle('leading-none')).toEqual({
       lineHeight: '1',
     });
 
-    expect(resolveTailwindClass('leading-relaxed')).toEqual({
+    expect(classNameToStyle('leading-relaxed')).toEqual({
       lineHeight: '1.625',
     });
   });
 
   it('isolates', () => {
-    expect(resolveTailwindClass('isolate')).toEqual({
+    expect(classNameToStyle('isolate')).toEqual({
       isolation: 'isolate',
     });
   });
 
   it('zIndex', () => {
-    expect(resolveTailwindClass('z-10')).toEqual({
+    expect(classNameToStyle('z-10')).toEqual({
       zIndex: '10',
     });
 
     // negative
-    expect(resolveTailwindClass('-z-10')).toEqual({
+    expect(classNameToStyle('-z-10')).toEqual({
       zIndex: '-10',
     });
   });
@@ -410,33 +414,19 @@ describe('last class in group', () => {
 
 describe('parameters', () => {
   it('basic', () => {
-    expect(
-      parametersToTailwindStyle({
-        'text-red-500': true,
-      }),
-    ).toEqual({
+    expect(classNamesToStyle(['text-red-500'])).toEqual({
       color: '#ef4444',
     });
   });
 
   it('last in group wins', () => {
-    expect(
-      parametersToTailwindStyle({
-        'text-red-500': true,
-        'text-blue-500': true,
-      }),
-    ).toEqual({
+    expect(classNamesToStyle(['text-red-500', 'text-blue-500'])).toEqual({
       color: '#3b82f6',
     });
   });
 
   it('merge', () => {
-    expect(
-      parametersToTailwindStyle({
-        'items-center': true,
-        'justify-center': true,
-      }),
-    ).toEqual({
+    expect(classNamesToStyle(['items-center', 'justify-center'])).toEqual({
       alignItems: 'center',
       justifyContent: 'center',
     });
@@ -444,11 +434,7 @@ describe('parameters', () => {
 
   it('creates gradient', () => {
     expect(
-      parametersToTailwindStyle([
-        'bg-gradient-to-r',
-        'from-red-500',
-        'to-blue-500',
-      ]),
+      classNamesToStyle(['bg-gradient-to-r', 'from-red-500', 'to-blue-500']),
     ).toEqual({
       backgroundImage: 'linear-gradient(to right, #ef4444, #3b82f6)',
     });
@@ -456,7 +442,9 @@ describe('parameters', () => {
 
   it('custom resolver', () => {
     expect(
-      parametersToTailwindStyle({ center: true }, simpleAlignmentResolver),
+      classNamesToStyle(['foo'], {
+        resolve: (c) => (c === 'foo' ? { textAlign: 'center' } : null),
+      }),
     ).toEqual({
       textAlign: 'center',
     });
@@ -464,25 +452,25 @@ describe('parameters', () => {
 
   describe('ring', () => {
     it('default', () => {
-      expect(parametersToTailwindStyle(['ring'])).toEqual({
+      expect(classNamesToStyle(['ring'])).toEqual({
         boxShadow: '0 0 0 3px #3b82f680',
       });
     });
 
     it('width', () => {
-      expect(parametersToTailwindStyle(['ring-2'])).toEqual({
+      expect(classNamesToStyle(['ring-2'])).toEqual({
         boxShadow: '0 0 0 2px #3b82f680',
       });
     });
 
     it('color', () => {
-      expect(parametersToTailwindStyle(['ring', 'ring-blue-500'])).toEqual({
+      expect(classNamesToStyle(['ring', 'ring-blue-500'])).toEqual({
         boxShadow: '0 0 0 3px #3b82f6',
       });
     });
 
     it('inset', () => {
-      expect(parametersToTailwindStyle(['ring', 'ring-inset'])).toEqual({
+      expect(classNamesToStyle(['ring', 'ring-inset'])).toEqual({
         boxShadow: 'inset 0 0 0 3px #3b82f680',
       });
     });

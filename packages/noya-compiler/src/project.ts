@@ -17,7 +17,7 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
-import { parametersToTailwindStyle, tailwindColors } from 'noya-tailwind';
+import { classNamesToStyle, tailwindColors } from 'noya-tailwind';
 import React, {
   CSSProperties,
   ReactElement,
@@ -900,7 +900,7 @@ function compileCSS({
 
       simpleElementToClassName.set(simple, className);
 
-      const convertedFromTailwind = parametersToTailwindStyle(
+      const convertedFromTailwind = classNamesToStyle(
         (simple.props.className as string | undefined)?.split(' '),
       );
 

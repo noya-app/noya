@@ -1,4 +1,4 @@
-import { get, groupBy, memoize } from '@noya-app/noya-utils';
+import { get, memoize } from '@noya-app/noya-utils';
 import {
   ThemeValue,
   config,
@@ -6,210 +6,15 @@ import {
   suggestedTailwindClasses,
 } from 'noya-tailwind';
 import { CSSProperties } from 'react';
+import {
+  getClassGroup,
+  getLastClassInGroup,
+  hasClassGroup,
+} from './classGroup';
+import { parseTailwindClass } from './parse';
 import { tailwindToLinearGradient } from './tailwindGradient';
 
 export const allClassNames = suggestedTailwindClasses;
-
-const allClassNamesSet = new Set(allClassNames);
-
-export function isSupportedTailwindClass(className: string) {
-  return allClassNamesSet.has(className);
-}
-
-const isTextClassRE =
-  /^(text|font|truncate|leading|underline|overline|no-underline|line-through)/;
-const isFillClassRE = /^fill-/;
-
-export const tailwindTextClasses = allClassNames.filter((item) =>
-  isTextClassRE.test(item),
-);
-export const tailwindBlockClasses = allClassNames.filter(
-  (item) => !isTextClassRE.test(item) && !isFillClassRE.test(item),
-);
-
-export function getBlockClassName(hashtags: string[]) {
-  const supportedHashtags = hashtags.filter(isSupportedTailwindClass);
-
-  const groups = groupBy(supportedHashtags, getTailwindClassGroup);
-
-  const hashtagsToApply = Object.entries(groups).flatMap(([name, group]) =>
-    name === 'none' ? group : group.slice(-1),
-  );
-
-  const className = hashtagsToApply.join(' ');
-
-  return className || undefined;
-}
-
-const textAlignKeys = new Set(['left', 'right', 'center']);
-
-export function getTextAlign(hashtags: string[]) {
-  const textAlignKey = hashtags
-    .slice()
-    .reverse()
-    .find((key) => textAlignKeys.has(key)) as
-    | 'left'
-    | 'right'
-    | 'center'
-    | undefined;
-
-  return textAlignKey;
-}
-
-export const classGroups = {
-  appearance: /^appearance-none/,
-  fontSize: /^text-(base|xs|sm|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)/,
-  fontWeight:
-    /^(font-thin|font-extralight|font-light|font-normal|font-medium|font-semibold|font-bold|font-extrabold|font-black)$/,
-  background: /^bg/,
-  backgroundSize: /^bg-(auto|cover|contain)/,
-  backgroundPosition:
-    /^bg-(bottom|center|left|left-bottom|left-top|right|right-bottom|right-top|top)/,
-  blur: /^blur/,
-  backdropFilter: /^backdrop-blur/,
-  gradientDirection: /^bg-gradient-to-/,
-  gradientStopFrom: /^from-/,
-  gradientStopTo: /^to-/,
-  textAlign: /^(text-left|text-center|text-right)/,
-  // From https://github.com/tailwindlabs/tailwindcss/blob/86f9c6f09270a9da6fee77909863444b52e2f9b6/stubs/config.full.js
-  textColor:
-    /^text-(inherit|current|transparent|black|white|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)/,
-  fill: /^fill-/,
-  justify: /^justify/,
-  items: /^items/,
-  width: /^w-/,
-  height: /^h-/,
-  minWidth: /^min-w-/,
-  minHeight: /^min-h-/,
-  maxWidth: /^max-w-/,
-  maxHeight: /^max-h-/,
-  aspectRatio: /^aspect-/,
-  top: /^top-/,
-  right: /^right-/,
-  bottom: /^bottom-/,
-  left: /^left-/,
-  // translate: /^translate-/,
-  // Only handle gap for now. Space-x and space-y are converted to gap.
-  gap: /^(gap-|space-y|space-x)/,
-  padding: /^p-/,
-  paddingX: /^px-/,
-  paddingY: /^py-/,
-  paddingTop: /^pt-/,
-  paddingRight: /^pr-/,
-  paddingBottom: /^pb-/,
-  paddingLeft: /^pl-/,
-  margin: /^m-/,
-  marginX: /^mx-/,
-  marginY: /^my-/,
-  marginTop: /^mt-/,
-  marginRight: /^mr-/,
-  marginBottom: /^mb-/,
-  marginLeft: /^ml-/,
-  flexDirection: /^(flex-row|flex-col)/,
-  flex: /^(flex-1|flex-auto|flex-none)/,
-  flexBasis: /^basis-/,
-  flexWrap: /^(flex-wrap|flex-nowrap)/,
-  grow: /^grow/,
-  shrink: /^shrink/,
-  alignSelf: /^self/,
-  borderRadius: /^rounded/,
-  borderWidth: /^border(-\d+)?$/,
-  borderXWidth: /^border-x(-\d+)?$/,
-  borderYWidth: /^border-y(-\d+)?$/,
-  borderTopWidth: /^border-t(-\d+)?$/,
-  borderRightWidth: /^border-r(-\d+)?$/,
-  borderBottomWidth: /^border-b(-\d+)?$/,
-  borderLeftWidth: /^border-l(-\d+)?$/,
-  borderColor: /^border-[-a-z]+/,
-  ringWidth: /^ring(-\d+)?$/,
-  ringOffsetWidth: /^ring-offset(-\d+)?$/,
-  ringInset: /^ring-inset$/,
-  ringColor: /^ring-(?!inset)[-a-z]+/,
-  textDecoration: /^(underline|overline|no-underline|line-through)/,
-  boxShadow: /^shadow(-(sm|DEFAULT|md|lg|xl|2xl|inner|none))?$/,
-  boxShadowColor: /^shadow-(?!sm|DEFAULT|md|lg|xl|2xl|inner|none)[-0-9a-z]+/,
-  autoCols: /^auto-cols/,
-  autoRows: /^auto-rows/,
-  gridFlow: /^grid-flow/,
-  gridCols: /^grid-cols/,
-  gridColumnSpan: /^col-span-/,
-  lineHeight: /^leading-/,
-  tracking: /^tracking-/,
-  position: /^(absolute|relative|fixed|sticky)/,
-  inset: /^inset-/,
-  opacity: /^opacity-/,
-  objectFit:
-    /^(object-contain|object-cover|object-fill|object-none|object-scale-down)/,
-  objectPosition: /^object-/,
-  overflow: /^overflow-(auto|hidden|visible|scroll)/,
-  overflowX: /^overflow-x-(auto|hidden|visible|scroll)/,
-  overflowY: /^overflow-y-(auto|hidden|visible|scroll)/,
-  isolate: /^(isolate|isolation-auto)/,
-  zIndex: /^-?z-/,
-  display:
-    /^(block|inline-block|inline|flex|inline-flex|table|table-caption|table-cell|table-column|table-column-group|table-footer-group|table-header-group|table-row-group|table-row|flow-root|grid|inline-grid|contents|list-item|hidden)$/,
-  // Must be last!
-  none: /.*/,
-};
-
-export type ClassGroupKey = keyof typeof classGroups;
-
-export function hasClassGroup(group: ClassGroupKey, hashtags: string[]) {
-  return hashtags.some((className) => classGroups[group].test(className));
-}
-
-export function getLastClassInGroup(group: ClassGroupKey, hashtags: string[]) {
-  return hashtags
-    .slice()
-    .reverse()
-    .find((className) => classGroups[group].test(className));
-}
-
-export const getTailwindClassGroup = memoize(
-  (className: string): ClassGroupKey => {
-    const entry = Object.entries(classGroups).find(([, re]) =>
-      re.test(className),
-    )!;
-
-    return entry[0] as ClassGroupKey;
-  },
-);
-
-export const isTailwindClassGroup = memoize(
-  (className: string, group: ClassGroupKey): boolean => {
-    return classGroups[group].test(className);
-  },
-);
-
-export const getTailwindClassesByGroup = memoize((group: ClassGroupKey) => {
-  return allClassNames.filter((className) =>
-    classGroups[group].test(className),
-  );
-});
-
-export function parseTailwindClass(className: string) {
-  const match = className.match(/^(\w+:)?(.*?)(\/\d*)?$/);
-
-  if (!match) return { className };
-
-  const [, prefix, classNameWithoutPrefix, opacity] = match;
-
-  return {
-    className: classNameWithoutPrefix,
-    ...(prefix && { prefix: prefix.slice(0, -1) }),
-    ...(opacity !== undefined && { opacity: opacity.slice(1) }),
-  };
-}
-
-export function stringifyTailwindClass({
-  className,
-  prefix,
-  opacity,
-}: ReturnType<typeof parseTailwindClass>) {
-  return `${prefix ? `${prefix}:` : ''}${className}${
-    opacity ? `/${opacity}` : ''
-  }`;
-}
 
 export const filterTailwindClassesByLastInGroup = memoize(
   (classNames: string[]) => {
@@ -222,7 +27,7 @@ export const filterTailwindClassesByLastInGroup = memoize(
 
     classNames.forEach((className) => {
       const parsed = parseTailwindClass(className);
-      const group = getTailwindClassGroup(parsed.className);
+      const group = getClassGroup(parsed.className);
       const key = parsed.prefix ? `${parsed.prefix}:${group}` : group;
 
       if (parsed.prefix) {
@@ -251,7 +56,7 @@ export const filterTailwindClassesByLastInGroup = memoize(
 );
 
 export const breakpoints = [
-  'none' as const,
+  'base' as const,
   'sm' as const,
   'md' as const,
   'lg' as const,
@@ -261,7 +66,7 @@ export const breakpoints = [
 
 export const colorSchemes = ['light' as const, 'dark' as const];
 
-export type BreakpointKey = (typeof breakpoints)[number] | 'none';
+export type BreakpointKey = (typeof breakpoints)[number] | 'base';
 
 export function matchBreakpoint(width: number): BreakpointKey {
   if (width >= 1536) return '2xl';
@@ -269,7 +74,7 @@ export function matchBreakpoint(width: number): BreakpointKey {
   if (width >= 1024) return 'lg';
   if (width >= 768) return 'md';
   if (width >= 640) return 'sm';
-  return 'none';
+  return 'base';
 }
 
 export const extractTailwindClassesByBreakpoint = (
@@ -350,7 +155,7 @@ function getSpacingValue(className: string): string | undefined {
 
 const customValueRE = /[A-Za-z0-9-]*(?:\[(.*)\])?/;
 
-export function getColor(className: string) {
+function getColor(className: string) {
   const [withoutOpacity, opacity] = className.split('/');
 
   const custom = customValueRE.exec(withoutOpacity)?.[1];
@@ -379,10 +184,10 @@ export function getColor(className: string) {
   return result;
 }
 
-export const resolveTailwindClass = memoize(function resolveTailwindClass(
+export const classNameToStyle = memoize(function classNameToStyle(
   className: string,
 ): CSSProperties | null {
-  const classGroup = getTailwindClassGroup(className);
+  const classGroup = getClassGroup(className);
 
   switch (classGroup) {
     case 'appearance':
@@ -834,36 +639,21 @@ export const resolveTailwindClass = memoize(function resolveTailwindClass(
   return assertNever(classGroup);
 });
 
-export function simpleAlignmentResolver(
-  className: string,
-): CSSProperties | null {
-  switch (className) {
-    case 'center':
-      return { textAlign: 'center' };
-    case 'left':
-      return { textAlign: 'left' };
-    case 'right':
-      return { textAlign: 'right' };
-    default:
-      return null;
-  }
-}
-
-export function parametersToTailwindStyle(
-  parameters?: Record<string, unknown> | string[],
-  resolve?: (className: string) => CSSProperties | null,
+export function classNamesToStyle(
+  classNames?: string[],
+  options: {
+    resolve?: (className: string) => CSSProperties | null;
+  } = {},
 ): CSSProperties {
-  if (!parameters) return {};
+  if (!classNames) return {};
 
-  const classNames = Array.isArray(parameters)
-    ? parameters
-    : Object.keys(parameters);
+  classNames = Array.isArray(classNames) ? classNames : Object.keys(classNames);
 
   let result: CSSProperties = classNames.reduce((result, className) => {
-    let style = resolve?.(className);
+    let style = options.resolve?.(className);
 
     if (!style) {
-      style = resolveTailwindClass(className);
+      style = classNameToStyle(className);
     }
 
     return {
