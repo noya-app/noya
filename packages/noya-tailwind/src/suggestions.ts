@@ -164,6 +164,6 @@ export const context = {
   breakpoints: () => {},
 };
 
-export const suggestedTailwindClasses = generateClasses(context.theme)(
+export const suggestedClasses = generateClasses(context.theme)(
   suggestionPatterns,
 );

@@ -1,4 +1,4 @@
-import { suggestedTailwindClasses } from '../suggestions';
+import { suggestedClasses } from '../suggestions';
 import { config, tailwindColors } from '../tailwind.config';
 
 const context = {
@@ -21,5 +21,5 @@ it('selects theme values', () => {
 });
 
 it('generates default suggestions', () => {
-  expect(suggestedTailwindClasses).toMatchSnapshot();
+  expect(suggestedClasses).toMatchSnapshot();
 });

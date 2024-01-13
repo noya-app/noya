@@ -3,7 +3,7 @@ import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
 import {
   ClassGroupKey,
   classNameToStyle,
-  extractTailwindClassesByBreakpoint,
+  extractClassNames,
   filterTailwindClassesByLastInGroup,
   getClassGroup,
   getLastClassInGroup,
@@ -735,7 +735,7 @@ export function rewriteMarginsInLayoutWithGap(layout: LayoutNode) {
 // Remove any classNames starting with lg:, xl:, and 2xl:.
 export function rewriteBreakpointClasses(layout: LayoutNode) {
   return rewriteClasses(layout, (node, indexPath, classes) => {
-    return extractTailwindClassesByBreakpoint(classes, 'md');
+    return extractClassNames(classes, { breakpoint: 'md' });
   });
 }
 

@@ -1,63 +1,63 @@
-import { parseTailwindClass, stringifyTailwindClass } from '../parse';
 import {
   classNameToStyle,
   classNamesToStyle,
   filterTailwindClassesByLastInGroup,
-} from '../tailwind';
+} from '../compile';
+import { parseTailwindClassName, stringifyTailwindClassName } from '../parse';
 
 describe('parse class name', () => {
   it('basic', () => {
-    expect(parseTailwindClass('bg-red-500')).toEqual({
+    expect(parseTailwindClassName('bg-red-500')).toEqual({
       className: 'bg-red-500',
     });
 
-    expect(stringifyTailwindClass({ className: 'bg-red-500' })).toEqual(
+    expect(stringifyTailwindClassName({ className: 'bg-red-500' })).toEqual(
       'bg-red-500',
     );
   });
 
   it('opacity', () => {
-    expect(parseTailwindClass('bg-red-500/10')).toEqual({
+    expect(parseTailwindClassName('bg-red-500/10')).toEqual({
       className: 'bg-red-500',
       opacity: '10',
     });
 
     expect(
-      stringifyTailwindClass({ className: 'bg-red-500', opacity: '10' }),
+      stringifyTailwindClassName({ className: 'bg-red-500', opacity: '10' }),
     ).toEqual('bg-red-500/10');
   });
 
   it('empty opacity', () => {
-    expect(parseTailwindClass('bg-red-500/')).toEqual({
+    expect(parseTailwindClassName('bg-red-500/')).toEqual({
       className: 'bg-red-500',
       opacity: '',
     });
 
     expect(
-      stringifyTailwindClass({ className: 'bg-red-500', opacity: '' }),
+      stringifyTailwindClassName({ className: 'bg-red-500', opacity: '' }),
     ).toEqual('bg-red-500');
   });
 
   it('prefix', () => {
-    expect(parseTailwindClass('lg:bg-red-500')).toEqual({
+    expect(parseTailwindClassName('lg:bg-red-500')).toEqual({
       className: 'bg-red-500',
       prefix: 'lg',
     });
 
     expect(
-      stringifyTailwindClass({ className: 'bg-red-500', prefix: 'lg' }),
+      stringifyTailwindClassName({ className: 'bg-red-500', prefix: 'lg' }),
     ).toEqual('lg:bg-red-500');
   });
 
   it('opacity with prefix', () => {
-    expect(parseTailwindClass('lg:bg-red-500/10')).toEqual({
+    expect(parseTailwindClassName('lg:bg-red-500/10')).toEqual({
       className: 'bg-red-500',
       opacity: '10',
       prefix: 'lg',
     });
 
     expect(
-      stringifyTailwindClass({
+      stringifyTailwindClassName({
         className: 'bg-red-500',
         opacity: '10',
         prefix: 'lg',

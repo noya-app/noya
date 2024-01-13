@@ -3,7 +3,10 @@ import {
   fuzzyFilter,
 } from '@noya-app/noya-designsystem';
 import { range } from '@noya-app/noya-utils';
-import { parseTailwindClass, stringifyTailwindClass } from 'noya-tailwind';
+import {
+  parseTailwindClassName,
+  stringifyTailwindClassName,
+} from 'noya-tailwind';
 import React, { forwardRef, useMemo } from 'react';
 import { primitiveElementStyleItems, styleItems } from './completionItems';
 
@@ -24,7 +27,7 @@ export const StyleInputField = forwardRef(function StyleInputField(
   const items = useMemo(() => {
     let items = primitiveElementStyleItems[componentID] ?? styleItems;
 
-    const { className, prefix, opacity } = parseTailwindClass(value);
+    const { className, prefix, opacity } = parseTailwindClassName(value);
 
     if (prefix) {
       items = items.map((item) => ({
@@ -37,7 +40,7 @@ export const StyleInputField = forwardRef(function StyleInputField(
     if (opacity !== undefined) {
       const matches = fuzzyFilter({
         items: items.map((item) => item.name),
-        query: stringifyTailwindClass({ className, prefix }),
+        query: stringifyTailwindClassName({ className, prefix }),
       });
 
       if (matches.length > 0) {

@@ -2,7 +2,7 @@ import { CompletionItem } from '@noya-app/noya-designsystem';
 import { StarIcon } from '@noya-app/noya-icons';
 import { range } from '@noya-app/noya-utils';
 import { PRIMITIVE_ELEMENT_MAP, primitiveElements } from 'noya-component';
-import { allClassNames } from 'noya-tailwind';
+import { suggestedClasses } from 'noya-tailwind';
 import React from 'react';
 import { HashtagIcon } from '../ayon/components/inspector/HashtagIcon';
 
@@ -16,7 +16,7 @@ const primaryStyles = [
 ];
 
 export const styleItems = [
-  ...allClassNames.map(
+  ...suggestedClasses.map(
     (item): CompletionItem => ({
       name: item,
       id: item,

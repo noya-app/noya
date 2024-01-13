@@ -1,20 +1,13 @@
 import { get, memoize } from '@noya-app/noya-utils';
-import {
-  ThemeValue,
-  config,
-  context,
-  suggestedTailwindClasses,
-} from 'noya-tailwind';
+import { ThemeValue, config, context } from 'noya-tailwind';
 import { CSSProperties } from 'react';
 import {
   getClassGroup,
   getLastClassInGroup,
   hasClassGroup,
 } from './classGroup';
-import { parseTailwindClass } from './parse';
-import { tailwindToLinearGradient } from './tailwindGradient';
-
-export const allClassNames = suggestedTailwindClasses;
+import { tailwindToLinearGradient } from './gradients';
+import { parseTailwindClassName } from './parse';
 
 export const filterTailwindClassesByLastInGroup = memoize(
   (classNames: string[]) => {
@@ -26,7 +19,7 @@ export const filterTailwindClassesByLastInGroup = memoize(
     const prefixedGroups = new Map<string, Set<string>>();
 
     classNames.forEach((className) => {
-      const parsed = parseTailwindClass(className);
+      const parsed = parseTailwindClassName(className);
       const group = getClassGroup(parsed.className);
       const key = parsed.prefix ? `${parsed.prefix}:${group}` : group;
 
@@ -54,80 +47,6 @@ export const filterTailwindClassesByLastInGroup = memoize(
     );
   },
 );
-
-export const breakpoints = [
-  'base' as const,
-  'sm' as const,
-  'md' as const,
-  'lg' as const,
-  'xl' as const,
-  '2xl' as const,
-];
-
-export const colorSchemes = ['light' as const, 'dark' as const];
-
-export type BreakpointKey = (typeof breakpoints)[number] | 'base';
-
-export function matchBreakpoint(width: number): BreakpointKey {
-  if (width >= 1536) return '2xl';
-  if (width >= 1280) return 'xl';
-  if (width >= 1024) return 'lg';
-  if (width >= 768) return 'md';
-  if (width >= 640) return 'sm';
-  return 'base';
-}
-
-export const extractTailwindClassesByBreakpoint = (
-  classes: string[],
-  breakpoint: BreakpointKey,
-) => {
-  const breakpointIndex = breakpoints.indexOf(breakpoint);
-  const included = breakpoints.slice(0, breakpointIndex + 1);
-  const excluded = breakpoints.slice(breakpointIndex + 1);
-
-  return classes.flatMap((className): string[] => {
-    // If the class starts with a breakpoint in the set, return the class without the breakpoint
-    for (const bp of included) {
-      if (className.startsWith(`${bp}:`)) {
-        return [className.substring(bp.length + 1)];
-      }
-    }
-
-    // If the class starts with a breakpoint not in the set, return nothing
-    for (const bp of excluded) {
-      if (className.startsWith(`${bp}:`)) {
-        return [];
-      }
-    }
-
-    return [className];
-  });
-};
-
-const themes = ['light', 'dark'] as const;
-
-/**
- * Extracts the classes for the given theme. Omits the theme prefix.
- * Omits that are prefixed with a different theme.
- */
-export const extractTailwindClassesByColorScheme = (
-  classes: string[],
-  theme: (typeof themes)[number],
-) => {
-  return classes.flatMap((className): string[] => {
-    if (className.startsWith(`${theme}:`)) {
-      return [className.substring(theme.length + 1)];
-    }
-
-    for (const t of themes) {
-      if (className.startsWith(`${t}:`)) {
-        return [];
-      }
-    }
-
-    return [className];
-  });
-};
 
 function getValue(className: string): string | undefined {
   let value =

@@ -19,8 +19,7 @@ import {
 import {
   BreakpointKey,
   classNamesToStyle,
-  extractTailwindClassesByBreakpoint,
-  extractTailwindClassesByColorScheme,
+  extractClassNames,
   filterTailwindClassesByLastInGroup,
   matchBreakpoint,
   tailwindColors,
@@ -90,17 +89,11 @@ export function createNoyaDSRenderingContext({
 
     const classNames = filterTailwindClassesByLastInGroup(normalizedClassNames);
 
-    const classNamesByColorScheme = extractTailwindClassesByColorScheme(
-      classNames,
-      dsConfig.colorMode ?? 'light',
-    );
-
-    const classNamesByBreakpoint = breakpoint
-      ? extractTailwindClassesByBreakpoint(classNamesByColorScheme, breakpoint)
-      : classNamesByColorScheme;
-
     const classNamesForCurrentPage = filterTailwindClassesByLastInGroup(
-      classNamesByBreakpoint,
+      extractClassNames(classNames, {
+        breakpoint,
+        colorScheme: dsConfig.colorMode ?? 'light',
+      }),
     );
 
     const style = classNamesToStyle(classNamesForCurrentPage);
