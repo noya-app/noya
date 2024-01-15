@@ -5,11 +5,11 @@ import {
   useDesignSystemTheme,
 } from '@noya-app/noya-designsystem';
 import { ChevronDownIcon } from '@noya-app/noya-icons';
+import { tailwindColors } from '@noya-app/noya-tailwind';
 import { upperFirst } from '@noya-app/noya-utils';
 import { produce } from 'immer';
 import { DS } from 'noya-api';
 import { InspectorPrimitives } from 'noya-inspector';
-import { tailwindColors } from 'noya-tailwind';
 import React from 'react';
 import styled from 'styled-components';
 import { ColorModeInput } from './ColorModeInput';

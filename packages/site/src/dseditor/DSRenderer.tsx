@@ -1,5 +1,6 @@
 import { Stack } from '@noya-app/noya-designsystem';
 import { Size } from '@noya-app/noya-geometry';
+import { tailwindColors } from '@noya-app/noya-tailwind';
 import { useDeepState, useStableCallback } from '@noya-app/react-utils';
 import {
   DesignSystemDefinition,
@@ -11,7 +12,6 @@ import {
 } from '@noya-design-system/protocol';
 import { DSConfig, DSSource } from 'noya-api';
 import { loadDesignSystem } from 'noya-module-loader';
-import { tailwindColors } from 'noya-tailwind';
 import React, {
   forwardRef,
   useCallback,

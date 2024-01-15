@@ -1,5 +1,3 @@
-import { memoize, partition } from '@noya-app/noya-utils';
-import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
 import {
   ClassGroupKey,
   classNameToStyle,
@@ -9,7 +7,9 @@ import {
   getLastClassInGroup,
   hasClassGroup,
   isClassGroup,
-} from 'noya-tailwind';
+} from '@noya-app/noya-tailwind';
+import { memoize, partition } from '@noya-app/noya-utils';
+import { LayoutHierarchy, LayoutNode } from 'noya-compiler';
 
 export function rewriteRemoveHiddenElements(layout: LayoutNode) {
   return LayoutHierarchy.map<LayoutNode | string>(

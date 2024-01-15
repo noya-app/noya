@@ -1,4 +1,5 @@
 /* eslint-disable testing-library/render-result-naming-convention */
+import { tailwindColors } from '@noya-app/noya-tailwind';
 import { uuid } from '@noya-app/noya-utils';
 import {
   component,
@@ -21,7 +22,6 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
-import { tailwindColors } from 'noya-tailwind';
 import ts from 'typescript';
 import { clean } from '../clean';
 import { createPassthrough, simpleElement } from '../common';

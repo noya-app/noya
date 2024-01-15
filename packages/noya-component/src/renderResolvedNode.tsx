@@ -1,3 +1,11 @@
+import {
+  BreakpointKey,
+  classNamesToStyle,
+  extractClassNames,
+  filterTailwindClassesByLastInGroup,
+  matchBreakpoint,
+  tailwindColors,
+} from '@noya-app/noya-tailwind';
 import { findLast, unique } from '@noya-app/noya-utils';
 import {
   DesignSystemDefinition,
@@ -16,14 +24,6 @@ import {
   placeholderImage,
   svgToDataUri,
 } from 'noya-component';
-import {
-  BreakpointKey,
-  classNamesToStyle,
-  extractClassNames,
-  filterTailwindClassesByLastInGroup,
-  matchBreakpoint,
-  tailwindColors,
-} from 'noya-tailwind';
 import React, { ReactNode } from 'react';
 import { selectOptionSymbolId } from './primitiveElements';
 import { svgToReactElement } from './renderSVGElement';

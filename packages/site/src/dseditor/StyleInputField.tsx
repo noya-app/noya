@@ -2,11 +2,11 @@ import {
   InputFieldWithCompletions,
   fuzzyFilter,
 } from '@noya-app/noya-designsystem';
-import { range } from '@noya-app/noya-utils';
 import {
   parseTailwindClassName,
   stringifyTailwindClassName,
-} from 'noya-tailwind';
+} from '@noya-app/noya-tailwind';
+import { range } from '@noya-app/noya-utils';
 import React, { forwardRef, useMemo } from 'react';
 import { primitiveElementStyleItems, styleItems } from './completionItems';
 

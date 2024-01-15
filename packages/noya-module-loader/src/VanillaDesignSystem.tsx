@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 /* eslint-disable jsx-a11y/alt-text */
+import { filterTailwindClassesByLastInGroup } from '@noya-app/noya-tailwind';
 import {
   ButtonVariant,
   CheckboxProps,
@@ -10,7 +11,6 @@ import {
   x,
 } from '@noya-design-system/protocol';
 import { DSConfig } from 'noya-api';
-import { filterTailwindClassesByLastInGroup } from 'noya-tailwind';
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 

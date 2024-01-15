@@ -1,4 +1,4 @@
-import { classNameToStyle } from 'noya-tailwind';
+import { classNameToStyle } from '@noya-app/noya-tailwind';
 import React from 'react';
 
 export function HashtagIcon({ item }: { item: string }) {

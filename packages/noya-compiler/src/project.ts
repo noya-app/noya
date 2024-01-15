@@ -1,3 +1,4 @@
+import { classNamesToStyle, tailwindColors } from '@noya-app/noya-tailwind';
 import { isDeepEqual, unique } from '@noya-app/noya-utils';
 import {
   DesignSystemDefinition,
@@ -17,7 +18,6 @@ import {
   renderResolvedNode,
 } from 'noya-component';
 import { loadDesignSystem } from 'noya-module-loader';
-import { classNamesToStyle, tailwindColors } from 'noya-tailwind';
 import React, {
   CSSProperties,
   ReactElement,
