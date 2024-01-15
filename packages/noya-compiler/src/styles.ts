@@ -58,21 +58,6 @@ export function compileCSS({
 
       if (!indexPath) return;
 
-      const pathOfNodes = ResolvedHierarchy.accessPath(resolvedNode, indexPath);
-
-      const namePath = pathOfNodes.map((n) => getNodeName(n, findComponent));
-      const elementName = namePath[namePath.length - 1];
-
-      const className = (
-        !existingNames.has(elementName)
-          ? [component.name, elementName]
-          : [component.name, ...namePath]
-      )
-        .map((name) => getComponentNameIdentifier(name, 'kebab'))
-        .join('__');
-
-      simpleElementToClassName.set(simple, className);
-
       const convertedFromTailwind = classNamesToStyle(
         (simple.props.className as string | undefined)?.split(' '),
       );
@@ -89,6 +74,38 @@ export function compileCSS({
           const styleName = styleNameToString(key);
           return [styleName, value.toString()] as [string, string];
         });
+
+      const pathOfNodes = ResolvedHierarchy.accessPath(resolvedNode, indexPath);
+      const namePath = pathOfNodes.map((n) => getNodeName(n, findComponent));
+      const elementName = namePath[namePath.length - 1];
+
+      const shortClassName = [component.name, elementName]
+        .map((name) => getComponentNameIdentifier(name, 'kebab'))
+        .join('__');
+      const fullClassName = [component.name, ...namePath]
+        .map((name) => getComponentNameIdentifier(name, 'kebab'))
+        .join('__');
+
+      // Check if the declarations are the same. If so, we can reuse the same
+      for (let className of [shortClassName, fullClassName]) {
+        if (existingNames.has(className)) {
+          const existingRule = styleRules.find(
+            (rule) => rule.selector === `.${className}`,
+          );
+
+          if (isDeepEqual(existingRule?.declarations, allDeclarations)) {
+            simpleElementToClassName.set(simple, className);
+            return;
+          }
+        }
+      }
+
+      const className = existingNames.has(shortClassName)
+        ? fullClassName
+        : shortClassName;
+
+      existingNames.add(className);
+      simpleElementToClassName.set(simple, className);
 
       styleRules.push({
         selector: `.${className}`,
