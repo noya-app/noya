@@ -22,6 +22,7 @@ import { clean } from './clean';
 import {
   SimpleElement,
   SimpleElementTree,
+  createPassthrough,
   getComponentNameIdentifier,
   isPassthrough,
   sortFiles,
@@ -36,7 +37,7 @@ export type ExportType =
   | 'html-tailwind'
   | 'react'
   | 'react-css'
-  // | 'react-css-modules'
+  | 'react-css-modules'
   | 'react-tailwind';
 
 export type ExportMap = Partial<Record<ExportType, Record<string, string>>>;
@@ -303,19 +304,21 @@ export function createReactCSSExport({
   resolvedNode,
   findComponent,
   imports,
+  mode,
 }: {
   component: NoyaComponent;
   simpleElement: SimpleElement;
   resolvedNode: NoyaResolvedNode;
   findComponent: FindComponent;
   imports: ts.ImportDeclaration[];
+  mode: 'css-modules' | 'css';
 }): Record<string, string> {
   const { styleRules, simpleElementToClassName } = compileCSS({
     simpleElement,
     component,
     resolvedNode,
     findComponent,
-    mode: 'css',
+    mode,
   });
 
   const cleanedSimpleElement = SimpleElementTree.map<
@@ -328,9 +331,28 @@ export function createReactCSSExport({
 
     const { style, ...props } = node.props;
 
+    if (!className) {
+      return {
+        ...node,
+        props,
+        children: transformedChildren,
+      };
+    }
+
     return {
       ...node,
-      props: { ...props, className },
+      props: {
+        ...props,
+        className:
+          mode === 'css-modules'
+            ? createPassthrough(
+                ts.factory.createPropertyAccessExpression(
+                  ts.factory.createIdentifier('styles'),
+                  ts.factory.createIdentifier(className ?? '_'),
+                ),
+              )
+            : className,
+      },
       children: transformedChildren,
     };
   }) as SimpleElement;
@@ -340,14 +362,25 @@ export function createReactCSSExport({
     createElementCode(cleanedSimpleElement),
   );
 
-  const source = [print(imports), print(func)].map(clean).join('\n');
+  const cssFileName =
+    getComponentNameIdentifier(component.name, 'kebab') +
+    (mode === 'css-modules' ? '.module' : '') +
+    '.css';
+
+  const source = [
+    print(imports),
+    mode === 'css-modules'
+      ? `import styles from './${cssFileName}'`
+      : `import './${cssFileName}'`,
+    print(func),
+  ]
+    .map(clean)
+    .join('\n');
 
   return {
     [getComponentNameIdentifier(component.name, 'kebab') + '.tsx']:
       source.trim(),
-    [getComponentNameIdentifier(component.name, 'kebab') + '.css']: formatCSS(
-      buildStyleSheet(styleRules),
-    ),
+    [cssFileName]: formatCSS(buildStyleSheet(styleRules)),
   };
 }
 
@@ -379,6 +412,7 @@ function createExport({
           source,
         });
         break;
+      case 'react-css-modules':
       case 'react-css':
         exportMap[exportType] = createReactCSSExport({
           component,
@@ -386,6 +420,7 @@ function createExport({
           resolvedNode,
           findComponent,
           imports,
+          mode: exportType === 'react-css-modules' ? 'css-modules' : 'css',
         });
         break;
       case 'html-tailwind':

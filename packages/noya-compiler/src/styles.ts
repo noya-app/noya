@@ -75,15 +75,29 @@ export function compileCSS({
           return [styleName, value.toString()] as [string, string];
         });
 
+      // If the declarations are empty, we can skip this node
+      if (allDeclarations.length === 0) return;
+
       const pathOfNodes = ResolvedHierarchy.accessPath(resolvedNode, indexPath);
       const namePath = pathOfNodes.map((n) => getNodeName(n, findComponent));
       const elementName = namePath[namePath.length - 1];
 
-      const shortClassName = [component.name, elementName]
-        .map((name) => getComponentNameIdentifier(name, 'kebab'))
+      const modulePrefix = mode === 'css-modules' ? [] : [component.name];
+      const shortClassName = [...modulePrefix, elementName]
+        .map((name) =>
+          getComponentNameIdentifier(
+            name,
+            mode === 'css-modules' ? 'camel' : 'kebab',
+          ),
+        )
         .join('__');
-      const fullClassName = [component.name, ...namePath]
-        .map((name) => getComponentNameIdentifier(name, 'kebab'))
+      const fullClassName = [...modulePrefix, ...namePath]
+        .map((name) =>
+          getComponentNameIdentifier(
+            name,
+            mode === 'css-modules' ? 'camel' : 'kebab',
+          ),
+        )
         .join('__');
 
       // Check if the declarations are the same. If so, we can reuse the same

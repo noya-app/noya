@@ -64,12 +64,13 @@ export function simpleElement<
 // Convert from a human-readable name like "Hero with Image" to pascal case "HeroWithImage"
 export function getComponentNameIdentifier(
   name: string,
-  format: 'pascal' | 'kebab' = 'pascal',
+  format: 'pascal' | 'kebab' | 'camel' = 'pascal',
 ) {
   return name
     .split(' ')
-    .map((word) => {
+    .map((word, index) => {
       if (format === 'kebab') return word.toLowerCase();
+      if (index === 0 && format === 'camel') return word.toLowerCase();
       return word[0].toUpperCase() + word.slice(1);
     })
     .join(format === 'kebab' ? '-' : '')

@@ -70,7 +70,7 @@ export function compile(configuration: CompilerConfiguration) {
                   'html-css',
                   'html-tailwind',
                   'react-css',
-                  // 'react-css-modules',
+                  'react-css-modules',
                   'react-tailwind',
                 ]
               : libraryName.endsWith('chakra')
