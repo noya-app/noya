@@ -1416,31 +1416,13 @@ export default config
 `;
 
 exports[`renders classnames 1`] = `
-"<Box className=\\"flex flex-col items-center justify-center p-10 flex-1 gap-4\\">
-  <Tag>New</Tag>
-  <Text fontSize=\\"5xl\\" className=\\"leading-none text-center\\">
-    Create, iterate, inspire.
-  </Text>
-  <Text fontSize=\\"2xl\\" className=\\"leading-none text-center\\">
-    Turn great ideas into new possibilities.
-  </Text>
-  <Box className=\\"flex items-center gap-4 mt-2\\">
-    <Button>Get Started</Button>
-    <Link href=\\"#\\">Learn More</Link>
-  </Box>
-</Box>;
-"
-`;
-
-exports[`renders default 1`] = `
-"<Box
-  display=\\"flex\\"
-  flexDirection=\\"column\\"
-  alignItems=\\"center\\"
-  justifyContent=\\"center\\"
-  p=\\"2.5rem\\"
+"<Flex
+  p=\\"10\\"
   flex=\\"1\\"
-  gap=\\"1rem\\"
+  gap=\\"4\\"
+  direction=\\"column\\"
+  align=\\"center\\"
+  justify=\\"center\\"
 >
   <Tag>New</Tag>
   <Text fontSize=\\"5xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
@@ -1449,11 +1431,35 @@ exports[`renders default 1`] = `
   <Text fontSize=\\"2xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
     Turn great ideas into new possibilities.
   </Text>
-  <Box display=\\"flex\\" alignItems=\\"center\\" gap=\\"1rem\\" mt=\\"0.5rem\\">
+  <Flex gap=\\"4\\" mt=\\"2\\" align=\\"center\\">
     <Button>Get Started</Button>
     <Link href=\\"#\\">Learn More</Link>
-  </Box>
-</Box>;
+  </Flex>
+</Flex>;
+"
+`;
+
+exports[`renders default 1`] = `
+"<Flex
+  p=\\"10\\"
+  flex=\\"1\\"
+  gap=\\"4\\"
+  direction=\\"column\\"
+  align=\\"center\\"
+  justify=\\"center\\"
+>
+  <Tag>New</Tag>
+  <Text fontSize=\\"5xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+    Create, iterate, inspire.
+  </Text>
+  <Text fontSize=\\"2xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+    Turn great ideas into new possibilities.
+  </Text>
+  <Flex gap=\\"4\\" mt=\\"2\\" align=\\"center\\">
+    <Button>Get Started</Button>
+    <Link href=\\"#\\">Learn More</Link>
+  </Flex>
+</Flex>;
 "
 `;
 
