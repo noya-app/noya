@@ -1,5 +1,7 @@
 import { memoize } from '@noya-app/noya-utils';
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import React, { isValidElement } from 'react';
+import { defineTree } from 'tree-visit';
 
 const passthroughSymbol = Symbol('passthrough');
 const simpleElementSymbol = Symbol('simpleElement');
@@ -15,6 +17,19 @@ export type SimpleElement = {
   props: Record<string, unknown>;
   children: (SimpleElement | string | Passthrough)[];
 };
+
+const getSimpleElementChildren = (
+  element: SimpleElement['children'][number],
+): SimpleElement['children'] => {
+  if (isPassthrough(element) || typeof element === 'string') return [];
+
+  return [
+    ...element.children,
+    ...Object.values(element.props).filter(isSimpleElement),
+  ];
+};
+
+export const SimpleElementTree = defineTree(getSimpleElementChildren);
 
 export function isPassthrough(
   value: unknown,
@@ -90,3 +105,56 @@ export const buildNamespaceMap = memoize(function buildNamespaceMap(
 
   return namespaceMap;
 });
+
+export function sortFiles(
+  files: Record<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(files).sort(([a], [b]) => {
+      // First compare the directory depth
+      const depthA = a.split('/').length;
+      const depthB = b.split('/').length;
+
+      if (depthA !== depthB) return depthA - depthB;
+
+      return a.localeCompare(b);
+    }),
+  );
+}
+export function findElementNameAndSource(
+  element: React.ReactNode,
+  DesignSystem: DesignSystemDefinition,
+  namespaceMap: Map<unknown, NamespaceItem>,
+):
+  | {
+      name: string;
+      element: React.ReactElement;
+      source?: string;
+      accessPath?: string[];
+    }
+  | undefined {
+  if (!React.isValidElement(element)) return;
+
+  // This is a DOM element
+  if (typeof element.type === 'string') {
+    return { name: element.type, element };
+  }
+
+  // This is a component exported directly from the design system
+  const namespaceItem = namespaceMap.get(element.type);
+
+  if (namespaceItem) {
+    return { ...namespaceItem, element };
+  }
+
+  const protocolComponent = Object.values(DesignSystem.components).find(
+    (value) => value === element.type,
+  );
+
+  // This is an adapter function that returns a DOM or design system component
+  const libraryElement = protocolComponent?.(element.props);
+
+  if (!isValidElement(libraryElement)) return;
+
+  return findElementNameAndSource(libraryElement, DesignSystem, namespaceMap);
+}

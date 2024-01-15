@@ -18,18 +18,10 @@ Array [
   "src/app/chakra/teal/light/components/globals.css",
   "src/app/chakra/teal/light/components/layout.tsx",
   "src/app/chakra/teal/light/components/theme.ts",
-  "public/chakra/blue/dark/components/hero/react-css/hero.css",
-  "public/chakra/blue/dark/components/hero/react-css/hero.tsx",
-  "public/chakra/blue/dark/components/hero/react-tailwind/hero.tsx",
-  "public/chakra/blue/light/components/hero/react-css/hero.css",
-  "public/chakra/blue/light/components/hero/react-css/hero.tsx",
-  "public/chakra/blue/light/components/hero/react-tailwind/hero.tsx",
-  "public/chakra/teal/dark/components/hero/react-css/hero.css",
-  "public/chakra/teal/dark/components/hero/react-css/hero.tsx",
-  "public/chakra/teal/dark/components/hero/react-tailwind/hero.tsx",
-  "public/chakra/teal/light/components/hero/react-css/hero.css",
-  "public/chakra/teal/light/components/hero/react-css/hero.tsx",
-  "public/chakra/teal/light/components/hero/react-tailwind/hero.tsx",
+  "public/chakra/blue/dark/components/hero/react/hero.tsx",
+  "public/chakra/blue/light/components/hero/react/hero.tsx",
+  "public/chakra/teal/dark/components/hero/react/hero.tsx",
+  "public/chakra/teal/light/components/hero/react/hero.tsx",
   "src/app/chakra/blue/dark/components/hero/page.tsx",
   "src/app/chakra/blue/light/components/hero/page.tsx",
   "src/app/chakra/teal/dark/components/hero/page.tsx",
@@ -908,8 +900,18 @@ export default function Page() {
       <h1 className=\\"text-4xl\\">Public</h1>
       <ul>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-tailwind/hero.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-tailwind/hero.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-tailwind/hero.html
           </a>
         </li>
         <li>
@@ -923,38 +925,8 @@ export default function Page() {
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-tailwind/hero.html\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-tailwind/hero.html
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.html\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.html
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/html-css/hero.css
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-tailwind/hero.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-tailwind/hero.tsx
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.tsx
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.css
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-tailwind/hero.html\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-tailwind/hero.html
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/light/components/hero/react-tailwind/hero.tsx
           </a>
         </li>
         <li>
@@ -968,23 +940,23 @@ export default function Page() {
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/html-tailwind/hero.html
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.tsx
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.css
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-css/hero.css
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-tailwind/hero.html\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-tailwind/hero.html
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/light/components/hero/react-tailwind/hero.tsx
           </a>
         </li>
         <li>
@@ -998,8 +970,38 @@ export default function Page() {
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/html-tailwind/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-css/hero.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/teal/dark/components/hero/react-tailwind/hero.tsx
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.html
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.css\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.css
+          </a>
+        </li>
+        <li>
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-tailwind/hero.html\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-tailwind/hero.html
           </a>
         </li>
         <li>
@@ -1013,18 +1015,8 @@ export default function Page() {
           </a>
         </li>
         <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-tailwind/hero.html\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-tailwind/hero.html
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.html\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.html
-          </a>
-        </li>
-        <li>
-          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.css\\">
-            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/html-css/hero.css
+          <a href=\\"/__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx\\">
+            /__NOYA_REPLACE_BASE_PATH__/vanilla/blue/dark/components/hero/react-tailwind/hero.tsx
           </a>
         </li>
       </ul>
