@@ -198,7 +198,6 @@ export const ControlledFrame = memo(
       }
     });
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
 </body>
 `;
 
