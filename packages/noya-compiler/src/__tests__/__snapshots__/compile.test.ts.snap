@@ -1805,10 +1805,24 @@ exports[`renders classnames 1`] = `
   justify=\\"center\\"
 >
   <Tag>New</Tag>
-  <Heading as=\\"h1\\" fontSize=\\"6xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  <Heading
+    as=\\"h1\\"
+    fontSize=\\"6xl\\"
+    fontWeight=\\"bold\\"
+    letterSpacing=\\"tight\\"
+    lineHeight=\\"1\\"
+    textAlign=\\"center\\"
+  >
     Create, iterate, inspire.
   </Heading>
-  <Heading as=\\"h4\\" fontSize=\\"3xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  <Heading
+    as=\\"h4\\"
+    fontSize=\\"3xl\\"
+    fontWeight=\\"bold\\"
+    letterSpacing=\\"tight\\"
+    lineHeight=\\"1\\"
+    textAlign=\\"center\\"
+  >
     Turn great ideas into new possibilities.
   </Heading>
   <Flex gap=\\"4\\" mt=\\"2\\" align=\\"center\\">
@@ -1829,10 +1843,24 @@ exports[`renders default 1`] = `
   justify=\\"center\\"
 >
   <Tag>New</Tag>
-  <Heading as=\\"h1\\" fontSize=\\"6xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  <Heading
+    as=\\"h1\\"
+    fontSize=\\"6xl\\"
+    fontWeight=\\"bold\\"
+    letterSpacing=\\"tight\\"
+    lineHeight=\\"1\\"
+    textAlign=\\"center\\"
+  >
     Create, iterate, inspire.
   </Heading>
-  <Heading as=\\"h4\\" fontSize=\\"3xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  <Heading
+    as=\\"h4\\"
+    fontSize=\\"3xl\\"
+    fontWeight=\\"bold\\"
+    letterSpacing=\\"tight\\"
+    lineHeight=\\"1\\"
+    textAlign=\\"center\\"
+  >
     Turn great ideas into new possibilities.
   </Heading>
   <Flex gap=\\"4\\" mt=\\"2\\" align=\\"center\\">
