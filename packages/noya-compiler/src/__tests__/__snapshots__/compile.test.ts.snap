@@ -1805,12 +1805,12 @@ exports[`renders classnames 1`] = `
   justify=\\"center\\"
 >
   <Tag>New</Tag>
-  <Text fontSize=\\"5xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  <Heading as=\\"h1\\" fontSize=\\"6xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
     Create, iterate, inspire.
-  </Text>
-  <Text fontSize=\\"2xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  </Heading>
+  <Heading as=\\"h4\\" fontSize=\\"3xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
     Turn great ideas into new possibilities.
-  </Text>
+  </Heading>
   <Flex gap=\\"4\\" mt=\\"2\\" align=\\"center\\">
     <Button>Get Started</Button>
     <Link href=\\"#\\">Learn More</Link>
@@ -1829,12 +1829,12 @@ exports[`renders default 1`] = `
   justify=\\"center\\"
 >
   <Tag>New</Tag>
-  <Text fontSize=\\"5xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  <Heading as=\\"h1\\" fontSize=\\"6xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
     Create, iterate, inspire.
-  </Text>
-  <Text fontSize=\\"2xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
+  </Heading>
+  <Heading as=\\"h4\\" fontSize=\\"3xl\\" lineHeight=\\"1\\" textAlign=\\"center\\">
     Turn great ideas into new possibilities.
-  </Text>
+  </Heading>
   <Flex gap=\\"4\\" mt=\\"2\\" align=\\"center\\">
     <Button>Get Started</Button>
     <Link href=\\"#\\">Learn More</Link>

@@ -102,6 +102,8 @@ const proxyObject = new Proxy(
           : []),
         ...(variant === 'outline'
           ? [
+              `bg-white`,
+              `dark:bg-neutral-900`,
               `ring-1`,
               `ring-${config.colors.primary}-500`,
               `text-${config.colors.primary}-500`,
@@ -144,6 +146,13 @@ const proxyObject = new Proxy(
           ...(props.variant === 'h6'
             ? ['text-xl', 'font-semibold', 'tracking-tight']
             : []),
+          ...(props.variant === 'subtitle1'
+            ? ['text-lg', 'font-semibold']
+            : []),
+          ...(props.variant === 'subtitle2' ? ['font-semibold'] : []),
+          ...(props.variant === 'body1' ? ['text-lg', 'leading-relaxed'] : []),
+          ...(props.variant === 'body2' ? ['leading-relaxed'] : []),
+          ...(props.variant === 'caption1' ? ['text-sm'] : []),
         ].filter(Boolean),
       );
 
