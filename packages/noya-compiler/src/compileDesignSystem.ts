@@ -1,5 +1,11 @@
 import { tailwindColors } from '@noya-app/noya-tailwind';
-import { Theme } from '@noya-design-system/protocol';
+import {
+  DesignSystemDefinition,
+  Theme,
+  component,
+  transform,
+} from '@noya-design-system/protocol';
+import { DSConfig } from 'noya-api';
 import {
   FindComponent,
   NoyaComponent,
@@ -8,12 +14,11 @@ import {
   createResolvedNode,
   renderResolvedNode,
 } from 'noya-component';
-import React, { ReactElement } from 'react';
+import React, { CSSProperties, ReactElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import ts from 'typescript';
 import {
   createElementCode,
-  createLayoutSource,
   createReactComponentDeclaration,
   createSimpleElement,
   extractImports,
@@ -25,6 +30,7 @@ import {
   createPassthrough,
   getComponentNameIdentifier,
   isPassthrough,
+  isSimpleElement,
   sortFiles,
 } from './common';
 import { generateThemeFile } from './compileTheme';
@@ -44,6 +50,7 @@ export type ExportMap = Partial<Record<ExportType, Record<string, string>>>;
 
 export type CompileDesignSystemConfiguration = ResolvedCompilerConfiguration & {
   includeTailwindBase: boolean;
+  spreadTheme: boolean;
   exportTypes: ExportType[];
 };
 
@@ -173,6 +180,7 @@ export function compileDesignSystem(
 
   const layoutSource = createLayoutSource({
     DesignSystem,
+    spreadTheme: configuration.spreadTheme,
     _noya: createNoyaDSRenderingContext({
       theme,
       dsConfig: configuration.ds.config,
@@ -441,4 +449,129 @@ function createExport({
   }
 
   return exportMap;
+}
+
+export function createLayoutSource({
+  DesignSystem,
+  _noya,
+  spreadTheme,
+}: {
+  DesignSystem: DesignSystemDefinition;
+  _noya: { theme: Theme; dsConfig: DSConfig };
+  spreadTheme: boolean;
+}): {
+  source: string;
+} {
+  const cssImport = "import './globals.css'";
+
+  const defaultLayout = `${cssImport}
+
+export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
+  return children;
+}
+`;
+
+  const providerElement = DesignSystem.components[component.id.Provider]
+    ? DesignSystem.components[component.id.Provider]({
+        theme: createPassthrough(
+          spreadTheme
+            ? transform({ theme: _noya.theme }, DesignSystem.themeTransformer)
+            : ts.factory.createIdentifier('theme'),
+        ),
+        children: createPassthrough(
+          ts.factory.createJsxExpression(
+            undefined,
+            ts.factory.createPropertyAccessExpression(
+              ts.factory.createIdentifier('props'),
+              ts.factory.createIdentifier('children'),
+            ),
+          ),
+        ),
+        ...(_noya && { _noya }),
+      })
+    : null;
+
+  const nextProviderElement = DesignSystem.components[component.id.NextProvider]
+    ? DesignSystem.components[component.id.NextProvider]({
+        children: providerElement,
+        ...(_noya && { _noya }),
+      })
+    : providerElement;
+
+  if (!nextProviderElement) return { source: defaultLayout };
+
+  const layoutElement = createSimpleElement(nextProviderElement, DesignSystem);
+
+  if (!layoutElement) return { source: defaultLayout };
+
+  const fonts = SimpleElementTree.reduce<string[]>(
+    layoutElement,
+    (result, node) => {
+      if (!isSimpleElement(node)) return result;
+
+      const style = node.props.style as CSSProperties | undefined;
+      const fontFamily = style?.fontFamily;
+
+      if (!fontFamily) return result;
+
+      delete style.fontFamily;
+
+      node.props.className = createPassthrough(
+        ts.factory.createPropertyAccessExpression(
+          ts.factory.createIdentifier('font' + fontFamily),
+          ts.factory.createIdentifier('className'),
+        ),
+      );
+
+      return [...result, fontFamily];
+    },
+    [],
+  );
+
+  const layoutComponentFunc = createReactComponentDeclaration(
+    'NextProvider',
+    createElementCode(layoutElement),
+    [
+      ts.factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        ts.factory.createIdentifier('props'),
+        undefined,
+        // Type React.PropsWithChildren<{}>
+        ts.factory.createTypeReferenceNode(
+          ts.factory.createIdentifier('React.PropsWithChildren'),
+          [
+            // Empty object type
+            ts.factory.createTypeLiteralNode([]),
+          ],
+        ),
+        undefined,
+      ),
+    ],
+  );
+
+  const layoutImports = extractImports(layoutElement, DesignSystem);
+
+  const layoutSource = [
+    "'use client'",
+    [
+      cssImport,
+      "import React from 'react'",
+      print(layoutImports),
+      ...(fonts.length > 0
+        ? [`import { ${fonts.join(', ')} } from "next/font/google";`]
+        : []),
+      ...(spreadTheme ? [] : ['import { theme } from "./theme"']),
+    ].join('\n'),
+    ...fonts.map(
+      (font) => `const font${font} = ${font}({ subsets: ["latin"] })`,
+    ),
+    print(layoutComponentFunc),
+  ]
+    .map(clean)
+    .join('\n');
+
+  return {
+    source: layoutSource,
+  };
 }

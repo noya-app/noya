@@ -18,6 +18,7 @@ import {
   ClipboardCopyIcon,
   ClipboardIcon,
   CopyIcon,
+  DownloadIcon,
   DropdownMenuIcon,
   EnterIcon,
   ExitIcon,
@@ -37,22 +38,25 @@ import {
   VercelLogoIcon,
 } from '@noya-app/noya-icons';
 import { useKeyboardShortcuts } from '@noya-app/noya-keymap';
+import { tailwindColors } from '@noya-app/noya-tailwind';
 import { isDeepEqual, uuid } from '@noya-app/noya-utils';
-import { component } from '@noya-design-system/protocol';
+import { Theme, component } from '@noya-design-system/protocol';
 import { fileOpen } from 'browser-fs-access';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
-import { useNoyaClientOrFallback } from 'noya-api';
+import { DS, DSConfig, useNoyaClientOrFallback } from 'noya-api';
 import {
   FindComponent,
   Model,
   NoyaComponent,
+  NoyaGeneratorProp,
   NoyaPrimitiveElement,
   NoyaProp,
   NoyaResolvedNode,
   NoyaResolvedPrimitiveElement,
   ResolvedHierarchy,
   createResolvedNode,
+  createSVG,
   getComponentName,
   getNodeName,
   randomSeed,
@@ -73,6 +77,7 @@ import React, {
 import { IndexPath } from 'tree-visit';
 import { z } from 'zod';
 import { DraggableMenuButton } from '../ayon/components/inspector/DraggableMenuButton';
+import { downloadBlob } from '../utils/download';
 import { StyleInputField } from './StyleInputField';
 import { typeItems } from './completionItems';
 import { exportLayout, parseLayoutWithOptions } from './componentLayout';
@@ -119,6 +124,7 @@ function flattenResolvedNode(
 }
 
 interface Props {
+  dsConfig?: DSConfig;
   onChange: (resolvedNode: NoyaResolvedNode) => void;
   findComponent: FindComponent;
   resolvedNode: NoyaResolvedNode;
@@ -149,6 +155,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
   components,
   onConfigureProp,
   uploadAsset,
+  dsConfig,
 }: Props) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const handleSetExpanded = useCallback((id: string, expanded: boolean) => {
@@ -363,6 +370,7 @@ export const DSLayoutTree = memo(function DSLayoutTree({
           onPressDown={() => handlePressDirection(indexPath, 'down')}
           onPressUp={() => handlePressDirection(indexPath, 'up')}
           uploadAsset={uploadAsset}
+          dsConfig={dsConfig}
         />
       )}
     />
@@ -400,6 +408,7 @@ export const DSLayoutRow = memo(
       onPressDown,
       focusPath,
       uploadAsset,
+      dsConfig,
     }: Pick<
       Props,
       | 'highlightedPath'
@@ -426,7 +435,7 @@ export const DSLayoutRow = memo(
       onPressUp: () => void;
       onPressDown: () => void;
       focusPath: (path?: string[]) => void;
-    } & Pick<Props, 'onCreateComponent' | 'components'>,
+    } & Pick<Props, 'onCreateComponent' | 'components' | 'dsConfig'>,
     forwardedRef: React.ForwardedRef<ILayoutRow>,
   ) {
     const client = useNoyaClientOrFallback();
@@ -1350,6 +1359,16 @@ export const DSLayoutRow = memo(
                             title: 'Configure',
                             icon: <MixerHorizontalIcon />,
                           },
+                          prop.generator === 'geometric' && {
+                            value: 'exportSVG',
+                            title: 'Export SVG',
+                            icon: <DownloadIcon />,
+                          },
+                          prop.generator === 'geometric' && {
+                            value: 'exportPNG',
+                            title: 'Export PNG',
+                            icon: <DownloadIcon />,
+                          },
                         ],
                         [
                           {
@@ -1389,6 +1408,37 @@ export const DSLayoutRow = memo(
                               prop: prop.name,
                             });
                             break;
+                          case 'exportSVG': {
+                            if (!dsConfig || prop.generator !== 'geometric')
+                              return;
+
+                            const svgBlob = createSVGBlob(prop, dsConfig);
+                            downloadBlob(svgBlob, 'pattern.svg');
+                            break;
+                          }
+                          case 'exportPNG': {
+                            if (!dsConfig || prop.generator !== 'geometric')
+                              return;
+
+                            const svgBlob = createSVGBlob(prop, dsConfig);
+                            const svgUrl = URL.createObjectURL(svgBlob);
+
+                            // Render svg on canvas
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            const img = new Image();
+                            img.onload = () => {
+                              canvas.width = img.width;
+                              canvas.height = img.height;
+                              ctx?.drawImage(img, 0, 0);
+                              canvas.toBlob((blob) => {
+                                if (!blob) return;
+                                downloadBlob(blob, 'pattern.png');
+                              });
+                            };
+                            img.src = svgUrl;
+                            break;
+                          }
                           case 'fetch': {
                             switch (prop.generator) {
                               case 'random-image':
@@ -1717,4 +1767,20 @@ function handleMoveItem(
   }
 
   return inner();
+}
+
+function createSVGBlob(prop: NoyaGeneratorProp, dsConfig: DS['config']) {
+  const theme: Theme = {
+    colorMode: dsConfig.colorMode ?? 'light',
+    colors: {
+      primary: (tailwindColors as any)[dsConfig.colors.primary],
+      neutral: tailwindColors.slate,
+    },
+  };
+
+  const pattern = createSVG(prop.data, theme.colors);
+  const blob = new Blob([pattern], {
+    type: 'image/svg+xml',
+  });
+  return blob;
 }

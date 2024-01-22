@@ -64,6 +64,7 @@ export function compile(configuration: CompilerConfiguration) {
           designSystemDefinition:
             configuration.resolvedDefinitions[libraryName],
           includeTailwindBase: libraryName === 'vanilla',
+          spreadTheme: libraryName.endsWith('radix'),
           exportTypes:
             libraryName === 'vanilla'
               ? [
@@ -73,7 +74,7 @@ export function compile(configuration: CompilerConfiguration) {
                   'react-css-modules',
                   'react-tailwind',
                 ]
-              : libraryName.endsWith('chakra')
+              : libraryName.endsWith('chakra') || libraryName.endsWith('radix')
               ? ['react']
               : ['react-css', 'react-tailwind'],
         });

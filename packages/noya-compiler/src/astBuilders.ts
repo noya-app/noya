@@ -1,24 +1,16 @@
 import { groupBy, unique } from '@noya-app/noya-utils';
-import {
-  DesignSystemDefinition,
-  Theme,
-  component,
-} from '@noya-design-system/protocol';
-import { DSConfig } from 'noya-api';
-import React, { CSSProperties, ReactNode } from 'react';
+import { DesignSystemDefinition } from '@noya-design-system/protocol';
+import React, { ReactNode } from 'react';
 import ts from 'typescript';
-import { clean } from './clean';
 import {
   SimpleElement,
   SimpleElementTree,
   buildNamespaceMap,
-  createPassthrough,
   findElementNameAndSource,
   isPassthrough,
   isSimpleElement,
   simpleElement,
 } from './common';
-import { print } from './print';
 import { isSafeForJsxText, isValidPropertyKey } from './validate';
 
 export function createJsxElement(
@@ -236,124 +228,7 @@ export function extractImports(
     ];
   });
 }
-export function createLayoutSource({
-  DesignSystem,
-  _noya,
-}: {
-  DesignSystem: DesignSystemDefinition;
-  _noya: { theme: Theme; dsConfig: DSConfig };
-}): {
-  source: string;
-} {
-  const cssImport = "import './globals.css'";
 
-  const defaultLayout = `${cssImport}
-
-export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
-  return children;
-}
-`;
-
-  const providerElement = DesignSystem.components[component.id.Provider]
-    ? DesignSystem.components[component.id.Provider]({
-        theme: createPassthrough(ts.factory.createIdentifier('theme')),
-        children: createPassthrough(
-          ts.factory.createJsxExpression(
-            undefined,
-            ts.factory.createPropertyAccessExpression(
-              ts.factory.createIdentifier('props'),
-              ts.factory.createIdentifier('children'),
-            ),
-          ),
-        ),
-        ...(_noya && { _noya }),
-      })
-    : null;
-
-  const nextProviderElement = DesignSystem.components[component.id.NextProvider]
-    ? DesignSystem.components[component.id.NextProvider]({
-        children: providerElement,
-        ...(_noya && { _noya }),
-      })
-    : providerElement;
-
-  if (!nextProviderElement) return { source: defaultLayout };
-
-  const layoutElement = createSimpleElement(nextProviderElement, DesignSystem);
-
-  if (!layoutElement) return { source: defaultLayout };
-
-  const fonts = SimpleElementTree.reduce<string[]>(
-    layoutElement,
-    (result, node) => {
-      if (!isSimpleElement(node)) return result;
-
-      const style = node.props.style as CSSProperties | undefined;
-      const fontFamily = style?.fontFamily;
-
-      if (!fontFamily) return result;
-
-      delete style.fontFamily;
-
-      node.props.className = createPassthrough(
-        ts.factory.createPropertyAccessExpression(
-          ts.factory.createIdentifier('font' + fontFamily),
-          ts.factory.createIdentifier('className'),
-        ),
-      );
-
-      return [...result, fontFamily];
-    },
-    [],
-  );
-
-  const layoutComponentFunc = createReactComponentDeclaration(
-    'NextProvider',
-    createElementCode(layoutElement),
-    [
-      ts.factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        ts.factory.createIdentifier('props'),
-        undefined,
-        // Type React.PropsWithChildren<{}>
-        ts.factory.createTypeReferenceNode(
-          ts.factory.createIdentifier('React.PropsWithChildren'),
-          [
-            // Empty object type
-            ts.factory.createTypeLiteralNode([]),
-          ],
-        ),
-        undefined,
-      ),
-    ],
-  );
-
-  const layoutImports = extractImports(layoutElement, DesignSystem);
-
-  const layoutSource = [
-    "'use client'",
-    [
-      cssImport,
-      "import React from 'react'",
-      print(layoutImports),
-      ...(fonts.length > 0
-        ? [`import { ${fonts.join(', ')} } from "next/font/google";`]
-        : []),
-      'import { theme } from "./theme"',
-    ].join('\n'),
-    ...fonts.map(
-      (font) => `const font${font} = ${font}({ subsets: ["latin"] })`,
-    ),
-    print(layoutComponentFunc),
-  ]
-    .map(clean)
-    .join('\n');
-
-  return {
-    source: layoutSource,
-  };
-}
 export function createSimpleElement(
   originalElement: React.ReactNode,
   DesignSystem: DesignSystemDefinition,

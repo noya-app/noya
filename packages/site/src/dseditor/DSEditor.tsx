@@ -715,6 +715,7 @@ export function DSEditor({
         resolvedNode &&
         rightSidebarVisibility !== 'hide' && (
           <DSComponentInspector
+            dsConfig={ds.config}
             key={`${selection.componentID}-${selection.variantID ?? ''}`} // Use key to reset any navigation state
             selection={selection}
             setSelection={setSelection}
@@ -829,6 +830,7 @@ function DSGalleryCode({
               '@noya-design-system/chakra',
               '@noya-design-system/antd',
               '@noya-design-system/mui',
+              '@noya-design-system/radix',
             ],
         ...(componentID && {
           filterComponents: (component) =>

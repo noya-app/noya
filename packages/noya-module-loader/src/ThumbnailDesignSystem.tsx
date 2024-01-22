@@ -28,13 +28,12 @@ function getTheme(props: any) {
  * This returns the wrapper span around the string child
  */
 function getStringChild(props: any): ReactElement | undefined {
-  if (
-    props.children &&
-    Array.isArray(props.children) &&
-    props.children.length === 1 &&
-    props.children[0].key === 'editable-span'
-  ) {
-    return props.children[0];
+  if (props.children && React.Children.count(props.children) === 1) {
+    const child = React.Children.only(props.children);
+
+    if (child.key === 'editable-span') {
+      return child;
+    }
   }
 
   return undefined;

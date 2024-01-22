@@ -16,6 +16,7 @@ const designSystems = {
   '@noya-design-system/mui': 'Material Design',
   '@noya-design-system/antd': 'Ant Design',
   '@noya-design-system/chakra': 'Chakra UI',
+  '@noya-design-system/radix': 'Radix Themes',
 };
 
 export function DesignSystemPicker() {

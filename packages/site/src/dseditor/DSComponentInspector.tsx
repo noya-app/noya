@@ -79,7 +79,11 @@ import { enforceSchema, enforceSchemaInDiff } from './layoutSchema';
 
 type Props = Pick<
   ComponentProps<typeof DSLayoutTree>,
-  'highlightedPath' | 'setHighlightedPath' | 'selectedPath' | 'setSelectedPath'
+  | 'highlightedPath'
+  | 'setHighlightedPath'
+  | 'selectedPath'
+  | 'setSelectedPath'
+  | 'dsConfig'
 > & {
   selection: SelectedComponent;
   setSelection: (selection: SelectedComponent) => void;
@@ -122,6 +126,7 @@ export function DSComponentInspector({
   onPressMeasure,
   groups,
   uploadAsset,
+  dsConfig,
 }: Props) {
   const { query } = useRouter();
   const openInputDialog = useOpenInputDialog();
@@ -755,6 +760,7 @@ export function DSComponentInspector({
             }
           >
             <DSLayoutTree
+              dsConfig={dsConfig}
               onChange={handlePendingChange}
               findComponent={findComponent}
               highlightedPath={highlightedPath}
