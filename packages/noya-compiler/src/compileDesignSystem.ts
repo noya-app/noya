@@ -471,6 +471,16 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
 }
 `;
 
+  const childrenPassthrough = createPassthrough(
+    ts.factory.createJsxExpression(
+      undefined,
+      ts.factory.createPropertyAccessExpression(
+        ts.factory.createIdentifier('props'),
+        ts.factory.createIdentifier('children'),
+      ),
+    ),
+  );
+
   const providerElement = DesignSystem.components[component.id.Provider]
     ? DesignSystem.components[component.id.Provider]({
         theme: createPassthrough(
@@ -478,22 +488,14 @@ export default function RootLayout({ children }: React.PropsWithChildren<{}>) {
             ? transform({ theme: _noya.theme }, DesignSystem.themeTransformer)
             : ts.factory.createIdentifier('theme'),
         ),
-        children: createPassthrough(
-          ts.factory.createJsxExpression(
-            undefined,
-            ts.factory.createPropertyAccessExpression(
-              ts.factory.createIdentifier('props'),
-              ts.factory.createIdentifier('children'),
-            ),
-          ),
-        ),
+        children: childrenPassthrough,
         ...(_noya && { _noya }),
       })
     : null;
 
   const nextProviderElement = DesignSystem.components[component.id.NextProvider]
     ? DesignSystem.components[component.id.NextProvider]({
-        children: providerElement,
+        children: providerElement || childrenPassthrough,
         ...(_noya && { _noya }),
       })
     : providerElement;

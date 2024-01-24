@@ -297,6 +297,19 @@ const proxyObject = new Proxy(
       );
     },
     [component.id.Provider]: (props: any) => {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            fontFamily: 'Manrope', // Gets swapped at compile-time
+          }}
+        >
+          {props.children}
+        </div>
+      );
+    },
+    [component.id.NextProvider]: (props: any) => {
       const config = getDSConfig(props);
 
       return (
@@ -305,7 +318,6 @@ const proxyObject = new Proxy(
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: 'Manrope', // Gets swapped at compile-time
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
             ...(config.colorMode === 'dark' && { background: '#111' }),
@@ -315,7 +327,6 @@ const proxyObject = new Proxy(
         </div>
       );
     },
-    [component.id.NextProvider]: undefined,
   },
   handler,
 );
