@@ -125,6 +125,7 @@ export function renderDSPreview({
             <div
               style={{
                 height: '52px',
+                flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 padding: '12px 24px 0',
@@ -166,6 +167,8 @@ export function renderDSPreview({
               display: 'flex',
               flexDirection: 'column',
               ...(!isThumbnail && height && { height }),
+              // overflowY: 'auto',
+              // ...(isThumbnail && { flex: 1 }),
             }}
           >
             {content}

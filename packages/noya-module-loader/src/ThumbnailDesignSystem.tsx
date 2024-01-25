@@ -175,6 +175,11 @@ function getAccentColor(props: any) {
   // return theme?.colors.primary[500] ?? '#ccc';
 }
 
+function getMutedNeutralColor(props: any) {
+  // return '#23195133';
+  return '#9891b666';
+}
+
 const proxyObject = new Proxy(
   {
     [component.id.Box]: (props: any) => {
@@ -182,7 +187,7 @@ const proxyObject = new Proxy(
         <div
           {...applyCommonProps(props)}
           style={{
-            borderColor: '#23195133',
+            borderColor: getMutedNeutralColor(props),
             ...props.style,
           }}
         />
@@ -195,7 +200,7 @@ const proxyObject = new Proxy(
           style={{
             ...props.style,
             borderRadius: '20px',
-            border: '4px dashed #23195133',
+            border: `4px dashed ${getMutedNeutralColor(props)}`,
             padding: '16px',
           }}
         />
@@ -260,7 +265,7 @@ const proxyObject = new Proxy(
     },
     [component.id.Text]: (props: any) => {
       return TextComponent(props, {
-        color: '#23195133',
+        color: getMutedNeutralColor(props),
         titleColor: '#231951',
       });
     },
@@ -288,11 +293,12 @@ const proxyObject = new Proxy(
           style={{
             appearance: 'none',
             ...props.style,
-            background: '#fff',
-            border: `4px solid ${getAccentColor(props)}`,
+            background: '#E1DAFF66',
+            // border: `4px solid ${getAccentColor(props)}`,
             padding: '0',
             borderRadius: tokens.borderRadius,
-            height: '56px',
+            // height: '56px',
+            height: '64px',
           }}
         />
       );
