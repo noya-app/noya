@@ -297,7 +297,8 @@ export function renderResolvedNode({
                 ? placeholderProp.value
                 : undefined,
           })}
-          {...(element.componentID === component.id.Image && {
+          {...((element.componentID === component.id.Image ||
+            element.componentID === component.id.Avatar) && {
             // src: 'https://placehold.it/300x300',
             // src: 'https://picsum.photos/300/300',
             src:

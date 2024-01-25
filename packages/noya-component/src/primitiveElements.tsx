@@ -45,7 +45,12 @@ export const primitiveElements: PrimitiveElementMetadata[] = [
     name: 'Avatar',
     description: 'A user avatar',
     icon: <AvatarIcon />,
-    schema: { children: 'none' },
+    schema: {
+      children: 'none',
+      props: {
+        src: 'image',
+      },
+    },
     initialValue: () =>
       Model.primitiveElement({
         name: 'Avatar',
