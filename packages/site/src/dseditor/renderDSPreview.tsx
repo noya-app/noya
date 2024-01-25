@@ -2,6 +2,7 @@ import { darkTheme, lightTheme } from '@noya-app/noya-designsystem';
 import { DSConfig } from 'noya-api';
 import {
   ComponentThumbnailChrome,
+  ComponentThumbnailSource,
   NoyaResolvedNode,
   renderResolvedNode,
 } from 'noya-component';
@@ -18,6 +19,7 @@ export function renderDSPreview({
   isThumbnail,
   chrome = 'none',
   height,
+  thumbnail,
 }: {
   renderProps: DSRenderProps;
   dsConfig: DSConfig;
@@ -27,9 +29,11 @@ export function renderDSPreview({
   isThumbnail?: boolean;
   chrome?: ComponentThumbnailChrome;
   height?: number;
+  thumbnail?: ComponentThumbnailSource;
 }) {
   const content = renderResolvedNode({
-    containerWidth: props.size.width,
+    // Thumbnails always use the largest breakpoint
+    containerWidth: isThumbnail ? 9999 : props.size.width,
     contentEditable: true,
     disableTabNavigation: false,
     includeDataProps: true,
@@ -55,6 +59,24 @@ export function renderDSPreview({
     computedBackgroundColor = colorMode === 'light' ? '#fff' : '#111';
   }
 
+  if (isThumbnail) {
+    computedBackgroundColor = `linear-gradient(to ${
+      thumbnail?.position === 'bottom' ? 'top' : 'bottom'
+    }, #fff 0%, hsla(0, 0%, 100%, 0.65) 100%)`;
+  }
+
+  const thumbnailAlignmentStyle =
+    isThumbnail && thumbnail
+      ? {
+          justifyContent:
+            thumbnail.position === 'bottom'
+              ? 'end'
+              : thumbnail.position === 'top'
+              ? 'start'
+              : 'center',
+        }
+      : {};
+
   return (
     <div
       style={{
@@ -67,10 +89,14 @@ export function renderDSPreview({
         padding,
         position: 'relative',
         ...(isThumbnail && {
-          padding: '5vh 5vw',
+          // padding: '5vh 5vw',
+          padding: '0',
           backgroundImage: undefined,
-          background: lightTheme.colors.thumbnailBackground,
           justifyContent: 'center',
+          ...thumbnailAlignmentStyle,
+          flex: `0 0 ${thumbnail?.size?.height}px`,
+          width: thumbnail?.size?.width,
+          overflow: 'hidden',
         }),
       }}
     >
@@ -82,9 +108,9 @@ export function renderDSPreview({
           position: 'relative',
           transition: 'background 0.2s',
           ...(isThumbnail && {
-            borderRadius: '16px',
-            border: '2px solid rgba(0,0,0,0.15)',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            borderRadius: '48px',
+            // border: '2px solid rgba(0,0,0,0.15)',
+            // boxShadow: '0 16px 28px hsla(251, 46, 87, 0.4)',
           }),
         }}
       >
@@ -101,12 +127,12 @@ export function renderDSPreview({
                 height: '52px',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 24px',
+                padding: '12px 24px 0',
                 gap: '12px',
-                borderBottom:
-                  colorMode === 'light'
-                    ? '4px solid rgba(0,0,0,0.1)'
-                    : '4px solid rgba(255,255,255,0.1)',
+                // borderBottom:
+                //   colorMode === 'light'
+                //     ? '4px solid rgba(0,0,0,0.1)'
+                //     : '4px solid rgba(255,255,255,0.1)',
               }}
             >
               <div
@@ -139,7 +165,7 @@ export function renderDSPreview({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              ...(height && !isThumbnail ? { height } : { flex: '1' }),
+              ...(!isThumbnail && height && { height }),
             }}
           >
             {content}

@@ -67,10 +67,20 @@ function createStylingProps(props: unknown, classes: (string | false)[]) {
 const proxyObject = new Proxy(
   {
     [component.id.Box]: (props: any) => {
-      return <div {...applyCommonProps(props)} />;
+      const stylingProps = createStylingProps(props, [`box-border`]);
+
+      return (
+        <div
+          {...applyCommonProps({
+            ...props,
+            ...stylingProps,
+          })}
+        />
+      );
     },
     [component.id.Card]: (props: any) => {
       const stylingProps = createStylingProps(props, [
+        `box-border`,
         `rounded-lg`,
         `bg-white`,
         `dark:bg-gray-800`,
@@ -162,6 +172,7 @@ const proxyObject = new Proxy(
       const config = getDSConfig(props);
 
       const stylingProps = createStylingProps(props, [
+        `no-underline`,
         'text-sm',
         'font-bold',
         `text-${config.colors.primary}-500`,
@@ -197,6 +208,7 @@ const proxyObject = new Proxy(
     },
     [component.id.Input]: (props: InputProps) => {
       const stylingProps = createStylingProps(props, [
+        `box-border`,
         `block`,
         `w-full`,
         `rounded-md`,

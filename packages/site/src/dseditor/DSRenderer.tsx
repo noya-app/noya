@@ -6,7 +6,6 @@ import {
   DesignSystemDefinition,
   ProviderProps,
   RenderableRoot,
-  Theme,
   component,
   transform,
 } from '@noya-design-system/protocol';
@@ -156,8 +155,10 @@ export const DSRenderer = forwardRef(function DSRenderer(
   const theme = useMemo(() => {
     if (!system || !system.themeTransformer) return undefined;
 
-    const t: Theme = {
+    const t = {
       colorMode: config.colorMode ?? 'light',
+      primaryColor: config.colors.primary ?? 'blue',
+      neutralColor: 'slate',
       colors: {
         primary: (tailwindColors as any)[config.colors.primary ?? 'blue'],
         neutral: tailwindColors.slate,

@@ -25,31 +25,38 @@ export const DSComponentThumbnail = memo(function DSComponentThumbnail({
       style={{
         width: '100%',
         height: '100%',
+        position: 'relative',
         backgroundColor: lightTheme.colors.thumbnailBackground,
-        backgroundSize: `${Math.round(size.width / 4)}px ${Math.round(
-          size.height / 4,
-        )}px`,
-        backgroundPosition: position,
-        backgroundRepeat: 'no-repeat',
-        backgroundImage: `url(${NOYA_HOST}/api/files/${fileId}.png?params[component]=${encodeURIComponent(
+        overflow: 'hidden',
+      }}
+    >
+      <img
+        src={`${NOYA_HOST}/api/files/${fileId}.png?params[component]=${encodeURIComponent(
           component.componentID,
         )}&params[library]=thumbnail&width=${size.width}&height=${
           size.height
-        }&deviceScaleFactor=1)`,
-      }}
-    >
-      {(position === 'top' || position === 'bottom') && (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            background:
-              position === 'top'
-                ? 'linear-gradient(rgba(240, 240, 242, 0) 80%, rgb(240, 240, 242) 98%)'
-                : 'linear-gradient(rgb(240, 240, 242) 2%, rgba(240, 240, 242, 0) 20%)',
-          }}
-        />
-      )}
+        }&deviceScaleFactor=1`}
+        style={{
+          width: `${Math.round(size.width / 4)}px`,
+          height: `${Math.round(size.height / 4)}px`,
+          position: 'absolute',
+          left: '50%',
+          marginLeft: `-${Math.round(size.width / 8)}px`, // Half of the width
+          top:
+            position === 'top'
+              ? '20px'
+              : position === 'bottom'
+              ? 'initial'
+              : '50%',
+          bottom: position === 'bottom' ? '20px' : 'initial',
+          marginTop:
+            position === 'top' || position === 'bottom'
+              ? 'initial'
+              : `-${Math.round(size.height / 8)}px`, // Half of the height, only if not top or bottom
+          filter: 'drop-shadow(0 4px 28px #D3CEED66)',
+        }}
+        alt=""
+      />
     </div>
   );
 });

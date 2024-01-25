@@ -59,7 +59,7 @@
   "dependencies": {
     "@noya-app/noya-canvaskit": "^0.0.1",
     "@noya-app/noya-colorpicker": "^0.0.3",
-    "@noya-app/noya-designsystem": "^0.0.5",
+    "@noya-app/noya-designsystem": "^0.0.7",
     "@noya-app/noya-file-format": "^0.0.1",
     "@noya-app/noya-filesystem": "^0.0.1",
     "@noya-app/noya-fonts": "^0.0.3",
@@ -74,7 +74,7 @@
     "@noya-app/noya-sketch-model": "^0.0.3",
     "@noya-app/noya-svg-renderer": "^0.0.1",
     "@noya-app/noya-svgkit": "^0.0.2",
-    "@noya-app/noya-tailwind": "^0.0.1",
+    "@noya-app/noya-tailwind": "^0.0.3",
     "@noya-app/noya-utils": "^0.0.7",
     "@noya-app/react-utils": "^0.0.4",
     "@shopify/eslint-plugin": "^40.1.0",

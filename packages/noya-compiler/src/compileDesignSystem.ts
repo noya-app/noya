@@ -72,8 +72,10 @@ export function compileDesignSystem(
 
   const filterComponents = configuration.filterComponents ?? (() => true);
 
-  const theme: Theme = {
+  const theme = {
     colorMode: configuration.ds.config.colorMode ?? 'light',
+    primaryColor: configuration.ds.config.colors.primary ?? 'blue',
+    neutralColor: 'slate',
     colors: {
       primary: (tailwindColors as any)[configuration.ds.config.colors.primary],
       neutral: tailwindColors.slate,

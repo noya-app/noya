@@ -2975,10 +2975,10 @@
     "@noya-app/react-utils" "0.0.4"
     styled-components "5.3.0"
 
-"@noya-app/noya-designsystem@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-designsystem/-/noya-designsystem-0.0.5.tgz#3278866f6f60fba6f9472b3b54844fb5dc2e5de5"
-  integrity sha512-yMtjXpqSTMIqr75niRft4kYCD/CjGSZwbjgcbAHrGaxMdjAxGsdUblpZQzXCt7X9fXCVSXucZ0DzHBFm79MIww==
+"@noya-app/noya-designsystem@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-designsystem/-/noya-designsystem-0.0.7.tgz#29ac1f3c26a720ec56231bf6cd856a65fdab9979"
+  integrity sha512-s0DGNLDtnrblbFv3voSxcnA2a5j8IvN8kL+bn9ToGx+XHn67svD+wmLIklyiLL/HRvWpczS5ksOHLGgLSu1e8w==
   dependencies:
     "@dnd-kit/core" "3.1.1"
     "@dnd-kit/modifiers" "3.0.0"
@@ -3122,10 +3122,10 @@
     "@noya-app/noya-utils" "0.0.7"
     parse-css-color "^0.2.1"
 
-"@noya-app/noya-tailwind@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-tailwind/-/noya-tailwind-0.0.1.tgz#81251a9cc5bb28e2aab87c3edb14fc3b57a4f278"
-  integrity sha512-8Kpe7xff1fAUwgVrw3ulya0bvH9zrcxXV89XwjUHbgj9IQHLqr4lxkkb5HkUg/Iy3LVmyNYHNqRC2Z1j5e2BTg==
+"@noya-app/noya-tailwind@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-tailwind/-/noya-tailwind-0.0.3.tgz#44a05063d2eb530aabb684d203d4708a2cfff5d8"
+  integrity sha512-xutEp5x49uthNyk4zI8+S945ZPWc0gSje7zskIswLMNHXt/lrs83hM2zgM9vXhVyMIP74X3iXw2YE5bFaEwzWg==
   dependencies:
     "@noya-app/noya-utils" "0.0.7"
 
@@ -3143,10 +3143,10 @@
   dependencies:
     cross-fetch "^4.0.0"
 
-"@noya-design-system/protocol@^0.0.59":
-  version "0.0.59"
-  resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.59.tgz#3b6f3e1da23f89c04ab54ef87d7acafc36514b51"
-  integrity sha512-PY0U0RAOjyqycxfv8XfLlEYtTc+vOL0UaHrYYuZVSfTH7WHqqBKh2odIQNBupTuEWzOZZRFDggM2uAruxSjVKA==
+"@noya-design-system/protocol@^0.0.80":
+  version "0.0.80"
+  resolved "https://registry.yarnpkg.com/@noya-design-system/protocol/-/protocol-0.0.80.tgz#52b4f6fb55e3407f0537f72f0f04807a50401a42"
+  integrity sha512-6CZyaQXHEtMZ8xLYzD0gCpdd1a7HkLKjrghDSgJrT5lEET+BLYHdKaf++aezjd7bN0TJuRTazxoGmi6/SBaYMA==
   dependencies:
     react "^18.2.0"
 

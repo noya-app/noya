@@ -421,6 +421,7 @@ export function DSEditor({
           isThumbnail,
           chrome,
           height: currentComponent?.preview?.height,
+          thumbnail: currentComponent?.thumbnail,
         });
       }
       return null;
@@ -434,6 +435,7 @@ export function DSEditor({
       isThumbnail,
       chrome,
       currentComponent?.preview?.height,
+      currentComponent?.thumbnail,
     ],
   );
 
@@ -560,6 +562,51 @@ export function DSEditor({
   const privateComponentCount = components.filter(
     (c) => c.accessModifier === 'internal',
   ).length;
+
+  const dialog = (
+    <Dialog
+      open={showCodePreview}
+      closeOnInteractOutside
+      onOpenChange={(value) => {
+        if (!value) {
+          setShowCodePreview(false);
+        }
+      }}
+      style={{
+        width: '90%',
+        height: '90%',
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: '90%',
+        gap: '12px',
+      }}
+    >
+      <Stack.H alignItems="center" gap="12px">
+        <span style={theme.textStyles.heading3}>Build</span>
+        {selection?.componentID ? (
+          <Chip
+            deletable
+            onDelete={() => {
+              setSelection(undefined);
+            }}
+          >
+            Current Component: {findComponent(selection?.componentID)?.name}
+          </Chip>
+        ) : (
+          <Chip>All Components</Chip>
+        )}
+      </Stack.H>
+      <Divider overflow={theme.sizes.dialog.padding} />
+      {system && showCodePreview && (
+        <DSGalleryCode
+          system={system}
+          ds={ds}
+          setLatestBuildAssetId={setLatestBuildAssetId}
+          componentID={selection?.componentID}
+        />
+      )}
+    </Dialog>
+  );
 
   return (
     <Stack.H flex="1" separator={<DividerVertical />}>
@@ -690,9 +737,10 @@ export function DSEditor({
                                   aspectRatio="16/9"
                                   alignItems="center"
                                   justifyContent="center"
-                                  borderRadius="4px"
+                                  borderRadius="20px"
+                                  overflow="hidden"
                                   background={theme.colors.inputBackground}
-                                  border={`1px solid ${theme.colors.divider}`}
+                                  // border={`1px solid ${theme.colors.divider}`}
                                 >
                                   <DSComponentThumbnail
                                     component={component}
@@ -759,48 +807,7 @@ export function DSEditor({
             }}
           />
         )}
-      <Dialog
-        open={showCodePreview}
-        closeOnInteractOutside
-        onOpenChange={(value) => {
-          if (!value) {
-            setShowCodePreview(false);
-          }
-        }}
-        style={{
-          width: '90%',
-          height: '90%',
-          display: 'flex',
-          flexDirection: 'column',
-          maxWidth: '90%',
-          gap: '12px',
-        }}
-      >
-        <Stack.H alignItems="center" gap="12px">
-          <span style={theme.textStyles.heading3}>Build</span>
-          {selection?.componentID ? (
-            <Chip
-              deletable
-              onDelete={() => {
-                setSelection(undefined);
-              }}
-            >
-              Current Component: {findComponent(selection?.componentID)?.name}
-            </Chip>
-          ) : (
-            <Chip>All Components</Chip>
-          )}
-        </Stack.H>
-        <Divider overflow={theme.sizes.dialog.padding} />
-        {system && showCodePreview && (
-          <DSGalleryCode
-            system={system}
-            ds={ds}
-            setLatestBuildAssetId={setLatestBuildAssetId}
-            componentID={selection?.componentID}
-          />
-        )}
-      </Dialog>
+      {!isThumbnail && dialog}
     </Stack.H>
   );
 }

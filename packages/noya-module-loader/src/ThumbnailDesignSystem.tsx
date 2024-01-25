@@ -1,3 +1,4 @@
+import { classNamesToStyle } from '@noya-app/noya-tailwind';
 import {
   DesignSystemDefinition,
   Theme,
@@ -59,17 +60,46 @@ const TextComponent = (
       typeof props.variant === 'string' &&
       /^(h1|h2|h3)/.test(props.variant);
 
+    const hasSmallTitleVariant =
+      'variant' in props &&
+      typeof props.variant === 'string' &&
+      /^(h4|h5|h6)/.test(props.variant);
+
     if (hasTitleVariant) {
-      const fontSize =
-        props.variant === 'h1'
-          ? '48px'
-          : props.variant === 'h2'
-          ? '40px'
-          : '32px';
+      const fontProps = classNamesToStyle(
+        [
+          ...(props.variant === 'h1'
+            ? ['text-6xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h2'
+            ? ['text-5xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h3'
+            ? ['text-4xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h4'
+            ? ['text-3xl', 'font-bold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h5'
+            ? ['text-2xl', 'font-semibold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'h6'
+            ? ['text-xl', 'font-semibold', 'tracking-tight']
+            : []),
+          ...(props.variant === 'subtitle1'
+            ? ['text-lg', 'font-semibold']
+            : []),
+          ...(props.variant === 'subtitle2' ? ['font-semibold'] : []),
+          ...(props.variant === 'body1' ? ['text-lg', 'leading-relaxed'] : []),
+          ...(props.variant === 'body2' ? ['leading-relaxed'] : []),
+          ...(props.variant === 'caption1' ? ['text-sm'] : []),
+        ].filter(Boolean),
+      );
 
       const childWithStyle = React.cloneElement(child, {
         style: {
-          color: props.style?.color ?? titleColor,
+          color: titleColor,
+          // color: props.style?.color ?? titleColor,
         },
       });
 
@@ -78,7 +108,8 @@ const TextComponent = (
           style={{
             ...props.style,
             fontFamily: 'sans-serif',
-            fontSize,
+            // fontSize,
+            ...fontProps,
             color: titleColor,
           }}
         >
@@ -94,31 +125,42 @@ const TextComponent = (
         ? child.props.dangerouslySetInnerHTML.__html
         : undefined;
 
+    const lineHeight = '12px';
+
     return (
       <div
         style={{
           ...props.style,
           background: 'transparent',
           backgroundColor: 'transparent',
+          // lineHeight: lineHeight,
         }}
       >
         <span
           style={{
-            background: props.style?.color ?? color,
-            lineHeight: '12px',
+            background: hasSmallTitleVariant ? '#231951B3' : color,
+            // background: props.style?.color ?? color,
+            lineHeight: lineHeight,
             opacity: opacity ?? undefined,
             ...(stringValue && stringValue.length > 80
               ? {
                   fontSize: '8px',
                 }
               : {
-                  height: '12px',
+                  height: lineHeight,
                   borderRadius: tokens.borderRadius,
                   display: 'inline-block',
                 }),
           }}
         >
-          <span style={{ color: 'transparent' }}>{child}</span>
+          <span
+            style={{
+              color: 'transparent',
+              // lineHeight: lineHeight
+            }}
+          >
+            {child}
+          </span>
         </span>
       </div>
     );
@@ -127,17 +169,20 @@ const TextComponent = (
   return <span {...applyCommonProps(props)} />;
 };
 
+function getAccentColor(props: any) {
+  return '#6746FF';
+  // const theme = getTheme(props);
+  // return theme?.colors.primary[500] ?? '#ccc';
+}
+
 const proxyObject = new Proxy(
   {
     [component.id.Box]: (props: any) => {
-      const theme = getTheme(props);
-
       return (
         <div
           {...applyCommonProps(props)}
           style={{
-            borderColor:
-              theme?.colorMode === 'light' ? 'rgb(221,221,221)' : '#222',
+            borderColor: '#23195133',
             ...props.style,
           }}
         />
@@ -149,8 +194,8 @@ const proxyObject = new Proxy(
           {...applyCommonProps(props)}
           style={{
             ...props.style,
-            borderRadius: tokens.borderRadius,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            borderRadius: '20px',
+            border: '4px dashed #23195133',
             padding: '16px',
           }}
         />
@@ -160,8 +205,10 @@ const proxyObject = new Proxy(
       const theme = getTheme(props);
 
       const backgroundColor =
-        props.style.backgroundColor ?? theme?.colors.primary[500];
+        props.style.backgroundColor ?? getAccentColor(props);
       const foregroundColor = props.style?.color ?? 'white';
+
+      const childCount = React.Children.count(props.children);
 
       return (
         <button
@@ -180,7 +227,7 @@ const proxyObject = new Proxy(
                   }`,
                 }
               : {
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  // boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                 }),
             display: 'inline-flex',
             alignItems: 'center',
@@ -188,66 +235,62 @@ const proxyObject = new Proxy(
             padding: '12px 16px',
           }}
         >
-          <span
-            style={{
-              ...props.style,
-              background:
-                props.variant === 'text' ? backgroundColor : foregroundColor,
-              borderRadius: tokens.borderRadius,
-              height: '8px',
-              minWidth: '33%',
-              maxWidth: '66%',
-              display: 'inline-block',
-            }}
-          >
-            <span style={{ color: 'transparent', fontSize: '32px' }}>
-              {props.children}
+          {childCount > 1 ? (
+            props.children
+          ) : (
+            <span
+              style={{
+                ...props.style,
+                background:
+                  props.variant === 'text' ? backgroundColor : foregroundColor,
+                borderRadius: tokens.borderRadius,
+                height: '8px',
+                minWidth: '33%',
+                maxWidth: '66%',
+                display: 'inline-block',
+              }}
+            >
+              <span style={{ color: 'transparent', fontSize: '32px' }}>
+                {props.children}
+              </span>
             </span>
-          </span>
+          )}
         </button>
       );
     },
     [component.id.Text]: (props: any) => {
-      const theme = getTheme(props);
-      const colorMode = theme?.colorMode || 'light';
       return TextComponent(props, {
-        color: colorMode === 'light' ? '#ccc' : '#333',
-        titleColor: colorMode === 'light' ? 'rgb(48,58,71)' : '#fff',
+        color: '#23195133',
+        titleColor: '#231951',
       });
     },
     [component.id.Link]: (props: any) => {
       const theme = getTheme(props);
 
       return TextComponent(props, {
-        color: theme?.colors.primary[500] || '#ccc',
-        titleColor: theme?.colors.primary[500] || '#ccc',
+        color: getAccentColor(theme) || '#ccc',
+        titleColor: getAccentColor(theme) || '#ccc',
       });
     },
     [component.id.Tag]: (props: any) => {
       const theme = getTheme(props);
 
       return TextComponent(props, {
-        color: theme?.colors.primary[500] || '#ccc',
-        titleColor: theme?.colors.primary[500] || '#ccc',
-        opacity: 0.3,
+        color: getAccentColor(theme) || '#ccc',
+        titleColor: getAccentColor(theme) || '#ccc',
+        // opacity: 0.3,
       });
     },
     [component.id.Input]: (props: any) => {
-      const theme = getTheme(props);
-
       return (
         <input
           {...applyCommonProps(props)}
           style={{
             appearance: 'none',
             ...props.style,
-            background: theme?.colorMode === 'light' ? '#fff' : '#333',
-            border:
-              theme?.colorMode === 'light'
-                ? '4px solid rgb(221,221,221)'
-                : '4px solid #666',
+            background: '#fff',
+            border: `4px solid ${getAccentColor(props)}`,
             padding: '0',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             borderRadius: tokens.borderRadius,
             height: '56px',
           }}
@@ -264,26 +307,31 @@ const proxyObject = new Proxy(
           {...applyCommonProps(props)}
           style={{
             ...props.style,
-            ...(props.style.borderRadius && {
-              borderRadius: tokens.borderRadius,
-            }),
+            ...(props.style.borderRadius
+              ? {
+                  borderRadius: tokens.borderRadius,
+                }
+              : {
+                  borderRadius: '8px',
+                }),
             background: isBackgroundImage
-              ? 'white'
-              : `linear-gradient(135deg, ${theme?.colors.primary[300]} 0%, ${theme?.colors.primary[500]} 100%)`,
+              ? 'transparent'
+              : getAccentColor(theme) || '#ccc',
+            // background: isBackgroundImage
+            //   ? 'white'
+            //   : `linear-gradient(135deg, ${theme?.colors.primary[300]} 0%, ${theme?.colors.primary[500]} 100%)`,
           }}
         />
       );
     },
     [component.id.Avatar]: (props: any) => {
-      const theme = getTheme(props);
-
       return (
         <div
           {...applyCommonProps(props)}
           style={{
             ...props.style,
             borderRadius: '1000px',
-            background: theme?.colors.primary[500],
+            background: getAccentColor(props),
           }}
         />
       );
