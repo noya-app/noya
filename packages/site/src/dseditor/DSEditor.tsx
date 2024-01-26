@@ -824,26 +824,34 @@ function DSGalleryCode({
   componentID?: string;
 }) {
   const [files, setFiles] = React.useState<Record<string, string>>();
+  const [progress, setProgress] = React.useState<string | undefined>();
 
   useEffect(() => {
     async function main() {
-      const output = await compileAsync({
-        name: 'Gallery',
-        ds,
-        definitions: componentID
-          ? [ds.source.name]
-          : [
-              'vanilla',
-              '@noya-design-system/chakra',
-              '@noya-design-system/antd',
-              '@noya-design-system/mui',
-              '@noya-design-system/radix',
-            ],
-        ...(componentID && {
-          filterComponents: (component) =>
-            component.componentID === componentID,
-        }),
-      });
+      const output = await compileAsync(
+        {
+          name: 'Gallery',
+          ds,
+          definitions: componentID
+            ? [ds.source.name]
+            : [
+                'vanilla',
+                '@noya-design-system/chakra',
+                '@noya-design-system/antd',
+                '@noya-design-system/mui',
+                '@noya-design-system/radix',
+              ],
+          ...(componentID && {
+            filterComponents: (component) =>
+              component.componentID === componentID,
+          }),
+        },
+        (progress) => {
+          setProgress(
+            `${progress.current} / ${progress.total} (${progress.fileCount} files)`,
+          );
+        },
+      );
 
       setFiles(output);
     }
@@ -853,6 +861,10 @@ function DSGalleryCode({
 
   return (
     <Stack.V flex="1" gap="12px">
+      <Stack.H gap="12px" position="absolute" top="10px">
+        <span style={{ fontWeight: 500 }}>Status:</span>
+        <span>{progress ?? 'Compiling...'}</span>
+      </Stack.H>
       {files !== undefined && (
         <Playground
           files={files}
