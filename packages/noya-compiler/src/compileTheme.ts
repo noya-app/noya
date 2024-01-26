@@ -25,6 +25,16 @@ export function convertTransformer(
   context: ConvertTransformerContext,
 ): ts.Expression {
   function lookupOrGenerate(value: unknown) {
+    // If the value is a primitive, just return it
+    if (
+      !value ||
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      return createExpressionCode(value);
+    }
+
     const result = context.namespaceMap.get(value);
 
     if (!result) return createExpressionCode(value);

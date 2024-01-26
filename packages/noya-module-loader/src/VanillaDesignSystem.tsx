@@ -328,7 +328,7 @@ const proxyObject = new Proxy(
           style={{
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: 'Manrope', // Gets swapped at compile-time
+            fontFamily: 'Inter', // Gets swapped at compile-time
           }}
         >
           {props.children}

@@ -3122,10 +3122,10 @@
     "@noya-app/noya-utils" "0.0.7"
     parse-css-color "^0.2.1"
 
-"@noya-app/noya-tailwind@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@noya-app/noya-tailwind/-/noya-tailwind-0.0.3.tgz#44a05063d2eb530aabb684d203d4708a2cfff5d8"
-  integrity sha512-xutEp5x49uthNyk4zI8+S945ZPWc0gSje7zskIswLMNHXt/lrs83hM2zgM9vXhVyMIP74X3iXw2YE5bFaEwzWg==
+"@noya-app/noya-tailwind@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@noya-app/noya-tailwind/-/noya-tailwind-0.0.6.tgz#2e99f2d698a7498bd915a952d98bf032c3c3ccef"
+  integrity sha512-c5IQ6POjEgN8qYlMeJNJjys81EX/ZEbQR/dSTmMlMsK2pKKxSdu1LUYiu1Pysdhj/G7f6UXV4rVQffRK80xfkg==
   dependencies:
     "@noya-app/noya-utils" "0.0.7"
 

@@ -4,7 +4,6 @@ import { uuid } from '@noya-app/noya-utils';
 import {
   component,
   DesignSystemDefinition,
-  Theme,
   x,
 } from '@noya-design-system/protocol';
 import { DS } from 'noya-api';
@@ -96,14 +95,17 @@ const HeroComponent = Model.component({
 jest.setTimeout(20000);
 
 let ChakraDesignSystem: DesignSystemDefinition;
-// let MaterialDesignSystem: DesignSystemDefinition;
+// let RadixDesignSystem: DesignSystemDefinition;
 
 beforeAll(async () => {
   ChakraDesignSystem = await loadDesignSystem(
     '@noya-design-system/chakra',
     'latest',
   );
-  // MaterialDesignSystem = await loadDesignSystem('mui');
+  // RadixDesignSystem = await loadDesignSystem(
+  //   '@noya-design-system/radix',
+  //   'latest',
+  // );
 });
 
 const ds: DS = {
@@ -387,8 +389,10 @@ describe('theme', () => {
   it('generates transformer', () => {
     const config = ds.config;
 
-    const theme: Theme = {
+    const theme = {
       colorMode: config.colorMode ?? 'light',
+      primaryColor: config.colors.primary,
+      neutralColor: tailwindColors.slate,
       colors: {
         primary: (tailwindColors as any)[config.colors.primary],
         neutral: tailwindColors.slate,

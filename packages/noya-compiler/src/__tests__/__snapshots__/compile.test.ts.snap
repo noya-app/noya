@@ -1497,10 +1497,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
-import { Manrope } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { theme } from './theme';
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+const fontInter = Inter({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -1516,7 +1516,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
     >
       <div
         style={{ display: 'flex', flexDirection: 'column' }}
-        className={fontManrope.className}
+        className={fontInter.className}
       >
         {props.children}
       </div>
@@ -1595,10 +1595,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
-import { Manrope } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { theme } from './theme';
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+const fontInter = Inter({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -1613,7 +1613,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
     >
       <div
         style={{ display: 'flex', flexDirection: 'column' }}
-        className={fontManrope.className}
+        className={fontInter.className}
       >
         {props.children}
       </div>
@@ -1692,10 +1692,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
-import { Manrope } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { theme } from './theme';
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+const fontInter = Inter({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -1711,7 +1711,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
     >
       <div
         style={{ display: 'flex', flexDirection: 'column' }}
-        className={fontManrope.className}
+        className={fontInter.className}
       >
         {props.children}
       </div>
@@ -1790,10 +1790,10 @@ export default function Hero() {
 
 import './globals.css';
 import React from 'react';
-import { Manrope } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { theme } from './theme';
 
-const fontManrope = Manrope({ subsets: ['latin'] });
+const fontInter = Inter({ subsets: ['latin'] });
 
 export default function NextProvider(props: React.PropsWithChildren<{}>) {
   return (
@@ -1808,7 +1808,7 @@ export default function NextProvider(props: React.PropsWithChildren<{}>) {
     >
       <div
         style={{ display: 'flex', flexDirection: 'column' }}
-        className={fontManrope.className}
+        className={fontInter.className}
       >
         {props.children}
       </div>
