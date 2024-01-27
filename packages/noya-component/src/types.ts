@@ -1,4 +1,33 @@
 import { ArrayDiffItem } from './arrayDiff';
+import { Group } from './groups';
+
+export type ComponentGroup = Group<NoyaComponent>;
+
+export type DSConfig = {
+  colorMode?: 'light' | 'dark';
+  colors: {
+    primary: string;
+  };
+};
+
+export type DSSource = {
+  type: 'npm';
+  name: string;
+  version: string;
+};
+
+export type DS = {
+  source: DSSource;
+  config: DSConfig;
+  components?: NoyaComponent[];
+  groups?: ComponentGroup[];
+  latestBuildAssetId?: string;
+  prompt?: {
+    inputDescription?: string;
+    pickComponent?: string;
+    populateTemplate?: string;
+  };
+};
 
 export type NoyaString = {
   id: string;

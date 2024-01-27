@@ -1,8 +1,6 @@
 import { defineTree } from 'tree-visit';
-import { FlatGroupItem, Group, flattenGroups } from './groups';
-import { NoyaComponent } from './types';
-
-export type ComponentGroup = Group<NoyaComponent>;
+import { FlatGroupItem, flattenGroups } from './groups';
+import { ComponentGroup, NoyaComponent } from './types';
 
 export const UNCATEGORIZED = 'uncategorized';
 

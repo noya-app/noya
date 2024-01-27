@@ -5,8 +5,8 @@ import {
   component,
   transform,
 } from '@noya-design-system/protocol';
-import { DSConfig } from 'noya-api';
 import {
+  DSConfig,
   FindComponent,
   NoyaComponent,
   NoyaResolvedNode,

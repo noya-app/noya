@@ -1,6 +1,5 @@
 import { DesignSystemDefinition } from '@noya-design-system/protocol';
-import { DS } from 'noya-api';
-import { NoyaComponent } from 'noya-component';
+import { DS, NoyaComponent } from 'noya-component';
 
 export interface CompilerConfiguration {
   name: string;

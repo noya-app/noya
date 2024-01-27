@@ -6,7 +6,6 @@ import {
   DesignSystemDefinition,
   x,
 } from '@noya-design-system/protocol';
-import { DS } from 'noya-api';
 import {
   compile,
   compileAsync,
@@ -16,6 +15,7 @@ import {
 } from 'noya-compiler';
 import {
   createResolvedNode,
+  DS,
   FindComponent,
   Model,
   renderResolvedNode,
