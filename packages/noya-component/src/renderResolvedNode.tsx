@@ -12,8 +12,8 @@ import {
   Theme,
   component,
 } from '@noya-design-system/protocol';
-import type { DSConfig } from 'noya-api';
 import {
+  DSConfig,
   NoyaNumberProp,
   NoyaProp,
   NoyaResolvedNode,
