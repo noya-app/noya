@@ -117,6 +117,7 @@ export const DSRenderer = forwardRef(function DSRenderer(
         {
           Function: ref.current!.contentWindow!['Function' as any] as any,
           enableCache: false,
+          // useLocal: true,
         },
       );
 

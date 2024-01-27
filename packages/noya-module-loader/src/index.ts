@@ -53,6 +53,7 @@ export async function loadDesignSystem(
   options: {
     Function?: typeof window.Function;
     enableCache?: boolean;
+    useLocal?: boolean;
   } = {},
 ): Promise<DesignSystemDefinition> {
   if (name === 'thumbnail') return ThumbnailDesignSystem;
@@ -66,7 +67,12 @@ export async function loadDesignSystem(
     return DesignSystemCache.get(key)!;
   }
 
-  const url = name.includes('@')
+  const url = options.useLocal
+    ? `http://localhost:8080/${name.replace(
+        '@noya-design-system/',
+        '',
+      )}/standalone.js`
+    : name.includes('@')
     ? `https://www.unpkg.com/${key}/dist/standalone`
     : `https://www.unpkg.com/@noya-design-system/${key}/dist/standalone`;
 
