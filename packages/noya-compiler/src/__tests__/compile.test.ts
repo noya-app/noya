@@ -297,6 +297,22 @@ describe('theme', () => {
     imports: [],
   };
 
+  it('passthrough', () => {
+    const result = convertTransformer({ theme: 'foo' }, {}, emptyContext);
+
+    expect(print(result)).toEqual(`{}`);
+  });
+
+  it('special characters in key', () => {
+    const result = convertTransformer(
+      { theme: 'foo' },
+      { '&:foo-bar': 'baz' },
+      emptyContext,
+    );
+
+    expect(print(result)).toEqual(`{ "&:foo-bar": "baz" }`);
+  });
+
   it('access key', () => {
     const result = convertTransformer(
       { theme: 'foo' },

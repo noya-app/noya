@@ -32,7 +32,9 @@ export function createJsxElement(
   );
 }
 
-function createPropertyKey(key: string): ts.Identifier | ts.StringLiteral {
+export function createPropertyKey(
+  key: string,
+): ts.Identifier | ts.StringLiteral {
   if (isValidPropertyKey(key)) {
     return ts.factory.createIdentifier(key);
   } else {

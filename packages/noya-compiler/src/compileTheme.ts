@@ -6,6 +6,7 @@ import {
 import ts from 'typescript';
 import {
   createExpressionCode,
+  createPropertyKey,
   generateImportDeclarations,
 } from './astBuilders';
 import { clean } from './clean';
@@ -105,7 +106,7 @@ export function convertTransformer(
 
         return [
           ts.factory.createPropertyAssignment(
-            ts.factory.createIdentifier(key),
+            createPropertyKey(key),
             expression,
           ),
         ];
