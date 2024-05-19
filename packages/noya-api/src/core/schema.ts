@@ -30,8 +30,8 @@ export const noyaAssetSchema = z.object({
 export const noyaFileDataSchema = z
   .object({
     name: z.string(),
-    type: z.literal('io.noya.ayon'),
-    schemaVersion: z.literal('0.1.0'),
+    type: z.string(),
+    schemaVersion: z.string(),
     document: z.custom<SketchFile>(),
   })
   .passthrough();

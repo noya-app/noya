@@ -1,14 +1,14 @@
 import { formatDistance, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
-import { useNoyaClient, useNoyaFiles } from 'noya-api';
+import { NoyaAPI, useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
-  createSectionedMenu,
   Heading2,
   ListView,
   Small,
   Spacer,
   Stack,
+  createSectionedMenu,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { resize } from 'noya-geometry';
@@ -134,17 +134,7 @@ export function Projects() {
           {sortedFiles
             .filter((file) => file.id !== hideWhileNavigating)
             .map((file) => {
-              const artboard = Layers.find<Sketch.Artboard>(
-                file.data.document.pages[0],
-                Layers.isArtboard,
-              );
-              const scaledThumbnailSize = artboard
-                ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
-                : thumbnailSize;
-              scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
-              scaledThumbnailSize.height = Math.round(
-                scaledThumbnailSize.height,
-              );
+              const scaledThumbnailSize = getThumbnailSize(file);
 
               return (
                 <ListView.Row
@@ -186,7 +176,11 @@ export function Projects() {
                     setHovered(hovered ? file.id : undefined);
                   }}
                   onPress={() => {
-                    push(`/projects/${file.id}`);
+                    if (file.data.type === 'io.noya.ayon') {
+                      push(`/projects/${file.id}`);
+                    } else {
+                      window.location.href = `${NOYA_HOST}/v2/projects/${file.id}`;
+                    }
                   }}
                   onMenuOpenChange={(open) => {
                     setSelected(open ? file.id : undefined);
@@ -200,7 +194,11 @@ export function Projects() {
                     flex="1"
                   >
                     <img
-                      src={`${NOYA_HOST}/api/files/${file.id}/thumbnail.png?width=${scaledThumbnailSize.width}&height=${scaledThumbnailSize.height}&deviceScaleFactor=1`}
+                      src={`${NOYA_HOST}/api/files/${file.id}/thumbnail.png?${
+                        file.data.type === 'io.noya.ayon' ? '' : 'v2=1&'
+                      }width=${scaledThumbnailSize.width}&height=${
+                        scaledThumbnailSize.height
+                      }&deviceScaleFactor=1`}
                       alt=""
                       style={{
                         ...thumbnailSize,
@@ -250,4 +248,25 @@ export function Projects() {
       </Stack.V>
     </Stack.V>
   );
+}
+
+function getThumbnailSize(file: NoyaAPI.File) {
+  if (file.data.type === 'io.noya.ayon') {
+    const artboard = Layers.find<Sketch.Artboard>(
+      file.data.document.pages[0],
+      Layers.isArtboard,
+    );
+    const scaledThumbnailSize = artboard
+      ? resize(artboard.frame, thumbnailSize, 'scaleAspectFit')
+      : thumbnailSize;
+    scaledThumbnailSize.width = Math.round(scaledThumbnailSize.width);
+    scaledThumbnailSize.height = Math.round(scaledThumbnailSize.height);
+
+    return scaledThumbnailSize;
+  }
+
+  return {
+    width: 512,
+    height: 512,
+  };
 }
