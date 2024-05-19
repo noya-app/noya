@@ -34,7 +34,11 @@ const StyledLink = forwardRef(function StyledLink(
   return <StyledAnchor ref={forwardedRef} active={active} {...props} />;
 });
 
-export function NavigationLinks() {
+export function NavigationLinks({
+  includeDownload = false,
+}: {
+  includeDownload?: boolean;
+}) {
   return (
     <Stack.H
       gap={40}
@@ -51,6 +55,11 @@ export function NavigationLinks() {
         <StyledLink activePrefix="/docs">Docs</StyledLink>
       </Link>
       <StyledLink href={'/templates'}>Templates</StyledLink>
+      {includeDownload && (
+        <Link href={'/download'} passHref>
+          <StyledLink>Download</StyledLink>
+        </Link>
+      )}
     </Stack.H>
   );
 }

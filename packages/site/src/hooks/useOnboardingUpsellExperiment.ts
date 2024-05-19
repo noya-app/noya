@@ -10,11 +10,11 @@ import {
   isProfessionalPlan,
 } from '../components/Subscription';
 
-export function useIsSubscribed() {
+export function useIsSubscribed(defaultValue = true) {
   const { subscriptions, availableProducts, loading } = useNoyaBilling();
 
   // Assume we're subscribed if we're still loading
-  if (loading) return true;
+  if (loading) return defaultValue;
 
   const subscribedProduct = findSubscribedProduct(
     subscriptions,
