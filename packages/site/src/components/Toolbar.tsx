@@ -112,7 +112,7 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
       <Link href="/">
         <LogoContainer
           onClick={() => {
-            router.push('/');
+            window.location.href = `${NOYA_HOST}/v2`;
           }}
         >
           <Logo />
@@ -149,7 +149,7 @@ export function Toolbar({ children, left, right, subscribeButton }: Props) {
                   switch (value) {
                     case 'account':
                       if (isProjectsPath) {
-                        openInNewTab(`${NOYA_HOST}/app/account`);
+                        openInNewTab(`${NOYA_HOST}/v2/account`);
                       } else {
                         router.push('/account');
                       }

@@ -61,7 +61,7 @@ export default function Project() {
             priceDescription="Free"
             callToActionAccented
             callToActionText="Upgrade"
-            callToActionUrl="/app/account"
+            callToActionUrl="/v2/account"
             onPressCallToAction={() => {
               setShowUpgradeDialog(true);
             }}
